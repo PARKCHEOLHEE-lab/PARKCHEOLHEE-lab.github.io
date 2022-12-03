@@ -1,0 +1,51 @@
+---
+title:  "Dynamic mesh fence"
+layout: post
+---
+
+<h3>│ Where does design start? </h3>
+<div style='margin-left: 15px; text-align: justify;'>
+
+Different designers have different approaches to solving design problems. Intuition, aesthetics, <code>function</code>, cost, data, structure, etc. are prioritized based on what designers value. And this is expressed in form. A perfect design has each element properly balanced. However, it is not easy to do such a design in reality. So, in general, we set one or two high priorities and design according to the conditions.
+
+<br><br>
+
+In my opinion, what should be most important is what you can base your analysis on: function, data, structure. Designers are persuaders. We have an obligation to inform the client of how the design came about. To do that, the logic in the design process must be solid, and this logic comes from the elements listed above. In other words, <code>design is what must necessarily be so</code> in the process.
+
+<!-- 
+디자인 문제를 해결하는 접근방식은 디자이너마다 다릅니다. 또한 직관, 심미, 기능, 비용, 데이터 등의 우선순위는 디자이너가 무엇을 중요하게 여기는지에 따라 결정됩니다. 그리고 이것은 형태로 발현됩니다. 완벽한 디자인은 각각의 요소들이 적절하게 균형을 갖추고 있습니다. 하지만 현실적으로 그런 디자인을 하기는 쉽지 않습니다. 그래서 우리는 일반적으로 한 두가지 정도의 높은 우선순위를 정하고 그에 맞는 조건으로 디자인을 합니다.
+
+제 생각에 가장 중요시 되어야 하는 것은, 기능, 데이터, 구조와 같은 분석에 기반할 수 있는 요소들입니다. 디자이너는 설득자입니다. 우리는 클라이언트에게 디자인이 이렇게 된 과정을 알려야 할 의무가 있습니다. 그러려면 디자인 과정에서의 논리가 탄탄해야 하고, 이러한 논리는 위에서 나열한 요소들로부터 나옵니다. 즉 디자인은 그 과정에서 필연적으로 그렇게 되어야만 하는것입니다.
+-->
+
+</div>
+
+<br>
+
+<!-- <img src="https://user-images.githubusercontent.com/83874157/203311006-a39a4e44-7a09-4744-a303-805ad562a82b.png" style="max-width:20%; height:auto; padding-left: 45px; padding-top: 20px;" align="right"/> -->
+<h3>│ Form follows function </h3>
+<div style="text-align: center; margin-left: 15px;">
+<img src="https://user-images.githubusercontent.com/83874157/203985300-3e5ed9fa-9b17-41a9-9fc0-5c43f32e035b.png" style="width:auto; height:auto;">
+</div>
+
+<div style='margin-left: 15px; text-align: justify; margin-top: 15px'>
+
+That's why I like designs where form follows function. This project is to <code>create an algorithm</code> from this point of view. <code>Mesh fence</code> is a product that is common in our surroundings and is faithful to its function. A mesh fence divides the boundary between here and there and <code>blocks interaction</code>
+
+<br><br>
+
+I thought it would be possible to maintain the blocking function needed inside the boundary, and create interaction between internal users as an additional function through internal transformation. I will be able to give users the necessary functions by bending the fence to create a bench or a stand for flower pots.
+
+<br><br>
+
+Please refer to the <a href="https://github.com/PARKCHEOLHEE-lab/fff/tree/main/mesh_fence">this link</a> to download the prototype.
+
+<!-- 그래서 저는 기능이 형태적으로 발현된 디자인을 좋아합니다. 이 프로젝트는 이러한 관점에서의 알고리즘을 제작하는 작업입니다. mesh fence는 우리 주변에서 흔히 볼 수 있는, 자신의 기능에 충실한 제품입니다. 이곳과 저곳의 경계를 나누고, 상호작용을 차단합니다. 
+
+나는 경계 내부에 필요한 차단 기능은 유지하고, 내부 변형을 통해 추가기능으로서 내부 이용자들간의 인터랙션을 만들어 낼 수 있을 것이라고 생각했습니다. Fence를 구부려서 벤치를 조성하거나, 화분을 놓을 수 있는 거치대를 만들거나 하는 방식으로 사용자들에게 필요한 기능을 부여할 수 있을 것입니다.
+
+프로토타입을 다운받으시려면 아래 링크를 참고하세요.
+-->
+
+</div>
+
