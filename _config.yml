@@ -1,6 +1,6 @@
-title: "Blog Title"
-author: "Blog Author"
-description: "Made with <b style=\"color: #f45;\">&lt;3</b>"
+title: "parkcheolhee-lab"
+author: "pch"
+description: "<b style=\"color: #9c9c9c; font-weight: 200; font-size: smaller\">Computational design lab by pch</b>"
 permalink: /:title/
 lang: "en"
 excerpt_separator: "\n\n\n"
@@ -8,21 +8,22 @@ date_format: "%B %d, %Y"
 
 # Layout
 
-show_excerpts: true        # show article excerpts on the home page
-show_frame: true           # adds a gray frame to the site
+show_excerpts: false        # show article excerpts on the home page
+show_frame: false           # adds a gray frame to the site
 show_sidebar: false        # show a sidebar instead of the usual header
 minimal: false             # use a dark header
 
 # Menu
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
-  - {file: "index.html"}
-  - {file: "README.md"}
+  # - {title: "cv", file: "2022-04-18-cv.md"}
+  - {title: "Lab", file: "archive.html"}
+  - {title: "thought", file: "empty.html"}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
-  - {title: Mail, icon: envelope, url: "mailto:niklasbuschmann@users.noreply.github.com"}
-  - {title: Github, icon: github, url: "https://github.com/niklasbuschmann/contrast"}
-  - {title: Subscribe, icon: rss, url: "/feed.xml"}
+  # - {title: Mail, icon: envelope, url: "mailto:park112368@gmail.com"}
+  - {title: Github, icon: github, url: "https://github.com/PARKCHEOLHEE-lab"}
+  - {title: Issuu, icon: book, url: "https://issuu.com/brighthope03"}
 
 comments:
 #  disqus_shortname: ""    # see https://disqus.com/

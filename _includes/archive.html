@@ -1,11 +1,13 @@
 <article>
-  <header><h1>{{ include.title | default: page.title }}</h1></header>
+  <header><h2>{{ include.title | default: page.title }}</h2></header>
+  <p style="margin-top: -1.5em; color: gray;">
+      Since  <b><time datetime="2022-04-18T00:00:00+09:00">2022-04-11</time></b>
+      </p>
   <ul class="archive">
     {% for post in site.posts %}
-    <li>
-      <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%Y-%m-%d" }}</time>
-      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    </li>
+    <time datetime="{{ post.date | date_to_xmlschema }}" style="color: gray; font-size: smaller">{{ post.date | date: "%B %d, %Y" }}</time>
+    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+    <br>
     {% endfor %}
   </ul>
 </article>

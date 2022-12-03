@@ -3,9 +3,8 @@ title:  "Merry christmas"
 layout: post
 ---
 
-<h3>│ Fractal tree </h3>
-<div style='margin-left: 15px; text-align: justify;'>
-
+<h3 style="margin-left: -6px">│ Fractal tree </h3>
+<div style='margin-left: 15px;'>
 <del>You used to call me on my You used to, you used to Yeah You used to call me on my cell phone Late night when you need my love Call me on my cell phone Late night when you need my love And I know when that hotline bling That can only mean one thing I know when that hotline bling That can only mean one thing</del>
 
 <br><br>
@@ -26,12 +25,9 @@ In my opinion, what should be most important is what you can base your analysis 
 <br><br>
 
 </div>
-<h3>│ Fractal christmas tree </h3>
-<div style='margin-left: 15px; text-align: justify;'>
+<h3 style="margin-left: -6px">│ Fractal christmas tree </h3>
+<div style='margin-left: 15px;'>
 
-<del>You used to call me on my You used to, you used to Yeah You used to call me on my cell phone Late night when you need my love Call me on my cell phone Late night when you need my love And I know when that hotline bling That can only mean one thing I know when that hotline bling That can only mean one thing</del
+<del>You used to call me on my You used to, you used to Yeah You used to call me on my cell phone Late night when you need my love Call me on my cell phone Late night when you need my love And I know when that hotline bling That can only mean one thing I know when that hotline bling That can only mean one thing</del>
 
 <br><br>
-
-
-</div>
