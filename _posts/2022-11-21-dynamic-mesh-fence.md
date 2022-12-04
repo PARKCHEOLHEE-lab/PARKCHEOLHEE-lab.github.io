@@ -4,7 +4,7 @@ layout: post
 ---
 
 <h3 style="margin-left: -6px">│ Where does design start? </h3>
-<div style='margin-left: 15px; text-align: justify;'>
+<div style='margin-left: 18px; text-align: justify;'>
 
 Different designers have different approaches to solving design problems. Intuition, aesthetics, <code>function</code>, cost, data, structure, etc. are prioritized based on what designers value. And this is expressed in form. A perfect design has each element properly balanced. However, it is not easy to do such a design in reality. So, in general, we set one or two high priorities and design according to the conditions.
 
@@ -24,11 +24,11 @@ In my opinion, what should be most important is what you can base your analysis 
 
 <!-- <img src="https://user-images.githubusercontent.com/83874157/203311006-a39a4e44-7a09-4744-a303-805ad562a82b.png" style="max-width:20%; height:auto; padding-left: 45px; padding-top: 20px;" align="right"/> -->
 <h3 style="margin-left: -6px">│ Form follows function </h3>
-<div style="text-align: center; margin-left: 15px;">
+<div style="text-align: center; margin-left: 18px;">
 <img src="https://user-images.githubusercontent.com/83874157/203985300-3e5ed9fa-9b17-41a9-9fc0-5c43f32e035b.png" style="width:auto; height:auto;">
 </div>
 
-<div style='margin-left: 15px; margin-top: 15px text-align: justify;'>
+<div style='margin-left: 18px; margin-top: 15px text-align: justify;'>
 
 That's why I like designs where form follows function. This project is to <code>create an algorithm</code> from this point of view. <code>Mesh fence</code> is a product that is common in our surroundings and is faithful to its function. A mesh fence divides the boundary between here and there and <code>blocks interaction</code>
 
