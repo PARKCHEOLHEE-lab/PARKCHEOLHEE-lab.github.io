@@ -3,7 +3,7 @@ author: "pch"
 description: "<b style=\"color: #9c9c9c; font-weight: 200; font-size: smaller\">Computational design lab by pch</b>"
 permalink: /:title/
 lang: "en"
-excerpt_separator: "\n\n\n"
+excerpt_separator: <!--break-->
 date_format: "%B %d, %Y"
 
 # Layout
@@ -17,8 +17,8 @@ minimal: false             # use a dark header
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   # - {title: "cv", file: "2022-04-18-cv.md"}
-  - {title: "Lab", file: "archive.html"}
-  - {title: "thought", file: "empty.html"}
+  - {title: "test-bed", file: "archive.html"}
+  - {title: "retrospect", file: "empty.html"}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
   # - {title: Mail, icon: envelope, url: "mailto:park112368@gmail.com"}

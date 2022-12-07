@@ -1,13 +1,40 @@
+<style>
+
+  .useBottomLine {
+    border-bottom: 1px dotted rgba(128, 128, 128, 0.14);
+    padding-bottom: 2em;
+  }
+
+  .onClickDiv {
+    cursor: pointer;
+  }
+
+  div:hover {
+      opacity: 0.7;
+    }
+
+  .useGray {
+    color: gray;
+  }
+
+
+</style>
+
 <article>
   <header><h2>{{ include.title | default: page.title }}</h2></header>
-  <p style="margin-top: -1.5em; color: gray;">
-      Since  <b><time datetime="2022-04-18T00:00:00+09:00">2022-04-11</time></b>
-      </p>
+  <!-- <p style="margin-top: -1.5em; color: gray;">Since  <time datetime="2022-04-18T00:00:00+09:00">2022-04-11</time></p> -->
   <ul class="archive">
     {% for post in site.posts %}
-    <time datetime="{{ post.date | date_to_xmlschema }}" style="color: gray; font-size: smaller">{{ post.date | date: "%B %d, %Y" }}</time>
-    <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
-    <br>
+    <div>
+      <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+        <h3>{{ post.title }}</h3>
+        <p style="margin-top: -0.5em; margin-bottom: 0.5em; margin-left: -0.2em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
+        <p style=" text-align: justify; font-size:smaller;">
+          {{ post.excerpt | strip_html }}
+        <p class="useBottomLine" style="margin-bottom: 0.5em; margin-left: -0.2em; font-size: small; text-align: right; color: gray;">{{ post.hashtag }}</p>
+        </p>
+      </div>
+    </div>
     {% endfor %}
   </ul>
 </article>
