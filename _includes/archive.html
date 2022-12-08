@@ -18,24 +18,35 @@
     color: gray;
   }
 
+  u.wavyUnderline {
+      text-decoration: #0011e3 wavy underline;
+  }
+
 
 </style>
 
 <article>
   <header><h2>{{ include.title | default: page.title }}</h2></header>
-  <p style="margin-top: -1.5em; color: gray;">This is experiment place!</p>
-  <ul class="archive">
+  <!-- <p style="margin-top: -1.5em; color: gray; float: left">Testing place for all research related to computational design</p> -->
+  <p style="margin-top: -1.5em; color: gray; float: left">Testing place for all research</p>
+  <p style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured research&nbsp;</u></b></p>
+  <p style="margin-top: -1em">　</p>
+  <!-- <ul class="archive"> -->
     {% for post in site.posts %}
-    <div>
+    <div style="margin-top: -0.2em">
       <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
-        <h3>{{ post.title }}</h3>
-        <p style="margin-top: -0.5em; margin-bottom: 0.5em; margin-left: -0.2em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
+        {% if post.featured %}
+          <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
+        {% else %}
+          <h3>{{ post.title }}</h3>
+        {% endif %}
+        <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
         <p style=" text-align: justify; font-size:smaller;">
           {{ post.excerpt | strip_html }}
-        <p class="useBottomLine" style="margin-bottom: 0.5em; margin-left: -0.2em; font-size: small; text-align: right; color: gray;">{{ post.hashtag }}</p>
+          <p class="useBottomLine" style="margin-bottom: 0.5em; font-size: small; text-align: right; color: gray;">{{ post.hashtag }}</p>
         </p>
       </div>
     </div>
     {% endfor %}
-  </ul>
+  <!-- </ul> -->
 </article>

@@ -37,14 +37,21 @@
       width: 0;  /* Remove scrollbar space */
       background: transparent;  /* Optional: just make scrollbar invisible */
   }
+  a:hover {
+    opacity: 0.5;
+    transition:opacity 0.5s ease;
+  }
 </style>
 
 <header>
   <style>
     .title {
-      background: #000000;
+      background: #0011e3;
       color: #ffffff;
-      padding: 0.2em;
+      padding-left: 0.5em;
+      padding-right: 0.5em;
+      padding-bottom: 0.1em;
+      padding-top: 0.1em;
     }
   </style>
   <a href="{{ "/" | relative_url }}" class="title">{{ site.title | escape }}</a>
@@ -54,10 +61,12 @@
 {{ content }}
 
 {% if site.external %}
+{% if page.home != true %}
 <footer>
   {% include menu.html menu=site.external %}
   <div>{{ site.description | default: site.title }}</div>
 </footer>
+{% endif %}
 {% endif %}
 </html>
 
