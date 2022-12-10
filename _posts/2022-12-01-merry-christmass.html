@@ -5,48 +5,69 @@ hashtag: "#algorithm #python #grasshopper #merry-christmas"
 ---
 
 <h3>What is fractal ? </h3>
-<div style='text-align: justify; font-size: medium;'>
+<div style='text-align: justify;'>
+
     It refers to a structure that geometrically solves the self-similarity concept that <code>and wholes have the same shape.</code> 
     A fractal is a simple structure that repeats endlessly to create a complex and mysterious overall structure, which is characterized by <code>self-similarity</code> and <code>recursiveness.</code> 
     The rias coastline of the natural world, the distribution of animal blood vessels, the shape of tree branches, 
     the appearance of frost growing on windows, and the appearance of mountain ranges are all fractal, and everything in the universe has a fractal structure after all.
+
+    <br><br>
+
+    <figure style="text-align: center;">
+        <a href="https://natureofcode.com/book/chapter-8-fractals/"><img src="https://user-images.githubusercontent.com/83874157/206451031-7d1c0180-de19-4ece-9562-a261c0109a94.png" width="700"></a>
+        <figcaption style="text-align: center; margin-top: 1em">Fig.1 Concept of fractal</figcaption>
+      </figure>
     
     <!--break-->
-    
-    <br><br>
-    <div style="text-align: center;">
-        <img src="https://user-images.githubusercontent.com/83874157/206451031-7d1c0180-de19-4ece-9562-a261c0109a94.png" style="width: auto; height: auto;">
-    </div>
-    <br>
-    <div style="text-align: right; font-size: small;">
-    <a href="https://natureofcode.com/book/chapter-8-fractals/" style="text-align: right;">https://natureofcode.com/book/chapter-8-fractals/</a>
-    </div>
 </div>
 
-<h3>Fractal tree </h3>
-<div style='text-align: justify; font-size: medium;'>
-<del>You used to call me on my You used to, you used to Yeah You used to call me on my cell phone Late night when you need my love Call me on my cell phone Late night when you need my love And I know when that hotline bling That can only mean one thing I know when that hotline bling That can only mean one thing</del>
+<br>
 
+<h3>2D fractal tree implementation </h3>
+<div style='text-align: justify;'>
+
+Based on the above concept, I implemented a simple 2D fractal tree using ghPython. The <code>_divide_target_branch</code> function below creates a sub branches of the target branch based on <code style="color:#c48002">SUB_BRANCH_RATIO</code> and <code style="color:#c48002">ANGLE</code>.
+ See <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/f8eeb81a975b0b16700230c941334cec4087c7c7/fractal_tree/fractal_tree_loop.py#L29-L50">this link</a> for all code
 <br><br>
-<!-- 
-You used to call me on my You used to, you used to Yeah You used to call me on my cell phone Late night when you need my love Call me on my cell phone Late night when you need my love And I know when that hotline bling That can only mean one thing I know when that hotline bling That can only mean one thing -->
+<pre class="highlight">
+    def _divide_target_branch(self, target_branch):
+        <span class="doc">"""generate target branch's sub branches"""</span>
 
-<!-- Different designers have different approaches to solving design problems. Intuition, aesthetics, <code>function</code>, cost, data, structure, etc. are prioritized based on what designers value. And this is expressed in form. A perfect design has each element properly balanced. However, it is not easy to do such a design in reality. So, in general, we set one or two high priorities and design according to the conditions.
+        target_branch_last_vertex = target_branch.PointAt(1)
+        
+        reduced_target_branch = rg.Line(
+                                    target_branch_last_vertex,
+                                    target_branch.PointAt(1 - <span class="const">SUB_BRANCH_RATIO</span>)
+                                    )
+        
+        rotated_reduced_target_branch_1 = gh.Rotate(
+                                                reduced_target_branch, 
+                                                <span class="const">ANGLE</span> * math.pi, 
+                                                gh.XZPlane(target_branch_last_vertex)
+                                                ).geometry
+        
+        rotated_reduced_target_branch_2 = gh.Rotate(
+                                                reduced_target_branch, 
+                                                (<span class="const">ANGLE</span> + (1 - <span class="const">ANGLE</span>) * 2) * math.pi, 
+                                                gh.XZPlane(target_branch_last_vertex)
+                                                ).geometry
+        
+        return rotated_reduced_target_branch_1, rotated_reduced_target_branch_2
+</pre>
 
-<br><br>
+<br>
 
-In my opinion, what should be most important is what you can base your analysis on: function, data, structure. Designers are persuaders. We have an obligation to inform the client of how the design came about. To do that, the logic in the design process must be solid, and this logic comes from the elements listed above. In other words, <code>design is what must necessarily be so</code> in the process. -->
-
-<!-- 
-디자인 문제를 해결하는 접근방식은 디자이너마다 다릅니다. 또한 직관, 심미, 기능, 비용, 데이터 등의 우선순위는 디자이너가 무엇을 중요하게 여기는지에 따라 결정됩니다. 그리고 이것은 형태로 발현됩니다. 완벽한 디자인은 각각의 요소들이 적절하게 균형을 갖추고 있습니다. 하지만 현실적으로 그런 디자인을 하기는 쉽지 않습니다. 그래서 우리는 일반적으로 한 두가지 정도의 높은 우선순위를 정하고 그에 맞는 조건으로 디자인을 합니다.
-
-제 생각에 가장 중요시 되어야 하는 것은, 기능, 데이터, 구조와 같은 분석에 기반할 수 있는 요소들입니다. 디자이너는 설득자입니다. 우리는 클라이언트에게 디자인이 이렇게 된 과정을 알려야 할 의무가 있습니다. 그러려면 디자인 과정에서의 논리가 탄탄해야 하고, 이러한 논리는 위에서 나열한 요소들로부터 나옵니다. 즉 디자인은 그 과정에서 필연적으로 그렇게 되어야만 하는것입니다.
--->
 
 </div>
 <h3>Fractal christmas tree </h3>
-<div style='text-align: justify; font-size: medium;'>
+<div style='text-align: justify;'>
+It is a Christmas tree created by extending the concept of a 2D fractal tree to a 3D one. Please click the image below for detail code. Happy New Year and <code>Merry Christmas!</code>
+<br><br>
+    <figure>
+        <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/fractal_tree/fractal_christmas_tree.py"><img src="https://user-images.githubusercontent.com/83874157/206839883-abd134b4-c3fc-4f1e-9e66-17cfd8c1ca88.png"></a>
+        <figcaption style="text-align: center">Fig.2 From the left, self-similarity module · top · front · parallel</figcaption>
+      </figure>
 
-<del>You used to call me on my You used to, you used to Yeah You used to call me on my cell phone Late night when you need my love Call me on my cell phone Late night when you need my love And I know when that hotline bling That can only mean one thing I know when that hotline bling That can only mean one thing</del>
   
 <br><br>

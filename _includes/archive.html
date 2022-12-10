@@ -18,11 +18,6 @@
     color: gray;
   }
 
-  u.wavyUnderline {
-      text-decoration: #0011e3 wavy underline;
-  }
-
-
 </style>
 
 <article>
@@ -31,7 +26,6 @@
   <p style="margin-top: -1.5em; color: gray; float: left">Testing place for all research</p>
   <p style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured research&nbsp;</u></b></p>
   <p style="margin-top: -1em">　</p>
-  <!-- <ul class="archive"> -->
     {% for post in site.posts %}
     <div style="margin-top: -0.2em">
       <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
@@ -43,10 +37,13 @@
         <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
         <p style=" text-align: justify; font-size:smaller;">
           {{ post.excerpt | strip_html }}
-          <p class="useBottomLine" style="margin-bottom: 0.5em; font-size: small; text-align: right; color: gray;">{{ post.hashtag }}</p>
+          {% if post.done %}
+            <p style="margin-bottom: 0.5em; font-size: calc(0.5rem + 0.2vw); text-align: right; color: gray;">{{ post.hashtag }}</p>
+          {% else %}
+            <p class="useBottomLine" style="margin-bottom: 0.5em; font-size: calc(0.5rem + 0.2vw); text-align: right; color: gray;">{{ post.hashtag }}</p>
+          {% endif %}
         </p>
       </div>
     </div>
     {% endfor %}
-  <!-- </ul> -->
 </article>
