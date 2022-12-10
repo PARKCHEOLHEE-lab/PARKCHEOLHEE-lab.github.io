@@ -1,11 +1,3 @@
-<style>
-  
-  u.wavyUnderline {
-      text-decoration: #0011e3 wavy underline;
-  }
-
-</style>
-
 <nav>
 {%- for item in include.menu -%}
   {%- assign node = site.pages | where: "name", item.file | first -%}
