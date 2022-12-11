@@ -28,33 +28,8 @@
   {% assign pages = site.pages | where_exp: "item", "item.title and item.sitemap != false" | sort: "order" %}
 {% endif %}
 
-<style>
-    html {
-      overflow: scroll;
-      overflow-x: hidden;
-  }
-  ::-webkit-scrollbar {
-      width: 0;  /* Remove scrollbar space */
-      background: transparent;  /* Optional: just make scrollbar invisible */
-  }
-  a:hover {
-    opacity: 0.5;
-    transition:opacity 0.5s ease;
-  }
-</style>
-
 <header>
-  <style>
-    .title {
-      background: #0011e3;
-      color: #ffffff;
-      padding-left: 0.5em;
-      padding-right: 0.5em;
-      padding-bottom: 0.1em;
-      padding-top: 0.1em;
-    }
-  </style>
-  <a href="{{ "/" | relative_url }}" class="title">{{ site.title | escape }}</a>
+  <a href="{{ "/" | relative_url }}" class="titleMain">{{ site.title | escape }}</a>
   {% include menu.html menu=pages %}
 </header>
 
