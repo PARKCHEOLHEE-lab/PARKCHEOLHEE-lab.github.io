@@ -40,6 +40,7 @@ a
 u.wavyUnderline
   text-decoration: #0011e3 wavy underline
   -webkit-text-decoration: wavy underline #0011e3
+  -webkit-text-decoration-thickness: 5px
 
 header a, footer a, aside a
   color: inherit
@@ -108,3 +109,28 @@ pre
 figcaption
   color: gray
   font-size: calc(0.6rem + 0.2vw)
+
+
+
+html 
+  overflow: scroll
+  overflow-x: hidden
+  
+
+::-webkit-scrollbar 
+  width: 0  /* Remove scrollbar space */
+  background: transparent  /* Optional: just make scrollbar invisible */
+  
+a:hover 
+  opacity: 0.5
+  transition:opacity 0.5s ease
+
+
+.titleMain 
+  background: #0011e3
+  color: #ffffff
+  padding-left: 0.5em
+  padding-right: 0.5em
+  padding-bottom: 0.2em
+  padding-top: 0.2em
+  font-size: calc(0.9rem + 0.2vw)
