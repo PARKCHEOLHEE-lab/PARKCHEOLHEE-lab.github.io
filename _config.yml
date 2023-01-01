@@ -19,7 +19,7 @@ navigation:                # accepts {file, title, url, icon, sidebaricon}
   # - {title: "cv", file: "2022-04-18-cv.md"}
   # - {title: "cv", file: "cv.html"}
   - {title: "testbed", file: "archive.html"}
-  - {title: "　r!　", file: "empty.html"}
+  - {title: "　r!　", file: "retrospection.html"}
 
 external:                  # shows a footer with social links - for available icons see fontawesome.com/icons
   # - {title: Mail, icon: envelope, url: "mailto:park112368@gmail.com"}
