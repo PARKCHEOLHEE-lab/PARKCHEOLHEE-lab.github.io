@@ -26,8 +26,8 @@
 
   {% if page.id == "testbed" %}
     <p style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured research&nbsp;</u></b></p>
-    
     <p style="margin-top: -1em">　</p>
+    
       {% for post in site.categories.testbed %}
       <div style="margin-top: -0.2em">
         <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
