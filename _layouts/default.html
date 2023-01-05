@@ -32,6 +32,7 @@
   html {
     overflow: scroll;
     overflow-x: hidden;
+    scroll-behavior: smooth;
 }
 ::-webkit-scrollbar {
     width: 0;  /* Remove scrollbar space */
@@ -41,6 +42,7 @@ a:hover {
   opacity: 0.5;
   transition:opacity 0.5s ease;
 }
+
 </style>
 
 <header>
@@ -58,6 +60,8 @@ a:hover {
 </footer>
 {% endif %}
 {% endif %}
+
+
 
 
 <script>
@@ -82,8 +86,26 @@ a:hover {
 
   }
 
+  function getTOC() {
+    toc = "<ul class='section-nav'>";
+
+    h3Tags = document.getElementsByTagName("h3");
+    for (let i=0; i < h3Tags.length; i++) {
+        h3TagTitle = h3Tags[i].innerText
+        toc += "<li><a href=\"#" + h3Tags[i].id + "\">" + h3TagTitle + "</a></li>";
+
+    }
+
+    toc += "</ul><br><br>";
+    document.getElementById("toc").innerHTML += toc;
+
+  }
+
   TOCidSetter();
+  getTOC();
+
 </script>
+
 
 </html>
 
