@@ -33,4 +33,3 @@ comments:
 
 plugins:
  - jekyll-feed
- - jekyll-toc
