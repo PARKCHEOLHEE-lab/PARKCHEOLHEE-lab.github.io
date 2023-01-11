@@ -6,7 +6,7 @@ hashtag: "#python #machine-learning"
 
 
 <div id="toc"></div>
-<h3>How many shapes does the plot have ?</h3>
+<h3>How many shapes does the plot have ? 🏷️</h3>
 <div style='text-align: justify;'>
 
     The shape of the plot in Seoul is diverse. There are <code>flags, squares, long-squares, trapezoids, triangles</code> and other shapes that are hard to define. building will exists within the plot.
@@ -15,17 +15,34 @@ hashtag: "#python #machine-learning"
 
     The architect empirically judges the shape of plot and develops the design. In the case of too long-square shapes, the architect will scale the building down in the direction of the long side axis.
     If given a triangle shapes of land, architects design it to eliminate acute angles. In this way, people can subjectively <code>judge</code> the type and <code>define</code> the shape.
+    <!--break-->
 
     <figure>
         <img src="https://user-images.githubusercontent.com/83874157/211546606-03adc3b9-0111-4e8a-8531-13dfc190b651.png" style="width:100%;">
         <figcaption style="text-align: center">Somewhere in Seoul</figcaption>
     </figure>
     <br>
+    So how can a computer determine and define the shape of plot? In this article, I analyze how computers can determine the shape of plot and develop designs.
+</div>
 
+<br><br>
 
-    <br><br>
-    <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator">work in progress</a>
-    <!--break-->
+<h3>Properties of the plot</h3>
+<div style='text-align: justify;'>
+    Plot is a individual 2D geometry. And expressions such as long, short, round, and pointed are related to the properties of geometry.
+    So then, How to make computers understand like these properties? First, we need to <code>define the properties</code> of the plot.
+    I'll look at the most common plots. The most common shapes of plots are shown below.
+    
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/211810293-c9c03df2-586d-41fc-adaa-9f73dffcbbce.png" style="width:100%;">
+        <figcaption style="text-align: center">From the left, square, flag, trapezoid, long-square, triangle</figcaption>
+    </figure>
+    <br>
+    The square shape and long square shape can be defined based on: aspect ratio, sum of interior angles(360'), bounding box ratio, etc. Similarly, the shape of a triangle can be also defined as the sum of interior angles(180').
+    In general, the feature of a flag shape is that the shape obtained by subtracting the flag shape itself from its convex hull is a triangle. 
+    Lastly, the trapezoid shape can be defined as the number of triangles obtained by subtracting the trapezoid shape from its bounding box.
+    
+
 </div>
 
 <br><br>
