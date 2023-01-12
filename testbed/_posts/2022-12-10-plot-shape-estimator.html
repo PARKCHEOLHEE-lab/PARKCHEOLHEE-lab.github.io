@@ -6,14 +6,84 @@ hashtag: "#python #machine-learning"
 
 
 <div id="toc"></div>
-<h3>How many shapes does the plot have ?</h3>
+<h3>How many shapes does the plot have ? 🏷️</h3>
 <div style='text-align: justify;'>
 
-    Architects design within a given plot and depending on the shape of the plot, the direction of the design changes.
-
+    The shape of the plot in Seoul is diverse. There are <code>flags, squares, long-squares, trapezoids, triangles</code> and other shapes that are hard to define. building will exists within the plot.
+    Since architects design within a given plot, the direction of design may change depending on the shape of the site.
     <br><br>
-    <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator">work in progress</a>
+
+    The architect empirically judges the shape of plot and develops the design. In the case of too long-square shapes, the architect will scale the building down in the direction of the long side axis.
+    If given a triangle shapes of land, architects design it to eliminate acute angles. In this way, people can subjectively <code>judge</code> the type and <code>define</code> the shape.
     <!--break-->
+
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/211546606-03adc3b9-0111-4e8a-8531-13dfc190b651.png" style="width:100%;">
+        <figcaption style="text-align: center">Somewhere in Seoul</figcaption>
+    </figure>
+    <br>
+    So how can a computer determine and define the shape of plot? In this article, We analyze how computers can determine the shape of plot and develop designs.
+</div>
+
+<br><br>
+
+<h3>Properties of the plot</h3>
+<div style='text-align: justify;'>
+    Plot is a individual 2D geometry. And expressions such as long, short, round, and pointed are related to the properties of geometry.
+    So then, How to make computers understand like these properties? First, we need to <code>define the properties</code> of the plot.
+    I'll look at the most common plots. The most common shapes of plots are shown below.
+    
+    <figure>
+        <img src="https://user-images.githubusercontent.com/97011129/211963124-515e33c0-95df-430f-aeaa-e005a5243ed3.png" style="width:100%;">
+        <figcaption style="text-align: center">Most common shapes of plots <br> From the left, square, flag, trapezoid, long-square, triangle</figcaption>
+    </figure>
+    <br>
+    The square shape and long square shape can be defined based on: aspect ratio, sum of interior angles(360'), bounding box ratio, etc. Similarly, the shape of a triangle can be also defined as the sum of interior angles(180').
+    In general, the feature of a flag shape is that the shape obtained by subtracting the flag shape itself from its convex hull is a triangle. 
+    Lastly, the trapezoid shape can be defined as the number of triangles obtained by subtracting the trapezoid shape from its bounding box. Visualizing the above is as follows.
+    
+    <figure>
+        <img src="https://user-images.githubusercontent.com/97011129/211976673-cd2b4727-d911-4898-9626-4d40952e1b6e.png" style="width:100%;">
+        <figcaption style="text-align: center">Properties of each plot</figcaption>
+    </figure>
+</div>
+
+<br>
+
+<h3>Generate training data</h3>
+<div style='text-align: justify;'>
+    To teach the computer the properties of each plot, we need to generate <code>data.</code> People understand based on visualized information. But <code>computers only understand numeric.</code>
+    Therefore, all properties must be converted to numeric. For this, define <code>PlotData</code> object. <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/data/plot_data.py">PlotData has properties</a> defined above.
+    However, these properties alone do not fully categorize the shape of the plot. This can be seen as a primary classification task for training computers.
+    <br><br>
+    
+    As mentioned above, looking at the <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/tree/main/data/QA">preprocessed data</a>, there are plots <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/preprocess.py">classified</a> differently from the defined properties.
+    After filtering out the misclassified data once again and generating the <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/tree/main/data/end_data">end data</a>, the computer is now ready to be trained.
+    The structure of end data as follows
+    
+    <figure>
+        <img src="https://user-images.githubusercontent.com/97011129/212032404-c5a98dff-6766-45ca-a104-d5280dbd83ed.png" style="width:100%;">
+        <figcaption style="text-align: center">End data of the flag plot (defined <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/8e8e4be1cbbb9295ac797174823a4657dc1cf868/utils/utils.py#L14-L21">ShapeLabel</a>)</figcaption>
+    </figure>
+    
+    
+</div>
+
+<br>
+<h3>Plot shape estimator</h3>
+<div style='text-align: justify;'>
+    Since I do not have the basic knowledge of machine learning, I will omit the detailed training contents. 
+    I tried all scikit-learn's classification-related models, but the performance was not as good as I thought, so I used tensorflow's sequential <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/model/tf.py">model.</a>
+    <br><br>
+    
+    As a result of <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/plot_shape_estimator.py">testing a few cases,</a> it seems that a usable model has been created as a prototype, although it is not satisfactory.
+    With this model, we can tell the computer to decide which direction to cut the mass.
+    
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/212064783-0ee1f467-cf23-4073-8296-2ce010aa1b7e.png" style="width:100%;">
+        <figcaption style="text-align: center">Getting mass</figcaption>
+    </figure>
+
 </div>
 
 <br><br>
