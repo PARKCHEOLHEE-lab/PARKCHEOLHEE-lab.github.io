@@ -1,0 +1,110 @@
+---
+title:  "Theater sightlines"
+layout: post
+hashtag: "#optimization"
+featured: true
+done: true
+---
+
+<div id="toc"></div>
+<h3>C - Value 👀</h3>
+<div style='text-align: justify;'>
+
+    When you go to theater, have you ever had any inconvenience in viewing because of the back of the person in front of you?
+    C-Value is an index of <code>viewing quality</code> in a theater. This project aims quantitatively <code>evaluate</code> and <code>optimize</code> viewing quality in theaters using Galapagos and ghPython.
+    <!--break-->
+    <br><br>
+
+    To evaluate Fitness, I designed <code>state space</code> based on predefined parameters and constants. A state space is the same concept as a parametric model.
+    A state space is a parametric model in which the state of a model can be scored according to its current parameters.
+
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/210356995-72d55bf3-0f41-4cbd-b1a9-52731c9bea47.png" style="width: 100%;">
+        <figcaption style="text-align: center; margin-top: 1em">From the left, C - Value, State space</figcaption>
+    </figure>
+
+</div>
+
+<br>
+
+<h3>Set constraints</h3>
+<div style='text-align: justify;'>
+    And I set constraints to specify the scope of the exploration. 
+    As you can see in the image on the above, I wanted to derive the <code>optimal C-Value</code> within the constraints by putting the ceiling height of the theater and the width of the stairs as constraints
+    <br><br>
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/212461152-17e0225c-3f31-4958-9812-665cf4dac2c8.png" style="width: 100%;">
+        <figcaption style="text-align: center; margin-top: 1em">From the left, 
+            <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/f8eeb81a975b0b16700230c941334cec4087c7c7/theater_sightlines/theater_sightlines.py#L169-L175">Ceiling constraint</a>, 
+            <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/f8eeb81a975b0b16700230c941334cec4087c7c7/theater_sightlines/theater_sightlines.py#L177-L183">Step constraint</a>
+        </figcaption>
+    </figure>
+    <br>
+
+    The C - Value is determined by width and height of the stairs. If there is no constraints set above, a high and narrow stairs will be created unconditionally by the optimizer 
+    Therefore, we need an <code>exception handling</code> conditional statement in the state space 
+    Since the purpose of this project is to <code>maximize</code> the C-Value, we have set our state space to <code>return very low score</code> when the constraints are violated.
+
+</div>
+
+<br><br>
+
+<h3>Evaluating the state space</h3>
+<div style='text-align: justify;'>
+    Based on the predefined constraints and the return score when the constraints are violated, the C-Value, the <code>fitness(or objective)</code> of the project, was evaluated for each state space.
+    <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/f8eeb81a975b0b16700230c941334cec4087c7c7/theater_sightlines/theater_sightlines.py#L185-L200">C-Value</a> can be evaluated by finding the distance between two sight points, and galapagos is used to replace the genetic algorithm code.
+
+    <br>
+    <figure>
+        <img src="../img/c-value-optimizing.gif" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">Calculating C-Value each state space</figcaption>
+    </figure>
+    <br>
+    <pre class="highlight">
+
+        def calculate_cvalue(self):
+        <span class="doc">"""calculating C-Value of current state space"""</span>
+        curr_ceil_height = self.calculate_ceil_height()
+        curr_step_width = self.calculate_step_margin()
+        
+        sight_elements = self.generate_sight()
+        cal_crv = sight_elements[0]
+        cal_pt_1 = sight_elements[1]
+        cal_vect = <span class="const">Point</span>(0,0,1).generate_point()
+        cal_line = gh.<span class="const">LineSDL</span>(cal_pt_1, cal_vect, 30)
+        cal_pt_2 = gh.<span class="const">CurveXLine</span>(rs.coercecurve(cal_crv), cal_line)[0][1]
+        
+        if curr_ceil_height == 0 or curr_step_width == 0:
+        cvalue = 0
+        else:
+        cvalue = rs.<span class="const">Distance</span>(cal_pt_1, cal_pt_2) * self.<span class="const">SCALE</span>
+        
+        return round(cvalue, 1)
+    </pre>
+    
+
+</div>
+
+<br>
+
+<h3>Record & Result</h3>
+<div style='text-align: justify;'>
+    Through the galapagos <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/theater_sightlines/record.txt">record</a> written below, you can see the C-Value that increase with each generation.
+
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/212463167-877b6c4b-ea85-464b-aaa8-659955d59706.png" style="width: 100%">
+        <figcaption style="text-align: center; margin-top: 1em">Each generation C-Value</figcaption>
+    </figure>
+    <br>
+    Actually, this project was a problem to know the optimal value intuitively. What I wanted to check through this project was whether it was possible to set the desired constraints and <code>explore in the desired direction.</code>
+    Therefore, the exploration scope of the parameters was extended beyond the need and the work was carried out. If you need the source code for this project, please refer to this <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/tree/master/theater_sightlines">link</a>.
+    <br><br>
+    <figure>
+        <img src="https://user-images.githubusercontent.com/83874157/212463665-a71db456-1c4b-41a5-8f19-3e992b333119.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">C-Value standard</figcaption>
+    </figure>
+    
+    
+</div>
+
+<br><br>
