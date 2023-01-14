@@ -4,6 +4,7 @@ layout: post
 hashtag: "#optimization"
 ---
 
+
 <div id="toc"></div>
 <h3>Requirement</h3>
 <div style='text-align: justify;'>
@@ -13,7 +14,7 @@ hashtag: "#optimization"
 
     <figure>
         <img src="../img/tower-crane-1.png" style="width: 100%;">
-        <figcaption style="text-align: center; margin-top: 1em">From the left, Radius of crane, Project purpose</figcaption>
+        <figcaption style="text-align: center; margin-top: 1em">Requirement <br>From the left, Radius of crane, Project purpose</figcaption>
     </figure>
 
 <!--break-->
@@ -55,12 +56,12 @@ hashtag: "#optimization"
     <br>
     More details can be found in the <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/tower_crane_layout/tower_crane_layout.py">code</a>. 
     I have set three thresholds. 1. Whether the point is inside the given site,2. How much is the intersected area of the tower crane, 3. How much the crane has invaded the housing area.
-    <pre class="higlight">
-
-        1. origin_in_region % 2 != 0
-        2. crane_intersected_area >= 1000
-        3. housing_intersected_area >= 200
-    </pre>
+    <blockquote>
+        <br>1. origin_in_region % 2 != 0
+        <br>2. crane_intersected_area >= 1000
+        <br>3. housing_intersected_area >= 200
+        <br><br>   
+    </blockquote>
 
 </div>
 
@@ -78,11 +79,14 @@ hashtag: "#optimization"
 
     Each generation was recorded as follows. After 153 generation, fitness is no longer lower.
     And the code I wrote and the optimized reesult within the set constraints are as follows. The area of the elements used in the fitness evaluation can be checked through the visualized images on the bottom
-
-
+    <br>
+    
     <figure>
-        <img src="../img/tower-crane-5.png" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
-        <figcaption style="text-align: center; margin-top: 1em">Optimum layout</figcaption>
+    <div style="width:100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/tower-crane-6.gif" style="width: 44%;">
+        <img src="../img/tower-crane-5.png" style="width: 55%;">
+    </div>
+        <figcaption style="text-align: center; margin-top: 1em">Result <br>From the left, Optimization process, Optimum layout</figcaption>
     </figure>
 </div>
 <br><br>
