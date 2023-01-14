@@ -1,0 +1,88 @@
+---
+title:  "Tower crane arrangement"
+layout: post
+hashtag: "#optimization"
+---
+
+<div id="toc"></div>
+<h3>Requirement</h3>
+<div style='text-align: justify;'>
+
+    This project is to optimize the layout of the tower cranes given the required number of cranes.
+    The size of the crane is as shown in the diagram below, and when arranging three cranes, I thought about which size crane to choose and what criteria to place it.
+
+    <figure>
+        <img src="../img/tower-crane-1.png" style="width: 100%;">
+        <figcaption style="text-align: center; margin-top: 1em">From the left, Radius of crane, Project purpose</figcaption>
+    </figure>
+
+<!--break-->
+</div>
+
+<br>
+
+<h3>Designing state space</h3>
+<div style='text-align: justify;'>
+
+    Constraints in this project is to minimize the intrusion of tower cranes into the housing areas around the site.
+    If a tower crane <code>invades housing areas</code>, that state space will receive a low score.
+
+    <figure>
+        <img src="../img/tower-crane-2.png" style="width: 100%;">
+        <figcaption style="text-align: center; margin-top: 1em">Set constraints</figcaption>
+    </figure>
+    <br>
+    And I created a bounding box on the given <code>site</code> and created the positions parameter (origin of the crane) in it.
+    A state space reflecting the radius of the selected tower crane based on the origin is created.
+    And since we need to check if the origin of the crane is created outside the given site, we use a <a href="https://en.wikipedia.org/wiki/Point_in_polygon">Point in Polygon</a> algorithm to verify it. 
+    
+
+</div>
+
+<br><br>
+
+<h3>Evaluating</h3>
+<div style='text-align: justify;'>
+
+    Fitness is set as the total area of the <code>given site minus the area occupied by the tower cranes.</code>
+    If you explore this fitness without any threshold, the result will be calculated in the direction of increasing the size of the tower crane only.
+    So, I thought that I had to set an additional threshold to the pre-set constraint, so I created an evaluation function.
+
+    <figure>
+        <img src="../img/tower-crane-3.png" style="width: 70%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">Set fitness</figcaption>
+    </figure>
+    <br>
+    More details can be found in the <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/tower_crane_layout/tower_crane_layout.py">code</a>. 
+    I have set three thresholds. 1. Whether the point is inside the given site,2. How much is the intersected area of the tower crane, 3. How much the crane has invaded the housing area.
+    <pre class="higlight">
+
+        1. origin_in_region % 2 != 0
+        2. crane_intersected_area >= 1000
+        3. housing_intersected_area >= 200
+    </pre>
+
+</div>
+
+<br><br>
+
+<h3>Record & Result</h3>
+<div style='text-align: justify;'>
+
+    <figure>
+        <img src="../img/tower-crane-4.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <br>
+        <figcaption style="text-align: center; margin-top: 1em">Each generation fitness</figcaption>
+    </figure>
+    <br>
+
+    Each generation was recorded as follows. After 153 generation, fitness is no longer lower.
+    And the code I wrote and the optimized reesult within the set constraints are as follows. The area of the elements used in the fitness evaluation can be checked through the visualized images on the bottom
+
+
+    <figure>
+        <img src="../img/tower-crane-5.png" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">Optimum layout</figcaption>
+    </figure>
+</div>
+<br><br>
