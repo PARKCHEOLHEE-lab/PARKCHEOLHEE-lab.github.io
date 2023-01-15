@@ -1,0 +1,70 @@
+---
+title:  "Space syntax"
+layout: post
+hashtag: "#informatin #visualization"
+---
+
+<div id="toc"></div>
+<h3>Depth of space</h3>
+<div style='text-align: justify;'>
+
+    The depth of spcae can be a criterion for evaluating the <code>accessibility</code> of the space.
+    Let's take a look at the image below. There are two spaces, and the way they are all laid out is the same.
+    However, you can see that the accessibility to the space changes depending on the way the spaces are connected, that is, the depth.
+    
+    <!--break-->
+    <figure>
+        <img src="../img/space-syntax-0.png" style="width: 60%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">Same space different evaluation 
+            <br>From the top, space structure, space connection
+        </figcaption>
+    </figure>
+    <br>
+
+    Let's take a look at a little more complex structure of space. 
+    We have 2 spaces, each space consists of 8 rooms. We can visualize the conditions of each space as follows. (The room number 0 is entrance)
+    <br><br>
+    At first glance, there is no difference between the two spaces. However, the difference becomes clear when looking at the <code>graph</code> and calculated <code>depth</code> in the picture on the right.
+    Interestingly, even if the space (Space 1: 8, Space 2: 7) is in the same location, the depth varies according to the location of the entrance and the connected relationship.
+    This can be seen through the computed depth on the far right. The <code>maximum depths of the two spaces are 6 and 2</code>, respectively.
+    <figure>
+        <img src="../img/space-syntax-1.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">The conditions of each space 
+            <br>From the top, Space 1, Space 2
+        </figcaption>
+    </figure>
+</div>
+
+<br>
+
+<h3>Evaluating each space</h3>
+<div style='text-align: justify;'>
+
+    Visibility polygons are the criterion for evaluating the visibility at a specific point.
+    This can be used to quantitatively evaluate spatial activity or connectivity. Let's evaluate the previous two spaces through the following process.
+    <figure>
+        <img src="../img/space-syntax-2.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">What is the visibility polygon ?
+            <br>From the left, Obstacles, Visibility polygon
+        </figcaption>
+    </figure>
+    <br>
+    First, we need to create a bounding box to wrap the all space. And then write a square grid in the bounding box.
+    Second, creates the center point of all grids, and checks whether the point is located inside the space or outisde.
+    Lastly, create a visibility polygon through point in space. And measure the peremeter of the polygon. You can check the process through the 
+    <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/space_syntax/space_syntax.py">link.</a>
+    <figure>
+        <img src="../img/space-syntax-3.png" style="width: 45%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">Apply to the space 2
+        </figcaption>
+    </figure>
+    <br>
+
+    If you put the perimeter of the polygon obtained earlier in the list and match it with the index of the grid to brightly visualize the wide perimeter, the image below is created.
+    <figure>
+        <img src="../img/space-syntax-4.png" style="width: 70%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">Space syntax
+        </figcaption>
+    </figure>
+</div>
+<br><br>
