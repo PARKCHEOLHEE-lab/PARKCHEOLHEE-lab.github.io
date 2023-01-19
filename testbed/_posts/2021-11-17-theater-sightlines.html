@@ -63,23 +63,23 @@ done: true
     <pre class="highlight">
 
         def calculate_cvalue(self):
-        <span class="doc">"""calculating C-Value of current state space"""</span>
-        curr_ceil_height = self.calculate_ceil_height()
-        curr_step_width = self.calculate_step_margin()
-        
-        sight_elements = self.generate_sight()
-        cal_crv = sight_elements[0]
-        cal_pt_1 = sight_elements[1]
-        cal_vect = <span class="const">Point</span>(0,0,1).generate_point()
-        cal_line = gh.<span class="const">LineSDL</span>(cal_pt_1, cal_vect, 30)
-        cal_pt_2 = gh.<span class="const">CurveXLine</span>(rs.coercecurve(cal_crv), cal_line)[0][1]
-        
-        if curr_ceil_height == 0 or curr_step_width == 0:
-        cvalue = 0
-        else:
-        cvalue = rs.<span class="const">Distance</span>(cal_pt_1, cal_pt_2) * self.<span class="const">SCALE</span>
-        
-        return round(cvalue, 1)
+            <span class="doc">"""calculating C-Value of current state space"""</span>
+            curr_ceil_height = self.calculate_ceil_height()
+            curr_step_width = self.calculate_step_margin()
+            
+            sight_elements = self.generate_sight()
+            cal_crv = sight_elements[0]
+            cal_pt_1 = sight_elements[1]
+            cal_vect = <span class="const">Point</span>(0,0,1).generate_point()
+            cal_line = gh.<span class="const">LineSDL</span>(cal_pt_1, cal_vect, 30)
+            cal_pt_2 = gh.<span class="const">CurveXLine</span>(rs.coercecurve(cal_crv), cal_line)[0][1]
+            
+            if curr_ceil_height == 0 or curr_step_width == 0:
+                cvalue = 0
+            else:
+                cvalue = rs.<span class="const">Distance</span>(cal_pt_1, cal_pt_2) * self.<span class="const">SCALE</span>
+            
+            return round(cvalue, 1)
     </pre>
     
 
