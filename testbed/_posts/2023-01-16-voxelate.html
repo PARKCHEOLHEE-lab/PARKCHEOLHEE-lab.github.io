@@ -39,7 +39,11 @@ featured: true
 <h3>3D grid & conditions map</h3>
 <div style='text-align: justify;'>
     First we should create <code>grids</code> and to create a grid, need a bounding box of given shape. The angle of bounding box sets sun faced like the <code>picture 4</code> above.
-    Now, We can obtain the grids that fully fills the bounding box through the segments of the bounding box obtained in this way.
+    Through the segments X and Y of the bounding box facing the sun, we can get a 3D voxel grid of the desired size that fully fills the bounding box. 
+    Then we check if the voxel is inside the given shape, <code>filter only the voxel that is inside the shape.</code> 
+    <br><br>
+    This grid of voxels can be represented as a <code>List,</code> one of Python's data structures. And the data structure List can express <code>multi-dimensional</code> data.
+    Let's take a look at a simple example below. The given simple conditions are as follows. <i>1. voxel size: 3.5, 2. given shape: sphere that radius: 20</i>
 </div>
 
 <br><br>
