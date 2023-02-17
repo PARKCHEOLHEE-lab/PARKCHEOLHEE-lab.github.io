@@ -14,7 +14,7 @@ featured: true
     All individual voxels are the same size, however voxels can then be combined in the same grid at different positions with different colors to create what is known as a voxel model.
     <figure>
         <a href="https://www.gamersnexus.net/gg/762-voxels-vs-vertexes-in-games">
-            <img src="../img/voxelate-0.png" style="width: 60%; display: block; margin-left: auto; margin-right: auto;">
+            <img src="../img/voxelate-0.png" style="width: 50%; display: block; margin-left: auto; margin-right: auto;">
         </a>
         <figcaption style="text-align: center; margin-top: 1em">
             From the left, <br>Original shape · Voxelated shape
@@ -33,7 +33,7 @@ featured: true
             mvrdv's <a href="https://www.mvrdv.nl/projects/322/red7?photo=16205">RED7</a>
         </figcaption>
     </figure>
-
+    
 </div>
 <br>
 <h3>3D grid & conditions map</h3>
@@ -43,7 +43,19 @@ featured: true
     Then we check if the voxel is inside the given shape, <code>filter only the voxel that is inside the shape.</code> 
     <br><br>
     This grid of voxels can be represented as a <code>List,</code> one of Python's data structures. And the data structure List can express <code>multi-dimensional</code> data.
-    Let's take a look at a simple example below. The given simple conditions are as follows. <i>1. voxel size: 3.5, 2. given shape: sphere that radius: 20</i>
+    Let's take a look at a simple example below. 
+    <br><br>
+    The given simple conditions are as follows. <i>① voxel size: 3.5 ② given shape: sphere that radius: 20</i>. As mentioned earlier, in the last picture below you can see the voxel data structure represented as a List in Python.
+    Data of <code>0</code> means empty voxels and data of <code>1</code> means filled voxels.
+    We can determine each voxel condition through the data we have. Examples include <code>interior voxels, exterior voxels, corner voxels, and roof voxels</code> etc.
+
+    <br><br>
+    <figure>
+        <img src="../img/voxelate-2.png" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            From the left, <br>Given sphere · Voxelated sphere · Conditions map(9th voxels grid) 
+        </figcaption>
+    </figure>
 </div>
 
 <br><br>
