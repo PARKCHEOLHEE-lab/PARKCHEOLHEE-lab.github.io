@@ -17,7 +17,7 @@ featured: true
             <img src="../img/voxelate-0.png" style="width: 50%; display: block; margin-left: auto; margin-right: auto;">
         </a>
         <figcaption style="text-align: center; margin-top: 1em">
-            From the left, <br>Original shape · Voxelated shape
+            What is a voxel ?<br> From the left, Original shape · Voxelated shape
         </figcaption>
     </figure>
     <br>
@@ -47,15 +47,81 @@ featured: true
     <br><br>
     The given simple conditions are as follows. <i>① voxel size: 2.0 ② given shape: sphere that radius: 20.0</i>. As mentioned earlier, in the last picture below you can see the voxel data structure represented as a List in Python.
     Data of <code>0</code> means empty voxels and data of <code>1</code> means filled voxels.
-    Now, we can determine each voxel condition through the data we have. Examples include <code>interior voxels, exterior voxels, corner voxels, and roof voxels</code> etc.
 
     <br><br>
     <figure>
         <img src="../img/voxelate-2.png" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
-            From the left, <br>Given sphere · Voxelated sphere · Conditions map(9th voxels grid) 
+            3D grid & conditions map <br> From the left, Given sphere · Voxelated sphere · Conditions map(9th voxels grid) 
+        </figcaption>
+    </figure>
+
+</div>
+
+<br><br>
+<h3>Determining the voxel's condition</h3>
+<div style="text-align: justify;">
+    
+    Now, we can determine each voxel condition through the data we have. 
+    <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L101-L111">Examples</a> include <code>interior voxels, exterior voxels, corner voxels, and roof voxels</code> etc.
+    <br><br>
+
+    To determine the ROOF voxel, simply <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L587-L592">check the condition</a> of the upper voxel. 
+    Likewise, to determine the CORNER voxel, simply check previous voxel, next voxel, front voxel, back voxel.
+    The diagram below shows how red voxels are estimated to be CORNER voxels. Please refer to the link above for detailed code related to determining the voxel condition.
+
+    <figure>
+        <img src="../img/voxelate-3.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            Determining the voxel's condition <br> From the left, Target voxel · Check surround voxel conditions 
+        </figcaption>
+    </figure>
+
+</div>
+<br>
+<h3>Voxel unit matching by condition</h3>
+<div style="text-align: justify;">
+    Several predefined VoxelUnits can be matched through the condition of each voxel determined based on the conditions map.
+    You can design and apply a unit suitable for the desired voxel size, and if you wish, you can <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L138-L143">resize</a> the voxel size and apply it.
+    And for voxel matching, it also supports <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L131-L136">rotation</a> function by calculating the angle of the voxel.
+
+    <figure>
+        <img src="../img/voxelate-4.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            VoxelUnits <br> From the left, Exterior · Exterior both · Exterior corner · Exterior corner O · Exterior corner U 
+        </figcaption>
+    </figure>
+
+    <br><br>
+    Finally, I'll wrap up the article by showing some examples of each of the above VoxelUnits applied.
+    <br><br>
+    <figure>
+        <img src="../img/voxelate-5.png" style="width: auto; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            RED7 <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+        </figcaption>
+    </figure>
+    <br><br>
+    <figure>
+        <img src="../img/voxelate-6.png" style="width: auto; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            79&PARK <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+        </figcaption>
+    </figure>
+    <br><br>
+    <figure>
+        <img src="../img/voxelate-7.png" style="width: auto; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            KING TORONTO <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+        </figcaption>
+    </figure>
+    <br><br>
+    <figure>
+        <img src="../img/voxelate-8.png" style="width: auto; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            VANCOUVER HOUSE <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
         </figcaption>
     </figure>
 </div>
 
-<br><br>
+<br><br><br>
