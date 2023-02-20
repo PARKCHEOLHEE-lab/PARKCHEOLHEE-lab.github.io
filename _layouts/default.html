@@ -90,16 +90,18 @@ a:hover {
     toc = "<ul class='section-nav'>";
 
     h3Tags = document.getElementsByTagName("h3");
-    for (let i=0; i < h3Tags.length; i++) {
-        h3TagTitle = h3Tags[i].innerText
-        toc += "<li><a href=\"#" + h3Tags[i].id + "\">" + h3TagTitle + "</a></li>";
+    if (h3Tags.length > 0) {
+        for (let i=0; i < h3Tags.length; i++) {
+          h3TagTitle = h3Tags[i].innerText
+          toc += "<li><a href=\"#" + h3Tags[i].id + "\">" + h3TagTitle + "</a></li>";
 
+      }
+
+      toc += "</ul><br><br>";
+      document.getElementById("toc").innerHTML += toc;
+    }
     }
 
-    toc += "</ul><br><br>";
-    document.getElementById("toc").innerHTML += toc;
-
-  }
 
   function figNumberSetter() {
     figCaptions = document.getElementsByTagName("figcaption");

@@ -76,6 +76,30 @@
       {% endif %}
     {% endfor %}
 
+  {% elsif page.id == "threebed" %}
+    <p style="margin-top: -1em">　</p>
+    
+      {% for post in site.categories.threebed %}
+      <div style="margin-top: -0.2em">
+        <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+          {% if post.featured %}
+            <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
+          {% else %}
+            <h3>{{ post.title }}</h3>
+          {% endif %}
+          <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
+          <p style=" text-align: justify; font-size:smaller;">
+            Exercise: {{ post.title}} 
+            {% if post.done %}
+              <p style="margin-bottom: 0.5em; font-size: calc(0.5rem + 0.2vw); text-align: right; color: gray;">{{ post.hashtag }}</p>
+            {% else %}
+              <p class="useBottomLine" style="margin-bottom: 0.5em; font-size: calc(0.5rem + 0.2vw); text-align: right; color: gray;">{{ post.hashtag }}</p>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      {% endfor %}
+
   {% else %}
   
     <p style="margin-top: -1em">　</p>
