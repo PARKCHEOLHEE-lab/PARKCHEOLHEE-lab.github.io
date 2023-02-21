@@ -4,7 +4,7 @@ import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitCo
 
 
 class Box {
-  constructor (size=5) {
+  constructor (size=4) {
     this.size = size;
     this.container = document.getElementById("threejs");
 
@@ -23,9 +23,9 @@ class Box {
 
   _setCamera () {
     this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
-    this.camera.position.x = 10;
-    this.camera.position.y = 10;
-    this.camera.position.z = 10;
+    this.camera.position.x = 13;
+    this.camera.position.y = 13;
+    this.camera.position.z = 13;
   }
 
   _setRenderer () {
@@ -38,29 +38,29 @@ class Box {
   }
 
   _setGeometry () {
-    let geometry = new THREE.BoxGeometry(this.size, this.size, this.size);
-    let material = new THREE.MeshBasicMaterial({color: 0x0011e3});
-    let cube = new THREE.Mesh(geometry, material);
+    let geometry = new THREE.SphereGeometry(this.size, 15, 15);
+    let material = new THREE.MeshBasicMaterial({color: 0xff00a1, wireframe: true});
+    let sphere = new THREE.Mesh(geometry, material);
 
     let container = this.container;
     let renderer = this.renderer
     let scene = this.scene
     let camera = this.camera
-    let gridHelper = new THREE.GridHelper(cube.geometry.parameters.depth * 10, cube.geometry.parameters.depth * 30);
+    let gridHelper = new THREE.GridHelper(this.size * 10, this.size * 30);
     
     scene.add(gridHelper);
-    scene.add(cube);
+    scene.add(sphere);
     animate();
 
-    this.cube = cube
-    this.cube.position.y = 3;
+    this.sphere = sphere
+    this.sphere.position.y = 3;
     this.orbit.update();
 
     function animate () {
       requestAnimationFrame(animate);
 
-      cube.rotation.x += 0.005;
-      cube.rotation.y += 0.005;
+      sphere.rotation.x += 0.005;
+      sphere.rotation.y += 0.005;
 
       renderer.render(scene, camera);
 
@@ -76,14 +76,29 @@ class Box {
   
   _setGUI () {
 
-    let gui = new dat.GUI({width: 150, closeOnTop: true});
+    let gui = new dat.GUI({width: 230, closeOnTop: true});
 
-    gui.add(this.cube.material, "wireframe");
-    gui.add(this.cube.scale, "x", 0.5, 2, 0.1).name("scaleX");
-    gui.add(this.cube.scale, "y", 0.5, 2, 0.1).name("scaleY");
-    gui.add(this.cube.scale, "z", 0.5, 2, 0.1).name("scaleZ");
+    const sphereData = {
+        sphere: this.sphere,
+        radius: this.size,
+        widthSegments: 15,
+        heightSegments: 15
+    }
+
+    gui.add(sphereData, "radius", 1, this.size * 2).onChange(regenerateSphereGeometry);
+    gui.add(sphereData, "widthSegments", 5, 25).onChange(regenerateSphereGeometry);
+    gui.add(sphereData, "heightSegments", 5, 25).onChange(regenerateSphereGeometry);
 
     document.getElementById("gui").appendChild(gui.domElement);
+    
+    function regenerateSphereGeometry() {
+        let newGeometry = new THREE.SphereGeometry(
+            sphereData.radius, sphereData.widthSegments, sphereData.heightSegments
+        )
+
+        sphereData.sphere.geometry.dispose()
+        sphereData.sphere.geometry = newGeometry
+    }
 
   }
 }
