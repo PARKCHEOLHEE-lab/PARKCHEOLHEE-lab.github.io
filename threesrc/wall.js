@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
-import { IFCLoader } from "https://unpkg.com/browse/web-ifc-three@0.0.103/IFCLoader.js";
+import { IFCLoader } from "web-ifc-three";
+import { IFCSPACE } from "web-ifc";
+
+// import { IFCLoader } from "web-ifc-three";
 
 // class DomIno {
 //   constructor () {
