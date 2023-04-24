@@ -9,6 +9,7 @@ class Box {
     this.container = document.getElementById("threejs");
 
     this._setScene();
+    this._setAxes();
     this._setCamera();
     this._setRenderer();
     this._setOrbit();
@@ -21,11 +22,18 @@ class Box {
     this.scene.background = new THREE.Color(0xffffff);
   }
 
+  _setAxes() {
+      const axes = new THREE.AxesHelper(10);
+      axes.material.depthTest = false;
+      axes.renderOrder = 1;
+      this.scene.add(axes);
+  }
+
   _setCamera () {
     this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
-    this.camera.position.x = 10;
-    this.camera.position.y = 10;
-    this.camera.position.z = 10;
+    this.camera.position.x = 15;
+    this.camera.position.y = 15;
+    this.camera.position.z = 15;
   }
 
   _setRenderer () {
