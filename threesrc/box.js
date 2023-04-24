@@ -14,7 +14,7 @@ class Box {
     this._setRenderer();
     this._setOrbit();
     this._setGeometry();
-    this._setGUI();
+    // this._setGUI();
   }
 
   _setScene () {
@@ -23,17 +23,17 @@ class Box {
   }
 
   _setAxes() {
-      const axes = new THREE.AxesHelper(10);
+      const axes = new THREE.AxesHelper(25);
       axes.material.depthTest = false;
       axes.renderOrder = 1;
       this.scene.add(axes);
   }
 
   _setCamera () {
-    this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
-    this.camera.position.x = 15;
-    this.camera.position.y = 15;
-    this.camera.position.z = 15;
+    this.camera = new THREE.PerspectiveCamera(5, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
+    this.camera.position.x = -200;
+    this.camera.position.y = 200;
+    this.camera.position.z = 200;
   }
 
   _setRenderer () {
@@ -46,29 +46,41 @@ class Box {
   }
 
   _setGeometry () {
-    let geometry = new THREE.BoxGeometry(this.size, this.size, this.size);
-    let material = new THREE.MeshBasicMaterial({color: 0x0011e3});
-    let cube = new THREE.Mesh(geometry, material);
+    const geometry = new THREE.BoxGeometry(this.size, this.size, this.size);
+    const edges = new THREE.WireframeGeometry(geometry);
+    const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
 
-    let container = this.container;
-    let renderer = this.renderer
-    let scene = this.scene
-    let camera = this.camera
-    let gridHelper = new THREE.GridHelper(cube.geometry.parameters.depth * 10, cube.geometry.parameters.depth * 30);
+    const material = new THREE.MeshBasicMaterial({color: 0x0011e3});
+    const cube = new THREE.Mesh(geometry, material);
+
+    const container = this.container;
+    const renderer = this.renderer
+    const scene = this.scene
+    const camera = this.camera
+    const gridHelper = new THREE.GridHelper(cube.geometry.parameters.depth * 10, cube.geometry.parameters.depth * 15);
     
     scene.add(gridHelper);
     scene.add(cube);
+    scene.add(line);
     animate();
 
-    this.cube = cube
-    this.cube.position.y = 3;
+    this.cube = cube;
+    this.line = line;
+    line.renderOrder = 10;
+    
+    this.line.position.y = this.size / 2;
+    this.cube.position.y = this.size / 2;
+    
     this.orbit.update();
-
+    
     function animate () {
       requestAnimationFrame(animate);
-
-      cube.rotation.x += 0.005;
-      cube.rotation.y += 0.005;
+      
+      // cube.rotation.x += 0.005;
+      // cube.rotation.y += 0.005;
+      
+      // line.rotation.x += 0.005;
+      // line.rotation.y += 0.005;
 
       renderer.render(scene, camera);
 
@@ -84,7 +96,7 @@ class Box {
   
   _setGUI () {
 
-    let gui = new dat.GUI({width: 150, closeOnTop: true});
+    const gui = new dat.GUI({width: 150, closeOnTop: true});
 
     gui.add(this.cube.material, "wireframe");
     gui.add(this.cube.scale, "x", 0.5, 2, 0.1).name("scaleX");
