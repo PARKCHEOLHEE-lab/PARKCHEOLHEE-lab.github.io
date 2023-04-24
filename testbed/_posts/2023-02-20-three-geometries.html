@@ -21,6 +21,10 @@ summary: Box geometry creation using three.js
 </div>
 <br><br>
 <h3>THREE.BoxGeometry array</h3>
+<div style="text-align: justify;">
+    <a href="https://threejs.org/docs/?q=box#api/en/geometries/BoxGeometry">BoxGeometry</a> is a geometry class for a rectangular cuboid with a given 'width', 'height', and 'depth'. 
+    On creation, the cuboid is centred on the origin, with each edge parallel to one of the axes.
+</div>
 <div id="gui"></div>
 <div id="threejs">
     <script type="importmap">
@@ -31,4 +35,15 @@ summary: Box geometry creation using three.js
         }
     </script>
     <script type="module" src="../../threesrc/box.js"></script>
+</div>
+
+<div style="text-align: justify;">
+    The code for <code>BoxGeometry</code> is below and we can create the box array through the <a href="">code</a> to following. 
+    Try it to handle the camera using your mouse
+<pre class="highlight">
+    <span class="gi">const</span> geometry = new THREE.<span class="blue">BoxGeometry</span>( 1, 1, 1 );
+    <span class="gi">const</span> material = new THREE.<span class="blue">MeshBasicMaterial</span>( {color: 0x00ff00} );
+    <span class="gi">const</span> cube = new THREE.<span class="blue">Mesh</span>( geometry, material );
+    scene.add( cube );
+</pre>
 </div>

@@ -4,7 +4,7 @@ import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitCo
 
 
 class Box {
-  constructor (size=5) {
+  constructor (size=6) {
     this.size = size;
     this.container = document.getElementById("threejs");
 
@@ -43,33 +43,49 @@ class Box {
 
   _setOrbit () {
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbit.maxDistance = 500;
   }
 
   _setGeometry () {
-    const geometry = new THREE.BoxGeometry(this.size, this.size, this.size);
-    const edges = new THREE.WireframeGeometry(geometry);
-    const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
-
-    const material = new THREE.MeshBasicMaterial({color: 0x0011e3});
-    const cube = new THREE.Mesh(geometry, material);
-
+    
     const container = this.container;
     const renderer = this.renderer
     const scene = this.scene
     const camera = this.camera
-    const gridHelper = new THREE.GridHelper(cube.geometry.parameters.depth * 10, cube.geometry.parameters.depth * 15);
+    const gridHelper = new THREE.GridHelper(50, 50);
     
     scene.add(gridHelper);
-    scene.add(cube);
-    scene.add(line);
     animate();
-
-    this.cube = cube;
-    this.line = line;
-    line.renderOrder = 10;
     
-    this.line.position.y = this.size / 2;
-    this.cube.position.y = this.size / 2;
+    for (let i = 1; i <= this.size; i++) {
+      const geometry = new THREE.BoxGeometry(i, i, i);
+      const edges = new THREE.WireframeGeometry(geometry);
+      const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+  
+      const material = new THREE.MeshBasicMaterial({color: 0x0011e3});
+      const cube = new THREE.Mesh(geometry, material);
+
+      let interval = i;
+      if (i == 1) {
+        interval = 0;
+      } else {
+        interval = i / 2 * i * 1.5
+      }
+
+      console.log(interval)
+      cube.position.z = interval;
+      line.position.z = interval;
+
+      cube.position.y = i / 2;
+      line.position.y = i / 2;
+
+      line.renderOrder = 1;
+
+      scene.add(cube);
+      scene.add(line);
+
+    }
+    
     
     this.orbit.update();
     
