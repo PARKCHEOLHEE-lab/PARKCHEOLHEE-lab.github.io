@@ -4,11 +4,13 @@ import { OBJLoader } from "https://threejs.org/examples/jsm/loaders/OBJLoader.js
 
 class DomIno {
   constructor () {
-    this.container = document.getElementById("threejs");
+    this.container = document.getElementById("threejsDomIno");
 
     this._setScene();
-    this._setCamera();
+    this._setAxes();
     this._setRenderer();
+    this._setLights();
+    this._setCamera();
     this._setOrbit();
     this._setGeometry();
   }
@@ -18,35 +20,77 @@ class DomIno {
     this.scene.background = new THREE.Color(0xffffff);
   }
 
+  _setAxes() {
+      const axes = new THREE.AxesHelper(10);
+      axes.material.depthTest = false;
+      axes.renderOrder = 1;
+      this.scene.add(axes);
+  }
+
+  _setLights() {
+      const directionalLight = new THREE.DirectionalLight(0x808080, 3);
+      directionalLight.position.set(-15, 10, 10);
+      directionalLight.target.position.set(0, 0, 0)
+      directionalLight.shadow.mapSize.width = 512
+      directionalLight.shadow.mapSize.height = 512
+      directionalLight.shadow.camera.near = 0.5
+      directionalLight.shadow.camera.far = 40
+      directionalLight.shadow.camera.top = 10
+      directionalLight.castShadow = true;
+
+      const helper = new THREE.CameraHelper( directionalLight.shadow.camera );
+      
+      this.scene.add(directionalLight);
+      this.scene.add( helper );
+  }
+
   _setCamera () {
-    this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
-    this.camera.position.x = 10;
-    this.camera.position.y = 1;
-    this.camera.position.z = 7;
+    this.camera = new THREE.PerspectiveCamera(5, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
+    this.camera.position.x = -70 * 1.2;
+    this.camera.position.y = 50 * 1.2;
+    this.camera.position.z = 120 * 1.2;
   }
 
   _setRenderer () {
     this.renderer = new THREE.WebGLRenderer();
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.BasicShadowMap;
     this.container.appendChild(this.renderer.domElement);
   }
 
   _setOrbit () {
     this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbit.minDistance = 10;
+    this.orbit.maxDistance = 300;
   }
 
   _setGeometry () {
-    let loader = new OBJLoader();
+    const loader = new OBJLoader();
 
     loader.load(
       "../model/dom-ino/dom-ino.obj",
       function ( object ) {
         object.traverse(function ( child ) {
-          if (child instanceof THREE.Mesh) {
-              child.material = new THREE.MeshBasicMaterial({color: 0x808080});
+          if (child.isMesh) {
+              child.geometry.center();
+
+              child.geometry.computeBoundingBox();
+              child.position.y = child.geometry.boundingBox.max.y;
+              child.castShadow = true;
+              child.receiveShadow = true;
+
+              const edges = new THREE.WireframeGeometry(child.geometry)
+              const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial({color: 0xcfcfcf}) )
+              line.position.y = child.geometry.boundingBox.max.y;
+              line.renderOrder = 1;
+      
+              scene.add( object );
+              // scene.add(line);
             }
           }
         )
-        scene.add( object );
+        
+        
       },
       function () {
       },
@@ -55,12 +99,19 @@ class DomIno {
       }
     )
 
-    let container = this.container;
-    let renderer = this.renderer
-    let scene = this.scene
-    let camera = this.camera
-    let gridHelper = new THREE.GridHelper(3, 10);
+    const container = this.container;
+    const renderer = this.renderer
+    const scene = this.scene
+    const camera = this.camera
+    const gridHelper = new THREE.GridHelper(3, 10);
     
+    const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+    const planeMaterial = new THREE.ShadowMaterial();
+    const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+    planeMesh.rotation.x = Math.PI * -0.5;
+    planeMesh.receiveShadow = true;
+
+    scene.add(planeMesh)
     scene.add(gridHelper);
     animate();
 
