@@ -18,15 +18,12 @@ summary: Box geometry creation using three.js
     
     <br><br>
     <a href="https://en.wikipedia.org/wiki/Three.js">(...)</a> 
+    <br><br>
+    What's unusual is that unlike common geometry handling tools (Rhino, Sketchup, Revit, etc.), Three.js <code>reverses the y-axis and z-axis.</code>
 </div>
 <br><br>
 <h3>THREE.BoxGeometry array</h3>
-<div style="text-align: justify;">
-    <a href="https://threejs.org/docs/?q=box#api/en/geometries/BoxGeometry">BoxGeometry</a> is a geometry class for a rectangular cuboid with a given 'width', 'height', and 'depth'. 
-    On creation, the cuboid is centred on the origin, with each edge parallel to one of the axes.
-</div>
-<div id="gui"></div>
-<div id="threejs">
+<div id="threejsBox">
     <script type="importmap">
         {
             "imports": {
@@ -36,14 +33,72 @@ summary: Box geometry creation using three.js
     </script>
     <script type="module" src="../../threesrc/box.js"></script>
 </div>
+<figcaption style="text-align: center">Reversed axes and boxes array<br>You can handle the camera using your mouse !</figcaption>
+
+<br>
+
 
 <div style="text-align: justify;">
-    The code for <code>BoxGeometry</code> is below and we can create the box array through the <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/blob/caa3cba3ca809b3d13b2d7995589d141569bb99f/threesrc/box.js#L60-L87">code</a> to following. 
-    Try it to handle the camera using your mouse
+    <a href="https://threejs.org/docs/?q=box#api/en/geometries/BoxGeometry">BoxGeometry</a> is a geometry class for a rectangular cuboid with a given 'width', 'height', and 'depth'. 
+    On creation, the cuboid is centred on the origin, with each edge parallel to one of the axes.
+    So, we can create boxes array like the above with these properties that the cuboid is centered.
+    Please refer the <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/blob/caa3cba3ca809b3d13b2d7995589d141569bb99f/threesrc/box.js#L60-L87"">GitHub</a> to see the detailed code.
+</div>
+<div style="text-align: justify;">
 <pre class="highlight">
-    <span class="gi">const</span> geometry = new THREE.<span class="blue">BoxGeometry</span>( 1, 1, 1 );
-    <span class="gi">const</span> material = new THREE.<span class="blue">MeshBasicMaterial</span>( {color: 0x00ff00} );
-    <span class="gi">const</span> cube = new THREE.<span class="blue">Mesh</span>( geometry, material );
-    scene.add( cube );
+    for (<span class="gi">let</span> i = 1; i <= this.size; i++) {
+        <span class="gi">const</span> geometry = new THREE.<span class="blue">BoxGeometry</span>(i, i, i);
+        <span class="gi">const</span> edges = new THREE.<span class="blue">WireframeGeometry</span>(geometry);
+        <span class="gi">const</span> line = new THREE.<span class="blue">LineSegments</span>( edges, new THREE.<span>LineBasicMaterial</span>( { color: 0xffffff } ) );
+    
+        <span class="gi">const</span> material = new THREE.<span class="blue">MeshBasicMaterial</span>({color: 0x0011e3});
+        <span class="gi">const</span> cube = new THREE.<span class="blue">Mesh</span>(geometry, material);
+  
+        <span class="gi">let</span> interval = i;
+        if (i == 1) {
+          interval = 0;
+        } else {
+          interval = i / 2 * i * 1.5
+        }
+  
+        cube.position.x = -interval;
+        line.position.x = -interval;
+  
+        cube.position.y = i / 2;
+        line.position.y = i / 2;
+  
+        line.renderOrder = 1;
+  
+        scene.add(cube);
+        scene.add(line);
+      }
 </pre>
 </div>
+
+<br><br>
+<h3>THREE.SphereGeometry</h3>
+<div style="text-align: justify;">
+    <a href="https://threejs.org/docs/index.html?q=sphere#api/en/geometries/SphereGeometry">SphereGeometry</a> is a 
+    geometry class for a sphere geometries with a given 'radius', 'widthSegments', and 'heightSegments'. 
+    <br><br>
+    The all of geometries in the Three.js are expressed as a <code>Mesh.</code> 
+    Thus, incomplete spheres can be created depending on the number of <code>Mesh.</code>
+    There is an initial <code>SphereGeometry</code> that has 10 by 10 meshes (Segments of control box). 
+    If you change these values to highly using the control box located upper right, 
+    we can get the delicately expressed SphereGeometry.
+</div>
+<br>
+<div id="gui"></div>
+<div id="threejsSphere">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.126.1/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module" src="../../threesrc/sphere.js"></script>
+</div>
+<figcaption style="text-align: center">Sphere geometry<br>You can handle the camera and properties of sphere using your mouse !</figcaption>
+
+<br><br>
