@@ -6,28 +6,57 @@ done: false
 summary: Box geometry creation using three.js
 ---
 
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.151.3/build/three.module.js",
+            "three/examples/jsm/utils/BufferGeometryUtils": "https://unpkg.com/three@0.140.1/examples/jsm/utils/BufferGeometryUtils.js",
+            "web-ifc": "https://unpkg.com/web-ifc@0.0.36/web-ifc-api.js",
+            "web-ifc-three": "https://unpkg.com/web-ifc-three@0.0.124/IFCLoader.js"
+        }
+    }
+</script>
+
 <div id="toc"></div>
 <h3>three.js features</h3>
 <div style="text-align: justify;">
-    Three.js includes the following features: <br>
+    Three.js includes the following <a href="https://en.wikipedia.org/wiki/Three.js">features</a>: <br>
     <ul style="padding-left: 2em;">
         <li>Lights: ambient, direction, point, and spot lights; shadows: cast and receive</li>
         <li>Export and import: utilities to create Three.js-compatible JSON files from within: Blender, openCTM, FBX, Max, and OBJ</li>
     </ul>    
+    <!--break-->
 </div>
 
 <br>
-<h3>OBJ Loader</h3>
+<h3>OBJLoader</h3>
+<div style="text-align: justify;">
+    The <code>OBJ file format</code> is a simple data-format that represents 3D geometry alone — namely, 
+    the position of each vertex, the UV position of each texture coordinate vertex, 
+    vertex normals, and the faces that make each polygon defined as a list of vertices, and texture vertices.
+    <br><br>
+    An OBJ file may contain vertex data, free-form curve/surface attributes, elements, 
+    free-form curve/surface body statements, connectivity between free-form surfaces, 
+    grouping and display/render attribute information. 
+    The most common elements are <code>geometric vertices, texture coordinates, vertex normals and polygonal faces.</code>
+    <br><br>
+    I have a 3D model of Le Corbusier's Dom-ino system and it can be loaded to HTML canvas using OBJLoader in the three.js addons.
+    <br>
+</div>
 <div id="threejsDomIno">
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.126.1/build/three.module.js"
-            }
-        }
-    </script>
     <script type="module" src="../../threesrc/dom-ino.js"></script>
 </div>
 <figcaption style="text-align: center">Dom-ino system by Le Corbusier<br>You can handle the camera using your mouse !</figcaption>
 
+<br>
+
+<h3>IFCLoader</h3>
+<div style="text-align: justify;">
+    The <a href="https://ifcjs.io/"><code>Industry Foundation Classes (IFC)</code></a> is a CAD data exchange data schema intended for description of architectural, building and construction industry data.
+    It is an object-based data schema with a data model 
+    to facilitate interoperability in the architecture, engineering and construction (AEC) industry, and is a commonly used collaboration format in <code>Building information modeling (BIM)</code> based projects. 
+</div>
+<div id="threejsIFC">
+    <script type="module" src="../../threesrc/wall.js"></script>
+</div>
 <br><br>

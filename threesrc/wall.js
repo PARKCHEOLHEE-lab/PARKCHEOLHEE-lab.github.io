@@ -1,11 +1,11 @@
 import * as THREE from "three";
 import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 import { IFCLoader } from "web-ifc-three";
-import { IFCSPACE } from "web-ifc";
+// import { IFCSPACE } from "web-ifc";
 
 class IfcWall {
     constructor() {
-        this.container = document.getElementById("threejs");
+        this.container = document.getElementById("threejsIFC");
 
         this._setScene();
         this._setAxes();
