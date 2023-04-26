@@ -30,9 +30,6 @@ class DomIno {
   _setLights() {
       const directionalLight = new THREE.DirectionalLight(0x808080, 3);
       directionalLight.position.set(-15, 10, 10);
-      directionalLight.target.position.set(0, 0, 0)
-      directionalLight.shadow.mapSize.width = 512
-      directionalLight.shadow.mapSize.height = 512
       directionalLight.shadow.camera.near = 0.5
       directionalLight.shadow.camera.far = 40
       directionalLight.shadow.camera.top = 10

@@ -10,9 +10,9 @@ class IfcWall {
         this._setScene();
         this._setAxes();
         this._setGrid();
-        this._setLights();
         this._setCamera();
         this._setRenderer();
+        this._setLights();
         this._setOrbit();
         this._setGeometry();
     }
@@ -30,18 +30,21 @@ class IfcWall {
     }
 
     _setLights() {
-        const lightColor = 0xffffff;
-
-        const ambientLight = new THREE.AmbientLight(lightColor, 0.5);
-        ambientLight.castShadow = true;
-        this.scene.add(ambientLight);
-
-        const directionalLight = new THREE.DirectionalLight(lightColor, 1);
-        directionalLight.position.set(100, 100, 0);
-        directionalLight.target.position.set(0, 0, 0);
-        this.scene.add(directionalLight);
-        this.scene.add(directionalLight.target);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+        directionalLight.position.set(-5, 5, 5);
+        directionalLight.target.position.set(0, 2, 0);
+        directionalLight.shadow.camera.near = -100
+        directionalLight.shadow.camera.far = 100
+        directionalLight.shadow.camera.top = 100
+        directionalLight.shadow.camera.bottom = 100
+        directionalLight.shadow.camera.left = 100
+        directionalLight.shadow.camera.right = 100
         directionalLight.castShadow = true;
+        
+        const lightHelper = new THREE.DirectionalLightHelper(directionalLight, 2, 0xff0000)
+        
+        this.scene.add(directionalLight);
+        this.scene.add(lightHelper)
     }
 
     _setCamera() {
@@ -61,6 +64,8 @@ class IfcWall {
 
     _setOrbit() {
         this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+        this.orbit.minDistance = 5;
+        this.orbit.maxDistance = 150;
     }
 
     _setGeometry() {
@@ -69,20 +74,38 @@ class IfcWall {
         const scene = this.scene
         const camera = this.camera
 
-        const planeGeometry = new THREE.PlaneGeometry(100, 100);
-        const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
-        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
-        plane.rotation.x = Math.PI * -0.5;
-        plane.receiveShadow = true;
-        scene.add(plane);
-
         const ifcLoader = new IFCLoader();
         ifcLoader.ifcManager.setWasmPath('https://unpkg.com/web-ifc@0.0.36/', true);
 
-        ifcLoader.load('../realbuilding/wall.ifc', function (model) {
-            scene.add(model.mesh);
+        ifcLoader.load('../realbuilding/wall.ifc', function ( object ) {
+              object.traverse(function ( child ) {
+                if (child.isMesh) {
+                    child.geometry.center();
+      
+                    child.geometry.computeBoundingBox();
+                    child.position.y = child.geometry.boundingBox.max.y;
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+      
+                    const edges = new THREE.WireframeGeometry(child.geometry)
+                    const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial({color: 0xcfcfcf}) )
+                    line.position.y = child.geometry.boundingBox.max.y;
+                    line.renderOrder = 1;
+            
+                    scene.add( object );
+                    // scene.add(line);
+                  }
+                }
+              )
+            }
+        );
 
-        });
+        const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
+        const planeMaterial = new THREE.ShadowMaterial();
+        const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+        planeMesh.rotation.x = Math.PI * -0.5;
+        planeMesh.receiveShadow = true;
+        scene.add(planeMesh);
 
         animate();
 
@@ -92,6 +115,7 @@ class IfcWall {
             requestAnimationFrame(animate);
 
             renderer.render(scene, camera);
+            // console.log(camera.position)
 
             resize();
         }
