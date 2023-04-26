@@ -23,7 +23,7 @@ class IfcWall {
     }
 
     _setAxes() {
-        const axes = new THREE.AxesHelper();
+        const axes = new THREE.AxesHelper(3 / 2);
         axes.material.depthTest = false;
         axes.renderOrder = 1;
         this.scene.add(axes);
@@ -32,7 +32,7 @@ class IfcWall {
     _setLights() {
         const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
         directionalLight.position.set(-5, 5, 5);
-        directionalLight.target.position.set(0, 2, 0);
+        directionalLight.target.position.set(0, 1.5, -1.5);
         directionalLight.shadow.camera.near = -100
         directionalLight.shadow.camera.far = 100
         directionalLight.shadow.camera.top = 100
@@ -42,14 +42,17 @@ class IfcWall {
         directionalLight.castShadow = true;
         
         const lightHelper = new THREE.DirectionalLightHelper(directionalLight, 2, 0xff0000)
+        const helper = new THREE.CameraHelper( directionalLight.shadow.camera );
         
         this.scene.add(directionalLight);
-        this.scene.add(lightHelper)
+        // console.log(this.scene)
+        console.log(helper)
+        // this.scene.add(helper)
     }
 
     _setCamera() {
         this.camera = new THREE.PerspectiveCamera(5, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000);
-        this.camera.position.set(60, 60, 60);
+        this.camera.position.set(100, 100, 100);
     }
 
     _setGrid() {
@@ -69,55 +72,47 @@ class IfcWall {
     }
 
     _setGeometry() {
-        const container = this.container;
-        const renderer = this.renderer
-        const scene = this.scene
-        const camera = this.camera
-
         const ifcLoader = new IFCLoader();
         ifcLoader.ifcManager.setWasmPath('https://unpkg.com/web-ifc@0.0.36/', true);
-
         ifcLoader.load('../realbuilding/wall.ifc', function ( object ) {
               object.traverse(function ( child ) {
                 if (child.isMesh) {
-                    child.geometry.center();
-      
-                    child.geometry.computeBoundingBox();
-                    child.position.y = child.geometry.boundingBox.max.y;
                     child.castShadow = true;
                     child.receiveShadow = true;
       
-                    const edges = new THREE.WireframeGeometry(child.geometry)
+                    const edges = new THREE.EdgesGeometry(child.geometry)
                     const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial({color: 0xcfcfcf}) )
-                    line.position.y = child.geometry.boundingBox.max.y;
                     line.renderOrder = 1;
-            
+
                     scene.add( object );
-                    // scene.add(line);
+                    scene.add(line);
                   }
                 }
               )
             }
         );
 
+        const container = this.container;
+        const renderer = this.renderer
+        const scene = this.scene
+        const camera = this.camera
+
         const planeGeometry = new THREE.PlaneGeometry(1000, 1000);
         const planeMaterial = new THREE.ShadowMaterial();
         const planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
         planeMesh.rotation.x = Math.PI * -0.5;
         planeMesh.receiveShadow = true;
+        
         scene.add(planeMesh);
-
         animate();
 
         this.orbit.update();
 
         function animate() {
             requestAnimationFrame(animate);
+            resize();
 
             renderer.render(scene, camera);
-            // console.log(camera.position)
-
-            resize();
         }
 
         function resize() {

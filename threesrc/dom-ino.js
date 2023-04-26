@@ -116,10 +116,9 @@ class DomIno {
 
     function animate () {
       requestAnimationFrame(animate);
+      resize();
 
       renderer.render(scene, camera);
-
-      resize();
     }
 
     function resize () {
