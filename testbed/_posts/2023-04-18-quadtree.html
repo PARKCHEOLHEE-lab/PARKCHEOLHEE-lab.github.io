@@ -31,4 +31,70 @@ done: false
     </figure>
 </div>
 
+<br>
+
+<h3>Edge quadtree</h3>
+<div style="text-align: justify;">
+    Edge quadtrees are used to store <code>lines.</code> 
+    The difference is the type of information stored about the cells.
+    Curves are approximated by subdivided cells to a very fine resolution, specifically until there is a single line segment per cell.
+    Near corners/vertices, edge quadtrees will continue dividing until they reach their <code>maximum level</code> of decomposition.
+    This can result in extremely unbalanced trees.
+
+    <br><br>
+
+    There is an interesting diagram regarding Edge quadtree. Here, the <code>k</code> is may be infinite.
+    That's why, as mentioned above you should designate the maximum level of decomposition.
+
+    
+    <br><br><br>
+    <figure>
+        <img src="../img/quadtree-1.png" style="width: 50%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            <a href="https://www.researchgate.net/figure/Quadtree-decomposition-of-a-finite-element-for-the-numerical-integration-in-the-FCM-four_fig9_317584421">Edge quadtree</a> 
+            diagram<br>Each node has exactly four children 
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+</div>
+
+<h3>Implementation</h3>
+<div style="text-align: justify;">
+    Now, let's implement it using GhPython based on the explanations above.
+
+    First, define the <code>quadtree</code> class and takes <code>bounding_box</code> and <code>min_size</code> as input values.
+    The <code>min_size</code> is used as the maximum level of decomposition as mentioned above.
+
+<pre>
+    class Quadtree:
+        COUNTER = 1
+
+        def __init__(self, bounding_box, min_size=2):
+            self.bounding_box = bounding_box
+            self.min_size = min_size
+
+            self.crvs = []
+            self.children = None
+            self.children_geometries = None
+    
+            self._post_init()
+</pre>
+    Quadtree has a root node, middle node, and leaf node because its data structure is based on a node.
+    If cannnot subdivide no more, children will be <code>None</code>, else other Quadtree objects.
+
+    <br><br>
+
+    In the <code>crvs</code> instance variable of the quadtree, the line segments included in each quadtree rectangle are stored.
+    The <code>COUNTER</code> class variable that the quadtree has, is used as a flag to subdivide when each region of the quadtree contains a curve.
+
+    
+
+    
+
+    <br><br>
+    See the full code <a href="">here.</a>
+</div>
 <br><br>
+
