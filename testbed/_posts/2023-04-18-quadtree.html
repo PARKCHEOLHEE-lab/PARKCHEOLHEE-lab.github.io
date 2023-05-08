@@ -67,8 +67,8 @@ done: false
     First, define the <code>quadtree</code> class and takes <code>bounding_box</code> and <code>min_size</code> as input values.
     The <code>min_size</code> is used as the maximum level of decomposition as mentioned above.
 
-<pre>
-    class Quadtree:
+<pre class="highlight">
+    class <span class="method">Quadtree</span>:
         COUNTER = 1
 
         def __init__(self, bounding_box, min_size=2):
@@ -76,10 +76,10 @@ done: false
             self.min_size = min_size
 
             self.crvs = []
-            self.children = None
-            self.children_geometries = None
+            self.children = <span class="blue">None</span>
+            self.children_geometries = <span class="blue">None</span>
     
-            self._post_init()
+            self.<span class="defName">_post_init</span>()
 </pre>
     Quadtree has a root node, middle node, and leaf node because its data structure is based on a node.
     If cannnot subdivide no more, children will be <code>None</code>, else other Quadtree objects.
@@ -89,12 +89,89 @@ done: false
     In the <code>crvs</code> instance variable of the quadtree, the line segments included in each quadtree rectangle are stored.
     The <code>COUNTER</code> class variable that the quadtree has, is used as a flag to subdivide when each region of the quadtree contains a curve.
 
-    
-
-    
-
     <br><br>
-    See the full code <a href="">here.</a>
+
+    In the second, you need a function that checks whether <code>intersects(or contains)</code> between given curves and quadtree region.
+    It can be defined as below, and a return value of this function is worked as a requirement condition to subdivide.
+<pre class="highlight">
+        def <span class="defName">_is_intersects</span>(self, crv, bb):
+            intersects = rg.<span class="method">Intersect.Intersection.CurveCurve</span>(
+                crv, bb, ConstsCollection.TOLERANCE, ConstsCollection.TOLERANCE
+            )
+
+            return len(intersects) > 0
+</pre>
+
+    
+    <br><br>
+
+    Finally, if you define a function to create a <code>quadtrant</code> and a function to <code>insert</code> it into each quadtree,
+    all preparations are complete. Those functions can be defined as below, you can see the full code at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/quadtree/quadtree.py">this link.</a>
+
+<pre class="highlight">
+    def <span class="defName">_subdivide</span>(self):
+        ne_bb = rg.<span class="method">Rectangle3d</span>(self.plane, self.width / 2, self.height / 2)
+        ne_bb = ne_bb.ToNurbsCurve()
+
+        nw_bb = rg.<span class="method">Rectangle3d</span>(self.plane, -self.width / 2, self.height / 2)
+        nw_bb = nw_bb.ToNurbsCurve()
+
+        se_bb = rg.<span class="method">Rectangle3d</span>(self.plane, self.width / 2, -self.height / 2)
+        se_bb = se_bb.ToNurbsCurve()
+
+        sw_bb = rg.<span class="method">Rectangle3d</span>(self.plane, -self.width / 2, -self.height / 2)
+        sw_bb = sw_bb.ToNurbsCurve()
+
+        ne = <span class="method">Quadtree</span>(ne_bb)
+        nw = <span class="method">Quadtree</span>(nw_bb)
+        se = <span class="method">Quadtree</span>(se_bb)
+        sw = <span class="method">Quadtree</span>(sw_bb)
+
+        self.children = [ne, nw, se, sw]
+        self.children_geometries = [ne_bb, nw_bb, se_bb, sw_bb]
+
+        for crv in self.crvs:
+            if self.<span class="defName">_is_intersects</span>(crv, ne_bb):
+                ne.insert(crv)
+            if self.<span class="defName">_is_intersects</span>(crv, nw_bb):
+                nw.insert(crv)
+            if self.<span class="defName">_is_intersects</span>(crv, se_bb):
+                se.insert(crv)
+            if self.<span class="defName">_is_intersects</span>(crv, sw_bb):
+                sw.insert(crv)
+
+    def <span class="defName">insert</span>(self, crv):
+        """Append the geometry to quadtree
+
+        Args:
+            crv (Rhino.Geometry.Curve): Target curve to insert
+        """
+
+        if self.children:
+            for child in self.children:
+                if self.<span class="defName">_is_intersects</span>(crv, self.bounding_box):
+                    child.<span class="defName">insert</span>(crv)
+        else:
+            self.crvs.append(crv)
+
+            if len(self.crvs) >= self.COUNTER and (
+                self.width > self.min_size or self.height > self.min_size
+            ):
+                self.<span class="defName">_subdivide</span>()
+</pre>
 </div>
 <br><br>
-
+<h3>Example</h3>
+<div>
+    If you have done all implementations now, you can get the geometries regarding <code>Edge quadtree</code> as below.
+    
+    <figure>
+        <img src="../img/quadtree-2.png" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            Edge quadtree example
+            <br>From the left, given edge · edge quadtree
+            <br>You can set the direction of the bounding box using the plane of Rhino object
+        </figcaption>
+    </figure>
+</div>
+<br><br>
