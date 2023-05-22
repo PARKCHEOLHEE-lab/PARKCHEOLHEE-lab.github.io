@@ -1,7 +1,7 @@
 ---
 title:  "K-Rooms clusters"
 layout: post
-hashtag: "#k-means #unsupervised-learning #machine-learning"
+hashtag: "#unsupervised-learning #machine-learning"
 featured: true
 ---
 
@@ -33,13 +33,68 @@ featured: true
     
 </div>
 <br><br>
-<h3>The Flow of K-Means clustering algorithm</h3>
+<h3>Implementation</h3>
 <div style="text-align: justify;">
-    The operation flow of the K-Means clustering consists of 5 steps following.
+    The operation flow of the K-Means clustering consists of 5 steps following:
+    <ul style="padding-left: 2em;">
+        <li class="decimal">Select up a K (the count of clusters) and enter data</li>
+        <li class="decimal">Set initial centroids of clusters randomly</li>
+        <li class="decimal">Assign the data to each cluster based on the nearest centroid</li>
+        <li class="decimal">Recalculate the new centroids of clusters and re-execute step-4</li>
+        <li class="decimal">Terminate if no longer locations of centroids aren't updated</li>
+    </ul>
 
-    <!-- K-means 알고리즘의 작동 원리는 다음과 같이 5가지 단계로 구성된다. K-means 알고리즘으로 -->
-    <!-- https://velog.io/@jhlee508/%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-K-%ED%8F%89%EA%B7%A0K-Means-%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98 -->
+    <br><br>
+
+    Let's implement the K-Means algorithm based on the steps above. First, we define the <code>KMeans</code> object.
+    As input, it receives the <code>number of clusters(K)</code> to divide, <code>points cloud</code>, 
+    and <code>iteration_count</code> which is the number of centroid update iterations
+
+    
+<pre class="highlight">
+    class KMeans(PointHelper):
+        def __init__(self, points=None, k=3, iteration_count=20, random_seed=0):
+            """KMeansCluster simple implementation using Rhino Geometry
+    
+            Args:
+                points (Rhino.Geometry.Point3d, optional): Points to classify. Defaults to None. if points is None, make random points
+                k (int, optional): Number to classify. Defaults to 3.
+                iteration_count (int, optional): Clusters candidates creation count. Defaults to 20.
+                random_seed (int, optional): Random seed number to fix. Defaults to 0.
+            """
+    
+            PointHelper.__init__(self)
+    
+            self.points = points
+            self.k = k
+            self.iteration_count = iteration_count
+            self.threshold = 0.1
+    
+            import random  # pylint: disable=import-outside-toplevel
+    
+            self.random = random
+            self.random.seed(random_seed)
+</pre>
+
+    <br><br>
+
+    Next, Initialize the centroids of clusters as much as the number of K by <code>selecting the given points cloud as much as K randomly.</code>
+    If the initial centroid setting is done, <code>calculate the distance</code> between each centroid and the given points cloud, 
+    and assign the data at the cluster which is the closest distance.
+    
+    Now we should update all the centroids of clusters. 
+    We need to <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/15fbd324250c5059a758fbe97e81fc82c72ec02a/utils/utils.py#L505-L517">
+        compute centroids of initial clusters(points cloud clusters)
+    </a> for that.
+
+    <br><br>
+    
+    Finally, compute the distance between the updated centroid and the previous centroid. 
+    If this distance does not no longer changes, terminate. Otherwise, just iterate on key things which are explained above.
 
 </div>
+<br><br>
+<h3>K-Rooms Clusters</h3>
+
 
 <br><br>
