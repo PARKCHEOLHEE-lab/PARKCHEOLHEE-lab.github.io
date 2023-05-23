@@ -144,43 +144,44 @@ featured: true
 </pre>
 <br><br>
 Now we can get the point clusters by setting the K, from the code below. 
-
-<pre class="highlight">
-    from ghpythonutils.utils.kmeans.kmeans import KMeans
-    from ghpythonlib.treehelpers import list_to_tree
-    import rhinoscriptsyntax as rs
-    import random
-    
-    kmeans = KMeans(points=points, k=10, random_seed=90)
-    points_clusters = kmeans.predict()
-    points_clusters = list_to_tree(points_clusters)
-    
-    points_clusters_colors = []
-    for branch in points_clusters.Branches:
-        
-        r = random.randint(0, 255)
-        g = random.randint(0, 255)
-        b = random.randint(0, 255)
-        
-        points_clusters_colors.append(
-            [rs.CreateColor(r, g, b)] * len(branch)
-        )
-    
-    points_clusters_colors = list_to_tree(points_clusters_colors)
-</pre>
-
-
 And you can see the detailed code for the K-Means at this <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/kmeans/kmeans.py">link</a>.
 
 <figure>
     <img src="../img/k-rooms-1.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
     <figcaption style="text-align: center; margin-top: 1em">
-        <a href="https://www.askpython.com/python/examples/plot-k-means-clusters-python">Implemented K-means clustering</a>, divided by 10 <br> From the left, Given Points · Result clusters     
+        <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/tree/main/utils/kmeans">Implemented K-means clustering</a>, divided by 10 <br> From the left, Given Points · Result clusters     
     </figcaption>
 </figure>
 <br>
 </div>
-<h3>K-Rooms Clusters</h3>
+<h3>K-Rooms clusters</h3>
+<div style="text-align: justify;">
 
+</div>
+    The K-Means algorithm is used to cluster as much as the number of K, given points, like described above. 
+    If you utilize it, you can divide a given architectural boundary as much as the number of K. 
+    It means that K number of rooms can be obtained.
+
+    <br><br>
+
+    Let's implement by steps following:
+
+    <!-- 
+        이를 위해서 다음과 같이 순서를 정의해야합니다.
+        self._is_disjoint_floor_and_core()
+
+        self._gen_given_axis_aligned_obb()
+        self._gen_boundaries()
+        self._gen_estimated_grid_size()
+        self._gen_grid()
+        self._gen_predicted_rooms()
+        self._gen_corridor() 
+    
+    -->
+    
+
+<br><br>
+
+<h3>Limitation of K-Rooms clusters</h3>
 
 <br><br>
