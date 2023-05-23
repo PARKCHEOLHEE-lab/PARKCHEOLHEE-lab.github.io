@@ -92,8 +92,94 @@ featured: true
     Finally, compute the distance between the updated centroid and the previous centroid. 
     If this distance does not no longer changes, terminate. Otherwise, just iterate on key things which are explained above.
 
-</div>
+    <br><br>
+
+<pre class="highlight">
+        def kmeans(self, points, k, threshold):
+            """Clusters by each iteration
+
+            Args:
+                points (Rhino.Geometry.Point3d): Initialized given points
+                k (int): Initialized given k
+                threshold (float): Initialized threshold
+
+            Returns:
+                Tuple[List[List[Rhino.Geometry.Point3d]], List[List[int]]]: Clusters by each iteration, Indices by each iteration
+            """
+
+            centroids = self.random.sample(points, k)
+
+            while True:
+                clusters = [[] for _ in centroids]
+                indices = [[] for _ in centroids]
+
+                for pi, point in enumerate(points):
+                    point_to_centroid_distance = [
+                        point.DistanceTo(centroid) for centroid in centroids
+                    ]
+                    nearest_centroid_index = point_to_centroid_distance.index(
+                        min(point_to_centroid_distance)
+                    )
+
+                    clusters[nearest_centroid_index].append(point)
+                    indices[nearest_centroid_index].append(pi)
+
+                shift_distance = 0.0
+                for ci, current_centroid in enumerate(centroids):
+                    if len(clusters[ci]) == 0:
+                        continue
+
+                    updated_centroid = self.get_centroid(clusters[ci])
+                    shift_distance = max(
+                        updated_centroid.DistanceTo(current_centroid),
+                        shift_distance,
+                    )
+
+                    centroids[ci] = updated_centroid
+
+                if shift_distance < threshold:
+                    break
+
+            return clusters, indices
+</pre>
 <br><br>
+Now we can get the point clusters by setting the K, from the code below. 
+
+<pre class="highlight">
+    from ghpythonutils.utils.kmeans.kmeans import KMeans
+    from ghpythonlib.treehelpers import list_to_tree
+    import rhinoscriptsyntax as rs
+    import random
+    
+    kmeans = KMeans(points=points, k=10, random_seed=90)
+    points_clusters = kmeans.predict()
+    points_clusters = list_to_tree(points_clusters)
+    
+    points_clusters_colors = []
+    for branch in points_clusters.Branches:
+        
+        r = random.randint(0, 255)
+        g = random.randint(0, 255)
+        b = random.randint(0, 255)
+        
+        points_clusters_colors.append(
+            [rs.CreateColor(r, g, b)] * len(branch)
+        )
+    
+    points_clusters_colors = list_to_tree(points_clusters_colors)
+</pre>
+
+
+And you can see the detailed code for the K-Means at this <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/kmeans/kmeans.py">link</a>.
+
+<figure>
+    <img src="../img/k-rooms-1.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+    <figcaption style="text-align: center; margin-top: 1em">
+        <a href="https://www.askpython.com/python/examples/plot-k-means-clusters-python">Implemented K-means clustering</a>, divided by 10 <br> From the left, Given Points · Result clusters     
+    </figcaption>
+</figure>
+<br>
+</div>
 <h3>K-Rooms Clusters</h3>
 
 
