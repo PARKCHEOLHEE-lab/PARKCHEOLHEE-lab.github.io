@@ -167,7 +167,13 @@ And you can see the detailed code for the K-Means at this <a href="https://githu
     Let's implement by steps following:
 
     <!-- 
-        이를 위해서 다음과 같이 순서를 정의해야합니다.
+        코드를 작성하기 전에 다음과 같은 순서를 정합니다.
+        1. 입력으로 건물 외벽선 닫힌 선분()과 몇 개의 방으로 나눌 것인지를 받는다.
+        2. oriented bounding box를 생성하고 그리드를 생성한다.
+        3. 그리드 중심점들을 K-Means 클러스터링 알고리즘에 대입한다. 
+        4. 군집화 한 그리드 중심점들의 인덱스를 기반으로 그리드들을 병합시킨다.
+        5. 코어 -> 실까지의 최단경로를 탐색하고 복도를 생성한다. (dijkstra)
+
         self._is_disjoint_floor_and_core()
 
         self._gen_given_axis_aligned_obb()
