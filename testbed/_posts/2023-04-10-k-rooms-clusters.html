@@ -52,16 +52,16 @@ featured: true
 
     
 <pre class="highlight">
-    class KMeans(PointHelper):
+    class <span class="method">KMeans</span>(PointHelper):
         def __init__(self, points=None, k=3, iteration_count=20, random_seed=0):
-            """KMeansCluster simple implementation using Rhino Geometry
+            <span class="blue">"""KMeansCluster simple implementation using Rhino Geometry
     
             Args:
                 points (Rhino.Geometry.Point3d, optional): Points to classify. Defaults to None. if points is None, make random points
                 k (int, optional): Number to classify. Defaults to 3.
                 iteration_count (int, optional): Clusters candidates creation count. Defaults to 20.
                 random_seed (int, optional): Random seed number to fix. Defaults to 0.
-            """
+            """</span>
     
             PointHelper.__init__(self)
     
@@ -73,7 +73,7 @@ featured: true
             import random  # pylint: disable=import-outside-toplevel
     
             self.random = random
-            self.random.seed(random_seed)
+            self.random.<span class="defName">seed</span>(random_seed)
 </pre>
 
     <br><br>
@@ -95,8 +95,8 @@ featured: true
     <br><br>
 
 <pre class="highlight">
-        def kmeans(self, points, k, threshold):
-            """Clusters by each iteration
+        def <span class="defName">kmeans</span>(self, points, k, threshold):
+            <span class="blue">"""Clusters by each iteration
 
             Args:
                 points (Rhino.Geometry.Point3d): Initialized given points
@@ -105,9 +105,9 @@ featured: true
 
             Returns:
                 Tuple[List[List[Rhino.Geometry.Point3d]], List[List[int]]]: Clusters by each iteration, Indices by each iteration
-            """
+            """</span>
 
-            centroids = self.random.sample(points, k)
+            centroids = self.random.<span class="defName">sample</span>(points, k)
 
             while True:
                 clusters = [[] for _ in centroids]
@@ -115,7 +115,7 @@ featured: true
 
                 for pi, point in enumerate(points):
                     point_to_centroid_distance = [
-                        point.DistanceTo(centroid) for centroid in centroids
+                        point.<span class="defName">DistanceTo</span>(centroid) for centroid in centroids
                     ]
                     nearest_centroid_index = point_to_centroid_distance.index(
                         min(point_to_centroid_distance)
@@ -131,7 +131,7 @@ featured: true
 
                     updated_centroid = self.get_centroid(clusters[ci])
                     shift_distance = max(
-                        updated_centroid.DistanceTo(current_centroid),
+                        updated_centroid.<span class="defName">DistanceTo</span>(current_centroid),
                         shift_distance,
                     )
 
@@ -164,30 +164,203 @@ And you can see the detailed code for the K-Means at this <a href="https://githu
 
     <br><br>
 
-    Let's implement by steps following:
-
-    <!-- 
-        코드를 작성하기 전에 다음과 같은 순서를 정합니다.
-        1. 입력으로 건물 외벽선 닫힌 선분()과 몇 개의 방으로 나눌 것인지를 받는다.
-        2. oriented bounding box를 생성하고 그리드를 생성한다.
-        3. 그리드 중심점들을 K-Means 클러스터링 알고리즘에 대입한다. 
-        4. 군집화 한 그리드 중심점들의 인덱스를 기반으로 그리드들을 병합시킨다.
-        5. 코어 -> 실까지의 최단경로를 탐색하고 복도를 생성한다. (dijkstra)
-
-        self._is_disjoint_floor_and_core()
-
-        self._gen_given_axis_aligned_obb()
-        self._gen_boundaries()
-        self._gen_estimated_grid_size()
-        self._gen_grid()
-        self._gen_predicted_rooms()
-        self._gen_corridor() 
+    Before writing the code, set the following order.
+    <ul style="padding-left: 2em;">
+        <li class="decimal">As input, it receives the building exterior wall line (closed line) and how many rooms to divide into</li>
+        <li class="decimal">Create an oriented bounding box and create a grid</li>
+        <li class="decimal">Insert the grid center points into the K-Means clustering algorithm, implemented above</li>
+        <li class="decimal">Grids are merged based on the indices of the clustered grid center points</li>
+        <li class="decimal">Search for the shortest path from the core to each room and create a corridor</li>
+    </ul>
     
-    -->
+    <br>
+    Now let's implement the K-Rooms cluster algorithm. 
+    <br>
+    Define the KRoomsClusters class as follows and take as input what you defined in step 1. And inherit the <code>KMeans</code> class.
+
+<pre class="highlight">
+    class <span class="method">KRoomsCluster</span>(<span class="method">KMeans</span>, PointHelper, LineHelper, ConstsCollection):
+        """
+        To use the inherited moduels, refer the link below.
+        https://github.com/PARKCHEOLHEE-lab/GhPythonUtils
+        """
+
+        def __init__(self, floor, core, hall, target_area, axis=None):
+            self.floor = floor
+            self.core = core
+            self.hall = hall
+            self.sorted_hall_segments = self.get_sorted_segment(self.hall)
+            self.target_area = target_area
+            self.axis = axis
+
+            KMeans.__init__(self)
+            PointHelper.__init__(self)
+            LineHelper.__init__(self)
+            ConstsCollection.__init__(self)
+</pre>
     
+    <br><br>
+    Next, we create an <code>OBB(oriented bounding box)</code> to create the grid. OBB is for defining the grid xy axes. (See this <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/utils.py#L64-L93">link</a> to see the OBB creation algorithm)
+    Then, create grid and grid centroid, <code>extract the clustering indices</code> by putting the center points of the grid and the K value, and then merge all the grids that exist in the same cluster.
+    
+    <figure>
+        <img src="../img/k-rooms-2.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            K-Rooms clustering key process, divided by 5 <br> From the left, Grid and centroids creation · Divided rooms   
+        </figcaption>
+    </figure>
+<pre class="highlight">
+        def <span class="defName">_gen_grid</span>(self):
+            self.base_rectangles = [
+                self.<span class="defName">get_2d_offset_polygon</span>(seg, self.grid_size)
+                for seg in self.sorted_hall_segments[:2]
+            ]
+
+            counts = []
+            planes = []
+
+            for ri, base_rectangle in enumerate(self.base_rectangles):
+                x_vector = (
+                    rg.AreaMassProperties.Compute(base_rectangle).Centroid
+                    - rg.AreaMassProperties.Compute(self.hall).Centroid
+                )
+
+                y_vector = copy.copy(x_vector)
+                y_transform = rg.Transform.Rotation(
+                    math.pi * 0.5,
+                    rg.AreaMassProperties.Compute(base_rectangle).Centroid,
+                )
+                y_vector.Transform(y_transform)
+
+                base_rectangle.Translate(
+                    (
+                        self.sorted_hall_segments[0].PointAtStart
+                        - self.sorted_hall_segments[0].PointAtEnd
+                    )
+                    / 2
+                )
+
+                base_rectangle.Translate(
+                    self.<span class="defName">get_normalized_vector</span>(x_vector) * -self.grid_size / 2
+                )
+
+                anchor = rg.AreaMassProperties.Compute(base_rectangle).Centroid
+                plane = rg.Plane(
+                    origin=anchor,
+                    xDirection=x_vector,
+                    yDirection=y_vector,
+                )
+
+                x_proj = self.<span class="defName">get_projected_point_on_curve</span>(
+                    anchor, plane.XAxis, self.obb
+                )
+
+                x_count = (
+                    int(math.ceil(x_proj.DistanceTo(anchor) / self.grid_size)) + 1
+                )
+
+                y_projs = [
+                    self.<span class="defName">get_projected_point_on_curve</span>(
+                        anchor, plane.YAxis, self.obb
+                    ),
+                    self.<span class="defName">get_projected_point_on_curve</span>(
+                        anchor, -plane.YAxis, self.obb
+                    ),
+                ]
+
+                y_count = [
+                    int(math.ceil(y_proj.DistanceTo(anchor) / self.grid_size)) + 1
+                    for y_proj in y_projs
+                ]
+
+                planes.append(plane)
+                counts.append([x_count] + y_count)
+
+            x_grid = []
+            for base_rectangle, count, plane in zip(
+                self.base_rectangles, counts, planes
+            ):
+                xc, _, _ = count
+
+                for x in range(xc):
+                    copied_rectangle = copy.copy(base_rectangle)
+                    vector = plane.XAxis * self.grid_size * x
+                    copied_rectangle.Translate(vector)
+                    x_grid.append(copied_rectangle)
+
+            y_vectors = [planes[0].YAxis, -planes[0].YAxis]
+            y_counts = counts[0][1:]
+            all_grid = [] + x_grid
+            for rectangle in x_grid:
+                for y_count, y_vector in zip(y_counts, y_vectors):
+                    for yc in range(1, y_count):
+                        copied_rectangle = copy.copy(rectangle)
+                        vector = y_vector * self.grid_size * yc
+                        copied_rectangle.Translate(vector)
+                        all_grid.append(copied_rectangle)
+
+            union_all_grid = rg.<span class="method">Curve.CreateBooleanUnion</span>(all_grid, self.TOLERANCE)
+
+            for y_count, y_vector in zip(y_counts, y_vectors):
+                for yc in range(1, y_count):
+                    copied_hall = copy.copy(self.hall)
+                    copied_hall.Translate(
+                        (
+                            self.sorted_hall_segments[0].PointAtStart
+                            - self.sorted_hall_segments[0].PointAtEnd
+                        )
+                        / 2
+                    )
+
+                    vector = y_vector * self.grid_size * yc
+                    copied_hall.Translate(vector)
+                    all_grid.extend(
+                        rg.<span class="method">Curve.CreateBooleanDifference</span>(
+                            copied_hall, union_all_grid
+                        )
+                    )
+
+            self.grid = []
+            for grid in all_grid:
+                for boundary in self.boundaries:
+                    tidied_grid = list(
+                        rg.<span class="method">Curve.CreateBooleanIntersection</span>(
+                            boundary.boundary, grid, self.TOLERANCE
+                        )
+                    )
+
+                    self.grid.extend(tidied_grid)
+            self.grid_centroids = [
+                rg.AreaMassProperties.Compute(g).Centroid for g in self.grid
+            ]
+</pre>
+<br>
+    Finally, connect each room with a hallway and you're done! 
+    <br>(I implemented <code>Dijkstra</code> algorithm for the shortest-path algorithm. 
+    You can check the implementation through the following <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/dijkstra/dijkstra.py">link</a>. I will do a post on this at the next opportunity.)
+
+    <figure>
+        <img src="../img/k-rooms-3.png" style="width: 55%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            Corridor creation   
+        </figcaption>
+    </figure>
 
 <br><br>
 
 <h3>Limitation of K-Rooms clusters</h3>
+
+    The K-Rooms Clusters algorithm we implemented is still incomplete. The images shown above are valid results <code>when the K value is small.</code>
+    When the K value increases and the number of rooms increases, a problem  in which an architecturally appropriate shape cannot be derived. For example below:
+
+    <figure>
+        <img src="../img/k-rooms-4.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+            <figcaption style="text-align: center; margin-top: 1em">
+                Improper shapes, divided by 13<br> From the left, K-Rooms · Result corridor     
+            </figcaption>
+    </figure>
+
+All we need to do further to solve this problem is to define the appropriate shape and create the logic to mitigate it with post-processing.
+And you can see the whole code of K-Rooms clusters at this <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/15fbd324250c5059a758fbe97e81fc82c72ec02a/utils/_archived/kroomsclusters.py">link</a>.
 
 <br><br>
