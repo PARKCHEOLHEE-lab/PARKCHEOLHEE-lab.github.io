@@ -25,7 +25,9 @@ external:                  # shows a footer with social links - for available ic
   # - {title: Mail, icon: envelope, url: "mailto:park112368@gmail.com"}
   - {title: Github, icon: github, url: "https://github.com/PARKCHEOLHEE-lab"}
   - {title: Linkedin, icon: linkedin, url: "https://www.linkedin.com/in/cheolhee-park-94577b228/"}
-  - {title: Issuu, icon: book, url: "https://issuu.com/brighthope03"}
+  # - {title: Issuu, icon: book, url: "https://issuu.com/brighthope03"}
+  - {title: p-arc, icon: building, url: "portfolio-architectural.html"}
+  - {title: p-com, icon: cube, url: "portfolio-computational.html"}
 
 comments:
 #  disqus_shortname: ""    # see https://disqus.com/
