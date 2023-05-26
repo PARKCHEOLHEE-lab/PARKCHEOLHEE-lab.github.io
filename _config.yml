@@ -26,8 +26,7 @@ external:                  # shows a footer with social links - for available ic
   - {title: Github, icon: github, url: "https://github.com/PARKCHEOLHEE-lab"}
   - {title: Linkedin, icon: linkedin, url: "https://www.linkedin.com/in/cheolhee-park-94577b228/"}
   # - {title: Issuu, icon: book, url: "https://issuu.com/brighthope03"}
-  - {title: p-arc, icon: building, url: "portfolio-architectural.html"}
-  - {title: p-com, icon: cube, url: "portfolio-computational.html"}
+  - {title: p-arc, icon: building, url: "portfolio-architectural.pdf"}
 
 comments:
 #  disqus_shortname: ""    # see https://disqus.com/
