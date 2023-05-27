@@ -143,37 +143,69 @@ In this example, we can get the result we want simply before reaching the maximu
     
 <pre class="highlight">
     city_coordinates = [[217, 314], [328, 294], [394, 269], [272, 337], [485, 210],
-                        [328, 371], [418, 340], [299, 353], [247, 230], [158, 377],
-                        [139, 285], [153, 389], [100, 364], [395, 286], [247, 349],
-                        [236, 227], [422, 370], [207, 279], [356, 232], [312, 350]]
-   
+    [328, 371], [418, 340], [299, 353], [247, 230], [158, 377],
+    [139, 285], [153, 389], [100, 364], [395, 286], [247, 349],
+    [236, 227], [422, 370], [207, 279], [356, 232], [312, 350]]
+    
     genome = [0, 12, 10, 17, 14, 3, 11, 5, 19, 16, 8, 7, 1, 9, 15, 4, 6, 13, 2, 18, 0]
-
+    
     
     def <span class="defName">evaluate_distance</span>(self, city_1, city_2):
-        x1, y1 = city_1
-        x2, y2 = city_2
-        distance = math.<span class="defName">sqrt</span>((x2-x1)**2 + (y2-y1)**2)
-        return distance
-
+    x1, y1 = city_1
+    x2, y2 = city_2
+    distance = math.<span class="defName">sqrt</span>((x2-x1)**2 + (y2-y1)**2)
+    return distance
+    
     distances = [127.24, 88.1, 68.26, 80.62, 27.73, 129.87, 175.92, 26.4, 111.8, 224.11, 
-                 133.54, 65.74, 189.18, 169.07, 249.58, 146.25, 58.69, 17.03, 53.94, 161.38]
-
+    133.54, 65.74, 189.18, 169.07, 249.58, 146.25, 58.69, 17.03, 53.94, 161.38]
+    
     fitness = sum(distances)
 </pre><br>
-
-    And this time, we will use the <code>order one crossover</code> method among the crossover methods.
-
     
-    <!-- <figure style="display:flex;">
+    And this time, we will use the <code>order one crossover</code> method among the crossover methods.
+    First, part of the <code>parent_1</code> genome is randomly sliced and assigned to the <code>offspring</code> genome.
+    And the rest are given genes from the <code>parent_2</code> genome to create an offspring genome.
+    <!-- 또한, 임의의 확률로 도시 방문 순서를 바꿔주는 mutation 기능을 추가할 수도 있습니다. Fig.4 이미지의 가장 아래 mutated 부분을 참조하세요. -->
+
+    We can add a function to mutate that changes cities visit order via randomly probability also.
+
+    <br><br>
+    Please refer the <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/f8eeb81a975b0b16700230c941334cec4087c7c7/genetic_algorithm/TSP.py#L111-L151">github link</a> to see the order one crossover or mutation related code.
+    
+    <figure>
+        <img src="../img/tsp-5.png" style="width: 70%; margin-top: 2em;">
+        <figcaption style="margin-top: 2em;">
+            Conception of the order one crossover 
+        </figcaption>
+    </figure><br>
+
+    Lastly, sets a threshold value. It is used to remove the genome in the population if fitness is less than the threshold we set. 
+
+<pre class="highlight">
+    population = [[0, 12, 10, 17, 14, 3, 11, 5, 19, 16, 8, 7, 1, 9, 15, 4, 13, 2, 18, 0]
+                  [0, 1, 3, 17, 14, 10, 11, 5, 4, 16, 8, 7, 12, 9, 15, 19, 18, 13, 2, 6, 0]
+
+                                                    .
+                                                    .
+                                                    .
+
+                  [0, 17, 1, 12, 15, 3, 6, 7, 19, 16, 8, 5, 10, 9, 14, 4, 11, 13, 18, 2, 0]]
+                  
+    if fitness > self.weakness_threshold:
+        population.remove(genome)
+</pre><br>
+    The image below compares with threshold and without threshold.
+    You can see that applying a threshold finds the shortest path in an earlier generation than the version without applying it.
+    
+    <figure style="display:flex;">
         <img src="../img/tsp-4.gif" style="width: 45%; margin-top: 2em;">
         <img src="../img/tsp-5.gif" style="width: 45%; margin-top: 2em;">
-
+        
     </figure><br>
-    <figcaption style="margin-top: 2em;">Calculate minimum distance<br>
+    <figcaption>Calculate minimum distance<br>
         From the left, With threshold, Without threshold
-    </figcaption> -->
-
+    </figcaption>
+    
 </div>
 
 <br><br>
