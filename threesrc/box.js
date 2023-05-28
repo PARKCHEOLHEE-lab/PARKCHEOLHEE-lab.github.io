@@ -2,8 +2,9 @@ import * as THREE from "three";
 import dat from "https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js";
 import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
 import { TextGeometry } from "https://threejs.org/examples/jsm/geometries/TextGeometry.js"
-import { FontLoader } from "https://threejs.org/examples/jsm/loaders/FontLoader.js"
-// import { font } from "https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json"
+import { FontLoader, Font } from "https://threejs.org/examples/jsm/loaders/FontLoader.js"
+import helvetiker_regular from "https://threejs.org/examples/fonts/helvetiker_regular.typeface.json" assert{ type: "json"}
+
 
 
 class Box {
@@ -61,39 +62,73 @@ class Box {
     scene.add(gridHelper);
     
     const loader = new FontLoader();
-    
-    loader.load( "https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json", function ( font ) {
-      
-      let textString = ["x", "y", "z"];
+    const font = new Font(helvetiker_regular)
+    const axisString = ["x", "y", "z"];
 
-      textString.forEach(axisString => {
-        const axisStringGeometry = new TextGeometry( 
-          axisString, 
-          {
-            font: font,
-            size: 2,
-            height: 0,
-            curveSegments: 12,
-          } 
-        );
-        
-        const axisStringGeometrymaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
-        const axisStringGeometrymesh = new THREE.Mesh(axisStringGeometry, axisStringGeometrymaterial);
-        
-        const translateDistance = 7;
-        if (axisString === "x") {
-          axisStringGeometrymesh.translateX(translateDistance)
-        } else if (axisString === "y") {
-          axisStringGeometrymesh.translateY(translateDistance)
-          axisStringGeometrymesh.material.color = new THREE.Color(0x00ff00)
-        } else {
-          axisStringGeometrymesh.translateZ(translateDistance)
-          axisStringGeometrymesh.material.color = new THREE.Color(0x0000ff)
+    const axisArray = [];
+    for (let i = 0; i < axisString.length; i++) {
+      const eachAxisString = axisString[i]
+      const axisStringGeometry = new TextGeometry(
+        eachAxisString,
+        {
+          font: font,
+          size: 2,
+          height: 0,
+          curveSegments: 12
         }
+      )
+      
+      const axisStringGeometrymaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+      const axisStringGeometrymesh = new THREE.Mesh(axisStringGeometry, axisStringGeometrymaterial);
+      
+      const translateDistance = 7;
+      if (eachAxisString === "x") {
+        axisStringGeometrymesh.translateX(translateDistance)
+      } else if (eachAxisString === "y") {
+        axisStringGeometrymesh.translateY(translateDistance)
+        axisStringGeometrymesh.material.color = new THREE.Color(0x00ff00)
+      } else {
+        axisStringGeometrymesh.translateZ(translateDistance)
+        axisStringGeometrymesh.material.color = new THREE.Color(0x0000ff)
+      }
+      
+      axisArray.push(axisStringGeometrymesh);
 
-        scene.add(axisStringGeometrymesh)
-      })
-    });
+    }
+
+
+    // loader.load( "https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json", function ( font ) {
+      
+    //   let textString = ["x", "y", "z"];
+
+    //   textString.forEach(axisString => {
+    //     const axisStringGeometry = new TextGeometry( 
+    //       axisString, 
+    //       {
+    //         font: font,
+    //         size: 2,
+    //         height: 0,
+    //         curveSegments: 12,
+    //       } 
+    //     );
+        
+    //     const axisStringGeometrymaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+    //     const axisStringGeometrymesh = new THREE.Mesh(axisStringGeometry, axisStringGeometrymaterial);
+        
+    //     const translateDistance = 7;
+    //     if (axisString === "x") {
+    //       axisStringGeometrymesh.translateX(translateDistance)
+    //     } else if (axisString === "y") {
+    //       axisStringGeometrymesh.translateY(translateDistance)
+    //       axisStringGeometrymesh.material.color = new THREE.Color(0x00ff00)
+    //     } else {
+    //       axisStringGeometrymesh.translateZ(translateDistance)
+    //       axisStringGeometrymesh.material.color = new THREE.Color(0x0000ff)
+    //     }
+
+    //     scene.add(axisStringGeometrymesh)
+    //   })
+    // });
     
     
     for (let i = 1; i <= this.size; i++) {
@@ -121,6 +156,11 @@ class Box {
       
       scene.add(cube);
       scene.add(line);
+
+      scene.add(axisArray[0]);
+      scene.add(axisArray[1]);
+      scene.add(axisArray[2]);
+
     }
     
     animate();
@@ -129,7 +169,11 @@ class Box {
     
     function animate () {
       requestAnimationFrame(animate);
-      
+
+      axisArray[0].rotation.y -= 0.03;
+      axisArray[1].rotation.y -= 0.03;
+      axisArray[2].rotation.y -= 0.03;
+
       // cube.rotation.x += 0.005;
       // cube.rotation.y += 0.005;
       
