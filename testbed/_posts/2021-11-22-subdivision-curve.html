@@ -1,0 +1,73 @@
+---
+title:  "Subdivision curve"
+layout: post
+hashtag: "#geometry #algorithm"
+---
+
+<div id="toc"></div>
+<h3>Subdivision curves</h3>
+    Subdvision methods progressively refine a discrete curve and <code>converge to a smooth</code> curve. This allows to perform an interpolation or approximation of a given coarse dataset.
+    
+    <figure>
+        <img src="/img/sub-curve-0.png" style="width: 60%">
+        <figcaption>
+            <a href="https://www.numerical-tours.com/matlab/meshwav_1_subdivision_curves/">Subdivision</a> iterative step
+        </figcaption>
+    </figure><br>
+    
+    Subdivision curve is created based on the base vertices(or curve). Given the base vertices, find the vectors of the <code>n%</code> and <code>100-n%</code> vertices between the i-th point and the i+1-th point.
+    <!--break-->
+    
+    The <a href="https://github.com/PARKCHEOLHEE-lab/GeometryCamp/blob/master/geometryFundamental/SubdivisionCurve/subdivisionCurve.py">code</a> is like the one below.
+
+<pre class="highlight">
+    class <span class="method">SubdivisionCurve</span>:
+        <span class="method">QUARTER</span> = 0.25
+        <span class="method">QUARTERDIFF</span> = 1 - <span class="method">QUARTER</span>
+        
+        def <span class="defName">__init__</span>(self, points, count, is_closed=False):
+            self.points = points
+            self.count = count
+            self.is_closed = is_closed
+            
+            self.subdivided_points = points[:]
+            
+        def <span class="defName">get_subdivided_curve</span>(self):
+            self.<span class="defName">_subdivide</span>()
+            return self.subdivided_points
+            
+        def <span class="defName">_subdivide</span>(self):
+            for _ in range(self.count):
+                each_subdivided_points = []
+            
+                for curr_index in range(len(self.subdivided_points)):
+                    next_index = (curr_index + 1) % len(self.subdivided_points)
+                    if next_index == 0 and not self.is_closed:
+                        continue
+                
+                    curr_point = self.subdivided_points[curr_index]
+                    next_point = self.subdivided_points[next_index]
+                    
+                    pt_1 = (next_point - curr_point) * self.<span class="method">QUARTER</span> + curr_point
+                    pt_2 = (next_point - curr_point) * self.<span class="method">QUARTERDIFF</span> + curr_point
+
+                    each_subdivided_points.append(pt_1)
+                    each_subdivided_points.append(pt_2)
+                    
+                self.subdivided_points = each_subdivided_points
+</pre><br>
+
+Increasing the <code>iterative count</code> can create smoother curves. The image below is an explanation of it.
+
+<figure>
+    <img src="/img/sub-curve-1.png" style="width: 100%">
+    <figcaption>
+        Shape of subdivision curve by iterative count <br>
+        From the left, Subdivided vertices · Subdivided curve
+    </figcaption>
+</figure>
+
+<div class="article">
+
+</div>
+<br><br>
