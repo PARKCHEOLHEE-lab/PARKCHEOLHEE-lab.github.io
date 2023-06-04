@@ -20,23 +20,110 @@ done: false
     
     <br><br>
     <figure>
-        <img src="/img/p2m-0.jpg" width="80%">
+        <img src="/img/p2m-0.jpg" width="60%">
         <figcaption>
             Lenna <br>
             <a href="https://en.wikipedia.org/wiki/Lenna">Lenna (or Lena)</a> is a standard test image used in the field of digital image processing
         </figcaption>
-    </figure>
+    </figure><br>
 
 
     <!--break-->
 
+    We can convert from an image of a <code>floor plan to vector data</code> and also model to 3d, using <code>Edge Detection</code> with OpenCV described above. Let's implement it!
+
 </div><br><br>
-
-<!-- <h3>dddd</h3>
+<h3>Image preprocessing</h3>
 <div class="article">
-    Grasshopper does not support external libraries. If you want to use other packages, you can execute running API server(Flask, Django, Fastapi etc)
+    Image binarization is the operation that makes the pixel of an image 0 or 255(Here 0 means black and 255 means white).
+    <br>The reason for <code>binarization</code> is: 
+        <ul style="padding-left: 2em;">
+            <li class="decimal">to distinguish the background from the object</li>
+            <li class="decimal">to distinguish the region of interest(ROI) from the region of non-interest</li>
+        </ul>
 
-</div> -->
+    In the binarization of a grayscale image, a pixel value above the <code>threshold</code> is 0 (black), and 255 (white) below the threshold. 
+    One of the most popular computer vision libraries, OpenCV, provides these functions.
+
+    <figure style="display: flex;">
+        <img src="/img/p2m-1.jpg" width="30%">
+        <img src="/img/p2m-3.png" width="30%">
+        <img src="/img/p2m-2.png" width="30%">
+    </figure>
+    <figcaption>
+        Preprocessing sequence<br>From the left, Original floor plan image · Applied threshold · Eroded and dilated image
+    </figcaption><br><br>
+
+    The pre-processing is finished by first cleaning the image using a threshold and removing the remaining elements except for the wall using image <code>erosion</code> and <code>dilation</code>.
+    The <a href="https://en.wikipedia.org/wiki/Erosion_(morphology)">erosion</a> operation usually uses a structuring element for probing and reducing the shapes contained in the input image (<a href="https://en.wikipedia.org/wiki/Dilation_(morphology)">dilation</a> operation expands the shapes).
+    The code related a pre-processing is <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/d70bcb99bc2823a829605a37c973f12dd3bc5c80/APIs/p2m/p2m.py#L30-L50">here</a>.
+    <br><br>
+    <figure>
+        <img src="/img/p2m-4.gif" width="60%"><br>
+        <img src="/img/p2m-5.gif" width="60%">
+    </figure>
+    <figcaption style="margin-top: 2em;">
+        <a href="https://www.cs.auckland.ac.nz/courses/compsci773s1c/lectures/ImageProcessing-html/topic4.htm">Erosion and Dilation</a>
+        <br> From the top, Erosion operation · Dilation operation
+    </figcaption><br>
+</div>
+
+<h3>Data vectorization</h3>
+<div class="article">
+    After all the preprocessing described above has been completed, the <code>coordinates of the outer wall</code> can be extracted through edge detection with OpenCV.
+    The code is the following: In this code, I used <code>Shapely</code>, geometries handling library for simplifying geometries.
+    
+<pre class="highlight">
+    def <span class="defName">get_wall_coordinates</span>(self) -> List[List[Tuple[int]]]:
+        <span class="blue">"""Converts list of coordinates to list of polygon"""</span>
+
+        contours, _ = cv2.<span class="defName">findContours</span>(self.wall_image_cleaned, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+        
+        image_boundary_area = (self.wall_image_cleaned.shape[0] - 1) * (self.wall_image_cleaned.shape[1] - 1)
+
+        wall_coordinates = []
+        for contour in contours:
+            
+            coords = [[x, -y] for (x, y), *_ in contour]
+            
+            <span class="gi"># if current contours are just line, skip</span>
+            if len(coords) <= 2:
+                continue
+            
+            wall_geometry = Polygon(coords).<span class="defName">simplify</span >(self.TOLERANCE_SIMPLIFY)
+
+            <span class="gi"># Skip the image's boundary coordinates. </span>
+            if np.isclose(wall_geometry.area, image_boundary_area):
+                continue
+
+            if wall_geometry.area >= self.MIN_AREA_GEOM: 
+                wall_coord = list(wall_geometry.boundary.coords)
+                wall_coordinates.append(wall_coord)
+        
+        return wall_coordinates
+</pre> 
+</div>
+<br>
+<h3>Loading data within Grasshopper</h3>
+<div class="article">
+    Grasshopper does not support external libraries. If you want to use other packages, you can execute running API server(Flask, Django, Fastapi etc).
+    Thus I defined the Flask app following. 
+    This is an API that returns the wall's coordinates of a given image. Now we can use external library we defined using <code>ghpython</code>.
+
+<pre class="highlight">
+    <span class="defName">@app.route</span>("/p2m/＜path:image_path_param＞")
+    def <span class="defName">p2m</span>(image_path_param):
+        """convert plan to model"""
+        
+        return <span class="defName">jsonify</span>({"wall_coordinates": <span class="method">P2M</span>(image_path_param).wall_coordinates})
+</pre><br>
+    Finally, all we need to do is model the information about the outer wall line in 3D. You can check about this project in my <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/tree/main/APIs">repository</a>.
+    <figure>
+        <img src="/img/p2m-6.gif" width="80%">
+        <img src="/img/p2m-7.gif" width="80%">
+        <figcaption>Plan to model</figcaption>
+    </figure>
+</div>
 
 <br><br>
 
