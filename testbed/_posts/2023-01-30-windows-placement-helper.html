@@ -1,0 +1,106 @@
+---
+title:  "Windows placement helper"
+layout: post
+hashtag: "#drawing #automation #ezdxf #shapely"
+featured: false
+---
+
+
+<div id="toc"></div>
+<h3>Boring, boring, boring 😑</h3>
+<div class="article">
+
+    If you are an architect, you may have downloaded open cad sources and used them to draw plans.
+    And you may also have experienced the repetitive task of <code>moving</code> design elements such as windows and doors to the desired location and <code>drilling</code> holes in the wall at that location.
+    <!--break-->
+
+    <br><br>
+    It is an unproductive task highly. Many architects(or designers who work similarly to architects) are exposed to these repetitive tasks, It makes them exhausted and also stay up all night.
+    Let's automate these repetitive tasks by writing simple code!
+
+    <figure style="display: flex;">
+        <!-- <img src="/img/window-0.png" width="60%"> -->
+        <img src="/img/window-2.png" width="40%">
+        <img src="/img/window-1.jpg" width="40%">
+    </figure>
+    <figcaption>
+        Window blocks <br>
+        From the left, <a href="https://www.conceptdraw.com/examples/sliding-window-symbol-floor-plan">Blocks</a> · Floor plan
+    </figcaption>
+</div><br><br>
+
+<h3>From CAD blocks to objects</h3>
+<div class="article">
+    We have lots of CAD block sources. These are distinguished by each layer its usage. For example, if there is a window block, the block has the following elements:
+    
+    <ul style="padding-left: 2em;">
+        <li>frames</li>
+        <li>glass panes</li>
+        <li>boundary</li>
+        <li>elevation lines</li>
+        <li>center lines</li>
+    </ul><br>
+
+    Through the above common elements that windows have, all windows with different appearances can be integrated into one <code>object</code>.
+    The following code is part of that task.
+
+<pre class="highlight">
+    class <span class="method">WindowGenerator</span>:
+        """.dxf window block parsing and converting shapely geometry"""
+
+        def <span class="defName">__init__</span>(self, dxf_path: str):
+            self.dxf_path = dxf_path
+            self.<span class="defName">__generate_window</span>()
+
+        def <span class="defName">__generate_window</span>(self):
+            window_dxf = ezdxf.readfile(self.dxf_path)
+            window_msp = window_dxf.modelspace()
+
+            self.frames = []
+            self.panes = []
+            self.centerlines = []
+
+            self.boundary = LineString()
+            self.elevationlines = LineString()
+
+            for entity in window_msp:
+
+                layer = entity.dxf.layer
+                if layer == "centerlines":
+                    self.centerlines.append(LineString([entity.dxf.start, entity.dxf.end]))
+
+                elif entity.DXFTYPE == "POLYLINE":
+                    entity_points = list(entity.points())
+                    entity_geometry = LineString([loc for _, loc in enumerate(entity_points + entity_points[:1])])
+
+                    if layer == "frames":
+                        self.frames.append(entity_geometry)
+                    elif layer == "panes":
+                        self.panes.append(entity_geometry)
+                    elif layer == "boundary":
+                        self.boundary = entity_geometry
+                    elif layer == "elevationlines":
+                        self.elevationlines = entity_geometry
+                    else:
+                        raise Exception("undefined layer")
+
+            self.window = [
+                self.boundary,
+                *self.frames,
+                *self.panes,
+                *self.centerlines,
+                self.elevationlines,
+            ]
+
+            self.sorted_centerlines = sorted(self.centerlines, key=lambda l: l.length, reverse=True)
+            self.window_width = self.sorted_centerlines[0].length
+</pre>
+
+    <!-- <figure>
+        <img src="/img/window-0.png" width="60%">
+    </figure> -->
+
+
+</div>
+
+<br><br><br>
