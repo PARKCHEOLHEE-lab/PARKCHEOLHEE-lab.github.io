@@ -46,7 +46,7 @@ featured: false
 
 <pre class="highlight">
     class <span class="method">WindowGenerator</span>:
-        """.dxf window block parsing and converting shapely geometry"""
+        <span class="blue">""".dxf window block parsing and converting shapely geometry"""</span>
 
         def <span class="defName">__init__</span>(self, dxf_path: str):
             self.dxf_path = dxf_path
@@ -86,19 +86,21 @@ featured: false
 
             self.window = [
                 self.boundary,
-                *self.frames,
-                *self.panes,
-                *self.centerlines,
+                <span class="blue">*</span>self.frames,
+                <span class="blue">*</span>self.panes,
+                <span class="blue">*</span>self.centerlines,
                 self.elevationlines,
             ]
 
             self.sorted_centerlines = sorted(self.centerlines, key=lambda l: l.length, reverse=True)
             self.window_width = self.sorted_centerlines[0].length
 </pre>
+</div><br>
 
-    <!-- <figure>
-        <img src="/img/window-0.png" width="60%">
-    </figure> -->
+<h3>Placement helper</h3>
+<div class="article">
+    We created a window object with all information of the window using <code>ezdxf</code> and <code>shapely</code>.
+    Now, if you define a function that places a window at the desired location and drills walls, it's done.
 
 
 </div>
