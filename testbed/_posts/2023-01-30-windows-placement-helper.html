@@ -16,7 +16,6 @@ featured: false
 
     <br><br>
     It is an unproductive task highly. Many architects(or designers who work similarly to architects) are exposed to these repetitive tasks, It makes them exhausted and also stay up all night.
-    Let's automate these repetitive tasks by writing simple code!
 
     <figure style="display: flex;">
         <!-- <img src="/img/window-0.png" width="60%"> -->
@@ -41,10 +40,9 @@ featured: false
         <li>center lines</li>
     </ul><br>
 
-    Through the above common elements that windows have, all windows with different appearances can be integrated into one <code>object</code>.
-    The following code is part of that task.
+    Through the above common elements that windows have, all windows with different appearances can be integrated into one <code>object</code>. And the following image is part of that task.
 
-<pre class="highlight">
+<!-- <pre class="highlight">
     class <span class="method">WindowGenerator</span>:
         <span class="blue">""".dxf window block parsing and converting shapely geometry"""</span>
 
@@ -94,7 +92,16 @@ featured: false
 
             self.sorted_centerlines = sorted(self.centerlines, key=lambda l: l.length, reverse=True)
             self.window_width = self.sorted_centerlines[0].length
-</pre>
+</pre><br> -->
+
+    The window, converted to the object is the following.
+    <figure>
+        <img src="/img/window-3.png">
+        <figcaption>Window object <br>
+            Visualize elements of the window using <a href="https://marketplace.visualstudio.com/items?itemName=hediet.debug-visualizer">Debug Visualizer</a>
+        </figcaption>
+    </figure>
+
 </div><br>
 
 <h3>Placement helper</h3>
@@ -102,6 +109,16 @@ featured: false
     We created a window object with all information of the window using <code>ezdxf</code> and <code>shapely</code>.
     Now, if you define a function that places a window at the desired location and drills walls, it's done.
 
+    It's simple. First, calculate the angle of the wall and rotate the geometries to match the angle of the wall.
+    Lastly, make a vector to move, and translate the window. It's all!
+
+    <figure style="display: flex;">
+        <img src="/img/window-7.png" width="45%">
+        <img src="/img/window-8.png" width="50%">
+    </figure>
+    <figcaption>
+        Windows placed on the wall
+    </figcaption>
 
 </div>
 
