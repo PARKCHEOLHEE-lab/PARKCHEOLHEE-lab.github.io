@@ -35,11 +35,13 @@ featured: false
     and then rendering the image in the desired direction using <code>ControlNet of the stable diffusion API</code>.
     <br><br>
     <figure>
-        <img src="/img/d2r-4.png" width="100%">
-        <figcaption>Using stable diffusion in Rhino environment</figcaption>
+        <img src="/img/d2r-5.gif" width="100%">
+        <figcaption>Demo for using stable diffusion in Rhino environment <br>
+            Prompt: <u>Colorful basketball court, Long windows, Sunlight</u>
+        </figcaption>
     </figure><br>
 
-    <figure style="display: flex;">
+    <!-- <figure style="display: flex;">
         <img src="/img/d2r-3.png" width="31%">
         <img src="/img/d2r-1.png" width="31%">
         <img src="/img/d2r-2.png" width="31%">
@@ -47,7 +49,7 @@ featured: false
     <figcaption>
         From the left, Rhino viewport · Controlnet scribble · Rendered image with stable diffusion<br>
         Prompt: <u>Interior view with sunlight, Curtain wall with city view, Colorful sofas, Cushions on the sofas, Transparent glass table, Fabric stools, Some flower pots</u>
-    </figcaption><br><br>
+    </figcaption><br><br> -->
 
     First, We need to write code for capturing the rhino viewport.
     I made it to be saved in the path where the current *.gh file is located.
@@ -83,13 +85,23 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     You can check the code to the API request used in the <code>GhPython</code> at this <a href="https://github.com/PARKCHEOLHEE-lab/stable-diffusion-webui/blob/5eead22e36b1293824a1005915ee1ea24ef9538b/d2r.py#L182-L219">link</a>.
     The below figure is the demo for <code>drafting with AI</code> by calling API within Grasshopper environment.
 
-    <figure>
+    <!-- <figure>
         <img src="/img/d2r-5.gif" width="100%">
         <figcaption>
             Demo<br>
             Prompt: <u>Colorful basketball court, Long windows, Sunlight</u>
         </figcaption>
-    </figure><br>
+    </figure><br> -->
+
+    <figure style="display: flex;">
+        <img src="/img/d2r-3.png" width="46.5%">
+        <img src="/img/d2r-2.png" width="46.5%">
+    </figure>
+    <figcaption>
+        Isometric model <br>
+        From the left, Drfat view · Rendered view <br>
+        Prompt: <u>Interior view with sunlight, Curtain wall with city view, Colorful sofas, Cushions on the sofas, Transparent glass table, Fabric stools, Some flower pots</u>
+    </figcaption><br>
 
     <figure style="display: flex;">
         <img src="/img/d2r-5.png" width="46.5%">
