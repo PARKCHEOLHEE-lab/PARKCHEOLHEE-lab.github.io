@@ -41,16 +41,6 @@ featured: false
         </figcaption>
     </figure><br>
 
-    <!-- <figure style="display: flex;">
-        <img src="/img/d2r-3.png" width="31%">
-        <img src="/img/d2r-1.png" width="31%">
-        <img src="/img/d2r-2.png" width="31%">
-    </figure>
-    <figcaption>
-        From the left, Rhino viewport · Controlnet scribble · Rendered image with stable diffusion<br>
-        Prompt: <u>Interior view with sunlight, Curtain wall with city view, Colorful sofas, Cushions on the sofas, Transparent glass table, Fabric stools, Some flower pots</u>
-    </figcaption><br><br> -->
-
     First, We need to write code for capturing the rhino viewport.
     I made it to be saved in the path where the current *.gh file is located.
 
@@ -83,34 +73,41 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
 <div class="article">
     Python serves a built-in module called <code>urllib</code> to use HTTP. 
     You can check the code to the API request used in the <code>GhPython</code> at this <a href="https://github.com/PARKCHEOLHEE-lab/stable-diffusion-webui/blob/5eead22e36b1293824a1005915ee1ea24ef9538b/d2r.py#L182-L219">link</a>.
-    The below figure is the demo for <code>drafting with AI</code> by calling API within Grasshopper environment.
-
-    <!-- <figure>
-        <img src="/img/d2r-5.gif" width="100%">
-        <figcaption>
-            Demo<br>
-            Prompt: <u>Colorful basketball court, Long windows, Sunlight</u>
-        </figcaption>
-    </figure><br> -->
-
-    <figure style="display: flex;">
-        <img src="/img/d2r-3.png" width="46.5%">
-        <img src="/img/d2r-2.png" width="46.5%">
-    </figure>
-    <figcaption>
-        Isometric model <br>
-        From the left, Drfat view · Rendered view <br>
-        Prompt: <u>Interior view with sunlight, Curtain wall with city view, Colorful sofas, Cushions on the sofas, Transparent glass table, Fabric stools, Some flower pots</u>
-    </figcaption><br>
 
     <figure style="display: flex;">
         <img src="/img/d2r-5.png" width="46.5%">
         <img src="/img/d2r-6.png" width="46.5%">
     </figure>
     <figcaption>
-        Isometric model <br>
+        Physical model <br>
         From the left, Drfat view · Rendered view <br>
         Prompt: <u>Isometric view, River, Trees, 3D printed white model with illumination</u>
+    </figcaption><br>
+
+    <figure style="display: flex;">
+        <img src="/img/d2r-3.png" width="46.5%">
+        <img src="/img/d2r-2.png" width="46.5%">
+    </figure>
+    <figcaption>
+        Interior view <br>
+        From the left, Drfat view · Rendered view <br>
+        Prompt: <u>Interior view with sunlight, Curtain wall with city view, Colorful sofas, Cushions on the sofas, Transparent glass table, Fabric stools, Some flower pots</u>
+    </figcaption><br>
+
+    <figure style="display: flex;">
+        <img src="/img/d2r-11.png" width="46.5%">
+        <img src="/img/d2r-12.png" width="46.5%">
+    </figure>
+    <figcaption>
+        <a href="https://www.archdaily.com/932099/chaptal-residence-nathalie-eldan-architecture/5e21774d3312fd970e000439-chaptal-residence-nathalie-eldan-architecture-floor-plan?next_project=no">Floor plan</a><br>
+        From the left, Drfat view · Rendered view <br>
+        Prompt: <u>
+            Top view,
+            With sunlight and shadows,
+            Some flower pots,
+            Colorful furnitures,
+            Conceptual image
+        </u>
     </figcaption><br>
 
     <figure style="display: flex;">
@@ -125,6 +122,50 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
             Night scene with many stars in the sky,
             Neon sign has shine brightly,
             Milky way in the sky
+        </u>
+    </figcaption><br>
+
+    <figure style="display: flex;">
+        <img src="/img/d2r-9.png" width="46.5%">
+        <img src="/img/d2r-10.png" width="46.5%">
+    </figure>
+    <figcaption>
+        <a href="https://www.pinterest.co.kr/pin/1094937728135829205/">Contour</a><br>
+        From the left, Drfat view · Rendered view <br>
+        Prompt: <u>
+            Bird's eye view,
+            Colorful master plan,
+            Bright photograph,
+            River
+        </u>
+    </figcaption><br>
+
+    <figure style="display: flex;">
+        <img src="/img/d2r-15.png" width="46.5%">
+        <img src="/img/d2r-16.png" width="46.5%">
+    </figure>
+    <figcaption>
+        <a href="https://www.pinterest.co.kr/pin/353321533273442068/">Gabled houses</a><br>
+        From the left, Drfat view · Rendered view <br>
+        Prompt: <u>
+            Two points perspective,
+            White clouds,
+            Colorful houses,
+            Sunlight
+        </u>
+    </figcaption><br>
+
+    <figure style="display: flex;">
+        <img src="/img/d2r-13.png" width="46.5%">
+        <img src="/img/d2r-14.png" width="46.5%">
+    </figure>
+    <figcaption>
+        Kitchen<br>
+        From the left, Drfat view · Rendered view <br>
+        Prompt: <u>
+            Front view,
+            Kitchen with black color interior,
+            Illuminations
         </u>
     </figcaption><br>
 
