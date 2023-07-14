@@ -6,8 +6,55 @@ featured: false
 ---
 
 <div id="toc"></div>
-<h3>Understand to multiprocessing</h3>
+<h3>A simple understanding of multiprocessing</h3>
 <div class="article">
+    Multiprocessing refers to the ability of a computer system to execute multiple processes or tasks concurrently. 
+    It involves the use of multiple processors or processor cores to perform multiple tasks <code>simultaneously</code>, thereby improving overall system performance and efficiency.
+
+    <br><br>
+    In a multiprocessing system, each process is an independent unit of execution with its own program counter, stack, and data section. 
+    These <code>processes</code> can run concurrently, allowing for parallelism and efficient utilization of system resources.
+
+    <ul style="padding-left: 2em;">
+        <li>Processes: A process is an instance of a running program. Each process has its own memory space, file descriptors, and system resources. Processes are created and managed by the operating system. <code>They can communicate with each other</code> using inter-process communication mechanisms.</li>
+    </ul>    
+
+    <br>
+    The below code is a very simple example of multiprocessing:
+<pre class="highlight">
+    import time
+    from multiprocessing import Pool, cpu_count
+    
+    def f(x):
+        time.sleep(1)
+        return x*x
+    
+    if __name__ == '__main__':
+        
+        max_range = 10
+        
+        start = time.time()
+        with Pool(processes=cpu_count()) as p:
+            x_squared = p.map(f, range(max_range))
+        parallel_time = time.time() - start
+        
+        start = time.time()
+        x_squared = []
+        for x in range(max_range):
+            x_squared.append(f(x))
+    
+        sequential_time = time.time() - start
+    
+        print(f"Parallel execution time: {parallel_time}")      
+        print(f"Sequential execution time: {sequential_time}")  
+
+        # Parallel execution time: 1.8122541904449463
+        # Sequential execution time: 10.073817014694214
+</pre>
+    
+
+    
+
 </div>
 <br><br>
 <h3>Algorithm for finding `MIR`</h3>
