@@ -10,6 +10,7 @@ featured: false
 <div class="article">
     Multiprocessing refers to the ability of a computer system to execute multiple processes or tasks concurrently. 
     It involves the use of multiple processors or processor cores to perform multiple tasks <code>simultaneously</code>, thereby improving overall system performance and efficiency.
+    <!--break-->
 
     <br><br>
     In a multiprocessing system, each process is an independent unit of execution with its own program counter, stack, and data section. 
@@ -20,49 +21,81 @@ featured: false
     </ul>    
 
     <br>
-    The below code is a very simple example of multiprocessing:
+
+    You can understand multiprocessing with a very simple example easily. That is the following:
+
 <pre class="highlight">
-    import time
-    from multiprocessing import Pool, cpu_count
+
+    from multiprocessing import <spab class="method">Pool</spab>, cpu_count
+    import <span class="defName">time</span>
     
-    def f(x):
-        time.sleep(1)
+    def <span class="defName">f</span>(x):
+        time.<span class="defName">sleep</span>(1)
         return x*x
     
-    if __name__ == '__main__':
-        
-        max_range = 10
-        
+    def <span class="defName">parallel_execution</span>(max_range):
         start = time.time()
-        with Pool(processes=cpu_count()) as p:
-            x_squared = p.map(f, range(max_range))
+        with <span class="method">Pool</span>(processes=cpu_count()) as p:
+            x_squared = p.<span class="defName">map</span>(f, range(max_range))
+    
         parallel_time = time.time() - start
+        print(f"Parallel execution time: {parallel_time}")      
         
+        return x_squared
+    
+    def <span class="defName">sequential_execution</span>(max_range):
         start = time.time()
         x_squared = []
         for x in range(max_range):
-            x_squared.append(f(x))
+            x_squared.<span class="defName">append</span>(f(x))
     
         sequential_time = time.time() - start
-    
-        print(f"Parallel execution time: {parallel_time}")      
         print(f"Sequential execution time: {sequential_time}")  
+    
+        return x_squared
+    
+    
+    if __name__ == '__main__':
 
-        # Parallel execution time: 1.8122541904449463
-        # Sequential execution time: 10.073817014694214
+        max_range = 10
+        x_squared_parallel = <span class="defName">parallel_execution</span>(max_range)
+        x_squared_sequential = <span class="defName">sequential_execution</span>(max_range)
+
+        <span class="annotation"># Parallel execution time: 1.8122541904449463</span>
+        <span class="annotation"># Sequential execution time: 10.073817014694214</span>
 </pre>
-    
 
-    
-
+<br>
+The <code>parallel_execution</code> and <code>sequential_execution</code> functions use <code>f(x)</code> in common,
+return a squared value about given x after wating 1 second (sleep). 
+Thus in the sequential function, you have to wait <code>at least max_range * 1</code> seconds before getting the result (On my computer, it took 10.073817014694214 seconds).
+<br><br>
+On the other hand, the parallel function took 1.8122541904449463 seconds. 
+Because it executes simultaneously as much as <code>cpu_count</code>, you don't have to wait <code>max_range * 1</code> seconds.
 </div>
 <br><br>
-<h3>Algorithm for finding `MIR`</h3>
+
+<h3>Improving performance of the real algorithm</h3>
 <div class="article">
+    Now, let's improve the performance of a real algorithm by applying multiprocessing (This task corresponds to defining f(x) you saw above).
+    There is the algorithm that finds <code>MIR</code> (Maximal Inner Rectangle) for a given polygon like the following.
+    <figure>
+        <img src="/img/parallel-0.gif" width="85%">
+        <figcaption>Algorithm for finding MIR</figcaption>
+    </figure><br>
+
+    This algorithm approximates the maximal rectangle within a given polygon based on rotation interval degree and grid size.
+    Smaller values for <code>rotation interval degree</code> and <code>grid size</code> result in more accurate rectangles, but slower.
+
 </div>
 <br><br>
+
 <h3>Parallel vs. Sequential</h3>
 <div class="article">
 </div>
+<br><br>
 
+<h3>References</h3>
+<div class="article">
+</div>
 <br><br>
