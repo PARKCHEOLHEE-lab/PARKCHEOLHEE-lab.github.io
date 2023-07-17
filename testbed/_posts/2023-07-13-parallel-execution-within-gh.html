@@ -80,22 +80,103 @@ Because it executes simultaneously as much as <code>cpu_count</code>, you don't 
     Now, let's improve the performance of a real algorithm by applying multiprocessing (This task corresponds to defining f(x) you saw above).
     There is the algorithm that finds <code>MIR</code> (Maximal Inner Rectangle) for a given polygon like the following.
     <figure>
-        <img src="/img/parallel-0.gif" width="85%">
+        <img src="/img/parallel-1.gif" width="100%">
         <figcaption>Algorithm for finding MIR</figcaption>
     </figure><br>
 
     This algorithm approximates the maximal rectangle within a given polygon based on rotation interval degree and grid size.
     Smaller values for <code>rotation interval degree</code> and <code>grid size</code> result in more accurate rectangles, but slower.
 
+    <br><br>
+
+    This algorithm is based on rotating a polygon at input rotation intervals and creating a binary grid (AABB axes-aligned).
+    That is, the same logic is executed at all rotation intervals. At this point, we can write the code for finding MIR with <code>parallelism</code> in mind. That's the following.
+
+<pre class="highlight">
+    def <span class="defName">_generate_maximal_inner_rectangle</span>(
+        self, polygon, rotation_degree, grid_size, is_strict
+    ):
+        <span class="annotation">"""Estimates the maximum inner rectangle of the given polygon by `rotation_degree` and `grid_size`
+
+        Args:
+            polygon (Rhino.Geometry.PolylineCurve): polygon to estimate
+            rotation_degree (float): rotation step
+            grid_size (float): size of the grid each cell
+            is_strict (bool, optional): if true, only uses fully inner cells. Defaults to False.
+
+        Returns:
+            Rhino.Geometry.PolylineCurve: estimated maximal rectangle
+
+        Reference:
+            https://leetcode.com/problems/maximal-rectangle/solutions/3407011/ex-amazon-explains-a-solution-with-a-video-python-javascript-java-and-c/
+            https://chat.openai.com/share/50607e72-da71-4938-8a4d-61d94b097ede
+        """</span>
+
+        anchor = rg.AreaMassProperties.Compute(polygon).Centroid
+        mir_args_list = []
+
+        each_degree = 0
+        while each_degree <= 359:
+            each_args = []
+
+            each_angle = math.radians(each_degree)
+
+            rotation_transform = rg.<span class="method">Transform</span>.<span class="method">Rotation</span>(each_angle, anchor)
+            rotated_polygon = copy.copy(polygon)
+            rotated_polygon.<span class="method">Transform</span>(rotation_transform)
+
+            each_args = [
+                rotated_polygon,
+                anchor,
+                each_angle,
+                grid_size,
+                is_strict,
+            ]
+
+            mir_args_list.append(each_args)
+
+            each_degree += rotation_degree
+        
+        <span class="annotation"># Parallel execution</span>
+        if self.is_parallel:
+            mirs = ghpythonlib.parallel.<span class="defName">run</span>(self.<span class="defName">_get_each_mir</span>, mir_args_list, True)
+        
+        <span class="annotation"># Sequential execution</span>
+        else:
+            mirs = [self.<span class="defName">_get_each_mir</span>(each_args) for each_args in mir_args_list]
+        
+        mir = max(
+            list(mirs), key=lambda m: rg.AreaMassProperties.Compute(m).Area
+        )
+
+        return mir
+</pre><br>
+
+For one's information, GhPython has no multiprocessing module, so you can parallelize it by using <code>ghpythonlib.parallel</code> module.
+Perhaps GhPython is Iron Python implemented by .NET Framework, so you could use the multiprocessing module used in C#.
+
 </div>
 <br><br>
 
-<h3>Parallel vs. Sequential</h3>
+<h3>Comparing execution time</h3>
 <div class="article">
+    On my computer, I got the following reuslts. When run in parallel, it takes 1.9735183715820313. And run in sequential, it takes 8.2854690551757813.
+    In the case of parallel processing, the result can be obtained <code>4x</code> times faster. If you have more inputs, you can expect a bigger performance boost.
+    <br><br>
+    <figure>
+        <img src="/img/parallel-2.png" width="60%">
+        <figcaption>Compare execution time for Parallel vs. Sequential</figcaption>
+    </figure><br>
+    The code for the above is in <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/mir/mir.py">this link</a>.
 </div>
 <br><br>
 
 <h3>References</h3>
 <div class="article">
+    <ul style="padding-left: 2em;">
+        <li><a href="https://discourse.mcneel.com/t/ghpython-and-parallel/125510">https://discourse.mcneel.com/t/ghpython-and-parallel/125510</a></li>
+        <li><a href="https://leetcode.com/problems/maximal-rectangle/solutions/3407011/ex-amazon-explains-a-solution-with-a-video-python-javascript-java-and-c/">https://leetcode.com/problems/maximal-rectangle/solutions/3407011/ex-amazon-explains-a-solution-with-a-video-python-javascript-java-and-c/</a></li>
+        <li><a href="https://chat.openai.com/share/50607e72-da71-4938-8a4d-61d94b097ede">https://chat.openai.com/share/50607e72-da71-4938-8a4d-61d94b097ede</a></li>
+    </ul>    
 </div>
 <br><br>
