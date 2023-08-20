@@ -1,0 +1,155 @@
+---
+title: "The selfish gene"
+layout: post
+hashtag: "#natural-selection #evolution #simulation"
+featured: true
+---
+
+<div id="toc"></div>
+<h3>What is natural selection 🦕</h3>
+<div class="article">
+    <a href="https://www.nhm.ac.uk/discover/what-is-natural-selection.html">Natural selection</a> is a mechanism of evolution. 
+    Organisms that are more adapted to their environment are more likely to survive and pass on the genes that aided their success. 
+    This process causes species to change and diverge over time.
+    Natural selection is one of the ways to account for the millions of species that have lived on Earth.
+
+    <br><br>
+    For example, evolving long necks have enabled giraffes to feed on leaves that others can't reach, giving them a competitive advantage.
+    Thanks to a better food source, those with longer necks were able to survive. Those with shorter necks and access to less food would be less likely to survive.
+    <!--break-->
+
+    <figure>
+        <img src="/img/the-selfish-gene-0.png" width="60%">
+        <figcaption><a href="https://www.ck12.org/book/ck-12-biology-advanced-concepts/section/10.36/">Giraffes</a> with each other different genes</figcaption>
+    </figure>
+</div><br>
+
+<h3>Creating environment and defining genes</h3>
+<div class="article">
+    Let's do a simple simulation based on the basic concepts and understanding of natural selection. 
+    First, we need to create an <code>environment</code> and <code>populations</code> that have the <code>genes</code> to do so. 
+    The worm will live in the environment that I created in a two-dimensional form, and the worm will have the following genes to survive to eat the feeds:
+    
+    <ul style="padding-left: 2em;">
+        <li>speed: The moving speed of the worm</li>
+        <li>sense: The distance for sensing feeds</li>
+        <li>switch: The direction change probability (when there are no feeds within the distance for sensing)</li>
+    </ul><br>
+
+    I defined a class as below. Worms use the <code>moving</code> function that interacts with genes to act.
+    
+<pre class="highlight">
+    class <span class="method">WormGene</span>:
+        def __init__(self, speed: int, sense: float, switch: float) -> None:
+            self.speed = speed
+            self.sense = sense
+            self.switch = switch
+
+
+    class <span class="method">Worm</span>(<sapn class="method">WormGene</sapn>, <span class="method">WormHelper</span>):
+        def <span class="defName">__init__</span>(
+            self, 
+            speed: int = <span class="method">EnvironmentConsts.WORM_SPEED_ORIGINAL</span>, 
+            sense: float = <span class="method">EnvironmentConsts.WORM_SENSE_ORIGINAL</span>, 
+            switch: float = <span class="method">EnvironmentConsts.WORM_SWITCH_ORIGINAL</span>
+        ):
+            <span class="method">WormGene</span>.<span class="defName">__init__</span>(self, speed, sense, switch)
+            self<span class="defName">._initialize</span>()
+            
+
+        (...)
+
+
+        def <span class="defName">moving</span>(self, apples: List[<span class="method">Apple</span>]) -> None:
+            self.direction: str
+            self.direction = <span class="defName">self._get_random_direction</span>(self.direction, self.switch)
+            
+            nearest_apple = <span class="defName">self._get_nearest_apple</span>(self.body[-1], apples, self.sense)
+            if nearest_apple is not None:
+                self.direction = <span class="defName">self._get_direction_by_sense</span>(self.body[-1], nearest_apple, self.direction)
+            
+            self.body: List[List[int]]
+            self.body = <span class="defName">self._get_moved_body</span>(self.body, self.direction, self.speed)
+</pre><br><br>
+    
+    
+    If you want to see the code for <code>Worm</code> I defined, you can see it at the following link. And the environment, worms operate like the below Fig.2: An operation of the environment and worms.
+        <ul style="padding-left: 2em;">
+            <li><a href="https://github.com/PARKCHEOLHEE-lab/the-selfish-gene/blob/main/classes/worm.py">https://github.com/PARKCHEOLHEE-lab/the-selfish-gene/blob/main/classes/worm.py</a></li>
+        </ul><br>
+        
+    Following whether the sensing circle the worm has contains apples, each worm will have a different operation method. 
+    If apples are not within the sensing circle, worms determine the direction randomly by the <code>switch</code> gene. 
+    
+    <br><br>
+    Else, calculate the angle between the worm's movement direction vector and the worm-to-apple vector, and calculate the difference between the angles to <code>select the vector with the highest similarity</code>.
+    See the <a href="https://github.com/PARKCHEOLHEE-lab/the-selfish-gene/blob/4eec1df9e018ea0b87fe6d3fafac892ab32cd80a/classes/worm.py#L217-L265">code</a> for detail of the worm's operation method <code>_get_direction_by_sense()</code>.
+    <br><br>
+    <figure>
+        <img src="/img/the-selfish-gene-1.gif" width="80%">
+        <figcaption>An operation of the environment and worms</figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Simulating natural selection</h3>
+<div class="article">
+    Now all preparations for the simulation are done. You can simulate natural selection as follows Fig.3: A part of the natural selection simulation
+
+    <br><br>
+    
+    Let's fix the <code>generation</code>, <code>population</code>, and <code>seed</code> for the reproducibility of natural selection simulations, and observe which genes survive. 
+    Note that worms that do not eat even one <code>apple</code> within one generation will die.
+    <br><br>
+    <figure>
+        <img src="/img/the-selfish-gene-2.gif" width="80%">
+        <figcaption>A part of the natural selection simulation</figcaption>
+    </figure><br>
+
+    I set the parameters for generation, population and seed as shown below. I then logged and visualized the results to observe how genes evolve and survive.
+        <ul style="padding-left: 2em;">
+            <li>generation: 100</li>
+            <li>population: 50</li>
+            <li>seed: 6</li>
+        </ul><br>
+
+    Let's see the visualized results. The x-axis is generation and the y-axis indicates each gene. And in the figure, I drew a line for <code>average genes</code> per generation.
+    The set generation is 100, but it stopped at 70 generations. This is because only one worm survived after that generation.
+
+    <br><br>
+    The <code>Speed</code> and <code>Sense</code> genes tend to increase gradually over generations. Detecting apples and moving quickly to eat it will of course be advantageous to survival.
+
+    <br><br>
+    In the case of the <code>Switch</code> gene, it started with 0.5, but the final evolved worm also returned to 0.5. In this environment, turning direction change too much seems to be against survival.
+    <br><br>
+    <figure>
+        <img src="/img/the-selfish-gene-3.png" width="85%">
+        <figcaption>Speed</figcaption><br>
+        <img src="/img/the-selfish-gene-4.png" width="85%">
+        <figcaption>Sense</figcaption><br>
+        <img src="/img/the-selfish-gene-5.png" width="85%">
+        <figcaption>Switch</figcaption>
+    </figure>
+
+
+
+</div><br><br>
+
+<h3>A birth of the a super worm</h3>
+<div class="article">
+    Lastly, I will reproduce the data of the super earthworm that survived until the end in the environment and finish the post. 
+    <br><br>It's too fast...
+
+    <figure>
+        <img src="/img/the-selfish-gene-6.gif" width="80%">
+    </figure>
+
+</div><br><br>
+
+<h3>References</h3>
+<div class="article">
+    <ul style="padding-left: 2em;">
+        <li><a href="https://youtu.be/0ZGbIKd0XrM">https://youtu.be/0ZGbIKd0XrM</a></li>
+        <li><a href="https://github.com/kairess/natural-selection">https://github.com/kairess/natural-selection</a></li>
+    </ul>    
+</div><br><br>
