@@ -3,6 +3,7 @@ layout: default
 ---
 
 <article>
+  
   {% include meta.html post=page %}
   {{ content }}
   {% if page.comments != false and site.comments.isso or site.comments.disqus %}
@@ -24,6 +25,7 @@ layout: default
         crossorigin="anonymous"
         async>
       </script>
-    </div>
+    </div><br><br>
   {% endif %}
+
 </article>
