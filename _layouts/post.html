@@ -11,4 +11,19 @@ layout: default
     {% if site.comments.disqus_shortname %}<div id="disqus_thread"></div>{% endif %}
     <noscript>Please enable JavaScript to view comments.</noscript>
   {% endif %}
+  
+  {% if page.comment %}
+    <div class="col-lg-8 col-md-10 mx-auto">
+      <hr />
+      
+      <script src="https://utteranc.es/client.js"
+        repo="dev-yakuza/dev-yakuza.github.io"
+        issue-term="url"
+        label="comment"
+        theme="github-light"
+        crossorigin="anonymous"
+        async>
+      </script>
+    </div>
+  {% endif %}
 </article>
