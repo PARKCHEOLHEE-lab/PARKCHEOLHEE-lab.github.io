@@ -31,7 +31,7 @@
     
       {% for post in site.categories.testbed %}
         {% assign sorted_hashtag = post.hashtag | split: " " %}
-
+    
       <div style="margin-top: -0.2em">
         <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
           {% if post.featured %}
@@ -41,6 +41,7 @@
           {% else %}
             <h3>{{ post.title }}</h3>
           {% endif %}
+          
           <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
           <p style=" text-align: justify; font-size:smaller;">
             <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
@@ -62,6 +63,7 @@
   {% elsif page.id == "featured" %}
     
     <p class="onClickDiv" onclick="location.href='../archive'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b>&nbsp;back to the previous&nbsp;</b></p>
+    <p style="margin-top: -1em">　</p>
     <p style="margin-top: -1em">　</p>
     {% for post in site.categories.testbed %}
       {% assign sorted_hashtag = post.hashtag | split: " " %}
@@ -98,7 +100,8 @@
       
       <p class="onClickDiv" onclick="location.href='../archive'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b>&nbsp;back to the previous&nbsp;</b></p>
       <p style="margin-top: -1em">　</p>
-      {% for post in site.categories.testbed %}
+      <p style="margin-top: -1em">　</p>
+    {% for post in site.categories.testbed %}
         {% assign sorted_hashtag = post.hashtag | split: " " %}
 
         {% if post.inprogress %}
