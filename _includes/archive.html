@@ -41,11 +41,21 @@
           {% else %}
             <h3>{{ post.title }}</h3>
           {% endif %}
+
+          {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
+          {% assign excerpt_part_size = excerpt_part | size %}
           
           <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
           <p style=" text-align: justify; font-size:smaller;">
             <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-              <p style="margin-bottom: -0.4em;">{{ post.excerpt | strip_html }}</p>
+              <p style="margin-bottom: -0.4em;">
+                {% for i in (0..excerpt_part_size) %}
+                  {{ excerpt_part[i] }}.
+                  {% if i == 6 %}
+                    <br><br>
+                  {% endif %}
+                {% endfor %}
+              </p>
               {% if post.thumbnail %}
                 <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;">
               {% endif %}
@@ -68,6 +78,9 @@
     {% for post in site.categories.testbed %}
       {% assign sorted_hashtag = post.hashtag | split: " " %}
 
+      {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
+      {% assign excerpt_part_size = excerpt_part | size %}
+
       {% if post.featured %}
         <div style="margin-top: -0.2em">
           <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
@@ -79,7 +92,14 @@
             <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
             <p style=" text-align: justify; font-size:smaller;">
               <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-                <p style="margin-bottom: -0.4em;">{{ post.excerpt | strip_html }}</p>
+                <p style="margin-bottom: -0.4em;">
+                  {% for i in (0..excerpt_part_size) %}
+                    {{ excerpt_part[i] }}.
+                    {% if i == 6 %}
+                      <br><br>
+                    {% endif %}
+                  {% endfor %}
+                </p>
                 {% if post.thumbnail %}
                   <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;">
                 {% endif %}
@@ -104,6 +124,9 @@
     {% for post in site.categories.testbed %}
         {% assign sorted_hashtag = post.hashtag | split: " " %}
 
+        {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
+        {% assign excerpt_part_size = excerpt_part | size %}
+
         {% if post.inprogress %}
           <div style="margin-top: -0.2em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
@@ -115,7 +138,14 @@
               <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time></p>
               <p style=" text-align: justify; font-size:smaller;">
                 <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-                  <p style="margin-bottom: -0.4em;">{{ post.excerpt | strip_html }}</p>
+                  <p style="margin-bottom: -0.4em;">
+                    {% for i in (0..excerpt_part_size) %}
+                      {{ excerpt_part[i] }}.
+                      {% if i == 6 %}
+                        <br><br>
+                      {% endif %}
+                    {% endfor %}
+                  </p>
                   {% if post.thumbnail %}
                     <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;">
                   {% endif %}
