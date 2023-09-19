@@ -51,7 +51,7 @@
               <p style="margin-bottom: -0.4em;">
                 {% for i in (0..excerpt_part_size) %}
                   {{ excerpt_part[i] }}.
-                  {% if i == 6 %}
+                  {% if i == post.splitter %}
                     <br><br>
                   {% endif %}
                 {% endfor %}
@@ -95,7 +95,7 @@
                 <p style="margin-bottom: -0.4em;">
                   {% for i in (0..excerpt_part_size) %}
                     {{ excerpt_part[i] }}.
-                    {% if i == 6 %}
+                    {% if i == post.splitter %}
                       <br><br>
                     {% endif %}
                   {% endfor %}
@@ -141,7 +141,7 @@
                   <p style="margin-bottom: -0.4em;">
                     {% for i in (0..excerpt_part_size) %}
                       {{ excerpt_part[i] }}.
-                      {% if i == 6 %}
+                      {% if i == post.splitter %}
                         <br><br>
                       {% endif %}
                     {% endfor %}
