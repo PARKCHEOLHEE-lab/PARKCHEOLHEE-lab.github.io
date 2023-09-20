@@ -59,8 +59,9 @@ thumbnail: /img/apartment-1.gif
         <!--break-->
         <li class="decimal">The range of parameters for offseting is <code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST</code> And it follows the following analysis.</li>
         <figure>
-            <img src="/img/apartment-12.png" alt="">
-        </figure>
+            <img src="/img/apartment-12.png" width="70%">
+            <figcaption>Analysis of SITE_BOUNDARY_OFFSET_DISTANCE_LIST</figcaption>
+        </figure><br>
 <pre><code class="python">
     class Consts:
         TOLERANCE_TO_SIMPLIFY = 10
@@ -153,12 +154,12 @@ thumbnail: /img/apartment-1.gif
           <tr>
             <td>param_building_positions</td>
             <td>continuous</td>
-            <td>Refer the <code>get_param_building_positions</code> func</td>
+            <td>Refer the <code>get_param_building_positions</code> function</td>
           </tr>
           <tr>
             <td>param_building_positions_count</td>
             <td>discrete</td>
-            <td>Refer the <code>get_param_building_positions</code> func</td>
+            <td>Refer the <code>get_param_building_positions</code> function</td>
           </tr>
         </tbody>
       </table><br><br>
@@ -173,10 +174,10 @@ thumbnail: /img/apartment-1.gif
           <li>param_offset_distance: Offset distance when <code>Boundary axis</code> is selected</li>
           <li>param_building_positions: Starting point parameter of Apt</li>
           <li>param_building_positions_count: Starting point count parameter of Apt</li>
-      </ul><br>
+      </ul>
 
       <figure>
-        <img src="/img/apartment-0.gif" style="width: 60%;">
+        <img src="/img/apartment-0.gif" style="width: 70%;">
         <figcaption>State spaces by randomly distributed parameters</figcaption>
       </figure><br>
      
@@ -240,9 +241,122 @@ Parameters definition:
 
 </div><br><br>
 
-<h3>State spaces of placement starting point</h3>
+<h3>Searching placement starting points</h3>
 <div class="article">
-</div>
+    1. Creation sequence of <code>Enums.LONGEST_ARRAY_AXIS</code>
+    <ul>
+        <figure>
+            <img src="/img/apartment-13.png" width="70%">
+            <figcaption>Analysis of LONGEST_ARRAY_AXIS</figcaption>
+        </figure>
+        
+        <ul style="padding-left: 2em;">
+            <li>Create an OBB by the longest segment of site segments</li>
+            <li>Move the axis in the vertical direction of the long axis OBB using the <code>param_axis_position</code> parameter</li>
+            <li>Derive the intersection line segment between the moved axis and site_geom</li>
+            <li>Divide the corresponding <code>array_axis</code> into equal parts by the number of created <code>param_building_positions_count</code> parameters</li>
+                <ul>
+                    <li>This is to prevent dots from appearing in overlapping locations</li>
+                </ul>
+            <li>After dividing into equal parts, both ends of each line are reduced by <code>POSITION_REDUCE_LENGTH</code></li>
+                <ul>
+                    <li>If a line segment disappears, use it as is without reducing it</li>
+                </ul>
+            <li>After creating the <code>param_building_positions</code> parameter, set the starting point of each reduced line segment to 0 and the final point to 1 and interpolate. Use that point as the starting point for Apt placement</li>
+        </ul>
+    </ul><br>
 
+    2. Creation sequence of <code>Enums.BOUNDARIES_ARRAY_AXIS</code>
+    <ul>
+        <ul style="padding-left: 2em;">
+            <figure>
+                <img src="/img/apartment-14.png" width="70%">
+                <figcaption>Creation result of BOUNDARIES_ARRAY_AXIS using dummy blocks</figcaption>
+            </figure><br>
 
-<br><br>
+            <li>Simplify a site geometry</li>
+                <ul>
+                    <li><code>TOLERANCE_TO_SIMPLIFY = 10</code></li>
+                    <li><code>TOLERANCE_ANGLE_TO_SIMPLIFY = 10</code></li>
+                </ul>
+            <li>Explode the simplified site segments and sort them by the length of each segment</li>
+            <li>Slice sorted segments up to <code>SITE_BOUNDARY_NUMBER_TO_USE</code></li>
+            <li>Slice to the <code>SITE_BOUNDARY_NUMBER_TO_USE</code>th longest line segment in length</li>
+            <li>Offset the site shape using the <code>param_offset_distance</code> parameter.</li>
+                <ul>
+                    <li><code>SITE_BOUNDARY_NUMBER_TO_USE = 4</code></li>
+                    <li><code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST = [15, 20, 25]</code></li>
+                </ul>
+            <li>Draw the intersection points between offsetted site segments</li>
+            <li>Create circles with a radius of <code>max(SITE_BOUNDARY_OFFSET_DISTANCE_LIST) from the intersections</code></li>
+                <ul>
+                    <li>Place corner type Apt at intersection points</li>
+                </ul>
+            <li>Subtract the circles from the boundary axis and remove segments that have a length is less than <code>ARRAY_AXIS_LENGTH_BASELINE_LOWEST</code></li>
+                <ul>
+                    <li><code>ARRAY_AXIS_LENGTH_BASELINE_LOWEST = 20</code></li>
+                </ul>
+        </ul>
+    </ul><br>
+
+    3. Creation sequence of <code>Enums.FULL_SOUTH_ARRAY_AXIS</code>
+    <ul>
+        <ul style="padding-left: 2em;">
+            <li>This parameter is only used when <code>AABB_OMBR_RATIO_BASELINE</code> is greater than 0.84</li>
+                <ul>
+                    <li>If this condition is not satisfied, the axis is recalculated</li>
+                </ul>
+
+            <figure>
+                <img src="/img/apartment-15.png" width="70%">
+                <figcaption>Analysis of BOUNDARIES_ARRAY_AXIS</figcaption>
+            </figure><br>
+
+            <li>Create AABB (Axis Aligned Bounding Box)</li>
+            <li>Derive the most northern segment among the AABB segments</li>
+            <li>The subsequent process is the same as <code>Enums.LONGEST_ARRAY_AXIS</code> to derive the placement starting points</li>
+        </ul>
+    </ul><br>
+
+    4. Creation sequence of <code>Enums.N_DEGREE_SOUTH_FACING_ARRAY_AXIS</code>
+    <ul>
+        <ul style="padding-left: 2em;">
+            <li>This parameter is intended to respond to irregular plots that do not follow any axis of the site line, such as:</li>
+            <figure>
+                <img src="/img/apartment-16.png" width="35%">
+                <figcaption>Analysis of N_DEGREE_SOUTH_FACING_ARRAY_AXIS</figcaption>
+            </figure><br>
+
+            <li>The same placement method as <code>Enums.FULL_SOUTH_ARRAY_AXIS</code> in step 3 is used and with the only difference being the angle of the array axis</li>
+            <li>Create axes by fixing a specific axis without being affected by the site geometry and place blocks at the same south-facing angle</li>
+        
+        </ul>
+    </ul><br>
+
+    5. Creation sequence of <code>Enums.N_DEGREE_SOUTH_FACING_ARRAY_AXIS</code>
+    <ul>
+        <ul style="padding-left: 2em;">
+            <li>This parameter is only considered when the plot area is greater than equal <code>N m²</code></li>
+            <figure>
+                <img src="/img/apartment-17.png" width="35%">
+                <figcaption>Analysis of BOUNDARIES_MULTIPLE_OFFSET_ARRAY_AXIS</figcaption>
+            </figure><br>
+
+            <li>Explode the site segments and sort them by the length of each segment</li>
+            
+            <li>After sorting, select up to the <code>M</code>th longest segment (can be switched to use <code>M</code> or searching)</li>
+            <li><code>param_offset_distance_indices</code></li>
+                <ul>
+                    <li>This parameter selects the index for offseting distance among <code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST = [15, 20, 25]</code></li>
+                </ul>
+            <li><code>param_axis_offset_counts</code></li>
+                <ul>
+                    <li>This parameter selects offset count of each segment (0 ~ 4)</code></li>
+                </ul>
+
+            <li>When this parameter is selected, the plate-type module is expanded and placed on the offset axis</li>
+            
+        </ul>
+    </ul><br>
+
+</div><br><br>
