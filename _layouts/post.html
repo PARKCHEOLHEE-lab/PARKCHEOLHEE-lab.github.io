@@ -2,6 +2,9 @@
 layout: default
 ---
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/stackoverflow-light.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
+
 <article>
   
   {% include meta.html post=page %}
@@ -29,3 +32,9 @@ layout: default
   {% endif %}
 
 </article>
+
+
+<script>
+  // Initialize Highlight.js
+  hljs.highlightAll();
+</script>

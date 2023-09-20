@@ -36,7 +36,7 @@ thumbnail: /img/tsp-6.png
     Set the simple goal to optimize, and let's implement the genetic algorithm simply.
     The goal is to make chromosomes, which own <code>seven lucky numbers(7)</code>, and then make a genome, which has seven chromosomes again. like the below:
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     <span class="method">GENE_COUNT</span> = 7
     <span class="method">CHROMOSOME_COUNT</span> = 7
     <span class="method">GENERATION_LIMIT</span> = 777
@@ -61,7 +61,7 @@ thumbnail: /img/tsp-6.png
                 chromosome.append(gene)
             genome.append(chromosome)
         return genome    
-</pre><br>
+</code></pre><br>
 
 You can check the method to create the genome the above.
 <br><br>
@@ -86,7 +86,7 @@ There are several crossover methods, but here we will use uniform crossover. <co
 The uniform crossover method randomly selects one of the parent chromosomes to <code>mask</code> the genes of the parent chromosome and assign the masked gene to the child chromosome.
 A description of the uniform crossover is explained in <a href="https://en.wikipedia.org/wiki/Crossover_(genetic_algorithm)#Uniform_crossover">here</a> more detail, and the implementation of it is below.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     def <span class="defName">reproduction_genome</span>(self, parent_chromosome, child_chromosome, best_parents_indices):
         for i in range(self.<span class="method">GENOME_COUNT</span>):
             for j in range(self.<span class="method">GENE_COUNT</span>):
@@ -98,7 +98,7 @@ A description of the uniform crossover is explained in <a href="https://en.wikip
                     selected_parent = best_parents_indices[idx]
                     crossoverd_gene = parent_chromosome[selected_parent][j]
                     child_chromosome[i][j] = crossoverd_gene
-</pre>
+</code></pre>
 
 <br>
 Lastly, iterate the above processes. That's all. 
@@ -142,7 +142,7 @@ In this example, we can get the result we want simply before reaching the maximu
     The fitness of the genome is determined by the sum of the distances of visits in the current order(indices) through the formula for <a href="https://en.wikipedia.org/wiki/Euclidean_distance">calculating the distance between two points</a>.
     If the coordinates of the city are given as follows, and the genome is in the sequence shown above, it is calculated as shown in the figure below.
     
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     city_coordinates = [[217, 314], [328, 294], [394, 269], [272, 337], [485, 210],
                         [328, 371], [418, 340], [299, 353], [247, 230], [158, 377],
                         [139, 285], [153, 389], [100, 364], [395, 286], [247, 349],
@@ -161,7 +161,7 @@ In this example, we can get the result we want simply before reaching the maximu
                  133.54, 65.74, 189.18, 169.07, 249.58, 146.25, 58.69, 17.03, 53.94, 161.38]
     
     fitness = sum(distances)
-</pre><br>
+</code></pre><br>
     
     And this time, we will use the <code>order one crossover</code> method among the crossover methods.
     First, part of the <code>parent_1</code> genome is randomly sliced and assigned to the <code>offspring</code> genome.
@@ -182,7 +182,7 @@ In this example, we can get the result we want simply before reaching the maximu
 
     Lastly, sets a threshold value. It is used to remove the genome in the population if fitness is less than the threshold we set. 
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     population = [[0, 12, 10, 17, 14, 3, 11, 5, 19, 16, 8, 7, 1, 9, 15, 4, 13, 2, 18, 0]
                   [0, 1, 3, 17, 14, 10, 11, 5, 4, 16, 8, 7, 12, 9, 15, 19, 18, 13, 2, 6, 0]
 
@@ -194,7 +194,7 @@ In this example, we can get the result we want simply before reaching the maximu
                   
     if fitness > self.weakness_threshold:
         population.remove(genome)
-</pre><br>
+</code></pre><br>
     The image below compares with threshold and without threshold.
     You can see that applying a threshold finds the shortest path in an earlier generation than the version without applying it.
     

@@ -61,7 +61,7 @@ thumbnail: /img/apartment-1.gif
         <figure>
             <img src="/img/apartment-12.png" alt="">
         </figure>
-<pre>
+<pre><code class="python">
     class Consts:
         TOLERANCE_TO_SIMPLIFY = 10
         TOLERANCE_ANGLE_TO_SIMPLIFY = 10
@@ -89,10 +89,10 @@ thumbnail: /img/apartment-1.gif
         # and offset each segment as much as SITE_BOUNDARY_NUMBER_TO_USE
         elif param_axis == Enums.BOUNDARIES_ARRAY_AXIS:
             axis = sorted_simplified_site_geom[:Consts.SITE_BOUNDARY_NUMBER_TO_USE]
-</pre><br>
+</code></pre><br>
     <li class="decimal">If Boundary axis is selected, the units' directions will follow the site boundary axis</li>
     <li class="decimal">If the aspect_ratio of the obb created for the site's long axis is more than <code>ASPECT_RATIO_BASELINE</code>, other axes are not searched but fixed to the long axis</li>
-<pre>
+<pre><code class="python">
     class Consts:
         ASPECT_RATIO_BASELINE = 1.91
 
@@ -103,7 +103,7 @@ thumbnail: /img/apartment-1.gif
 
     if is_aspect_ratio_gte_baseline:
         Parameters.param_axis = param_axis = Enums.LONGEST_ARRAY_AXIS
-</pre>
+</code></pre>
     </ul>
 
 </div><br>
@@ -181,7 +181,7 @@ thumbnail: /img/apartment-1.gif
       </figure><br>
      
 Parameters definition:
-<pre>
+<pre><code class="python">
     class Parameters:
         # Enums.LONGEST_ARRAY_AXIS, 
         # Enums.BOUNDARIES_ARRAY_AXIS
@@ -236,7 +236,7 @@ Parameters definition:
             ]
             
             return param_offset_distance
-</pre>
+</code></pre>
 
 </div><br><br>
 

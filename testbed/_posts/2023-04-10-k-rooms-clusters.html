@@ -54,7 +54,7 @@ thumbnail: /img/k-rooms-2.png
     and <code>iteration_count</code> which is the number of centroid update iterations
 
     
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     class <span class="method">KMeans</span>(PointHelper):
         def __init__(self, points=None, k=3, iteration_count=20, random_seed=0):
             <span class="blue">"""KMeansCluster simple implementation using Rhino Geometry
@@ -77,7 +77,7 @@ thumbnail: /img/k-rooms-2.png
     
             self.random = random
             self.random.<span class="defName">seed</span>(random_seed)
-</pre>
+</code></pre>
 
     <br><br>
 
@@ -97,7 +97,7 @@ thumbnail: /img/k-rooms-2.png
 
     <br><br>
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
         def <span class="defName">kmeans</span>(self, points, k, threshold):
             <span class="blue">"""Clusters by each iteration
 
@@ -144,7 +144,7 @@ thumbnail: /img/k-rooms-2.png
                     break
 
             return clusters, indices
-</pre>
+</code></pre>
 <br><br>
 Now we can get the point clusters by setting the K, from the code above. 
 And you can see the detailed code for the K-Means at this <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/kmeans/kmeans.py">link</a>.
@@ -181,7 +181,7 @@ And you can see the detailed code for the K-Means at this <a href="https://githu
     <br>
     Define the KRoomsClusters class as follows and take as input what you defined in step 1. And inherit the <code>KMeans</code> class.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     class <span class="method">KRoomsCluster</span>(<span class="method">KMeans</span>, PointHelper, LineHelper, ConstsCollection):
         """
         To use the inherited moduels, refer the link below.
@@ -200,7 +200,7 @@ And you can see the detailed code for the K-Means at this <a href="https://githu
             PointHelper.__init__(self)
             LineHelper.__init__(self)
             ConstsCollection.__init__(self)
-</pre>
+</code></pre>
     
     <br><br>
     Next, we create an <code>OBB(oriented bounding box)</code> to create the grid. OBB is for defining the grid xy axes. (See this <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/utils.py#L64-L93">link</a> to see the OBB creation algorithm)
@@ -212,7 +212,7 @@ And you can see the detailed code for the K-Means at this <a href="https://githu
             K-Rooms clustering key process, divided by 5 <br> From the left, Grid and centroids creation · Divided rooms   
         </figcaption>
     </figure>
-<pre class="highlight">
+<pre class="highlight"><code class="python">
         def <span class="defName">_gen_grid</span>(self):
             self.base_rectangles = [
                 self.<span class="defName">get_2d_offset_polygon</span>(seg, self.grid_size)
@@ -336,7 +336,7 @@ And you can see the detailed code for the K-Means at this <a href="https://githu
             self.grid_centroids = [
                 rg.AreaMassProperties.Compute(g).Centroid for g in self.grid
             ]
-</pre>
+</code></pre>
 <br>
     Finally, connect each room with a hallway and you're done! 
     <br>(I implemented <code>Dijkstra</code> algorithm for the shortest-path algorithm. 

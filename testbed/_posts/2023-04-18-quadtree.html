@@ -69,7 +69,7 @@ thumbnail: /img/quadtree-2.png
     First, define the <code>quadtree</code> class and takes <code>bounding_box</code> and <code>min_size</code> as input values.
     The <code>min_size</code> is used as the maximum level of decomposition as mentioned above.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     class <span class="method">Quadtree</span>:
         COUNTER = 1
 
@@ -82,7 +82,7 @@ thumbnail: /img/quadtree-2.png
             self.children_geometries = <span class="blue">None</span>
     
             self.<span class="defName">_post_init</span>()
-</pre>
+</code></pre>
     Quadtree has a root node, middle node, and leaf node because its data structure is based on a node.
     If cannnot subdivide no more, children will be <code>None</code>, else other Quadtree objects.
 
@@ -95,14 +95,14 @@ thumbnail: /img/quadtree-2.png
 
     In the second, you need a function that checks whether <code>intersects(or contains)</code> between given curves and quadtree region.
     It can be defined as below, and a return value of this function is worked as a requirement condition to subdivide.
-<pre class="highlight">
+<pre class="highlight"><code class="python">
         def <span class="defName">_is_intersects</span>(self, crv, bb):
             intersects = rg.<span class="method">Intersect.Intersection.CurveCurve</span>(
                 crv, bb, ConstsCollection.TOLERANCE, ConstsCollection.TOLERANCE
             )
 
             return len(intersects) > 0
-</pre>
+</code></pre>
 
     
     <br><br>
@@ -110,7 +110,7 @@ thumbnail: /img/quadtree-2.png
     Finally, if you define a function to create a <code>quadtrant</code> and a function to <code>insert</code> it into each quadtree,
     all preparations are complete. Those functions can be defined as below, you can see the full code at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/quadtree/quadtree.py">this link.</a>
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     def <span class="defName">_subdivide</span>(self):
         ne_bb = rg.<span class="method">Rectangle3d</span>(self.plane, self.width / 2, self.height / 2)
         ne_bb = ne_bb.ToNurbsCurve()
@@ -160,7 +160,7 @@ thumbnail: /img/quadtree-2.png
                 self.width > self.min_size or self.height > self.min_size
             ):
                 self.<span class="defName">_subdivide</span>()
-</pre>
+</code></pre>
 </div>
 <br><br>
 <h3>Example</h3>

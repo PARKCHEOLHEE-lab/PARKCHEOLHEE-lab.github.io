@@ -40,7 +40,7 @@ thumbnail: /img/the-selfish-gene-1.gif
 
     I defined a class as below. Worms use the <code>moving</code> function that interacts with genes to act.
     
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     class <span class="method">WormGene</span>:
         def __init__(self, speed: int, sense: float, switch: float) -> None:
             self.speed = speed
@@ -72,7 +72,7 @@ thumbnail: /img/the-selfish-gene-1.gif
             
             self.body: List[List[int]]
             self.body = <span class="defName">self._get_moved_body</span>(self.body, self.direction, self.speed)
-</pre><br><br>
+</code></pre><br><br>
     
     
     If you want to see the code for <code>Worm</code> I defined, you can see it at the following link. And the environment, worms operate like the below Fig.2: An operation of the environment and worms.

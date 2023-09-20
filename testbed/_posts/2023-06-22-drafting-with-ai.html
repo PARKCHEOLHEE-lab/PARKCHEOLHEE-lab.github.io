@@ -46,7 +46,7 @@ thumbnail: /img/d2r-16.png
     First, We need to write code for capturing the rhino viewport.
     I made it to be saved in the path where the current *.gh file is located.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     def <span class="defName">capture_activated_viewport</span>(
         self, save_name="draft.png", return_size=False
     ):
@@ -64,7 +64,7 @@ thumbnail: /img/d2r-16.png
             return save_path, viewport.Size
         
         return save_path
-</pre><br>
+</code></pre><br>
 
 Next, we should to run our local API server after cloning <code>stable-diffusion-webui</code> repository. 
 Please refer this <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a> 

@@ -27,8 +27,7 @@ thumbnail: /img/parallel-1.gif
     You can understand multiprocessing with a very simple example easily. That is the following:
     <!--break-->
 
-<pre class="highlight">
-
+<pre class="highlight"><code class="python">
     from multiprocessing import <spab class="method">Pool</spab>, cpu_count
     import <span class="defName">time</span>
     
@@ -66,7 +65,7 @@ thumbnail: /img/parallel-1.gif
 
         <span class="annotation"># Parallel execution time: 1.8122541904449463</span>
         <span class="annotation"># Sequential execution time: 10.073817014694214</span>
-</pre>
+</code></pre>
 
 <br>
 The <code>parallel_execution</code> and <code>sequential_execution</code> functions use <code>f(x)</code> in common,
@@ -95,7 +94,7 @@ Because it executes simultaneously as much as <code>cpu_count</code>, you don't 
     This algorithm is based on rotating a polygon at input rotation intervals and creating a binary grid (AABB axes-aligned).
     That is, the same logic is executed at all rotation intervals. At this point, we can write the code for finding MIR with <code>parallelism</code> in mind. That's the following.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     def <span class="defName">_generate_maximal_inner_rectangle</span>(
         self, polygon, rotation_degree, grid_size, is_strict
     ):
@@ -153,7 +152,7 @@ Because it executes simultaneously as much as <code>cpu_count</code>, you don't 
         )
 
         return mir
-</pre><br>
+</code></pre><br>
 
 For one's information, GhPython has no multiprocessing module, so you can parallelize it by using <code>ghpythonlib.parallel</code> module.
 Perhaps GhPython is Iron Python implemented by .NET Framework, so you could use the multiprocessing module used in C#.

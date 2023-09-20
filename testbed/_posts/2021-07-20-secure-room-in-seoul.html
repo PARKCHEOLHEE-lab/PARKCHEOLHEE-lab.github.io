@@ -24,19 +24,19 @@ thumbnail: /img/secure-room-2.png
     If you look at the below HTML source of the "Getting a good room with Peter Pan" real estate sales site,
     there is a tag indicating the presence or absence of <code>security facilities</code>.
     I wanted to collect this and score the security score.
-<pre class="highlight">
+<pre><code class="python">
     ＜div class="col-md-3 col-xs-4 column left-padding-20"＞
         보안시설
     ＜/div＞
     ＜div class="col-md-3 col-xs-8 column value"＞
-        <span class="gd">현관보안, CCTV, 인터폰, 비디오폰, 카드키</span>
+        현관보안, CCTV, 인터폰, 비디오폰, 카드키
     ＜/div＞
-</pre><br>
+</code></pre><br>
 
 Basic information such as contract type, price, and area within the property sales site was collected. 
 After that, tags containing security facility data were parsed and security scores were aggregated for each property. The whole code related to scrapping is <a href="https://github.com/PARKCHEOLHEE-lab/SecrueRoomInSeoul/blob/PCH/peterpan.py">here</a>.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     r_contract = soup.select("div#contract_type")[0].string                                                               <span class="gi"># 계약형태</span>
     r_price = soup.select("tr > td")[5].string.strip()                                                                    <span class="gi"># 가격</span>
     r_btype = soup.select("div.column.value")[12].string.strip()                                                          <span class="gi"># 건물유형</span>
@@ -74,7 +74,7 @@ After that, tags containing security facility data were parsed and security scor
 
     peterpan = peterpan.append(info, ignore_index=True)                                                                    
     <span class="gd">peterpan.to_csv("dataset/seoul_room.csv", index=False, encoding="utf-8", header=False)</span>                                 
-</pre><br>
+</code></pre><br>
 
 <!-- 스크래핑된 데이터 형태는 다음과 같습니다. 계산된 보안점수와, 보안 점수 계산에 사용된 보안시설, 그리고 방의 위치 정보인 위도와 경도를 포함합니다. -->
 The structure of scraped data is the following. It contains aggregated <code>security scores</code>, used <code>security facilities</code> for calculating the security score, and location data with <code>latitude</code>, and <code>longitude</code>.

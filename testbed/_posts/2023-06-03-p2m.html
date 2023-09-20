@@ -75,7 +75,7 @@ thumbnail: /img/p2m-6.gif
     After all the preprocessing described above has been completed, the <code>coordinates of the outer wall</code> can be extracted through edge detection with OpenCV.
     The code is the following: In this code, I used <code>Shapely</code>, geometries handling library for simplifying geometries.
     
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     def <span class="defName">get_wall_coordinates</span>(self) -> List[List[Tuple[int]]]:
         <span class="blue">"""Converts list of coordinates to list of polygon"""</span>
 
@@ -103,7 +103,7 @@ thumbnail: /img/p2m-6.gif
                 wall_coordinates.append(wall_coord)
         
         return wall_coordinates
-</pre> 
+</code></pre> 
 </div>
 <br>
 <h3>Loading data within Grasshopper</h3>
@@ -112,13 +112,13 @@ thumbnail: /img/p2m-6.gif
     Thus I defined the Flask app following. 
     This is an API that returns the wall's coordinates of a given image. Now we can use external library we defined using <code>ghpython</code>.
 
-<pre class="highlight">
+<pre class="highlight"><code class="python">
     <span class="defName">@app.route</span>("/p2m/＜path:image_path_param＞")
     def <span class="defName">p2m</span>(image_path_param):
         """convert plan to model"""
         
         return <span class="defName">jsonify</span>({"wall_coordinates": <span class="method">P2M</span>(image_path_param).wall_coordinates})
-</pre><br>
+</code></pre><br>
     Finally, all we need to do is model the information about the outer wall line in 3D. You can check about this project in my <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/tree/main/APIs">repository</a>.
     <figure>
         <img src="/img/p2m-6.gif" width="80%">
