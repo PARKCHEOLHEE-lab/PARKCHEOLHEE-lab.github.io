@@ -46,7 +46,7 @@ thumbnail: /img/d2r-16.png
     First, We need to write code for capturing the rhino viewport.
     I made it to be saved in the path where the current *.gh file is located.
 
-<pre class="highlight"><code class="python">
+<pre><code class="python">
     def <span class="defName">capture_activated_viewport</span>(
         self, save_name="draft.png", return_size=False
     ):
@@ -75,6 +75,130 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
 <div class="article">
     Python serves a built-in module called <code>urllib</code> to use HTTP. 
     You can check the code to the API request used in the <code>GhPython</code> at this <a href="https://github.com/PARKCHEOLHEE-lab/stable-diffusion-webui/blob/5eead22e36b1293824a1005915ee1ea24ef9538b/d2r.py#L182-L219">link</a>.
+    
+<pre><code class="python">
+    ﻿import os
+    import json
+    import Rhino
+    import base64
+    import urllib2
+    import scriptcontext as sc
+    import System.Drawing.Imaging as Imaging
+    
+    
+    class D2R:
+        """Convert Draft to Rendered using `stable diffusion webui` API"""
+        
+        def __init__(
+            self, prompt, width=512, height=512, local_url="http://127.0.0.1:7860"
+        ):
+            self.prompt = prompt
+            self.width = width
+            self.height = height
+            self.local_url = local_url
+            
+        (...)
+        
+        def render(self, image_path, seed=-1, steps=20, draft_size=None):
+            payload = {
+                "prompt": self.prompt,
+                "negative_prompt": "",
+                "resize_mode": 0,
+                "denoising_strength": 0.75,
+                "mask_blur": 36,
+                "inpainting_fill": 0,
+                "inpaint_full_res": "true",
+                "inpaint_full_res_padding": 72,
+                "inpainting_mask_invert": 0,
+                "initial_noise_multiplier": 1,
+                "seed": seed,
+                "sampler_name": "Euler a",
+                "batch_size": 1,
+                "steps": steps,
+                "cfg_scale": 4,
+                "width": self.width if draft_size is None else draft_size.Width,
+                "height": self.height if draft_size is None else draft_size.Height,
+                "restore_faces": "false",
+                "tiling": "false",
+                "alwayson_scripts": {
+                    "ControlNet": {
+                    "args": [
+                        {
+                            "enabled": "true",
+                            "input_image": self._get_decoded_image_to_base64(image_path),
+                            "module": self.module_pidinet_scribble,
+                            "model": self.model_scribble,
+                            "processor_res": 1024,
+                        },
+                    ]
+                    }
+                }
+            }
+            
+            request = urllib2.Request(
+                url=self.local_url + "/sdapi/v1/txt2img", 
+                data=json.dumps(payload), 
+                headers={'Content-Type': 'application/json'}
+            )
+    
+            try:
+                response = urllib2.urlopen(request)
+                response_data = response.read()
+                
+                rendered_save_path = os.path.join(CURRENT_DIR, "rendered.png")
+                converted_save_path = os.path.join(CURRENT_DIR, "converted.png")
+                
+                response_data_jsonify = json.loads(response_data)
+                
+                used_seed = json.loads(response_data_jsonify["info"])["seed"]
+                used_params = response_data_jsonify["parameters"]
+                
+                for ii, image in enumerate(response_data_jsonify["images"]):
+                    
+                    if ii == len(response_data_jsonify["images"]) - 1:
+                        self._save_base64_to_png(image, converted_save_path)
+                    else:
+                        self._save_base64_to_png(image, rendered_save_path)
+    
+                return (
+                    rendered_save_path, 
+                    converted_save_path,
+                    used_seed, 
+                    used_params
+                )
+            
+            except urllib2.HTTPError as e:
+                print("HTTP Error:", e.code, e.reason)
+                response_data = e.read()
+                print(response_data)
+                
+                return None
+    
+    
+    
+    if __name__ == "__main__":
+        CURRENT_FILE = sc.doc.Path
+        CURRENT_DIR = "\\".join(CURRENT_FILE.split("\\")[:-1])
+        
+        prompt = (
+            """
+                Interior view with sunlight,
+                Curtain wall with city view
+                Colorful Sofas,
+                Cushions on the sofas
+                Transparent glass Table,
+                Fabric stools,
+                Some flower pots
+            """
+        )
+        
+        d2r = D2R(prompt=prompt)
+        
+        draft, draft_size = d2r.capture_activated_viewport(return_size=True)
+        rendered, converted, seed, params = d2r.render(
+            draft, seed=-1, steps=50, draft_size=draft_size
+        )
+</code></pre><br>
 
     <figure style="display: flex;">
         <img src="/img/d2r-5.png" width="46.5%">
