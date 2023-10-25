@@ -1,16 +1,11 @@
 ---
 title: "Latent masses"
 layout: post
-hashtag: "#machine-learning #deep-learning #gan #generative-adversarial-networks"
-featured: false
+hashtag: "#deep-learning #generative-adversarial-networks"
+featured: true
 comment: true
-thumbnail: 
+<!-- thumbnail: /img/latent-masses-0.gif -->
 ---
-
-<div id="toc"></div>
-<h3></h3>
-<div class="article"></div>
-<br>
 
 
 <!-- 
@@ -40,4 +35,118 @@ thumbnail:
     5. References
         - SingleShapeGan
         - Other articles related to this post
+        
  -->
+
+<div id="toc"></div>
+
+<h3>Objectives</h3>
+<div class="article">
+    Generative Adversarial Networks (GANs) have paved the way for unprecedented advancements in numerous areas, from art creation to deepfake video generation. 
+    However, the potential of GANs isn't restricted to 2D space. The development and application of 3D GANs have opened new possibilities, especially in the realm of design.
+
+    <br><br>
+
+    This project delves deep into the <code>possibilities of 3D GANs in the design field</code> with the following objectives:
+    <ul style="padding-left: 2em;">
+        <li>Grasp the fundamental concepts behind GANs and their 3D extension</li>
+        <li>Appreciate the power and nuances of 3D GANs through hands-on experiments</li>
+        <li>Examine how 3D GANs can be harnessed for product design, architectural modeling, and virtual environment creation</li>
+        <li>visualize and manipulate the <a href="https://medium.com/hackernoon/latent-space-visualization-deep-learning-bits-2-bd09a46920df">latent space</a> to generate novel and innovative designs</li>
+        <li>Understand the limitations of current 3D GAN models and the potential areas of improvement</li>
+    </ul>
+
+    <figure>
+        <img src="/img/latent-masses-4.gif" style="width: 70%;"><br>
+        <figcaption>Interpolation in latent space for the generative chair model</figcaption>
+    </figure></div>
+
+</div><br>
+
+<h3>3D shape representations for the generative adversarial networks</h3>
+<div class="article">
+    
+        1. Point cloud
+        <ul style="padding-left: 2em;">
+            <li>
+                A point cloud is a set of data points in space. 
+                In 3D shape representation, point clouds are typically used to <code>represent the external surface</code> of an object
+                Each point in the point cloud has an (x, y, z) coordinate
+            </li>
+            <li>Can represent any 3D shape without being limited to a specific topology or grid (Good at flexibility)</li>
+            <li>Requires less memory than volumetric representations like voxels, especially for sparse objects (Good at efficiency)</li>
+            <li>Points are disconnected, so additional processing is often required to extract surfaces or other features (Not good at lack of connectivity)</li>
+            <li>Requires specialized processing techniques to handle operations like sampling, transformation, and deformation</li>
+            <!--break-->
+        </ul><br>
+        2. Voxel
+        <ul style="padding-left: 2em;">
+            <li>
+                Voxels (short for volumetric pixels) are the 3D equivalent of 2D pixels. 
+                A voxel representation <code>divides the 3D space into a regular grid, and each cell</code> (or voxel) in the grid can be either occupied or empty
+            </li>
+            <li>Operations like convolution are straightforward to apply on voxel grids (Simplicity)</li>
+            <li>Provides a consistent data structure that's easy to sample and modify (Good at consistency)</li>
+            <li>Requires a lot of memory for high-resolution grids (Memory-intensive)</li>
+            <li>To represent fine details, a very high-resolution grid is needed, which can be computationally prohibitive (Limited resolution)</li>
+        </ul><br>
+        3. Mesh
+        <ul style="padding-left: 2em;">
+            <li>
+                A 3D mesh consists of vertices, edges, and faces that define the shape of a 3D object in space. 
+                The most common type of mesh is a triangular mesh, where the shape is <code>represented using triangles</code>
+            </li>
+            <li>Can represent both simple and complex geometries (Good expressiveness)</li>
+            <li>Provides information about how points are connected, which is useful for many applications (Good at continuous surface representation)</li>
+            <li>Operations on meshes, like subdivision or simplification, can be computationally demanding (Complexity)</li>
+            <li>Changing the topology (e.g., creating a hole) of a mesh can be challenging (Topological constraints)</li>
+        </ul><br>
+
+        <figure>
+            <img src="/img/latent-masses-1.png" style="width: 80%;"><br>
+            <figcaption>
+                <a href="https://medium.com/@phamtdong0406/1-3d-ai-data-representation-99c98ec402c6">Shape representations</a><br>
+                From the left, point cloud · mesh · voxel
+            </figcaption>
+        </figure>
+</div><br>
+
+<h3>Simple implementation: a single sphere GAN</h3>
+<div class="article">
+    First, I'll implement a practical application of training a GAN on point cloud data, aiming to generate a single sphere, represented by point cloud
+    Before implementing the neural networks, we begin by loading our target sphere point cloud from a file. I modeled just one sphere shape using Rhino.
+
+    <br><br>
+    Typically, the normalization can be particularly beneficial if your training data consists of similar objects in various sizes or if the absolute size isn't critical for your task.
+    In our dataset concerning a single sphere, the absolute size is not of significance. Therefore, let's normalize it. The sphere can be normalized easily using <code>numpy</code> as follows:
+    
+<pre><code class="python">
+    class Normalize:
+        def __call__(self, pointcloud):
+            assert len(pointcloud.shape) == 2
+            
+            norm_pointcloud = pointcloud - np.mean(pointcloud, axis=0) 
+            norm_pointcloud /= np.max(np.linalg.norm(norm_pointcloud, axis=1))
+
+            return norm_pointcloud
+</pre></code>
+
+    <figure style="display: flex;">
+        <img src="/img/latent-masses-2.png" style="width: 32%;"><br>
+        <img src="/img/latent-masses-2.png" style="width: 32%;"><br>
+        <img src="/img/latent-masses-2.png" style="width: 32%;"><br>
+    </figure></div>
+    <figcaption>
+        A sphere, represented by point cloud <br>
+        From the left, original sphere · normalized sphere · normalized and random sampled sphere
+    </figcaption>
+
+<!-- <figure>
+    <img src="/img/latent-masses-0.gif" width="100%">
+    <figcaption>Visualized training process at each 200 epochs</figcaption>
+</figure> -->
+
+<h3>References</h3>
+<div class="article">
+
+</div>
