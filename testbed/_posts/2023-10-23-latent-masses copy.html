@@ -208,7 +208,7 @@ thumbnail: /img/latent-masses-thumbnail.gif
 
 <h3>Preparation and preprocessing of the dataset</h3>
 <div class="article">
-    Firstly, I collected building models designed by several famous architects for model training. 
+    I collected building models designed by several famous architects for model training. 
     The figure below shows the actual buildings from the modeling data I gathered.
 
     <figure style="display: flex;">
@@ -218,7 +218,7 @@ thumbnail: /img/latent-masses-thumbnail.gif
     </figure>
     <figcaption>
         Voxel-shaped buildings <br>
-        From the left, RED7(MVRDV architects) · 79andPark(BIG architects) · Mountain dwelling(BIG architects)  
+        From the left, RED7(MVRDV architects) · 79 and Park(BIG architects) · Mountain dwelling(BIG architects)  
     </figcaption><br><br>
 
     The buildings aforementioned possess a common characteristic: their voxel-shaped configuration. 
@@ -227,7 +227,23 @@ thumbnail: /img/latent-masses-thumbnail.gif
     However, within the realm of architectural design, this constraint might be reconceived as an opportunity. 
     The voxel-shaped form is prevalently utilized in the architecture field, and there is no imperative demand for high-resolution depictions of such forms.
 
-    <!-- 그러므로 우리는 적절한 해상도의 복셀 데이터를 이용해서 학습을 진행할 것입니다. 데이터는 다음과 같이 전처리됩니다. -->
+    <br><br>
+
+    Therefore, we'll create a generative model that generates masses like to the aforementioned using voxel data with appropriate resolutions.
+    Firstly, to train models utilizing modeling data, it is imperative to transform the data structure from the <code>.obj</code> format to the more suitable <code>.binvox</code> format.
+    The .binvox format delineates data as a binary voxel grid structure, representing <code>True (1)</code> for solid regions and <code>False (0)</code> for vacant spaces.
+    Let us examine the illustrative example that is preprocessed to the .binvox format below.
+
+    <figure>
+        <img src="/img/latent-masses-14.png" style="width: 90%;">
+        <img src="/img/latent-masses-15.png" style="width: 90%;">
+        <br>
+        <figcaption>
+            Preprocessed data to the binary voxel grid utilizing <a href="https://www.patrickmin.com/binvox/">binvox</a><br>
+            From the top left, 79 and Park · Lego tower, RED7 <br>
+            From the bottom left, Vancouver house · CCTV Headquarter, Mountain dwelling
+        </figcaption>
+    </figure>
 
     
 </div><br>    
