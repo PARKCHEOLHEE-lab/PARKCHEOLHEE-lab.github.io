@@ -2,7 +2,7 @@
 title: "Latent masses"
 layout: post
 hashtag: "#deep-learning #generative-adversarial-networks #machine-learning #gan"
-featured: true
+featured: false
 comment: true
 splitter: 2
 thumbnail: /img/latent-masses-thumbnail.gif
@@ -232,7 +232,27 @@ thumbnail: /img/latent-masses-thumbnail.gif
     Therefore, we'll create a generative model that generates masses like to the aforementioned using voxel data with appropriate resolutions.
     Firstly, to train models utilizing modeling data, it is imperative to transform the data structure from the <code>.obj</code> format to the more suitable <code>.binvox</code> format.
     The .binvox format delineates data as a binary voxel grid structure, representing <code>True (1)</code> for solid regions and <code>False (0)</code> for vacant spaces.
-    Let us examine the illustrative example that is preprocessed to the .binvox format below.
+    Let us look the illustrative example that is preprocessed to the .binvox format below. 
+    <br><br>
+    These were aforementioned in the part of my postings titled <a href="https://parkcheolhee-lab.github.io/voxelate/#d-grid--conditions-map">Voxelate</a>. 
+
+    <figure>
+        <img src="/img/voxelate-2.png" style="width: 90%;">
+        <figcaption>
+            Binary voxel grid representations <br>
+            From the left, Given sphere · Voxelated sphere · Binary voxel grid(9th voxels grid)
+        </figcaption>
+    </figure><br>
+
+    As stated above in the binary voxel grid, one can observe the vacant regions are represented by 0s, while the solid regions are denoted by 1s. 
+    All detailed code of preprocessing to the .binvox format is showing in the following <a href="https://github.com/PARKCHEOLHEE-lab/gan-exercise/blob/main/massGAN/utils.py#L328">link</a> 
+    and I preprocessed 6 models below utilizing it.
+
+    <br><br>
+    <p style="font-size: smaller;">
+        (Initially, I had curated 24 models for the training MassGAN. However, due to the limited computational efficiency of my RTX 3060 laptop graphics card, 
+        which resulted in protracted learning durations, I decided to reduce the dataset size. 😭)
+    </p>
 
     <figure>
         <img src="/img/latent-masses-14.png" style="width: 90%;">
@@ -244,6 +264,7 @@ thumbnail: /img/latent-masses-thumbnail.gif
             From the bottom left, Vancouver house · CCTV Headquarter, Mountain dwelling
         </figcaption>
     </figure>
+    
 
     
 </div><br>    
