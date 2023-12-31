@@ -1,45 +1,166 @@
 ---
 title: "Local coordinate system"
 layout: post
-hashtag: "#geometry #algorithm"
+hashtag: "#geometry #algorithm #coordinate-system"
 featured: false
 comment: true
-splitter: 2
-thumbnail: 
+splitter: 4
+thumbnail: /img/local-coordinate-system-thumbnail.png
 ---
 
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=default'></script>
+
 <div id="toc"></div>
-<h3>Objectives</h3>
+<h3>Types of coordinate systems: Global vs. Local</h3>
 <div class="article">
-    Generative Adversarial Networks (GANs) have paved the way for unprecedented advancements in numerous areas, from art creation to deepfake video generation. 
-    However, the potential of GANs isn't restricted to 2D space. The development and application of 3D GANs have opened new possibilities, especially in the realm of design.
+
+    In the field of engineering, computer graphics, and physics, understanding the relationship between different coordinate systems is crucial for accurate modeling, simulation, and analysis. 
+    The figure attached describes the concept of a <code>global coordinate system</code> (GCS) and a <code>local coordinate system</code> (LCS), 
+    both of which are commonly used to define the position and orientation of objects in 3D space.
+
+    <!--break-->
+
+    <br><br>
+    
+    The GCS is represented by the axes \( \LARGE x \), \( \LARGE y \), and \( \LARGE z \). 
+    <code>This system provides a fixed reference</code> for describing the location of all objects within the space. 
+    In contrast, the LCS, denoted by the axes \( \LARGE x' \), \( \LARGE y' \), and \( \LARGE z' \), is <code>tied to a specific object within the GCS</code>. 
+    It moves and rotates with the object, providing a reference frame that is local to the object itself.
+
+
+    <br><br>
+    
+    <figure>
+        <img src="/img/local-coordinate-system-0.png" style="width: 30%;">
+        <figcaption>
+            Global coordinate system and local coordinate system <br>
+        </figcaption>
+    </figure><br>
+    
+    These transformations between coordinate systems are governed by rotation matrices or <code>transformation matrices</code> that contain the cosine and sine functions of the angles between the axes.
+</div><br>
+
+<h3>Simple implementation of Plane2d</h3>
+<div class="article">
+
+    The <code>Plane2d</code> class has properties that are the origin, x-axis, and y-axis as the 2D coordinate system. In this <a href="https://github.com/PARKCHEOLHEE-lab/local-coordinate-system/blob/df058f3562e363452dbc754f30c1b8b79b0f61cd/plane2d.py#L85">class that I implemented</a>, the core functions are as follows:
+
+    <ul style="padding-left: 2em;">
+        <li>_get_local_coords_matrix(): This method constructs a matrix that represents the local coordinate system of the plane in terms of <a href="https://eunho5751.tistory.com/38">homogeneous coordinates</a></li>
+        <li>get_converted_geometry_by_plane(): Converts a geometry from the plane's coordinate system to another</li>
+    </ul>
+    
+<pre><code class="python">
+    class Plane2d(AxesVisualizer):
+        def __init__(self, origin: np.ndarray, x_axis: np.ndarray, y_axis: np.ndarray, normalize: bool = True):
+            self._origin = origin
+            self._x_axis = x_axis / np.linalg.norm(x_axis) if normalize else x_axis
+            self._y_axis = y_axis / np.linalg.norm(y_axis) if normalize else y_axis
+            
+    
+        def _get_local_coords_matrix(self) -> np.ndarray:
+            """Returns a local coordinate matrix expressed in homogeneous coordinates
+
+            Returns:
+                np.ndarray: local coordinates of self
+            """
+            
+            return np.array(
+                [
+                    [self.x_axis[0], self.y_axis[0], self.origin[0]],
+                    [self.x_axis[1], self.y_axis[1], self.origin[1]],
+                    [0, 0, 1],
+                ]
+            )
+        
+        def get_converted_geometry_by_plane(self, plane_to_convert: Plane2d, geometry_to_convert: GeometryCollection) -> GeometryCollection:
+            """Converts a given geometry from one plane to another
+
+            Args:
+                plane_to_convert (Plane2d): Target plane to convert the coordinate system
+                geometry_to_convert (GeometryCollection): Geometry of Shapely to convert
+
+            Returns:
+                GeometryCollection: Converted geometry
+            """
+            
+            matrix_to_map_global_coords = np.linalg.inv(self._get_local_coords_matrix())
+            matrix_to_map_local_coords = plane_to_convert._get_local_coords_matrix() @ matrix_to_map_global_coords
+
+            return affinity.affine_transform(
+                geom=geometry_to_convert,
+                matrix=[
+                    matrix_to_map_local_coords[0][0], 
+                    matrix_to_map_local_coords[0][1],
+                    matrix_to_map_local_coords[1][0], 
+                    matrix_to_map_local_coords[1][1],
+                    matrix_to_map_local_coords[0][2],
+                    matrix_to_map_local_coords[1][2],
+                ]
+            )
+</pre></code><br>
+
+    The figure below describes the transformation process easily. 
 
     <br><br>
 
-    This project delves deep into the <code>possibilities of 3D GANs in the design field</code> with the following objectives:
-    <ul style="padding-left: 2em;">
-        <li>Grasp the fundamental concepts behind GANs and their 3D extension</li>
-        <li>Appreciate the power and nuances of 3D GANs through hands-on experiments</li>
-        <li>Examine how 3D GANs can be harnessed for product design, architectural modeling, and virtual environment creation</li>
-        <li>visualize and manipulate the <a href="https://medium.com/hackernoon/latent-space-visualization-deep-learning-bits-2-bd09a46920df">latent space</a> to generate novel and innovative designs</li>
-        <li>Understand the limitations of current 3D GAN models and the potential areas of improvement</li>
-        <!--break-->
-    </ul><br>
+    Firstly, it needs to take the inverse of a transformation matrix to convert a polygon from the original plane to another
+    This process corresponds from the blue polygon to the black polygon, and the code line <code>matrix_to_map_global_coords = np.linalg.inv(self._get_local_coords_matrix())</code> above. 
+    By this process, the polygon in the local coordinate system is mapped to the global coordinate system that considers (0, 0) to the origin.
+
+    <br><br>
+
+    After processing the above, we need to remap from the global coordinate system to the local coordinate system to convert it. This is from the black polygon to the green polygon.
+    The <code>matrix_to_map_local_coords = plane_to_convert._get_local_coords_matrix() @ matrix_to_map_global_coords</code> line is corresponded to it.
+
+    <br><br>
+
+    In the entire <a href="https://github.com/PARKCHEOLHEE-lab/local-coordinate-system/blob/main/plane2d_viz.ipynb">process of transformation</a>, the polygon keeps the same indices of vertices, the shape of the geometry, and orientation (in this case counter-clockwise).
+    
+    <figure style="display: flex;">
+        <img src="/img/local-coordinate-system-1.png" style="width: 45%;">
+        <img src="/img/local-coordinate-system-2.png" style="width: 45%;">
+    </figure>
+    <figcaption>
+        Coordinate system transformation process <br>
+    </figcaption><br>
+    
+</div>
+
+<h3>Applying coordinate system transformation in Architectural design</h3>
+<div class="article">
+
+    As you saw above, the transformation from GCS to LCS involves <code>rotation, translation, and reflection matrices</code> that convert a geometry's coordinates to its position and orientation within the plane.
+
+    <br><br>
+    In architectural design, a transformation matrix can help align building shapes along intended angles and directions within an axial framework.
+    Let's say we're developing an algorithm to automate apartment layout and we have some building templates. 
+    In this situation, we can situate buildings simply along a given axis that is defined for placing apartments. 
+    
+    <br><br>
+    You just apply the logic that is described above after defining two planes, and geometries for apartments. That's all!
 
     <figure>
-        <img src="/img/latent-masses-7.png" style="width: 70%;"><br>
-        <figcaption>Interpolation in <a href="https://hsejun07.tistory.com/100">latent space</a></figcaption>
-    </figure></div>
+        <img src="/img/local-coordinate-system-4.png" style="width: 100%;">
+        <img src="/img/local-coordinate-system-6.png" style="width: 100%;">
+        <img src="/img/local-coordinate-system-5.png" style="width: 100%;"> 
+        <img src="/img/local-coordinate-system-7.png" style="width: 100%;"> 
+        <figcaption>
+            Applying it in apartment design automation<br>
+        </figcaption>
+    </figure><br>
+
+    
+
+    <!-- 위에서 설명한 내용을 그대로 적용하기만 하면 됩니다. 변환을 위한 두 개의 로컬좌표계 (origin plane, target plane)를 정의하고, 건물 도형들을 정의합니다. 그 후    -->
 
 </div><br>
 
 <h3>References</h3>
 <div class="article">
     <ul>
-        <li><a href="https://medium.com/hackernoon/latent-space-visualization-deep-learning-bits-2-bd09a46920df">https://medium.com/hackernoon/latent-space-visualization-deep-learning-bits-2-bd09a46920df</a></li>
-        <li><a href="https://github.com/ChrisWu1997/SingleShapeGen">https://github.com/ChrisWu1997/SingleShapeGen</a></li>
-        <li><a href="https://github.com/znxlwm/pytorch-MNIST-CelebA-GAN-DCGAN">https://github.com/znxlwm/pytorch-MNIST-CelebA-GAN-DCGAN</a></li>
-        <li><a href="https://developer-ping9.tistory.com/108">https://developer-ping9.tistory.com/108</a></li>
+        <li><a href="https://eunho5751.tistory.com/38">https://eunho5751.tistory.com/38</a></li>
+        <li><a href="https://math-development-geometry.tistory.com/49">https://math-development-geometry.tistory.com/49</a></li>
     </ul>
     
 </div><br><br>
