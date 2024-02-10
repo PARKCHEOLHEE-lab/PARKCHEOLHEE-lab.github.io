@@ -7,6 +7,18 @@ comment: true
 thumbnail: /img/the-selfish-gene-1.gif
 ---
 
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      CommonHTML: {
+        scale: 200
+      }
+    });
+    </script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+
 <div id="toc"></div>
 <h3>What is natural selection 🦕</h3>
 <div class="article">
@@ -85,8 +97,22 @@ thumbnail: /img/the-selfish-gene-1.gif
     
     <br><br>
     Else, calculate the angle between the worm's movement direction vector and the worm-to-apple vector, and calculate the difference between the angles to <code>select the vector with the highest similarity</code>.
-    See the <a href="https://github.com/PARKCHEOLHEE-lab/the-selfish-gene/blob/4eec1df9e018ea0b87fe6d3fafac892ab32cd80a/classes/worm.py#L217-L265">code</a> for detail of the worm's operation method <code>_get_direction_by_sense()</code>.
+    See the <a href="https://github.com/PARKCHEOLHEE-lab/the-selfish-gene/blob/4eec1df9e018ea0b87fe6d3fafac892ab32cd80a/classes/worm.py#L217-L265">code</a> for detail of the worm's operation method <code>_get_direction_by_sense()</code> and the method for finding the most similar direction to an apple is mathematically described as follows:
     <br><br>
+    <ul>
+        <p>\( \mathbf{h} = (hx, hy)\) as the position of the worm's head</p>
+        <p>\( \mathbf{a} = (ax, ay)\) as the position of the nearest apple, adjusted by half the worm size to center on the apple</p>
+        <p>\( \mathbf{v}_{ha} = (a - h)\) as the vector from the worm's head to the apple</p>
+        <p>\( \theta_{ha} = arctan2(\mathbf{v}_{ha_y}, \mathbf{v}_{ha_x})\) as the angle in radians of \( \mathbf{v}_{ha}\)</p>
+        <p>\( \mathbf{U}\) as the set of unit vectors for possible movement directions, excluding the reverse of the current direction</p>
+        <p>\( \textit{D}\) as the set of corresponding movement directions</p>
+        <p>\( \theta_{u}\) as the angle as the angle in radians of each unit vector \(u \in U\)</p>
+        <p>\( \Delta\theta_{u, h_a} = | \theta_{ha} - \theta_{u} |\) as the absolute angular difference between \( \mathbf{v}_{ha} \) and each \(u\)
+        <br><br>
+        <p style="text-align: center; font-size: larger;">\(d_{\min} = \arg \min_{d \in D} (\Delta \theta_{u, ha})\)</p>
+    </ul>
+
+    <br>
     <figure>
         <img src="/img/the-selfish-gene-1.gif" width="80%">
         <figcaption>An operation of the environment and worms</figcaption>
