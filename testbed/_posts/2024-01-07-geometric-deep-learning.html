@@ -1,0 +1,123 @@
+---
+title: "Geometric losses"
+layout: post
+hashtag: "#geometry #conditional-generative-adversairal-networks #deep-learning"
+featured: true
+comment: true
+splitter: 0
+thumbnail: /img/geometric-losses-thumbnail.gif
+---
+
+<div id="toc"></div>
+<h3>Introduction 💡</h3>
+<div class="article">
+    This project was initiated by curiosities about the <code>intersection of geometric data and optimization</code> within the realm of machine learning:
+
+    <ul style="padding-left: 2em;">
+        <li class="decimal">Can the geometric properties of data enhance model performance?</li>
+        <li class="decimal">Can models converge faster if optimizers have geometric losses?</li>
+    </ul>
+
+    <br>
+
+    Based on the above questions, let us observe the concept of geometric loss simply:
+
+    <br><br>
+
+    The concept of geometric loss is grounded in the idea that understanding and leveraging the geometric properties of data is important.
+    This understanding and leveraging can significantly enhance model performance, especially in tasks where the spatial arrangement and relationships between data points are crucial.
+    
+    
+    <br><br>
+    
+    Geometric losses <code>incorporate geometric principles of data into the learning process.</code> 
+
+    <!--break-->
+
+    This approach enables models to recognize and preserve the underlying geometric structures of the dataset.
+    
+    For instance, in tasks involving images, shapes, or graphs, where the spatial relationships and configurations are essential, geometric losses help in capturing these nuances more effectively than traditional methods.
+    
+
+
+</div><br>
+
+<h3>Problem definition</h3>
+<div class="article">
+
+    To experiment with the above questions in the Introduction part, 
+    let me define a simple geometric problem. 
+    It is to find the <code>largest inscribed rectangle</code> on a given 2d polygon like the following.
+    <br><br>
+
+    <figure style="display: flex;">
+        <img src="/img/geometric-losses-2.png" width="25%">
+        <img src="/img/geometric-losses-3.png" width="25%">
+        <img src="/img/geometric-losses-1.png" width="25%">
+    </figure>
+    <figcaption style="text-align: center; margin-top: 1em">
+        <a href="https://community.esri.com/t5/spatial-data-science-questions/how-to-find-the-maximum-rectangle-contained-within/td-p/408977">The largest inscribed rectangle</a>    
+    </figcaption>
+
+    <br><br>
+
+    After defining a geometric problem, I defined the algorithm for finding <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/largest_inscribed_rectangle.py#L12-L133">LIR</a>.
+    In this algorithm, a given polygon is represented as a <code>binary grid</code> of 1s and 0s.
+    1 is represented as a solid part and 0 is represented as a void part. 
+    The following representation of a binary grid-shaped polygon has 100 x 100 grid size. If the size is higher, it can be represented more precisely.
+
+    <br><br>
+
+    <figure>
+        <img src="../img/geometric-losses-4.png" style="width: 70%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            <a href="https://miro.medium.com/v2/resize:fit:720/format:webp/1*J6Ipo8rqdjpsN3_9LafnQw.png">Representation of a geometry</a><br>
+            From the left, Vector-shaped polygon · Binary grid-shaped polygon
+        </figcaption>
+    </figure>
+
+
+</div><br>
+
+<h3>Data preparation</h3>
+<div class="article">
+
+    We have set up a problem and a way to represent geometric data to experiment with the problem in the above section. 
+    In this part, we create a dataset to train a generator that estimates the <code>LIR</code> given an input polygon.
+
+</div><br>
+
+<h3>Building models and loss functions</h3>
+<div class="article">
+
+</div><br>
+
+<h3>Training and evaluating</h3>
+<div class="article">
+    
+    <figure style="display: flex;">
+        <img src="/img/without-geometric-loss-polygons.gif" width="48.5%">
+        <img src="/img/with-geometric-loss-polygons.gif" width="48.5%">
+    </figure>
+    
+    <figure style="display: flex;">
+        <img src="/img/without-geometric-loss-graphs.gif" width="48.5%">
+        <img src="/img/with-geometric-loss-graphs.gif" width="48.5%">
+    </figure>
+
+</div><br>
+
+<h3>Potential improvements</h3>
+<div class="article">
+
+</div><br>
+
+<h3>References</h3>
+<div class="article">
+
+    <ul>
+        <li><a href="https://towardsdatascience.com/a-brief-introduction-to-geometric-deep-learning-dae114923ddb">https://towardsdatascience.com/a-brief-introduction-to-geometric-deep-learning-dae114923ddb</a></li>
+        <li><a href="https://deep-learning-study.tistory.com/634">https://deep-learning-study.tistory.com/634</a></li>
+    </ul>
+    
+</div><br><br>
