@@ -87,7 +87,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
 
     <br><br>
 
-    Firstly, I'm going to define the function for creating a polygon with random coordinates called <code>_get_random_coordinates</code> as follows:
+    First of all, I'm going to define the function for creating a polygon with random coordinates called <code>_get_random_coordinates</code> as follows:
     
 <pre><code class="python">
     def _get_random_coordinates(
@@ -115,14 +115,38 @@ thumbnail: /img/geometric-losses-thumbnail.gif
         coordinates[:, 1] *= scale_factor
 
         return coordinates
-</pre></code><br>
+</pre></code><br><br>
 
     This algorithm sorts polygon vertices by angle from the center to each vertex so that they do not intersect.
     The whole process of creating a random polygon is as follows and you can see the code in this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L45-L69">link</a>.
     <br><br>
 
     <figure>
-        <img src="../img/geometric-losses-5.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-5.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            The process of creating a random polygon
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    After creating each random polygon, it needs to <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L71-L98">resize</a> as much as the grid size(I set 256x256).
+    We then need to <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/utils.py#L59-L74">convert</a> these <code>vector-shaped polygons to binary grid-shaped polygons</code> consisting of 1s and 0s. It's easy with OpenCV.
+    Through this process, <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/tree/main/lirGAN/data/binpy">5000 datasets</a> were created as shown in the figure below. If you need more data sets, you can get them easily.
+
+    <br><br>
+
+    <figure>
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
             The process of creating a random polygon
         </figcaption>
@@ -133,6 +157,51 @@ thumbnail: /img/geometric-losses-thumbnail.gif
 
 <h3>Building models and loss functions</h3>
 <div class="article">
+
+    In this section, we will build a model based on DCGANs architecture for 256x256 data and implement a geometric loss function.
+    Additionally, since the generator model uses a given polygon as one of its inputs(with noise vector), the <code>conditional GANs</code> structure must be taken into account. 
+
+    <br><br>
+
+    The paper for <a href="https://arxiv.org/pdf/1411.1784.pdf">Conditional Generative Adversarial Nets</a> says:
+    <br>
+    <b>"</b> Generative adversarial nets can be extended to a conditional model if both the generator and discriminator are conditioned on some <code>extra information y</code>. 
+    y could be any kind of auxiliary information, such as class labels or data from other modalities. We can perform the conditioning by feeding y into the both the discriminator and generator as additional input layer. <b>"</b>
+    
+
+    <figure>
+        <img src="../img/geometric-losses-7.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            Conditional adversarial net
+        </figcaption>
+    </figure><br>
+
+    In the LIR problem contexts we defined, <code>extra information y</code> corresponds to an input polygon.
+    The following <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L235-L244">forward</a> propagation method takes two inputs: noise and input polygon.
+    The <code>input_polygon</code> is first flattened and then this reshaped tensor is converted to feature space by passing through fully connected layers.
+
+    <br><br>
+
+    The output(128) of the linear transformation is concatenated with the noise(128) tensor. 
+    This concatenation(256) allows the model to use both the random noise and the information from the <code>input_polygon</code> to generate the output.
+    
+<pre><code class="python">
+    class LirGenerator(nn.Module, ModelConfig):
+
+        ( ... )
+
+        def forward(self, noise, input_polygon):
+            fc = self.linear(input_polygon.reshape(input_polygon.shape[0], -1))
+            x = torch.cat([noise, fc], dim=1)
+            x = x.reshape(x.shape[0], 256, 1, 1)
+            x = self.main(x)
+
+            if self.use_tanh:
+                return nn.Tanh()(x)
+
+            return nn.Sigmoid()(x)
+</pre></code><br><br>
+
 
 </div><br>
 
@@ -162,6 +231,9 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <ul>
         <li><a href="https://towardsdatascience.com/a-brief-introduction-to-geometric-deep-learning-dae114923ddb">https://towardsdatascience.com/a-brief-introduction-to-geometric-deep-learning-dae114923ddb</a></li>
         <li><a href="https://deep-learning-study.tistory.com/634">https://deep-learning-study.tistory.com/634</a></li>
+        <li><a href="https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html">https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html</a></li>
+        <li><a href="https://www.kaggle.com/code/arturlacerda/pytorch-conditional-gan">https://www.kaggle.com/code/arturlacerda/pytorch-conditional-gan</a></li>
+        <li><a href="https://arxiv.org/pdf/1411.1784.pdf">https://arxiv.org/pdf/1411.1784.pdf</a></li>
     </ul>
     
 </div><br><br>
