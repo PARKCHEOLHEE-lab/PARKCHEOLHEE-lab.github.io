@@ -2,7 +2,7 @@
 title: "Geometric losses"
 layout: post
 hashtag: "#geometry #conditional-generative-adversairal-networks #deep-learning"
-featured: true
+featured: false
 comment: true
 splitter: 0
 thumbnail: /img/geometric-losses-thumbnail.gif
@@ -71,7 +71,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <figure>
         <img src="../img/geometric-losses-4.png" style="width: 70%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
-            <a href="https://miro.medium.com/v2/resize:fit:720/format:webp/1*J6Ipo8rqdjpsN3_9LafnQw.png">Representation of a geometry</a><br>
+            Representation of a geometry<br>
             From the left, Vector-shaped polygon · Binary grid-shaped polygon
         </figcaption>
     </figure>
@@ -84,6 +84,50 @@ thumbnail: /img/geometric-losses-thumbnail.gif
 
     We have set up a problem and a way to represent geometric data to experiment with the problem in the above section. 
     In this part, we create a dataset to train a generator that estimates the <code>LIR</code> given an input polygon.
+
+    <br><br>
+
+    Firstly, I'm going to define the function for creating a polygon with random coordinates called <code>_get_random_coordinates</code> as follows:
+    
+<pre><code class="python">
+    def _get_random_coordinates(
+        self, vertices_count_min: int, vertices_count_max: int, scale_factor: float = 1.0
+    ) -> np.ndarray:
+        """Generate non-intersected polygon randomly
+
+        Args:
+            vertices_count_min (int): random vertices count minimum value
+            vertices_count_max (int): random vertices count maximum value
+            scale_factor (float, optional): constant to scale. Defaults to 1.0.
+
+        Returns:
+            np.ndarray: random coordinates
+        """
+
+        vertices_count = np.random.randint(vertices_count_min, vertices_count_max)
+        vertices = np.random.rand(vertices_count, 2)
+        vertices_centroid = np.mean(vertices, axis=0)
+
+        coordinates = sorted(vertices, key=lambda p, c=vertices_centroid: np.arctan2(p[1] - c[1], p[0] - c[0]))
+
+        coordinates = np.array(coordinates)
+        coordinates[:, 0] *= scale_factor
+        coordinates[:, 1] *= scale_factor
+
+        return coordinates
+</pre></code><br>
+
+    This algorithm sorts polygon vertices by angle from the center to each vertex so that they do not intersect.
+    The whole process of creating a random polygon is as follows and you can see the code in this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L45-L69">link</a>.
+    <br><br>
+
+    <figure>
+        <img src="../img/geometric-losses-5.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            The process of creating a random polygon
+        </figcaption>
+    </figure>
+
 
 </div><br>
 
