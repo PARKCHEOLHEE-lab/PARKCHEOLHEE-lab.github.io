@@ -69,7 +69,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <br><br>
 
     <figure>
-        <img src="../img/geometric-losses-4.png" style="width: 70%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-4.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
             Representation of a geometry<br>
             From the left, Vector-shaped polygon · Binary grid-shaped polygon
@@ -122,7 +122,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <br><br>
 
     <figure>
-        <img src="../img/geometric-losses-5.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-5.png" style="width: 70%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
             The process of creating a random polygon
         </figcaption>
@@ -137,16 +137,16 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <br><br>
 
     <figure>
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-8.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-9.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-10.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-11.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-12.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-13.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-14.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-15.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-16.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
             The process of creating a random polygon
         </figcaption>
@@ -202,7 +202,49 @@ thumbnail: /img/geometric-losses-thumbnail.gif
             return nn.Sigmoid()(x)
 </pre></code><br><br>
 
+    Similarly, the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L247C10-L272">discriminator</a> takes the input polygon as additional input. 
+    In the forward propagation method of the discriminator, the <code>rectangle</code> and <code>input_polygon</code> have the same shape as the tensor. 
+    So we just need to connect them and then pass them to the main layer.
 
+    <pre><code class="python">
+        class LirDiscriminator(nn.Module, ModelConfig):
+            def __init__(self):
+                super().__init__()
+        
+                self.main = nn.Sequential(
+                    nn.Conv2d(2, 64, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.BatchNorm2d(128),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.BatchNorm2d(256),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.BatchNorm2d(512),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(512, 1, kernel_size=4, stride=2, padding=0, bias=False),
+                    nn.AdaptiveAvgPool2d(1),
+                    nn.Sigmoid(),
+                )
+        
+                self.to(self.DEVICE)
+
+            def forward(self, rectangle, input_polygon):
+                x = torch.cat([rectangle, input_polygon], dim=1)
+                return self.main(x).view(-1, 1).squeeze(1)
+    </pre></code><br><br>
+
+    Next, let us define the <code>LirGeometricLoss</code> class that wil be used to train the <code>LirGenerator</code> defined above.
+    The losses are consisting of:
+    
+    <ul style="padding-left: 2em;">
+        <li class="decimal">BCE loss is a standard loss function used for binary classification tasks </li>
+        <li class="decimal"><a href="https://deep-learning-study.tistory.com/634">DIoU</a> loss, or Distance Intersection over Union Loss, is a metric used to evaluate the similarity between two boxes</li>
+        <li class="decimal">Feasibility loss</li>
+        <li class="decimal">Connectivity loss</li>
+    </ul>
+    
 </div><br>
 
 <h3>Training and evaluating</h3>
@@ -234,6 +276,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
         <li><a href="https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html">https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html</a></li>
         <li><a href="https://www.kaggle.com/code/arturlacerda/pytorch-conditional-gan">https://www.kaggle.com/code/arturlacerda/pytorch-conditional-gan</a></li>
         <li><a href="https://arxiv.org/pdf/1411.1784.pdf">https://arxiv.org/pdf/1411.1784.pdf</a></li>
+        <li><a href="https://deep-learning-study.tistory.com/634">https://deep-learning-study.tistory.com/634</a></li>
     </ul>
     
 </div><br><br>
