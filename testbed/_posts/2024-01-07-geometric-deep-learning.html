@@ -1,51 +1,47 @@
 ---
-title: "Geometric losses"
+title: "Shape-conditional GANs"
 layout: post
 hashtag: "#geometry #conditional-generative-adversairal-networks #deep-learning"
 featured: false
 comment: true
 splitter: 0
-thumbnail: /img/geometric-losses-thumbnail.gif
+thumbnail: /img/polygons-thumbnail-2.gif
 ---
 
 <div id="toc"></div>
-<h3>Introduction 💡</h3>
+
+<h3>What is Conditional Generative Adversarial Networks ❓</h3>
 <div class="article">
-    This project was initiated by curiosities about the <code>intersection of geometric data and optimization</code> within the realm of machine learning:
 
-    <ul style="padding-left: 2em;">
-        <li class="decimal">Can the geometric properties of data enhance model performance?</li>
-        <li class="decimal">Can models converge faster if optimizers have geometric losses?</li>
-    </ul>
+    <code>Conditional Generative Adversarial Networks</code> (cGANs) is an extension of the original Generative Adversarial Networks.
+    cGANs take the concept of conventional GANs further by feeding additional information into both the generator and discriminator, allowing the generation of data that is more specific and controlled.
 
+    This information acts as a directive or constraint for the generator on what type of data to produce. 
+
+    <br><br>
+    
+    The paper for <a href="https://arxiv.org/pdf/1411.1784.pdf">Conditional Generative Adversarial Nets</a> says:
     <br>
-
-    Based on the above questions, let us observe the concept of geometric loss simply:
-
-    <br><br>
-
-    The concept of geometric loss is grounded in the idea that understanding and leveraging the geometric properties of data is important.
-    This understanding and leveraging can significantly enhance model performance, especially in tasks where the spatial arrangement and relationships between data points are crucial.
+    <b>"</b> Generative adversarial nets can be extended to a conditional model if both the generator and discriminator are conditioned on some <code>extra information y.</code> 
+    y could be any kind of auxiliary information, such as class labels or data from other modalities. We can perform the conditioning by feeding y into the both the discriminator and generator as additional input layer. <b>"</b>
     
-    
-    <br><br>
-    
-    Geometric losses <code>incorporate geometric principles of data into the learning process.</code> 
-
     <!--break-->
 
-    This approach enables models to recognize and preserve the underlying geometric structures of the dataset.
+    <figure>
+        <img src="../img/geometric-losses-7.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            Conditional adversarial net
+        </figcaption>
+    </figure><br>
     
-    For instance, in tasks involving images, shapes, or graphs, where the spatial relationships and configurations are essential, geometric losses help in capturing these nuances more effectively than traditional methods.
-    
-
+    Since I am interested in handling geometry and generative design, I wanted to combine my interests with cGAN to solve a simple problem and understand these concepts.
 
 </div><br>
 
 <h3>Problem definition</h3>
 <div class="article">
 
-    To experiment with the above questions in the Introduction part, 
+    To experiment with the above, 
     let me define a simple geometric problem. 
     It is to find the <code>largest inscribed rectangle</code> on a given 2d polygon like the following.
     <br><br>
@@ -61,7 +57,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
 
     <br><br>
 
-    After defining a geometric problem, I defined the algorithm for finding <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/largest_inscribed_rectangle.py#L12-L133">LIR</a>.
+    After setting a geometric problem, I defined the algorithm for finding <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/largest_inscribed_rectangle.py#L12-L133">LIR</a>.
     In this algorithm, a given polygon is represented as a <code>binary grid</code> of 1s and 0s.
     1 is represented as a solid part and 0 is represented as a void part. 
     The following representation of a binary grid-shaped polygon has 100 x 100 grid size. If the size is higher, it can be represented more precisely.
@@ -137,16 +133,16 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <br><br>
 
     <figure>
-        <img src="../img/geometric-losses-6.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-8.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-9.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-10.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-11.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-12.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-13.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-14.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-15.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/geometric-losses-16.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-6.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-8.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-9.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-10.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-11.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-12.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-13.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-14.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-15.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/geometric-losses-16.png" style="width: 100%; display: block; margin-left: auto; margin-right: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
             The process of creating a random polygon
         </figcaption>
@@ -159,22 +155,8 @@ thumbnail: /img/geometric-losses-thumbnail.gif
 <div class="article">
 
     In this section, we will build a model based on DCGANs architecture for 256x256 data and implement a geometric loss function.
-    Additionally, since the generator model uses a given polygon as one of its inputs(with noise vector), the <code>conditional GANs</code> structure must be taken into account. 
 
     <br><br>
-
-    The paper for <a href="https://arxiv.org/pdf/1411.1784.pdf">Conditional Generative Adversarial Nets</a> says:
-    <br>
-    <b>"</b> Generative adversarial nets can be extended to a conditional model if both the generator and discriminator are conditioned on some <code>extra information y</code>. 
-    y could be any kind of auxiliary information, such as class labels or data from other modalities. We can perform the conditioning by feeding y into the both the discriminator and generator as additional input layer. <b>"</b>
-    
-
-    <figure>
-        <img src="../img/geometric-losses-7.png" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <figcaption style="text-align: center; margin-top: 1em">
-            Conditional adversarial net
-        </figcaption>
-    </figure><br>
 
     In the LIR problem contexts we defined, <code>extra information y</code> corresponds to an input polygon.
     The following <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L235-L244">forward</a> propagation method takes two inputs: noise and input polygon.
@@ -235,22 +217,31 @@ thumbnail: /img/geometric-losses-thumbnail.gif
                 return self.main(x).view(-1, 1).squeeze(1)
     </pre></code><br><br>
 
-    Next, let us define the <code>LirGeometricLoss</code> class that wil be used to train the <code>LirGenerator</code> defined above.
-    The losses are consisting of:
+    Next, let us define the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L55C7-L168">additional loss functions</a> that compute the geometric features of generated data. I think these losses will help train the generator stably.
+
+    The losses consist of:
     
     <ul style="padding-left: 2em;">
-        <li class="decimal">BCE loss is a standard loss function used for binary classification tasks </li>
-        <li class="decimal"><a href="https://deep-learning-study.tistory.com/634">DIoU</a> loss, or Distance Intersection over Union Loss, is a metric used to evaluate the similarity between two boxes</li>
-        <li class="decimal">Feasibility loss</li>
-        <li class="decimal">Connectivity loss</li>
+        <li class="decimal"><u>BCE loss</u> is a standard loss function used for binary classification tasks(conventional GANs do not use any loss other than the adversarial loss, but without these losses when training the generator, the model did not create rectangles) </li>
+        <li class="decimal"><u><a href="https://deep-learning-study.tistory.com/634">DIoU</a> loss</u>, or Distance Intersection over Union Loss, is a metric used to evaluate the similarity between two boxes</li>
+        <li class="decimal"><u>Feasibility loss</u> measures how well the generated rectangle fits within the input polygon(and target rectangle) without overextending beyond its boundaries or underfitting within them</li>
+        <li class="decimal"><u>Connectivity loss</u> checks whether the generated rectangle is a single piece using the labeling function</li>
     </ul>
     
 </div><br>
 
 <h3>Training and evaluating</h3>
 <div class="article">
+
+    <figure>
+        <img src="../img/with-geometric-loss-polygons-2000.gif" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <img src="../img/without-geometric-loss-polygons-2000.gif" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            The process of creating a random polygon
+        </figcaption>
+    </figure>
     
-    <figure style="display: flex;">
+    <!-- <figure style="display: flex;">
         <img src="/img/without-geometric-loss-polygons.gif" width="48.5%">
         <img src="/img/with-geometric-loss-polygons.gif" width="48.5%">
     </figure>
@@ -258,12 +249,7 @@ thumbnail: /img/geometric-losses-thumbnail.gif
     <figure style="display: flex;">
         <img src="/img/without-geometric-loss-graphs.gif" width="48.5%">
         <img src="/img/with-geometric-loss-graphs.gif" width="48.5%">
-    </figure>
-
-</div><br>
-
-<h3>Potential improvements</h3>
-<div class="article">
+    </figure> -->
 
 </div><br>
 
