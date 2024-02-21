@@ -240,16 +240,32 @@ thumbnail: /img/polygons-thumbnail-2.gif
             The process of creating a random polygon
         </figcaption>
     </figure>
+</div><br>
+
+<h3>Conclusions & future works</h3>
+<div class="article">
+
+    When defining the loss function, I intuitively thought that incorporating a geometric loss function would aid in <code>generalizing</code> the model. 
+    I experimented with two versions: one using BCELoss with geometric loss and another using BCELoss without geometric loss. 
+    However, the additional loss functions seem to have no effect. Therefore, I think we could try the following:
     
-    <!-- <figure style="display: flex;">
-        <img src="/img/without-geometric-loss-polygons.gif" width="48.5%">
-        <img src="/img/with-geometric-loss-polygons.gif" width="48.5%">
-    </figure>
+    <br><br>
+    <ul style="padding-left: 2em;">
+        <li>Increasing data volume:</li>
+        <ul style="list-style-type: none;">
+            Since we have <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/data/data_creator.py#L101-L158">DataCreator</a> class and it is created by LIR algorithm, so we can increase the volume of the dataset as much as you want.
+            Therefore, it is worth increasing the amount of training data, making the model structure more complex, overfitting, and checking whether the model generalizes.
+        </ul>
+        <br>
+        <li>Experimenting with a dataset that has fewer vertices:</li>
+        <ul style="list-style-type: none;">
+            In this project, I generated training data by creating random geometries with a number of vertices between 3 and 23 and creating the Largest Inscribed Rectangle for them.
+        </ul>
+    </ul>
+
     
-    <figure style="display: flex;">
-        <img src="/img/without-geometric-loss-graphs.gif" width="48.5%">
-        <img src="/img/with-geometric-loss-graphs.gif" width="48.5%">
-    </figure> -->
+    <!-- After setting the batch size to 32 on a laptop with an NVIDIA GeForce RTX 3060 6GB, training the model took 3 minutes per epoch, resulting in approximately 5 hours for 100 epochs. 
+    Although I initially planned for more, due to time constraints, I trained the model for only 1000 epochs (). Despite this, I obtained interesting results. -->
 
 </div><br>
 
