@@ -216,9 +216,9 @@ thumbnail: /img/polygons-thumbnail-2.gif
                 x = torch.cat([rectangle, input_polygon], dim=1)
                 return self.main(x).view(-1, 1).squeeze(1)
     </pre></code><br><br>
-
+    
     Next, let us define the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L55C7-L168">additional loss functions</a> that compute the geometric features of generated data. I think these losses will help train the generator stably.
-
+    
     The losses consist of:
     
     <ul style="padding-left: 2em;">
@@ -228,18 +228,76 @@ thumbnail: /img/polygons-thumbnail-2.gif
         <li class="decimal"><u>Connectivity loss</u> checks whether the generated rectangle is a single piece using the labeling function</li>
     </ul>
     
+    <br><br>
+    We have now finished defining the base models and loss functions. Let's train the model using only one data point to check whether it has a structure that can be learned.
+
+    <figure>
+        <img src="../img/with-geometric-loss-polygons-2000.gif" style="width: 90%; display: block; margin-left: auto; margin-right: auto;">
+        <figcaption style="text-align: center; margin-top: 1em">
+            The process of creating a random polygon for 2000 epochs<br>
+            From the left, ground truth · training process
+        </figcaption>
+    </figure>
+
 </div><br>
 
 <h3>Training and evaluating</h3>
 <div class="article">
+    Now, let's proceed with <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/lirGAN.ipynb">training</a> using the 5,000 datasets we have prepared. 
+    The configuration for training the models is as follows:
+    
+<pre><code class="python">
+    """Train models with Geometric loss and Tanh using all data"""
+    """Test base models using all data"""
 
-    <figure>
-        <img src="../img/with-geometric-loss-polygons-2000.gif" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <img src="../img/without-geometric-loss-polygons-2000.gif" style="width: 80%; display: block; margin-left: auto; margin-right: auto;">
-        <figcaption style="text-align: center; margin-top: 1em">
-            The process of creating a random polygon
-        </figcaption>
-    </figure>
+    lir_dataset = LirDataset()
+    lir_dataloader = DataLoader(
+        dataset=lir_dataset,
+        batch_size=32,
+        shuffle=True,
+        drop_last=True,
+    )
+
+    lir_generator = LirGenerator(use_tanh=True)
+    lir_discriminator = LirDiscriminator()
+
+    lir_geometric_loss_function = LirGeometricLoss(
+        bce_weight=1.0, diou_weight=0.5, feasibility_weight=0.01, connectivity_weight=0.01
+    )
+
+    lir_gan_trainer = LirGanTrainer(
+        epochs=1000,
+        lir_generator=lir_generator,
+        lir_discriminator=lir_discriminator,
+        lir_dataloader=lir_dataloader,
+        lir_geometric_loss_function=lir_geometric_loss_function,
+        initial_weights_key=ModelConfig.XAVIER,
+        log_interval=1,
+        use_gradient_penalty=True,
+        use_lr_scheduler=True,
+        is_record=True,
+        record_name="with-geometric-loss-all-data",
+    )
+
+    lir_gan_trainer.set_seed()
+    lir_gan_trainer.train()
+</pre></code><br><br>
+
+I have set the epochs and batch sizes to 1000 and 32, respectively. 
+Additionally, to qualitatively measure the quality of the generated data, I have configured the function to visualize the generated data at each epoch, as demonstrated in the following figure, when the given <code>log_interval</code> is reached.
+
+<!-- 
+    왼쪽3 unseen data, 오른쪽3 training data, losses
+    n번째 epoch 이상부터는 더이상 로스가 감소하지 않습니다. 5000개의 데이터셋을 모두 학습하였지만, 보지 못한 데이터에 대해서는 아직 완전히 일반화하지 못하는 모습을 볼 수 있습니다.
+    다만 학습한 것과 비슷한 형상의 입력 도형을 받은 경우 GT와 유사한 도형을 생성해냅니다.
+
+    ㅁㅁㅁㅁㅁㅁㅁㅁ
+    ㅁㅁㅁㅁㅁㅁㅁㅁ
+    ㅁㅁㅁㅁㅁㅁㅁㅁ
+    ㅁㅁㅁㅁㅁㅁㅁㅁ
+    ㅁㅁㅁㅁㅁㅁㅁㅁ
+ -->
+
 </div><br>
 
 <h3>Conclusions & future works</h3>
@@ -257,9 +315,11 @@ thumbnail: /img/polygons-thumbnail-2.gif
             Therefore, it is worth increasing the amount of training data, making the model structure more complex, overfitting, and checking whether the model generalizes.
         </ul>
         <br>
-        <li>Experimenting with a dataset that has fewer vertices:</li>
+        <li>Experimenting with a dataset that has fewer vertices and simpler geometry:</li>
         <ul style="list-style-type: none;">
-            In this project, I generated training data by creating random geometries with a number of vertices between 3 and 23 and creating the Largest Inscribed Rectangle for them.
+            In this project, I generated training data by creating random geometries with a number of vertices between <code>3 and 23</code> and creating the Largest Inscribed Rectangle for them.
+            That's why polygon datasets are so complex, as seen in the <code>Data preparation</code> part.
+            Therefore, I think it is necessary to simplify and generalize the data for training and then train the model.
         </ul>
     </ul>
 
