@@ -1,0 +1,72 @@
+---
+title: "Seeing is solving"
+layout: post
+hashtag: "#geometry #debugger #visualization"
+inprogress: true
+comment: true
+splitter: 3
+thumbnail: /img/seeing-is-solving-thumbnail-0.png
+---
+
+<div id="toc"></div>
+
+<h3>Difficulty of the geometric imagination</h3>
+<div class="article">
+    <p style="text-align: center;"><i>"I have no geometric imagination..."</i></p> 
+    I often feel this way, especially when facing complex geometry problems or writing code that deals with shapes and spaces.
+
+    At least for me, it is not easy to picture complex 3D shapes in my mind. This is a big challenge and why visualization is so useful.
+    <br><br>
+
+    I think visualizing geometry is key to solving problems. 
+    Seeing what I am doing makes a huge difference. General debugging tools like <code>print</code> don't help much here. 
+    They give me numbers and text but don't show me the geometry I need to see.
+
+    <!--break-->
+
+</div>
+<br><br>
+
+<h3>Debug Visualizer</h3>
+<div class="article">
+    <a href="https://github.com/microsoft/vscode-debug-visualizer">vscode-debug-visualizer</a> is an extension for Visual Studio Code that significantly enhances the debugging experience by visualizing data structures or geometry during a <code>debugging session.</code> 
+    Unlike traditional debugging tools that rely on textual or numerical output, this visualizer transforms data into intuitive and interactive visual representations.
+
+    <br><br>
+    <figure>
+        <img src="/img/seeing-is-solving-0.png" width="90%">
+        <figcaption>Visualizing geometries in debugging session</figcaption>
+    </figure>
+
+</div>
+<br>
+
+<h3>Usage</h3>
+<div class="article">
+
+    You need to install the extension for <code>hediet.debug-visualizer</code> in Visual Studio Code.
+    Then, you also need to install vscode-debug-visualizer module. You can use pip to install it as follows:
+<pre><code>
+    pip install vscodedebugvisualizer
+</pre></code><br>
+
+    After installing this <a href="https://marketplace.visualstudio.com/items?itemName=hediet.debug-visualizer">extension</a>, use the command <code>Debug Visualizer: New View</code> to open a new visualizer view. 
+    In this view you can enter an expression that is evaluated and visualized while stepping through your application. 
+    This view works the same as the watch view of VS Code, except that the resulting value is presented visually rather than textually and you can only watch one expression (but you can still open multiple windows).
+
+    <br><br>
+    <figure>
+        <img src="/img/seeing-is-solving-1.gif" width="90%">
+        <figcaption>Visualizing geometries in each debugging session</figcaption>
+    </figure><br>
+    
+    In the above demo, I used the <a href="https://github.com/PARKCHEOLHEE-lab/debugvisualizer/blob/main/debugvisualizer.py#L11">Plotter</a> to convert JSON string object for visualizing 3d geometry for <code>shapely</code> and <code>trimesh</code> to process them.
+    If you want to use the Plotter, you can install it via cloning the repository.
+
+<pre><code>
+    git clone https://github.com/PARKCHEOLHEE-lab/debugvisualizer.git
+</code></pre>
+
+</div>
+<br>
+
