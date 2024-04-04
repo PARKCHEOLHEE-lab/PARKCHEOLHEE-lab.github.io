@@ -1,5 +1,5 @@
 ---
-title: "Infinite synthesis of skyscrapers"
+title: "Infinite synthesis"
 layout: post
 hashtag: "#geometry #deep-learning #generative-design #deep-sdf"
 comment: true
@@ -17,59 +17,103 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
     In the realm of architectural design, especially in the <code>phase of initial design</code>, generative AI can serve as a useful tool for examining many design options.
 
     <br><br>
+    <figure>
+        <img src="/img/synthesized-skyscrapers-2.jpg" width="60%">
+        <figcaption>
+            <a href="https://www.archdaily.com/198946/shou-sugi-ban-bytr-architects">Physical model examination by humans</a><br>
+            Shou Sugi Ban / BYTR Architects
+        </figcaption>
+    </figure><br>
 
-    Leveraging the Deep Signed Distance Functions model (<a href="https://arxiv.org/pdf/1901.05103.pdf">DeepSDF</a>), this project aims to <code>build the system that can synthesize infinite number of skyscrapers</code> simliar to trained data.
 
-    <br><br>
-    These vectors, encapsulated within a high-dimensional latent space, serve as the DNA for potential skyscraper designs. 
-
-    <br><br>
-    By <code>interpolating</code> or <code>arithmetically operating</code> between two or more latent spaces, the model gives us infinite design options theoretically. 
-    This method not only enhances the efficiency of the design process but also encourages the exploration of novel architectural forms and structures previously unattainable through conventional design methodologies.
-
+    Leveraging the Deep Signed Distance Functions model (<a href="https://arxiv.org/pdf/1901.05103.pdf">DeepSDF</a>) with latent vectors, this project aims to <code>build the algorithm that can synthesize infinite number of skyscrapers</code> simliar to trained data.
+    These vectors, mapped within a high-dimensional latent space, serve as the DNA for synthesizing potential skyscrapers. 
+    
     <br><br>
     
     So, through the system that manipulates the latent vectors for expressing the shape of the buildings, architectural designers can rapidly generate and examine a diverse array of design options.
 
     <br><br>
+    By manipulating(interpolation, and arithmetic operations) between two or more latent vectors, the model gives us infinite design options virtually. 
+    This method not only enhances the efficiency of the design process but also encourages the exploration of novel architectural forms and structures previously unattainable through conventional design methodologies.
 
-    <!-- 
-        generative design, deep sdf, infinitely data generating 
-        the role of the deep learning in design industries
-        signed distance function
-
-        generative ai for generating image, text, sound, 3d models, etc.
-        
-        generative ai helps us to examine many design options at the phase of initial design.
-    -->
-
-    <!-- <p style="text-align: center;"><i>"I have no geometric imagination..."</i></p> 
-    I often feel this way, especially when facing complex geometry problems or writing code that deals with shapes and spaces.
-
-    At least for me, it is not easy to picture complex 3D shapes in my mind. This is a big challenge and why visualization is so useful.
-    <br><br>
-
-    I think visualizing geometry is key to solving problems. 
-    Seeing what I am doing makes a huge difference. General debugging tools like <code>print</code> don't help much here. 
-    They give me numbers and text but don't show me the geometry I need to see. -->
 
     <!--break-->
 
 </div>
-<br>
+<br><br>
 
-<h3>What is the Signed Distance Function (SDF)?</h3>
+<h3>Understanding Signed Distance Functions</h3>
 <div class="article">
+    In <a href="https://en.wikipedia.org/wiki/Signed_distance_function">wikipedia</a>, Signed Distance Functions (SDFs) is defined as follows:
+    <br><br>
+
+    In mathematics and its applications, the signed distance function (or oriented distance function) is the orthogonal distance of a given point x to the boundary of a set Ω in a metric space, with the <code>sign determined by whether or not x is in the interior of Ω</code>. 
+    The function has positive values at points x inside Ω, it decreases in value as x approaches the boundary of Ω where the signed distance function is zero, and it takes negative values outside of Ω. However, the alternative convention is also sometimes taken instead (i.e., negative inside Ω and positive outside).
+    
+    <br><br>
+    <figure>
+        <img src="/img/synthesized-skyscrapers-1.png" width="60%">
+        <figcaption>
+            <a href="https://arxiv.org/pdf/1901.05103.pdf">SDF representation applied to the Stanford Bunny</a><br>
+            (a) Way to decide sign: If the point is on the surface, SDF = 0<br>
+            (b) 2D cross-section of the signed distance field<br>
+            (c) Rendered 3D surface recovered from SDF = 0<br>
+        </figcaption>
+    </figure><br>
+
+    At the core of SDFs lies their simplicity and power in <code>describing complex geometries.</code> 
+    Unlike traditional mesh representations, which rely on vertices, edges, and faces to define forms, by using SDFs, we can construct 3d mesh models with a continuous surface, and it just needs 3D grid-shaped <code>XYZs and their corresponding SDF values.</code>
+
+    <br><br>
+    
+    Let's take a look at the following example for the CCTV headquarters by OMA recovered from SDF = 0.
+    Initially, to obtain SDF values, the entire space around the CCTV headquarters model is sampled on a <code>regular grid</code> (In this example, resolution indicates the number of grid points. i.e., resolution 8 means 8x8x8 grid). 
+    At each grid point, the SDF provides a value that indicates the point's distance from the closest surface of the model. 
+    Inside the model, these values are negative (or positive, depending on the convention), and outside, they are positive (or negative).
+
+    <br><br>
+
+    As you can see in the below figure, more grid points result in more detailed and accurate 3d models. 
+    The numbers of the grid points used in examples are respectively <code>8x8x8(=512), 16x16x16(=4096), 32x32x32(=32768), 64x64x64(=262144), 128x128x128(=2097152).</code>
+
+    
+    <figure>
+        <img src="/img/synthesized-skyscrapers-3.png" width="100%">
+        <figcaption>
+            Recovered CCTV headquarters from the SDFs<br>
+            top 3, original 3d model · resolution 8 · resolution 16 <br>
+            bottom 3, resolution 32 · resolution 64 · resolution 128
+        </figcaption>
+    </figure><br>
 
 </div>
+<br><br>
 
+
+<h3>Data preparation and processing</h3>
+<div class="article">
+</div>
+<br><br>
+
+
+<h3>Training DeepSDF model</h3>
+<div class="article">
+</div>
+<br><br>
 
 <h3>The process of synthesizing skyscrapers</h3>
+<div class="article">
+</div>
+<br><br>
 
 <h3>References</h3>
 <div class="article">
 
     <ul>
+        <li><a href="https://en.wikipedia.org/wiki/Signed_distance_function">https://en.wikipedia.org/wiki/Signed_distance_function</a></li>
+        <li><a href="https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html">https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html</a></li>
+        <li><a href="https://xoft.tistory.com/47">https://xoft.tistory.com/47</a></li>
         <li><a href="https://arxiv.org/pdf/1901.05103.pdf">https://arxiv.org/pdf/1901.05103.pdf</a></li>
         <li><a href="https://github.com/facebookresearch/DeepSDF">https://github.com/facebookresearch/DeepSDF</a></li>
         <li><a href="https://github.com/maurock/DeepSDF">https://github.com/maurock/DeepSDF</a></li>
