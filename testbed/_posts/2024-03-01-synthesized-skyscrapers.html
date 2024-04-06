@@ -7,6 +7,15 @@ splitter: 1
 thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
 ---
 
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<style>
+    .mjx-chtml {
+        font-size: 100% !important; /* Adjust the size as needed */
+    }
+</style>
+
 <div id="toc"></div>
 
 <h3>Introduction 🏢</h3>
@@ -23,7 +32,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
             <a href="https://www.archdaily.com/198946/shou-sugi-ban-bytr-architects">Physical model examination by humans</a><br>
             Shou Sugi Ban / BYTR Architects
         </figcaption>
-    </figure><br>
+    </figure><br><br>
 
 
     Leveraging the Deep Signed Distance Functions model (<a href="https://arxiv.org/pdf/1901.05103.pdf">DeepSDF</a>) with latent vectors, this project aims to <code>build the algorithm that can synthesize infinite number of skyscrapers</code> simliar to trained data.
@@ -60,7 +69,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
             (b) 2D cross-section of the signed distance field<br>
             (c) Rendered 3D surface recovered from SDF = 0<br>
         </figcaption>
-    </figure><br>
+    </figure><br><br>
 
     At the core of SDFs lies their simplicity and power in <code>describing complex geometries.</code> 
     Unlike traditional mesh representations, which rely on vertices, edges, and faces to define forms, by using SDFs, we can construct 3d mesh models with a continuous surface, and it just needs 3D grid-shaped <code>XYZs and their corresponding SDF values.</code>
@@ -70,29 +79,123 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
     Let's take a look at the following example for the CCTV headquarters by OMA recovered from SDF = 0.
     Initially, to obtain SDF values, the entire space around the CCTV headquarters model is sampled on a <code>regular grid</code> (In this example, resolution indicates the number of grid points. i.e., resolution 8 means 8x8x8 grid). 
     At each grid point, the SDF provides a value that indicates the point's distance from the closest surface of the model. 
-    Inside the model, these values are negative (or positive, depending on the convention), and outside, they are positive (or negative).
+    Inside the model, these values are negative (or positive, depending on the convention), and outside, they are positive (or negative). 
 
     <br><br>
 
     As you can see in the below figure, more grid points result in more detailed and accurate 3d models. 
     The numbers of the grid points used in examples are respectively <code>8x8x8(=512), 16x16x16(=4096), 32x32x32(=32768), 64x64x64(=262144), 128x128x128(=2097152).</code>
+    To recover meshes using grid points and SDF values, it needs to use the <a href="https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html">Marching Cubes</a> algorithm.
+
+    <br><br>
 
     
     <figure>
-        <img src="/img/synthesized-skyscrapers-3.png" width="100%">
+        <img src="/img/synthesized-skyscrapers-3.png" width="90%">
         <figcaption>
             Recovered CCTV headquarters from the SDFs<br>
             top 3, original 3d model · resolution 8 · resolution 16 <br>
             bottom 3, resolution 32 · resolution 64 · resolution 128
         </figcaption>
-    </figure><br>
+    </figure><br><br>
+
+    Because we need each <code>sign</code> that decides whether the point is inside or outside the model, 
+    the meshes we recover from SDF values must be <code>watertight</code> meshes that are fully closed.
+    By using the below code, I examined the recovered meshes from the SDF values and each grid resolution. 
+    The <code>check_watertight</code> parameter is set to True, so the code checks if the mesh is watertight, if not fully closed, it will convert the mesh to the watertight mesh using <a href="https://github.com/fwilliams/point-cloud-utils">pcu</a>. 
+
+<pre><code class="python">
+    mesh = DataCreatorHelper.load_mesh(
+        path=r"deepSDF\data\raw-skyscrapers\cctv_headquarter.obj", 
+        normalize=True, 
+        map_z_to_y=True, 
+        check_watertight=True, 
+        translate_mode=DataCreatorHelper.CENTER_WITHOUT_Z
+    )
+    
+    for resolution in [8, 16, 32, 64, 128]:
+        coords, grid_size_axis = ReconstructorHelper.get_volume_coords(resolution=resolution)
+
+        sdf, *_ = pcu.signed_distance_to_mesh(
+            np.array(coords.cpu(), dtype=np.float32), 
+            mesh.vertices.astype(np.float32, order='F'), 
+            mesh.faces.astype(np.int32)
+        )
+        
+        recovered_mesh = ReconstructorHelper.extract_mesh(
+            grid_size_axis, 
+            torch.tensor(sdf), 
+        )
+</code></pre>
 
 </div>
-<br><br>
+<br>
 
 
 <h3>Data preparation and processing</h3>
 <div class="article">
+
+    The first step for preparing data to train DeepSDF model is to gather the 3d models of the skyscrapers. I used the <a href="https://3dwarehouse.sketchup.com/">3dwarehouse</a> to download the free 3d models.
+    I downloaded the following models in the below figure. From the left, CCTV headquarters · Mahanakhon · Hearst Tower · Bank of China · Empire State Building · Transamerica Pyramid · The Shard · Gherkin London · Taipei 101 · Shanghai World Financial Center · One World Trade Center · Lotte Tower · Kingdom Centre · China Zun · Burj Al Arab.
+    The 15 raw data I gathered is in this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/tree/main/deepSDF/data/raw-skyscrapers">link</a>.
+    <br><br>
+    <figure>
+        <img src="/img/synthesized-skyscrapers-4.png" width="100%">
+        <figcaption>
+            Skyscrapers
+        </figcaption>
+    </figure><br><br>
+
+    The next step includes <code>normalizing (1)</code> all data to fit within a regular grid volume, <code>converting (2)</code> them into a consistent format. 
+
+    <br><br>
+
+
+    (1) normalizing: 
+    Generally, when geometry data is used for learning, it is normalized to a value between 0 and 1 for <code>each individual object</code>, and normalized by moving the centroid of the model to the origin(0, 0). 
+    i.e., the farthest point of the model is set to 1. If we use the normalization method used generally, it doesn't reflect the relative height of the skyscrapers.
+
+    Therefore, in this project, the height of the <code>highest model</code> among all skyscrapers data is set to 1 and normalized.
+    <img src="/img/synthesized-skyscrapers-6.png" width="80%">
+    <figcaption>
+        Normalized skyscrapers <br>
+        from the left, the lowest building (Gherkin London) · the highest building (One World Trade Center)
+    </figcaption>
+    </figure><br><br>
+
+
+    (2) converting:
+    The DeepSDF model's feed-forward networks have the following architecture. It is composed of 8 fully connected layers, denoted as "FC" on the diagram.
+    As you can see in the below figure, the dimension of the input X excepting latent vectors consists of (x, y, z) 3.
+    <br><br>
+    <img src="/img/synthesized-skyscrapers-5.png" width="80%">
+    <figcaption>
+        The feed-forward network for DeepSDF model <br>
+    </figcaption>
+    </figure><br><br>
+    
+    The data sample \( X \) is composed of \( (x, y, z) \) and the corresponding label \( s \) like this: \( X := \{(x, s) : SDF(x) = s\} \)
+    Additionally, class numbers are required to assign a latent vector to each sample. 
+    As mentioned in the introduction part, the latent vectors play the role of the DNA in representing the shape of the buildings.
+
+<pre><code class="python">
+    class SDFdataset(Dataset, Configuration):
+        def __init__(self, data_path: str = Configuration.SAVE_DATA_PATH):
+            self.sdf_dataset, self.cls_nums, self.cls_dict = self._get_sdf_dataset(data_path=data_path)
+
+        def __len__(self) -> int:
+            return len(self.sdf_dataset)
+
+        def __getitem__(self, index: int) -> Tuple[torch.Tensor]:
+            xyz = self.sdf_dataset[index, :3]
+            sdf = self.sdf_dataset[index, 3]
+            cls = self.sdf_dataset[index, 4].long()
+
+            return xyz.to(self.DEVICE), sdf.to(self.DEVICE), cls.to(self.DEVICE)
+</code></pre>
+
+
+
 </div>
 <br><br>
 
@@ -112,6 +215,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
 
     <ul>
         <li><a href="https://en.wikipedia.org/wiki/Signed_distance_function">https://en.wikipedia.org/wiki/Signed_distance_function</a></li>
+        <li><a href="https://github.com/fwilliams/point-cloud-utils">https://github.com/fwilliams/point-cloud-utils</a></li>
         <li><a href="https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html">https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html</a></li>
         <li><a href="https://xoft.tistory.com/47">https://xoft.tistory.com/47</a></li>
         <li><a href="https://arxiv.org/pdf/1901.05103.pdf">https://arxiv.org/pdf/1901.05103.pdf</a></li>
