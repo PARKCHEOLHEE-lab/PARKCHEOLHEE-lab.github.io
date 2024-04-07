@@ -44,7 +44,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
 
     <br><br>
     By manipulating(interpolation, and arithmetic operations) between two or more latent vectors, the model gives us infinite design options virtually. 
-    This method not only enhances the efficiency of the design process but also encourages the exploration of novel architectural forms and structures previously unattainable through conventional design methodologies.
+    This method not only provides a brand-new design process but also will lead us to explore the novel architectural forms previously unattainable through conventional design methodologies.
 
 
     <!--break-->
@@ -146,7 +146,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
         </figcaption>
     </figure><br><br>
 
-    The next step includes <code>normalizing (1)</code> all data to fit within a regular grid volume, <code>converting (2)</code> them into a consistent format. 
+    The next step includes <code>(1) normalizing</code> all data to fit within a regular grid volume, <code>(2) converting</code> them into a consistent format. 
 
     <br><br>
 
@@ -159,7 +159,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
     <img src="/img/synthesized-skyscrapers-6.png" width="80%">
     <figcaption>
         Normalized skyscrapers <br>
-        from the left, the lowest building (Gherkin London) · the highest building (One World Trade Center)
+        From the left, the lowest building (Gherkin London) · the highest building (One World Trade Center)
     </figcaption>
     </figure><br><br>
 
@@ -193,15 +193,102 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
 
             return xyz.to(self.DEVICE), sdf.to(self.DEVICE), cls.to(self.DEVICE)
 </code></pre>
-
-
-
 </div>
 <br><br>
 
 
-<h3>Training DeepSDF model</h3>
+<h3>Implementing and training of DeepSDF model</h3>
 <div class="article">
+
+    As can be seen in the above part of <code>(2) converting</code>, the feed-forward network of the DeepSDF model is simple as follows.
+
+<pre><code class="python">
+    class SDFdecoder(nn.Module, Configuration):
+        def __init__(self, cls_nums: int, latent_size: int = Configuration.LATENT_SIZE):
+            super().__init__()
+
+            self.main_1 = nn.Sequential(
+                nn.Linear(latent_size + 3, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 512),
+            )
+
+            self.main_2 = nn.Sequential(
+                nn.Linear(latent_size + 3 + 512, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 512),
+                nn.ReLU(True),
+                nn.Linear(512, 1),
+                nn.Tanh(),
+            )
+
+            self.latent_codes = nn.Parameter(torch.FloatTensor(cls_nums, latent_size))
+            self.latent_codes.to(self.DEVICE)
+            self.to(self.DEVICE)
+
+        def forward(self, i, xyz, cxyz_1=None):
+            if cxyz_1 is None:
+                cxyz_1 = torch.cat((self.latent_codes[i], xyz), dim=1)
+
+            x1 = self.main_1(cxyz_1)
+
+            # skip connection
+            cxyz_2 = torch.cat((x1, cxyz_1), dim=1)
+            x2 = self.main_2(cxyz_2)
+
+            return x2
+</code></pre><br>
+
+The <code>SDFdecoder</code> class has the following arguments as inputs:
+    
+<ul style="padding-left: 2em;">
+    <li class="decimal"><code>cls_nums</code> is the number of skyscrapers</li>
+    <li class="decimal"><code>latent_size</code> is the dimension of the latent vector</li>
+</ul><br>
+
+In this project, the <code>cls_nums</code> and <code>latent_size</code> were used as 15 and 128, respectively.
+Therefore, the size of the instance variable initialized for the latent vector (self.latent_codes) is <code>torch.Size([15, 128])</code>.
+
+<br><br>
+
+The <code>skip connection</code> technique used in forward propagation enables the model to learn complex functions representing the SDF by <code>combining low-level information</code> (XYZ coordinates) with the high-level features learned by the network.
+
+<br><br>
+
+Now let's look at the learning process. It was trained for 150 epochs, and the total number of data (number of points) is 64x64x64x15 (=3932160). This is divided into an 8:2 ratio and used in the learning and evaluation process. It took an average of 1000 seconds per epoch.
+At the end of each epoch loop, I added code to reconstruct the skyscraper to <code>qualitatively evaluate</code> the model.
+
+
+<figure>
+    <img src="/img/synthesized-skyscrapers-8.gif" width="30%">
+    <img src="/img/synthesized-skyscrapers-7.gif" width="80%">
+</figure>
+<figcaption style="text-align: center; margin-top: 1em">
+    Training process for 150 epochs <br>
+    From the top, reconstructed skyscraper · losses
+</figcaption><br><br>
+
+After training the model for 150 epochs, 
+I reconstructed the 3D model by predicting the SDF value for each point in regular grid points for 15 skyscrapers with latent vectors.
+
+<br><br>
+<figure>
+    <img src="/img/synthesized-skyscrapers-9.gif" width="100%">
+</figure><br>
+<figcaption style="text-align: center; margin-top: 1em">
+    reconstructed skyscrapers <br>
+    The left is reconstructed one and the right is reconstructed another.
+</figcaption><br><br>
+
+
 </div>
 <br><br>
 
@@ -218,6 +305,7 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
         <li><a href="https://github.com/fwilliams/point-cloud-utils">https://github.com/fwilliams/point-cloud-utils</a></li>
         <li><a href="https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html">https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html</a></li>
         <li><a href="https://xoft.tistory.com/47">https://xoft.tistory.com/47</a></li>
+        <li><a href="https://velog.io/@qtly_u/Skip-Connection">https://velog.io/@qtly_u/Skip-Connection</a></li>
         <li><a href="https://arxiv.org/pdf/1901.05103.pdf">https://arxiv.org/pdf/1901.05103.pdf</a></li>
         <li><a href="https://github.com/facebookresearch/DeepSDF">https://github.com/facebookresearch/DeepSDF</a></li>
         <li><a href="https://github.com/maurock/DeepSDF">https://github.com/maurock/DeepSDF</a></li>
