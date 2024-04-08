@@ -4,7 +4,7 @@ layout: post
 hashtag: "#geometry #deep-learning #generative-design #deep-sdf"
 comment: true
 splitter: 1
-thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
+thumbnail: /img/synthesized-skyscrapers-8.gif
 ---
 
 <script type="text/javascript" async
@@ -250,8 +250,8 @@ thumbnail: /img/synthesized-skyscrapers-thumbnail-1.jpg
 The <code>SDFdecoder</code> class has the following arguments as inputs:
     
 <ul style="padding-left: 2em;">
-    <li class="decimal"><code>cls_nums</code> is the number of skyscrapers</li>
-    <li class="decimal"><code>latent_size</code> is the dimension of the latent vector</li>
+    <li><code>cls_nums</code> is the number of skyscrapers</li>
+    <li><code>latent_size</code> is the dimension of the latent vector</li>
 </ul><br>
 
 In this project, the <code>cls_nums</code> and <code>latent_size</code> were used as 15 and 128, respectively.
@@ -278,22 +278,154 @@ At the end of each epoch loop, I added code to reconstruct the skyscraper to <co
 
 After training the model for 150 epochs, 
 I reconstructed the 3D model by predicting the SDF value for each point in regular grid points for 15 skyscrapers with latent vectors.
+In the below figure, the buildings in the left row are reconstructed by the model, and the buildings in the right row are the original 3D models.
 
-<br><br>
+<br><br><br>
 <figure>
     <img src="/img/synthesized-skyscrapers-9.gif" width="100%">
 </figure><br>
 <figcaption style="text-align: center; margin-top: 1em">
-    reconstructed skyscrapers <br>
-    The left is reconstructed one and the right is reconstructed another.
+    Comparing reconstructed skyscrapers vs. originals
 </figcaption><br><br>
+
+I think the model is unable to reconstruct the original skyscrapers with precise details accurately, 
+but it seems to generate skyscrapers that are similar to the original skyscrapers appropriately.
+In this task for reconstructing models, I used 384x384x384(=56623104) for the grid points resolution.
 
 
 </div>
 <br><br>
 
-<h3>The process of synthesizing skyscrapers</h3>
+<h3>Synthesizing skyscrapers infinitely</h3>
 <div class="article">
+    Lastly, let me synthesize skyscrapers by interpolating them or using arithmetic operations.
+    Through the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/6b62d93d538087d29166ce7a523134dac5bd046f/deepSDF/synthesize.py#L190">following code</a>, you can generate infinite data of different shapes, starting by synthesizing latent vectors for the initial 15 buildings.
+    In this time, to synthesize them, I used 128x128x128(=2097152) grid points resolution.
+
+<pre><code class="python">
+    def infinite_synthesis(
+        sdf_decoder: SDFdecoder,
+        save_dir: str,
+        synthesis_count: int = np.inf,
+        resolution: int = 128,
+        map_z_to_y: bool = True,
+        check_watertight: bool = True,
+    ):
+        synthesizer = Synthesizer()
+    
+        synthesized_latent_codes_npz = "infinite_synthesized_latent_codes.npz"
+        synthesized_latent_codes_path = os.path.join(save_dir, synthesized_latent_codes_npz)
+    
+        os.makedirs(save_dir, exist_ok=True)
+    
+        synthesized_latent_codes = {
+            "data": [
+                {
+                    "name": i,
+                    "index": i,
+                    "synthesis_type": "initial",
+                    "latent_code": list(latent_code.detach().cpu().numpy()),
+                }
+                for i, latent_code in enumerate(sdf_decoder.latent_codes)
+            ]
+        }
+    
+        if os.path.exists(synthesized_latent_codes_path):
+            synthesized_latent_codes = {
+                "data": list(np.load(synthesized_latent_codes_path, allow_pickle=True)["synthesized_data"])
+            }
+    
+        while len(synthesized_latent_codes["data"]) < synthesis_count:
+            print("synthesized data length:", len(synthesized_latent_codes["data"]))
+    
+            if random.Random(time.time()).random() < 0.5:
+                selected_indices, synthesized_latent_code = synthesizer.random_arithmetic_operations_synthesis(
+                    sdf_decoder=sdf_decoder, latent_codes_data=synthesized_latent_codes
+                )
+    
+                synthesis_type = "arithmetic"
+    
+                name = f"{selected_indices}.obj"
+                save_name = os.path.join(save_dir, name)
+    
+            else:
+                (
+                    selected_indices,
+                    random_interpolation_factor,
+                    synthesized_latent_code,
+                ) = synthesizer.random_interpolation_synthesis(
+                    sdf_decoder=sdf_decoder, latent_codes_data=synthesized_latent_codes
+                )
+    
+                synthesis_type = "interpolation"
+    
+                name = f"{selected_indices}__{str(random_interpolation_factor).replace('.', '-')}.obj"
+                save_name = os.path.join(save_dir, name)
+    
+            if os.path.exists(save_name):
+                continue
+    
+            _ = synthesizer.synthesize(
+                sdf_decoder=sdf_decoder,
+                latent_code=synthesized_latent_code,
+                resolution=resolution,
+                save_name=save_name,
+                map_z_to_y=map_z_to_y,
+                check_watertight=check_watertight,
+            )
+    
+            synthesized_data = {
+                "name": name,
+                "index": len(synthesized_latent_codes["data"]),
+                "synthesis_type": synthesis_type,
+                "latent_code": list(synthesized_latent_code.detach().cpu().numpy()),
+            }
+    
+            synthesized_latent_codes["data"].append(synthesized_data)
+    
+            np.savez(
+                synthesized_latent_codes_path,
+                synthesized_data=np.array(synthesized_latent_codes["data"]),
+            )
+    
+            clear_output(wait=False)    
+</code></pre><br>
+
+<figure>
+    <img src="/img/synthesized-skyscrapers-11.gif" width="100%">
+</figure><br>
+<figcaption style="text-align: center; margin-top: 1em">
+    From 15 skyscrapers to the 450 skyscrapers <br>
+    The first row that is illustrated as rectangles the initial 15 skyscrapers
+</figcaption>
+
+</div>
+<br><br>
+
+<h3>Limitations and future works</h3>
+<div class="article">
+    
+    While the project demonstrates the potential of Deep Generative AI in synthesizing skyscraper designs, it's not without its limitations. 
+    So, the following points need to be improved:
+
+    <ul>
+    <li>
+        <u>Design Evaluation</u>: Although the model can synthesize skyscraper designs, it currently lacks the capability to automatically evaluate the quality of these designs. 
+        <!-- Therefore, developing tools for assessing the design quality of synthesized skyscraper designs is necessary. -->
+    </li><br>
+    <li>
+        <u>Detail Expression</u>: One of the significant limitations of the current model is its inability to capture the intricate details of the skyscraper models accurately.
+        <!-- Therefore, it is appropriate to use models in the initial design phase.  -->
+    </li><br>
+    <li>
+        <u>Computational Resources</u>: The process of training the model, especially at high resolutions for detailed synthesis, requires substantial computational power and time
+        <!-- Therefore, it is necessary to research ways for synthesizing the 3d model faster. -->
+    </li><br>
+    <li>
+        <u>Interactive Design Tools:</u> Developing interactive tools that allow architects to manipulate latent vectors directly or specify constraints and preferences could make the technology more practical and appealing for real-world design applications.
+    </li>
+    </ul>
+
 </div>
 <br><br>
 
