@@ -6,6 +6,8 @@ lang: "en"
 excerpt_separator: <!--break-->
 date_format: "%B %d, %Y"
 
+google_site_verification: "GKJEYyW0dEIgdiKJcLRyWyeKoYYIW3YwSmsZGfbeEHU"
+
 # Layout
 
 show_excerpts: false        # show article excerpts on the home page
