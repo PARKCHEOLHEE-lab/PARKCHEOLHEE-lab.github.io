@@ -429,6 +429,49 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
 </div>
 <br><br>
 
+<h3>Tracking synthesized data</h3>
+<div class="article">
+
+    Since the function used above for synthesizing skyscrapers records data, we can use the data to check the parents of the synthesized skyscrapers.
+    The process involves tracking back from any given synthesized design to its origins using graph-based analysis. 
+    This helps us to <code>understand how specific designs are derived</code> and the influence of original models on synthesized outcomes.
+    Therefore, to track the synthesized skyscrapers, I used the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/aae3bdad2a91fdc87218f11d185ae67dbd7362fc/deepSDF/synthesize.py#L327-L368">BFS</a>.
+
+
+    <br><br>
+
+
+    The figures below demonstrate the application of these functions, showing the trace and visualization of synthesized skyscrapers starting from initial designs through various synthesis steps, culminating in complex structures. 
+    This illustrates the complex relationships and dependencies within the synthesized skyscrapers.
+
+    <br><br>
+    
+    <figure style="display: flex;">
+        <img src="/img/synthesized-skyscrapers-14.png" width="48%">
+        <img src="/img/synthesized-skyscrapers-19.png" width="48%">
+    </figure>
+    
+    <figure style="display: flex;">
+        <img src="/img/synthesized-skyscrapers-12.png" width="48%">
+        <img src="/img/synthesized-skyscrapers-15.png" width="48%">
+    </figure>
+    
+    <figure style="display: flex;">
+        <img src="/img/synthesized-skyscrapers-16.png" width="48%">
+        <img src="/img/synthesized-skyscrapers-17.png" width="48%">
+    </figure>
+    
+    <figure style="display: flex;">
+        <img src="/img/synthesized-skyscrapers-18.png" width="48%">
+        <img src="/img/synthesized-skyscrapers-13.png" width="48%">
+    </figure><br>
+
+    <figcaption>
+        Tracking synthesized skyscrapers
+    </figcaption>
+
+</div><br>
+
 <h3>References</h3>
 <div class="article">
 
