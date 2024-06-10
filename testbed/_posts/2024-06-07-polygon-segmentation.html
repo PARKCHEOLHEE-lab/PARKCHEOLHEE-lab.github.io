@@ -1,0 +1,102 @@
+---
+title: "Polygon segmentations"
+layout: post
+hashtag: "#geometry #deep-learning #graph-neural-network #link-prediction"
+comment: true
+splitter: 2
+featured: true
+thumbnail: /img/polygon-segmentation-thumbnail-1.png
+---
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<style>
+    .mjx-chtml {
+        font-size: 100% !important; /* Adjust the size as needed */
+    }
+</style>
+
+<div id="toc"></div>
+
+<h3>Objective</h3>
+<div class="article">
+
+    In the early stages of architectural design, there is a concept about the <code>axis</code> in which direction the building will be placed.
+    This plays an important role in determining the optimal layout considering the functionality, aesthetics, and environmental conditions of the building.
+    The goal of this project is to develop a segmenter that can determine how many axes a given 2D polygon should be segmented into and how to make those segmentations. 
+    <br><br>
+    
+    <figure style="display: flex;">
+        <img src="/img/polygon-segmentation-0.png" width="48%">
+        <img src="/img/polygon-segmentation-1.png" width="48%">
+    </figure>
+    
+    <figure style="display: flex;">
+        <img src="/img/polygon-segmentation-3.png" width="48%">
+        <img src="/img/polygon-segmentation-2.png" width="48%">
+    </figure>
+
+    <figcaption>
+        Segmented lands by a human architect
+    </figcaption><br><br>
+
+    The figures above are imaginary dividing lines arbitrarily set by the architect. The apartments in the figures are placed based on segmented polygons.
+    Human architects <code>intuitively know</code> how many axes a given 2D polygon should be segmented into and how to create these segmentations, but explaining this intuition to a computer is difficult.
+
+    <br><br>
+
+    To achieve this, I will use a combination of deep learning and graph theory. 
+    In the graph, each point of the polygon will be a node and the connections between points will be edges.
+    Based on this concept, I will implement a GNN-based model, which will learn how to optimally segment given polygons.
+
+    <!--break-->
+
+</div>
+<br><br>
+
+<h3>Understanding Graph Neural Network</h3>
+<div class="article">
+
+    Before generating data, let's understand graphs and Graph Neural Networks.
+    
+    Firstly, a Graph Neural Network (GNN) is a type of neural network designed to operate on graph structures. Unlike traditional neural networks, which work on fixed-size inputs like vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity. This makes GNNs particularly suitable for tasks where relationships between entities are important, such as social networks, molecular structures, and in this case, polygon segmentation for architectural design.
+
+    <br><br>
+
+    The key components of a GNN include nodes, edges, and a message-passing mechanism. Nodes represent the entities (e.g., points of a polygon), and edges represent the relationships or connections between these entities. The message-passing mechanism allows nodes to exchange information with their neighbors, enabling the network to capture the local and global structure of the graph.
+
+    In the context of our project, the GNN will learn to process the graph representation of a polygon and predict the optimal segmentation. Each node (polygon point) will gather information from its connected nodes through the edges, iteratively refining its understanding of the local and global structure of the polygon. This process allows the GNN to make informed decisions about how to divide the polygon into segments.
+
+    Training a GNN involves feeding it many examples of polygons along with their optimal segmentations. The network learns by adjusting its internal parameters to minimize the difference between its predicted segmentations and the ground truth provided in the training data. Over time, the GNN becomes adept at understanding the underlying patterns and rules that govern polygon segmentation, making it capable of generalizing to new, unseen polygons.
+
+    The advantages of using a GNN for this task include its ability to naturally handle the irregular structure of polygons and its flexibility in learning complex relationships between nodes. This approach promises to provide more accurate and efficient segmentation compared to traditional methods.
+
+
+</div>
+<br><br>
+
+<h3>Data creation and preparation using a naive algorithm</h3>
+<div class="article">
+</div>
+<br><br>
+
+<h3>Modeling</h3>
+<div class="article">
+</div>
+<br><br>
+
+<h3>Limitations and future works</h3>
+<div class="article">
+</div>
+<br><br>
+
+<h3>References</h3>
+<div class="article">
+
+    <ul>
+        <li><a href="https://pytorch-geometric.readthedocs.io/en/latest/">https://pytorch-geometric.readthedocs.io/en/latest/</a></li>
+        <li><a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/">https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/</a></li>
+    </ul>
+    
+</div><br><br>
