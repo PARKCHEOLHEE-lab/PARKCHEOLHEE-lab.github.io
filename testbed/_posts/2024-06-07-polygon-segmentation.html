@@ -28,13 +28,13 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     <br><br>
     
     <figure style="display: flex;">
-        <img src="/img/polygon-segmentation-0.png" width="48%">
-        <img src="/img/polygon-segmentation-1.png" width="48%">
+        <img src="/img/polygon-segmentation-0.png" width="45%">
+        <img src="/img/polygon-segmentation-1.png" width="45%">
     </figure>
     
     <figure style="display: flex;">
-        <img src="/img/polygon-segmentation-3.png" width="48%">
-        <img src="/img/polygon-segmentation-2.png" width="48%">
+        <img src="/img/polygon-segmentation-3.png" width="45%">
+        <img src="/img/polygon-segmentation-2.png" width="45%">
     </figure>
 
     <figcaption>
@@ -55,12 +55,26 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 </div>
 <br><br>
 
-<h3>Understanding Graph Neural Network</h3>
+<h3>A simple understanding of graph and GNN</h3>
 <div class="article">
 
     Before generating data, let's understand graphs and Graph Neural Networks.
+    Basically, the graph is defined \( G = (V, E) \). At this expression, \( V \) is the set of vertices (nodes) and \( E \) is the set of edges.
+
+    <br><br>
+
+    Graphs are mainly expressed as an <code>adjacency matrix</code>. When the number of points is \( n \), the size of the adjacency matrix is \( n \times n \). 
+    When dealing with a graph in machine learning, it is expressed as a feature matrix depicting the characteristics of points. When the number of features is \( f \), the dimension of the feature matrix is \( n \times f \).
+
+    <br><br>
+    <figure>
+        <img src="/img/polygon-segmentation-4.png" width="70%">
+        <figcaption>
+            <a href="https://mathworld.wolfram.com/AdjacencyMatrix.html">Adjacency Matrix</a><br>
+        </figcaption>
+    </figure><br><br>
     
-    Firstly, a Graph Neural Network (GNN) is a type of neural network designed to operate on graph structures. Unlike traditional neural networks, which work on fixed-size inputs like vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity. This makes GNNs particularly suitable for tasks where relationships between entities are important, such as social networks, molecular structures, and in this case, polygon segmentation for architectural design.
+    <!-- Firstly, a Graph Neural Network (GNN) is a type of neural network designed to operate on graph structures. Unlike traditional neural networks, which work on fixed-size inputs like vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity. This makes GNNs particularly suitable for tasks where relationships between entities are important, such as social networks, molecular structures, and in this case, polygon segmentation for architectural design.
 
     <br><br>
 
@@ -70,7 +84,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
     Training a GNN involves feeding it many examples of polygons along with their optimal segmentations. The network learns by adjusting its internal parameters to minimize the difference between its predicted segmentations and the ground truth provided in the training data. Over time, the GNN becomes adept at understanding the underlying patterns and rules that govern polygon segmentation, making it capable of generalizing to new, unseen polygons.
 
-    The advantages of using a GNN for this task include its ability to naturally handle the irregular structure of polygons and its flexibility in learning complex relationships between nodes. This approach promises to provide more accurate and efficient segmentation compared to traditional methods.
+    The advantages of using a GNN for this task include its ability to naturally handle the irregular structure of polygons and its flexibility in learning complex relationships between nodes. This approach promises to provide more accurate and efficient segmentation compared to traditional methods. -->
 
 
 </div>
@@ -96,6 +110,8 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
     <ul>
         <li><a href="https://pytorch-geometric.readthedocs.io/en/latest/">https://pytorch-geometric.readthedocs.io/en/latest/</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Graph_theory/">https://en.wikipedia.org/wiki/Graph_theory/</a></li>
+        <li><a href="https://mathworld.wolfram.com/AdjacencyMatrix.html/">https://mathworld.wolfram.com/AdjacencyMatrix.html/</a></li>
         <li><a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/">https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/</a></li>
     </ul>
     
