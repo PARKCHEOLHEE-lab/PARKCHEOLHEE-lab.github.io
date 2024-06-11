@@ -63,34 +63,63 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
     <br><br>
 
-    Graphs are mainly expressed as an <code>adjacency matrix</code>. When the number of points is \( n \), the size of the adjacency matrix is \( n \times n \). 
-    When dealing with a graph in machine learning, it is expressed as a feature matrix depicting the characteristics of points. When the number of features is \( f \), the dimension of the feature matrix is \( n \times f \).
+    Graphs are mainly expressed as an <code>adjacency matrix</code>. When the number of points is \( n \), the size of the adjacency matrix \( A \) is \( n \times n \). 
+    When dealing with a graph in machine learning, it is expressed as a feature matrix depicting the characteristics of points. When the number of features is \( f \), the dimension of the feature matrix \( X \) is \( n \times f \).
 
-    <br><br>
     <figure>
-        <img src="/img/polygon-segmentation-4.png" width="70%">
+        <img src="/img/polygon-segmentation-4.png" width="90%">
         <figcaption>
-            <a href="https://mathworld.wolfram.com/AdjacencyMatrix.html">Adjacency Matrix</a><br>
+            <a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479">Understanding of the graph expression</a> <br>
+            In this figure, \( n = 4 \), \( f = 3 \) <br> 
+            \( A = n \times n = 4 \times 4 \) <br>
+            \( X = n \times f = 4 \times 3 \).
         </figcaption>
     </figure><br><br>
+
+    <code>Graphs</code> are used in various fields to represent data, and they are useful when teaching geometry to deep learning models for the following reasons:
     
-    <!-- Firstly, a Graph Neural Network (GNN) is a type of neural network designed to operate on graph structures. Unlike traditional neural networks, which work on fixed-size inputs like vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity. This makes GNNs particularly suitable for tasks where relationships between entities are important, such as social networks, molecular structures, and in this case, polygon segmentation for architectural design.
+    <ul style="padding-left: 2em;">
+        <li class="decimal"><b>Representing Complex Structures Simply</b>: Graphs effectively represent complex structures and relationships, making them suitable for modeling various forms of geometric data.</li>
+        <li class="decimal"><b>Flexibility</b>: Graphs can accommodate varying numbers of nodes and edges, making them advantageous when dealing with objects of diverse shapes and sizes.</li>
+    </ul>
 
     <br><br>
 
-    The key components of a GNN include nodes, edges, and a message-passing mechanism. Nodes represent the entities (e.g., points of a polygon), and edges represent the relationships or connections between these entities. The message-passing mechanism allows nodes to exchange information with their neighbors, enabling the network to capture the local and global structure of the graph.
+    <code>Graph Neural Networks (GNN)</code> is a type of neural network designed to operate on graph structures. 
+    Unlike traditional neural networks, which work on fixed-size inputs like vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity. 
+    This makes GNNs particularly suitable for tasks where relationships are important, such as social networks, <code>geometries</code>, etc. 
+    It primarily use connections and the states of neighboring nodes to update (learn) the state of each node (<a href="https://process-mining.tistory.com/164">Message Passing</a>). 
+    Predictions are then made based on the final states. This final state is generally referred to as the <code>node embedding</code> (or I think also <code>encoding</code> is right because raw features of nodes are changed to other representations).
 
-    In the context of our project, the GNN will learn to process the graph representation of a polygon and predict the optimal segmentation. Each node (polygon point) will gather information from its connected nodes through the edges, iteratively refining its understanding of the local and global structure of the polygon. This process allows the GNN to make informed decisions about how to divide the polygon into segments.
+    <br><br>
 
-    Training a GNN involves feeding it many examples of polygons along with their optimal segmentations. The network learns by adjusting its internal parameters to minimize the difference between its predicted segmentations and the ground truth provided in the training data. Over time, the GNN becomes adept at understanding the underlying patterns and rules that govern polygon segmentation, making it capable of generalizing to new, unseen polygons.
+    There are various methods for Message Passing, but since this task will be dealing with geometry, let's focus on models based on <code>Spatial Convolutionan Network</code>. 
+    This method is known to be suitable for representing data with important geometric and spatial structures.
+    GNNs using Spatial Convolutional Network enable each node to integrate information from neighboring nodes, allowing for a more accurate understanding of local characteristics. 
+    Through this, the model can better comprehend the complex shapes and features of geometry.
 
-    The advantages of using a GNN for this task include its ability to naturally handle the irregular structure of polygons and its flexibility in learning complex relationships between nodes. This approach promises to provide more accurate and efficient segmentation compared to traditional methods. -->
+    <figure>
+        <img src="/img/polygon-segmentation-5.png" width="90%">
+        <figcaption>
+            Convolution operations<br>
+            From the left, <a href="https://arxiv.org/abs/1901.00596">2D Convolution · Graph Convolution</a>
+        </figcaption>
+    </figure><br><br>
 
+    The idea of a Spatial Convolutional Network (SCN) is similar to that of a Convolutional Neural Network (CNN). An image can be transformed into a <code>grid-shaped graph</code>.
+
+    <br><br>
+
+    CNN processes images by using filters to combine the surrounding pixels of a central pixel. 
+    <code>SCN</code> extends this idea to graph structures by combining the features of neighboring connected nodes instead of neighboring pixels.
+
+    Specifically, CNNs are useful for processing images in a regular grid structure, where the filter considers the surrounding area of each pixel to extract features. 
+    In contrast, <code>SCNs</code> operate on general graph structures, combining the features of each node with those of its connected neighbors to generate <code>embeddings</code>.
 
 </div>
 <br><br>
 
-<h3>Data creation and preparation using a naive algorithm</h3>
+<h3>Data preparation</h3>
 <div class="article">
 </div>
 <br><br>
@@ -102,6 +131,8 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
 <h3>Limitations and future works</h3>
 <div class="article">
+
+    <!-- CNN 모델과의 비교. CNN + GNN 모델 결합 -->
 </div>
 <br><br>
 
@@ -112,6 +143,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
         <li><a href="https://pytorch-geometric.readthedocs.io/en/latest/">https://pytorch-geometric.readthedocs.io/en/latest/</a></li>
         <li><a href="https://en.wikipedia.org/wiki/Graph_theory/">https://en.wikipedia.org/wiki/Graph_theory/</a></li>
         <li><a href="https://mathworld.wolfram.com/AdjacencyMatrix.html/">https://mathworld.wolfram.com/AdjacencyMatrix.html/</a></li>
+        <li><a href="https://process-mining.tistory.com/164">https://process-mining.tistory.com/164</a></li>
         <li><a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/">https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/</a></li>
     </ul>
     
