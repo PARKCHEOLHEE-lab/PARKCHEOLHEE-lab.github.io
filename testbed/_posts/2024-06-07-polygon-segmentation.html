@@ -19,7 +19,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
 <div id="toc"></div>
 
-<h3>Objective</h3>
+<h3>Objective ✂️</h3>
 <div class="article">
 
     In the early stages of architectural design, there is a concept about the <code>axis</code> in which direction the building will be placed.
@@ -121,6 +121,19 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
 <h3>Data preparation</h3>
 <div class="article">
+
+    Since I have briefly looked into graphs and GNNs in the above, let's now prepare the data! There are already many raw polygons around us, and that is the land.
+    First, let's collect raw polygons from <a href="https://www.vworld.kr/dtna/dtna_fileDataList_s001.do">vworld</a>. Below is a part of all the raw polygons I collected from vworld.
+
+    <figure>
+        <img src="/img/polygon-segmentation-6.png" width="95%">
+        <figcaption>
+            Somewhere in Seoul.shp
+        </figcaption>
+    </figure><br><br>
+
+    <!-- 이제 대량의 raw polygons를 수집했으니, 데이터를 만들어봅시다. 모든 polygons에 대한 segmentations를 수작업으로 labeling할 수는 없으니 naive한 알고리즘으로 작업을 줄여보도록 하겠습니다. -->
+
 </div>
 <br><br>
 
