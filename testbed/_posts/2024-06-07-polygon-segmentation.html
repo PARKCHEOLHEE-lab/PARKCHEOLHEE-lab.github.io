@@ -526,8 +526,16 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
     <br><br>
 
-    The segmenter generates the some segmentations through the encoder and decoder processes described above. 
+    The segmenter generates the segmentations using <code>topk</code> through the encoder and decoder processes described above. 
     It then sorts the generated links in order of connection strength, and the predictor decides how many links to use.
+
+    <figure>
+        <img src="/img/polygon-segmentation-15.png" width="100%">
+        <figcaption>
+            <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/5052a9e5ea1d740f7a98c3d07b249e233030435c/polygon_segmentation_with_gcn/src/model.py#L327-L462">Inference</a> process<br>
+            From the top, topk segmentations · segmentation selected by predictor
+        </figcaption>
+    </figure>
 
 
 </div>
