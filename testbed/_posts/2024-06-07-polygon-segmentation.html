@@ -132,12 +132,408 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
         </figcaption>
     </figure><br><br>
 
-    <!-- 이제 대량의 raw polygons를 수집했으니, 데이터를 만들어봅시다. 모든 polygons에 대한 segmentations를 수작업으로 labeling할 수는 없으니 naive한 알고리즘으로 작업을 줄여보도록 하겠습니다. -->
+    Now that we have collected the raw polygons, let's define the characteristics of the polygons to be included in the feature matrix. They are as follows:
+    <ul style="padding-left: 2em;">
+        <li>X coordinate (normalized)</li>
+        <li>Y coordinate (normalized)</li>
+        <li>Inner angle of each vertex (normalized)</li>
+        <li>Incoming edge length (normalized)</li>
+        <li>Outgoing edge length (normalized)</li>
+        <li>Concavity or convexity of each vertex</li>
+        <li>Minimum rotated rectangle ratio</li>
+        <li>Minimum rotated rectangle aspect ratio</li>
+        <li>Polygon area</li>
+    </ul><br><br>
+
+    Then, I need to convert these data into graph form. Here is an example of hand labeling:
+    
+    <figure>
+        <img src="/img/polygon-segmentation-8.png" width="100%">
+        <figcaption>
+            Land polygon in Gangbukgu, Seoul <br>
+            From the left, raw polygon & labeled link · adjacency matrix · feature matrix
+        </figcaption>
+    </figure><br><br>
+
+    However since it is impossible to label countless raw polygons by hand, I need to generate this data automatically. 
+    It would be nice if it could be fully automated with an algorithm, but if that were possible, there wouldn't be a need for deep learning 🤔.
+    
+    So, I created a naive algorithm that can reduce manual work even a little. 
+    This algorithm is inspired by the <code>triangulations</code> of the polygon. The process of this algorithm is as follows:
+    
+    <ul style="padding-left: 2em;">
+        <li class="decimal"><b>Triangulate a polygon</b>: Retrieve the triangulation edges.</li>
+        <li class="decimal"><b>Generate Splitter Combinations</b>: Generate all possible combinations of splitters for iterating over them.</li>
+        <li class="decimal"><b>Iterate Over Combinations</b>: Iterate over all possible combinations of splitters to find the best segmented polygon.</li>
+        <li class="decimal"><b>Check Split Validity</b>: Check if all segmentations are valid.</li>
+        <li class="decimal"><b>Compute Scores and evaluation</b>: Compute scores to store the best segmentations.</li>
+    </ul><br><br>
+
+    The scores (<code>even_area_score</code>, <code>ombr_ratio_score</code>, <code>slope_similarity_score</code>) used in the fifth step are computed as follows, and each score is aggregated as a weighted sum to obtain the segmentations with the lowest score.
+
+    <br><br>
+
+    <p>
+        \[
+        even\_area\_score = \frac{(A_1 - \sum_{i=2}^{n} A_i)}{A_{polygon}} \times {w_1}
+        \]
+    </p>
+    <br>
+    <p>
+        \[
+        ombr\_ratio\_score = |(1 - \frac{A_{split1}}{A_{ombr1}}) - \sum_{i=2}^{n} (1 - \frac{A_{spliti}}{A_{ombri}})| \times {w_2}
+        \]
+    </p>
+    <br>
+    <p>
+        \[
+        avg\_slope\_similarity_i = \frac{\sum_{j=1}^{k_i} |\text{slope}_j - \text{slope}_{\text{main}}|}{k_i}
+        \]
+    </p>
+    <br>
+    <p>
+        \[
+        slope\_similarity\_score = \frac{\sum_{i=1}^{n} avg\_slope\_similarity_i}{n} \times {w_3}
+        \]
+    </p>
+    <br><br>
+    <p>
+        \[
+        score = even\_area\_score + ombr\_ratio\_score + slope\_similarity\_score
+        \]
+    </p>
+    <br><br>
+
+
+    The whole code for this algorithm can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/b8e8e7516326c428f435a17af35705308e14decc/polygon_segmentation_with_gcn/src/data_creator.py#L670-L855">here</a>,
+    and the key part of the algorithm is as follows.
+
+<pre><code class="python">
+    def segment_polygon(
+        self,
+        polygon: Polygon,
+        number_to_split: int,
+        segment_threshold_length: float,
+        even_area_weight: float,
+        ombr_ratio_weight: float,
+        slope_similarity_weight: float,
+        return_splitters_only: bool = True,
+    ):
+        """Segment a given polygon
+
+        Args:
+            polygon (Polygon): polygon to segment
+            number_to_split (int): number of splits to segment
+            segment_threshold_length (float): segment threshold length
+            even_area_weight (float): even area weight
+            ombr_ratio_weight (float): ombr ratio weight
+            slope_similarity_weight (float): slope similarity weight
+            return_splitters_only (bool, optional): return splitters only. Defaults to True.
+
+        Returns:
+            Tuple[List[Polygon], List[LineString], List[LineString]]: splits, triangulations edges, splitters
+        """
+
+        _, triangulations_edges = self.triangulate_polygon(
+            polygon=polygon,
+            segment_threshold_length=segment_threshold_length,
+        )
+
+        splitters_selceted = None
+        splits_selected = None
+        splits_score = None
+
+        for splitters in list(itertools.combinations(triangulations_edges, number_to_split - 1)):
+            exterior_with_splitters = ops.unary_union(list(splitters) + self.explode_polygon(polygon))
+
+            exterior_with_splitters = shapely.set_precision(
+                exterior_with_splitters, self.TOLERANCE_LARGE, mode="valid_output"
+            )
+
+            exterior_with_splitters = ops.unary_union(exterior_with_splitters)
+
+            splits = list(ops.polygonize(exterior_with_splitters))
+
+            if len(splits) != number_to_split:
+                continue
+
+            if any(split.area < polygon.area * 0.25 for split in splits):
+                continue
+
+            is_acute_angle_in = False
+            is_triangle_shape_in = False
+            for split in splits:
+                split_segments = self.explode_polygon(split)
+                splitter_indices = []
+
+                for ssi, split_segment in enumerate(split_segments):
+                    if split_segment.length <= self.TOLERANCE_LARGE * 2:
+                        continue
+
+                    reduced_split_segment = DataCreatorHelper.extend_linestring(
+                        split_segment, -self.TOLERANCE_LARGE, -self.TOLERANCE_LARGE
+                    )
+                    buffered_split_segment = reduced_split_segment.buffer(self.TOLERANCE, cap_style=CAP_STYLE.flat)
+
+                    if buffered_split_segment.intersects(MultiLineString(splitters)):
+                        splitter_indices.append(ssi)
+                        splitter_indices.append(ssi + 1)
+
+                degrees = self.compute_polyon_inner_degrees(split)
+                degrees += [degrees[0]]
+
+                if (np.array(degrees)[splitter_indices] < 20).sum():
+                    is_acute_angle_in = True
+                    break
+
+                if len(self.explode_polygon(self.simplify_polygon(split))) == 3:
+                    is_triangle_shape_in = True
+                    break
+
+            if is_acute_angle_in or is_triangle_shape_in:
+                continue
+
+            sorted_splits_area = sorted([split.area for split in splits], reverse=True)
+            even_area_score = (sorted_splits_area[0] - sum(sorted_splits_area[1:])) / polygon.area * even_area_weight
+
+            ombr_ratio_scores = []
+            slope_similarity_scores = []
+
+            for split in splits:
+                ombr = split.minimum_rotated_rectangle
+                each_ombr_ratio = split.area / ombr.area
+                inverted_ombr_score = 1 - each_ombr_ratio
+                ombr_ratio_scores.append(inverted_ombr_score)
+
+                slopes = []
+                for splitter in splitters:
+                    if split.buffer(self.TOLERANCE_LARGE).intersects(splitter):
+                        slopes.append(self.compute_slope(splitter.coords[0], splitter.coords[1]))
+
+                splitter_main_slope = max(slopes, key=abs)
+
+                split_slopes_similarity = []
+                split_segments = self.explode_polygon(split)
+                for split_seg in split_segments:
+                    split_seg_slope = self.compute_slope(split_seg.coords[0], split_seg.coords[1])
+                    split_slopes_similarity.append(abs(splitter_main_slope - split_seg_slope))
+
+                avg_slope_similarity = sum(split_slopes_similarity) / len(split_slopes_similarity)
+                slope_similarity_scores.append(avg_slope_similarity)
+
+            ombr_ratio_score = abs(ombr_ratio_scores[0] - sum(ombr_ratio_scores[1:])) * ombr_ratio_weight
+            slope_similarity_score = sum(slope_similarity_scores) / len(splits) * slope_similarity_weight
+
+            score_sum = even_area_score + ombr_ratio_score + slope_similarity_score
+
+            if splits_score is None or splits_score > score_sum:
+                splits_score = score_sum
+                splits_selected = splits
+                splitters_selceted = splitters
+
+        if return_splitters_only:
+            return splitters_selceted
+
+        return splits_selected, triangulations_edges, splitters_selceted
+</code></pre><br><br>
+
+    However, this algorithm is not perfect, and there are some problems. Because this algorithm uses the weights for computing scores, it may be sensitive to them. Look at the below figures.
+    The first is good case, and the second is bad case. 
+    
+    <figure>
+        <img src="/img/polygon-segmentation-9.png" width="70%">
+        <!-- <img src="/img/polygon-segmentation-11.png" width="70%"> -->
+        <img src="/img/polygon-segmentation-10.png" width="70%">
+        <!-- <img src="/img/polygon-segmentation-12.png" width="70%"> -->
+        <figcaption>
+            Results of the algorithm<br>
+            From the left, triangulations · segmentations · oriented bounding boxes for segmentations
+        </figcaption>
+    </figure><br><br>
+
+    Since these problems cannot be handled by my naive algorithm, I first used the algorithm to process the raw polygon data and then labeled it manually like the following.
+    So now I have approximately 40000 data with augmented originals. The all dataset can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/tree/main/polygon_segmentation_with_gcn/data/processed">here</a>.
+    <figure>
+        <img src="/img/polygon-segmentation-13.png" width="100%">
+        <figcaption>
+            Some data for training<br>
+        </figcaption>
+    </figure>
+
+</div>
+<br>
+
+<h3>Model for link prediction</h3>
+<div class="article">
+
+    Now, let's create a graph model using <a href="https://pytorch-geometric.readthedocs.io/en/latest/">Pytorch Geometric</a> and teach the graph data.
+    Pytorch Geometric is a library based on PyTorch to easily write and train graph neural networks.
+
+    <br><br>
+
+    The role I need to assign to the model is to generate lines that will segment polygons. This can be translated into a task primarily used in GNNs, known as <code>link prediction</code>.
+    Link prediction models usually use an <code>encoder-decoder</code> structure. 
+    The encoder creates node embeddings, which are vector representations of the nodes that extract their features. 
+    The decoder then uses these embeddings to predict the probability that a pair of nodes is connected.
+
+    <br><br>
+
+    When inference, the model inputs all possible node pairs into the decoder. 
+    It then calculates the probability of each pair being connected. 
+    Only pairs with probabilities above a certain threshold are kept, indicating likely connections.
+
+    <br><br>
+
+    Generally, a simple operation like the <code>dot product</code> is used to predict links based on the similarity of node pairs. 
+    However, I thought this approach was not suitable for tasks using geometric data, so I additionally trained a decoder. 
+    Below are the <code>encode</code> and <code>decode</code> methods of the model. The complete model code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/b8e8e7516326c428f435a17af35705308e14decc/polygon_segmentation_with_gcn/src/model.py#L124">here</a>.
+
+<pre><code class="python">
+    class PolygonSegmenter(nn.Module):
+        def __init__(
+            self,
+            conv_type: str,
+            in_channels: int,
+            hidden_channels: int,
+            out_channels: int,
+            encoder_activation: nn.Module,
+            decoder_activation: nn.Module,
+            predictor_activation: nn.Module,
+            use_skip_connection: bool = Configuration.USE_SKIP_CONNECTION,
+        ):
+                
+            ( ... )
+
+        def encode(self, data: Batch) -> torch.Tensor:
+            """Encode the features of polygon graphs
+
+            Args:
+                data (Batch): graph batch
+
+            Returns:
+                torch.Tensor: Encoded features
+            """
+
+            encoded = self.encoder(data.x, data.edge_index, edge_weight=data.edge_weight)
+
+            return encoded
+
+        def decode(self, data: Batch, encoded: torch.Tensor, edge_label_index: torch.Tensor) -> torch.Tensor:
+            """Decode the encoded features of the nodes to predict whether the edges are connected
+
+            Args:
+                data (Batch): graph batch
+                encoded (torch.Tensor): Encoded features
+                edge_label_index (torch.Tensor): indices labels
+
+            Returns:
+                torch.Tensor: whether the edges are connected
+            """
+
+            # Merge raw features and encoded features to inject geometric informations
+            if self.use_skip_connection:
+                encoded = torch.cat([data.x, encoded], dim=1)
+
+            decoded = self.decoder(torch.cat([encoded[edge_label_index[0]], encoded[edge_label_index[1]]], dim=1)).squeeze()
+
+            return decoded
+</code></pre><br>
+
+    The encoding process transforms the original feature matrix \( F \) into a new matrix \( E \) with potentially different dimensions. 
+    The following is an expression of the feature matrix before and after the encode function.
+
+    <ul>
+        <p>\( n \) as the number of nodes</p>
+        <p>\( m \) as the number of features</p>
+        <p>\( c \) as the number of channels</p>
+        <p>\( F \in \mathbb{R}^{n \times m} \) as the feature matrix before the <code>encode</code> function</p>
+        <p>\( E \in \mathbb{R}^{n \times c} \) as the feature matrix after the <code>encode</code> function</p>
+    </ul>
+
+    <div style="display: flex; justify-content: space-around;">
+        <div>
+            \[
+            F = \begin{bmatrix}
+            f_{11} & f_{12} & \cdots & f_{1m} \\
+            f_{21} & f_{22} & \cdots & f_{2m} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            f_{n1} & f_{n2} & \cdots & f_{nm}
+            \end{bmatrix}
+            \]
+        </div>
+        <div>
+            \[
+            E = \begin{bmatrix}
+            e_{11} & e_{12} & \cdots & e_{1c} \\
+            e_{21} & e_{22} & \cdots & e_{2c} \\
+            \vdots & \vdots & \ddots & \vdots \\
+            e_{n1} & e_{n2} & \cdots & e_{nc}
+            \end{bmatrix}
+            \]
+        </div>
+    </div><br><br>
+
+
+    In the <code>decode</code> method, the encoded features of the nodes and <code>raw features</code> are used to predict the connections (links) between them. 
+    This skip connection merges raw features and encoded features to inject geometric information. 
+    Using skip connections helps preserve original features, and enhances overall model performance by combining low-level and high-level information.
+
+    <br><br>
+
+
+    In the <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/b8e8e7516326c428f435a17af35705308e14decc/polygon_segmentation_with_gcn/src/model.py#L273-L323">feedforward</a> process, the decoder is trained with connected labels and labels that should not be connected. This is a technique called <code>negative sampling</code>, which is used to improve model performance in link prediction tasks.
+
+    By providing examples of what should not be linked, negative sampling helps the model better distinguish between actual links and non-links, leading to improved accuracy in predicting future or missing links.
+
+    <br><br>
+    In most networks, actual links are significantly fewer than non-links, which can <code>bias</code> the model towards predicting no link. Negative sampling allows for controlled selection of negative examples, balancing the training data and enhancing the learning process.
+
+<pre><code class="python">
+        def forward(self, data: Batch) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+            """Forward method of the models, segmenter and predictor
+
+            Args:
+                data (Batch): graph batch
+
+            Returns:
+                Tuple[torch.Tensor, torch.Tensor, torch.Tensor]: whether the edges are connected, predicted k and target k
+            """
+
+            # Encode the features of polygon graphs
+            encoded = self.encode(data)
+
+            ( ... )
+
+            # Sample negative edges
+            negative_edge_index = negative_sampling(
+                edge_index=data.edge_label_index_only,
+                num_nodes=data.num_nodes,
+                num_neg_samples=int(data.edge_label_index_only.shape[1] * Configuration.NEGATIVE_SAMPLE_MULTIPLIER),
+                method="sparse",
+            )
+
+            # Decode the encoded features of the nodes to predict whether the edges are connected
+            decoded = self.decode(data, encoded, torch.hstack([data.edge_label_index_only, negative_edge_index]).int())
+
+            return decoded, k_predictions, k_targets
+</code></pre><br><br>
+
+    Up to this point, I defined the encoder and decoder.
+    Since the encoder and decoder use nodes in batches, it seems that they cannot recognize each graph separately.
+
+    Because I wanted to train the model on how many segmentations to divide the graph into when a graph is input, 
+    I defined a <code>predictor</code> to train <code>k</code> separately within the <code>segmenter</code> class.
+
+    <br><br>
+
+    The segmenter generates the some segmentations through the encoder and decoder processes described above. 
+    It then sorts the generated links in order of connection strength, and the predictor decides how many links to use.
+
 
 </div>
 <br><br>
 
-<h3>Modeling</h3>
+<h3>Training and evaluating</h3>
 <div class="article">
 </div>
 <br><br>
@@ -145,7 +541,10 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 <h3>Limitations and future works</h3>
 <div class="article">
 
-    <!-- CNN 모델과의 비교. CNN + GNN 모델 결합 -->
+    <!--
+        CNN 모델과의 비교. CNN + GNN 모델 결합 
+        predictor label 불균형
+    -->
 </div>
 <br><br>
 
