@@ -537,33 +537,174 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
         </figcaption>
     </figure>
 
+    <br><br>
+
+    Then, taking inspiration from <code>IoU loss</code>, I defined <code>GeometricLoss</code> to evaluate segmentation quality.
+    The <code>GeometricLoss</code> is used with BCELoss and aims to quantify the discrepancy between predicted and ground-truth geometric structures within a <code>graph</code>. 
+    Process of the geometric loss calculation is as follows:
+        
+    <ul style="padding-left: 2em;">
+        <li class="decimal"><b>Polygon Creation from Node Features</b>: Each graph's node features, representing coordinates, are converted into a polygon.</li>
+        <li class="decimal"><b>Connecting Predicted Edges</b>: These edges represent the predicted segmentation of the polygon.</li>
+        <li class="decimal"><b>Connecting Ground-Truth Edges</b>: These edges represent the correct segmentation of the polygon.</li>
+        <li class="decimal"><b>Creating Buffered Unions</b>: The predicted and ground-truth edges are combined and then buffered.</li>
+        <li class="decimal"><b>Calculating Intersection</b>: This intersection represents the common area between the predicted and true geometric structures.</li>
+        <li class="decimal"><b>Computing Geometric Loss</b>: The intersection area is squared and negated to obtain and <code>minimize</code> the geometric loss.</li>
+    </ul><br><br>
+
+    The <code>GeometricLoss</code> class is defined as follows and uses <code>ray</code> to parallelize the geometric loss calculation for each graph in the batch.
+    The code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/5052a9e5ea1d740f7a98c3d07b249e233030435c/polygon_segmentation_with_gcn/src/model.py#L39-L123">here</a>
+
+<pre><code class="python">
+    class GeometricLoss(nn.Module):
+        def __init__(self, weight: float = 1.0):
+            super().__init__()
+            self.weight = weight
+
+        @staticmethod
+        @ray.remote
+        def compute_geometric_loss(each_data: Data, each_segmentation_indices: torch.Tensor) -> float:
+            """Compute geometric loss for each graph
+
+            Args:
+                each_data (Data): Data object of a graph
+                each_segmentation_indices (torch.Tensor): Segmentation indices of a graph
+
+            Returns:
+                float: Geometric loss
+            """
+
+            each_polygon = geometry.Polygon(each_data.x[:, :2].tolist())
+
+            predicted_edges = DataCreatorHelper.connect_polygon_segments_by_indices(
+                each_polygon, each_segmentation_indices.detach().cpu().numpy()
+            )
+
+            predicted_edges = [e for e in predicted_edges if e.length > 0]
+
+            predicted_edges = [
+                DataCreatorHelper.extend_linestring(
+                    e, -Configuration.LINESTRING_REDUCTION_LENGTH, -Configuration.LINESTRING_REDUCTION_LENGTH
+                )
+                for e in predicted_edges
+            ]
+
+            label_edges = DataCreatorHelper.connect_polygon_segments_by_indices(
+                each_polygon, each_data.edge_label_index_only.unique(dim=1).detach().cpu().numpy()
+            )
+
+            label_edges = [e for e in label_edges if e.length > 0]
+
+            label_edges = [
+                DataCreatorHelper.extend_linestring(
+                    e, -Configuration.LINESTRING_REDUCTION_LENGTH, -Configuration.LINESTRING_REDUCTION_LENGTH
+                )
+                for e in label_edges
+            ]
+
+            predicted_edges_union = geometry.MultiLineString(predicted_edges)
+            label_edges_union = geometry.MultiLineString(label_edges)
+
+            predicted_edges_union_buffered = predicted_edges_union.buffer(
+                Configuration.EDGES_BUFFER_DISTANCE, join_style=geometry.JOIN_STYLE.mitre
+            )
+
+            label_edge_union_buffered = label_edges_union.buffer(
+                Configuration.EDGES_BUFFER_DISTANCE, join_style=geometry.JOIN_STYLE.mitre
+            )
+
+            intersection = label_edge_union_buffered.intersection(predicted_edges_union_buffered)
+
+            geometric_loss = intersection.area**2
+            geometric_loss *= -1
+
+            return geometric_loss
+
+        def forward(self, data: Batch, infered: List[torch.Tensor]) -> float:
+            """Compute geometric loss for graph batch using ray
+
+            Args:
+                data (Batch): Batch object of a graph
+                infered (List[torch.Tensor]): List of infered segmentation indices by segmenter
+
+            Returns:
+                float: Geometric loss
+            """
+
+            tasks = [
+                self.compute_geometric_loss.remote(data[i].to("cpu"), infered[i].to("cpu")) for i in range(data.num_graphs)
+            ]
+
+            all_geometric_losses = ray.get(tasks)
+
+            all_geometric_losses = torch.tensor(all_geometric_losses)
+            geometric_loss = all_geometric_losses.sum() / all_geometric_losses.shape[0]
+
+            return geometric_loss
+</code></pre>
 
 </div>
 <br><br>
 
 <h3>Training and evaluating</h3>
 <div class="article">
+    It's time to train the model. 
+    The model has been trained for 500 epochs, during which both the training loss and validation loss were recorded to monitor the training progress and convergence. As shown in the plots:
+
+    <ul style="padding-left: 2em;">
+        <li>According to the top plots, both the training loss and validation loss decrease quickly initially and then generalize.</li>
+        <li>All evaluation metrics (accuracy, F1 score, recall, and AUROC) show rapid improvement initially and then stabilize, having good generalization.</li>
+    </ul>
+    
+    <figure>
+        <img src="/img/polygon-segmentation-18.png" width="80%">
+        <figcaption>
+            Losses and metrics for 500 epochs
+        </figcaption>
+    </figure><br><br>
+    
+    All the metrics look good, but there is a question about whether these metrics can be trusted 100%. 
+    This may be due to the impact of <code>negative sampling</code>. <br><br>
+    Based on the visualization of some of the test data, it is evident that the model accurately predicts polygons that do not require segmenting. 
+    This suggests that the model may be <code>overfitting on negative samples</code>. 
+    High performance on negative samples might not accurately reflect the model's ability to identify positive cases correctly.
+
+    <figure>
+        <img src="/img/polygon-segmentation-19.png" width="100%">
+        <figcaption>
+            Evaluate some test data qualitatively
+        </figcaption>
+    </figure>
+
+
+    
 </div>
 <br><br>
 
 <h3>Limitations and future works</h3>
 <div class="article">
 
-    <!--
-        CNN 모델과의 비교. CNN + GNN 모델 결합 
-        predictor label 불균형
-    -->
+    GNNs are node embedding-based models, so they seem to recognize the characteristics of <code>individual nodes</code> rather than the <code>overall shape of the graph</code>. 
+    While GNNs have a good ability to generalize shapes during training, it has been challenging to overfit them accurately to the intended labels.
+    
+    <ul style="padding-left: 2em;">
+        <li><b>Comparison with CNNs</b>: CNNs excel at capturing local patterns and combining them into more abstract representations, which can be advantageous for tasks involving polygons.</li>
+        <li><b>Imbalanced labels for predictor</b>: The predictor is trained to select one of 0, 1, or 2, but the number of data for 2 is very few.</li>
+        <li><b>Exploring reliable metrics</b>: Explore metrics that are more suitable for geometric tasks.</li>
+        <li><b>Overfitting</b>: Studying how positive labels can be completely overfitted.</li>
+    </ul>
 </div>
 <br><br>
 
 <h3>References</h3>
 <div class="article">
 
-    <ul>
+    <ul style="padding-left: 2em;">
         <li><a href="https://pytorch-geometric.readthedocs.io/en/latest/">https://pytorch-geometric.readthedocs.io/en/latest/</a></li>
         <li><a href="https://en.wikipedia.org/wiki/Graph_theory/">https://en.wikipedia.org/wiki/Graph_theory/</a></li>
         <li><a href="https://mathworld.wolfram.com/AdjacencyMatrix.html/">https://mathworld.wolfram.com/AdjacencyMatrix.html/</a></li>
         <li><a href="https://process-mining.tistory.com/164">https://process-mining.tistory.com/164</a></li>
+        <li><a href="https://blog.naver.com/gyrbsdl18/222556439520">https://blog.naver.com/gyrbsdl18/222556439520</a></li>
         <li><a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/">https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479/</a></li>
     </ul>
     
