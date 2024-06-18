@@ -1,0 +1,156 @@
+---
+title: "Intuitive understanding of Linear Algebra"
+layout: post
+hashtag: "#geometry #deep-learning #graph-neural-network #link-prediction"
+comment: true
+splitter: 3
+featured: false
+thumbnail: /img/polygon-segmentation-thumbnail-1.png
+---
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<style>
+    .mjx-chtml {
+        font-size: 100% !important; /* Adjust the size as needed */
+    }
+</style>
+
+<div id="toc"></div>
+
+<div style="text-align: center;">
+    <i>This article's contents are based on the book <a href="https://product.kyobobook.co.kr/detail/S000001792467">Linear Algebra for Programmers</a>.</i>
+</div><br><br>
+
+<h3>When thinking of data as space, intuition works</h3>
+<div class="article">
+
+    We live in a three-dimensional space. To handle problems in a 3D world, we need terms that describe this 'space' well. 
+    Examples include computer graphics, car navigation, and games. 
+    The vector spaces in linear algebra abstract certain properties of our real space. Therefore, linear algebra provides convenient terms and concepts to describe space. 
+    For instance, if you're thinking about 'how to draw a 3D object on a 2D plane,' you encounter the problem of 'what 2D image appears when you move and rotate the viewpoint in 3D space.' 
+    Linear algebra plays a fundamental role in solving such problems.
+
+    <br><br>
+    
+    However, we don't learn linear algebra just to solve problems in space.
+
+    <br><br>
+    
+    You'll often want to handle data composed of multiple numbers, not just single values. 
+    These cases might not be directly related to 'space,' so you can handle them without explicitly thinking about 'space.' 
+    But if you interpret this data as 'points in high-dimensional space,' you can use your <code>spatial intuition</code>.
+
+    <br><br>
+    
+    Although we can only recognize three-dimensional space, many 'general n-dimensional phenomena' can be intuitively understood by <code>inferring</code> from three-dimensional space. 
+    This interpretation is effective in data analysis. When it comes to 'space' problems, linear algebra steps in. 
+    <!-- Principal Component Analysis (PCA) and the Least Squares Method are classic examples. This book will explain these applications as well. -->
+    <!--break-->
+
+    <!-- \begin{array}{|c|c|c|}
+    \hline
+    A & B & C \\
+    \hline
+    2.178 & 97.8 & 99.4 \\
+    11.96 & 88.06 & 96.44 \\
+    55.0 & 45.0 & 83.5 \\
+    27.61 & 72.4 & 91.7 \\
+     &  &  \\
+    . & . & . \\
+    . & . & . \\
+    . & . & . \\
+     &  &  \\
+    72.6 & 27.39 & 78.2 \\
+    31.53 & 68.5 & 90.56 \\
+    51.1 & 48.9 & 84.7 \\
+    51.1 & 48.9 & 84.7 \\
+    \hline
+    \end{array} -->
+
+</div>
+<br><br>
+
+<h3>Vector and Space</h3>
+<div class="article">
+    <br>
+    <b>📎 Basis</b><br>
+    A basis is a set of vectors that defines a <code>coordinate system</code> for a vector space. By choosing a set of basis vectors, we can specify the position of any vector within that space relative to these basis vectors.<br><br>
+    For example, consider the standard basis vectors \( \mathbf{e_1} \) and \( \mathbf{e_2} \) in \( \mathbb{R}^2 \). 
+    These vectors form a convenient coordinate system. Any vector \( \mathbf{v} \) in this space can be expressed as a <code>linear combination</code> of these basis vectors.
+    This means \( \mathbf{v_1} \) can be decomposed into 2 units of \( \mathbf{e_1} \) and 3 units of \( \mathbf{e_2} \). <br>
+    
+    <p style="padding-left: 2em;">\( \mathbf{e_1} = [1, 0]^T \) <br> \( \mathbf{e_2} = [0, 1]^T \)</p>
+    <p style="padding-left: 2em;">\( \mathbf{v_1} = [2, 3]^T = 2\mathbf{e_1} + 3\mathbf{e_2} \) <br> \( \mathbf{v_2} = [3.3, 1.3]^T = 3.3\mathbf{e_1} + 1.3\mathbf{e_2} \)</p>
+
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-0.png" width="48%">
+        <img src="/img/intuitive-understanding-linear-algebra-2.png" width="48%">
+    </figure>
+    <figcaption>
+        Standard basis vectors in \( \mathbb{R}^2 \)
+    </figcaption>
+
+    <br><br><br>
+
+    Basis vectors do not need to be <code>orthogonal</code> or have unit length. Let's consider a different set of basis vectors in \( \mathbb{R}^2 \)!
+    We can express any vector in terms of these new basis vectors with the below specific basis. Here, \( \mathbf{v_2} \) is decomposed into 1.2 units of \( \mathbf{e_1} \) and 2.7 units of \( \mathbf{e_2} \). 
+    <p style="padding-left: 2em;">\( \mathbf{e_1} = [1, -0.1]^T \) <br> \( \mathbf{e_2} = [1, 1]^T \)</p>
+    <p style="padding-left: 2em;">\( \mathbf{v_1} = [4, 1.8]^T = 2\mathbf{e_1} + 2\mathbf{e_2} \) <br> \( \mathbf{v_2} = [3.9, 2.58]^T = 1.2\mathbf{e_1} + 2.7\mathbf{e_2} \) </p>
+
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-1.png" width="48%">
+        <img src="/img/intuitive-understanding-linear-algebra-3.png" width="48%">
+    </figure>
+    <figcaption>
+        Specific basis vectors in \( \mathbb{R}^2 \)
+    </figcaption>
+
+    <br><br>
+
+    <b>📎 Conditions for becoming a basis</b><br>
+    
+
+    <!-- <br><br>
+
+    Visualization can help in understanding how basis vectors define a coordinate system. Below are visualizations of standard basis vectors \( \mathbf{e_1} \) and \( \mathbf{e_2} \), and specific basis vectors \( \mathbf{e_1} \) and \( \mathbf{e_2} \), along with vector \( \mathbf{v} \):<br><br>
+
+    <br>
+
+    Understanding different basis vectors and their applications is crucial in linear algebra, as it provides flexibility in choosing the most convenient coordinate system for solving problems. Basis vectors are foundational in various applications, including computer graphics, physics, and engineering. -->
+
+
+    <br><br><br><br>
+
+    - basis <br>
+    　　. conditions for becoming the basis (p.49) <br>
+    　　　　. coordinate system 내에 존재하는 모든 벡터를 basis의 선형결합으로 표현할 수 있어야 한다. <br>
+    　　　　. 기저벡터가 서로 독립이어야 한다. 즉, 하나의 기저 벡터가 다른 기저 벡터들의 선형 결합으로 표현될 수 없다는 것입니다. 이 특성 때문에 벡터 공간의 모든 벡터를 단 하나의 방법으로 표현할 수 있습니다. <br><br>
+
+    <br><br>
+
+    - dimension = the number of basis = the number of elements of coordinates (p.52) <br>
+	　　. The number of basis vectors define dimensions of a space
+		
+</div>
+<br><br>
+
+<h3>Matrix and Mapping</h3>
+<div class="article">
+    When an \( m \times n \) matrix \( A \) is multiplied by an \( n \)-dimensional vector \( x \), 
+    an \( m \)-dimensional vector \( y = Ax \) is obtained. 
+    In other words, specifying matrix \( A \) determines a mapping that transforms one vector into another. 
+    In fact, this is the most important role of a matrix. 
+    From now on, when you see a matrix, do not simply think of it as a collection of numbers, 
+    but rather as a given <code>mapping</code>.
+</div>
+
+<h3>References</h3>
+<div class="article">
+
+    <ul style="padding-left: 2em;">
+        <li><a href="https://pytorch-geometric.readthedocs.io/en/latest/">https://pytorch-geometric.readthedocs.io/en/latest/</a></li>
+    </ul>
+    
+</div><br><br>
