@@ -1,5 +1,5 @@
 ---
-title: "Intuitive understanding of Linear Algebra"
+title: "Data and intuition"
 layout: post
 hashtag: "#geometry #deep-learning #graph-neural-network #link-prediction"
 comment: true
@@ -23,7 +23,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     <i>This article's contents are based on the book <a href="https://product.kyobobook.co.kr/detail/S000001792467">Linear Algebra for Programmers</a>.</i>
 </div><br><br>
 
-<h3>When thinking of data as space, intuition works</h3>
+<h3>When thinking of data as space, intuition works 💡</h3>
 <div class="article">
 
     We live in a three-dimensional space. To handle problems in a 3D world, we need terms that describe this 'space' well. 
@@ -46,28 +46,31 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     
     Although we can only recognize three-dimensional space, many 'general n-dimensional phenomena' can be intuitively understood by <code>inferring</code> from three-dimensional space. 
     This interpretation is effective in data analysis. When it comes to 'space' problems, linear algebra steps in. 
-    <!-- Principal Component Analysis (PCA) and the Least Squares Method are classic examples. This book will explain these applications as well. -->
     <!--break-->
 
-    <!-- \begin{array}{|c|c|c|}
-    \hline
-    A & B & C \\
-    \hline
-    2.178 & 97.8 & 99.4 \\
-    11.96 & 88.06 & 96.44 \\
-    55.0 & 45.0 & 83.5 \\
-    27.61 & 72.4 & 91.7 \\
-     &  &  \\
-    . & . & . \\
-    . & . & . \\
-    . & . & . \\
-     &  &  \\
-    72.6 & 27.39 & 78.2 \\
-    31.53 & 68.5 & 90.56 \\
-    51.1 & 48.9 & 84.7 \\
-    51.1 & 48.9 & 84.7 \\
-    \hline
-    \end{array} -->
+    <br><br>
+
+    \[
+        Data = \begin{bmatrix}
+        -4.310345 & 4.655172 & -0.517241 & -1.551724 & 3.965517 & 3.275862 & 4.310345 & \cdots \\
+        -4.310345 & -4.310345 & -4.310345 & -4.310345 & -4.310345 & -4.310345 & -4.310345 & \cdots \\
+        0.701754 & 4.350436 & 2.368040 & 4.004554 & 2.602387 & 3.394398 & 3.603163 & \cdots \\
+        \end{bmatrix}
+    \]
+
+    <br><br>
+
+
+
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-4.png" width="32%">
+        <img src="/img/intuitive-understanding-linear-algebra-6.png" width="32%">
+        <img src="/img/intuitive-understanding-linear-algebra-5.png" width="32%">
+    </figure>
+    <figcaption>
+        Thinking of \( Data \) as 3D space, it easier to understand the meaning of data.<br>
+        From the left, Data points · Data points projection · Intuitive understanding of data shape
+    </figcaption>
 
 </div>
 <br><br>
