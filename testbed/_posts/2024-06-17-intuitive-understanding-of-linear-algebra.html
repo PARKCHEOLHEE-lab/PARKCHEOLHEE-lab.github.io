@@ -266,7 +266,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             0 & 0 & 0 & \cdots & 1
         \end{bmatrix}
             　\rightarrow　
-            \begin{bmatrix}
+        \begin{bmatrix}
             a_{11} & a_{12} & a_{13} & \cdots & a_{1n} \\
             a_{21} & a_{22} & a_{23} & \cdots & a_{2n} \\
             a_{31} & a_{32} & a_{33} & \cdots & a_{3n} \\
@@ -294,8 +294,150 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         </figcaption><br><br>
     </figure>
 
-    <!-- <b>🧬 Matrix multiplication</b><br>
-    Multiplication of matrices is a combination of mappings. -->
+    <b>🧬 Matrix multiplication</b><br>
+    Multiplication between matrices is a combination of mappings.
+    If there are matrices \( B \in \mathbb{R}^{m \times n} \) and \( A \in \mathbb{R}^{n \times k} \),
+    its multiplication is defined as follows:
+    <br><br>
+    \[
+    \begin{bmatrix}
+        b_{11} & \cdots & b_{1n} \\
+        \vdots & 　 & \vdots \\
+        b_{m1} & \cdots & b_{mn}
+    \end{bmatrix}
+    \begin{bmatrix}
+        a_{11} & \cdots & a_{1k} \\
+        \vdots & 　 & \vdots \\
+        a_{n1} & \cdots & a_{nk}
+    \end{bmatrix}
+    \]
+    <br>
+    \[
+    =
+    \begin{bmatrix}
+        (b_{11}a_{11}) + \cdots + (b_{1n}a_{n1}) & \cdots & (b_{11}a_{1k}) + \cdots + (b_{1n}a_{nk}) \\
+        \vdots & 　 & \vdots \\
+        (b_{m1}a_{11} + \cdots + b_{mn}a_{n1}) & \cdots & (b_{m1}a_{1k} + \cdots + b_{mn}a_{nk})
+    \end{bmatrix}
+    \]
+    \[
+    <br>
+    \]
+    \[
+        \begin{bmatrix}
+            2 & 7 \\
+            9 & 5 \\
+            4 & 3
+        \end{bmatrix}
+        \begin{bmatrix}
+            1 & 3 \\
+            2 & -1
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            (2 \cdot 1 + 7 \cdot 2) & (2 \cdot 3 + 7 \cdot -1) \\
+            (9 \cdot 1 + 5 \cdot 2) & (9 \cdot 3 + 5 \cdot -1) \\
+            (4 \cdot 1 + 3 \cdot 2) & (4 \cdot 3 + 3 \cdot -1)
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            16 & -1 \\
+            19 & 22 \\
+            10 & 9
+        \end{bmatrix}
+    \]
+
+    <br><br>
+
+    What we need to pay attention to here is the dimension of the matrix multiplication result.
+    The matrix multiplication result in the above case where multiplying a \( 3 \times 2 \) matrix by a \( 2 \times 2 \) matrix 
+    has dimensions of \( 3 \times 2 \). 
+
+    In other words, the multiplication of an \( m \times n \) matrix and an \( n \times k \) matrix can be expressed as \( m \times k \).
+
+    <br><br>
+
+    Next, let's think about the multiplication of three or more matrices.
+    In the matrix multiplication, the <code>associative law</code> is valid. 
+    Therefore, 
+    
+    <p style="padding-left: 2em;">\( C(BA) = (CB)A = CBA \)</p>
+    <p style="padding-left: 2em;">\( D(C(BA)) = D((CB)A) = (D(CB))A = ((DC)B)A = (DC)(BA) = DCBA \)</p>
+
+    The order of applying matrix multiplication is right-to-left. 
+    In the above, \( CBA \) means that the first operation is \( A \times B \), and then the result is multiplied by \( C \)
+
+    <br><br>
+
+    But in the matrix multiplication, the <code>commutative law</code> is invalid. So, \( AB \neq BA \).
+    Depending on the sizes of matrices \( A \) and \( B \), the multiplication may not be defined.
+
+    For example, consider two matrices where \( A \) is a \( 2 \times 3 \) matrix and \( B \) is a \( 3 \times 4 \) matrix.
+    <br><br>
+
+    \[
+    \begin{bmatrix}
+        * & * & * \\
+        * & * & *
+    \end{bmatrix}
+    \begin{bmatrix}
+        * & * & * & * & * \\
+        * & * & * & * & * \\
+        * & * & * & * & *
+    \end{bmatrix}
+    =
+    \begin{bmatrix}
+        * & * & * & * & * \\
+        * & * & * & * & *
+    \end{bmatrix}
+    \]
+    \[
+        <br>
+    \]
+    \[
+    \begin{bmatrix}
+    * & * & * & * & * \\
+    * & * & * & * & * \\
+    * & * & * & * & *
+    \end{bmatrix}
+    \begin{bmatrix}
+        * & * & * \\
+        * & * & *
+    \end{bmatrix}
+    　\rightarrow 　❌
+    \]
+
+    <br><br>
+
+    If the multiplications \(AB\) and \(BA\) are possible, the results are different.
+    Let's think about the following matrices:
+    <p style="padding-left: 2em;">\( A = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix} \)</p>
+    <p style="padding-left: 2em;">\( B = \begin{bmatrix} 2 & 0 \\ 0 & 1 \end{bmatrix} \)</p>
+
+    
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-11.gif" width="40%">
+        <img src="/img/intuitive-understanding-linear-algebra-12.gif" width="40%">
+    </figure>
+    <figcaption>
+        Different results of <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/matrix-multiplication.ipynb">matrix multiplication</a> for \( AB \) and \( BA \) <br>
+        \[
+            AB = \begin{bmatrix}
+                0 & -2 \\
+                1 & 0
+            \end{bmatrix}
+            　
+            BA = \begin{bmatrix}
+                0 & -1 \\
+                2 & 0
+            \end{bmatrix}
+        \]
+    </figcaption> <br><br>
+
+    The matrix \(A\) <code>rotates</code> the space by 90 degrees relative to the standard basis,
+    and matrix \(B\) <code>extends</code> the space horizontally relative to the standard basis.
+    Therefore, the result of the space by \(AB\) is firstly extended horizontally and then rotated 90 degrees.
+    On the other hand, the result of the space by \(BA\) is firstly rotated 90 degrees and then extended horizontally.
 
 
 </div>
@@ -306,6 +448,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     <ul style="padding-left: 2em;">
         <li><a href="https://product.kyobobook.co.kr/detail/S000001792467">https://product.kyobobook.co.kr/detail/S000001792467</a></li>
+        <li><a href="https://www.3blue1brown.com/topics/linear-algebra">https://www.3blue1brown.com/topics/linear-algebra</a></li>
     </ul>
     
 </div><br><br>
