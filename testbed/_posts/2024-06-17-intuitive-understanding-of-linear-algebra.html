@@ -441,7 +441,101 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     Therefore, the result of the space by \(AB\) is firstly extended horizontally and then rotated 90 degrees.
     On the other hand, the result of the space by \(BA\) is firstly rotated 90 degrees and then extended horizontally.
 
+    <br><br><br>
 
+    <b>
+        🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/zero-matrix.ipynb">Zero matrix</a>, 
+        <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/identity-matrix.ipynb">Identity matrix</a>, 
+        Diagonal matrix
+    </b>
+    <br>
+
+    The matrix consisting of all zeros is called the <code>zero matrix</code>.
+    \[
+        O_{2, 3} = \begin{bmatrix}
+            0 & 0 \\
+            0 & 0
+        \end{bmatrix}
+        　
+        O_{3} = \begin{bmatrix}
+            0 & 0 & 0 \\
+            0 & 0 & 0 \\
+            0 & 0 & 0
+        \end{bmatrix}
+    \]
+
+    
+    The zero matrix mapping moves all elements in the vector space to the origin.
+    This is because for any vector \( x \), \( Ax = O \).
+
+    <br><br>
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-13.gif" width="40%">
+        <figcaption>
+            The zero matrix mapping process <br>
+            \[
+                \begin{bmatrix}
+                    1 & 0 \\
+                    0 & 1
+                \end{bmatrix}
+                \rightarrow
+                \begin{bmatrix}
+                    0 & 0 \\
+                    0 & 0
+                \end{bmatrix}
+            \]
+        </figcaption>
+    </figure>
+    <br><br>
+
+    In the square matrix, the <code>identity matrix</code> is a matrix where the diagonal elements are all ones and the rest are all zeros.
+    The identity matrix is expressed as \( I \).
+    \[
+        I_{2} = \begin{bmatrix}
+            1 & 0 \\
+            0 & 1
+        \end{bmatrix}
+        　
+        I_{3} = \begin{bmatrix}
+            1 & 0 & 0 \\
+            0 & 1 & 0 \\
+            0 & 0 & 1
+        \end{bmatrix}
+        　
+        I_{n} = \begin{bmatrix}
+            1 & 0 & 0 & \cdots & 0 \\
+            0 & 1 & 0 & \cdots & 0 \\
+            \vdots & \vdots & \vdots & \ddots & \vdots \\
+            0 & 0 & 0 & \cdots & 1
+        \end{bmatrix}
+    \]
+
+    <br><br>
+    The identity matrix \( I \) represents the transformation that does not change the vector space. 
+    In other words, the identity matrix moves any vector \( x \) to the same vector \( x \).
+    This is because for any vector \( x \), \( Ix = x \).
+
+    <br><br>
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-14.gif" width="40%">
+        <figcaption>
+            The identity matrix mapping process <br>
+            \[
+                \begin{bmatrix}
+                    1 & 0 \\
+                    0 & 1
+                \end{bmatrix}
+                \rightarrow
+                \begin{bmatrix}
+                    1 & 0 \\
+                    0 & 1
+                \end{bmatrix}
+            \]
+        </figcaption>
+    </figure>
+    
 </div>
 <br><br>
 
