@@ -537,112 +537,6 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
         </figcaption>
     </figure>
 
-    <br><br>
-
-    Then, taking inspiration from <code>IoU loss</code>, I defined <code>GeometricLoss</code> to evaluate segmentation quality.
-    The <code>GeometricLoss</code> is used with BCELoss and aims to quantify the discrepancy between predicted and ground-truth geometric structures within a <code>graph</code>. 
-    Process of the geometric loss calculation is as follows:
-        
-    <ul style="padding-left: 2em;">
-        <li class="decimal"><b>Polygon Creation from Node Features</b>: Each graph's node features, representing coordinates, are converted into a polygon.</li>
-        <li class="decimal"><b>Connecting Predicted Edges</b>: These edges represent the predicted segmentation of the polygon.</li>
-        <li class="decimal"><b>Connecting Ground-Truth Edges</b>: These edges represent the correct segmentation of the polygon.</li>
-        <li class="decimal"><b>Creating Buffered Unions</b>: The predicted and ground-truth edges are combined and then buffered.</li>
-        <li class="decimal"><b>Calculating Intersection</b>: This intersection represents the common area between the predicted and true geometric structures.</li>
-        <li class="decimal"><b>Computing Geometric Loss</b>: The intersection area is squared and negated to obtain and <code>minimize</code> the geometric loss.</li>
-    </ul><br><br>
-
-    The <code>GeometricLoss</code> class is defined as follows and uses <code>ray</code> to parallelize the geometric loss calculation for each graph in the batch.
-    The code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/5052a9e5ea1d740f7a98c3d07b249e233030435c/polygon_segmentation_with_gcn/src/model.py#L39-L123">here</a>
-
-<pre><code class="python">
-    class GeometricLoss(nn.Module):
-        def __init__(self, weight: float = 1.0):
-            super().__init__()
-            self.weight = weight
-
-        @staticmethod
-        @ray.remote
-        def compute_geometric_loss(each_data: Data, each_segmentation_indices: torch.Tensor) -> float:
-            """Compute geometric loss for each graph
-
-            Args:
-                each_data (Data): Data object of a graph
-                each_segmentation_indices (torch.Tensor): Segmentation indices of a graph
-
-            Returns:
-                float: Geometric loss
-            """
-
-            each_polygon = geometry.Polygon(each_data.x[:, :2].tolist())
-
-            predicted_edges = DataCreatorHelper.connect_polygon_segments_by_indices(
-                each_polygon, each_segmentation_indices.detach().cpu().numpy()
-            )
-
-            predicted_edges = [e for e in predicted_edges if e.length > 0]
-
-            predicted_edges = [
-                DataCreatorHelper.extend_linestring(
-                    e, -Configuration.LINESTRING_REDUCTION_LENGTH, -Configuration.LINESTRING_REDUCTION_LENGTH
-                )
-                for e in predicted_edges
-            ]
-
-            label_edges = DataCreatorHelper.connect_polygon_segments_by_indices(
-                each_polygon, each_data.edge_label_index_only.unique(dim=1).detach().cpu().numpy()
-            )
-
-            label_edges = [e for e in label_edges if e.length > 0]
-
-            label_edges = [
-                DataCreatorHelper.extend_linestring(
-                    e, -Configuration.LINESTRING_REDUCTION_LENGTH, -Configuration.LINESTRING_REDUCTION_LENGTH
-                )
-                for e in label_edges
-            ]
-
-            predicted_edges_union = geometry.MultiLineString(predicted_edges)
-            label_edges_union = geometry.MultiLineString(label_edges)
-
-            predicted_edges_union_buffered = predicted_edges_union.buffer(
-                Configuration.EDGES_BUFFER_DISTANCE, join_style=geometry.JOIN_STYLE.mitre
-            )
-
-            label_edge_union_buffered = label_edges_union.buffer(
-                Configuration.EDGES_BUFFER_DISTANCE, join_style=geometry.JOIN_STYLE.mitre
-            )
-
-            intersection = label_edge_union_buffered.intersection(predicted_edges_union_buffered)
-
-            geometric_loss = intersection.area**2
-            geometric_loss *= -1
-
-            return geometric_loss
-
-        def forward(self, data: Batch, infered: List[torch.Tensor]) -> float:
-            """Compute geometric loss for graph batch using ray
-
-            Args:
-                data (Batch): Batch object of a graph
-                infered (List[torch.Tensor]): List of infered segmentation indices by segmenter
-
-            Returns:
-                float: Geometric loss
-            """
-
-            tasks = [
-                self.compute_geometric_loss.remote(data[i].to("cpu"), infered[i].to("cpu")) for i in range(data.num_graphs)
-            ]
-
-            all_geometric_losses = ray.get(tasks)
-
-            all_geometric_losses = torch.tensor(all_geometric_losses)
-            geometric_loss = all_geometric_losses.sum() / all_geometric_losses.shape[0]
-
-            return geometric_loss
-</code></pre>
-
 </div>
 <br><br>
 
@@ -676,6 +570,45 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
         </figcaption>
     </figure>
 
+    <br><br>
+
+    <!-- 이에 따라서 나는 신뢰할 수 있는 성능지표를 만들었습니다.  -->
+
+    Taking inspiration from <code>IoU loss</code>, therefore I defined <code>GeometricLoss</code> to evaluate segmentation quality and create a reliable evaluation metric.
+    The <code>GeometricLoss</code> aims to quantify the discrepancy between predicted and ground-truth geometric structures within a <code>graph</code>. 
+    The process of the geometric loss calculation is as follows:
+        
+    <ul style="padding-left: 2em;">
+        <li class="decimal"><b>Polygon Creation from Node Features</b>: Each graph's node features, representing coordinates, are converted into a polygon.</li>
+        <li class="decimal"><b>Connecting Predicted Edges</b>: These edges represent the predicted segmentation of the polygon.</li>
+        <li class="decimal"><b>Connecting Ground-Truth Edges</b>: These edges represent the correct segmentation of the polygon.</li>
+        <li class="decimal"><b>Creating Buffered Unions</b>: The predicted and ground-truth edges are combined and then buffered.</li>
+        <li class="decimal"><b>Calculating Intersection</b>: This intersection represents the common area between the predicted and true geometric structures.</li>
+        <li class="decimal"><b>Computing Geometric Loss</b>: The intersection area is normalized by the ground-truth area and then negated</li>
+    </ul>
+    
+    <figure>
+        <img src="/img/polygon-segmentation-20.png" width="90%">
+        <figcaption>
+            An example for the geometric loss calculation <br>
+            From the left, loss: -0.000478528 · loss: -0.999999994
+        </figcaption>
+    </figure><br><br>
+
+    The geometric loss serves solely as an <code>evaluation metric</code> for the model. Therefore, it has not been added to the BCE loss. 
+    This is because the model's training batches are based on nodes rather than graphs. Hence, calculating this loss for every graph per epoch would significantly slow down the process. 
+    Therefore, I have calculated this loss only for <code>4 samples</code> per batch to use it exclusively as a model evaluation metric. The results are as follows:
+
+    
+    <figure>
+        <img src="/img/polygon-segmentation-21.png" width="85%">
+        <figcaption>
+            Geometric losses for 500 epochs <br>
+            From the left, train geometric loss · validation geometric loss
+        </figcaption>
+    </figure><br><br>
+
+    The <code>GeometricLoss</code> class is defined as follows and the code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/main/polygon_segmentation_with_gcn/src/model.py#L39-L113">here</a>.
 
     
 </div>
