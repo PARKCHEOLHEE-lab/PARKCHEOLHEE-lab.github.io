@@ -446,7 +446,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <b>
         🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/zero-matrix.ipynb">Zero matrix</a>, 
         <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/identity-matrix.ipynb">Identity matrix</a>, 
-        Diagonal matrix
+        <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/diagonal-matrix.ipynb">Diagonal matrix</a>
     </b>
     <br>
 
@@ -522,6 +522,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         <img src="/img/intuitive-understanding-linear-algebra-14.gif" width="40%">
         <figcaption>
             The identity matrix mapping process <br>
+            There is no change in the vector space
             \[
                 \begin{bmatrix}
                     1 & 0 \\
@@ -535,9 +536,79 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             \]
         </figcaption>
     </figure>
+    <br><br>
+
+    In a square matrix, all elements located at the diagonal are called the <code>diagonal elements</code>.
+    If the non-diagonal elements are all 0, this matrix is called a <code>diagonal matrix</code>.
+    \[
+        \begin{bmatrix}
+            2 & 0 \\
+            0 & 5
+        \end{bmatrix}
+        　
+        \begin{bmatrix}
+            -1.3 & 0 & 0 \\
+            0 & \sqrt{7} & 0 \\
+            0 & 0 & 1/\pi
+        \end{bmatrix}
+        　
+        \begin{bmatrix}
+            3 & 0 & 0 & 0 & 0 \\
+            0 & 1 & 0 & 0 & 0 \\
+            0 & 0 & 4 & 0 & 0 \\
+            0 & 0 & 0 & 1 & 0 \\
+            0 & 0 & 0 & 0 & 5
+        \end{bmatrix}
+    \]
+
+    <br><br>
+
+    The mapping for the diagonal matrix is <code>scaling</code>.
+    Each diagonal element is a scaling factor for the corresponding basis vector.
     
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-15.gif" width="32%">
+        <img src="/img/intuitive-understanding-linear-algebra-16.gif" width="32%">
+        <img src="/img/intuitive-understanding-linear-algebra-17.gif" width="32%">
+    </figure>
+    <figcaption>
+        The mapping process for the diagonal matrix <br>
+        \[
+            \begin{bmatrix}
+                1 & 0 \\
+                0 & 1
+            \end{bmatrix}
+            \\
+            　
+            \\
+            \downarrow
+            \\
+            　
+            \\
+            \begin{bmatrix}
+                0.7 & 0 \\
+                0 & 1.5
+            \end{bmatrix}
+            　
+            \begin{bmatrix}
+                0 & 0 \\
+                0 & 1.5
+            \end{bmatrix}
+            　
+            \begin{bmatrix}
+                -0.7 & 0 \\
+                0 & -1.5
+            \end{bmatrix}
+        \]
+    </figcaption><br><br>
+
+    In the above figure 2 where \( D \) has a 0 for the diagonal element, the vector space is <code>flattened</code>.
+    In the above figure 3 where \( D \) has negative values for the diagonal elements, the vector space is <code>reflected</code>.
+
 </div>
 <br><br>
+
+
 
 <h3>References</h3>
 <div class="article">
