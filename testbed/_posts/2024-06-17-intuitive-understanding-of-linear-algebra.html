@@ -605,10 +605,69 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     In the above figure 2 where \( D \) has a 0 for the diagonal element, the vector space is <code>flattened</code>.
     In the above figure 3 where \( D \) has negative values for the diagonal elements, the vector space is <code>reflected</code>.
 
+    <br><br><br>
+
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/inverse-matrix.ipynb">Inverse matrix</a></b><br>
+    The <code>inverse matrix</code> is a matrix that undoes the transformation matrix \(A\) to its original mapping. 
+    For a square matrix \(A\), the matrix corresponding to the inverse mapping is called the inverse matrix of \(A\).  
+    It denoted as \(A^{-1}\).
+    
+    <br><br>
+    For a vector \(x\), \(Ax = y\) or \(A^{-1}y = x\) are validated.
+    The other way, for a vector \(y\), \(A^{-1}y = x\) or \(Ax = y\) are validated.
+    This concept can be expressed as:
+    \[ 
+        x \overset{A}{\xrightarrow{\hspace{0.7cm}}} y 
+        \\
+        x \underset{A^{-1}}{\xleftarrow{\hspace{0.7cm}}} y 
+    \]
+
+    <br><br>
+
+    In other words, doing \(A \cdot A^{-1}\) is to back again to its original mapping, and doing \(A^{-1} \cdot A\) is the same as before mentioned.
+    That is \(A^{-1}A = AA^{-1} = I\).
+    By leveraging this concept, we can construct a <a href="https://parkcheolhee-lab.github.io/local-coordinate-system/">local coordinate system</a>.
+
+    <br><br>
+
+    The inverse matrix may exist or not exist.
+    Thinking intuitively, there is no inverse matrix when the space is flattened.
+    Imagine a 2D space where a transformation (matrix \(A\)) maps two different points (e.g., \(x_1\), \(x_2\)) to the same point \(y\). 
+    The space is "flattened," meaning the transformation is not bijective. 
+    In other words, flattening the space means that the transformation does not have unique input values, so one output corresponds to multiple input values.
+
+    <br><br>
+
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-18.png" width="40%"> <br>
+        <img src="/img/intuitive-understanding-linear-algebra-19.png" width="40%">
+    </figure>
+    <figcaption>
+        Visualization for the existence of inverse matrix <br>
+        \[
+            A = \begin{bmatrix}
+                1 & 0.2 \\
+                0.5 & -1.5
+            \end{bmatrix}
+            　 
+            A^{-1} = \begin{bmatrix}
+                0.9375 & 0.125 \\
+                0.3125 & -0.625
+            \end{bmatrix}
+            \\
+            　
+            \\
+            A = \begin{bmatrix}
+            2 & -1 \\
+            1 & -0.5
+            \end{bmatrix}
+            　
+            A^{-1} = \color{red}{\text{np.linalg.LinAlgError}}
+        \]
+    </figcaption>
+
 </div>
 <br><br>
-
-
 
 <h3>References</h3>
 <div class="article">
