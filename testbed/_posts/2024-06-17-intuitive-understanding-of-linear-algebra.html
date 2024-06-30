@@ -665,6 +665,36 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         \]
     </figcaption>
 
+    <br><br>
+
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/transposed-matrix.ipynb">Transposed matrix</a></b><br>
+    For a matrix \(A\), the <code>transposed matrix</code> is an operation that flips rows and columns, it denoted as \(A^{T}\).
+    In other words, the \(A_{ij}\) element is located at the \(A^{T}_{ji}\) position.
+
+    \[ B = \begin{bmatrix} 2 & 9 & 4 \\ 7 & 5 & 3 \end{bmatrix} 　 \rightarrow 　 B^{T} = \begin{bmatrix} 2 & 7 \\ 9 & 5 \\ 4 & 3 \end{bmatrix} \]
+    \[ A = \begin{bmatrix} 1.2 & \color{green}{-0.8} \\ \color{red}{0.3} & 1.7 \end{bmatrix} 　 \rightarrow 　 A^{T} = \begin{bmatrix} 1.2 & \color{red}{0.3} \\ \color{green}{-0.8} & 1.7 \end{bmatrix} \]
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-20.gif" width="45%">
+        <figcaption>
+            Visualization for the transformation matrix \(A^{T}\) <br>
+        </figcaption>
+    </figure>
+
+
+    <br><br>
+    For a diagonal matrix \(D\), the transposed matrix is the same as the original matrix.
+    It has only diagonal elements, so the \(ij\) indices is the same as the \(ji\) indices.
+
+    \[ 
+        D^{T} = D 
+        \\
+        　
+        \\
+        D = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0  \\ 0 & 0 & 1 \end{bmatrix} 　 \rightarrow 　 D^{T} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} 
+    \]
+
+
 </div>
 <br><br>
 
