@@ -693,7 +693,65 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         \\
         D = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0  \\ 0 & 0 & 1 \end{bmatrix} 　 \rightarrow 　 D^{T} = \begin{bmatrix} 1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{bmatrix} 
     \]
+</div>
+<br><br>
 
+<h3>Affine Transformation</h3>
+<div class="article">
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/affine-transfomation.ipynb">Affine transformation</a></b><br>
+    An affine transformation is a combination of a <code>linear transformation</code> and a <code>translation</code>. 
+    Mathematically, an affine transformation of a vector \(\mathbf{x}\) can be represented as:
+    \[
+        y = Ax + b
+    \]
+
+    <br>
+    where \(A\) is a matrix representing the linear transformation, and \(\mathbf{b}\) is a vector representing the translation.
+    The importance of affine transformations lies in their ability to not only rotate, scale, and shear data, as linear transformations do, but also to translate it. This makes affine transformations extremely powerful and versatile in mapping and manipulating data in space.
+    
+    <br><br>
+    In the context of neural networks, affine transformations are used in the layers of the network as: \(y = Wx + b\).
+    Each layer applies an affine transformation followed by a <code>non-linear activation function</code>. 
+    By combining linear and non-linear functions, neural networks can experiment with various data representation ways.
+
+    <br><br>
+    Let's take a look at how the original data can be transformed using an affine transformation with the hyperbolic tangent \(\sigma = tanh\) activation function. The transformation can be expressed as:
+    \[
+    \mathbf{z} = \sigma(Wx + b)
+    \]
+
+    <br>
+    For example, let me assume the following values for \(A(=W)\), \(b\) and \(x\) where \(x\) are 2D vectors:
+    \[
+    A = \begin{bmatrix}
+    0.5 & 1 \\
+    1 & 0.5
+    \end{bmatrix}
+    　
+    b = \begin{bmatrix}
+    -0.9 \\
+    0.9
+    \end{bmatrix}
+    　
+    x = \text{circular points}
+    \]
+    
+    <br>
+    In the provided figure, you can see the effect of an affine transformation on the original data. 
+    The first plot shows the original data points, the second plot shows the data after a linear transformation \(Ax\), 
+    and the third plot shows the result of applying the affine transformation with \(Ax + b\).
+    The last plot shows the result of applying the affine transformation with \(\sigma(Ax + b)\).
+    
+    The thing to notice is that the data after applying the affine transformation with a non-linear function is <code>separable</code> in one straight line.
+    In other words, the neural networks can learn the data by applying this transformation followed by a non-linear function.
+
+    <br><br>
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-21.png" width="90%">
+        <figcaption>
+            Visualization from \(Ax\) to \(\mathbf{z} = \sigma(Ax + b)\)
+        </figcaption>
+    </figure>
 
 </div>
 <br><br>
@@ -704,6 +762,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <ul style="padding-left: 2em;">
         <li><a href="https://product.kyobobook.co.kr/detail/S000001792467">https://product.kyobobook.co.kr/detail/S000001792467</a></li>
         <li><a href="https://www.3blue1brown.com/topics/linear-algebra">https://www.3blue1brown.com/topics/linear-algebra</a></li>
+        <li><a href="https://colah.github.io/posts/2014-03-NN-Manifolds-Topology/">https://colah.github.io/posts/2014-03-NN-Manifolds-Topology/</a></li>
     </ul>
     
 </div><br><br>
