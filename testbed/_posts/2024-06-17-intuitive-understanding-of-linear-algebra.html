@@ -706,7 +706,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     \]
 
     <br>
-    where \(A\) is a matrix representing the linear transformation, and \(\mathbf{b}\) is a vector representing the translation.
+    where \(A\) is a matrix representing the linear transformation, and \(b\) is a vector representing the translation.
     The importance of affine transformations lies in their ability to not only rotate, scale, and shear data, as linear transformations do, but also to translate it. This makes affine transformations extremely powerful and versatile in mapping and manipulating data in space.
     
     <br><br>
@@ -717,7 +717,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <br><br>
     Let's take a look at how the original data can be transformed using an affine transformation with the hyperbolic tangent \(\sigma = tanh\) activation function. The transformation can be expressed as:
     \[
-    \mathbf{z} = \sigma(Wx + b)
+        z = \sigma(Wx + b)
     \]
 
     <br>
@@ -749,10 +749,81 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <figure>
         <img src="/img/intuitive-understanding-linear-algebra-21.png" width="90%">
         <figcaption>
-            Visualization from \(Ax\) to \(\mathbf{z} = \sigma(Ax + b)\)
+            Visualization from \(Ax\) to \(\sigma(Ax + b)\)
         </figcaption>
     </figure>
 
+</div>
+<br><br>
+
+<h3>Determinant</h3>
+<div class="article">
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/determinant.ipynb">Determinant = magnification</a></b><br>
+    Let's assume that the following 2D square matrix is given. 
+    \[
+        A = \begin{bmatrix}
+            1.5 & 0 \\
+            0 & 0.5
+        \end{bmatrix}
+        　
+        A = \begin{bmatrix}
+            a & b \\
+            c & d
+        \end{bmatrix}
+    \]
+    <br>
+    Now, we have an intuition about the transformation that such a simple matrix performs.
+    The matrix \(A\) scales the x-axis by \(1.5\) and the y-axis by \(0.5\).
+    No inclined axes exist so we can imagine a rectangle with a width of \(1.5\) and a height of \(0.5\).
+
+    <br><br>
+    For a 2D square matrix, the determinant can be calculated as \(ad - bc\).
+    In this case, \(ad - bc = 1.5 \times 0.5 - 0 \times 0 = 0.75\).
+    This means that the determinant tells us the <code>amount of magnification</code> after the transformation.
+
+    <br><br>
+
+    At this time, let me assume that the following 2D square matrix with inclined axes is given.
+    Also, a determinant of \(A\) can be calculated as shown in the above expression.
+    \[
+        A = \begin{bmatrix}
+            1 & -0.3 \\
+            -0.7 & 0.6
+        \end{bmatrix}
+        　
+        detA = ad - bc = 0.39
+    \]
+    <br>
+
+    The matrix \(A\) transforms the space as follows and the determinant of \(A\) is calculated as:
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-22.png" width="95%">
+        <figcaption>
+            Determinant of \(A\) = an area of a parallelogram
+        </figcaption>
+    </figure>
+    
+    <br><br>
+    
+    This property is also applicable to 3D space. In 3D space, the determinant can be interpreted as a volume of a parallelepiped.
+    
+    \[
+        A = \begin{bmatrix}
+            1 & 0 & 0.2 \\
+            0 & 1 & 0.4 \\
+            0 & 0 & 0.9
+        \end{bmatrix}
+        　
+        detA = \text{volume of a parallelepiped} = 0.9
+    \] <br>
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-23.png" width="97%">
+        <figcaption>
+            Determinant of \(A\) = volume of a parallelepiped
+        </figcaption>
+    </figure>
+    
 </div>
 <br><br>
 
