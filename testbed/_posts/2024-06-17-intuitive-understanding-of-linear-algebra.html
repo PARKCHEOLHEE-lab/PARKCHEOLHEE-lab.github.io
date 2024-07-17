@@ -910,7 +910,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     The determinant has the property that its value does not change even if a scalar multiple of one column is added to another.
     Let me assume there are two matrices, \(A\) and \(B\). 
-    The matrix \(B\) is obtained by multiplying the second column of \(A\) by a scalar \(t\) and then adding it to the third column of \(A\).
+    The matrix \(B\) is obtained by multiplying the second column of \(A\) by a scalar \(s\) and then adding it to the third column of \(A\).
     <br>
     \[
         A = \begin{bmatrix}
@@ -920,12 +920,12 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         \end{bmatrix}
         　
         B = \begin{bmatrix}
-            1 & 0.5 & -0.3 + 0.5 \cdot t \\
-            0 & 0.7 & -0.3 + 0.7 \cdot t \\
-            0 & 0 & 1.5 + 0 \cdot t
+            1 & 0.5 & -0.3 + 0.5 \cdot s \\
+            0 & 0.7 & -0.3 + 0.7 \cdot s \\
+            0 & 0 & 1.5 + 0 \cdot s
         \end{bmatrix}
         　
-        t = 1.3
+        s = 1.3
     \]
     <br>
 
@@ -937,6 +937,109 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         <img src="/img/intuitive-understanding-linear-algebra-27.png" width="95%">
         <figcaption>
             The matrices \(A\) and \(B\) have the same determinant 
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    A matrix with a shape like \(A\) above is called an <code>upper triangular matrix</code>.
+    The upper triangular matrix has all 0s below the diagonal elements.
+    If the matrix is an upper triangular matrix, the determinant is the product of the diagonal elements.
+    The expression for the volume of a parallelepiped is the <code>product of the height and area of the bottom face</code>, 
+    so the determinant of a matrix is the volume(in 2D, area) of a parallelepiped.
+    This property can be applied to a lower triangular matrix as well.
+    \[
+        A = \begin{bmatrix}
+            1 & 0.5 & -0.3 \\
+            0 & 0.7 & -0.3 \\
+            0 & 0 & 1.5
+        \end{bmatrix}
+        　
+        A = \begin{bmatrix}
+            a_{11} & a_{12} & a_{13} \\
+            0 & a_{22} & a_{23} \\
+            0 & 0 & a_{33}
+        \end{bmatrix}
+        　
+        \mathbf{det}A = a_{11} \cdot a_{22} \cdot a_{33}
+    \]
+
+    <br><br>
+
+    For an \(n\) dimensional square matrix \(A\), if each element of the matrix is multiplied by a scalar \(s\),
+    the determinant of the resulting matrix is \(s^{n} \cdot \mathbf{det}A\).
+    That is, \(\mathbf{det}(cA) = \mathbf{s}^{n} \cdot \mathbf{det}A\).
+    This is because all the columns are multiplied by a scalar \(s\).
+    The following example gives an intuition for this property.
+    <br>
+
+    \[s = 2\] 
+    <div style="display: grid; grid-template-columns: 1fr 1fr;">
+            <div>
+
+            \[
+                A = \begin{bmatrix}
+                    0.5 & 0 & 0 \\
+                    0 & 0.5 & 0 \\
+                    0 & 0 & 0.5 
+                \end{bmatrix}
+                \\
+                　
+
+                \\
+                \mathbf{det}A = 0.5 \cdot 0.5 \cdot 0.5 = 0.125
+
+                \]
+                
+            </div>
+            <div>
+                \[
+                    B = \begin{bmatrix}
+                        0.5 & 0 & 0 \\
+                        0 & 0.5 & 0 \\
+                        0 & 0 & 0.5 \cdot s
+                    \end{bmatrix}\\
+                \\
+                　
+                \\
+                \mathbf{det}A = 0.5 \cdot 0.5 \cdot (0.5 \cdot s) = 0.250
+            \]
+            </div>
+
+            <div>
+                \[
+                    C = \begin{bmatrix}
+                        0.5 & 0 & 0 \\
+                        0 & 0.5 \cdot s & 0 \\
+                        0 & 0 & 0.5 \cdot s
+                    \end{bmatrix}\\
+                \\
+                　
+                \\
+                \mathbf{det}A = 0.5 \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 0.500
+            \]
+            </div>
+
+            <div>
+                \[
+                    D = \begin{bmatrix}
+                        0.5 \cdot s & 0 & 0 \\
+                        0 & 0.5 \cdot s & 0 \\
+                        0 & 0 & 0.5 \cdot s
+                    \end{bmatrix}\\
+                \\
+                　
+                \\
+                \mathbf{det}A = (0.5 \cdot s) \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 1.000
+            \]
+            </div>
+    </div><br>
+
+    
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-28.png" width="95%">
+        <figcaption>
+            Visualization of the property for \(s^{n} \cdot \mathbf{det}A\)
         </figcaption>
     </figure>
 
