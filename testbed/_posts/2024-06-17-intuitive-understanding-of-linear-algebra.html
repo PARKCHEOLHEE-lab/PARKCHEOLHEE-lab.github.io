@@ -791,7 +791,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             -0.7 & 0.6
         \end{bmatrix}
         　
-        detA = ad - bc = 0.39
+        \mathbf{det}A = ad - bc = 0.39
     \]
     <br>
 
@@ -814,7 +814,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             0 & 0 & 0.9
         \end{bmatrix}
         　
-        detA = \text{volume of a parallelepiped} = 0.9
+        \mathbf{det}A = \text{volume of a parallelepiped} = 0.9
     \] <br>
 
     <figure>
@@ -878,7 +878,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         <img src="/img/intuitive-understanding-linear-algebra-26.gif" width="40%">
     </figure>
     <figcaption>
-        Change of \(detA\). From the left,
+        Change of \(\mathbf{det}A\). From the left,
         \[
             A = \begin{bmatrix}
                 -1 & 0 & 0\\
@@ -894,8 +894,53 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         \]
     </figcaption><br><br>
 
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/properties-of-determinant.ipynb">Properties of a determinant</a></b><br>
+    A perspective for the 'Determinant = magnification' gives us \(\mathbf{det}I = 1\), and
+    previously, I mentioned that the inverse matrix undoes the transformation matrix.
+    We can get the \(\mathbf{det}A \cdot \mathbf{det}A^{-1} = 1 \) from these properties. In other words \(\mathbf{det}A^{-1} = 1/\mathbf{det}A\).
+    Also, we can realize that if \(\mathbf{det}A = 0\), \(A^{-1}\) does not exist.
 
-    
+    <br><br>
+
+    In a diagonal matrix \(\mathbf{det}(\mathbf{diag}(a_{1}, a_{2}, ..., a_{n}) = a_{1} \cdot a_{2} \cdot ... \cdot a_{n}\).
+    This is because the diagonal matrix is a transformation matrix for scaling axes.
+    If a matrix \(A\) isn't independent linearly, also determinant of \(A\) is 0.
+
+    <br><br>
+
+    The determinant has the property that its value does not change even if a scalar multiple of one column is added to another.
+    Let me assume there are two matrices, \(A\) and \(B\). 
+    The matrix \(B\) is obtained by multiplying the second column of \(A\) by a scalar \(t\) and then adding it to the third column of \(A\).
+    <br>
+    \[
+        A = \begin{bmatrix}
+            1 & 0.5 & -0.3 \\
+            0 & 0.7 & -0.3 \\
+            0 & 0 & 1.5
+        \end{bmatrix}
+        　
+        B = \begin{bmatrix}
+            1 & 0.5 & -0.3 + 0.5 \cdot t \\
+            0 & 0.7 & -0.3 + 0.7 \cdot t \\
+            0 & 0 & 1.5 + 0 \cdot t
+        \end{bmatrix}
+        　
+        t = 1.3
+    \]
+    <br>
+
+    A visualization of the two matrices is the following. 
+    Multiplying a column by a scalar and adding it to the column means that the column is shifted toward the added column.
+    So, the determinant of \(B\) is the same as the determinant of \(A\).
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-27.png" width="95%">
+        <figcaption>
+            The matrices \(A\) and \(B\) have the same determinant 
+        </figcaption>
+    </figure>
+
+
 </div>
 <br><br>
 
