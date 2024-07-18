@@ -913,6 +913,10 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     The matrix \(B\) is obtained by multiplying the second column of \(A\) by a scalar \(s\) and then adding it to the third column of \(A\).
     <br>
     \[
+        s = 1.3
+        \\
+        　
+        \\
         A = \begin{bmatrix}
             1 & 0.5 & -0.3 \\
             0 & 0.7 & -0.3 \\
@@ -925,7 +929,6 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             0 & 0 & 1.5 + 0 \cdot s
         \end{bmatrix}
         　
-        s = 1.3
     \]
     <br>
 
@@ -960,7 +963,9 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             0 & a_{22} & a_{23} \\
             0 & 0 & a_{33}
         \end{bmatrix}
+        \\
         　
+        \\
         \mathbf{det}A = a_{11} \cdot a_{22} \cdot a_{33}
     \]
 
@@ -973,73 +978,47 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     The following example gives an intuition for this property.
     <br>
 
-    \[s = 2\] 
-    <div style="display: grid; grid-template-columns: 1fr 1fr;">
-            <div>
-
-            \[
-                A = \begin{bmatrix}
-                    0.5 & 0 & 0 \\
-                    0 & 0.5 & 0 \\
-                    0 & 0 & 0.5 
-                \end{bmatrix}
-                \\
-                　
-
-                \\
-                \mathbf{det}A = 0.5 \cdot 0.5 \cdot 0.5 = 0.125
-
-                \]
-                
-            </div>
-            <div>
-                \[
-                    B = \begin{bmatrix}
-                        0.5 & 0 & 0 \\
-                        0 & 0.5 & 0 \\
-                        0 & 0 & 0.5 \cdot s
-                    \end{bmatrix}\\
-                \\
-                　
-                \\
-                \mathbf{det}A = 0.5 \cdot 0.5 \cdot (0.5 \cdot s) = 0.250
-            \]
-            </div>
-
-            <div>
-                \[
-                    C = \begin{bmatrix}
-                        0.5 & 0 & 0 \\
-                        0 & 0.5 \cdot s & 0 \\
-                        0 & 0 & 0.5 \cdot s
-                    \end{bmatrix}\\
-                \\
-                　
-                \\
-                \mathbf{det}A = 0.5 \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 0.500
-            \]
-            </div>
-
-            <div>
-                \[
-                    D = \begin{bmatrix}
-                        0.5 \cdot s & 0 & 0 \\
-                        0 & 0.5 \cdot s & 0 \\
-                        0 & 0 & 0.5 \cdot s
-                    \end{bmatrix}\\
-                \\
-                　
-                \\
-                \mathbf{det}A = (0.5 \cdot s) \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 1.000
-            \]
-            </div>
-    </div><br>
+    \[
+        s = 2
+        \\
+        　
+        \\
+        A = \begin{bmatrix}
+            0.5 & 0 & 0 \\
+            0 & 0.5 & 0 \\
+            0 & 0 & 0.5 
+        \end{bmatrix}
+        　
+        B = \begin{bmatrix}
+            0.5 & 0 & 0 \\
+            0 & 0.5 & 0 \\
+            0 & 0 & 0.5 \cdot s
+        \end{bmatrix}
+        \\
+        　
+        \\
+        C = \begin{bmatrix}
+            0.5 & 0 & 0 \\
+            0 & 0.5 \cdot s & 0 \\
+            0 & 0 & 0.5 \cdot s
+        \end{bmatrix}
+        　
+        D = \begin{bmatrix}
+            0.5 \cdot s & 0 & 0 \\
+            0 & 0.5 \cdot s & 0 \\
+            0 & 0 & 0.5 \cdot s
+        \end{bmatrix}
+    \] <br>
 
     
     <figure>
         <img src="/img/intuitive-understanding-linear-algebra-28.png" width="95%">
         <figcaption>
-            Visualization of the property for \(s^{n} \cdot \mathbf{det}A\)
+            Visualization of the property for \(s^{n} \cdot \mathbf{det}A\) <br><br>
+            \(\mathbf{det}A = 0.5 \cdot 0.5 \cdot 0.5 = 0.125\) <br>
+            \(\mathbf{det}B = 0.5 \cdot 0.5 \cdot (0.5 \cdot s) = 0.250\) <br>
+            \(\mathbf{det}C = 0.5 \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 0.500\) <br>
+            \(\mathbf{det}D = (0.5 \cdot s) \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 1.000\)
         </figcaption>
     </figure>
 
