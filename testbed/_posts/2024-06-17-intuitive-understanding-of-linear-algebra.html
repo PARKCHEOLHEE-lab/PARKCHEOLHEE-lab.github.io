@@ -1043,7 +1043,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
 <h3>Rank · Inverse matrix · Linear equation</h3>
 <div class="article">
-    <b>🧬 Kernel</b><br>
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/kernel.ipynb">Kernel</a></b><br>
     For A cause vector \(x = (x_{1}, ..., x_{n})^{T} \) and a result vector \(y = (y_{1}, ..., y_{n})^{T} \), what happens if the dimensions of \(x\), \(y\) are different? 
     This case is a problem finding the variables \(x\) with a number of \(n\) using clues with a number of \(m\).
 
@@ -1053,6 +1053,8 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     In other words, the \(A\) is longer horizontally than vertically.
     \[
         y = Ax
+        　
+        \rightarrow
         　
         \begin{bmatrix}
             * \\
@@ -1072,9 +1074,62 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     <br>
 
-    Let me give an example. First, we must remember the 'Matrix is mapping' section.
+    We must remember the 'Matrix is mapping' section again.
     The matrix \(A\) like the above is a mapping to transform \(x\) in the 3-dimensional space to \(y\) in the 2-dimensional space.
+    Let me give an example:
+    <br><br>
+    \[
+        A = \begin{bmatrix}
+            1 & 0 & 0 \\
+            0 & 1 & 0
+        \end{bmatrix}
+        \quad
+        x = \begin{bmatrix}
+        0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 \\
+        0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 \\
+        0 & 0 & 0 & 0 & 1 & 1 & 1 & 1
+        \end{bmatrix}
+        \\
+        　
+        \\
+        y = Ax = \begin{bmatrix}
+        0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 \\
+        0 & 0 & 1 & 1 & 0 & 0 & 1 & 1
+        \end{bmatrix}
+    \]
+    <br><br>
 
+    In this example, \(A\) is \(2 \times 3\) matrix and \(x\) is \(3 \times 8\) matrix.
+    So, the result of matrix \(Ax\) is \(2 \times 8\) matrix, that is the dimension of \(Ax\) is lower than the dimension of \(x\).  
+    In the image below, you can see that matrix \(A\) maps higher dimensional data into a lower dimensional space.
+    <br><br>
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-29.png" width="95%">
+        <figcaption>
+            The case is that the dimension of \(A\) is lower than that of \(x\). <br>
+            From the left, \(x\) · \(Ax\) · \(\mathbf{Ker}A\) <br>
+            \[
+            \mathbf{Ker}A 
+            = \left\{ 
+                \begin{bmatrix} 
+                    0 \\ 
+                    0 \\ 
+                    0 
+                \end{bmatrix}
+                \begin{bmatrix} 
+                    0 \\ 
+                    0 \\ 
+                    1 
+                \end{bmatrix} 
+            \right\}
+        \]
+        </figcaption>
+    </figure><br>
+
+    The <code>kernel</code> of \(A\) is a set of vectors \(x\) where \(Ax = 0\), express as \(\mathbf{Ker}A\), that is \(\mathbf{Ker}A = \left\{v \in V\text{ }|\text{ }Av = 0\right\}\).
+    This means information is <code>loss</code>.
+    
+    <br><br>
 
     
     
