@@ -80,13 +80,14 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 <div class="article">
     <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/basis.ipynb">Basis</a></b><br>
     A basis is a set of vectors that defines a <code>coordinate system</code> for a vector space. By choosing a set of basis vectors, we can specify the position of any vector within that space relative to these basis vectors.<br><br>
-    For example, consider the standard basis vectors \( \mathbf{e_1} \) and \( \mathbf{e_2} \) in \( \mathbb{R}^2 \). 
-    These vectors form a convenient coordinate system. Any vector \( \mathbf{v} \) in this space can be expressed as a <code>linear combination</code> of these basis vectors.
-    This means \( \mathbf{v_1} \) can be decomposed into 2 units of \( \mathbf{e_1} \) and 3 units of \( \mathbf{e_2} \). <br>
+    For example, consider the standard basis vectors \( e_{1} \) and \( e_{2} \) in \( \mathbb{R}^2 \). 
+    These vectors form a convenient coordinate system. Any vector \( v \) in this space can be expressed as a <code>linear combination</code> of these basis vectors.
+    This means \( v_{1} \) can be decomposed into 2 units of \( e_{1} \) and 3 units of \( e_{2} \). <br>
+    \[
+        e_{1} = [1, 0]^{T} \quad e_{2} = [0, 1]^{T} \\
+        v_{1} = [2, 3]^{T} = 2e_{1} + 3e_{2} \quad v_{2} = [3.3, 1.3]^{T} = 3.3e_{1} + 1.3e_{2}
+    \]
     
-    <p style="padding-left: 2em;">\( \mathbf{e_1} = [1, 0]^T \) <br> \( \mathbf{e_2} = [0, 1]^T \)</p>
-    <p style="padding-left: 2em;">\( \mathbf{v_1} = [2, 3]^T = 2\mathbf{e_1} + 3\mathbf{e_2} \) <br> \( \mathbf{v_2} = [3.3, 1.3]^T = 3.3\mathbf{e_1} + 1.3\mathbf{e_2} \)</p>
-
     <figure style="display: flex;">
         <img src="/img/intuitive-understanding-linear-algebra-0.png" width="40%">
         <img src="/img/intuitive-understanding-linear-algebra-2.png" width="40%">
@@ -98,9 +99,11 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <br><br><br>
 
     Basis vectors do not need to be <code>orthogonal</code> or have unit length. Let's consider a different set of basis vectors in \( \mathbb{R}^2 \)!
-    We can express any vector in terms of these new basis vectors with the below specific basis. Here, \( \mathbf{v_2} \) is decomposed into 1.2 units of \( \mathbf{e_1} \) and 2.7 units of \( \mathbf{e_2} \). 
-    <p style="padding-left: 2em;">\( \mathbf{e_1} = [1, -0.1]^T \) <br> \( \mathbf{e_2} = [1, 1]^T \)</p>
-    <p style="padding-left: 2em;">\( \mathbf{v_1} = [4, 1.8]^T = 2\mathbf{e_1} + 2\mathbf{e_2} \) <br> \( \mathbf{v_2} = [3.9, 2.58]^T = 1.2\mathbf{e_1} + 2.7\mathbf{e_2} \) </p>
+    We can express any vector in terms of these new basis vectors with the below specific basis. Here, \( v_{2} \) is decomposed into 1.2 units of \( e_{1} \) and 2.7 units of \( e_{2} \). 
+    \[
+        e_{1} = [1, -0.1]^{T}  \quad e_{2} = [1, 1]^{T} \\
+        v_{1} = [4, 1.8]^{T} = 2e_{1} + 2e_{2} \quad v_{2} = [3.9, 2.58]^{T} = 1.2e_{1} + 2.7e_{2}
+    \]
 
     <figure style="display: flex;">
         <img src="/img/intuitive-understanding-linear-algebra-1.png" width="40%">
@@ -131,7 +134,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     Imagine a vector space as a room, and the basis vectors as different directions you can travel within that room. 
     If you can move in every possible direction (<code>span</code>), then the basis vectors cover the entire space.
-    If \( \{ \mathbf{v}_1, \mathbf{v}_2, \ldots, \mathbf{v}_n \} \) is a set of vectors in a vector space \( V \), then \( V \) is spanned by these vectors if every vector \( \mathbf{v} \in V \) can be expressed as \( \mathbf{v} = c_1 \mathbf{v}_1 + c_2 \mathbf{v}_2 + \ldots + c_n \mathbf{v}_n \), where \( c_1, c_2, \ldots, c_n \) are scalars.
+    If \( \{ v_{1}, v_{2}, \ldots, v_{n} \} \) is a set of vectors in a vector space \( V \), then \( V \) is spanned by these vectors if every vector \( v \in V \) can be expressed as \( v = c_{1}v_{1} + c_{2}v_{2} + \ldots + c_{n}v_{n} \), where \( c_{1}, c_{2}, \ldots, c_{n} \) are scalars.
 
 
     <br><br>
@@ -214,7 +217,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <br><br>
 
     The matrix \( A \) accepts vectors from an \( n \)-dimensional space as inputs and transforms them into vectors in an \( m \)-dimensional space. 
-    For example, if we have an \( n \)-dimensional vector \( \mathbf{x} \), the <code>matrix-vector product</code> \( A\mathbf{x} \) results in an \( m \)-dimensional vector.
+    For example, if we have an \( n \)-dimensional vector \( x \), the <code>matrix-vector product</code> \( Ax \) results in an \( m \)-dimensional vector.
     
     <br><br>
     
@@ -361,8 +364,12 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     In the matrix multiplication, the <code>associative law</code> is valid. 
     Therefore, 
     
-    <p style="padding-left: 2em;">\( C(BA) = (CB)A = CBA \)</p>
-    <p style="padding-left: 2em;">\( D(C(BA)) = D((CB)A) = (D(CB))A = ((DC)B)A = (DC)(BA) = DCBA \)</p>
+    \[
+        C(BA) = (CB)A = CBA
+    \]
+    \[
+        D(C(BA)) = D((CB)A) = (D(CB))A = ((DC)B)A = ((DC)(BA)) = (DCBA)
+    \]
 
     <br>
 
@@ -413,7 +420,17 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     If the multiplications \(AB\) and \(BA\) are possible, the results are different.
     Let's think about the following matrices:
-    <p style="padding-left: 2em;">\( A = \begin{bmatrix} 0 & -1 \\ 1 & 0 \end{bmatrix} 　 B = \begin{bmatrix} 2 & 0 \\ 0 & 1 \end{bmatrix} \)</p>
+    \[
+        A = \begin{bmatrix} 
+            0 & -1 
+            \\ 1 & 0 
+        \end{bmatrix} 
+        　 
+        B = \begin{bmatrix} 
+            2 & 0 
+            \\ 0 & 1 
+        \end{bmatrix}
+    \]
 
     
     <figure style="display: flex;">
@@ -700,7 +717,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 <div class="article">
     <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/affine-transfomation.ipynb">Affine transformation</a></b><br>
     An affine transformation is a combination of a <code>linear transformation</code> and a <code>translation</code>. 
-    Mathematically, an affine transformation of a vector \(\mathbf{x}\) can be represented as:
+    Mathematically, an affine transformation of a vector \(x\) can be represented as:
     \[
         y = Ax + b
     \]
@@ -1021,8 +1038,46 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             \(\mathbf{det}D = (0.5 \cdot s) \cdot (0.5 \cdot s) \cdot (0.5 \cdot s) = 1.000\)
         </figcaption>
     </figure>
+</div>
+<br><br>
+
+<h3>Rank · Inverse matrix · Linear equation</h3>
+<div class="article">
+    <b>🧬 Kernel</b><br>
+    For A cause vector \(x = (x_{1}, ..., x_{n})^{T} \) and a result vector \(y = (y_{1}, ..., y_{n})^{T} \), what happens if the dimensions of \(x\), \(y\) are different? 
+    This case is a problem finding the variables \(x\) with a number of \(n\) using clues with a number of \(m\).
+
+    <br><br>
+    First, let's think about the case where the dimension of \(y\) is less than the dimension of \(x\) (\(m < n\)).
+    In the \(y = Ax\), the \(x\) has \(n\)-dimension and \(y\) has \(m\)-dimension, so the size of \(A\) is \(m \times n\).
+    In other words, the \(A\) is longer horizontally than vertically.
+    \[
+        y = Ax
+        　
+        \begin{bmatrix}
+            * \\
+            *
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            * & * & * \\
+            * & * & *
+        \end{bmatrix}
+        \begin{bmatrix}
+            * \\
+            * \\
+            *
+        \end{bmatrix}
+    \]
+
+    <br>
+
+    Let me give an example. First, we must remember the 'Matrix is mapping' section.
+    The matrix \(A\) like the above is a mapping to transform \(x\) in the 3-dimensional space to \(y\) in the 2-dimensional space.
 
 
+    
+    
 </div>
 <br><br>
 
