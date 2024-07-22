@@ -1107,7 +1107,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     <figure>
         <img src="/img/intuitive-understanding-linear-algebra-29.png" width="95%">
         <figcaption>
-            The case that the dimension of \(A\) is lower than the dimension of \(\x) <br>
+            The case that the dimension of \(A\) is lower than the dimension of \(x\) <br>
             From the left, \(x\) · \(Ax\) · \(\mathbf{Ker}A\) <br>
             \[
             \mathbf{Ker}A 
@@ -1130,10 +1130,105 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     The <code>kernel</code> of \(A\) is a set of vectors \(x\) where \(Ax = 0\), express as \(\mathbf{Ker}A\), that is \(\mathbf{Ker}A = \left\{v \in V\text{ }|\text{ }Av = 0\right\}\).
     This means information is <code>loss</code>.
     
+    <br><br><br>
+
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/image.ipynb">Image</a></b><br>
+    In the kernel section above, we learned the case where the matrix \(A\) has a lower dimension than vector \(x\). 
+    This time, let's look the case contrary where the matrix \(A\) has a higher dimension than vector \(x\).
+    <br><br>
+    \[
+        y = Ax
+        　
+        \rightarrow
+        　
+        \begin{bmatrix}
+            * \\
+            * \\
+            *
+        \end{bmatrix}
+        =
+        \begin{bmatrix}
+            * & * \\
+            * & * \\
+            * & *
+        \end{bmatrix}
+        \begin{bmatrix}
+            * \\
+            *
+        \end{bmatrix}
+    \]
+
+    Once again, we must remember the 'Matrix is mapping' section.
+    Let me give an example where the matrix \(A\) is \(3 \times 2\) and \(x\) is \(2 \times 5\).
+    The matrix \(A\) maps lower dimensional data into higher dimensional space.
+    Let's see how the matrix \(A\) maps the vector \(x\) into a higher dimensional space:
+    <br><br>
+    \[
+        A = \begin{bmatrix}
+            1 & 0 \\
+            0 & 1 \\
+            0.2 & 1
+        \end{bmatrix}
+        　
+        x = \begin{bmatrix}
+            0 & 1 & 1 & 0 & 0 \\
+            0 & 0 & 1 & 1 & 0
+        \end{bmatrix}
+        \\
+        　
+        \\
+        y = Ax = \begin{bmatrix}
+            0 & 1 & 1 & 0 & 0 \\
+            0 & 0 & 1 & 1 & 0 \\
+            0 & 0.2 & 1.2 & 1 & 0
+        \end{bmatrix}
+    \]
+    <br>
+    
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-30.png" width="95%">
+        <figcaption>
+            The case that the dimension of \(A\) is higher than the dimension of \(x\)
+        </figcaption>
+    </figure><br><br>
+
+    The 2D square in the image left is mapped to the 3D space, but the basis number is 2.
+    Therefore the possible spanning space is still 2D plane. In other words, it can not cover the entire 3D space.
+    A concept of the <code>image</code> \(Im A\) means the matrix \(A\) that can span the entire space.
+
     <br><br>
 
-    
-    
+    The mapping from 1D to 3D is the same as above. Let'see the below case where the matrix \(A\) is \(3 \times 1\) and \(x\) is \(1 \times 2\).
+    In this case, we can realize that the image of \(A\) is a straight line both before and after the transformation.
+    <br><br>
+    \[
+        A = \begin{bmatrix}
+            0.7 \\
+            0.3 \\
+            1.3
+        \end{bmatrix}
+        　
+        x = \begin{bmatrix}
+            2 -2
+        \end{bmatrix}
+        \\
+        　
+        \\
+        y = Ax = \begin{bmatrix}
+            1.4 & -1.4 \\
+            0.6 & -0.6 \\
+            2.6 & -2.6
+        \end{bmatrix}
+    \]
+    <br>
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-31.png" width="95%">
+        <figcaption>
+            The case that the dimension of \(A\) is higher than the dimension of \(x\)
+        </figcaption>
+    </figure><br><br>
+
 </div>
 <br><br>
 
