@@ -82,11 +82,15 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     A basis is a set of vectors that defines a <code>coordinate system</code> for a vector space. By choosing a set of basis vectors, we can specify the position of any vector within that space relative to these basis vectors.<br><br>
     For example, consider the standard basis vectors \( e_{1} \) and \( e_{2} \) in \( \mathbb{R}^2 \). 
     These vectors form a convenient coordinate system. Any vector \( v \) in this space can be expressed as a <code>linear combination</code> of these basis vectors.
-    This means \( v_{1} \) can be decomposed into 2 units of \( e_{1} \) and 3 units of \( e_{2} \). <br>
+    This means \( v_{1} \) can be decomposed into 2 units of \( e_{1} \) and 3 units of \( e_{2} \). 
+    <br><br>
     \[
-        e_{1} = [1, 0]^{T} \quad e_{2} = [0, 1]^{T} \\
+        e_{1} = [1, 0]^{T} \quad e_{2} = [0, 1]^{T} 
+        \\
+        　
+        \\
         v_{1} = [2, 3]^{T} = 2e_{1} + 3e_{2} \quad v_{2} = [3.3, 1.3]^{T} = 3.3e_{1} + 1.3e_{2}
-    \]
+    \] <br>
     
     <figure style="display: flex;">
         <img src="/img/intuitive-understanding-linear-algebra-0.png" width="40%">
@@ -100,10 +104,14 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     Basis vectors do not need to be <code>orthogonal</code> or have unit length. Let's consider a different set of basis vectors in \( \mathbb{R}^2 \)!
     We can express any vector in terms of these new basis vectors with the below specific basis. Here, \( v_{2} \) is decomposed into 1.2 units of \( e_{1} \) and 2.7 units of \( e_{2} \). 
+    <br><br>
     \[
-        e_{1} = [1, -0.1]^{T}  \quad e_{2} = [1, 1]^{T} \\
+        e_{1} = [1, -0.1]^{T}  \quad e_{2} = [1, 1]^{T}
+        \\
+        　
+        \\
         v_{1} = [4, 1.8]^{T} = 2e_{1} + 2e_{2} \quad v_{2} = [3.9, 2.58]^{T} = 1.2e_{1} + 2.7e_{2}
-    \]
+    \] <br>
 
     <figure style="display: flex;">
         <img src="/img/intuitive-understanding-linear-algebra-1.png" width="40%">
@@ -1042,7 +1050,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 </div>
 <br><br>
 
-<h3>Rank · Inverse matrix · Linear equation</h3>
+<h3>Rank</h3>
 <div class="article">
     <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/kernel.ipynb">Kernel</a></b><br>
     For A cause vector \(x = (x_{1}, ..., x_{n})^{T} \) and a result vector \(y = (y_{1}, ..., y_{n})^{T} \), what happens if the dimensions of \(x\), \(y\) are different? 
@@ -1194,11 +1202,11 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     The 2D square in the image left is mapped to the 3D space, but the basis number is 2.
     Therefore the possible spanning space is still 2D plane. In other words, it can not cover the entire 3D space.
-    A concept of the <code>image</code> \(Im A\) means the matrix \(A\) that can span the entire space.
+    A concept of the <code>image</code> \(\mathbf{Im}A\) means the matrix \(A\) that can span the entire space.
 
     <br><br>
 
-    The mapping from 1D to 3D is the same as above. Let'see the below case where the matrix \(A\) is \(3 \times 1\) and \(x\) is \(1 \times 2\).
+    The mapping from 1D to 3D is the same as above. Let's see the below case where the matrix \(A\) is \(3 \times 1\) and \(x\) is \(1 \times 2\).
     In this case, we can realize that the image of \(A\) is a straight line both before and after the transformation.
     <br><br>
     \[
@@ -1228,6 +1236,69 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             The case that the dimension of \(A\) is higher than the dimension of \(x\)
         </figcaption>
     </figure><br><br>
+
+    <b>🧬 Singular matrix</b><br>
+    Like this, it is important to have the same dimensions between \(x\) and \(y\).
+    Then, if the \(x\) and \(y\) have the same dimensions, is everything okay in all cases?
+    The answer is no. Let's see the below example:
+    \[
+        A = \begin{bmatrix}
+            0.8 & -0.6 \\
+            0.4 & -0.3
+        \end{bmatrix}
+    \] <br>
+
+    This matrix is a \(2 \times 2\) matrix that flattens the space. It means the \(y\) can not determine the \(x\) uniquely.
+    Additionally, because the \(y\) is flattened, it can not cover the entire space.
+    In other words, whether the properties of a matrix are ​​good or bad cannot be determined based on its dimensions.
+    The keys are a kernel and an image.
+    
+    <br><br><br>
+
+    <b>🧬 Surjective, Injective, Bijective</b><br>
+    To summarize the concepts above, the keys are as follows:    
+    
+    <ul style="padding-left: 2em;">
+        <li>Can \(\mathbf{Im}\, A\) cover the entire space? </li>
+        <li>Is the \(\mathbf{Ker}\, A\) is only 0? In other words, is the result \(y\) by \(x\) is unique?</li>
+    </ul> <br>
+
+    If the first condition is satisfied, mapping \(y = Ax\) is <code>surjective</code>.
+    If the second condition is satisfied, mapping \(y = Ax\) is <code>injective</code>.
+    If both conditions are satisfied, mapping \(y = Ax\) is <code>bijective</code>.
+    
+    <br><br><br>
+
+    <b>🧬 Properties of Rank</b><br>
+    As I mentioned above, the <code>image</code> \(\mathbf{Im}\, A\) is named the rank of a matrix \(A\).
+    It is expressed as \(\mathbf{rank}\, A\). Depending on the dimension theorem, \(\mathbf{dim}\, \mathbf{Ker} A + \mathbf{rank}\, A = n\).
+    'Can \(\mathbf{Im}\, A\) cover the entire space?', the first condition mentioned earlier asks whether \(\mathbf{Im}\, A\) has m dimensions of a transformation matrix \(A\).
+
+    <br><br>
+
+    The above concepts can be expressed with the rank as follows:
+    <ul style="padding-left: 2em;">
+        <li>\(\mathbf{rank}\, A = n \Leftrightarrow A\) is the injective (Rank is the same as the dimension of the \(x\))</li>
+        <li>\(\mathbf{rank}\, A = m \Leftrightarrow A\) is the surjective (Rank is the same as the dimension of the \(A\))</li>
+    </ul> <br>
+
+    For the \(m \times n\) matrix \(A\), the below properties are natural intuitively. 
+    This is because the dimension of the \(x\) is \(n\) and the dimension of the \(A\) is \(m\).
+    That is, the \(\mathbf{dim}\, \mathbf{Im} A\) can not be bigger than \(m\)
+    <br><br>
+    \[
+        \mathbf{rank}\, A \leq m \quad
+        \mathbf{rank}\, A \leq n
+    \]
+    <br>
+
+    Additionally, if the \(P\), \(Q\) are regular (or nonsingular, invertible) matrices, there is no change in the rank when multiplying the matrix \(A\) and them.
+    Since the regular matrix isn't a matrix that flattens the space, the rank of the matrix \(A\) is the same before and after multiplying the matrix \(A\) and them.
+    <br><br>
+    \[
+        \mathbf{rank}(PA) \, = \mathbf{rank}\, A \quad
+        \mathbf{rank}(AQ) \, = \mathbf{rank}\, A
+    \]
 
 </div>
 <br><br>
