@@ -1164,7 +1164,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             * \\
             *
         \end{bmatrix}
-    \]
+    \] <br>
 
     Once again, we must remember the 'Matrix is mapping' section.
     Let me give an example where the matrix \(A\) is \(3 \times 2\) and \(x\) is \(2 \times 5\).
@@ -1236,6 +1236,17 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
             The case that the dimension of \(A\) is higher than the dimension of \(x\)
         </figcaption>
     </figure><br><br>
+
+    Finally, let me describe the concepts of the <code>image</code> once again. For a matrix \(A^{m \times n}\), the \(\mathbf{Im}\, A \) represents the <code>range</code> of the transformation \(y = Ax\). 
+    For \(A = (a_{1}, \, ..., \, a_{n}) \) and \(x = (x_{1}, \, ..., \, x_{n})^{T} \), the output \(y\) can be written as \(y = x_{1}a_{1} + \, \cdots \, + x_{n}a_{n} \).
+    In this context, the range that x can move \(x_{1}a_{1} + \, \cdots \, + x_{n}a_{n}\) becomes to \(\mathbf{Im}\,A \). In other words, a set of vectors that can be created by linearly combining with \(a_{1}, \, ..., \, a_{n} \).
+
+    <br><br>
+    This is expressed as \(\mathbf{span}\{a_{1}, \, ..., \, a_{n}\}\), and is called the linear <code>subspace</code> created by the vectors \(a_{1}, \, ..., \, a_{n} \).
+    If the all \(a_{n} \in A\) are 0, the span becomes a point. 
+    Similarly, if all vectors lie on a line, the span is that line. If the vectors lie on a plane, the span is the entire plane.
+    
+    <br><br><br>
 
     <b>🧬 Singular matrix</b><br>
     Like this, it is important to have the same dimensions between \(x\) and \(y\).
