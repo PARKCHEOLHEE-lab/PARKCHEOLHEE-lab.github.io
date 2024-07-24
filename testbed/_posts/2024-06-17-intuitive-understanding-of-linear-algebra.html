@@ -1241,6 +1241,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     Like this, it is important to have the same dimensions between \(x\) and \(y\).
     Then, if the \(x\) and \(y\) have the same dimensions, is everything okay in all cases?
     The answer is no. Let's see the below example:
+    <br><br>
     \[
         A = \begin{bmatrix}
             0.8 & -0.6 \\
@@ -1260,7 +1261,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     
     <ul style="padding-left: 2em;">
         <li>Can \(\mathbf{Im}\, A\) cover the entire space? </li>
-        <li>Is the \(\mathbf{Ker}\, A\) is only 0? In other words, is the result \(y\) by \(x\) is unique?</li>
+        <li>Is the \(\mathbf{Ker}\, A\) only 0? In other words, is the result \(y\) by \(x\) is unique?</li>
     </ul> <br>
 
     If the first condition is satisfied, mapping \(y = Ax\) is <code>surjective</code>.
@@ -1269,7 +1270,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     
     <br><br><br>
 
-    <b>🧬 Properties of Rank</b><br>
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/properties-of-rank.ipynb">Properties of Rank</a></b><br>
     As I mentioned above, the <code>image</code> \(\mathbf{Im}\, A\) is named the rank of a matrix \(A\).
     It is expressed as \(\mathbf{rank}\, A\). Depending on the dimension theorem, \(\mathbf{dim}\, \mathbf{Ker} A + \mathbf{rank}\, A = n\).
     'Can \(\mathbf{Im}\, A\) cover the entire space?', the first condition mentioned earlier asks whether \(\mathbf{Im}\, A\) has m dimensions of a transformation matrix \(A\).
@@ -1281,7 +1282,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         <li>\(\mathbf{rank}\, A = n \Leftrightarrow A\) is the injective (Rank is the same as the dimension of the \(x\))</li>
         <li>\(\mathbf{rank}\, A = m \Leftrightarrow A\) is the surjective (Rank is the same as the dimension of the \(A\))</li>
     </ul> <br>
-
+    
     For the \(m \times n\) matrix \(A\), the below properties are natural intuitively. 
     This is because the dimension of the \(x\) is \(n\) and the dimension of the \(A\) is \(m\).
     That is, the \(\mathbf{dim}\, \mathbf{Im} A\) can not be bigger than \(m\)
@@ -1289,16 +1290,75 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     \[
         \mathbf{rank}\, A \leq m \quad
         \mathbf{rank}\, A \leq n
+        \]
+        <br>
+        
+        Additionally, if the \(P\), \(Q\) are regular (or nonsingular, invertible) matrices, there is no change in the rank when multiplying the matrix \(A\) and them.
+        Since the regular matrix isn't a matrix that flattens the space, the rank of the matrix \(A\) is the same before and after multiplying the matrix \(A\) and them.
+        <br><br>
+        \[
+        \mathbf{rank}(PA) \, = \mathbf{rank}\, A \quad
+        \mathbf{rank}(AQ) \, = \mathbf{rank}\, A
+        \]
+        
+    <br>
+    
+    For general matrices \(A\), \(B\) that are square matrices or not, the below properties are natural intuitively.
+    This is because the \(\mathbf{rank}(BA)\) is:
+    <ul style="padding-left: 2em;">
+        <li>Firstly, the existing space \(U\) for \(V\) is mapped to the space \(A\) </li>
+        <li>Secondly, the transformed \(V\) by \(A\) is mapped to the space \(B\) </li>
+    </ul> <br>
+
+    By the first step, the dimension of the space \(U\) becomes \(\mathbf{rank}\, A\).
+    Therefore, after the first step, any transformation matrix can not be bigger than \(\mathbf{rank}\, A\).
+    Additionally, since the second step maps the space to \(B\), the resulting space after all transformations can not exceed \(\mathbf{rank}\, B\).
+
+    <br><br>
+    \[
+    \mathbf{rank}(BA) \, \leq \mathbf{rank}\, A \quad
+    \mathbf{rank}(BA) \, \leq \mathbf{rank}\, B
     \]
     <br>
 
-    Additionally, if the \(P\), \(Q\) are regular (or nonsingular, invertible) matrices, there is no change in the rank when multiplying the matrix \(A\) and them.
-    Since the regular matrix isn't a matrix that flattens the space, the rank of the matrix \(A\) is the same before and after multiplying the matrix \(A\) and them.
+    Let's see intuitively the above concept with the below example:
     <br><br>
     \[
-        \mathbf{rank}(PA) \, = \mathbf{rank}\, A \quad
-        \mathbf{rank}(AQ) \, = \mathbf{rank}\, A
+        A' = \begin{bmatrix}
+            1 & 0 & 0 \\
+            0 & 1 & 0 \\
+            0 & 0 & 1
+        \end{bmatrix}
+        　
+        A = \begin{bmatrix}
+            1.2 & 0 & 0 \\
+            0 & 0 & 0 \\
+            0 & 0 & 1.2
+        \end{bmatrix}
+        　
+        B = \begin{bmatrix}
+            0.8 & 0 & 0 \\
+            0.5 & 0.7 & 0.8 \\
+            0 & 0 & 0.8
+        \end{bmatrix}
     \]
+
+    <br>
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-32.png" width="97%">
+        <figcaption>
+            Changes of the \(\mathbf{rank}\) <br>
+            From the left, \(\mathbf{rank}\, A'\) · \(\mathbf{rank}\, A\) · \(\mathbf{rank}\, BA\)
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    
+    In this example, the original space is 3-dimensional with \(\mathbf{rank}\, A' = 3\).
+    When multiplying \(A'\) by the matrix \(A\), where the second column consists of zeros, the information from the second column of \(A'\) is <code>lost</code>. Consequently, the space is flattened to a 2-dimensional space.
+    Therefore, since the \(\mathbf{rank}\, A\) became to 2, the \(\mathbf{rank}\, BA \) can not be bigger than 2.
 
 </div>
 <br><br>
