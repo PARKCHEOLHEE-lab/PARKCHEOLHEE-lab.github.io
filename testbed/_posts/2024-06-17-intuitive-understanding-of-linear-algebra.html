@@ -1217,7 +1217,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         \end{bmatrix}
         　
         x = \begin{bmatrix}
-            2 -2
+            2 \, -2
         \end{bmatrix}
         \\
         　
@@ -1245,7 +1245,7 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     This is expressed as \(\mathbf{span}\{a_{1}, \, ..., \, a_{n}\}\), and is called the linear <code>subspace</code> created by the vectors \(a_{1}, \, ..., \, a_{n} \).
     If the all \(a_{n} \in A\) are 0, the span becomes a point. 
     Similarly, if all vectors lie on a line, the span is that line. If the vectors lie on a plane, the span is the entire plane.
-    
+
     <br><br><br>
 
     <b>🧬 Singular matrix</b><br>
@@ -1370,6 +1370,68 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     In this example, the original space is 3-dimensional with \(\mathbf{rank}\, A' = 3\).
     When multiplying \(A'\) by the matrix \(A\), where the second column consists of zeros, the information from the second column of \(A'\) is <code>lost</code>. Consequently, the space is flattened to a 2-dimensional space.
     Therefore, since the \(\mathbf{rank}\, A\) became to 2, the \(\mathbf{rank}\, BA \) can not be bigger than 2.
+
+    <br><br><br>
+
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/extracting-rank.ipynb">Extracting rank</a></b><br>
+    In the <code>image</code> section, we learned that the \(\mathbf{Im}\, A = \mathbf{span}\, \{a_{1}, \, ..., \, a_{n}\}\).
+    The \(\mathbf{span}\) is the same as the \(\mathbf{rank}\, A\). 
+    In other words, the \(\mathbf{rank}\, A\) is the number of the vectors that can be the <code>basis</code> for the space represented by the \(A\).
+    If the vectors \(a_{1}, \, ..., \, a_{n} \) of \(A\) are linearly <code>independent</code> where the space is not flattened, \(\mathbf{rank}\, A = n\).
+    Otherwise, the \(\mathbf{rank}\, A < n\).
+    <br><br>
+
+    For example, there are the following matrices, and the space for the matrices is visualized as:
+    <br><br>
+
+    \[
+        A = \begin{bmatrix}
+                -0.5 & 0.75 & -1.5 \\
+                -0.5 & 0.75 & -1.5 \\
+                -0.5 & 0.75 & -1.5
+            \end{bmatrix}
+            \\
+            　
+            \\
+            B = \begin{bmatrix}
+            0.5 & -1 & -1.35 & 0.7\\
+            1.3 & -0.8 & -1.71 & -0.34\\
+            1 & 0 & -0.7 & -1
+            \end{bmatrix}
+            \\
+            　
+            \\
+        C = \begin{bmatrix}
+            0.5 & 1.5 & 0.7 & -0.75 & -2.25 \\
+            1 & -1.7 & 0.8 & -1.5 & 0.2 \\
+            0 & 0 & 1.1 & 0 & 0
+            \end{bmatrix}
+    \]
+
+    <br>
+
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-33.png" width="97%">
+        <figcaption>
+            The number of the vectors that can be the basis <br>
+            From the left, \(\mathbf{rank}\, A\) · \(\mathbf{rank}\, B\) · \(\mathbf{rank}\, C\)
+        </figcaption>
+    </figure> <br><br>
+
+    The example above explains that the number of columns in the matrix is not equal to the number of basis vectors.
+    <br><br>
+
+    Frist of all, the matrix \(A\) has three column vectors \(a_{1}, a_{2}, a_{3}\) but, this vectors also can be expressed as \(A = [a_{1}, \, -a_{1} \cdot 1.5, \, a{1} \cdot 3] \). 
+    Therefore the vector that can be the basis is, the \(\mathbf{Im}\, A = \mathbf{span}\{a_{1},\, a_{2},\, a_{3}\} = \mathbf{rank}\, A = 1\). Since the basis is a vector, \(\mathbf{Im}\, A\) is a straight line.
+    <br><br>
+    Similarly, the second matrix \(B\) can be converted as \(B = [b_{1},\, b_{2},\ -b_{1} \cdot 0.7 + b_{2},\ -b_{2} \cdot 1.2 - b_{1}] \) where \(b_{1} = [0.5, 1.3, 1]^{T}, \, b_{2} = [-1, -0.8, 0]^{T}\).
+    In this case, \(\mathbf{Im}\, B = \mathbf{span}\{b_{1},\, b_{2},\, b_{3}, b_{4}\} = \mathbf{rank}\, B = 2\). Because the rank is 2, the \(\mathbf{Im}\, B\) becomes a plane. 
+    <br><br>
+    For the matrix \(C\) is \(C = [c_{1}, \, c_{2}, \, c_{3}, \, -c_{1} \cdot 1.5, \, -c_{2} + c_{4}] \) where \(c_{1} = [0.5, 1, 0]^{T}, \, c_{2} = [1.5, -1.7, 0]^{T}, c_{3} = [0.7, 0.8, 1.1]^{T} \).
+    In this case, \(\mathbf{Im}\, C = \mathbf{span}\{c_{1},\, c_{2},\, c_{3}, c_{4}, c_{5}\} = \mathbf{rank}\, C = 3\), and has the parallelepiped-shaped <code>image</code>.
+    
+    <br><br>
+
 
 </div>
 <br><br>
