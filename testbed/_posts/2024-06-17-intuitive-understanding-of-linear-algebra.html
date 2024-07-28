@@ -1432,6 +1432,160 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
     
     <br><br>
 
+    This time, let's find out how to calculate the rank by hand. 
+    We can determine the rank by leveraging the property that the rank remains unchanged after multiplying by a regular matrix.
+    This approach is a concept used to simplify the matrix to determine its rank as:
+    
+    <ul style="padding-left: 2em;">
+        <li>Multiply a specific row(or column) by a constant\(C\) where \(C \neq 0\)</li>
+        <li>Multiply a specific row(or column) by a constant \(C\) and add it to the other row(or column)</li>
+        <li>Swap the places of a row(or column)</li>
+    </ul><br>
+    
+    Consider matrices \(A\) and \(B\). If the operation is performed on the rows, it is expressed as \(BA\).
+    If the operation is performed on the columns, it is expressed as \(AB\).
+    
+    For example:
+    <ul style="padding-left: 2em;">
+        <li>Multiply the second column by 5:</li>
+        
+        \[
+            \begin{bmatrix}
+                2 & \color{magenta}{3} & 3 & 9 \\
+                3 & \color{magenta}{4} & 2 & 9 \\
+                -2 & \color{magenta}{-2} & 3 & 2
+            \end{bmatrix}
+            \cdot
+            \begin{bmatrix}
+                1 & 0 & 0 & 0 \\
+                0 & \color{magenta}{5} & 0 & 0 \\
+                0 & 0 & 1 & 0 \\
+                0 & 0 & 0 & 1 \\
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                2 & \color{magenta}{15} & 3 & 9 \\
+                3 & \color{magenta}{20} & 2 & 9 \\
+                -2 & \color{magenta}{-10} & 3 & 2
+            \end{bmatrix}
+        \] <br>
+
+        <li>Multiply the second column by 10 and add it to the first column:</li>
+        \[
+            \begin{bmatrix}
+                2 & \color{magenta}{3} & 3 & 9 \\
+                3 & \color{magenta}{4} & 2 & 9 \\
+                -2 & \color{magenta}{-2} & 3 & 2
+            \end{bmatrix}
+            \cdot
+            \begin{bmatrix}
+                1 & 0 & 0 & 0 \\
+                \color{magenta}{10} & 1 & 0 & 0 \\
+                0 & 0 & 1 & 0 \\
+                0 & 0 & 0 & 1 \\
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+               \color{magenta}{32} & 3 & 3 & 9 \\
+               \color{magenta}{43} & 4 & 2 & 9 \\
+                \color{magenta}{-22} & -2 & 3 & 2
+            \end{bmatrix}
+        \] <br>
+
+        <li>Swap the second column and the fourth column:</li>
+        \[
+            \begin{bmatrix}
+                2 & \color{magenta}{3} & 3 & \color{magenta}{9} \\
+                3 & \color{magenta}{4} & 2 & \color{magenta}{9} \\
+                -2 & \color{magenta}{-2} & 3 & \color{magenta}{2}
+            \end{bmatrix}
+            \cdot
+            \begin{bmatrix}
+            1 & 0 & 0 & 0 \\
+            0 & 0 & 0 & \color{magenta}{1} \\
+            0 & 0 & 1 & 0 \\
+            0 & \color{magenta}{1} & 0 & 0
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                2 & \color{magenta}{9} & 3 & \color{magenta}{3} \\
+                3 & \color{magenta}{9} & 2 & \color{magenta}{4} \\
+                -2 & \color{magenta}{2} & 3 & \color{magenta}{-2}
+            \end{bmatrix}
+        \]
+    </ul> <br>
+
+    In fact, it's not necessary to explicitly write the transformation matrix when determining the rank.
+    It is important to understand that the rank does not change even if the above concept is applied to rows or columns and that each operation can be interpreted as multiplying the left or right.
+
+    <br><br>
+
+    Now, let's calculate the rank for the following matrix \(A\):
+    <br><br>
+    \(
+    A = \begin{bmatrix}
+        1 & 4 & 7 \\
+        2 & 5 & 8 \\
+        3 & 6 & 9
+    \end{bmatrix} 
+    \quad \text{Multiply the first row by -2 and add it to the second, third rows}
+    \)
+    <br><br>
+    \(
+        \quad
+        \rightarrow
+        \begin{bmatrix}
+            1 & 4 & 7 \\
+            0 & -3 & -6 \\
+            0 & -6 & -12
+        \end{bmatrix} \quad \text{Multiply the second column by -4 and -7 and add them to the second, third columns}
+    \)
+    <br><br>
+    \(  
+        \quad
+        \rightarrow
+        \begin{bmatrix}
+        1 & 0 & 0 \\
+        0 & -3 & -6 \\
+        0 & -6 & -12
+        \end{bmatrix} \quad \text{Multiply the second row by}\, -\frac{1}{3}
+    \)
+    <br><br>
+    \(
+        \quad
+        \rightarrow
+        \begin{bmatrix}
+            1 & 0 & 0 \\
+            0 & 1 & 2 \\
+            0 & -6 & -12
+        \end{bmatrix} \quad \text{Multiply the second row by 6 and add it to the third row}
+    \)
+    <br><br>
+    \(
+        \quad
+        \rightarrow
+        \begin{bmatrix}    
+            1 & 0 & 0 \\
+            0 & 1 & 2 \\
+            0 & 0 & 0
+        \end{bmatrix} \quad \text{Multiply the second column by -2 and add it to the third column}
+    \)
+    <br><br>
+    \(
+        \quad
+        \rightarrow
+        \begin{bmatrix}    
+            \color{magenta}{1} & 0 & 0 \\
+            0 & \color{magenta}{1} & 0 \\
+            0 & 0 & 0
+        \end{bmatrix} \quad \mathbf{rank}\, A = \color{magenta}{2}
+    \)
+    <br><br><br>
+
+    After repeating this process, the <code>number of 1s</code> in the diagonal elements is the rank.
+
+    <br><br>
+
 
 </div>
 <br><br>
