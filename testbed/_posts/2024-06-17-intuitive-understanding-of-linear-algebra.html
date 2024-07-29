@@ -1451,66 +1451,66 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         
         \[
             \begin{bmatrix}
-                2 & \color{magenta}{3} & 3 & 9 \\
-                3 & \color{magenta}{4} & 2 & 9 \\
-                -2 & \color{magenta}{-2} & 3 & 2
+                2 & \color{purple}{\mathbf{3}} & 3 & 9 \\
+                3 & \color{purple}{\mathbf{4}} & 2 & 9 \\
+                -2 & \color{purple}{\mathbf{-2}} & 3 & 2
             \end{bmatrix}
             \cdot
             \begin{bmatrix}
                 1 & 0 & 0 & 0 \\
-                0 & \color{magenta}{5} & 0 & 0 \\
+                0 & \color{purple}{\mathbf{5}} & 0 & 0 \\
                 0 & 0 & 1 & 0 \\
                 0 & 0 & 0 & 1 \\
             \end{bmatrix}
             =
             \begin{bmatrix}
-                2 & \color{magenta}{15} & 3 & 9 \\
-                3 & \color{magenta}{20} & 2 & 9 \\
-                -2 & \color{magenta}{-10} & 3 & 2
+                2 & \color{purple}{\mathbf{15}} & 3 & 9 \\
+                3 & \color{purple}{\mathbf{20}} & 2 & 9 \\
+                -2 & \color{purple}{\mathbf{-10}} & 3 & 2
             \end{bmatrix}
         \] <br>
 
         <li>Multiply the second column by 10 and add it to the first column:</li>
         \[
             \begin{bmatrix}
-                2 & \color{magenta}{3} & 3 & 9 \\
-                3 & \color{magenta}{4} & 2 & 9 \\
-                -2 & \color{magenta}{-2} & 3 & 2
+                2 & \color{purple}{\mathbf{3}} & 3 & 9 \\
+                3 & \color{purple}{\mathbf{4}} & 2 & 9 \\
+                -2 & \color{purple}{\mathbf{-2}} & 3 & 2
             \end{bmatrix}
             \cdot
             \begin{bmatrix}
                 1 & 0 & 0 & 0 \\
-                \color{magenta}{10} & 1 & 0 & 0 \\
+                \color{purple}{\mathbf{10}} & 1 & 0 & 0 \\
                 0 & 0 & 1 & 0 \\
                 0 & 0 & 0 & 1 \\
             \end{bmatrix}
             =
             \begin{bmatrix}
-               \color{magenta}{32} & 3 & 3 & 9 \\
-               \color{magenta}{43} & 4 & 2 & 9 \\
-                \color{magenta}{-22} & -2 & 3 & 2
+               \color{purple}{\mathbf{32}} & 3 & 3 & 9 \\
+               \color{purple}{\mathbf{43}} & 4 & 2 & 9 \\
+                \color{purple}{\mathbf{-22}} & -2 & 3 & 2
             \end{bmatrix}
         \] <br>
 
         <li>Swap the second column and the fourth column:</li>
         \[
             \begin{bmatrix}
-                2 & \color{magenta}{3} & 3 & \color{magenta}{9} \\
-                3 & \color{magenta}{4} & 2 & \color{magenta}{9} \\
-                -2 & \color{magenta}{-2} & 3 & \color{magenta}{2}
+                2 & \color{purple}{\mathbf{3}} & 3 & \color{purple}{\mathbf{9}} \\
+                3 & \color{purple}{\mathbf{4}} & 2 & \color{purple}{\mathbf{9}} \\
+                -2 & \color{purple}{\mathbf{-2}} & 3 & \color{purple}{\mathbf{2}}
             \end{bmatrix}
             \cdot
             \begin{bmatrix}
             1 & 0 & 0 & 0 \\
-            0 & 0 & 0 & \color{magenta}{1} \\
+            0 & 0 & 0 & \color{purple}{\mathbf{1}} \\
             0 & 0 & 1 & 0 \\
-            0 & \color{magenta}{1} & 0 & 0
+            0 & \color{purple}{\mathbf{1}} & 0 & 0
             \end{bmatrix}
             =
             \begin{bmatrix}
-                2 & \color{magenta}{9} & 3 & \color{magenta}{3} \\
-                3 & \color{magenta}{9} & 2 & \color{magenta}{4} \\
-                -2 & \color{magenta}{2} & 3 & \color{magenta}{-2}
+                2 & \color{purple}{\mathbf{9}} & 3 & \color{purple}{\mathbf{3}} \\
+                3 & \color{purple}{\mathbf{9}} & 2 & \color{purple}{\mathbf{4}} \\
+                -2 & \color{purple}{\mathbf{2}} & 3 & \color{purple}{\mathbf{-2}}
             \end{bmatrix}
         \]
     </ul> <br>
@@ -1575,18 +1575,44 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
         \quad
         \rightarrow
         \begin{bmatrix}    
-            \color{magenta}{1} & 0 & 0 \\
-            0 & \color{magenta}{1} & 0 \\
+            \color{purple}{\mathbf{1}} & 0 & 0 \\
+            0 & \color{purple}{\mathbf{1}} & 0 \\
             0 & 0 & 0
-        \end{bmatrix} \quad \mathbf{rank}\, A = \color{magenta}{2}
+        \end{bmatrix} \quad \mathbf{rank}\, A = \color{purple}{\mathbf{2}}
     \)
     <br><br><br>
 
     After repeating this process, the <code>number of 1s</code> in the diagonal elements is the rank.
+</div>
+<br><br>
+
+<h3>Eigenvalues and eigenvectors</h3>
+<div class="article">
+    <b>🧬 <a href="https://github.com/PARKCHEOLHEE-lab/intuitive-understanding-of-linear-algebra/blob/main/intuitive_understanding_of_linear_algebra/notebooks/eigenvalues-and-eigenvectors.ipynb">Geometric interpretation</a></b><br>
+    The geometric meaning of an eigenvector is 'multiplying by \(A\) only causes stretching, and the direction does not change'.
+    For a square matrix \(A\), \(Ax = \lambda x \quad x \neq 0\) the \(\lambda\), \(x\) that satisfy the equation are called eigenvalues and eigenvectors respectively.
 
     <br><br>
 
+    The following animation gives a geometric understanding of the <code>eigenvectors</code>. 
+    In the case of the matrix \( A \), you can observe that the eigenvectors are just stretched, and their directions remain unchanged. 
+    <br><br>
 
+    \[
+        A = \begin{bmatrix}
+            2 & -2 & 0 \\
+            0 & -0.5 & -1 \\
+            0 & -2 & 1.8 
+        \end{bmatrix}
+    \]
+    <figure>
+        <img src="/img/intuitive-understanding-linear-algebra-34.gif" width="50%">
+        <figcaption>
+            eigenvectors of \(A\)
+        </figcaption>
+    </figure>
+
+    <br><br>
 </div>
 <br><br>
 
