@@ -5,7 +5,7 @@ hashtag: "#linear-algebra"
 comment: true
 splitter: 5
 featured: false
-inprogress: true
+inprogress: false
 thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 ---
 
@@ -1596,21 +1596,54 @@ thumbnail: /img/intuitive-understanding-linear-algebra-6.png
 
     The following animation gives a geometric understanding of the <code>eigenvectors</code>. 
     In the case of the matrix \( A \), you can observe that the eigenvectors are just stretched, and their directions remain unchanged. 
+    The \(\lambda \) for the eigenvalues is the <code>expansion factor</code>.  
     <br><br>
 
-    \[
-        A = \begin{bmatrix}
-            2 & -2 & 0 \\
-            0 & -0.5 & -1 \\
-            0 & -2 & 1.8 
-        \end{bmatrix}
-    \]
-    <figure>
-        <img src="/img/intuitive-understanding-linear-algebra-34.gif" width="50%">
-        <figcaption>
-            eigenvectors of \(A\)
-        </figcaption>
+    
+    <figure style="display: flex;">
+        <img src="/img/intuitive-understanding-linear-algebra-34.gif" width="40%"> <br>
+        <img src="/img/intuitive-understanding-linear-algebra-35.gif" width="40%">
     </figure>
+    <figcaption>
+        eigenvectors of \(A\), \(B\) <br>
+        \[
+            A = \begin{bmatrix}
+                2 & -2 & 0 \\
+                0 & -0.5 & -1 \\
+                0 & -2 & 1.8 
+            \end{bmatrix}
+            　
+            B = \begin{bmatrix}
+                2.3 & -0.8 \\
+                -0.2 & 1.5
+            \end{bmatrix}
+
+        \]
+    </figcaption>
+
+    <br><br><br>
+
+    <b>🧬 Properties of the eigenvalues and the eigenvectors</b> <br>
+    When assume the \(\lambda\) and \(x\) are eigenvalues and eigenvectors respectively,
+    <ul style="padding-left: 2em;">
+        <li>The matrix \(A\) with 0 for eigenvalues is the same that the matrix \(A\) is singular</li>
+        <li>The \(\alpha x\) is also eigenvectors with the eigenvalues \(\lambda\) where the \(\alpha \neq 0\) </li>
+        <li>The eigenvalues of a diagonal matrix are diagonal elements</li>
+        <li>The upper triangular matrix (or lower triangular matrix) eigenvalues consist of diagonal elements</li>
+        <li>The determinant of a matrix \(A\) is equal to the product of eigenvalues</li>
+    </ul><br>
+
+    The equation \(Ax = \lambda x\) can be rewritten as \((A - \lambda I)x = 0\).
+    By this equation and the property of \(x \neq 0\), we can get an equation that \(\mathbf{det}(A - \lambda I) = 0\).
+
+    <br><br>
+    Consider the \(A - \lambda I\) has an inverse matrix, and then multiply both sides by the inverse matrix as
+    \((A - \lambda I)^{-1} \cdot (A - \lambda I)x = (A - \lambda I)^{-1} \cdot 0 \).
+    This equation is calculated as \(I \cdot x = (A - \lambda I)^{-1} \cdot 0 \rightarrow x = 0 \).
+    Therefore, if \(\mathbf{det}(A - \lambda I) \neq 0\), the property of \(x \neq 0\) is not satisfied.
+
+    
+    
 
     <br><br>
 </div>
