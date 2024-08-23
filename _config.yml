@@ -1,6 +1,6 @@
 title: "parkcheolhee-lab"
 author: "pch"
-description: "<b style=\"color: #9c9c9c; font-weight: 200; font-size: smaller\">DATASCAPE</b>"
+description: "<b style=\"color: #9c9c9c; font-weight: 200; font-size: smaller\">parkcheolhee-lab</b>"
 permalink: /:title/
 lang: "en"
 excerpt_separator: <!--break-->
@@ -19,7 +19,7 @@ minimal: false             # use a dark header
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {title: "testbed", file: "archive.html"}
-  # - {title: "👀", file: "404.html"}
+  - {title: "sandbox", file: "sandbox.html"}
   # - {title: "three", file: "threebed.html"}
   # - {title: "r!　", file: "retrospection.html"}
   # - {title: "　", file: "retrospection.html"}

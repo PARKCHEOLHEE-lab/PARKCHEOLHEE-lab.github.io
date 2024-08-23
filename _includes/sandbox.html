@@ -1,0 +1,63 @@
+<style>
+
+  .useBottomLine {
+    border-bottom: 1px dotted rgba(128, 128, 128, 0.14);
+    padding-bottom: 2em;
+  }
+
+  .onClickDiv {
+    cursor: pointer;
+  }
+
+  .onClickDiv:hover {
+      opacity: 0.5;
+      transition:opacity 0.5s ease;
+    }
+
+    .useGray {
+    color: gray;
+  }
+
+  .post-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 75%; 
+  }
+
+</style>
+
+<article>
+  <header><h2>{{ include.title | default: page.title }}</h2></header>
+  <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
+
+  {% if page.id == "sandbox" %}
+    <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline"></u></b></p><br>
+    <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline"></u></b></p>
+    <p style="margin-top: -1em">　</p>
+    
+      {% for post in site.categories.sandbox %}
+        <div style="margin-top: -0.2em">
+            <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: -3.0em;">
+                <h4 class="post-title" style="margin-top: -0.1em; color: rgb(70, 70, 70);">
+                    {% if post.emoji %}
+                        {{ post.emoji }}&nbsp; {{ post.title }}
+                    {% else %}
+                        📄&nbsp; {{ post.title }}
+                    {% endif %}
+
+                </h4>
+                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
+            </div>
+
+            {% if post.done %}
+                <p style="font-size: calc(0.35rem + 0.2vw); text-align: right;"></p>
+            {% else %}
+                <p class="useBottomLine" style="font-size: calc(0.35rem + 0.2vw); text-align: right;"></p>
+            {% endif %}
+            </div>
+        </div>
+      {% endfor %}
+  {% endif %}
+</article>
