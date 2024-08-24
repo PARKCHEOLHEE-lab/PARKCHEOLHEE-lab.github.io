@@ -37,31 +37,35 @@
     
       {% assign note_length = site.categories.note | size %}
       {% for post in site.categories.note %}
+
         <div style="margin-top: -0.1em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
               
             {% if forloop.index == note_length %}
               <div style="display: flex; justify-content: space-between;">
-                  <h4 class="post-title" style="margin: 0.4em; color: rgb(70, 70, 70);">
-                      {% if post.emoji %}
+                  <h4 class="post-title" style="margin: 0.3em; color: rgb(70, 70, 70);">
+                      {% if post.content == empty or post.content == blank %}
+                        <span style="opacity: 0.3;">📄</span>&nbsp; {{ post.title }}
+                      {% elsif post.emoji %}
                           {{ post.emoji }}&nbsp; {{ post.title }}
                       {% else %}
-                          📄&nbsp; {{ post.title }}
+                        📄&nbsp; {{ post.title }}
                       {% endif %}
                   </h4>
-                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.65em">{{ post.date | date: "%B %d, %Y" }}</time>
+                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.55em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
             {% else %}
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
-                  <h4 class="post-title" style="margin: 0.4em; color: rgb(70, 70, 70);">
-                      {% if post.emoji %}
-                          {{ post.emoji }}&nbsp; {{ post.title }}
-                      {% else %}
-                          📄&nbsp; {{ post.title }}
-                      {% endif %}
-
+                  <h4 class="post-title" style="margin: 0.3em; color: rgb(70, 70, 70);">
+                    {% if post.content == empty or post.content == blank %}
+                      <span style="opacity: 0.3;">📄</span>&nbsp; {{ post.title }}
+                    {% elsif post.emoji %}
+                        {{ post.emoji }}&nbsp; {{ post.title }}
+                    {% else %}
+                      📄&nbsp; {{ post.title }}
+                    {% endif %}
                   </h4>
-                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.65em">{{ post.date | date: "%B %d, %Y" }}</time>
+                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.55em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
             {% endif %}
             </div>
