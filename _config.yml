@@ -19,7 +19,7 @@ minimal: false             # use a dark header
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {title: "testbed", file: "archive.html"}
-  - {title: "sandbox", file: "sandbox.html"}
+  - {title: "note", file: "note.html"}
   # - {title: "three", file: "threebed.html"}
   # - {title: "r!　", file: "retrospection.html"}
   # - {title: "　", file: "retrospection.html"}

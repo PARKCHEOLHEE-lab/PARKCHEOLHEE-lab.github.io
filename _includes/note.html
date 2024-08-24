@@ -31,12 +31,13 @@
   <header><h2>{{ include.title | default: page.title }}</h2></header>
   <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
 
-  {% if page.id == "sandbox" %}
+  {% if page.id == "note" %}
     <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline"></u></b></p><br>
     <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline"></u></b></p>
     <p style="margin-top: -1em">　</p>
     
-      {% for post in site.categories.sandbox %}
+      {% assign note_length = site.categories.note | size %}
+      {% for post in site.categories.note %}
         <div style="margin-top: -0.2em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
             <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: -3.0em;">
@@ -50,8 +51,8 @@
                 </h4>
                 <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
             </div>
-
-            {% if post.done %}
+            
+            {% if forloop.index == note_length %}
                 <p style="font-size: calc(0.35rem + 0.2vw); text-align: right;"></p>
             {% else %}
                 <p class="useBottomLine" style="font-size: calc(0.35rem + 0.2vw); text-align: right;"></p>
