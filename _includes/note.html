@@ -49,7 +49,7 @@
                           📄&nbsp; {{ post.title }}
                       {% endif %}
                   </h4>
-                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
+                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.65em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
             {% else %}
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
@@ -61,7 +61,7 @@
                       {% endif %}
 
                   </h4>
-                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
+                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.65em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
             {% endif %}
             </div>
