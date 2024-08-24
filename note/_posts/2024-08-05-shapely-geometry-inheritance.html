@@ -1,0 +1,157 @@
+---
+title:  "Shapely geometry inheritance"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+
+    <li>
+        Custom geometry class with Shapely geometry instance
+    </li>
+    <ul>
+        <li>
+            Defining custom class for <code>Polygon</code>
+        </li>
+        <li>
+            <code>shapely.geometry.Polygon</code> has no attributes or functions to get these directly:
+            <!-- shapely Polygon 객체가 segments, vertices 등을 직접 가지고 있지는 않음.  -->
+        </li>
+        <ul>
+            <li>
+                segments
+            </li>
+            <li>
+                vertices
+            </li>
+            <li>
+                coords
+            </li>
+            <li>
+                ...
+            </li>
+        </ul>
+    </ul>
+
+    <br>
+
+    <li>
+        Inheritance
+    </li>
+
+
+<pre><code class="python">
+    import numpy as np
+    from shapely import geometry
+    from typing import List, Union
+
+
+    class Polygon(geometry.Polygon):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+        def coords(self, to_list: bool = False) -> Union[List[tuple], np.ndarray]:
+
+            coords = self.exterior.coords
+            if to_list:
+                return list(coords)
+
+            return np.array(coords)
+
+        def vertices(self) -> List[geometry.Point]:
+
+            coords = self.coords(to_list=True)
+
+            return [geometry.Point(c) for c in coords]
+
+        def segments(self) -> List[geometry.LineString]:
+
+            coords = self.coords(to_list=True)
+
+            if len(coords) == 0:
+                return []
+
+            segments = []
+            start_pt = coords[0]
+
+            for i in range(len(coords) - 1):
+                end_pt = coords[i + 1]
+                segments.append(geometry.LineString([start_pt, end_pt]))
+                start_pt = end_pt
+
+            return segments
+            
+
+    if __name__ == "__main__":
+
+        square = np.array(
+            [
+                [0, 0],
+                [0, 1],
+                [1, 1],
+                [1, 0],
+            ]
+        )
+
+        polygon_1 = Polygon(square)
+        polygon_2 = Polygon(square + 0.5)
+</code></pre>
+</ul>
+
+<br>
+
+<ul>
+    <li>Visualize properties</li>
+    <ul>
+        <li>
+            <code>polygon_1</code>
+        </li>
+        <li>
+            <code>polygon_2</code>
+        </li>
+        <li>
+            <code>polygon_2.vertices()</code>
+        </li>
+        <li>
+            <code>polygon_2.segments()</code>
+        </li>
+        <br>
+        <img src="/img/shapely-geometry-inheritance-1.png" width="60%">
+        <li>
+            <code>polygon_1.intersection(polygon_2).vertices()</code>
+        </li>
+        <li>
+            <code>polygon_1.intersection(polygon_2).segments()</code>
+        </li>
+<pre><code class="python">
+    Traceback (most recent call last):
+    AttributeError: 'Polygon' object has no attribute 'vertices'
+
+    Traceback (most recent call last):
+    AttributeError: 'Polygon' object has no attribute 'segments'
+</code></pre>
+    </ul>
+</ul>
+
+<br>
+
+<ul>
+    <li>
+        Trick for fixing <code>AttributeError</code>
+    </li>
+    <ul>
+        <li>
+            Set methods of custom <code>Polygon</code> to the original class
+        </li>
+<pre><code class="python">
+    for name, method in vars(Polygon).items():
+        if callable(method) and not name.startswith('__'):
+            setattr(geometry.Polygon, name, method)
+</code></pre><br>
+        <img src="/img/shapely-geometry-inheritance-2.png" width="60%">
+    </ul>
+</ul>
+
+<br><br>
