@@ -2,7 +2,6 @@
 
   .useBottomLine {
     border-bottom: 1px dotted rgba(128, 128, 128, 0.14);
-    padding-bottom: 2em;
   }
 
   .onClickDiv {
@@ -38,24 +37,32 @@
     
       {% assign note_length = site.categories.note | size %}
       {% for post in site.categories.note %}
-        <div style="margin-top: -0.2em">
+        <div style="margin-top: -0.1em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: -3.0em;">
-                <h4 class="post-title" style="margin-top: -0.1em; color: rgb(70, 70, 70);">
-                    {% if post.emoji %}
-                        {{ post.emoji }}&nbsp; {{ post.title }}
-                    {% else %}
-                        📄&nbsp; {{ post.title }}
-                    {% endif %}
-
-                </h4>
-                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
-            </div>
-            
+              
             {% if forloop.index == note_length %}
-                <p style="font-size: calc(0.35rem + 0.2vw); text-align: right;"></p>
+              <div style="display: flex; justify-content: space-between;">
+                  <h4 class="post-title" style="margin: 0.4em; color: rgb(70, 70, 70);">
+                      {% if post.emoji %}
+                          {{ post.emoji }}&nbsp; {{ post.title }}
+                      {% else %}
+                          📄&nbsp; {{ post.title }}
+                      {% endif %}
+                  </h4>
+                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
+              </div>
             {% else %}
-                <p class="useBottomLine" style="font-size: calc(0.35rem + 0.2vw); text-align: right;"></p>
+              <div class="useBottomLine" style="display: flex; justify-content: space-between;">
+                  <h4 class="post-title" style="margin: 0.4em; color: rgb(70, 70, 70);">
+                      {% if post.emoji %}
+                          {{ post.emoji }}&nbsp; {{ post.title }}
+                      {% else %}
+                          📄&nbsp; {{ post.title }}
+                      {% endif %}
+
+                  </h4>
+                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}</time>
+              </div>
             {% endif %}
             </div>
         </div>
