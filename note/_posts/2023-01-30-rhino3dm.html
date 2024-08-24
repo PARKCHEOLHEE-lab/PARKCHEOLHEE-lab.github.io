@@ -1,0 +1,60 @@
+---
+title:  "rhino3dm"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+    <li>
+        <code>rhino3dm</code> is a module created by McNeel
+    </li>
+    <ul>
+        <li>
+            <a href="https://mcneel.github.io/rhino3dm/python/api/index.html">https://mcneel.github.io/rhino3dm/python/api/index.html</a>
+        </li>
+        <li>
+            Unfinished project? The document has less information
+        </li>
+        <li>
+            Converting 2d to 3d then save <code>.3dm</code>
+        </li>
+        <li>
+            It has less function for building detailed modeling
+        </li>
+        <li>
+            Unsupporting <code>python 3.11</code>
+        </li>
+        <img src="/img/rhino3dm-1.png" width="50%">
+    </ul>
+    <br><br>
+    <li>
+        Testing <code>legal_geom</code>, <code>floors_geom</code>, <code>core_geom</code>, <code>parking_geom</code> of the below result from <a href="https://www.landbook.net/service/ai-analytics">Landbook</a> engine
+    </li>
+    <ul>
+        <img src="/img/rhino3dm-2.png">
+    </ul>
+    <br><br>
+    <li>
+        Code
+    </li>
+    <ul>
+        <li>
+            <a href="/model/zzz.3dm" download style="color: gray;">💾 zzz.3dm </a>
+        </li>
+    </ul>
+<pre><code class="python">
+    model = File3dm()
+
+    plot_geom = wkt.loads(result_bldg["plot_geom"])
+    plot_geom_points = [Point3d(x, y, 0) for x, y in plot_geom.boundary.coords]
+    plot_geom_curve = Curve.CreateControlPointCurve(plot_geom_points, degree=1)
+    plot_geom_extrusion = Extrusion.Create(plot_geom_curve, -2, True)
+    model.Objects.AddExtrusion(plot_geom_extrusion)
+
+    model.Write("zzz.3dm", 6)  # file name, rhino version
+</code></pre>
+</ul>
+
+<br><br>
