@@ -1,0 +1,76 @@
+---
+title:  "super()"
+layout: post
+done: false
+---
+
+
+<br>
+
+<ul>
+    <li>
+        Python <code>super()</code>
+    </li>
+    <ul>
+        <li>
+            The <code>super()</code> function is used to give access to methods and properties of a parent or sibling class.
+        </li>
+        <li>
+            The <code>super()</code> function returns an object that represents the parent class.
+        </li>
+<pre><code class="Python">
+    class Foo:
+        def __init__(self):
+            self.foo = "foo"
+            
+        def _print_self_foo(self):
+            print(self.foo)
+
+        def _print_foo(self):
+            print("foo")
+
+
+    class Bar(Foo):
+        def __init__(self):
+            pass
+        
+        def print_foo(self):
+            super()._print_foo()
+            self._print_foo()
+            
+        def print_self_foo(self):
+            self._print_self_foo()
+        
+        def print_self_foo_after_inheritance(self):
+            super().__init__()
+            self._print_self_foo()
+
+
+    if __name__ == "__main__":
+        import traceback
+        
+        bar = Bar()
+        bar.print_foo()
+        # >>> foo
+        # >>> foo
+        
+        try:
+            bar.print_self_foo()
+        except Exception as e:
+            traceback.print_exc()
+            # >>> AttributeError: 'Bar' object has no attribute 'foo'
+        
+        bar.print_self_foo_after_inheritance()
+        # >>> foo
+</code></pre>
+    <li>
+        <code>print_self_foo()</code> method of <cod>Bar</cod> occurs <code>AttributeError</code> because <code>Foo.__init__()</code> method wasn't called
+    </li>
+    <li>
+        <code>super().__init__()</code> is basically called in the child class's <code>__init__()</code>
+    </li>
+    </ul>
+</ul>
+
+
+<br><br>
