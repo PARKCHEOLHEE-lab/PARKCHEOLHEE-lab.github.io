@@ -24,9 +24,24 @@
   <header><h2>{{ include.title | default: page.title }}</h2></header>
   <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
 
+  {% assign featured_count = 0 %}
+  {% assign progress_count = 0 %}
+  {% for post in site.categories.testbed %}
+    {% if post.featured %}
+      {% assign featured_count = featured_count | plus: 1 %}
+    {% endif %}
+    {% if post.inprogress %}
+      {% assign progress_count = progress_count | plus: 1 %}
+    {% endif %}
+  {% endfor %}
+
   {% if page.id == "testbed" %}
-    <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p><br>
-    <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured research&nbsp;</u></b></p>
+    {% if progress_count != 0 %}
+      <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p><br>
+    {% endif %}
+    {% if featured_count != 0 %}
+      <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured research&nbsp;</u></b></p>
+    {% endif %}
     <p style="margin-top: -1em">　</p>
     
       {% for post in site.categories.testbed %}

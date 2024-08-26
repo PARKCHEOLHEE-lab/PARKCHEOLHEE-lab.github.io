@@ -24,6 +24,13 @@
     max-width: 75%; 
   }
 
+  .emoji-img {
+  width: 1.25em;
+  height: 1.25em;
+  margin-left: 0.3em;
+  margin-right: 0.5em;
+}
+
 </style>
 
 <article>
@@ -43,29 +50,31 @@
               
             {% if forloop.index == note_length %}
               <div style="display: flex; justify-content: space-between;">
-                  <h4 class="post-title" style="margin: 0.3em; color: rgb(70, 70, 70);">
-                      {% if post.content == empty or post.content == blank %}
-                        <span style="opacity: 0.3;">📄</span>&nbsp; {{ post.title }}
-                      {% elsif post.emoji %}
-                          {{ post.emoji }}&nbsp; {{ post.title }}
-                      {% else %}
-                        📄&nbsp; {{ post.title }}
-                      {% endif %}
-                  </h4>
-                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.55em">{{ post.date | date: "%B %d, %Y" }}</time>
+                <h4 class="post-title" style="margin: 0em; color: rgb(70, 70, 70); display: flex; align-items: center;">
+                  {% if post.emoji %}
+                    <img src="{{ post.emoji }}" class="emoji-img">
+                  {% elsif post.content == empty or post.content == blank %}
+                    <img src="/emoji/default-empty.png" class="emoji-img">
+                  {% else %}
+                    <img src="/emoji/default.png" class="emoji-img">
+                  {% endif %}
+                  {{ post.title }}
+                </h4>
+                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.5em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
             {% else %}
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
-                  <h4 class="post-title" style="margin: 0.3em; color: rgb(70, 70, 70);">
-                    {% if post.content == empty or post.content == blank %}
-                      <span style="opacity: 0.3;">📄</span>&nbsp; {{ post.title }}
-                    {% elsif post.emoji %}
-                        {{ post.emoji }}&nbsp; {{ post.title }}
-                    {% else %}
-                      📄&nbsp; {{ post.title }}
-                    {% endif %}
-                  </h4>
-                  <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.55em">{{ post.date | date: "%B %d, %Y" }}</time>
+                <h4 class="post-title" style="margin: 0em; color: rgb(70, 70, 70); display: flex; align-items: center;">
+                  {% if post.emoji %}
+                    <img src="{{ post.emoji }}" class="emoji-img">
+                  {% elsif post.content == empty or post.content == blank %}
+                    <img src="/emoji/default-empty.png" class="emoji-img">
+                  {% else %}
+                    <img src="/emoji/default.png" class="emoji-img">
+                  {% endif %}
+                  {{ post.title }}
+                </h4>
+                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.5em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
             {% endif %}
             </div>

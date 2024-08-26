@@ -51,17 +51,17 @@ done: false
         
         bar = Bar()
         bar.print_foo()
-        # >>> foo
-        # >>> foo
+        # > foo
+        # > foo
         
         try:
             bar.print_self_foo()
         except Exception as e:
             traceback.print_exc()
-            # >>> AttributeError: 'Bar' object has no attribute 'foo'
+            # > AttributeError: 'Bar' object has no attribute 'foo'
         
         bar.print_self_foo_after_inheritance()
-        # >>> foo
+        # > foo
 </code></pre>
     <li>
         <code>print_self_foo()</code> method of <cod>Bar</cod> occurs <code>AttributeError</code> because <code>Foo.__init__()</code> method wasn't called
