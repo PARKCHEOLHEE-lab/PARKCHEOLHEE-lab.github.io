@@ -1,0 +1,85 @@
+---
+title:  "Dropout"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+    <li>
+        Dropout
+    </li>
+    <ul>
+        <li>
+            <a href="https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html">https://pytorch.org/docs/stable/generated/torch.nn.Dropout.html</a>
+        </li>
+        <li>
+            <a href="https://medium.com/@amarbudhiraja/https-medium-com-amarbudhiraja-learning-less-to-learn-better-dropout-in-deep-machine-learning-74334da4bfc5">https://medium.com/@amarbudhiraja/https-medium-com-amarbudhiraja-learning-less-to-learn-better-dropout-in-deep-machine-learning-74334da4bfc5</a>
+        </li>
+        <br>
+        <li>
+            <code>torch.nn.Dropout(p=0.5, inplace=False)</code>
+        </li>
+        <li>
+            During training, randomly zeroes some of the elements of the input tensor with probability <code>p</code>.
+        </li>
+        <li>
+            If <code>inplace</code> is set to True, will do this operation in-place
+        </li>
+        <br>
+        <img src="/img/dropout-1.png" width="70%">
+        <br>
+        <li>
+            The concept for killing some nodes and learning (different nodes die for each batch)
+            <ul>
+                <li>
+                    No zeroing when evaluating, testing
+                </li>
+                <li>
+                    Thing to prevent overfitting
+                </li>
+            </ul>
+        </li>
+        <li>
+            Furthermore, the outputs are scaled by a factor of <code>1 / (1 - p)</code> during training
+            <ul>
+                <li>
+                    The purpose of scaling is to maintain the expected value of each node
+                </li>
+                <li>
+                    When p=0.5, each node has a 50% probability of being disabled
+                </li>
+                <li>
+                    To reward for this, the values of the surviving nodes are scaled by a factor of 2.
+                </li>
+            </ul>
+        </li>
+    </ul>
+<pre><code class="python">
+    import torch
+    torch.random.manual_seed(777)
+
+    rand_3x3 = torch.rand(size=(3, 3))
+    print(rand_3x3)
+    # > tensor([[0.0819, 0.4911, 0.4033],
+    #           [0.3859, 0.8813, 0.8811],
+    #           [0.7242, 0.5033, 0.8249]])
+
+    dropout = torch.nn.Dropout(p=0.5, inplace=False)
+    rand_3x3_dropped = dropout(rand_3x3)
+    print(rand_3x3_dropped)
+    # > tensor([[0.1638, 0.0000, 0.0000],
+    #           [0.7718, 1.7626, 0.0000],
+    #           [1.4485, 0.0000, 0.0000]])
+
+    dropout.eval()
+    print(dropout(rand_3x3))
+    # > tensor([[0.0819, 0.4911, 0.4033],
+    #           [0.3859, 0.8813, 0.8811],
+    #           [0.7242, 0.5033, 0.8249]])
+</code></pre>
+</ul>
+
+
+<br><br>
