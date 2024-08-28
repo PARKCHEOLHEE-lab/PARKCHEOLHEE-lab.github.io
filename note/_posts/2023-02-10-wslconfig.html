@@ -1,0 +1,49 @@
+---
+title:  ".wslconfig"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+    <li>
+        WSL consumes massive amounts of RAM
+    </li>
+    <ul>
+        <li>
+            <a href="https://github.com/microsoft/WSL/issues/4166">https://github.com/microsoft/WSL/issues/4166</a>
+        </li>
+        <img src="/img/wslconfig-1.png">
+        <br>
+    </ul>
+</ul>
+<ul>
+    <li>
+        Define .wslconfig within <code>C:\Users\&lt;User Name&gt;\.wslconfig</code>
+    </li>
+    <ul>
+        <li>
+            <code>memory</code>: Limits maximum memory assigned to WSL2
+        </li>
+        <li>
+            <code>swap</code>: Sets the size of swap space for WSL2 (It temporarly saves data if the RAM is full )
+        </li>
+        <li>
+            <code>processors</code>: Limits the number of processors available to WSL2
+        </li>
+        <li>
+            <code>shmsize</code>: Sets the maximum size of shared memory (It is a memory space that processes can access to share data)
+        </li>
+    </ul>
+<pre><code class="text">
+    [wsl2]
+    memory=16GB
+    swap=8GB
+    processors=12
+    shmsize=8GB
+</code></pre>
+    <img src="/img/wslconfig-2.png">
+</ul>
+
+<br><br>

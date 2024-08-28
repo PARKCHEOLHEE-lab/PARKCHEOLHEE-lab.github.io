@@ -52,13 +52,12 @@
               <div style="display: flex; justify-content: space-between;">
                 <h4 class="post-title" style="margin: 0em; color: rgb(70, 70, 70); display: flex; align-items: center;">
                   {% if post.emoji %}
-                    <img src="{{ post.emoji }}" class="emoji-img">
+                    <img src="{{ post.emoji }}" class="emoji-img"> {{ post.title }}
                   {% elsif post.content == empty or post.content == blank %}
-                    <img src="/emoji/default-empty.png" class="emoji-img">
+                    <img src="/emoji/default-empty.png" class="emoji-img"> <span style="color: gray;">{{ post.title }}</span>
                   {% else %}
-                    <img src="/emoji/default.png" class="emoji-img">
+                    <img src="/emoji/default.png" class="emoji-img">{{ post.title }}
                   {% endif %}
-                  {{ post.title }}
                 </h4>
                 <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.5em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
@@ -66,13 +65,12 @@
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
                 <h4 class="post-title" style="margin: 0em; color: rgb(70, 70, 70); display: flex; align-items: center;">
                   {% if post.emoji %}
-                    <img src="{{ post.emoji }}" class="emoji-img">
+                    <img src="{{ post.emoji }}" class="emoji-img"> {{ post.title }}
                   {% elsif post.content == empty or post.content == blank %}
-                    <img src="/emoji/default-empty.png" class="emoji-img">
+                    <img src="/emoji/default-empty.png" class="emoji-img"> <span style="color: gray;">{{ post.title }}</span>
                   {% else %}
-                    <img src="/emoji/default.png" class="emoji-img">
+                    <img src="/emoji/default.png" class="emoji-img">{{ post.title }}
                   {% endif %}
-                  {{ post.title }}
                 </h4>
                 <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.5em">{{ post.date | date: "%B %d, %Y" }}</time>
               </div>
@@ -82,3 +80,4 @@
       {% endfor %}
   {% endif %}
 </article>
+<br><br>

@@ -1,0 +1,106 @@
+---
+title:  "Testing with Github Actions"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+    <li>
+        Github Actions
+    </li>
+    <ul>
+        <li>
+            <a href="https://docs.github.com/en/actions/about-github-actions/understanding-github-actions">https://docs.github.com/en/actions/about-github-actions/understanding-github-actions</a>
+        </li>
+        <li>
+            <b>Actions</b>: An action is a custom application for the GitHub Actions platform that performs a complex but frequently repeated task.
+        </li>
+        <li>
+            <b>Runner</b>: A runner is a server that runs your workflows when they're triggered. Each runner can run a single job at a time.
+        </li>
+    </ul>
+    <br>
+    <li>
+        Set yaml
+        <ul>
+            <li>
+                <a href="https://github.com/PARKCHEOLHEE-lab/debugvisualizer/blob/main/.github/workflows/ci.yaml">https://github.com/PARKCHEOLHEE-lab/debugvisualizer/blob/main/.github/workflows/ci.yaml</a>
+            </li>
+            <li>
+                <code>name</code>: workflow name
+            </li>
+            <li>
+                <code>on</code>: trigger
+            </li>
+            <li>
+                <a href="https://github.com/PARKCHEOLHEE-lab/debugvisualizer/actions/runs/9722049008/job/26835476847#step:2:1"><code>actions/checkout@v2</code></a>: clone and checkout repository ...
+            </li>
+            <li>
+                <a href="https://github.com/actions/setup-python"><code>actions/setup-python@v2</code></a>: Install Python
+            </li>
+            <li>
+                <code>name: Install dependencies</code>: Install dependencies using pip
+            </li>
+            <li>
+                <code>name: Run tests</code>: Execute pytest
+                <ul>
+                    <li>
+                        <a href="https://github.com/PARKCHEOLHEE-lab/debugvisualizer/blob/main/tests/test_plotter.py">https://github.com/PARKCHEOLHEE-lab/debugvisualizer/blob/main/tests/test_plotter.py</a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+<pre><code class="yaml">
+    name: Python CI
+
+    on: [push]
+
+    jobs:
+        build:
+            runs-on: ubuntu-latest
+
+            steps:
+            - uses: actions/checkout@v2
+            - name: Set up Python
+            uses: actions/setup-python@v2
+            with:
+                python-version: '3.10'
+            - name: Install dependencies
+            run: |
+                python -m pip install --upgrade pip
+                pip install -r requirements.txt
+            - name: Run tests
+            env:
+                PYTHONPATH: $&#123;&#123; github.workspace &#125;&#125;
+            run: |
+                pytest tests/
+</code></pre>
+<br>
+<li>
+    Tests
+    <ul>
+        <li>
+            when tests are passed:
+        </li>
+        <li>
+            <a href="https://github.com/PARKCHEOLHEE-lab/debugvisualizer/actions/runs/9722049008/job/26835476847#step:5:1">https://github.com/PARKCHEOLHEE-lab/debugvisualizer/actions/runs/9722049008/job/26835476847#step:5:1</a>
+        </li>
+<pre><code class="text">
+============================= test session starts ==============================
+platform linux -- Python 3.10.14, pytest-8.2.2, pluggy-1.5.0
+rootdir: /home/runner/work/debugvisualizer/debugvisualizer
+configfile: pyproject.toml
+collected 2 items
+
+tests/test_plotter.py ..                                                 [100%]
+
+============================== 2 passed in 0.20s ===============================
+</code></pre>
+    </ul>
+</li>
+</ul>
+
+<br><br>
