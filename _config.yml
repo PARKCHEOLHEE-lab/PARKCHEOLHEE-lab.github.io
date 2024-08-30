@@ -38,4 +38,3 @@ comments:
 
 plugins:
  - jekyll-feed
- - jekyll-jupyter-notebook
