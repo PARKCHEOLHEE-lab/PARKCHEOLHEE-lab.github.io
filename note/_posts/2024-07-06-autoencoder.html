@@ -1,0 +1,92 @@
+---
+title:  "Autoencoder"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+    <li>
+        Autoencoder
+    </li>
+    <ul>
+        <li>
+            Keywords
+        </li>
+        <ul>
+            <li>
+                <b>Unsupervised learning</b>
+            </li>
+            <li>
+                Dimensionality reduction 
+                <br> = <b>Representation learning</b>
+                <br> = Feature extraction
+            </li>
+            <li>
+                Generative model learning
+            </li>
+        </ul>
+        <br>
+        <li>
+            Properties
+        </li>
+        <ul>
+            <li>
+                Input and output are the same size
+            </li>
+            <li>
+                It consists of two parts: Encoder and a Decoder
+            </li>
+            <img src="/img/autoencoder-1.png" width="70%">
+            <figcaption>
+                <a href="https://towardsdatascience.com/applied-deep-learning-part-3-autoencoders-1c083af4d798">autoencoder</a>
+            </figcaption>
+            <br>
+            <li>
+                Hidden <b>Bottleneck</b> Layer architecture
+            </li>
+            <li>
+                The term for <code>Code</code> in the above figure is same as <code>z</code>, <code>latent variable</code>, <code>feature</code> ...
+            </li>
+            <li>
+                Encoder performs a role as dimensionality reduction
+            </li>
+            <li>
+                Decoder performs a role as a generative model
+            </li>
+            <li>
+                It reduces dimensions and then reconstructs them, learning the core features of the data and generating a <b>compressed representation</b>
+            </li>
+        </ul>
+        <br>
+        <li>
+            Simple implementation
+        </li>
+    </ul>
+</ul>
+<div class="ipynb_container">
+    <iframe class="ipynb" src="/notebooks/autoencoder.html" frameborder="0"></iframe>
+</div>
+
+<style>
+    .ipynb_container {
+        position: relative;
+        width: 100%;
+        padding-top: 70%;
+        overflow-x: auto;
+    }
+
+    .ipynb {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-width: 700px;
+        height: 100%;
+        -webkit-overflow-scrolling: touch;
+        overflow: auto;
+    }
+</style>
+
+<br><br>
