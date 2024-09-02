@@ -3,3 +3,69 @@ title:  "Skip Connection"
 layout: post
 done: false
 ---
+
+
+<br>
+
+
+<ul>
+    <li>
+        Skip Connection
+    </li>
+        <ul>
+            <li>
+                Concepts
+            </li>
+                <ul>
+                    <li>
+                        Skip Connection is to <b>bypass</b> a particular layer and <b>combine</b> its input directly to the output of the next few layers
+                    </li>
+                    <li>
+                        Prevent <b>loss of low level information</b> and <b>vanishing gradient</b>
+                    </li>
+                    <li>
+                        Block with skip-connection is called <b>Residual (잔차) Block</b>
+                    </li>
+                </ul>
+            <li>
+                Methods to combine
+            </li>
+            <ul>
+                <li>
+                    Summation
+                </li>
+                    <ul>
+                        <li>
+                            <a href="https://github.com/JayPatwardhan/ResNet-PyTorch/blob/master/ResNet/ResNet.py#L67"><b>ResNet</b></a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/hyunwoongko/transformer/blob/master/models/blocks/encoder_layer.py#L32">Transformer</a>
+                        </li>
+                        <img src="/img/skip-connection-1.png" width="50%">
+                        <figcaption>Summation method</figcaption><br>
+                    </ul>
+                <li>
+                    Concatenation
+                </li>
+                    <ul>
+                        <li>
+                            <a href="https://github.com/milesial/Pytorch-UNet/blob/master/unet/unet_model.py#L26-L34"><b>UNet</b></a>
+                        </li>
+                        <li>
+                            <a href="https://github.com/lucidrains/denoising-diffusion-pytorch/blob/main/denoising_diffusion_pytorch/denoising_diffusion_pytorch.py#L392-L433">Denoising Diffusion</a>
+                        </li>
+                        <img src="/img/skip-connection-2.png" width="100%">
+                        <figcaption>Concatenation method</figcaption><br>
+                    </ul>
+            </ul>
+            <li>
+                Simple implementation with MLP
+            </li>
+        </ul>
+</ul>
+
+<span style="display: block; margin-left: -2em;">
+    {% include embed.html url="/notebooks/skip-connection.html" %}
+</span>
+
+<br><br>
