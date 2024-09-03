@@ -1,0 +1,144 @@
+---
+title:  "Machine Learning Students Overfit to Overfitting"
+layout: post
+emoji: /emoji/brain.png
+---
+
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<style>
+    .mjx-chtml {
+        font-size: 100% !important; /* Adjust the size as needed */
+    }
+</style>
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/2209.03032">Machine Learning Students Overfit to Overfitting</a>
+    </li>
+    <ul>
+        <li>
+            Introduction
+        </li>
+            <ul>
+                <li>
+                    But the fundamentals of machine learning have not changed, and the basic concept of any successful learning system is <b>generalization</b>, 
+                    that is, to learn from a limited training set, and still generalize and perform well on test samples that might come from <b>different distributions</b>.
+                </li>
+                <li>
+                    Teaching the concept of overfitting is not easy, basically because it is a judgment call based on the <b>ratios of training and validation losses</b>.
+                </li>
+                <li>
+                    The contributions of this paper are a conceptual framework to understand why students have misconceptions on overfitting, 
+                    we present examples of these misconceptions, both on the concept of overfitting, how overfitting can be prevented, and possible implementation errors that are often be confused with overfitting.
+                </li>
+            </ul>
+        <br>
+        <li>
+            Concept of Overfitting
+        </li>
+            <ul>
+                <li>
+                    Overfitting is the <b>lack of generalization</b> in a machine learning model.
+                </li>
+                <li>
+                    This is usually evaluated over losses computed on train and validation split of the data, where the generalization <b>gap</b> can be estimated:
+                </li>
+                <br>
+                \[
+                    L_{gap} = L_{validation} - L_{train}
+                \]
+                <br>
+                <li>
+                    In general if \( L_{gap} >> 0 \), it is said that the model is overfitting. 
+                    But there is normally a small difference between validation and training loss, the question is, <mark><b>how much difference should there be to declare overfitting?</b></mark>
+                </li>
+                <li>
+                    But there is normally a small difference between validation and training loss, the question is, how much difference should there be to declare overfitting.
+                </li>
+                <li>
+                    The typical view of overfitting is presented in Figure 1, where <b>training loss decreases with epochs while validation loss increases, clearly indicating overfitting</b>.
+
+                </li>
+                <img src="/img/machine-learning-students-overfit-to-overfitting-1.png" width="80%">
+                <figcaption>Example view of overfitting in textbooks (top) vs how students see overfitting in practice (bottom)</figcaption>
+                <br>
+                <li>
+                    Overfitting is <b>not a binary condition</b> consisting of whether a model overfits or not.
+                </li>
+                <li>
+                    Overfitting is more likely to happen with larger \( L_{gap} \) values, and the question is, 
+                    how large \( L_{gap} \) must be to decide that the model overfits. 
+                    <b>This is basically a <mark>judgment call, and there are no clear guidelines</mark> in the literature</b>.
+                </li>
+            </ul>
+        <br>    
+        <li>
+            Student Misconceotions of Overfitting
+        </li>
+            <ul>
+                <li>
+                    Mostly students try to make unrelated changes to the model or training process (like changing learning rates), 
+                    and in many cases the students <b>do not realize that the dataset is just too small</b>.
+                </li>
+            </ul>
+        <br>
+        <li>
+            Use Cases for Learning about Overfitting
+        </li>
+            <ul>
+                <li>
+                    An exercise can be built, adding more data to the training set, the student can see how overfitting decreases and generalization improves. 
+                    This particular use case can be used to showcase that <b>overfitting is not a binary condition but has continuous properties</b>.
+                </li>
+                <li>
+                    In reinforcement learning, limited exploration can be used to show students the influence of the training set on generalization, 
+                    <b>using part of the environment for training, and out of training distribution parts of the environment for testing</b>, 
+                    which will most likely reveal failure to generalize.
+                </li>
+                <li>
+                    We argue that the <mark><b>generalization gap \( L_{gap} \) is not intuitive to interpret</b></mark> since there are no clear thresholds to declare overfitting.
+                </li>
+                <li>
+                    In the appendix we provide a checklist that students and lecturers can use to check if their training scheme is appropriate. 
+                    This can be useful to systematically debug overfitting and failure to generalize issues, and from where new use cases or exercises can be derived
+                </li>
+            </ul>
+        <br>
+        <li>
+            Appendix. Checklist for Debugging ML Models
+        </li>
+            <ul>
+                <li class="decimal">
+                    <b>Is the loss used for training the model appropriate for the task?</b>
+                </li>
+                <li class="decimal">
+                    <b>Was the model trained until convergence?</b>
+                </li>
+                <li class="decimal">
+                    <b>Was validation data used to be able to check for overfitting?</b>
+                </li>
+                    <ul>
+                        <li>
+                            There is only one way to check for overfitting, that is, <b>to use a train and a validation split that have no opverlapped samples</b>, train the model on the training set, and after each epoch (or a set number of iterations), evaluate the model on the validation set.
+                        </li>
+                    </ul>
+                <li class="decimal">
+                    <b>Is there enough training data?</b>
+                </li>
+                <li class="decimal">
+                    <b>Is the data distribution of training and validation/test sets equal or similar?</b>
+                </li>
+                <li class="decimal">
+                    <b>Is the model and/or training process correctly implemented?</b>
+                </li>
+            </ul>
+    </ul>
+</ul>
+
+<br><br>
+
