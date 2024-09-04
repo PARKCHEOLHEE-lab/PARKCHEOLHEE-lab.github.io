@@ -1,0 +1,238 @@
+---
+title:  "Chain Rule"
+layout: post
+done: true
+---
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+    </script>
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+    </script>
+    <style>
+        .mjx-chtml {
+            font-size: 100% !important; /* Adjust the size as needed */
+        }
+    </style>
+<br>
+
+<ul>
+    <li>
+        <b>Backpropagation (역전파)</b> with chain rule
+    </li>
+        <ul>
+            <li>
+                Let's say there's a very simple MLP,
+            </li>
+        </ul>
+        <div id="mlp-container" style="width: 300px; height: 200px; position: relative; transform: scale(0.88); transform-origin: top left;">
+            <div class="node" style="left: 10px; top: 30px;">\(x_{1} (0.5)\)</div>
+            <div class="node" style="left: 10px; top: 150px;">\(x_{2} (0.3)\)</div>
+            <div class="node" style="left: 150px; top: 30px;">\( z_{1} \, | \, h_{1}\)</div>
+            <div class="node" style="left: 150px; top: 150px;">\( z_{2} \, | \, h_{2}\)</div>
+            <div class="node" style="left: 290px; top: 100px;">\( z_{3} \, | \, \hat{y} \)</div>
+        </div>
+        <br>
+        where \( h_{1} \), \( h_{2}\) and \( o \) are used a sigmoid \(\sigma\) for the non-linear activation, and the loss function \(L\) is used MSE.
+        A learning rate \(\eta\) is 0.1. The label \(y\) is 1.
+        \[
+            \sigma(x) = \frac{1}{1 + e^{-x}}
+            \quad \quad
+            L(y, \hat{y}) = \frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
+        \]
+        <br>
+        <ul>
+            <li>
+                Training neural network can be divided into 3 steps
+            </li>
+            <li>
+                These iterative steps are called <b>training</b> or <b>optimization</b>
+            </li>
+            <ul>
+                <li class="decimal">
+                    forward propagation (순전파)
+                </li>
+                    <ul style="margin-left: -1em;">
+                        \( z_{1} = x_{1}w_{1} + x_{2}w_{3} = 0.5 \cdot 0.7 + 0.3 \cdot 0.4 = 0.47 \) \(\\\)
+                        \( z_{2} = x_{1}w_{2} + x_{2}w_{4} = 0.5 \cdot 0.3 + 0.3 \cdot 0.6 = 0.33 \) \(\\\)
+                        \( h_{1} = \sigma(0.47) = 0.615 \) \(\\\)
+                        \( h_{2} = \sigma(0.33) = 0.582 \) \(\\\)
+                        \( z_{3} = h_{1}w_{5} + h_{2}w_{6} = 0.615 \cdot 0.55 + 0.582 \cdot 0.45 = 0.6 \) \(\\\)
+                        \( \hat{y} = \sigma(0.6) = 0.645\)
+                    </ul>
+                <br>
+                <li class="decimal">
+                    loss calculation
+                </li>
+                    <ul style="margin-left: -1em;">
+                        \( L = \frac{1}{1} \sum_{i=1}^1 (y_1 - \hat{y}_1)^2 \) \(\\\)
+                        \( L = (1 - 0.645)^2 \) \(\\\)
+                        \( L = 0.126 \)
+                    </ul>
+                <br>
+                <li class="decimal">
+                    back propagation (역전파)
+                    <ul style="margin-left: -1em;">
+                        The chain rule is used in calculus to differentiate. <b>If one variable depends on another, and that second variable depends on a third</b>, the chain rule helps to find the derivative of the first variable with respect to the third.
+                        <br><br>
+                    
+                        In this example, to update the current \(w_{5}\) with <b>gradient descent</b> (<i>updated</i> \(w_{5}\) = <i>current</i> \( w_{5}\) \(- \, \eta \, \frac{\partial L}{\partial w_{5}} \)), <br><br>
+                        it cannot be obtained at once, so the chain rule is used as: <br><br>
+                        \(\frac{\partial L}{\partial w_{5}} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_{3}} \cdot \frac{\partial z_{3}}{\partial w_{5}} \) 
+                        <br>
+                        \(\frac{\partial L}{\partial w_{5}} = \frac{\partial L}{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial \hat{y}}}} \cdot \frac{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial \hat{y}}}}{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial z_{3}}}} \cdot \frac{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial z_{3}}}}{\partial w_{5}} \)
+                        <br><br><br>
+                    
+                        Firstly, we can get the following easily: <br><br>
+                        \(\frac{\partial L}{\partial \hat{y}} = (y - \hat{y})^2 = 2(y - \hat{y}) \cdot (-1) \) <br>\(\\\)
+                        \(\frac{\partial L}{\partial \hat{y}} = -2(1 - 0.645) = -0.71 \)
+                        <br><br>
+                    
+                        <!-- Second step: Derivative of sigmoid function -->
+                        Then, to get the derivative of \(\frac{\partial \hat{y}}{\partial z_{3}}\), we need to calculate the derivative of the sigmoid function \( \sigma(x) \):
+                        <br><br>
+                        \(\frac{d}{dx} \left( \frac{f(x)}{g(x)} \right) = \frac{f'(x) \cdot g(x) - f(x) \cdot g'(x)}{g(x)^2}\)
+                        <br>
+                        \(\frac{d}{dx} \sigma(x) = \frac{(0) \cdot (1 + e^{-x}) - (1) \cdot (-e^{-x})}{(1 + e^{-x})^2}\)
+                        <br>
+                        \(\frac{d}{dx} \sigma(x) = \frac{e^{-x}}{(1 + e^{-x})^2}\)
+                        <br><br>
+                        \( 1 + e^{-x} = \frac{1}{\sigma(x)} \)
+                        <br>
+                        \((1 + e^{-x})^2 = \left( \frac{1}{\sigma(x)} \right)^2 = \frac{1}{\sigma(x)^2}\)
+                        <br>
+
+                        \(\frac{e^{-x}}{(1 + e^{-x})^2} = \frac{e^{-x}}{\frac{1}{\sigma(x)^2}}\)
+                        
+                        <br>
+
+                        \(\frac{e^{-x}}{\frac{1}{\sigma(x)^2}} = e^{-x} \cdot \sigma(x)^2\)
+
+                        <br><br>
+                        \(e^{-x} = \frac{1 - \sigma(x)}{\sigma(x)}\)
+
+                        <br><br>
+
+                        \(\frac{d}{dx} \sigma(x) = \frac{1 - \sigma(x)}{\sigma(x)} \cdot \sigma(x)^2\)
+
+                        <br><br>
+                        \(\frac{d}{dx} \sigma(x) = \sigma(x) \cdot (1 - \sigma(x))\)
+                    
+                        <br><br>
+                    
+                        Since \(\hat{y} = \sigma(z_3)\), we can substitute \(\hat{y}\) into the result:
+                        \(
+                        \frac{\partial \hat{y}}{\partial z_{3}} = \hat{y}(1 - \hat{y}) = 0.645(1 - 0.645) = 0.229
+                        \)
+                    
+                        <br><br>
+
+                        Lastly, \(\frac{\partial z_{3}}{\partial w_{5}}\) is simple. Since \(z_3 = h_{1}w_{5} + h_{2}w_{6}\), therefore the \(\frac{\partial z_{3}}{\partial w_{5}} = h_{1} \require{enclose}\enclose{horizontalstrike}{w_{5}} +  \require{enclose}\enclose{horizontalstrike}{h_{2}w_{6}} = h_{1} = 0.615 \)
+
+                        <br><br>
+                    
+                        Now, using the chain rule, we can combine all the derivatives to calculate the final gradient:
+                        <br><br>
+                        \(
+                        \frac{\partial L}{\partial w_{5}} = -0.71 \cdot 0.229 \cdot 0.615 \approx -0.01
+                        \)
+                    
+                        <br><br>
+                    
+                        This value can be used in gradient descent to update the weight \(
+                        w_5 = w_5 - \eta \cdot \frac{\partial L}{\partial w_5} = 0.551
+                        \)
+                    </ul>
+                </li>
+            </ul>
+            <br>
+        </ul>
+</ul>
+
+<style>
+    #mlp-container .node {
+        position: absolute;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: #f0f0f0;
+        border: 2px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        z-index: 2;
+    }
+    #mlp-container .line {
+        position: absolute;
+        height: 1px;
+        background-color: #999;
+        transform-origin: 0 0;
+        z-index: 1;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var container = document.getElementById('mlp-container');
+        var nodes = container.getElementsByClassName('node');
+        
+        drawLine(nodes[0], nodes[2], '\\( w_{1}(0.7)\\)')
+        drawLine(nodes[0], nodes[3], '\\( w_{2}(0.3)\\)')
+        drawLine(nodes[1], nodes[2], '\\( w_{3}(0.4)\\)')
+        drawLine(nodes[1], nodes[3], '\\( w_{4}(0.6)\\)')
+        drawLine(nodes[2], nodes[4], '\\( w_{5}(0.55)\\)')
+        drawLine(nodes[3], nodes[4], '\\( w_{6}(0.45)\\)')
+        
+        function drawLine(from, to, text) {
+            const line = document.createElement('div');
+            const x1 = from.offsetLeft + from.offsetWidth / 2;
+            const y1 = from.offsetTop + from.offsetHeight / 2;
+            const x2 = to.offsetLeft + to.offsetWidth / 2;
+            const y2 = to.offsetTop + to.offsetHeight / 2;
+            
+            const length = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+            const angle  = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            line.style.position = 'absolute';
+            line.style.width = length + 'px';
+            line.style.height = '1px';
+            line.style.backgroundColor = '#999';
+            line.style.top = y1 + 'px';
+            line.style.left = x1 + 'px';
+            line.style.transform = 'rotate(' + angle + 'deg)';
+            line.style.transformOrigin = '0 0';
+            
+            container.appendChild(line);
+
+            const weight_text = document.createElement('div');
+            weight_text.textContent = text;
+            weight_text.style.position = 'absolute';
+            
+            const interpolation_ratio = 0.37;
+            const x = x1 + (x2 - x1) * interpolation_ratio;
+            const y = y1 + (y2 - y1) * interpolation_ratio;
+            
+            weight_text.style.left = x + 'px';
+            weight_text.style.top = y + 'px';
+            weight_text.style.transform = 'translate(-50%, -50%)';
+            weight_text.style.fontSize = '14px';
+            weight_text.style.fontWeight = 'bold';
+            weight_text.style.color = '#333';
+            container.appendChild(weight_text);
+            
+        }
+        
+        function addWeightText(x1, y1, x2, y2, weight) {
+        }
+    });
+</script>
+
+<br><br>
+
