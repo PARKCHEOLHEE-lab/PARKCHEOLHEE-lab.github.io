@@ -58,96 +58,142 @@ done: true
                 <li class="decimal">
                     forward propagation (순전파)
                 </li>
-                    <ul style="margin-left: -1em;">
-                        \( z_{1} = x_{1}w_{1} + x_{2}w_{3} = 0.5 \cdot 0.7 + 0.3 \cdot 0.4 = 0.47 \) \(\\\)
-                        \( z_{2} = x_{1}w_{2} + x_{2}w_{4} = 0.5 \cdot 0.3 + 0.3 \cdot 0.6 = 0.33 \) \(\\\)
-                        \( h_{1} = \sigma(0.47) = 0.615 \) \(\\\)
-                        \( h_{2} = \sigma(0.33) = 0.582 \) \(\\\)
-                        \( z_{3} = h_{1}w_{5} + h_{2}w_{6} = 0.615 \cdot 0.55 + 0.582 \cdot 0.45 = 0.6 \) \(\\\)
-                        \( \hat{y} = \sigma(0.6) = 0.645\)
+                    <ul>
+                        <li>
+                            \( z_{1} = x_{1}w_{1} + x_{2}w_{3} = 0.5 \cdot 0.7 + 0.3 \cdot 0.4 = 0.47 \)
+                        </li>
+                        <li>
+                            \( z_{2} = x_{1}w_{2} + x_{2}w_{4} = 0.5 \cdot 0.3 + 0.3 \cdot 0.6 = 0.33 \)
+                        </li>
+                        <li>
+                            \( h_{1} = \sigma(0.47) = 0.615 \)
+                        </li>
+                        <li>
+                            \( h_{2} = \sigma(0.33) = 0.582 \) 
+                        </li>
+                        <li>
+                            \( z_{3} = h_{1}w_{5} + h_{2}w_{6} = 0.615 \cdot 0.55 + 0.582 \cdot 0.45 = 0.6 \) 
+                        </li>
+                        <li>
+                            \( \hat{y} = \sigma(0.6) = 0.645\)
+                        </li>
                     </ul>
                 <br>
                 <li class="decimal">
                     loss calculation
                 </li>
-                    <ul style="margin-left: -1em;">
-                        \( L = \frac{1}{1} \sum_{i=1}^1 (y_1 - \hat{y}_1)^2 \) \(\\\)
-                        \( L = (1 - 0.645)^2 \) \(\\\)
-                        \( L = 0.126 \)
+                    <ul>
+                        <li>
+                            \( L = \frac{1}{1} \sum_{i=1}^1 (y_1 - \hat{y}_1)^2 \)
+                        </li>
+                        <li>
+                            \( L = (1 - 0.645)^2 \)
+                        </li>
+                        <li>
+                            \( L = 0.126 \)
+                        </li>
                     </ul>
                 <br>
                 <li class="decimal">
                     back propagation (역전파)
-                    <ul style="margin-left: -1em;">
-                        The chain rule is used in calculus to differentiate. <b>If one variable depends on another, and that second variable depends on a third</b>, the chain rule helps to find the derivative of the first variable with respect to the third.
-                        <br><br>
-                    
-                        In this example, to update the current \(w_{5}\) with <b>gradient descent</b> (<i>updated</i> \(w_{5}\) = <i>current</i> \( w_{5}\) \(- \, \eta \, \frac{\partial L}{\partial w_{5}} \)), <br><br>
-                        it cannot be obtained at once, so the chain rule is used as: <br><br>
-                        \(\frac{\partial L}{\partial w_{5}} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_{3}} \cdot \frac{\partial z_{3}}{\partial w_{5}} \) 
+                    <ul>
+                        <li>
+                            The chain rule is used in calculus to differentiate. <b>If one variable depends on another, and that second variable depends on a third</b>, the chain rule helps to find the derivative of the first variable with respect to the third.
+                        </li>
+                        <li>
+                            In this example, to update the current \(w_{5}\) with <b>gradient descent</b> (<i>updated</i> \(w_{5}\) = <i>current</i> \( w_{5}\) \(- \, \eta \, \frac{\partial L}{\partial w_{5}} \)),
+                            it cannot be obtained at once, so the chain rule is used as:
+                        </li>
+                            <ul>
+                                <li>
+                                    \(\frac{\partial L}{\partial w_{5}} = \frac{\partial L}{\partial \hat{y}} \cdot \frac{\partial \hat{y}}{\partial z_{3}} \cdot \frac{\partial z_{3}}{\partial w_{5}} \) 
+                                </li>
+                                <li>
+                                    \(\frac{\partial L}{\partial w_{5}} = \frac{\partial L}{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial \hat{y}}}} \cdot \frac{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial \hat{y}}}}{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial z_{3}}}} \cdot \frac{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial z_{3}}}}{\partial w_{5}} \)
+                                </li>
+                            </ul>
                         <br>
-                        \(\frac{\partial L}{\partial w_{5}} = \frac{\partial L}{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial \hat{y}}}} \cdot \frac{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial \hat{y}}}}{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial z_{3}}}} \cdot \frac{\require{enclose}\enclose{horizontalstrike}{\color{gray}{\partial z_{3}}}}{\partial w_{5}} \)
-                        <br><br><br>
-                    
-                        Firstly, we can get the following easily: <br><br>
-                        \(\frac{\partial L}{\partial \hat{y}} = (y - \hat{y})^2 = 2(y - \hat{y}) \cdot (-1) \) <br>\(\\\)
-                        \(\frac{\partial L}{\partial \hat{y}} = -2(1 - 0.645) = -0.71 \)
-                        <br><br>
-                    
-                        <!-- Second step: Derivative of sigmoid function -->
-                        Then, to get the derivative of \(\frac{\partial \hat{y}}{\partial z_{3}}\), we need to calculate the derivative of the sigmoid function \( \sigma(x) \):
-                        <br><br>
-                        \(\frac{d}{dx} \left( \frac{f(x)}{g(x)} \right) = \frac{f'(x) \cdot g(x) - f(x) \cdot g'(x)}{g(x)^2}\)
+                        <li>
+                            From the above expression, firstly, we can get the following easily:
+                        </li>
+                            <ul>
+                                <li>
+                                    \(\frac{\partial L}{\partial \hat{y}} = (y - \hat{y})^2 = 2(y - \hat{y}) \cdot (-1) \) <br>\(\\\)
+                                </li>
+                                <li>
+                                    \(\frac{\partial L}{\partial \hat{y}} = -2(1 - 0.645) = -0.71 \)
+                                </li>
+                            </ul>
                         <br>
-                        \(\frac{d}{dx} \sigma(x) = \frac{(0) \cdot (1 + e^{-x}) - (1) \cdot (-e^{-x})}{(1 + e^{-x})^2}\)
+                    
+                        <li>
+                            Then, to get the derivative of \(\frac{\partial \hat{y}}{\partial z_{3}}\), we need to calculate the derivative of the sigmoid function \( \sigma(x) \):
+                        </li>
+                            <ul>
+                                <li>
+                                    \(\frac{d}{dx} \left( \frac{f(x)}{g(x)} \right) = \frac{f'(x) \cdot g(x) - f(x) \cdot g'(x)}{g(x)^2}\)
+                                </li>
+                                <li>
+                                    \(\frac{d}{dx} \sigma(x) = \frac{(0) \cdot (1 + e^{-x}) - (1) \cdot (-e^{-x})}{(1 + e^{-x})^2}\)
+                                </li>
+                                <li>
+                                    \(\frac{d}{dx} \sigma(x) = \frac{e^{-x}}{(1 + e^{-x})^2}\)
+                                </li>
+                                <li>
+                                    \( 1 + e^{-x} = \frac{1}{\sigma(x)} \)
+                                </li>
+                                <li>
+                                    \((1 + e^{-x})^2 = \left( \frac{1}{\sigma(x)} \right)^2 = \frac{1}{\sigma(x)^2}\)
+                                </li>
+                                <li>
+                                    \(\frac{e^{-x}}{(1 + e^{-x})^2} = \frac{e^{-x}}{\frac{1}{\sigma(x)^2}}\)
+                                </li>
+                                <li>
+                                    \(\frac{e^{-x}}{\frac{1}{\sigma(x)^2}} = e^{-x} \cdot \sigma(x)^2\)
+                                </li>
+                                <li>
+                                    \(e^{-x} = \frac{1 - \sigma(x)}{\sigma(x)}\)
+                                </li>
+                                <li>
+                                    \(\frac{d}{dx} \sigma(x) = \frac{1 - \sigma(x)}{\sigma(x)} \cdot \sigma(x)^2\)
+                                </li>
+                                <li>
+                                    \(\frac{d}{dx} \sigma(x) = \sigma(x) \cdot (1 - \sigma(x))\)
+                                </li>
+                            </ul>
                         <br>
-                        \(\frac{d}{dx} \sigma(x) = \frac{e^{-x}}{(1 + e^{-x})^2}\)
-                        <br><br>
-                        \( 1 + e^{-x} = \frac{1}{\sigma(x)} \)
+                        <li>
+                            Since \(\hat{y} = \sigma(z_3)\), we can substitute \(\hat{y}\) into the result:
+                        </li>
+                        <ul>
+                            <li>
+                                \(\frac{\partial \hat{y}}{\partial z_{3}} = \hat{y}(1 - \hat{y}) = 0.645(1 - 0.645) = 0.229\)
+                            </li>
+                        </ul>
                         <br>
-                        \((1 + e^{-x})^2 = \left( \frac{1}{\sigma(x)} \right)^2 = \frac{1}{\sigma(x)^2}\)
+                        <li>
+                            Lastly, \(\frac{\partial z_{3}}{\partial w_{5}}\) is simple. Since \(z_3 = h_{1}w_{5} + h_{2}w_{6}\), 
+                        </li>
+                            <ul>
+                                <li>
+                                    therefore the \(\frac{\partial z_{3}}{\partial w_{5}} = h_{1} \require{enclose}\enclose{horizontalstrike}{w_{5}} +  \require{enclose}\enclose{horizontalstrike}{h_{2}w_{6}} = h_{1} = 0.615 \)
+                                </li>
+                            </ul>
                         <br>
-
-                        \(\frac{e^{-x}}{(1 + e^{-x})^2} = \frac{e^{-x}}{\frac{1}{\sigma(x)^2}}\)
-                        
+                        <li>
+                            Now, using the chain rule, we can combine all the derivatives to calculate the final gradient:
+                        </li>
+                            <ul>
+                                <li>
+                                    \(\frac{\partial L}{\partial w_{5}} = -0.71 \cdot 0.229 \cdot 0.615 \approx -0.01\)
+                                </li>
+                            </ul>
                         <br>
-
-                        \(\frac{e^{-x}}{\frac{1}{\sigma(x)^2}} = e^{-x} \cdot \sigma(x)^2\)
-
-                        <br><br>
-                        \(e^{-x} = \frac{1 - \sigma(x)}{\sigma(x)}\)
-
-                        <br><br>
-
-                        \(\frac{d}{dx} \sigma(x) = \frac{1 - \sigma(x)}{\sigma(x)} \cdot \sigma(x)^2\)
-
-                        <br><br>
-                        \(\frac{d}{dx} \sigma(x) = \sigma(x) \cdot (1 - \sigma(x))\)
-                    
-                        <br><br>
-                    
-                        Since \(\hat{y} = \sigma(z_3)\), we can substitute \(\hat{y}\) into the result:
-                        \(
-                        \frac{\partial \hat{y}}{\partial z_{3}} = \hat{y}(1 - \hat{y}) = 0.645(1 - 0.645) = 0.229
-                        \)
-                    
-                        <br><br>
-
-                        Lastly, \(\frac{\partial z_{3}}{\partial w_{5}}\) is simple. Since \(z_3 = h_{1}w_{5} + h_{2}w_{6}\), therefore the \(\frac{\partial z_{3}}{\partial w_{5}} = h_{1} \require{enclose}\enclose{horizontalstrike}{w_{5}} +  \require{enclose}\enclose{horizontalstrike}{h_{2}w_{6}} = h_{1} = 0.615 \)
-
-                        <br><br>
-                    
-                        Now, using the chain rule, we can combine all the derivatives to calculate the final gradient:
-                        <br><br>
-                        \(
-                        \frac{\partial L}{\partial w_{5}} = -0.71 \cdot 0.229 \cdot 0.615 \approx -0.01
-                        \)
-                    
-                        <br><br>
-                    
-                        This value can be used in gradient descent to update the weight \(
-                        w_5 = w_5 - \eta \cdot \frac{\partial L}{\partial w_5} = 0.551
-                        \)
+                        <li>
+                            This value can be used in gradient descent to update the weight \(
+                            w_5 = w_5 - \eta \cdot \frac{\partial L}{\partial w_5} = 0.551
+                            \)
+                        </li>
                     </ul>
                 </li>
             </ul>
