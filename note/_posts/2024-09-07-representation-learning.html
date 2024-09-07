@@ -1,0 +1,448 @@
+---
+title:  "Representation Learning: A Review and New Perspectives"
+layout: post
+done: false
+emoji: /emoji/brain.png
+---
+
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<style>
+    .mjx-chtml {
+        font-size: 100% !important; /* Adjust the size as needed */
+    }
+    .mjx-sup {
+        font-size: 100% !important;
+    }
+    .mjx-sub {
+        font-size: 60% !important;
+    }
+</style>
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/1206.5538">Representation Learning: A Review and New Perspectives</a>
+    </li>
+        <ol>
+            <li>
+                Abstract
+            </li>
+                <ul>
+                    <li>
+                        <mark>The success of machine learning algorithms generally <b>depends on data representation</b></mark>, and we hypothesize that this is because different representations can <b>entangle and hide</b> more or less the different explanatory factors of variation behind the data.
+                        <br>
+                        (좋은 데이터 표현은 얽히고 숨어있는 요인들이 잘 학습되도록 돕는다)
+                    </li>
+                    <li>
+                        <b>Index Terms</b>ㅡDeep learning, 
+                        representation learning, 
+                        feature learning, 
+                        unsupervised learning, 
+                        <a href="https://en.wikipedia.org/wiki/Likelihood_function#:~:text=A%20likelihood%20function%20(often%20simply%20called%20the%20likelihood)%20measures%20how%20well%20a%20statistical%20model%20explains%20observed%20data%20by%20calculating%20the%20probability%20of%20seeing%20that%20data%20under%20different%20parameter%20values%20of%20the%20model.">likelihood</a>
+                        Boltzmann Machine, 
+                        autoencoder, 
+                        neural nets, 
+                        <a href="https://velog.io/@yuns_u/%EB%B6%84%EC%82%B0-%ED%91%9C%ED%98%84Distributed-Representation">destributed representation</a>,
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Introduction
+            </li>
+                <ul>
+                    <li>
+                        The performance of machine learning methods is heavily dependent on the <b>choice of data representation</b> (or features) on which they are applied. 
+                    </li>
+                    <li>
+                        An AI must fundamentally understand the world around us, and we argue that this can only be achieved if it can learn to identify and <b>disentangle the underlying explanatory factors</b> hidden in the observed milieu of low-level sensory data.
+                    </li>
+                    <li>
+                        We consider some of the fundamental questions that have been driving research in this area. 
+                        Specifically, <b>what makes one representation better than another?</b>
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Why should we care about learning representation?
+            </li>
+                <ul>
+                    <li>
+                        Neural net language models are all based on <b>learning a distributed representation for each word, called a word embedding</b>.
+                    </li>
+                    <li>
+                        Learning word embeddings can be combined with learning image representations in a way that allow to associate text and images.
+                    </li>
+                        <ul>
+                            <li>
+                                Image Captioning
+                            </li>
+                            <li>
+                                Searching image based on text
+                            </li>
+                        </ul>
+                    <li>
+                        In transfer learning, we hypothesize that representation
+                        learning algorithms have an advantage for such tasks because
+                        they learn representations that capture underlying factors.
+                    </li>
+                    <br>
+                    <img src="/img/representation-learning-1.png" width="70%">
+                    <figcaption>Illustration of representation-learning discovering explanatory factors </figcaption>
+                    <br>
+                    <li>
+                        Most impressive are the two transfer learning challenges held in 2011 and won by representation learning algorithms.
+                    </li>
+                </ul>
+            <br>
+            <li>
+                What makes a representation good ?
+            </li>
+                <ol type="a">
+                    <li>
+                        Priors for Representation Learning in AI
+                    </li>
+                        <ul>
+                            <li>
+                                One reason why <a href="https://www.sciencedirect.com/topics/computer-science/explicit-representation#:~:text=Explicit%20representation%20in%20computer%20science%20refers%20to%20a%20well%2Ddefined%20knowledge%20representation">explicitly dealing with representations</a> is interesting is because they can be convenient to
+                                express many general priors about the world around us
+                            </li>
+                            <li>
+                                consecutive or spatially nearby observations tend to be associated 
+                                with the same value of relevant categorical concepts.
+                                <br>
+                                (Embedding?)
+                            </li>
+                            <li>
+                                연속적인 데이터에서 작은 변화를 허용하는 것은 더 자연스럽고, 더 안정적인 표현을 학습하도록 한다.
+                            </li>
+                            <li>
+                                in good high-level representations, the factors are related to each other through simple, typically linear dependencies. 
+                                <br>
+                                (high-level representation을 학습할 때 이 표현들의 관계가 선형적이라는 가정을 하고 모델링?)
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Depth and abstraction
+                    </li>
+                        <ul>
+                            <li>
+                                Deep architectures can lead
+                                to abstract representations because <b>
+                                    more abstract concepts can
+                                    often be constructed in terms of less abstract ones
+                                </b>
+                            </li>
+                            <li>
+                                저수준 추상화들을 기반으로 고수준 추상화 학습.
+                            </li>
+                            <li>
+                                More abstract concepts are generally <b>invariant to most local changes</b> of the input.
+                            </li>
+                            <li>
+                                입력 데이터의 local changes 가 있더라도 일관되게 추상화하여 일반화 성능 강화 <br>
+                                (고양이 이미지에서 고양이의 위치, 크기, 색 등이 다르더라도 고양이 인 것은 변함 없음)
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Disentangling Factors of Variation
+                    </li>
+                        <ul>
+                            <li>
+                                How can we cope with these complex interactions? How can
+                                we disentangle the objects and their shadows? Ultimately,
+                                <b>
+                                    <mark>
+                                        we believe the approach we adopt for overcoming these
+                                        challenges must leverage the data itself
+                                    </mark>
+                                </b>, using vast quantities
+                                of unlabeled examples, to learn representations that separate
+                                the various explanatory sources 
+                                <br>
+                                (unsupervised leraning)
+                            </li>
+                            <li>
+                                정보의 보존 및 분리
+                            </li>
+                            <li>
+                                It
+                                is often difficult to determine a priori which set of features
+                                and variations will ultimately be relevant to the task at hand. 
+                                <br>
+                                (<a href="https://en.wikipedia.org/wiki/Feature_engineering#:~:text=Feature%20engineering%20is%20a%20preprocessing%20step%20in%20supervised%20machine%20learning%20and%20statistical%20modeling%5B1%5D%20which%20transforms%20raw%20data%20into%20a%20more%20effective%20set%20of%20inputs">feature engineering</a>)
+                            </li>
+                        </ul>
+                </ol>
+            <br>
+            <li>
+                Building Deep Representations
+            </li>
+                <ul>
+                    <li>
+                        it was empirically observed that layerwise <b>stacking of feature extraction</b> often yielded better representations
+                    </li>
+                    <li>
+                        Alternatively, the outputs of the <b>previous layer can be fed as extra inputs</b> for the next layer (in addition to the raw input), as successfully done in Yu et al. (2010).
+                        <br>
+                         (Skip Connection, Residual Connection)
+                    </li>
+                    <li>
+                        This <b>joint training</b> has brought substantial improvements, both in terms of likelihood and in terms of classification performance of the resulting deep feature learner
+                        <br>
+                        (Combining multi-losses, e.g. summation of a loss for the feature learning and a loss for the classification)
+                    </li>
+                    <li>
+                        The deep auto-encoder can then be jointly trained, with all the parameters optimized with respect to a global <b>reconstruction error</b> criterion
+                        <br>
+                        (Decreasing reconstruction error = Increasing likelihood)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Single-Layer Learning Modules
+            </li>
+                <ul>
+                    <li>
+                        같은 구조의 모델이더라도 hidden units을 어떻게 해석하느냐에 따라 그 모델의 의미가 달라질 수 있음
+                        <br>
+                        (Probabilistic perspective (VAE) or Computational perspective (AE))
+                    </li>
+                    <li>
+                        The
+                        expressive power of linear features is very limited: <mark><b>
+                            they cannot
+                            be stacked</b> to form deeper, more abstract representations since
+                        the composition of linear operations yields <b>another linear operation</b>
+                        </mark>
+                        <br>
+                        (선형변환을 여러 층 쌓더라도 그대로 선형변환)
+                        \[
+                            y = W_{3} \cdot W_{2} \cdot W_{1}x \\
+                        \]
+                    </li>
+                    <li>
+                        To extract non-linear features, simply <b>insert a non-linearity</b> between learned single-layer linear projections.
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Probabilistic models
+            </li>
+                <ul>
+                    <li>
+                        From the probabilistic modeling perspective, the question of
+                        <b>
+                            feature learning can be interpreted as an attempt to recover
+                            a parsimonious set of latent variables (잠재 변수)
+                        </b> that describe
+                        a distribution over the observed data. 
+                    </li>
+                    <li>
+                        정규분포를 따르는 잠재변수는 원본 데이터를 잘 설명하는 벡터, 원본데이터를 잘 설명하도록 맵핑된다는 직관
+                    </li>
+                    <li>
+                        <b>Explaining away</b> (설명 소거)
+                    </li>
+                    <li>
+                        a priori independent causes of an event can become non-independent given the observation of the event.
+                    </li>
+                    <li>
+                        alarm activation. burglarized or earthquake.
+                    </li>
+                    <li>
+                        알람이 울렸을 때 처음에는 도둑이 들었거나 지진이 발생했을 가능성이 모두 있음.
+                        하지만 도둑이 들었다는 사실이 확인되면, 지진이 발생했을 가능성은 크게 낮아짐. 
+                        반대로, 지진이 발생했다는 사실을 알면 도둑이 든 가능성 역시 크게 낮아짐.
+                    </li>
+                    <li>
+                        <a href="http://ufldl.stanford.edu/tutorial/unsupervised/SparseCoding/#:~:text=Sparse%20coding%20is,these%20basis%20vectors%3A">Sparse Coding</a>
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Directly learning a parametric map from input to representation
+            </li>
+                <ol type="a">
+                    <li>
+                        Auto-Encoders
+                    </li>
+                        <ul>
+                            <li>
+                                Non-probabilistic method to map features of the input
+                            </li>
+                            <li>
+                                입력 데이터를 저차원 표현 (Latent Space)로 변환하고 다시 복원함으로써, 입력 데이터를 특징으로 변환하는 직접적인 함수를 학습
+                            </li>
+                            \[
+                                h = f_{\theta}(x), \,\,
+                                r = g_{\phi}(h) \\
+                                f_{\theta}(x) = \sigma(b + Wx), \,\,
+                                g_{\phi}(h) = \sigma(b' + W'h) \\
+                            \]
+                            <li>
+                                Good generaliztion means low reconstruction error \( L(x, r) \) at test examples.
+                            </li>
+                            <li>
+                                To
+                                capture the structure of the data-generating distribution, it
+                                is therefore important that the parametrization <mark>
+                                    prevents the auto-encoder from
+                                    learning the <b>identity function</b> \(I\)
+                                </mark>, which has zero reconstruction
+                                error everywhere.
+                            </li>
+                            \[
+                                I = f(x) = x \\
+                            \]
+                            <li>
+                                To prevent the above issue, it is possible to achieve this by <b>setting the dimensions of latent space lower than the input data</b>. 
+                            </li>
+                            <li>
+                                Bottleneck structure \( d_{h} < d_{x} \)
+                            </li>
+                            <img src="/img/representation-learning-2.png" width="90%">
+                            <figcaption>Basic auto-encoder structure to prevent learning the identity function</figcaption> <br>
+                            <li>
+                                In summary, basic auto-encoder training consists in ifnding a value of parameter vector \(\theta\) minimizing reconstruction error.
+                            </li>
+                            \[
+                                \mathcal{Loss}_{AE}(\theta) = \sum_{t} L\left(x^{(t)}, \,\, g_{\phi}(\,f_{\theta}(\,x^{(t)}\,)\,)\right)
+                            \]
+                        </ul>
+                    <li>
+                        Sparse Auto-Encoders
+                    </li>
+                        <ul>
+                            <li>
+                                It tends to favour <b>overcomplete representations</b>, i.e. \( d_{h} > d_{x} \).
+                            </li>
+                            <li>
+                                인코더의 가중치와 디코더의 가중치를 공유함으로서 모델의 복잡성 제한
+                            </li>
+                            <li>
+                                <b>Sparsity</b> in the representation can be achieved by <b>penalizing the hidden unit biases</b>
+                                or by directly <b>penalizing the output of the hidden unit activations</b>.
+                            </li>
+                            \[
+                                \log(1 + h^{(j)\,2})
+                            \]
+                        </ul>
+                    <li>
+                        Denoising Auto-Encoders
+                    </li>
+                        <ul>
+                            <li>
+                                Learning to reconstruct the clean input from a <b>corrupted version</b>
+                            </li>
+                            <li>
+                                Learning the identity is no longer enough: the learner must capture the structure
+                                of the input distribution <b>
+                                    in order to optimally undo the effect
+                                    of the corruption process, i.e. DAE learns a <b>reconstruction function</b>
+                                </b>
+                            </li>
+                            <br>
+                            <img src="/img/representation-learning-4.png" width="70%">
+                            <figcaption>Illustration of DAE</figcaption><br>
+                            <li>
+                                Formally, the objective optimized by a DAE is:
+                            </li>
+                            \[
+                                \mathcal{J}_{DAE} = 
+                                \sum_{t} \mathbb{E}_{q(\tilde{x}^{(t)} \,|\, x^{(t)})} \left[ L\left( x^{(t)}, \,\, g_\theta \,(f_\theta \,(\tilde{x}^{(t)})) \right) \right]
+                                \\
+                            \]
+                            <li>
+                                Where \( \mathbb{E}_{q(\tilde{x}|x^{(t)})} [\cdot] \) averages over corrupted examples \( \tilde{x} \) drawn from the corruption process \( q(\tilde{x}|x^{(t)}) \).
+                            </li>
+                            <li>
+                                \(\tilde{x}^{(t)}\) 와 복원된 데이터 \(g_\theta(f_\theta(\tilde{x}^{(t)})) \) 사이의 손실을 계산하고 배치 내 모든 샘플에 대해 평균을 구함으로써 기댓값 근사
+                            </li>
+                            <li>
+                                <b>Gaussian noise</b> method adds the noise that follows gaussian distribution
+                            </li>
+                            <li>
+                                Salt and pepper noise method randomly changes some pixels to 0 or 1 for the gray-scale images/
+                            </li>
+                            <li>
+                                Masking noise method randomly sets chosen inputs to 0  
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Contractive Auto-Encoders
+                    </li>
+                        <ul>
+                            <li>
+                                By using contractive penalty (Frobenius norm), CAE learns the representations that are insensitive to small changes in the input.
+                            </li>
+                            <li>
+                                Frobenius norm은 인코더의 Jacobian 행렬의 크기를 측정. Jacobian 행렬은 인코더 함수가 입력 데이터 \(x\)의 작은 변화에 얼마나 영향을 미치는지 계산
+                            </li>
+                            <li>
+                                the <a href="https://angeloyeo.github.io/2020/07/24/Jacobian.html#:~:text=%EC%95%9E%EC%84%9C%20%EC%9E%90%EC%BD%94%EB%B9%84%EC%95%88%EC%9D%98%20%EC%A0%95%EC%9D%98%EC%97%90%20%EB%8C%80%ED%95%B4%20%EC%95%8C%EC%95%84%EB%B3%BC%20%EB%95%8C%20%EC%9E%90%EC%BD%94%EB%B9%84%EC%95%88%EC%9D%B4%20%EB%A7%90%ED%95%98%EA%B3%A0%EC%9E%90%20%ED%95%98%EB%8A%94%20%EA%B2%83%EC%9D%80%20%EB%AF%B8%EC%86%8C%20%EC%98%81%EC%97%AD%EC%97%90%EC%84%9C%20%E2%80%98%EB%B9%84%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%E2%80%99%EC%9D%84%20%E2%80%98%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%EC%9C%BC%EB%A1%9C%20%EA%B7%BC%EC%82%AC%E2%80%99%20%EC%8B%9C%ED%82%A8%20%EA%B2%83%EC%9D%B4%EB%9D%BC%EA%B3%A0%20%EC%96%B8%EA%B8%89%ED%95%9C%20%EB%B0%94%EA%B0%80%20%EC%9E%88%EB%8B%A4.%20%EA%B7%B8%EB%A0%87%EB%8B%A4%EB%A9%B4%20%EC%A0%95%EB%A7%90%20%EB%B9%84%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%EC%9D%84%20%EB%AF%B8%EC%86%8C%20%EC%98%81%EC%97%AD%EC%97%90%EC%84%9C%20%EB%B3%B8%EB%8B%A4%EB%A9%B4%20%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%EC%9C%BC%EB%A1%9C%20%EC%B6%A9%EB%B6%84%ED%9E%88%20%EA%B7%BC%EC%82%AC%ED%95%A0%20%EC%88%98%20%EC%9E%88%EB%8A%94%20%EA%B2%83%EC%9D%BC%EA%B9%8C%3F">Jacobian matrix</a> \(J(f)\) is a matrix that consists of the partial derivatives and shows how each output variable changes for the input variable.                            
+                            </li>
+                            \[
+                                J(f) = 
+                                \begin{bmatrix}
+                                \frac{\partial y_1}{\partial x_1} & \frac{\partial y_1}{\partial x_2} & \cdots & \frac{\partial y_1}{\partial x_n} \\
+                                \frac{\partial y_2}{\partial x_1} & \frac{\partial y_2}{\partial x_2} & \cdots & \frac{\partial y_2}{\partial x_n} \\
+                                \vdots & \vdots & \ddots & \vdots \\
+                                \frac{\partial y_m}{\partial x_1} & \frac{\partial y_m}{\partial x_2} & \cdots & \frac{\partial y_m}{\partial x_n}
+                                \end{bmatrix}
+                            \]
+                            <br>
+                            <li>
+                                The CAE's training objective is 
+                            </li>
+                            \[
+                            \mathcal{J}_{CAE} = \sum_t L(x^{(t)}, \,\, g_\theta(f_\theta(x^{(t)}))) + \lambda \, \left\| J(f_\theta(x^{(t)})) \right\|_F^2
+                            \\
+                            \|A\|_F = \sqrt{\sum_{i,j} |a_{ij}|^2}
+                            \]
+                            <br>
+                            <li>
+                                CAE에서 <b>Jacobian matrix</b>는 입력 \(x\)에 대한 인코더의 출력 \(f_\theta(x)\)의 변화가 얼마나 큰지를 나타내므로,
+                                \(J(f_\theta(x^{(t)}))\)의 Frobenius norm을 최소화 하는 term은 입력의 작은 변화에 대해 인코더의 출력 변화가 최소가 되도록 만드는 것
+                            </li>
+                            <li>
+                                A potential disadvantage of the CAE it only responds to small input changes and <b>may not consider for larger or diverse input changes</b>. (It is remedied in <a href="https://link.springer.com/chapter/10.1007/978-3-642-23783-6_41">CAE+H</a>)
+                            </li>
+                            <li>
+                                The representation learned
+                                by the CAE tends to be <b>saturated</b> rather than sparse, <b>
+                                    i.e.,
+                                    most hidden units are near the extremes of their range </b>(e.g. 0
+                                    or 1 after passing the sigmoid)
+                                
+                            </li>
+                            <li>
+                                포화된 유닛은 활성화 함수의 출력이 0 또는 1에 매우 가까운 상태(시그모이드 기준)를 의미하며, 
+                                이런 상황에서는 입력의 작은 변화에 대해 출력 변화가 거의 일어나지 않게 됨. (기울기가 거의 0) 
+                                <br>
+                                따라서 saturated unit이 입력 데이터의 미세한 변화를 잘 반영하지 못하고, 민감하게 반응하지 않음을 의미.
+                                <br>
+                                (고양이 이미지에서 고양이의 위치, 크기, 색 등이 다르더라도 고양이 인 것은 변함 없음)
+                            </li>
+                        </ul>
+                </ol>
+        </ol>
+</ul>
+
+
+<br><br>
