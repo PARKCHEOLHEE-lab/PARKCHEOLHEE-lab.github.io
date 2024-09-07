@@ -1,0 +1,65 @@
+---
+title:  "Label Smoothing"
+layout: post
+done: false
+---
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+    </script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+
+<ul>
+    <li>
+        Label Smoothing
+    </li>
+        <ul>
+            <li>
+                Label Smoothing method <b>prevents the model from being overconfident</b>
+            </li>
+            <li>
+                Regulairzation techinques for the <b>Generaliztion</b> and the <b>Calibration</b>
+            </li>
+            <li>
+                Formula for Label Smoothing is:
+            </li>
+            \[
+                y_{smooth} = y \, (1 - \alpha) + \frac{\alpha}{K} \\
+            \]
+            where \(y\) is a given label, \(K\) is possible classes, and the \(\alpha\) is the smoothing parameter, usually a small value like \(0.1\)
+            <li>
+                When the possible classes \(K = 5\) and \(\alpha = 0.1\), 
+                the one-hot encoded label \(y = [0, 1, 0, 0, 0]\) becomes to the \([0.02, 0.92, 0.02, 0.02, 0.02]\)
+            </li>
+            <li>
+                The \(\frac{\alpha}{K} \) term makes all classes except the label a Uniform Distribution.
+            </li>
+            <li>
+                Cross entropy loss applied with Label Smoothing is as:
+                \[
+                \mathcal{L}(y, \, \hat{y}) = -\sum_{k=1}^K y_{smooth_k} \cdot \, \log(\hat{y}_k) \\
+                \]
+                where $y_{smooth,k}$ is the smoothed label for class $k$, and $p_k$ is the predicted probability for class $k$.
+            </li>
+        </ul>
+<pre><code class="python">
+    def smooth_labels(self, labels: torch.Tensor, k: int, smoothing: float = 0.1) -> torch.Tensor:
+        """Applies label smoothing to reduce model overconfidence.
+        """
+
+        return labels * (1 - smoothing) + smoothing / k
+</code></pre>
+    <br>
+</ul>
+
+<br><br>
