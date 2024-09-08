@@ -2,3 +2,205 @@
 title:  "Math Notation Cheat Sheet"
 layout: post
 ---
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+<ul>
+    <li>
+        Frequently and commonly used mathematical notation symbols in the ML ...
+    </li>
+    <br>
+    <table style="width: 100%;">
+        <thead>
+            <tr>
+            <th>Math notation</th>
+            <th>Typical meaning</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>$a, b, c, \alpha, \beta, \gamma$</td>
+                <td>Scalars are lowercase</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{x}, \boldsymbol{y}, \boldsymbol{z}$</td>
+                <td>Vectors are bold lowercase</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{A}, \boldsymbol{B}, \boldsymbol{C}$</td>
+                <td>Matrices are bold uppercase</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{x}^\top, \boldsymbol{A}^\top$</td>
+                <td>Transpose of a vector or matrix</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{A}^{-1}$</td>
+                <td>Inverse of a matrix</td>
+            </tr>
+            <tr>
+                <td>$\langle \boldsymbol{x}, \boldsymbol{y} \rangle$</td>
+                <td>Inner product of $\boldsymbol{x}$ and $\boldsymbol{y}$</td>
+            </tr>
+            <tr>
+                <td>$\boldsymbol{x}^\top \boldsymbol{y}$</td>
+                <td>Dot product of $\boldsymbol{x}$ and $\boldsymbol{y}$</td>
+                </tr>
+                <tr>
+                <td>$\mathbb{Z}, \, \mathbb{N}, \, \mathbb{R}$</td>
+                <td>Integers, natural numbers and real numbers respectively</td>
+            </tr>
+            <tr>
+                <td>$\mathbb{R}^n$</td>
+                <td>$n$-dimensional vector space of real numbers</td>
+            </tr>
+            <tr>
+                <td>$a := b$</td>
+                <td>$a$ is defined as $b$</td>
+            </tr>
+            <tr>
+              <td>$a \approx b$</td>
+              <td>$a$ is approximately equal to $b$</td>
+            </tr>
+            <tr>
+                <td>$a \in \mathcal{A}$</td>
+                <td>$a$ is an element of set $\mathcal{A}$</td>
+            </tr>
+            <tr>
+              <td>$\boldsymbol{I}_m$</td>
+              <td>Identity matrix of size $m \times m$</td>
+            </tr>
+            <tr>
+              <td>$\boldsymbol{0}_{m,n}$</td>
+              <td>Matrix of zeros of size $m \times n$</td>
+            </tr>
+            <tr>
+              <td>$\boldsymbol{1}_{m,n}$</td>
+              <td>Matrix of ones of size $m \times n$</td>
+            </tr>
+            <tr>
+              <td>$\text{rk}(\boldsymbol{A})$</td>
+              <td>Rank of matrix $\boldsymbol{A}$</td>
+            </tr>
+            <tr>
+              <td>$\text{Im}(\Phi)$</td>
+              <td>Image of linear mapping $\Phi$</td>
+            </tr>
+            <tr>
+              <td>$\text{ker}(\Phi)$</td>
+              <td>Kernel (null space) of a linear mapping $\Phi$</td>
+            </tr>
+            <tr>
+              <td>$\text{span}[\boldsymbol{b}_1]$</td>
+              <td>Span (generating set) of $\boldsymbol{b}_1$</td>
+            </tr>
+            <tr>
+              <td>$\text{det}(\boldsymbol{A})$</td>
+              <td>Determinant of $\boldsymbol{A}$</td>
+            </tr>
+            <tr>
+              <td>$\|\cdot\|$</td>
+              <td>Norm; Euclidean, unless specified</td>
+            </tr>
+            <tr>
+              <td>$\boldsymbol{x} \perp \boldsymbol{y}$</td>
+              <td>Vectors $\boldsymbol{x}$ and $\boldsymbol{y}$ are orthogonal</td>
+            </tr>
+            <tr>
+              <td>$V$</td>
+              <td>Vector space</td>
+            </tr>
+            <tr>
+              <td>$\boldsymbol{\theta}$</td>
+              <td>Parameters</td>
+            </tr>
+            <tr>
+              <td>$\nabla$</td>
+              <td>Gradient (Nabla)</td>
+            </tr>
+            <tr>
+              <td>$\sum_{n=1}^N x_n$</td>
+              <td>Sum of the $x_n$: $x_1 + \ldots + x_N$</td>
+            </tr>
+            <tr>
+              <td>$\prod_{n=1}^N x_n$</td>
+              <td>Product of the $x_n$: $x_1 \times \ldots \times x_N$</td>
+            </tr>
+            <tr>
+              <td>$\frac{\partial f}{\partial x}$</td>
+              <td>Partial derivative of $f$ with respect to $x$</td>
+            </tr>
+            <tr>
+              <td>$\frac{df}{dx}$</td>
+              <td>Total derivative of $f$ with respect to $x$</td>
+            </tr>
+            <tr>
+              <td>$P(A)$</td>
+              <td>Probability of event $A$</td>
+            </tr>
+            <tr>
+              <td>$P(A|B)$</td>
+              <td>Conditional probability of $A$ given $B$</td>
+            </tr>
+            <tr>
+              <td>$\mathbb{E}[X]$</td>
+              <td>Expected value of random variable $X$</td>
+            </tr>
+            <tr>
+              <td>$\sigma$</td>
+              <td>Standard deviation</td>
+            </tr>
+            <tr>
+              <td>$\mathcal{N}(\mu, \sigma^2)$</td>
+              <td>Normal distribution with mean $\mu$ and variance $\sigma^2$</td>
+            </tr>
+            <tr>
+              <td>$\arg\max_x f(x)$</td>
+              <td>Value of $x$ that maximizes $f(x)$</td>
+            </tr>
+            <tr>
+              <td>$\arg\min_x f(x)$</td>
+              <td>Value of $x$ that minimizes $f(x)$</td>
+            </tr>
+            <tr>
+              <td>$L(y, \hat{y})$</td>
+              <td>Loss function comparing true value $y$ and predicted value $\hat{y}$</td>
+            </tr>
+            <tr>
+              <td>$\hat{y}$</td>
+              <td>Predicted value of $y$ (y hat)</td>
+            </tr>
+            <tr>
+              <td>$\boldsymbol{w}$</td>
+              <td>Weights </td>
+            </tr>
+            <tr>
+              <td>$b$</td>
+              <td>Bias</td>
+            </tr>
+            <tr>
+              <td>$\eta$</td>
+              <td>Learning rate in optimizer (Eta)</td>
+            </tr>
+            <tr>
+                <td>$g(x)$</td>
+                <td>Activation function</td>
+            </tr>
+        </tbody>
+    </table>
+</ul>
+
+
+<br><br>
