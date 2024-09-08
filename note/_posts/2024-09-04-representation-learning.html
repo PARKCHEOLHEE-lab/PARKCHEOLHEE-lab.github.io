@@ -380,7 +380,7 @@ emoji: /emoji/brain.png
                                 By using contractive penalty (Frobenius norm), CAE learns the representations that are insensitive to small changes in the input.
                             </li>
                             <li>
-                                Frobenius norm은 인코더의 Jacobian 행렬의 크기를 측정. Jacobian 행렬은 인코더 함수가 입력 데이터 \(x\)의 작은 변화에 얼마나 영향을 미치는지 계산
+                                Frobenius norm은 인코더의 Jacobian matrix의 크기를 측정. Jacobian matrix는 인코더 함수가 입력 데이터 \(x\)의 작은 변화에 얼마나 영향을 미치는지 계산
                             </li>
                             <li>
                                 the <a href="https://angeloyeo.github.io/2020/07/24/Jacobian.html#:~:text=%EC%95%9E%EC%84%9C%20%EC%9E%90%EC%BD%94%EB%B9%84%EC%95%88%EC%9D%98%20%EC%A0%95%EC%9D%98%EC%97%90%20%EB%8C%80%ED%95%B4%20%EC%95%8C%EC%95%84%EB%B3%BC%20%EB%95%8C%20%EC%9E%90%EC%BD%94%EB%B9%84%EC%95%88%EC%9D%B4%20%EB%A7%90%ED%95%98%EA%B3%A0%EC%9E%90%20%ED%95%98%EB%8A%94%20%EA%B2%83%EC%9D%80%20%EB%AF%B8%EC%86%8C%20%EC%98%81%EC%97%AD%EC%97%90%EC%84%9C%20%E2%80%98%EB%B9%84%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%E2%80%99%EC%9D%84%20%E2%80%98%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%EC%9C%BC%EB%A1%9C%20%EA%B7%BC%EC%82%AC%E2%80%99%20%EC%8B%9C%ED%82%A8%20%EA%B2%83%EC%9D%B4%EB%9D%BC%EA%B3%A0%20%EC%96%B8%EA%B8%89%ED%95%9C%20%EB%B0%94%EA%B0%80%20%EC%9E%88%EB%8B%A4.%20%EA%B7%B8%EB%A0%87%EB%8B%A4%EB%A9%B4%20%EC%A0%95%EB%A7%90%20%EB%B9%84%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%EC%9D%84%20%EB%AF%B8%EC%86%8C%20%EC%98%81%EC%97%AD%EC%97%90%EC%84%9C%20%EB%B3%B8%EB%8B%A4%EB%A9%B4%20%EC%84%A0%ED%98%95%20%EB%B3%80%ED%99%98%EC%9C%BC%EB%A1%9C%20%EC%B6%A9%EB%B6%84%ED%9E%88%20%EA%B7%BC%EC%82%AC%ED%95%A0%20%EC%88%98%20%EC%9E%88%EB%8A%94%20%EA%B2%83%EC%9D%BC%EA%B9%8C%3F">Jacobian matrix</a> \(J(f)\) is a matrix that consists of the partial derivatives and shows how each output variable changes for the input variable.                            
@@ -428,8 +428,150 @@ emoji: /emoji/brain.png
                                 (고양이 이미지에서 고양이의 위치, 크기, 색 등이 다르더라도 고양이 인 것은 변함 없음)
                             </li>
                         </ul>
+                    </ol>
+                    <br>
+                    <li>
+                        Representation learning as manifold learning
+                    </li>
+                        <ul>
+                            <li>
+                                Another important perspective on representation learning is
+                                based on the geometric notion of <b>manifold</b>. Its premise is
+                                the <a href="https://en.wikipedia.org/wiki/Manifold_hypothesis#:~:text=The%20manifold%20hypothesis%20posits%20that%20many%20high%2Ddimensional%20data%20sets%20that%20occur%20in%20the%20real%20world%20actually%20lie%20along%20low%2Ddimensional%20latent%20manifolds%20inside%20that%20high%2Ddimensional%20space">manifold hypothesis</a>, according to which real-world data
+                                presented in high dimensional spaces are expected to <mark>
+                                    concentrate in the vicinity of a manifold (subspace)
+                                    \(\mathcal{M} \) of much lower dimensionality \(d_{\mathcal{M}}\) embedded in high dimensional input space \(\mathbb{R}^{d_x}\).
+                                </mark>
+                            </li>
+                            <img src="/img/representation-learning-5.png" width="60%">
+                            <figcaption>Meaningful representation learned by the encoder of auto-encoders </figcaption>
+                            <br>
+                            <li>
+                                With this perspective, the primary unsupervised learning task is then seen as
+                                modeling the structure of the <b>data-supporting manifold</b>
+                            </li>
+                            <li>
+                                The
+                                associated representation being learned can be associated with
+                                an intrinsic <b>coordinate system on the embedded manifold</b>.
+                            </li>
+                            <li>
+                                <a href="https://darkpgmr.tistory.com/110#:~:text=%EC%97%AC%EA%B8%B0%EC%84%9C%20%EC%A3%BC%EC%84%B1%EB%B6%84%EC%9D%B4%EB%9D%BC%20%ED%95%A8%EC%9D%80%20%EA%B7%B8%20%EB%B0%A9%ED%96%A5%EC%9C%BC%EB%A1%9C%20%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%93%A4%EC%9D%98%20%EB%B6%84%EC%82%B0%EC%9D%B4%20%EA%B0%80%EC%9E%A5%20%ED%81%B0%20%EB%B0%A9%ED%96%A5%EB%B2%A1%ED%84%B0%EB%A5%BC%20%EC%9D%98%EB%AF%B8%ED%95%9C%EB%8B%A4.">Principal Component Analysis (PCA)</a>, which models a
+                                linear manifold. It was initially devised with the objective
+                                of <b>
+                                    finding the closest linear manifold to a cloud of data
+                                    points
+                                </b>. The principal components, i.e. the representation \(f_{\theta}(x)\)
+                                that PCA yields for an input point \(x\), uniquely locates its
+                                projection on that manifold: it corresponds to intrinsic coordinates on the manifold.
+                            </li>
+                            <li>
+                                PCA는 linear manifold이므로 고정된 방식으로 데이터를 변형하므로 비선형 구조를 가진 데이터에 대해서는 적절한 표현흘 못하는 경우가 많음
+                            </li>
+                            <li>
+                                A parametrized
+                                neural network architecture simultaneously learns a manifold
+                                embedding and a classifier. The training criterion <b>
+                                    encourages
+                                    training set neigbhors to have similar representations.
+                                </b>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Connections between probabilistic and direct encoding models
+                    </li>
+                        <ul>
+                            <li>
+                                Direct encoding models focus on the encoding process, which transforms input data into latent representations,
+                                whereas probabilistic models focus on the decoding process \(P(x \,| \,h, \,\theta)\), which reconstructs data from latent representations.
+                            </li>
+                            <li>
+                                <b>테스트 셋에 대한 reconstruction error</b>를 통한 feature learning 성능 평가의 지표가 될 수 있으나 모델 옹량이 크면 지표의 신뢰도가 낮아질 수 있음
+                                (<b>DAE, CAE</b>는 노이즈와 함께 학습되므로 더 큰 모델과 더 많은 학습시간이 항상 더 나은 결과를 의미하지 않음) 
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Global Training of deep models
+                    </li>
+                        <ul>
+                            <li>
+                                Higher-level abstraction means more non-linearity
+                            </li>
+                            <li>
+                                The hard part is learning a
+                                good representation that does this unfolding.
+                                <br>
+                                (For the auto-encoders, the encoder corresponds to the <b>unfolding</b> process and the decoder corresponds to the <b>folding</b> process)
+                            </li>
+                            <li>
+                                It is interesting to ask <b>
+                                    why does the layerwise unsupervised pre-training procedure sometimes help a supervised
+                                    learner
+                                </b>
+                            </li>
+                            <li>
+                                Intermediate representations 학습. Single-Layer learning이 아닌 hidden layer를 추가함으로써 각 레이어가 추상적이고 고차원적인 패턴 학습.
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Building-in invariance
+                    </li>
+                        <ul>
+                            <li>
+                                <mark><b>도메인 지식과 ML 통합</b></mark>
+                            </li>
+                            <li>
+                                Generalization performance is usually improved by providing
+                                a larger quantity of representative data. This can be achieved
+                                by <b>
+                                    generating new examples by applying small random deformations
+                                </b> to the original training examples, using deformations
+                                that are known not to change the target variables of interest.
+                            </li>
+                            <li>
+                                Convolution and pooling play an important role in training invariance.
+                            </li>
+                            <li>
+                                불변성 학습의 목표는 데이터의 중요한 요소들 간의 분리(disentangle)를 도와주는 것
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Conclusion
+                    </li>
+                        <ol type="a">
+                            <li>
+                                Practical Concerns and Guidelines
+                            </li>
+                                <ul>
+                                    <li>
+                                        One of the criticisms
+                                        addressed to artificial neural networks and deep learning algorithms is that <b>they have many hyper-parameters and variants</b>
+                                        and that exploring their configurations and architectures is an <b>art</b> (노하우, 경험에 의존).
+                                    </li>
+                                    <li>
+                                        Recent work on <b>automating hyper-parameter search</b> is also making it more convenient, efficient
+                                        and reproducible.
+                                    </li>
+                                </ul>
+                            <br>
+                            <li>
+                                Incorporating Generic AI-level Priors
+                            </li>
+                                <ul>
+                                    <li>
+                                        일반화할 수 있는 선행지식(priors) 또는 도메인 지식을 ML과 통합하여 데이터의 중요한 요소를 분리하고 설명 가능성을 높이는 것이 중요하다.
+                                    </li>
+                                    <li>
+                                        이미지로 예를 들면, 이미지에서 <b>물체의 모양이 조금 회전해도 그 물체가 동일</b>하다는 가정은 
+                                        이미지를 처리하는 모델이 학습해야 할 <b>priors</b>가 될 수 있음. (일반화 성능 개선)
+                                    </li>
+                                </ul>
+                        </ol>
                 </ol>
-        </ol>
 </ul>
 
 
