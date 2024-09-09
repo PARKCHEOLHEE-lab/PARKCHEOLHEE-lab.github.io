@@ -2,3 +2,91 @@
 title:  "Intersection over Union (IoU)"
 layout: post
 ---
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+    </script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+
+<ul>
+    <li>
+        Intersection over Union (IoU)
+    </li>
+        <ul>
+            <li>
+                <b>IoU loss</b> \(IoU\) computes the ratio between the intersection and union of the predicted bounding box \(\text{pred}\) and the ground-truth bounding box \(\text{gt}\).
+            </li>
+            \[
+            \text{IoU} = \frac{\text{Area of Intersection}}{\text{Area of Union}} = \,\, \frac{\text{gt} \cap \text{pred}}{\text{gt} \cup \text{pred}}
+            \\
+            \]
+            <li>
+                IoU is a good measure of how much the boxes intersect, 
+                but it does not describe the distance between the predicted and true bounding boxes 
+                when the intersection part is empty. <b>In all empty intersection states, IoU losses are all 0</b> like the right below figure.
+            </li>
+            <br>
+            <img src="/img/iou-1.png" width="50%">
+            <figcaption>IoU loss</figcaption>
+        </ul>
+    <br>
+    <li>
+        Distance-Intersection over Union (DIoU)
+    </li>
+        <ul>
+            <li>
+                <b>DIoU loss</b> addresses this issue by adding a distance term to the IoU loss. The loss is defined as:
+            </li>
+            \[
+                \text{DIoU} = 1 - \text{IoU} + \frac{d^2(c_{\text{gt}}, \,\, c_{\text{pred}})}{diag^2}
+            \]
+
+            Where:
+            <ul>
+                <li>
+                    \(c_{\text{gt}}\) and \(c_{\text{pred}}\) are the centroids of the ground truth and predicted bounding boxes.
+                </li>
+                <li>
+                    \(d(c_{\text{gt}}, \, c_{\text{pred}})\) is the Euclidean distance between the centroids of the boxes
+                </li>
+                <li>
+                    \(diag\) is the diagonal distance of the AABB that contains the two boxes.  
+                </li>
+            </ul>
+            <img src="/img/iou-2.png" width="30%">
+            <figcaption>DIoU loss</figcaption>
+            <br>
+            <li>
+                The term for square \(^2\) of the \(d\) and the \(diag\) is to emphasize the distance between centroids.
+            </li>
+            <li>
+                The minimum DIoU loss value is 0. This is because, 
+                <br>
+                When \(\text{IoU} = 1\) (perfectly intersects), the term \(1 - \text{IoU} = 0\). 
+                <br>
+                When \(d(c_{\text{gt}}, \, c_{\text{pred}} ) = 0\), the distance term equal to \(0\).
+                <br>
+                Thus, the overall DIoU loss would be \(0\).
+                <br>
+
+            </li>
+            <li>
+                The term for \(\frac{d^2(c_{\text{gt}}, \,\, c_{\text{pred}})}{diag^2}\) is to normalize the distance to 0 ~ 1.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Implementation
+    </li>
+</ul>
+
+<br><br>
