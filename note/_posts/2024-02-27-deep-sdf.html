@@ -1,0 +1,341 @@
+---
+title:  "DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation"
+layout: post
+emoji: /emoji/brain.png
+---
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/1901.05103">DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation</a>
+    </li>
+        <ol>
+            <li>
+                Abstract
+            </li>
+                <ul>
+                    <li>
+                        In this work, we introduce DeepSDF, a learned continuous <a href="https://en.wikipedia.org/wiki/Signed_distance_function#:~:text=In%20mathematics%20and%20its%20applications%2C%20the%20signed%20distance%20function%20or%20signed%20distance%20field%20(SDF)%20is%20the%20orthogonal%20distance%20of%20a%20given%20point%20x%20to%20the%20boundary%20of%20a%20set%20%CE%A9">Signed Distance Function (SDF)</a> representation of a class of shapes 
+                        that enables high quality shape representation, interpolation and completion from partial and noisy 3D input data.
+                    </li>
+                    <li>
+                        DeepSDF represents a shape's surface by a continuous volumetric field.
+                    </li>
+                    <li>
+                        <mark>
+                            The magnitude of a <b>point in the field represents the distance to the surface boundary</b> 
+                            and the <b>sign indicates whether the region is inside \((-)\) or outside \((+)\)</b> of the shape,
+                        </mark>
+                    </li>
+                    <li>
+                        hence our representation implicitly encodes a shape's boundary as the <b>zero-level-set</b> of the learned function. 
+                        (If the point in the field is perfectly on the surface, the SDF value is 0)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Introduction
+            </li>
+                <ul>
+                    <li>
+                        we may need to <b>deal with an unknown number of vertices</b> and arbitrary topology.
+                    </li>
+                    <li>
+                        In this work, we present a novel representation and approach for generative 3D modeling 
+                        that is efficient, expressive, and <b>fully continuous</b>. 
+                    </li>
+                    <li>
+                        Contributions include:
+                    </li>
+                        <ol type="i">
+                            <li>
+                                the formulation of generative shape-conditioned 3D modeling with a continuous implicit surface,
+                            </li>
+                            <li>
+                                a learning method for 3D shapes based on a probabilistic auto-decoder.
+                            </li>
+                        </ol>
+                </ul>
+            <br>
+            <li>
+                Related Work
+            </li>
+                <ol type="a">
+                    <li>
+                        Representation for 3d Shape Learning
+                    </li>
+                        <ul>
+                            <li>
+                                Representations for data-driven 3D learning approaches can be largely classified into three categories:
+                            </li>
+                                <ol type="i">
+                                    <li>
+                                        Point-based 
+                                    </li>
+                                    <li>
+                                        Mesh-based
+                                    </li>
+                                    <li>
+                                        Voxel-based
+                                    </li>
+                                </ol>
+                        </ul>
+                    <br>
+                    <li>
+                        Representation Learning Techniques
+                    </li>
+                        <ul>
+                            <li>
+                                Modern representation learning techniques aim at automatically discovering a set of features 
+                                that compactly but expressively describe data.
+                                For a more extensive review of the field, we refer to <a href="https://arxiv.org/pdf/1206.5538">Bengio et al.</a>
+                            </li>
+                                <ol type="i">
+                                    <li>
+                                        Generative Adversarial Networks
+                                    </li>
+                                    <li>
+                                        Auto-encoders
+                                    </li>
+                                    <li>
+                                        <b>Optimizing Latent Vectors</b>:
+                                        <br>
+                                        which simultaneously optimizes the <b>latent vectors (3D 오브젝트 클래스별 임베딩)</b> assigned to each data point and the decoder weights through back-propagation. 
+                                        Throughout the paper we refer to this class of networks as <b>auto-decoders</b>, for they are trained with reconstruction loss on decoder-only architectures
+                                    </li>
+                                </ol>
+                        </ul>
+                </ol>
+            <br>
+            <li>
+                Modeling SDFs with Neural Networks
+            </li>
+                <ul>
+                    <li>
+                        A signed distance function is a continuous function 
+                        that, for a given spatial point, outputs the point's distance to the closest surface, 
+                        whose sign encodes whether the point is inside (negative) or outside (positive) of the watertight surface:
+                        \[ 
+                            \,\\
+                            SDF(x) = s: x \in \mathbb{R}^3, \, s \in \mathbb{R}
+                            \\
+                        \]
+                    </li>
+                    <li>
+                        <b>The surface is implicitly represented by the \(SDF(\cdot) = 0\). </b>
+                        A view of this implicit surface can be rendered through raycasting or rasterization of a mesh obtained with <a href="https://xoft.tistory.com/47">Marching Cubes</a>.
+                    </li>
+                    <li>
+                        <mark>Our key idea is to <b>directly regress the continuous SDF</b></mark> from point samples using deep neural networks.
+                        The resulting trained network is able to predict the SDF value of a given query position, 
+                        from which we can extract the zero level-set surface.
+                    </li>
+                    <li>
+                        As a <a href="https://dlaiml.tistory.com/entry/Universal-Approximation-Theorem">universal function approximator</a>, 
+                        deep feed-forward networks in theory can learn the fully continuous shape functions with arbitrary precision.
+                    </li>
+                    <li>
+                        The most direct application of this approach is to train a single deep network for a given target shape.
+                    </li>
+                    <br>
+                    <img src="/img/deep-sdf-1.png" width="50%">
+                    <figcaption>Difference of DeepSDF model input shape between a single shape and multi-shapes</figcaption>
+                    <br><br>
+                    <li>
+                        Given a target shape, we prepare a <b>set of pairs \(X\) composed of 3D point samples and their SDF values:</b> (xyz 입력 좌표 및 sdf 레이블 값)
+                        \[
+                            \,\\
+                            X := {(x, s) : SDF(x) = s}
+                            \\
+                        \]  
+                    </li>
+                    <li>
+                        We train the parameters \(\theta\) of a multi-layer fully-connected neural network \(f_\theta\) on the training set S 
+                        to make \(f_\theta\) a good approximator of the given SDF in the target domain \(\Omega\):
+                        \[
+                            \,\\
+                            f_\theta(x) \approx SDF(x), \, \forall x \in \Omega
+                            \\
+                        \]
+                    </li>
+                    <li>
+                        The training is done by minimizing the sum over losses 
+                        between the predicted and real SDF values of points in \(X\) under the following \(L_1\) loss function (MAE loss):
+                        \[
+                            \,\\
+                            \mathcal{L}(f_\theta(x), \, s) = | \, \text{clamp}\, (f_\theta(x), \, \delta) - \text{clamp}\, (s, \, \delta) \, |
+                            \\
+                        \]
+                        where \(\text{clamp}(a, \, \delta) := \text{min}(\delta, \, \text{max}(-\delta, \, a)) \)
+                        <mark>(각각의 점이 대상 표면 주변 거리 \(-\delta \,\) ~ \(\delta \, \) 범위 내에서 예측되도록 조정)</mark>
+                    </li> 
+                    <br>
+                    <li>
+                        In this paper, the \(\delta = 0.1\) and a feed-forward network composed of eight fully connected layers, each of them applied with dropouts. 
+                        All internal layers are 512-dimensional and hae \(\text{ReLU}\) non-linearities.
+                        The output non-linearity regressing the SDF value is \(\text{tanh}\).
+                        We found training with <b>batch-normalization to be unstable</b> and <b>applied the weight-normalization technique instead</b>.
+                        For training, we use the \(\text{Adam}\) optimizer. 
+                    </li>
+                    <br>
+                    <img src="/img/deep-sdf-2.png" width="100%">
+                    <figcaption>DeepSDF decoder architecture</figcaption>
+                    <br>
+                </ul>
+            <br>
+            <li>
+                Learning the Latent Space of Shapes
+            </li>
+                <ul>
+                    <li>
+                        We introduce a <b>latent vector</b> \(z\), which can be thought of as encoding the desired shape, as a <b>second input</b> to the neural network.
+                        <mark>The latent vector \(z\) is mapped to a 3D shape represented by a continuous SDF.</mark>
+                    </li>
+                    <li>
+                        For some shape indexed by \(i, \, f_\theta\) is a function of a latent code \(z_i\) and a query 3D location \(x\), and outputs the shape's SDFs:
+                        \[
+                            \,\\
+                            f_\theta(z_i, \, x) \approx SDF^i(x)
+                            \\
+                        \]
+                    </li>
+                    <li>
+                        By conditioning (임베딩) the network output on a latent vector,
+                        this formulation <b>allows modeling multiple SDFs with a single neural network</b>.
+                        (one 3D object has one embedding vector)
+                    </li>
+                    <br>
+                    <li>
+                        Motivating Encoder-less Learning
+                    </li>
+                        <ol type="i">
+                            <li>
+                                In the encoder-decoder architecture, since the <b>trained encoder is unused at test time</b>, 
+                                it is unclear whether using the encoder is the most effective use of computational resources during training.
+                                (<b>auto-decoder</b>, decoder only architecture for learning a shape embedding without an encoder)
+                            </li>
+                        </ol>
+                    <br>
+                    <li>
+                        Auto-decoder-based DeepSDf Formulation
+                    </li>
+                        <ol type="i">
+                            <li>
+                                Given a dataset of \(N\) shapes represented with signed distnace function,
+                                we prepare a set of \(K\) point samples and their signed ditance values:
+                                \[
+                                    \,\\
+                                    X_i = \{ \, (x_j, \, s_j) \, : \, s_j = SDF^i(x_j) \, \}
+                                    \\
+                                \]
+                            </li>
+                            <li>
+                                For an auto-decoder, as there is no encoder, each latent code \(z_i\) is paired with training shape \(X_i\).
+                                The posterior over shape code \(z_i\) given the shape SDF samples \(X_i\) can be decomposed as:
+                                \[
+                                    \,\\
+                                    p_\theta(z_i\, | \, X_i) = p(z_i) \, \cdot \, \prod{(x_j, \, s_j) \in X_i} \,\, p_\theta(s_j\, | \, z_i;x_j)
+                                    \\
+                                \]
+
+                                where \(\theta\) parameterizes the SDF likelihood.
+                                <br><br>
+
+                                <ul>
+                                    <li>
+                                        3D shape \(X_i\) 를 가장 잘 설명하는 임베딩 벡터 \(z_i\)를 학습
+                                    </li>
+                                    <li>
+                                        <mark>
+                                            latent vector \(z_i\)를 찾는 것은 데이터 \((x_j, s_j) = X_i\) 를 동시에 잘 설명할 수 있는 \(z_i\)를 찾는 것
+                                        </mark>
+                                    </li>
+                                    <li>
+                                        \(\prod{(x_j, \, s_j) \in X_i} \,\, p_\theta(s_j\, | \, z_i;x_j)\) : Maximum Likelihood Estimation, \(X_i\)를 가장 잘 설명하는 \(z_i\)와 파라미터 \(\theta\) 탐색 
+                                    </li>
+                                    <li>
+                                        In the latent shape-code space, we assume the prior distribution over codes \(p(z_i)\) to be zero-mean and \(\sigma^2\)
+                                    </li>
+                                    <li>
+                                        굳이 정규분포를 따르는 \(z\, \)를 사용해야 하는 이유는? (학습 안정성? 확률적 해석을 위한?) 그냥 임베딩 하면 되는것 아닌지?
+                                    </li>
+                                </ul>
+                            </li>
+                            <br>
+                            
+                            <li>
+                                In the auto-decoder-based DeepSDF formulation we express the SDF likelihood via a deep feed-forward network \(f_\theta(z_i, \, x_j )\)
+                                and, without loss of generality, <b>assume that the likelihood takes the form:</b>
+                                \[
+                                    \,\\
+                                    p_\theta(s_j\, | \, z_i;x_j) = \text{exp}(-\mathcal{L}(f_\theta(z_i, \, x_j), \, s_j))
+                                    \\
+                                \]
+
+                                where the SDF prediction \(\tilde{s}_j\)  is represented using a fully-connected network.
+                                \(\mathcal{L}(\tilde{s}_j, \, s_j)\) is a loss function penalizing the difference between network prediction and actual SDF value \(s_j\).
+                                <br><br>
+
+                                <ul>
+                                    <li>
+                                        손실함수를 \(\text{exp}\)의 입력으로 하여 손실값이 작을수록 가능도가 높은 것으로 해석
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <br>
+                            <li>
+                                In the implementation \( \text{clamped} \, \, L_1\) cost is used for back-propagation.
+                            </li>
+                            <li>
+                                At training time we maximize the 
+                                \[
+                                \,\\
+                                \underset{\theta, \{z_i\}_{i=1}^N}{\arg \min} \sum_{i=1}^N \left( \sum_{j=1}^K \mathcal{L}(f_{\theta}(z_i, x_j), s_j) + \frac{1}{\sigma^2} \|z_i\|_2^2 \right)
+                                \\
+                                \]
+                                where the term \(\frac{1}{\sigma^2} \|z_i\|_2^2\) is to <a href="https://github.com/maurock/DeepSDF/blob/main/utils/utils_deepsdf.py#L23-L29">정규화</a>
+                                <br><br>
+
+                                <ul>
+                                    <li>
+                                        <mark>Minimizing loss \( \mathcal{L}(f_{\theta}(z_i, x_j), s_j) \) == maximizing the likelihood \( p_\theta(s_j | z_i; x_j) \)</mark>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                </ul>
+            <br>
+            <li>
+                Results
+            </li>
+                <ol type="a">
+                    <li>
+                        Latent Space Shape Interpolation
+                    </li>
+                        <ul>
+                            <li>
+                                To show that our learned shape embedding is complete and continuous,
+                                we render the results of the decoder when a pair of shapes are interpolated in the latent vector space 
+                            </li>
+                            <br>
+                            <img src="/img/deep-sdf-3.png" width="90%">
+                            <figcaption>DeepSDF represents signed distance functions (SDFs) of shapes via latent code-conditioned feed-forward decoder networks</figcaption>
+                        </ul>
+                </ol>
+        </ol>
+</ul>
+
+<br><br>
