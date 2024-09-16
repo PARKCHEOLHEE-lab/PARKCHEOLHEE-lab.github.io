@@ -1,5 +1,146 @@
 ---
-title:  "U-Net"
+title:  "U-Net: Convolutional Networks for Biomedical Image Segmentation"
 layout: post
-done: false
+emoji: /emoji/brain.png
 ---
+
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/1505.04597">U-Net: Convolutional Networks for Biomedical Image Segmentation</a>
+    </li>
+        <ol>
+            <li>
+                Abstract    
+            </li>
+                <ul>
+                    <li>
+                        In this paper, we present a network and training strategy 
+                        that relies on the strong use of data augmentation to use the available annotated samples more efficiently.
+                    </li>
+                    <li>
+                        <mark>
+                            The architecture consists of a <b>contracting path to capture context</b> 
+                            and a symmetric <b>expanding path that enables precise <a href="https://velog.io/@jing93/%EC%BB%B4%ED%93%A8%ED%84%B0-%EB%B9%84%EC%A0%84-Object-localization">localization</a></b>.
+                        </mark>
+                        (오토인코더, representation learning)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Introduction
+            </li>
+                <ul>
+                    <li>
+                        The typical use of convolutional networks is on classification tasks, 
+                        where the output to an image is a single class label. 
+                        However, in many visual tasks,especially in biomedical image processing, the desired output should include localization, 
+                        i.e., a <b>class label is supposed to be assigned to each pixel.</b>
+                    </li>
+                    <li>
+                        In this paper, we build upon a more elegant architecture, the so-called "fully convolutional network". 
+                        We modify and extend this architecture such that itworks with very few training images and yields more precise segmentations;
+                    </li>
+                    <br>
+                    <img src="/img/unet-1.png" width="80%">
+                    <figcaption>U-net architecture</figcaption>
+                    <br>
+                    <li>
+                        The main idea in <a href="https://arxiv.org/pdf/1411.4038">Fully Convolutional Networks for Semantic Segmentation</a> is to supplement a usual contracting network by successive layers,
+                        where <b>pooling operators are replaced by upsampling operators</b>. (원본 이미지 데이터와 같은 사이즈의 크기가 되도록. output channels = number of classes.)
+                    </li>
+                    <li>
+                        <mark>In order to localize, high resolution features from the contracting path are combined with the upsampled output.</mark>
+                        (<b>Skip Connection</b> that uses the Concatenation method to combine)
+                    </li>
+                    <li>
+                        업샘플링 레이어에서 다운샘플링 단계(feature extraction)에서 사용된 output을 함께 사용함. feature map을 함께 사용하여 고해상도 출력 생성 
+                        (더 넓은 범위에서 본 이미지의 특성을 입력으로 사용함으로써 맥락에 대한 정보를 업샘플링 레이어로 전달)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Network Architecture
+            </li>
+                <ul>
+                    <li>
+                        The contracting path followsthe typical architecture of a convolutional network.
+                        It consists of the repeated application of two 3x3 convolutions (<b>unpadded convolutions</b>), 
+                        each followed by a rectified linear unit (ReLU) and a 2x2 max pooling operation with stride 2 for downsampling. (경계부분 정보 신뢰도가 낮다는 가정?)
+                    </li>
+                    <li>
+                        Every step in the expansive path consists of an upsampling of the feature map 
+                        followed by a 2x2 convolution (<b>up-convolution</b>) that halves the number of feature channels, 
+                        a concatenation with the correspondingly cropped feature map from the contracting path, and two 3x3 convolutions, each followed by a ReLU.
+                    </li>
+                    <li>
+                        <mark>At the final layer a <b>1x1 convolution</b> is used to map each 64-component feature vector to the desired number of classes.</mark>
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Training
+            </li>
+                <ul>
+                    <li>
+                        The energy function is computed by a <b>pixel-wise soft-max</b> over the final feature map combined with the <b>cross entropy loss</b> function. 
+                    </li>
+                    <img src="/img/unet-3.png" width="80%">
+                    <figcaption>Softmax dimension</figcaption>
+                    <br>
+                    <li>
+                        Ideally the initial weights should be adapted such that eachfeature map in the network has approximately <a href="https://m.blog.naver.com/magnking/221164336924">unit variance</a>.
+                    </li>
+                    <li>
+                        For a network with our architecture (alternating convolution and ReLU layers) 
+                        this can be achieved by drawing the initial weights from a Gaussian distribution with a standarddeviation of \(\sqrt{2/N}\), where N denotes the number of incoming nodes of one neuron. 
+                        E.g. for a 3x3 convolution and 64 feature channels in the previous layer \(N = 3 \cdot 3 \cdot 64 = 576\). (<a href="https://reniew.github.io/13/#:~:text=ReLU%EB%A5%BC%20%ED%99%9C%EC%84%B1%ED%99%94%20%ED%95%A8%EC%88%98%EB%A1%9C%20%EC%82%AC%EC%9A%A9%20%EC%8B%9C%20Xavier%20%EC%B4%88%EA%B8%B0%EA%B0%92%20%EC%84%A4%EC%A0%95%EC%9D%B4%20%EB%B9%84%ED%9A%A8%EC%9C%A8%EC%A0%81%EC%9D%B8%20%EA%B2%B0%EA%B3%BC%EB%A5%BC%20%EB%B3%B4%EC%9D%B4%EB%8A%94%20%EA%B2%83%EC%9D%84%20%ED%99%95%EC%9D%B8%ED%96%88%EB%8A%94%EB%8D%B0%2C%20%EC%9D%B4%EB%9F%B0%20%EA%B2%BD%EC%9A%B0%20%EC%82%AC%EC%9A%A9%ED%95%98%EB%8A%94%20%EC%B4%88%EA%B8%B0%ED%99%94%20%EB%B0%A9%EB%B2%95%EC%9D%84%20He%20initialization%EC%9D%B4%EB%9D%BC%EA%B3%A0%20%ED%95%9C%EB%8B%A4.%20%EC%9D%B4%20%EB%B0%A9%EB%B2%95%20%EB%98%90%ED%95%9C%20%EC%A0%95%EA%B7%9C%EB%B6%84%ED%8F%AC%EC%99%80%20%EA%B7%A0%EB%93%B1%EB%B6%84%ED%8F%AC%20%EB%91%90%EA%B0%80%EC%A7%80%20%EB%B0%A9%EB%B2%95%EC%9D%B4%20%EC%82%AC%EC%9A%A9%EB%90%9C%EB%8B%A4.(He%20et%20al.%20%2C2015)">He initialization</a>)
+                        (레이어마다 적용해주면 되는듯?)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Data Augmentation
+            </li>
+                <ul>
+                    <li>
+                        Data augmentation is essential to teach the network the desired invariance androbustness properties, <b>when only few training samples are available.</b>
+                    </li>
+                    <li>
+                        <b>elastic deformations</b>, 3x3 coarse grid, \(N(0, 10)\) 에서 샘플링하여 픽셀위치 미세하게 변경 → <a href="https://kipl.tistory.com/55">bicubic interpolation</a>
+                    </li>
+                    <li>
+                        U-Net 인코더 부분의 Dropout 레이어가 implicit data augmentation을 수행할 수 있음
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Conclusion
+            </li>
+                <ul>
+                    <li>
+                        Thanks to data augmentation with <b>elastic deformations</b>, it only needs very few annotated images 
+                        and has a very reasonable training time of only 10 hours on a NVidia Titan GPU (6 GB). 
+                        We provide the full Caffe-based implementation and the trained networks. 
+                        We are sure that the u-net architecture can be applied easily to many more tasks.
+                    </li>
+                </ul>
+        </ol>
+</ul>
+
+<br><br>
+
