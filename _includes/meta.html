@@ -1,6 +1,9 @@
 <header>
-  <!-- <h2><a href="{{ include.post.url | relative_url }}">{{ include.post.title }}</a></h2> -->
   <h2>{{ include.post.title }}</h2>
-  {%- assign date_format = site.date_format | default: "%B %d, %Y" -%}
+  {%- if include.post.categories contains "note" -%}
+    {%- assign date_format = "%m/%d/%Y" -%}
+  {%- else -%}
+    {%- assign date_format = site.date_format | default: "%B %d, %Y" -%}
+  {%- endif -%}
   <time datetime="{{ include.post.date | date_to_xmlschema }}">{{ include.post.date | date: date_format }}</time>
 </header>
