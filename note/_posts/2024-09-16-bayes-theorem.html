@@ -1,0 +1,96 @@
+---
+title:  "Bayes' Theorem"
+layout: post
+---
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+
+<iframe src="https://www.youtube.com/embed/HZGCoVF3YvM" frameborder="0" width="100%" height="400px"></iframe>
+
+<ul>
+    <li>
+        <a href="https://www.3blue1brown.com/lessons/bayes-theorem">Bayes' Theorem</a>
+    </li>
+        <ul>
+
+            \[
+                \,\\
+                P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)}
+                \,\\
+            \]
+            <li>
+                새로운 정보를 기반으로 사전 확률에 대한 <a href="https://angeloyeo.github.io/2020/01/09/Bayes_rule.html#:~:text=%EA%B0%80%EB%A0%B9%20%EB%8F%99%EC%A0%84%EC%9D%98%20%EC%95%9E%EB%A9%B4%EC%9D%B4%20%EB%82%98%EC%98%AC%20%ED%99%95%EB%A5%A0%EC%9D%B4%2050%25%EB%9D%BC%EA%B3%A0%20%ED%95%98%EB%A9%B4%2C%20%EB%B9%88%EB%8F%84%EC%A3%BC%EC%9D%98%EC%9E%90%EB%93%A4%EC%9D%80%20100%EB%B2%88%20%EB%8F%99%EC%A0%84%EC%9D%84%20%EB%8D%98%EC%A1%8C%EC%9D%84%20%EB%95%8C%2050%EB%B2%88%EC%9D%80%20%EC%95%9E%EB%A9%B4%EC%9D%B4%20%EB%82%98%EC%98%A8%EB%8B%A4%EA%B3%A0%20%ED%95%B4%EC%84%9D%ED%95%98%EA%B3%A0%2C%20%EB%B2%A0%EC%9D%B4%EC%A7%80%EC%95%88%20%EC%A3%BC%EC%9D%98%EC%9E%90%EB%93%A4%EC%9D%80%20%EB%8F%99%EC%A0%84%EC%9D%98%20%EC%95%9E%EB%A9%B4%EC%9D%B4%20%EB%82%98%EC%99%94%EB%8B%A4%EB%8A%94%20%EC%A3%BC%EC%9E%A5%EC%9D%98%20%EC%8B%A0%EB%A2%B0%EB%8F%84%EA%B0%80%2050%25%EB%9D%BC%EA%B3%A0%20%EB%B3%B4%EB%8A%94%20%EA%B2%83."><b>신뢰도</b></a> 갱신
+                (a method to update belief on the basis of new information)
+                <ul>
+                    <li>
+                        \(H\): Hypothesis (가설), \(E\): Evidence (증거, 새로운 정보)
+                    </li>
+                    <li>
+                        \(P(H)\): Prior (사전확률), \(P(H|E)\): Posterior (사후확률, 새로운 정보를 받은 후 갱신된 <b>신뢰도</b>)
+                    </li>
+                    <li>
+                        \(P(E|H)\): Likelihood (우도, 증거 \(E\)가 가설 \(H\) 내에서 관찰될 확률)
+                    </li>
+                    <li>
+                        연역적 추론 → 귀납적 추론
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <!-- <li>
+                There are multiple levels of understanding:
+            </li>
+                <ul>
+                    <li>
+                        The simplest form of understanding is just knowing what each part of the formula means, so you can plug in numbers.
+                    </li>
+                    <li>
+                        Then there's understanding why it's true. Later I'll show you to a diagram that's helpful for rediscovering the formula on the fly as needed, which only really works if you understand the why of Bayes' theorem.
+                    </li>
+                    <li>
+                        The final level of understanding is being able to recognize when you need to use it.
+                    </li>
+                </ul>
+            <br> -->
+            <li>
+                Steve:
+            </li>
+                <ul>
+                    <i>
+                        　<br>
+                        스티브는 매우 수줍고 내성적이며, 변함없이 도움을 주지만 사람이나 현실 세계에 대한 관심은 거의 없습니다. <br>
+                        온순하고 깔끔한 영혼인 그는 질서와 구조에 대한 필요성과 디테일에 대한 열정을 가지고 있습니다.
+                        <br>　
+                    </i>
+                    <li>
+                        Steve is a librarian? or Steve is a farmer? Steve에 대한 설명은 librarian이 가진 <b>고정관념</b>에 부합함
+                    </li>
+                    <li>
+                        According to Kahneman and Tversky, people do not hold correct or biased views about the personalities of librarians or farmers. 
+                        It's that almost no one thinks to incorporate information about the <b>ratio of farmers to librarians</b> into their judgments.
+                    </li>
+                    <li>
+                        In their paper, Kahneman and Tversky said that in the US there are about <b>20 farmers for every 1 librarian</b>.
+                    </li>
+                    <br>
+                    <img src="/img/bayes-1.png" width="60%">
+                    <figcaption>Ratio of farmers to librarians</figcaption>
+                    <br>
+                </ul>
+        </ul>
+</ul>
+
+
+<br><br>
