@@ -1,5 +1,5 @@
 ---
-title:  "Bayes' Theorem"
+title:  "Bayes'&nbsp Theorem"
 layout: post
 ---
 
@@ -21,7 +21,7 @@ layout: post
 
 <ul>
     <li>
-        <a href="https://www.3blue1brown.com/lessons/bayes-theorem">Bayes' Theorem</a>
+        Bayes' Theorem
     </li>
         <ul>
 
@@ -41,7 +41,7 @@ layout: post
                         \(P(H)\): Prior (사전확률), \(P(H|E)\): Posterior (사후확률, 새로운 정보를 받은 후 갱신된 <b>신뢰도</b>)
                     </li>
                     <li>
-                        \(P(E|H)\): Likelihood (우도, 증거 \(E\)가 가설 \(H\) 내에서 관찰될 확률)
+                        \(P(E|H)\): Likelihood (우도, 가설 \(H\)가 참일 때 증거 \(E\)가 발생할 확률)
                     </li>
                     <li>
                         연역적 추론 → 귀납적 추론
@@ -68,12 +68,13 @@ layout: post
                 Steve:
             </li>
                 <ul>
-                    <i>
-                        　<br>
-                        스티브는 매우 수줍고 내성적이며, 변함없이 도움을 주지만 사람이나 현실 세계에 대한 관심은 거의 없습니다. <br>
-                        온순하고 깔끔한 영혼인 그는 질서와 구조에 대한 필요성과 디테일에 대한 열정을 가지고 있습니다.
-                        <br>　
-                    </i>
+                    <p style="text-align: center;">
+                        <i>
+                            스티브는 매우 수줍고 내성적이며, 변함없이 도움을 주지만 사람이나 현실 세계에 대한 관심은 거의 없습니다. <br>
+                            온순하고 깔끔한 영혼인 그는 질서와 구조에 대한 필요성과 디테일에 대한 열정을 가지고 있습니다.
+                        </i>
+                        <br><br>
+                    </p>
                     <li>
                         Steve is a librarian? or Steve is a farmer? Steve에 대한 설명은 librarian이 가진 <b>고정관념</b>에 부합함
                     </li>
@@ -88,6 +89,165 @@ layout: post
                     <img src="/img/bayes-1.png" width="60%">
                     <figcaption>Ratio of farmers to librarians</figcaption>
                     <br>
+                    <li>
+                        This overwhelmingly large ratio of farmers to librarians greatly increases the chances that Steve is a farmer, 
+                        even though his description seems librarian
+                    </li>
+                    <li>
+                        합리성은 사실을 아는 것이 아니라 어떤 사실이 <b>관련성</b>이 있는지 인식하는 것
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Thinking about a sample
+            </li>
+                <ul>
+                    <li>
+                        Say, 200 farmers and 10 librarians.
+                    </li>
+                    <br>
+                    <img src="/img/bayes-2.png" width="80%">
+                    <figcaption>Ratio of farmers to librarians</figcaption>
+                    <br>
+                    <li>
+                        meek and tidy하다는 description이 librarians의 40%가, farmers의 10%가 들어맞는다고 가정했을 때, 
+                    </li>
+                    <ul>
+                            <li>
+                                \(\text{matching librarians} = P\,(\text{Description} \,|\, \text{Librarian}) = 10 \times 0.4 = 4\)
+                            </li>
+                            <li>
+                                \(\text{matching farmers} = P\,(\text{Description} \,|\, \text{Farmer}) = 200 \times 0.1 = 20\)
+                            </li>
+                            <!-- <li>
+                                \(\frac{4}{4 + 20} \approx 16.7 \%\)
+                            </li> -->
+                        </ul>
+                    <br>
+                    <img src="/img/bayes-3.png" width="80%">
+                    <figcaption>The probability that a random person who fits this description is a librarian</figcaption>
+                    <br>
+                    <li>
+                        About 40% of librarians fit the description, but only 10% of farmers do. But that's still more farmers than librarians.
+                    </li>
+                    <li>
+                        librarian이 farmer 보다 description 적합도가 4배 더 높을 것이라고 가정하더라도 농부일 가능성이 더 높음.
+                    </li>
+                    <br>
+                    <img src="/img/bayes-4.png" width="80%">
+                    <figcaption>
+                        Before reading the description of Steve, there was about a 20-to-1 chance that he was a farmer rather than a librarian. 
+                        Reading his description should <b>update that belief, but not replace it entirely</b>.
+                    </figcaption>
+                    <br>
+                    <li>
+                        \(P\,(\text{Librarian}) \approx 4.761 \%\) (prior)
+                    </li>
+                    <li>
+                        \(P\,(\text{Description} \,|\, \text{Librarian}) = 40\%\) (likelihood)
+                    </li>
+                    <li>
+                        \(P\,(\text{Farmer}) \approx 95.238 \% \)
+                    </li>
+                    <li>
+                        \(P\,(\text{Description} \,|\, \text{Farmer}) = 10\%\)
+                    </li>
+                    <br>
+                    <li>
+                        \(P(H|E) = \frac{P(E|H) \cdot P(H)}{P(E)} \quad ↘ \) 
+                        <br>
+                        \[P\,(\text{Librarian} \,|\, \text{Description}) = \frac{P\,(\text{Description} \,|\, \text{Librarian}) \, \cdot \, P\,{(\text{Librarian})}}{P\,(\text{Description})}\]
+                    </li>
+                    <br>
+                    <li>
+                        \(P(E) = \sum_i{P(E|H_i) \cdot P(H_i)}\) (전체 확률)
+                    </li>
+                        <ul>
+                            <li>
+                                Sum of the \(\text{Likelihood} \times \text{Prior Probability}\)
+                            </li>
+                            <li>
+                                \(H_1 = \text{Librarian}\)
+                            </li>
+                            <li>
+                                \(H_2 = \text{Farmer}\)
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        \(P\,(\text{Description}) \approx 0.40 \cdot 0.04761 + 0.10 \cdot 0.95.238 = 0.114 \)
+                    </li>
+                    <br>
+                    <!-- <li>
+                        \(P\,(\text{Description} \,|\, \text{Librarian}) = 0.40\)
+                    </li>
+                    <li>
+                        \(P\, (\text{Librarian}) = 0.04 \)
+                    </li> -->
+                    <li>
+                        \(P\, (\text{Librarian} \,|\, \text{Description}) = \frac{0.40 \cdot 0.04761}{0.114} \approx 16.7\% \) (posterior)
+                    </li>
+                    <br>
+                    <li>
+                        Maybe the numbers you'd estimate would be different, but what matters is how you fit the numbers together to update a belief based on evidence. 
+                        <b>That process of updating beliefs is what Bayes' theorem describes mathematically.</b>
+                    </li>
+                    <br>
+                    <img src="/img/bayes-5.png" width="80%">
+                    <figcaption>
+                        The herat of Bayes' theorem
+                    </figcaption>
+                    <br>
+                </ul>
+            <br>
+            <li>
+                When to use Bayes' rule
+            </li>
+                <ul>
+                    <li>
+                        베이즈 정리는 어떤 가설<i>(Steve is a librarian)</i>이 있는 상황과 어떤 증거<i>(Steve is a "meek and tidy")</i>를 보고
+                        증거가 참일때 <b>가설이 성립할 확률</b>을 알고싶은 상황에 적합 (새로운 정보-증거를 기반으로 <b>사전 확률에 대한 신뢰도</b> 갱신)
+                    </li>
+                    <li>
+                        In the standard notation, this vertical bar '\( | \)' means "given that".
+                        (Evidence가 주어진 상황에서의 확률로 제한)
+                        \[
+                            \,\\
+                            P(H|E) = P(\text{Hypothesis} \, \text{given} \, \text{the Evidence})
+                            \,\\
+                        \]
+                    </li>
+                    <li>
+                        likelihood \(P(E|H)\): 가설이 참이라고 가정할 때 증거를 볼 확률
+                    </li>
+                    <br>
+                    <img src="/img/bayes-6.png" width="80%">
+                    <figcaption>Prior and Likelihood</figcaption>
+                    <br>
+                    <li>
+                        \(P(E|\neg H)\) = 가설이 거짓일 확률 즉 이 예시에서는 \(P\,(\text{Description} \,|\, \text{Farmer})\)
+                    </li>
+                    <br>
+                    <img src="/img/bayes-7.png" width="80%">
+                    <figcaption>\(P(E|\neg H)\)</figcaption>
+                    <br>
+                </ul>
+            <br>
+            <li>
+                Thinking the posterior as a ratio of areas
+            </li>
+                <ul>
+                    <li>
+                        \(1 \times 1\) 정사각형으로 놓고 모든 사건은 이 공간의 일부 하위 집합을 차지하고, 
+                        그 사건의 확률은 그 하위 집합의 면적비로 생각
+                    </li>
+                    <br>
+                    <img src="/img/bayes-8.png" width="80%">
+                    <figcaption>Thinking the posterior as a ratio of areas</figcaption>
+                    <br>
+                    <li>
+                        <a href="https://www.skobelevs.ie/BayesTheorem">https://www.skobelevs.ie/BayesTheorem</a>
+                    </li>
                 </ul>
         </ul>
 </ul>
