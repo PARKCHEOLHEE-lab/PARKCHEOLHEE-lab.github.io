@@ -1,0 +1,138 @@
+---
+title:  "docker CLI Cheat Sheet"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://docs.docker.com/get-started/docker_cheatsheet.pdf">docker CLI cheat sheet</a>
+    </li>
+    <br>
+    <table style="width: 100%;">
+        <thead>
+            <tr>
+            <th>Docker Command</th>
+            <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- <tr>
+                <td><code>docker -d</code></td>
+                <td>Start the docker daemon</td>
+            </tr>
+            <tr>
+                <td><code>docker --help</code></td>
+                <td>Get help with Docker. Can also use --help on all subcommands</td>
+            </tr>
+            <tr>
+                <td><code>docker info</code></td>
+                <td>Display system-wide information</td>
+            </tr> -->
+            <tr>
+                <td><code>docker build -t &lt;image_name&gt;</code></td>
+                <td>Build an image from a Dockerfile</td>
+            </tr>
+            <!-- <tr>
+                <td><code>docker build -t &lt;image_name&gt; . --no-cache</code></td>
+                <td>Build an image from a Dockerfile without the cache</td>
+            </tr> -->
+            <tr>
+                <td><code>docker images</code></td>
+                <td>List local images</td>
+            </tr>
+            <tr>
+                <td><code>docker rmi &lt;image_name&gt;</code></td>
+                <td>Delete an image</td>
+            </tr>
+            <tr>
+                <td><code>docker image prune</code></td>
+                <td>Remove all unused images</td>
+            </tr>
+            <tr>
+                <td><code>docker run --name &lt;container_name&gt; &lt;image_name&gt;</code></td>
+                <td>Create and run a container from an image, with a custom name</td>
+            </tr>
+            <!-- <tr>
+                <td><code>docker run -p &lt;host_port&gt;:&lt;container_port&gt; &lt;image_name&gt;</code></td>
+                <td>Run a container with and publish a container's port(s) to the host</td>
+            </tr>
+            <tr>
+                <td><code>docker run -d &lt;image_name&gt;</code></td>
+                <td>Run a container in the background</td>
+            </tr> -->
+            <tr>
+                <td><code>docker start|stop &lt;container_name&gt; (or &lt;container_id&gt;)</code></td>
+                <td>Start or stop an existing container</td>
+            </tr>
+            <tr>
+                <td><code>docker rm &lt;container_name&gt;</code></td>
+                <td>Remove a stopped container</td>
+            </tr>
+            <tr>
+                <td><code>docker exec -it &lt;container_name&gt; sh</code></td>
+                <td>Open a shell inside a running container</td>
+            </tr>
+            <tr>
+                <td><code>docker logs -f &lt;container_name&gt;</code></td>
+                <td>Fetch and follow the logs of a container</td>
+            </tr>
+            <!-- <tr>
+                <td><code>docker inspect &lt;container_name&gt; (or &lt;container_id&gt;)</code></td>
+                <td>Inspect a running container</td>
+            </tr> -->
+            <tr>
+                <td><code>docker ps</code></td>
+                <td>List currently running containers</td>
+            </tr>
+            <tr>
+                <td><code>docker ps --all</code></td>
+                <td>List all docker containers (running and stopped)</td>
+            </tr>
+            <tr>
+                <td><code>docker stats</code></td>
+                <td>View resource usage stats</td>
+            </tr>
+            <tr>
+                <td><code>docker login -u &lt;username&gt;</code></td>
+                <td>Log in to Docker Hub</td>
+            </tr>
+            <tr>
+                <td><code>docker push &lt;username&gt;/&lt;image_name&gt;</code></td>
+                <td>Publish an image to Docker Hub</td>
+            </tr>
+            <!-- <tr>
+                <td><code>docker search &lt;image_name&gt;</code></td>
+                <td>Search Hub for an image</td>
+            </tr> -->
+            <tr>
+                <td><code>docker pull &lt;image_name&gt;</code></td>
+                <td>Pull an image from a Docker Hub</td>
+            </tr>
+        </tbody>
+    </table>
+    <br>
+</ul>
+
+<ul>
+    <li>
+        <code>docker run</code> parameters
+    </li>
+        <ul>
+<pre><code class="text">
+    docker run \
+        --memory &lt;MEMORY e.g. 4g&gt; \                   # RAM size to allocate
+        --cpus &lt;CPU e.g. 2&gt; \                         # Number of CPUs to allocate
+        --gpus &lt;GPU e.g. all &gt; \                      # GPU access (e.g., all available GPUs) --gpus device=0,1 ...
+        --shm-size &lt;SHM e.g. 2g&gt; \                    # Shared memory size
+        --name &lt;NAME e.g. my-container&gt; \             # Custom name for the container
+        -p &lt;HOST_PORT:CONTAINER_PORT e.g. 8080:80&gt; \  # Port mapping (host:container)
+        &lt;IMAGE e.g. my-image:latest&gt; \                # Image name and tag
+        &lt;SHELL e.g. bash&gt;                             # Command to run inside the container
+</code></pre>
+        </ul>
+</ul>
+
+
+<br><br>    
