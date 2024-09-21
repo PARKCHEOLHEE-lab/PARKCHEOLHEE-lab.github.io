@@ -1,0 +1,129 @@
+---
+title: "Polynomial Implicit Neural Representations For Large Diverse Datasets"
+layout: post
+emoji: /emoji/brain.png 
+---
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/2303.11424">Polynomial Implicit Neural Representations For Large Diverse Datasets</a>
+    </li>
+    <i>
+       keywords: Frequency, 
+       Positional Encoding, 
+       Polynomial Function, 
+       Fourier Features,
+    </i>
+    <br><br>
+    <ol>
+        <li>
+            Abstract
+        </li>
+            <ul>
+                <li>
+                    Most INR architectures rely on sinusoidal <b>positional encoding</b>, which accounts for high-frequency information in data. 
+                    However, the <b>finite encoding size restricts the model's representational power</b>.
+                    <ul type="circle">
+                        <li>
+                            이미지 데이터에서, high-frequency는 sharp variations(edges, fine details), low-frequency는 smooth variations(bigger, less details) 의미
+                        </li>
+                        <li>
+                            <b>Positional encodings</b> in the context of image data provide a way for neural networks, <b>to understand the spatial relationships</b> between different points or pixels in an image.
+                        </li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    Our approach addresses this gap by <mark><b>representing an image with a polynomial function and eliminates the need for positional encodings</b>.</mark>
+                </li>
+                <li>
+                    we use element-wise multiplications between features and affine-transformed coordinate locations after every \(\text{ReLU}\) layer
+                </li>
+                <li>
+                    convolution, normalization, self-attention을 사용하지 않고 이미지 생성. i.e., <b>no interaction between the pixels</b>
+                </li>
+                <li>
+                    <a href="https://github.com/Rajhans0/Poly_INR">https://github.com/Rajhans0/Poly_INR</a>
+                </li>
+            </ul>
+        <br>
+        <li>
+            Introduction
+        </li>
+            <ul>
+                <li>
+                    최근 생성모델은 대부분 CNNs을 기반으로 하지만, <mark>Implicit Neural Representations(INRs)와 같은 연구는 <b>이미지를 좌표값에 대한 연속함수</b>로 나타내며, 각각의 픽셀은 독립적으로 합성된다.</mark>
+                </li>
+                <li>
+                    INRs generally consists of a positional encoding module and a MLP. The positional encoding in INRs is based on sine functions, often reffered to as <b>Fourier features</b>.
+                    <ul type="circle">
+                        <li>
+                            <a href="https://velog.io/@gjghks950/Fourier-Features-Let-Networks-Learn-High-Frequency-Functions-in-Low-Dimensional-Domains-%EB%85%BC%EB%AC%B8-%EB%A6%AC%EB%B7%B0#:~:text=1.%20Introduction-,Fourier%2Dfeaturing%20%EC%9D%B4%EB%9E%80%2C%20coordinate%20space%20point%20%EB%A5%BC%20frequency%20space%20%EB%A1%9C%20embedding%20%ED%95%98%EB%8A%94%20function%20%EC%9D%98%20%EC%B4%9D%EC%B9%AD%20%EC%9D%B4%EB%8B%A4.,-Deeplearning%20model%20%EC%97%90%EC%84%9C%EC%9D%98">Fourier features</a> is a positional encoding that <b>embeds input coordinates to higher-dimensional vectors using sine functions</b>.
+                        </li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    Several methods have shown that using MLP without sinusoidal positional encoding generates blurry outputs, i.e., only preserves low-frequency information.
+                </li>
+            </ul>
+        <br>
+        <li>
+            Related work
+        </li>
+            <ul>
+                <li>
+
+                </li>
+            </ul>
+        <br>
+        <li>
+            Method
+        </li>
+            <ul>
+                <li>
+
+                </li>
+            </ul>
+        <br>
+        <li>
+            Experiments
+        </li>
+            <ol type="a">
+                <li>
+                    Quantitative results
+                </li>
+                <li>
+                    Qualitative results
+                </li>
+            </ol>
+        <br>
+        <li>
+            Training details
+        </li>
+            <ul>
+                <li>
+
+                </li>
+            </ul>
+    </ol>
+</ul>
+
+
+
+
+<br><br>
