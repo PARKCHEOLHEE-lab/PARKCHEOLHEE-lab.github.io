@@ -23,10 +23,9 @@ emoji: /emoji/brain.png
         <a href="https://arxiv.org/pdf/2303.11424">Polynomial Implicit Neural Representations For Large Diverse Datasets</a>
     </li>
     <i>
-       keywords: Frequency, 
+       keywords to search: Frequency, 
        Positional Encoding, 
-       Polynomial Function, 
-       Fourier Features,
+       Taylor Series
     </i>
     <br><br>
     <ol>
@@ -47,12 +46,6 @@ emoji: /emoji/brain.png
                     </ul>
                 </li>
                 <br>
-                <li>
-                    Our approach addresses this gap by <mark><b>representing an image with a polynomial function and eliminates the need for positional encodings</b>.</mark>
-                </li>
-                <li>
-                    we use element-wise multiplications between features and affine-transformed coordinate locations after every \(\text{ReLU}\) layer
-                </li>
                 <li>
                     convolution, normalization, self-attention을 사용하지 않고 이미지 생성. i.e., <b>no interaction between the pixels</b>
                 </li>
@@ -80,14 +73,23 @@ emoji: /emoji/brain.png
                 <li>
                     Several methods have shown that using MLP without sinusoidal positional encoding generates blurry outputs, i.e., only preserves low-frequency information.
                 </li>
-            </ul>
-        <br>
-        <li>
-            Related work
-        </li>
-            <ul>
                 <li>
-
+                    ReLU의 piece-wise linear nature에 의해 2차 이상의 미분이 0이므로, ReLU 기반의 네트워크는 high-frequency 함수를 표현하는데 좋지 않다.
+                    <ul type="circle">
+                        <li>
+                            In tasks requiring high precision for high-frequency information, 
+                            such as image generation, signal processing, or implicit representations, ReLU-based MLP often fail to capture fine details, 
+                            resulting in blurry or inaccurate outputs.
+                        </li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    Positional encoding을 사용하지 않고, 점진적으로 다항식의 차수를 MLP의 깊이에 따라 점진적으로 증가시키며,
+                    이는 feature와 각 ReLU 레이어 이후에 얻어진 affine transformed coordinate location(아핀변환 + 비선형성, \( \sigma(Wx + b)\))간의 element-wise multiplication을 통해 이루어진다. 
+                </li>
+                <li>
+                    Affine 파라미터는 알려진 분포에서 샘플링된 latent code에 의해 학습된다.
                 </li>
             </ul>
         <br>
@@ -96,7 +98,57 @@ emoji: /emoji/brain.png
         </li>
             <ul>
                 <li>
-
+                    We are interested in a class of functions that represent an image in the form:
+                    \[
+                        \,\\
+                        G(x, y) = g_{00} + g_{10}x + g_{01}y \,+\, ... \,+\, g_{pq}x^{p}y^{q}
+                        \,\\
+                    \]
+                    <ul type="circle">
+                        <li>
+                            where, \((x, y)\) is the <b>normalized pixel location</b> sampled from a coordinate grid of size \(H \times W\),
+                            while the coefficients of the polynomial \((g_{pq})\) are parameterized by a latent vector \(z\) sampled from a known distribution.
+                        </li>
+                        <li>
+                            파라미터 \(g_{pq}\) 는 \((x, y)\) 좌표를 기반으로 다항식의 각 항의 behaivor 조절하고 low-frequency & high-frequency 정보를 모두 표현가능
+                        </li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    Therefore, to form an image, we evaluate the generator \(G\) for all pixel locations \((x, y)\) for a given fixed \(z\):
+                    \[
+                        \,\\
+                        I = \{ G(x, y; z) \,|\, (x, y) \in CoordinateGrid(H, W) \}
+                        \,\\
+                    \]
+                    <ul type="circle">
+                        <li>
+                            where, \(CoordinateGrid(H, W) = \{ ( \frac{x}{W - 1}, \frac{y}{H - 1} ) \,|\, 0 \leq x < W, 0 \leq y < H \} \).
+                        </li>
+                        <li>
+                            By sampling different latent vectors \(z\), we generate different polynomials and represent images over a distribution of real images.
+                        </li>
+                    </ul>
+                </li>
+                <br>
+                <li>
+                    Our model consists of two parts: 1) <b>Mapping newtork</b>, which takes the latent code \(z\) and maps it to affine parameters space \(\mathbf{W}\), 
+                    and 2) <b>Synthesis network</b>, which takes the pixel location and generates the corresponding RGB value.
+                    <br>
+                    <img src="/img/poly-inr-1.png" width="100%">
+                    <figcaption>Polynomial Implicit Neural Representation (Poly-INR) based generator architecture</figcaption>
+                    <br>
+                    
+                    <ul type="circle">
+                        <li>
+                            Mapping Network: The mapping network takes the latent code \(z \in \mathbb{R}^{64} \) and maps it to the space \(\mathbf{W} \in \mathbb{R}^{512} \) (This mapping network is used in <a href="https://arxiv.org/pdf/2202.00273">StyleGAN-XL</a>).
+                        </li>
+                        <li>
+                            It consistsof a <b>pre-trained class embedding</b>, 
+                            which embeds the one hot class label into a 512 dimension vector and concatenates it with the latent code \(z\)
+                        </li>
+                    </ul>
                 </li>
             </ul>
         <br>
