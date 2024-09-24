@@ -133,45 +133,123 @@ emoji: /emoji/brain.png
                 </li>
                 <br>
                 <li>
-                    Our model consists of two parts: 1) <b>Mapping newtork</b>, which takes the latent code \(z\) and maps it to affine parameters space \(\mathbf{W}\), 
-                    and 2) <b>Synthesis network</b>, which takes the pixel location and generates the corresponding RGB value.
+                    Our model consists of two parts: a) <b>Mapping Newtork</b>, which takes the latent code \(z\) and maps it to affine parameters space \(\mathbf{W}\), 
+                    and b) <b>Synthesis Network</b>, which takes the pixel location and generates the corresponding RGB value.
                     <br>
                     <img src="/img/poly-inr-1.png" width="100%">
                     <figcaption>Polynomial Implicit Neural Representation (Poly-INR) based generator architecture</figcaption>
                     <br>
-                    
-                    <ul type="circle">
+
+                    <ol type="a">
                         <li>
-                            Mapping Network: The mapping network takes the latent code \(z \in \mathbb{R}^{64} \) and maps it to the space \(\mathbf{W} \in \mathbb{R}^{512} \) (This mapping network is used in <a href="https://arxiv.org/pdf/2202.00273">StyleGAN-XL</a>).
+                            <b>Mapping Network</b>
                         </li>
+                            <ul type="circle">
+                                <li>
+                                    The mapping network takes the latent code \(z \in \mathbb{R}^{64} \) and maps it to the space \(\mathbf{W} \in \mathbb{R}^{512} \) (This mapping network is used in <a href="https://arxiv.org/pdf/2202.00273">StyleGAN-XL</a>).
+                                </li>
+                                <li>
+                                    It consists of a <b>pre-trained class embedding</b>, 
+                                    which embeds the one hot class label into a 512 dimension vector and concatenates it with the latent code \(z\)
+                                    Then the mapping network consists of an MLP with two layers.
+                                    <br>
+<pre><code class="python">
+    self.mapping_network = nn.Sequential(
+        nn.Linear(64 + class_dim, 512)
+        nn.ReLU()
+        nn.Linear(512, 512)
+    )
+</code></pre>
+                                </li>
+                                <br>
+                                <li>
+                                    <code>mapping_network</code> is used to generate <b>affine transformation matrix</b>; hence we call \(\mathbf{W}\) as affine parameters space.
+                                </li>
+                            </ul>
+                        <br>
                         <li>
-                            It consistsof a <b>pre-trained class embedding</b>, 
-                            which embeds the one hot class label into a 512 dimension vector and concatenates it with the latent code \(z\)
+                            <b>Synthesis Network</b>
                         </li>
-                    </ul>
+                            <ul type="circle">
+                                <li>
+                                    The synthesis network generates the RGB (\(\mathbb{R}^3\)) value for the given pixel location \((x, y)\).
+                                </li>
+                                <li>
+                                    The synthesis network consists of multiple levels; 
+                                    at each level, <b>it receives the affine transformation parameters</b> from the mapping network and the pixel coordinate location
+                                </li>
+                                <li>
+                                    Leaky-ReLU layer is used with <code>negative_slope=0.2</code>.
+                                </li>
+                                <li>
+                                    The synthesis network can be expressed as:
+                                    \[
+                                        \,\\
+                                            G_{syn} = \ldots \sigma(W_{2}((A_{2}X) \odot \sigma(W_{1}((A_{1}X) \odot \sigma(W_{0}(A_{0}X))))))
+                                        \,\\
+                                    \]
+                                    <ul type="cir">
+                                        <li>
+                                            where \(X \in \mathbb{R}^{3 \times HW} \) is the coordinate grid of size \(H \times W\), 
+                                        </li>
+                                        <li>
+                                            Affine transformation matrix \(A_{i} \in \mathbb{R}^{n \times 3}  \).
+                                        </li>
+                                        <li>
+                                            <mark>element-wise multiplication을 level별로 수행하면서 <b>다항식의 차수</b>를 점진적으로 증가시키고 모델이 <b>표현의 복잡도</b>를 학습</mark>
+                                        </li>
+                                    </ul>
+                                <br>
+                                    이런느낌?
+<pre><code class="python">
+    def forward(self, z, class_embedding, x):
+        w = self.mapping_network(z, class_embedding)
+
+        for level in range(len(self.affine_layers)):
+            # 1x3 @ 3x3 -> 1x3
+            transformed_coord = self.affine_layers[level](w, x)
+
+            # 3 -> 512
+            linear_output = self.linears[level](transformed_coord)
+            
+            # apply Leaky-ReLU
+            x = self.lrelu(x)
+
+            # element-wise multiplication
+            x *= linear_output
+
+        # 512 -> 3
+        rgb = self.output_layer(x)
+
+        return rgb
+</code></pre>
+    <br>
+                                </li>
+                            </ul>
+                    </ol>
                 </li>
             </ul>
         <br>
         <li>
             Experiments
         </li>
-            <ol type="a">
+            <!-- <ol type="a">
                 <li>
                     Quantitative results
                 </li>
                 <li>
                     Qualitative results
                 </li>
-            </ol>
+            </ol> -->
         <br>
         <li>
             Training details
         </li>
-            <ul>
+            <!-- <ul>
                 <li>
 
                 </li>
-            </ul>
+            </ul> -->
     </ol>
 </ul>
 
