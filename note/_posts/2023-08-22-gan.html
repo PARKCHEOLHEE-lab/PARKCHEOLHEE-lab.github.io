@@ -1,0 +1,57 @@
+---
+title:  "Generative Adversarial Networks"
+layout: post
+emoji: /emoji/brain.png
+---
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
+      TeX: {
+        extensions: ["cancel.js"]
+      }
+    });
+</script>
+<script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/1406.2661">Generative Adversarial Networks</a>
+    </li>
+    <i>
+        keywords to search:
+        Maximum Likelihood Estimation
+    </i>
+    <br><br>
+        <ol>
+            <li>
+                Introduction
+            </li>
+                <ul>
+                    <li>
+                        In the proposed adversarial nets framework, 
+                        the <b>generative model</b> is pitted against an adversary: 
+                        a <b>discriminative model</b> that learns to determine whether a sample is from the model distribution or the data distribution.
+                    </li>
+                    <li>
+                        The generative model can be thought of as analogous to a team of <b>counterfeiters</b>, trying to produce fake currency and use it without detection, while the discriminative model is analogous to the <b>police</b>, trying to detect the counterfeit currency.
+                    </li>
+                    <li>
+                        <mark>Competition in this game drives both teams to improve their methods until the counterfeits are indistiguishable from the genuine articles.</mark>
+                    </li>
+                    <li>
+                        In this article, we explore the special case when the generative model generates samples by passing random noise through a multilayer perceptron, and the discriminative model is also a multilayer perceptron.
+                        We refer to this special case as <b>adversarial nets</b>.
+                    </li>
+                    <li>
+                        We can train both models using only the highly successful backpropagation and dropout algorithms and sample from the generative model using only forward propagation
+                    </li>
+                </ul>
+        </ol>
+</ul>
+
+
+<br><br>
