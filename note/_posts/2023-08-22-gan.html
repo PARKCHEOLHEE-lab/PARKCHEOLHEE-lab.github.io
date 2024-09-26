@@ -4,6 +4,7 @@ layout: post
 emoji: /emoji/brain.png
 ---
 
+
 <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
       tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
@@ -23,7 +24,11 @@ emoji: /emoji/brain.png
     </li>
     <i>
         keywords to search:
-        Maximum Likelihood Estimation
+        Maximum Likelihood Estimation (MLE),
+        Markov Chain,
+        Feedback Loop,
+        Latent Variables,
+        Noise-Contrastive Estimation (NCE)
     </i>
     <br><br>
         <ol>
@@ -50,8 +55,109 @@ emoji: /emoji/brain.png
                         We can train both models using only the highly successful backpropagation and dropout algorithms and sample from the generative model using only forward propagation
                     </li>
                 </ul>
+            <br>
+            <li>
+                Related work
+            </li>
+                <ul>
+                    <li>
+                        <a href="https://process-mining.tistory.com/211#:~:text=24.%2020%3A26-,Score%20function%EC%9D%80%20log%2Dlikelihood%EC%9D%98%20gradient%EB%A5%BC%20%EC%9D%98%EB%AF%B8%ED%95%98%EA%B3%A0%2C%20score%20matching%EC%9D%80%20%EC%8B%A4%EC%A0%9C%20probability%20density%20function%EC%9D%84%20%EA%B5%AC%ED%95%98%EB%8A%94%20%EA%B2%83%EC%9D%B4%20%EC%95%84%EB%8B%8C%2C%20%EC%9D%B4%EB%9F%AC%ED%95%9C%20score%20%EA%B0%92%EC%9D%84%20%ED%99%9C%EC%9A%A9%ED%95%98%EC%97%AC%20probability%20density%20function%EC%9D%84%20%EC%B6%94%EC%A0%95%ED%95%98%EB%8A%94%20%EA%B2%83%EC%9D%84%20%EC%9D%98%EB%AF%B8%ED%95%9C%EB%8B%A4.,-%EC%9D%B4%EB%9F%AC%ED%95%9C%20score%20matching">
+                            Score Matching
+                        </a>:
+                        This method attempts to match the <b>gradient of the data distribution</b> with the gradient of the model's distribution.
+                        \[
+                            \,\\
+                                \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})} \, [\, \|\ \nabla_{\mathbf{x}}\,\log p_\theta(\mathbf{x}) - \nabla_{\mathbf{x}} \log p_{data}(\mathbf{x}) \|^2 \,]
+                            \,\\
+                        \]
+                        <ul type="circle">
+                            <li>
+                                The term for \( \nabla_{\mathbf{x}} \log p_{data}(\mathbf{x}) \) is known as the <b>score</b> of the distribution.
+                                (Gradient of the true data distribution)
+                            </li>
+                            <li>
+                                The term for \( \nabla_{\mathbf{x}}\,\log p_\theta(\mathbf{x}) \) is the gradient of the model's log probability to the data \(\mathbf{x}\)
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Noise-Contrastive Estimation (NCE)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Adversarial nets
+            </li>
+                <ul>
+                    <li>
+                        To learn the generator's distribution \(p_g\) over data \(x\), 
+                        we <b>define a prior on input noise variables</b> \(p_z(z)\), 
+                        then represent a mapping to data space as \(G(z;\theta_g)\).
+                    </li>
+                    <li>
+                        We also define \(D(x;\theta_d)\) that outputs a single scalar.
+                        (Binary classification for whether the data is fake or real)
+                    </li>
+                    <li>
+                        <mark>
+                            We train \(D\) to maximize the probability of assigning the correct label to both training examples and samples from \(G\).
+                            We simultaneously train \(G\) to be that \(D(G(z)) \) is close to 1.
+                        </mark>
+                    </li>
+                    <li>
+                        In other words, \(D\) and \(G\) play the two-player minimax game with value function \(V(D, G)\):
+                        \[
+                            \,\\
+                            \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}(x)} [ \log D(x) ] + \mathbb{E}_{z \sim p_{z}(z)} [ \log (1 - D(G(z))) ].
+                            \,\\
+                        \]
+                    </li>
+                    <li>
+                        In practice, the above equation may not provide sufficient gradient for \(G\) to learn well.
+                        Early in learning, when \(G\) is poor, \(D\) can reject samples with high confidence because they are clearly different fromthe training data.
+                        Rather than training \(G\) to minimize \(\log (1 - D(G(z))) \), we can train \(G\) to maximize \(\log (D(G(z))) \).
+                        \[
+                            \,\\
+                            \begin{align*}
+                            Loss_D &= \mathcal{L}(D(x), \, label_{real}) + \mathcal{L}(D(G(z)), \, label_{fake}) \\
+                            Loss_G &= \mathcal{L}(D(G(z)), \, label_{real})
+                            \end{align*}
+                            \,\\
+                        \]
+                    </li>
+                    <li>
+                        A <b>pedagogical explanation</b> of GAN training
+                    </li>
+                    <br>
+                    <img src="/img/gan-1.png" width="100%">
+                    <figcaption>
+                        A pedagogical explanation of GAN training
+                        <br>
+                        blue dashed line: Discriminative Distribution
+                        <br>
+                        green solid line: Generative Distribution
+                        <br>
+                        black dotted line: Real Distriution
+                    </figcaption>
+                    <br>
+                    <ul type="circle">
+                        <li>
+                            \((\text{b})\): \(D\) is trained to discriminate samples from data, converging to \(D^{*}(x) = \frac{p_{data}(x)}{p_{data}(x) + p_g(x)} \).
+                        </li>
+                        <br>
+                        <li>
+                            \((\text{c})\): The gradient of \(D\) has guided \(G(z)\) to flow to regions that are more likely to be classified as real data.
+                        </li>
+                        <li>
+                            \((\text{d})\): If \(G\) and \(D\) have enough capacity, they will reach a point at which both cannot improve because \( p_g = p_{data} \).
+                            The discriminator is unable to differentiate between the two distributions, i.e. \( D(x) = \frac{1}{2} \).
+                        </li>
+                    </ul>
+                </ul>
         </ol>
 </ul>
+
 
 
 <br><br>
