@@ -1,0 +1,51 @@
+---
+title:  "JustMyCode configuration"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        JustMyCode configuration of launch.json
+    </li>
+        <ul>
+            <li>
+                It makes <b>debugging the external module</b> possible with <code>"JustMyCode": false</code>.
+            </li>
+            <li>
+                .vscode/launch.json is as:
+            </li>
+<pre><code class="json">
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Python Debugger: Current File",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${file}",
+                "justMyCode": false,
+                "console": "integratedTerminal"
+            }
+        ]
+    }       
+</code></pre>
+            <br>
+            <li>
+                Before setting JustMyCode to false, the Step Into of Debugger is skipped.
+            </li>
+            <img src="/img/just-my-code-1.png" width="100%">
+            <figcaption>Before setting JustMyCode to false</figcaption>
+
+            <br>
+            <li>
+                After setting JustMyCode to false, the Step Into works well.
+            </li>
+            <img src="/img/just-my-code-2.png" width="100%">
+            <figcaption>After setting JustMyCode to false</figcaption>
+        </ul>
+</ul>
+
+<br><br>
