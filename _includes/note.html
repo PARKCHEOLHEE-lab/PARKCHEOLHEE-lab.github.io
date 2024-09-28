@@ -37,12 +37,12 @@
   <header><h2>{{ include.title | default: page.title }}</h2></header>
   <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
 
+  {% assign note_length = site.categories.note | size %}
   {% if page.id == "note" %}
     <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline"></u></b></p><br>
     <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline"></u></b></p>
     <p style="margin-top: -1em">　</p>
     
-      {% assign note_length = site.categories.note | size %}
       {% for post in site.categories.note %}
 
         <div style="margin-top: -0.1em">
@@ -50,7 +50,7 @@
               
             {% if forloop.index == note_length %}
               <div style="display: flex; justify-content: space-between;">
-                <h4 class="post-title" style="margin: 0em; color: rgb(70, 70, 70); display: flex; align-items: center;">
+                <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center;">
                   {% if post.emoji %}
                     <img src="{{ post.emoji }}" class="emoji-img"> {{ post.title }}
                   {% elsif post.content == empty or post.content == blank %}
@@ -59,11 +59,11 @@
                     <img src="/emoji/default.png" class="emoji-img">{{ post.title }}
                   {% endif %}
                 </h4>
-                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.5em">{{ post.date | date: "%m/%d/%Y" }}</time>
+                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;">{{ post.date | date: "%m/%d/%Y" }}</time>
               </div>
             {% else %}
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
-                <h4 class="post-title" style="margin: 0em; color: rgb(70, 70, 70); display: flex; align-items: center;">
+                <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center;">
                   {% if post.emoji %}
                     <img src="{{ post.emoji }}" class="emoji-img"> {{ post.title }}
                   {% elsif post.content == empty or post.content == blank %}
@@ -72,12 +72,18 @@
                     <img src="/emoji/default.png" class="emoji-img">{{ post.title }}
                   {% endif %}
                 </h4>
-                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin: 0.5em">{{ post.date | date: "%m/%d/%Y" }}</time>
+                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;">{{ post.date | date: "%m/%d/%Y" }}</time>
               </div>
             {% endif %}
             </div>
         </div>
       {% endfor %}
   {% endif %}
+
+  <!-- <div style="text-align: center;"> -->
+    <!-- <span style="font-size: xx-small;">COUNT</span>: <span style="font-size: small;">{{ note_length }} -->
+    <!-- <p style="margin-top: -1.5em; float: right; font-size: smaller;"> <span style="font-size: xx-small;">COUNT</span>: <span style="font-size: small;">{{ note_length }}</span> </p><br> -->
+  <!-- </div> -->
+
 </article>
 <br><br>
