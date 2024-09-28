@@ -17,7 +17,7 @@ emoji: /emoji/brain.png
             </li>
                 <ul>
                     <li>
-                        <mark>By <b>conditioning</b> the model on additional information, it is possible to direct the data generation process.</mark>
+                        <mark>By <b>conditioning</b> the model on additional information, it is possible to <b>direct</b> the data generation process.</mark>
                         Such conditioning could be based on <b>class labels</b>, on <b>some part of data</b> for inpainting, or even on data from <b>different modality</b>.
                     </li>
                     <li>
@@ -26,6 +26,118 @@ emoji: /emoji/brain.png
                         One on MNIST digit data set conditioned on <b>class labels</b> and one on <a href="https://press.liacs.nl/mirflickr/mirdownload.html">MIR Flickr</a> 25,000 dataset for <b>multi-modal learning</b>.
                     </li>
                 </ul>
+            <br>
+            <li>
+                Related Work
+            </li>
+                <ol type="a">
+                    <li>
+                        Multi-modal Learning For Image Labelling
+                    </li>
+                        <ul>
+                            <li>
+                                Many interesting problems are more naturally thought of as a probabilistic one-to-many mapping. 
+                                For instance in the case of <b>
+                                    image labeling there may be many different tags that could appropriately applied to a given image,
+                                    and different (human) annotators may use different (but typically synonymous or related) terms to describe the same image.
+                                </b>
+                            </li>
+                            <li>
+                                자연어 기반의 라벨을 벡터 표현으로 학습하고 벡터간의 기하학적 관계가 유의미하도록 학습시킴으로써,
+                                예측 오류가 발생하더라도 더 가까운 결과와(책상 -> 탁자) 일반화를 이룰 수 있다.
+                            </li>
+                        </ul>
+                </ol>
+            <br>
+            <li>
+                Conditional Adversarial Nets
+            </li>
+                <ol type="a">
+                    <li>
+                        Generative Adversarial Nets
+                    </li>
+                        <ul>
+                            <li>
+                                Generative adversarial nets were recently introduced as a novel way to train a generative model.
+                                They consist of two 'adversarial' models: a generative model \(G\), which captures the data distribution,
+                                and a discriminative model \(D\), which estimates the probability that a given sample comes from the generative distribution \(p_{g}\) or from the real data distribution \(p_{data}\).
+                                \[
+                                    \,\\
+                                    \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}(x)} [ \log D(x) ] + \mathbb{E}_{z \sim p_{z}(z)} [ \log (1 - D(G(z))) ].
+                                    \,\\
+                                \]
+                                \[
+                                    \,\\
+                                    \begin{align*}
+                                    Loss_D &= \mathcal{L}(D(x), \, label_{real}) + \mathcal{L}(D(G(z)), \, label_{fake}) \\
+                                    Loss_G &= \mathcal{L}(D(G(z)), \, label_{real})
+                                    \end{align*}
+                                \]
+                            </li>
+                        </ul>
+                        <br>
+                        <li>
+                            Conditional Adversarial Nets
+                        </li>
+                        <ul>
+                            <li>
+                                <mark>Generative adversarial nets can be extended to a conditional model if both the generator and discriminator are <b>conditioned on some extra information</b> \(\color{blue}{y}\).</mark>
+                                It could be any kind of auxiliary information, such as <b>class labels or data from other modalities</b>.
+                                We can perform the conditioning by feeding \(\color{blue}{y}\) into the both the \(D\) and \(G\) as additional input layer. 
+                            </li>
+                            <li>
+                                In the generator, the <mark>prior input noise \(p_{z}(z)\), and \(y\) are combined</mark> in joint hidden representation,
+                                and adversarial training framework allows for considerable flexibility in how this hidden representation is composed\(^{1}\).
+                                
+                                <ul type="circle">
+                                    <li>
+                                        \(^{1}\): For now we simply have the conditioning input and prior noise as inputs to a single hidden layer of a MLP,
+                                        but one could imagine using higher order interactions allowing for complex generation mechanisms.
+                                    </li>
+                                </ul>
+                            </li>
+                            <br>
+                            <li>
+                                The objective function of a two-player minimax game would be as:
+                                \[
+                                    \,\\
+                                    \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}(x)} [ \log D(x \,|\, \color{blue}{y}) ] + \mathbb{E}_{z \sim p_{z}(z)} [ \log (1 - D(G(z \,|\, \color{blue}{y}))) ].
+                                    \,\\
+                                \]
+                                \[
+                                    \,\\
+                                    \begin{align*}
+                                    Loss_D &= \mathcal{L}(D(x \,|\, \color{blue}{y}), \, label_{real}) + \mathcal{L}(D(G(z \,|\, \color{blue}{y})), \, label_{fake}) \\
+                                    Loss_G &= \mathcal{L}(D(G(z \,|\, \color{blue}{y})), \, label_{real})
+                                    \end{align*}
+                                \]
+                            </li>
+                        </ul>
+                </ol>
+            <br>
+            <li>
+                Experimental Results
+            </li>
+                <ol type="a">
+                    <li>
+                        Unimodal
+                    </li>
+                        <ul>
+                            <li>
+                                We trained a conditional adversarial net on MNIST images conditioned on their class labels, <b>encoded as one-hot vectors</b>.
+                            </li>
+                            <br>
+                            <img src="/img/conditional-gan-1.png" width="100%">
+                            <figcaption>Generated MNIST digits, each row conditioned on one label</figcaption>
+                            <br>
+                            <li>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Multimodal
+                    </li>
+                </ol>
         </ol>
 </ul>
 
