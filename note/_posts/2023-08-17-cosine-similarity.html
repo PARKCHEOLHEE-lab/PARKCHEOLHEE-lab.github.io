@@ -1,0 +1,71 @@
+---
+title:  "Cosine Similarity"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        Cosine Similarity
+    </li>
+        <ul>
+            <li>
+                <a href="https://towardsdatascience.com/cosine-similarity-how-does-it-measure-the-similarity-maths-behind-and-usage-in-python-50ad30aad7db">Cosine similarity</a> measures the <b>similarity between two vectors</b>
+                by calculating the <b>cosine of the angle between the two vectors</b>.
+            </li>
+            <li>
+                Why cosine of the angle between \(x\) and \(y\) gives use the similarity?
+            </li>
+                <ul>
+                    <li>
+                        Cosine function is \(1\) at the \(\theta = 0\) and \(-1\) at \(\theta = 180\).
+                        Therefore, if the two vectors overlap more perfectly, the cosine similarity approaches \(1\).
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Calculation of cosine of the angle between \(x\) and \(y\) as:
+                \[
+                    \,\\
+                    \cos(\theta) = \frac{x \cdot y}{\|x\| \, \|y\|}
+                    \,\\
+                \]
+                <li>
+                    The above expression comes from the definition of the dot product:
+                    <ul>
+                        <li>
+                            The dot product of two vectors \(x\) and \(y\) is defined as:
+                            \[
+                                \,\\
+                                x \cdot y = \|x\| \, \|y\| \cos(\theta)
+                                \,\\
+                            \]
+                            </li>
+                            <li>
+                                Rearranging this equation to solve for \(\cos(\theta)\) gives us:
+                            \[
+                                \,\\
+                                \cos(\theta) = \frac{x \cdot y}{\|x\| \, \|y\|}
+                                \,\\
+                            \]
+                        </li>
+                        <li>
+                            This is equivalent to \(\cos(\theta) = \frac{\text{adjacent}}{\text{hypotenuse}}\) in a right-angled triangle, 
+                            where \(\text{adjacent} = x \cdot y \) and \(\text{hypotenuse} = \|x\| \, \|y\| \)
+                        </li>
+                    </ul>
+                </li>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Simple implementation
+    </li>
+</ul>
+
+<span style="display: block; margin-left: -2em;">
+    {% include embed.html url="/notebooks/cosine-similarity.html" %}
+</span>
+
+<br><br>
