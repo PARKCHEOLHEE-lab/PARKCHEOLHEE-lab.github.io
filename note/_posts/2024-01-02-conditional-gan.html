@@ -126,6 +126,12 @@ emoji: /emoji/brain.png
                             <li>
                                 We trained a conditional adversarial net on MNIST images conditioned on their class labels, <b>encoded as one-hot vectors</b>.
                             </li>
+                            <li>
+                                In the generator, a noise prior \(z\) was drawn from a uniform distribution within the unit hypercube.
+                            </li>
+                            <li>
+                                We present these results more as a proof-of-concept than as demonstration of efficacy.
+                            </li>
                             <br>
                             <img src="/img/conditional-gan-1.png" width="100%">
                             <figcaption>Generated MNIST digits, each row conditioned on one label</figcaption>
@@ -137,6 +143,20 @@ emoji: /emoji/brain.png
                     <li>
                         Multimodal
                     </li>
+                        <ul>
+                            <li>
+                                In this section we demonstrate automated tagging of images, with multi-label predictions, 
+                                using conditional adversarial nets to generate a (possibly multi-modal) distribution of tag-vectors conditional on image features.
+                            </li>
+                            <li>
+                                For evaluation, we generate 100 samples for each image and find top 20 closest words using <b>cosine similarity</b> of vector representation of the words in the vocabulary to each sample. 
+                                Then we select the top 10 most common words among all 100 samples. 
+                                The below figure shows some samples of the user assigned tags and annotations along with the generated tags.
+                            </li>
+                            <br>
+                            <img src="/img/conditional-gan-2.png" width="100%">
+                            <figcaption>Samples of generated tags</figcaption>
+                        </ul>
                 </ol>
         </ol>
 </ul>
