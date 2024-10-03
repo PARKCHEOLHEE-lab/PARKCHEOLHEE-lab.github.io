@@ -1,0 +1,68 @@
+---
+title:  "Inductive Bias"
+layout: post
+---
+
+<br>
+<ul>
+    <li>
+        Inductive Bias
+    </li>
+        <ul>
+            <li>
+                In machine learning, inductive bias refers to the set of <b>assumptions</b>.
+                These assumptions guide the algorithm in selecting the most likely hypothesis or model, based on the available training data.
+            </li>
+            <br>
+            <li>
+                Inductive Bias of <b>Convolutional Neural Networks</b>
+                <ul>
+                    <li>
+                        <b>Locality</b>:
+                        CNNs assume that nearby pixels in an image are more likely to be related or contain important patterns.
+                        This is why convolutional layers use small filters (kernels) that <b>focus on local regions</b> of the input image.
+                        The assumption is that the most meaningful features (like edges or textures) can be extracted from these local regions.
+                    </li>
+                    <li>
+                        <b>Translation Invariance</b>:
+                        CNNs also assume that import features can appear anywhere in the image and still be relevant.
+                        By using shared weights (the same filters across the entire image), the CNN is invariant to translations.
+                        This means that CNN can recognize an object even if it's shifted to a different part of the image. 
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Inductive Bias of <b>Transformers</b>
+                <ul>
+                    <li>
+                        <b>Attention</b>:
+                        In Transformer, every token can attend to every other token, regardless of their distance in the sequence.
+                        (거리와 상관없이 모든 토큰 간에 관계를 가질 수 있다는 가정을 기반으로, 학습을 통해 어떤 토큰 간의 관계가 중요한지를 결정)
+                    </li>
+                    <li>
+                        <b>Positional Encoding</b>:
+                        In attention layers, they don't assume that token positions matter, so positional encoding is introduced to provide the model with information about the order of tokens in a sequence.
+                        (단어의 순서에 따라 문장의 의미가 달라지는 것을 인식)
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Inductive Bias of <b>Fully Connected Layers (MLPs)</b>
+            </li>
+                <ul>
+                    <li>
+                        <b>Minimal Bias</b>:
+                        MLPs don't make any assumptions about the structure of the data, meaning they can be applied to a wide variety of problems.
+                        However, this also means they lack specialized mechanisms to handle certain types of data, like images or sequences.
+                    </li>
+                </ul>
+            <br>
+            <li>
+                데이터에 대한 가정? 모델이 작동하는 방식에 대한 디테일? 정도의 심상으로 정리할 수 있을듯 
+            </li>
+        </ul>
+</ul>
+<br><br>
+<!-- https://re-code-cord.tistory.com/entry/Inductive-Bias%EB%9E%80-%EB%AC%B4%EC%97%87%EC%9D%BC%EA%B9%8C -->
