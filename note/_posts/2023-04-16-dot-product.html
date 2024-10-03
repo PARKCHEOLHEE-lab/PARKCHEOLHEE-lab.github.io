@@ -1,0 +1,166 @@
+---
+title:  "Dot Product"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://en.wikipedia.org/wiki/Dot_product">Dot Product</a> (Scalar Product)
+    </li>
+        <ul>
+            <li>
+                The dot product defined algebraically or geometrically.
+                The equivalence of these two definitions relies on having a Cartesian coordinate system for Euclidean space.
+            </li>
+            <br>
+                <ol>
+                    <li>
+                        Coordinate definition
+                    </li>
+                        <ul>
+                            <li>
+                                The dot product of two vectors defined as:
+                                \[
+                                    \,\\
+                                    \vec{x} = (x_1, x_2, \,...,\, x_n),\, \vec{y} = (y_1, y_2, \,...,\, y_n) \\
+
+                                    \vec{x} \cdot \vec{y} = \sum_{i=1}^n x_i y_i = x_1 y_1 + x_2 y_2 + \,...\, + x_n y_n 
+                                    \,\\
+                                \]
+                            </li>
+                            <li>
+                                If vectors are identified with column vectors, the dot product can also be written as a matrix product:
+                                \[
+                                    \,\\
+                                    \vec{x} \cdot \vec{y} = x^\top y
+                                    \,\\
+                                \]
+
+                                In expressing the operation as shown above for \([1 \quad 3 \quad 5] \cdot [4 \, -2 \, -1]^\top \),
+                                a \(1 \times 3 \) matrix (row vector) is multiplied by a \(3 \times 1 \) matrix (column vector)
+                                to get a \(1 \times 1 \) matrix.
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Geometric definition
+                    </li>
+                        <ul>
+                            <li>
+                                In Euclidean space, a Euclidean vector is a geometric object that possesses both maginitude and a direction.
+                                A vector can be pictured as an arrow. Its magnitude is its length, and its direction is the direction to which the arrow points. 
+                                The dot product of two Euclidean vectors \(x\) and \(y\) is defined by:
+                                \[
+                                    \,\\
+                                    x \cdot y = \| x \| \| y \| \cos\theta
+                                    \,\\
+                                \]
+                                where \(\theta\) is the angle between \(x\) and \(y\). <br><br>
+                                In particular, if the vectors are orthogonal, then \(\cos \frac{\pi}{2} = 0\),
+                                which implies that \(x \cdot y = 0\).
+<pre><code class="text">
+    >>> x = np.array([1, 0])
+    >>> y = np.array([0, 1])
+    >>> np.dot(x, y)
+    0
+
+    >>> dot = np.linalg.norm(x) * np.linalg.norm(y) * np.cos(np.radians(90))
+    dot
+    6.123233995736766e-17
+
+    >>> np.isclose(0, dot)
+    True
+</code></pre>
+                            </li>
+                            <br>
+                            <li>
+                                If they are codirectional, then the angle between them is zero with \(\cos 0 = 1\) and
+                                \(x \cdot y = \| x \| \| y \| \).
+
+                                This implies that the dot product of a vector \(x\) with itself is 
+                                \[
+                                    \,\\
+                                    x \cdot x = \| x \| \| x \| = \| x \|^2
+                                    \,\\
+                                \]
+
+                                Which gives the formula for the Euclidean length of the vector.
+                                \[
+                                    \,\\
+                                    \| x \| = \sqrt{x \cdot x}
+                                    \,\\
+                                \]
+<pre><code class="text">
+    >>> x = np.array([5, 3])
+    >>> np.sqrt(np.dot(x, x))
+    5.830951894845301
+
+    >>> np.linalg.norm(x)
+    5.830951894845301
+    
+    >>> np.isclose(np.linalg.norm(x), np.sqrt(np.dot(x, x)))
+    True
+</code></pre>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Scalar projection and first properties
+                    </li>
+                        <ul>
+                            <li>
+                                The scalar projection of a vector \(x\) onto another vector \(y\) is a way 
+                                to measure how much of vector \(x\) lies in the direction of vector \(y\).
+                                It gives us the length of the shadow of \(x\) when it's projected onto \(y\).
+                                \[
+                                    \,\\
+                                    x_y = \| x \| \cos \theta
+                                    \,\\
+                                \]
+
+                                The above formula captures how much of vector \(x\) is pointing in the direction of vector \(y\),
+                                based on how aligned the two vectors are. 
+
+                                <br><br>
+
+                                This concept comes from:
+                                \[
+                                    \,\\
+                                    \cos \theta = \frac{\text{Adjacent}}{\text{Hypotenuse}}
+                                    \,\\
+                                \]
+                                
+                                Here, \(\text{Adjacent}\) refers to the projection \(x_y\), and \(\text{Hypotenuse}\) is the norm (maginitude) of vector \(x\).
+                            </li>
+                            <br>
+                            <li>
+                                In terms of the geometric definition of the dot product, this can be rewritten as:
+                                \[
+                                    \,\\
+                                    x_y = x \cdot \hat{y}
+                                    \,\\
+                                \]
+
+                                where \(\hat{y}\) is the unit vector defined as \(\hat{y} = \frac{y}{\| y \|} \) in the direction of the \(y\).
+                            </li>
+                            <br>
+                            <li>
+                                This is because the definition of dot product is given by \(x \cdot y = \| x \| \| y \| \cos\theta\).
+                                In this, if the \(y\) becomes a unit vector, expression can be rewritten as:
+                                \[
+                                    \,\\
+                                    x \cdot \hat{y} = \| x \| \cos \theta \\
+                                    x_y = \| x \| \cos \theta
+                                    \,\\
+                                \]
+                            </li>
+                        </ul>
+                </ol>
+        </ul>
+</ul>
+
+
+<br><br>
