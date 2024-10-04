@@ -1,0 +1,112 @@
+---
+title:  "Non-linearity"
+layout: post
+---
+
+
+<br>
+
+
+<ul>
+    <li>
+        Linearity
+        <ul>
+            <li>
+                Stacking multiple linear functions without any non-linear functions results in a single linear function 
+                because the <mark>combination of linear transformations is still linear</mark>.
+                <ol>
+                    <li>
+                        <b>Linear function definition</b>: 
+                        There is a linear function in its most basic form,
+                        where \(W\) is a matrix, \(x\) is the input, and \(b\) is a bias.
+                        \[
+                            \,\\
+                            f(x) = Ax + b
+                            \,\\
+                        \]
+                    </li>
+                    <li>
+                        <b>Combination of two linear functions</b>: 
+                        Let's say we have two linear functions as below:
+                        \[
+                            \,\\
+                            f(x) = W_1 x + b_1 \\
+                            g(x) = W_2 x + b_2
+                            \,\\
+                        \]
+                        then applying one after the other results in:
+                        \[
+                            \,\\
+                            g(f(x)) = W_2(W_1 x + b_1) + b_2 = W_2 W_1 x + W_2 b_1 + b_2
+                            \,\\
+                        \]
+
+                        This is still a linear function of the form \(h(x) = Cx + d\), where \(C = W_2 W_1\) and \(d = W_2 b_1 + b_2\).
+                    </li>
+                    <br>
+                    <li>
+                        This result shows that stacking linear functions are equivalent to a single linear transformation with 
+                        new parameters \(C\) and \(d\).
+                        Therefore, no matter how many linear functions you stack, the result is always one linear function.
+                    </li>
+                </ol>
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Non-Linearity for Neural Networks
+        <ul>
+            <li>
+                The world is non-linear. 
+                Many real-world phenomena consist of complex relationships that cannot be modeled using only linear functions. 
+                <mark>By giving non-linearity, neural networks can represent these complex relationships.</mark>
+                <ul>
+                    <li>
+                        \(\text{Sigmoid}\): Maps the input to a value between 0 and 1 using the formula:
+                        \[
+                            \text{Sigmoid}\,(x) = \frac{1}{1 + e^{-x}}
+                        \]
+                    </li>
+                    <br>
+                    <li>
+                        \(\text{ReLU} \) (Rectified Linear Unit): A simple non-linear function that returns \(0\) if the given \(x\) is below than \(0\), else return itself. It is defined as:
+                        \[
+                            \text{ReLU}\,(x) = \max(0,\, x)
+                        \]
+                    </li>
+                    <br>
+                    <!-- <li>
+                        \(\text{LeakyReLU}\): A variation of \(\text{ReLU} \) that allows a small, non-zero gradient for negative inputs to address the "dying ReLU" problem:
+                        \[
+                            \text{LeakyReLU}\,(x) = \begin{cases} 
+                                x & \text{if } x > 0 \\
+                                \alpha x & \text{if } x \leq 0
+                            \end{cases}
+                        \]
+                        Here, \( \alpha \) is a small constant.
+                    </li>
+                    <br>
+                    <li>
+                        <b>Tanh</b>: Maps inputs to the range \([-1, 1]\), and is given by:
+                        \[
+                            \text{Tanh}\,(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+                        \]
+                        It works better than sigmoid for models where the input data is centered around zero, but still suffers from vanishing gradients for very deep networks.
+                    </li>
+                    <br>
+                    <li>
+                        <b>Softmax</b>: The softmax function is primarily used in the output layer of classification models, particularly for multi-class classification. It converts raw scores (logits) into a probability distribution, where each output is a value between 0 and 1, and the sum of the outputs is 1. This is crucial when you want the model to predict probabilities for different classes. The formula for softmax is:
+                        \[
+                            \text{softmax}(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{n} e^{z_j}}
+                        \]
+                        where \(z_i\) is the \(i\)-th element of the input vector \(z\), and \(n\) is the number of elements (classes). The softmax function ensures that the output is a normalized probability distribution, making it ideal for choosing the most likely class in multi-class classification problems.
+                    </li> -->
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<br><br>
