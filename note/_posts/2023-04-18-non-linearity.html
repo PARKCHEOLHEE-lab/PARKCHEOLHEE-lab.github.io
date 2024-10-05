@@ -65,48 +65,81 @@ layout: post
                     <li>
                         \(\text{Sigmoid}\): Maps the input to a value between 0 and 1 using the formula:
                         \[
+                            \,\\
                             \text{Sigmoid}\,(x) = \frac{1}{1 + e^{-x}}
+                            \,\\
                         \]
+<!-- <pre><code class="python">
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+</code></pre><br> -->
                     </li>
-                    <br>
                     <li>
                         \(\text{ReLU} \) (Rectified Linear Unit): A simple non-linear function that returns \(0\) if the given \(x\) is below than \(0\), else return itself. It is defined as:
                         \[
-                            \text{ReLU}\,(x) = \max(0,\, x)
-                        \]
-                    </li>
-                    <br>
-                    <!-- <li>
-                        \(\text{LeakyReLU}\): A variation of \(\text{ReLU} \) that allows a small, non-zero gradient for negative inputs to address the "dying ReLU" problem:
-                        \[
-                            \text{LeakyReLU}\,(x) = \begin{cases} 
-                                x & \text{if } x > 0 \\
-                                \alpha x & \text{if } x \leq 0
+                            \,\\
+                            \text{ReLU}\,(x) = \begin{cases} 
+                            x & \text{if } x > 0 \\
+                            0 & \text{if } x \leq 0
                             \end{cases}
+                            \,\\
                         \]
-                        Here, \( \alpha \) is a small constant.
+<!-- <pre><code class="python">
+    def relu(x):
+        return np.where(x > 0, x, 0)
+</code></pre><br> -->
                     </li>
-                    <br>
                     <li>
-                        <b>Tanh</b>: Maps inputs to the range \([-1, 1]\), and is given by:
+                        \(\text{LeakyReLU}\): A simple non-linear function that returns \(x\) if \(x\) is greater than \(0\), otherwise it returns \( \alpha x \), where \( \alpha \) is a small constant. It is defined as:
                         \[
-                            \text{Tanh}\,(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}}
+                            \,\\
+                            \text{LeakyReLU}\,(x) = \begin{cases} 
+                            x & \text{if } x > 0 \\
+                            \alpha x & \text{if } x \leq 0
+                            \end{cases}
+                            \,\\
                         \]
-                        It works better than sigmoid for models where the input data is centered around zero, but still suffers from vanishing gradients for very deep networks.
+<!-- <pre><code class="python">
+    def leaky_relu(x, alpha):
+        return np.where(x > 0, x, x * alpha)
+</code></pre><br> -->
                     </li>
-                    <br>
                     <li>
-                        <b>Softmax</b>: The softmax function is primarily used in the output layer of classification models, particularly for multi-class classification. It converts raw scores (logits) into a probability distribution, where each output is a value between 0 and 1, and the sum of the outputs is 1. This is crucial when you want the model to predict probabilities for different classes. The formula for softmax is:
-                        \[
-                            \text{softmax}(z_i) = \frac{e^{z_i}}{\sum_{j=1}^{n} e^{z_j}}
+                        \(\text{Tanh}\): Maps the input to a value between -1 and 1 using the formula:
+                        \[ 
+                            \,\\
+                            \text{Tanh}\,(x) = \frac{e^x \,-\, e^{-x}}{e^x \,+\, e^{-x}}
+                            \,\\
                         \]
-                        where \(z_i\) is the \(i\)-th element of the input vector \(z\), and \(n\) is the number of elements (classes). The softmax function ensures that the output is a normalized probability distribution, making it ideal for choosing the most likely class in multi-class classification problems.
-                    </li> -->
+<!-- <pre><code class="python">
+    def tanh(x):
+        return (np.exp(x) - np.exp(-x)) / (np.exp(x) + np.exp(-x))
+</code></pre><br> -->
+                    </li>
+                    <li>
+                        \(\text{Softmax}\): It converts logits into a probability distribution, where each output is a value between 0 and 1, and the sum of the outputs is 1. The formula for softmax is:
+                        \[
+                            \,\\
+                            \text{Softmax}(x)_i = \frac{e^{x_i}}{\sum_{j=1}^{n} e^{x_j}}
+                            \,\\
+                        \]
+<!-- <pre><code class="python">
+    def softmax(x):
+        return np.exp(x) / np.sum(np.exp(x))
+</code></pre> -->
+                    </li>
                 </ul>
             </li>
         </ul>
     </li>
+    <br>
+    <li>
+        Visualization
+    </li>
 </ul>
 
+<span style="display: block; margin-left: -2em;">
+    {% include embed.html url="/notebooks/non-linearity.html" %}
+</span>
 
 <br><br>
