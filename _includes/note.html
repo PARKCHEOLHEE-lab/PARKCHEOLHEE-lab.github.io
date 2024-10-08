@@ -42,26 +42,16 @@
     <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline"></u></b></p><br>
     <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline"></u></b></p>
     <p style="margin-top: -1em">　</p>
-    
-      {% for post in site.categories.note %}
+  
+      {% assign pinned_posts = site.categories.note | where: "emoji", "/emoji/pin.png" %}
+      {% assign unpinned_posts = site.categories.note | where_exp: "post", "post.emoji != '/emoji/pin.png'" %}
+      {% assign all_posts = pinned_posts | concat: unpinned_posts %}
+      
+      {% for post in all_posts %}
 
         <div style="margin-top: -0.1em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
               
-            {% if forloop.index == note_length %}
-              <div style="display: flex; justify-content: space-between;">
-                <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center;">
-                  {% if post.emoji %}
-                    <img src="{{ post.emoji }}" class="emoji-img"> {{ post.title }}
-                  {% elsif post.content == empty or post.content == blank %}
-                    <img src="/emoji/default-empty.png" class="emoji-img"> <span style="color: gray;">{{ post.title }}</span>
-                  {% else %}
-                    <img src="/emoji/default.png" class="emoji-img">{{ post.title }}
-                  {% endif %}
-                </h4>
-                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;">{{ post.date | date: "%m/%d/%Y" }}</time>
-              </div>
-            {% else %}
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
                 <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center;">
                   {% if post.emoji %}
@@ -72,9 +62,14 @@
                     <img src="/emoji/default.png" class="emoji-img">{{ post.title }}
                   {% endif %}
                 </h4>
-                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;">{{ post.date | date: "%m/%d/%Y" }}</time>
+                <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;">
+                  {% if post.emoji == "/emoji/pin.png" %}
+                    {{ site.time | default: post.date | date: "%m/%d/%Y" }}
+                  {% else %}
+                    {{ post.date | date: "%m/%d/%Y" }}
+                  {% endif %}
+                </time>
               </div>
-            {% endif %}
             </div>
         </div>
       {% endfor %}
