@@ -64,7 +64,7 @@
                 </h4>
                 <time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;">
                   {% if post.emoji == "/emoji/pin.png" %}
-                    {{ site.time | default: post.date | date: "%m/%d/%Y" }}
+                    {{ post.last_modified_at }}
                   {% else %}
                     {{ post.date | date: "%m/%d/%Y" }}
                   {% endif %}
