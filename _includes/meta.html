@@ -5,5 +5,13 @@
   {%- else -%}
     {%- assign date_format = site.date_format | default: "%B %d, %Y" -%}
   {%- endif -%}
-  <time datetime="{{ include.post.date | date_to_xmlschema }}">{{ include.post.date | date: date_format }}</time>
+  <!-- <time datetime="{{ include.post.date | date_to_xmlschema }}">{{ include.post.date | date: date_format }}</time> -->
+  <time datetime="{{ post.date | date_to_xmlschema }}">
+    {% if include.post.emoji == "/emoji/pin.png" %}
+      {{ site.time | date: "%m/%d/%Y" }}
+    {% else %}
+      {{ include.post.date | date: "%m/%d/%Y" }}
+    {% endif %}
+  </time>
+  
 </header>
