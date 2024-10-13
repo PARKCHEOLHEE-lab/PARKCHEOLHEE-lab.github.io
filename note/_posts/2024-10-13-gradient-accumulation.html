@@ -1,0 +1,37 @@
+---
+title:  "Grandient Accumulation"
+layout: post
+done: false
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://www.hopsworks.ai/dictionary/gradient-accumulation">Gradient Accumulation</a>
+    </li>
+        <ul>
+            <li>
+                Gradient Accumulation is a technique used when training neural networks to support larger batch sizes given limited available GPU memory.
+            </li>
+            <li>
+                In <b>Gradient Accumulation</b>, instead of updating the model parameters after processing each individual batch of training data, 
+                the <mark>gradients are accumulated over multiple batches</mark> before updating.
+                <br>
+                This means that rather than immediately incorporating the information from a single batch into the model's parameters, the gradients are summed up over multiple batches
+            </li>
+            <li>
+                This approach reduces the amount of memory needed for training and can help stabilize the training process, 
+                particularly when <mark>working with the batch size is too large to fit into the memory</mark>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Implementation
+    </li>
+</ul>
+<span style="display: block; margin-left: -2em;">
+    {% include embed.html url="/notebooks/gradient-accumulation.html" %}
+</span>
+
+<br><br>
