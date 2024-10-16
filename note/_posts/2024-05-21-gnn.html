@@ -1,0 +1,58 @@
+---
+title:  "Weisfeiler and Leman Go Neural: Higher-order Graph Neural Networks"
+layout: post
+emoji: /emoji/brain.png
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/1810.02244">Weisfeiler and Leman Go Neural: Higher-order Graph Neural Networks</a>
+    </li>
+    <i>
+       keywords to search: 
+       graph kernels,
+       Weisfeiler-Lehman algorithm,
+       message passing
+    </i>
+    <br><br>
+        <ol>
+            <li>
+                Introduction
+            </li>
+                <ul>
+                    <li>
+                        Graph-structured data is ubiquitous across application domains ranging from chemo- and bioinformatics to image and social network analysis.
+                        To develop successful machine learning models in these domains, we need techniques that can exploit
+                        the rich information inherent in graph structure, as well as the
+                        feature information contained within a graph's nodes and edges.
+                    </li>
+                    <li>
+                        For example, one of the most
+                        successful kernel approaches, the <a href="https://process-mining.tistory.com/170">Weisfeiler-Lehman</a> subtree
+                        kernel, which is based on the 1-
+                        dimensional Weisfeiler-Leman graph isomorphism heuristic, generates node features through an
+                        iterative relabeling, or coloring, scheme.
+                    </li>
+                    <li>
+                        <mark>GNNs can be viewed as a neural version of the WL algorithm, 
+                        where colors are replaced by continuous feature vectors 
+                        and neural networks are used to aggregate over node neighborhoods.</mark>
+                    </li>
+                    <li>
+                        In effect, the GNN framework can
+                        be viewed as implementing a continuous form of graph-based
+                        “<a href="https://process-mining.tistory.com/164">message passing</a>”, where local neighborhood information is
+                        aggregated and passed on to the neighbors.
+                    </li>
+                    <li>
+                        GNN은 CNN처럼 데이터를 어떻게 집계할 것인가에 관한 것으로 생각하면 될듯? (CNN을 grid-shaped graph로 보고)
+                    </li>
+                </ul>
+        </ol>
+</ul>
+
+<!-- https://chatgpt.com/g/g-LmRBZpu94-arxivgpt/c/670e6c4c-1bb8-8011-aa41-4603ccc1a767 -->
+
+<br><br>
