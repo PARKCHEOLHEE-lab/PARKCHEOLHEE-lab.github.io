@@ -10,6 +10,10 @@ emoji: /emoji/brain.png
     <li>
         <a href="https://arxiv.org/pdf/1810.02244">Weisfeiler and Leman Go Neural: Higher-order Graph Neural Networks</a>
     </li>
+    <li>
+        <a href="https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.conv.GraphConv.html#:~:text=The%20graph%20neural%20network%20operator%20from%20the%20%E2%80%9CWeisfeiler%20and%20Leman%20Go%20Neural%3A%20Higher%2Dorder%20Graph%20Neural%20Networks%E2%80%9D%20paper.">torch_geometric.nn.conv.GraphConv</a>
+    </li>
+    <br>
     <i>
        keywords to search: 
        graph kernels,
@@ -30,9 +34,8 @@ emoji: /emoji/brain.png
                     </li>
                     <li>
                         For example, one of the most
-                        successful kernel approaches, the <a href="https://process-mining.tistory.com/170">Weisfeiler-Lehman</a> subtree
-                        kernel, which is based on the 1-
-                        dimensional Weisfeiler-Leman graph isomorphism heuristic, generates node features through an
+                        successful kernel approaches, the <a href="https://process-mining.tistory.com/170">Weisfeiler-Lehman subtree kernel</a>, 
+                        which is based on the 1-dimensional Weisfeiler-Leman graph isomorphism heuristic, generates node features through an
                         iterative relabeling, or coloring, scheme.
                     </li>
                     <li>
@@ -47,8 +50,77 @@ emoji: /emoji/brain.png
                         aggregated and passed on to the neighbors.
                     </li>
                     <li>
-                        GNN은 CNN처럼 데이터를 어떻게 집계할 것인가에 관한 것으로 생각하면 될듯? (CNN을 grid-shaped graph로 보고)
+                        일반적인 GNN은 graph isomorphism을 구별하는데 잇어서 1-WL 알고리즘보다 강력하지 않으므로, k-GNN을 제안.
+                        k-GNN은 k-WL 알고리즘을 기반으로 개별 노드간의 message passing이 아닌 서브 그래프 구조간의 정보를 전달. 
+                        <br> 
+                        (CNN이 필터별로 stride하면서 feature map을 만드는 것 처럼 
+                        GNN은 그래프 노드의 k-hop 만큼 집계 하는 심상)
                     </li>
+                </ul>
+            <br>
+            <li>
+                Preliminaries
+            </li>
+                <ul>
+                    <li>
+                        Notation and Background
+                    </li>
+                        <ul type="circle">
+                            <li>
+                                A graph \(G\) is a pair \((V, E) \) with a finite set of nodes \(V\) 
+                                and a set of edges \( E \subseteq \{ \{u, v\} \subseteq V \mid u \neq v \} \).
+                                We denote the set of nodes and the set of edges of \(G\) by \(V(G)\) and \(E(G)\), respectively.
+                            </li>
+                            <li>
+                                \(N(v)\) denotes the neighborhoods of \(v\) in \(V(G)\),
+                                i.e., \(N(v) = \{ u \in V(G) \,|\, (u, v) \in E(G) \} \)
+                            </li>
+                            <li>
+                                We say that two graphs \(G\) and \(H\) are isomorphic 
+                                if there exists an edge preserving <a href="https://blog.naver.com/obrigadu/50100112933">bijection</a> 
+                                \(\phi : V(G) \to V(H) \), i.e., \( (u, v) \in E(G) \) if and only if \( (\phi(u), \phi(v)) \in E(H) \).
+                            </li>
+                            <li>
+                                Let \(S \subseteq V(G) \) then \(G[S] = (S, E_S) \) is the <b>subgraph</b> 
+                                induced by \(S\) with \(E_S = \{ ( u, v )  \in E(G) \,|\, u, v \in S \} \)
+                            </li>
+                            <li>
+                                A node coloring is a function \(V(G) \to \sum \) with arbitrary codomain \(\sum\).
+                                Then a node colored or labeled graph \((G, l) \) is a graph \(G\) endowed with a node coloring \(l: V(G) \to \sum \).
+                                We say that \(l(v)\) is a label or color of \(v \in V(G) \).
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Graph Neural Networks
+                    </li>
+                        <ul type="circle">
+                            <li>
+                                Let \((G, l)\) be a labeled graph with an initial node coloring \(f^{(0)} : V(G) \to \mathbb{R}^{1 \times d} \) that is consistent with \(l\).
+                                This means that each node \(v\) is annotated with a feature \(f^{(0)}(u) = f^{(0)}(v) \) if and only if \(l(u) = l(v) \).
+                                \(f^{(0)}(u)\) can be an arbitrary real-valued feature vector.
+                                <br>
+                                <mark>(개별 \(1 \times d \) 형태의 feature vector가 노드 개수 \(n\)개 만큼 존재하므로 \(n \times \ d\)의 <a href="https://www.researchgate.net/figure/Feature-matrix-of-and-the-node-feature-calculation-method_fig6_379667645">feature matrix</a>가 됨)</mark>
+                            </li>
+                            <li>
+                                A GNN model consists of a stack of neural network layers, 
+                                where 
+                                <mark>each layer aggregates local neighborhood information, i.e., features of neighbors, around each node and then passes this aggregated information on to the next layer.</mark>
+                            </li>
+                            <li>
+                                A basic GNN model can be implemented as follows. In each layer \(t > 0\), we compute a new feature
+                                \[
+                                    \,\\
+                                    f^{(t)}(v) = \sigma( f^{(t-1)}(v) \cdot W^{(t)}_1 + \sum_{w \in N(v)} f^{(t-1)}(w) \cdot W^{(t)}_2 )
+                                    \,\\
+                                \]
+
+                                in \(\mathbb{R}^{1 \times e} \) for \(v\), where \(W^{(t)}_1 \) and \(W^{(t)}_2 \) are parameter matrices from \(\mathbb{R}^{d \times e} \), 
+                                and \(\sigma\) denotes a non-linear function, e.g., a \(\text{sigmoid}\) or a \(\text{ReLU}\).
+                                <br>
+                                (mapping the feature matrix \(n \times d \to n \times e \) by neural network layers &mdash; <mark>노드 임베딩</mark>)
+                            </li>
+                        </ul>
                 </ul>
         </ol>
 </ul>
