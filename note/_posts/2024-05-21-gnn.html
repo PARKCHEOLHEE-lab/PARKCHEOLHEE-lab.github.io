@@ -141,7 +141,69 @@ emoji: /emoji/brain.png
                                 where \(T > 0\) denotes the last layer.
                             </li>
                         </ul>
-                </ul>
+                    </ul>
+                <br>
+                <li>
+                    k-dimensional Graph Neural Networks
+                </li>
+                    <ul>
+                        <li>
+                            For a given k, we consider all k-element subset \([V(G)]^k \) over \(V(G)\).
+                            Let \(s = \{s_1, \, ... \, s_k\} \) be a k-set in \([V(G)]^k\), then we define the neighborhood of \(s\) as
+                            \[
+                                \,\\
+                                N(s) = \{ t \in [V(G)]^k \, | \,\, |s \cap t| = k - 1 \}
+                                \,\\
+                            \]
+
+                            <ul type="circle">
+                                <li>
+                                    (집합 \(s\)의 이웃 \(N(s)\)는 그래프 \(G\)에서 크기가 \(k\)인 모든 부분집합 \(t\) 중에서, \(s\)와 \(k - 1\)개의 노드를 공유하는 부분집합들의 집합)
+                                    \[
+                                        \,\\
+                                        e.g., \,\, V(G) = \{a,b,c,d,e\}, \, k = 3
+                                        \\
+                                        \,\\
+                                    \]
+                                </li>
+                                <li>
+                                    The subset satisfying \(k = 3\) is as:
+                                    \[
+                                        \,\\
+                                        [V(G)]^k = 
+                                        \{a, b, c\}, 
+                                        \{a, b, d\}, 
+                                        \{a, b, e\}, 
+                                        \{a, c, d\},
+                                        \{a, c, e\},
+                                        \{a, d, e\},
+                                        \{b, c, d\},
+                                        \{b, c, e\},
+                                        \{b, d, e\},
+                                        \{c, d, e\}
+                                        \,\\
+                                    \]
+                                </li>
+                                <li>
+                                    For \(s = \{a, b, c\}\), \(N(s)\) is subset that shares \(k - 1 = 2\) nodes as: 
+                                    \[
+                                    \,\\
+                                        N(s) = 
+                                        \{a, b, d\},
+                                        \{a, b, e\},
+                                        \{a, c, d\},
+                                        \{a, c, e\},
+                                        \{a, c, d\},
+                                        \{b, c, e\}.
+                                        \,\\
+                                    \]
+                                </li>
+                            </ul>
+
+
+                            
+                        </li>
+                    </ul>
         </ol>
 </ul>
 
