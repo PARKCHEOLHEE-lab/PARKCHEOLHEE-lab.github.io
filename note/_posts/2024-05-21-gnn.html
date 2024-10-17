@@ -120,6 +120,26 @@ emoji: /emoji/brain.png
                                 <br>
                                 (mapping the feature matrix \(n \times d \to n \times e \) by neural network layers &mdash; <mark>노드 임베딩</mark>)
                             </li>
+                            <li>
+                                이웃 노드에 대해서 permutation-invariant하도록 위 수식의 함수를 변경 가능하고, differentiable function으로 대체될 수 있음.
+                                In fully generality a new feature \(f^{(t)}(v) \) is computed as
+                                \[
+                                    \,\\
+                                    f^{W_1}_{merge} \, ( f^{(t-1)}(v), \, f^{W_2}_{aggr}(\{\{ f^{(t-1)}(w) \,|\, w \in N(v) \}\})  )
+                                    \,\\
+                                \]
+                            </li>
+                            <li>
+                                A vector representation \(f_{GNN}\) over the whole graph can be computed by
+                                summing over the vector representations computed for all nodes, i.e.,
+                                \[  
+                                    \,\\
+                                    f_{GNN}(G) = \sum_{v \in V(G)} f^{(T)}(v)
+                                    \,\\
+                                \]
+
+                                where \(T > 0\) denotes the last layer.
+                            </li>
                         </ul>
                 </ul>
         </ol>
