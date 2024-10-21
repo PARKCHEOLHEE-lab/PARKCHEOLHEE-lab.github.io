@@ -159,18 +159,15 @@ emoji: /emoji/brain.png
                             <ul type="circle">
                                 <li>
                                     (집합 \(s\)의 이웃 \(N(s)\)는 그래프 \(G\)에서 크기가 \(k\)인 모든 부분집합 \(t\) 중에서, \(s\)와 \(k - 1\)개의 노드를 공유하는 부분집합들의 집합)
-                                    \[
-                                        \,\\
-                                        e.g., \,\, V(G) = \{a,b,c,d,e\}, \, k = 3
-                                        \\
-                                        \,\\
-                                    \]
                                 </li>
+                                <br>
                                 <li>
-                                    The subset satisfying \(k = 3\) is as:
+                                    Let's say \(V(G) = \{a,b,c,d,e\}, \, k = 3 \). 
+                                    In this, the subset satisfying \(k = 3\) is as:
                                     \[
                                         \,\\
                                         [V(G)]^k = 
+                                        \{
                                         \{a, b, c\}, 
                                         \{a, b, d\}, 
                                         \{a, b, e\}, 
@@ -181,6 +178,7 @@ emoji: /emoji/brain.png
                                         \{b, c, e\},
                                         \{b, d, e\},
                                         \{c, d, e\}
+                                        \}
                                         \,\\
                                     \]
                                 </li>
@@ -189,19 +187,73 @@ emoji: /emoji/brain.png
                                     \[
                                     \,\\
                                         N(s) = 
+                                        \{
                                         \{a, b, d\},
                                         \{a, b, e\},
                                         \{a, c, d\},
                                         \{a, c, e\},
                                         \{a, c, d\},
                                         \{b, c, e\}.
+                                        \}
                                         \,\\
                                     \]
                                 </li>
                             </ul>
-
-
-                            
+                        </li>
+                        <br>
+                        <li>
+                            Definition of the local neighborhood \(N_{L}(s)\) is as:
+                            \[
+                                \,\\
+                                N_{L}(s) = \{ t \in N(s) \,|\, (v, w) \in E(G) \text{ for some } v \in s \setminus t \text{ and } w \in t \setminus s \}
+                                \,\\
+                            \]
+                            <ul type="circle">
+                                <li>
+                                    엣지로 연결된 노드를 의미. \( s = \{a, b, c\}, t = \{a, b, d\} \)일 때, \(s \setminus t = \{c\}, t \setminus s = \{d\}\).
+                                    이 때 엣지 \(c\)와 \(d\)가 엣지로 연결되어 있으면 \(N_{L}(s) \)에 속함.
+                                </li>
+                            </ul>
+                            <!-- The local neighborhood \(N_{L}(s)\) consists of all \(t \in N(s) \) such that \((v, w) \in E(G) \) for the unique \(v \in s \setminus t \) -->
+                        </li>
+                        <br>
+                        <li>
+                            Definition of the global neighborhood \(N_{G}(s) \) is as:
+                            \[
+                                \,\\
+                                N_{G}(s) = N(s) \setminus N_{L}(s)
+                                \,\\
+                            \]
+                        </li>
+                        <li>
+                            Let \((G, l)\) be a labeled graph. In each k-GNN layer \(t \geq 0 \), 
+                            we compute a feacture vector \(f^{(t)}_k(s) \) for each \(k\)-set \(s\) in \([ V(G) ]^k \).
+                            In each layer \(t > 0\), we compute new features by
+                            \[
+                                \,\\
+                                f^{(t)}_k(s) = \sigma\left( f^{(t-1)}_k(s) \cdot W^{(t)}_1 + \sum_{u \in N_L(s) \cup N_G(s)} f^{(t-1)}_k(u) \cdot W^{(t)}_2 \right)
+                                \,\\
+                            \]
+                        </li>
+                        <li>
+                            <mark>
+                                Moreover, one could split the sum into two sums ranging over \(N_L(s) \) and \(N_G(s) \) respectively,
+                                using distinct parameter matrices to enable the model to learn the importance of local and global neighborhoods.
+                            </mark>
+                            \[
+                                \,\\
+                                f^{(t)}_k(s) = \sigma\left( f^{(t-1)}_k(s) \cdot W^{(t)}_1 + \sum_{u \in N_L(s)} f^{(t-1)}_k(u) \cdot W^{(t)}_{2,L} + \sum_{u \in N_G(s)} f^{(t-1)}_k(u) \cdot W^{(t)}_{2,G} \right)
+                                \,\\
+                            \]
+                        </li>
+                        <li>
+                            To scale k-GNNs to larger datasets and to prevent overfitting, 
+                            we propose local k-GNNs, where we omit the global neighborhood of \(s\), i.e.,
+                            \[
+                                \,\\
+                                f^{(t)}_{k, L}(s) = \sigma\left( f^{(t-1)}_{k, L}(s) \cdot W^{(t)}_1 + \sum_{u \in N_L(s)} f^{(t-1)}_{k, L}(u) \cdot W^{(t)}_2 \right)
+                                \,\\
+                            \]
                         </li>
                     </ul>
         </ol>
