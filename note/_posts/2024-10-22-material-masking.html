@@ -1,0 +1,77 @@
+---
+title:  "Material Masking"
+layout: post
+---
+
+<br>
+<ul>
+    <li>
+        <a href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a>
+        <ul>
+            <li>
+                Highly efficient, running in parallel on the GPU
+            </li>
+            <li>
+                Allows for complex real-time effects not possible with standard materials
+            </li>
+        </ul>
+    </li>
+    <figure style="display: flex;">
+        <img src="/img/material-masking-1.png" width="48%">
+        <img src="/img/material-masking-2.png" width="48%">
+    </figure>
+    <figcaption>
+        <a href="https://www.landbook.net/service/ai-analytics">Landbook</a> architectural design engine
+        <br>
+        From the left, original 3D model · masked
+    </figcaption>
+    <br>
+    <li>
+        <a href="https://thebookofshaders.com/01/?lan=kr">fragmentShader</a>
+        <ul>
+            <li>
+                Executes per-pixel to determine final color output
+            </li>
+            <li>
+                Crucial for creating custom visual effects and material properties
+            </li>
+            <li>
+                <code>fragmentShader</code> properties must be compiled and run on the GPU using WebGL.
+            </li>
+            <li>
+                It uses GLSL (OpenGL Shading Language):
+                <ul>
+                    <li>
+                        Runs directly on the GPU for high-performance rendering
+                    </li>
+                    <li>
+                        In this context, used to define color output for each pixel (1.0 of <code>vec4(color, 1.0)</code> indicates that the color is fully solid)
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+<pre><code class="typescript">
+    const createMaskMaterial = (color: number) => {
+        return new THREE.ShaderMaterial({
+            uniforms: {
+                color: { value: new THREE.Color(color) }
+            },
+            fragmentShader: `
+            uniform vec3 color;
+            void main() {
+                gl_FragColor = vec4(color, 1.0);
+            }
+            `
+        });
+        };
+        
+    export const glassMaskMaterial = createMaskMaterial(0xff0000);        // red
+    export const backgroundMaskMaterial = createMaskMaterial(0x00ff00);   // green
+    export const wallMaskMaterial = createMaskMaterial(0x0000ff);         // blue
+    export const glassPanesMaskMaterial = createMaskMaterial(0x00ffff);   // cyan
+    export const columnsMaskMaterial = createMaskMaterial(0xff00ff);      // magenta
+</code></pre>
+</ul>
+
+<br><br>
