@@ -20,6 +20,14 @@ layout: post
         <img src="/img/material-masking-1.png" width="48%">
         <img src="/img/material-masking-2.png" width="48%">
     </figure>
+    <figure style="display: flex;">
+        <img src="/img/material-masking-3.png" width="48%">
+        <img src="/img/material-masking-4.png" width="48%">
+    </figure>
+    <figure style="display: flex;">
+        <img src="/img/material-masking-5.png" width="48%">
+        <img src="/img/material-masking-6.png" width="48%">
+    </figure>
     <figcaption>
         <a href="https://www.landbook.net/service/ai-analytics">Landbook</a> architectural design engine
         <br>
@@ -64,13 +72,16 @@ layout: post
             }
             `
         });
-        };
-        
-    export const glassMaskMaterial = createMaskMaterial(0xff0000);        // red
-    export const backgroundMaskMaterial = createMaskMaterial(0x00ff00);   // green
-    export const wallMaskMaterial = createMaskMaterial(0x0000ff);         // blue
-    export const glassPanesMaskMaterial = createMaskMaterial(0x00ffff);   // cyan
-    export const columnsMaskMaterial = createMaskMaterial(0xff00ff);      // magenta
+    };
+
+    export const glassMaskMaterial = createMaskMaterial(0xff0000);                   // red 
+    export const glassPanesMaskMaterial = createMaskMaterial(0x00ffff);              // cyan
+    export const columnsMaskMaterial = createMaskMaterial(0xff00ff);                 // magenta
+    export const wallMaskMaterial = createMaskMaterial(0x0000ff);                    // blue
+    export const surroundingBuildingsMaskMaterial = createMaskMaterial(0xffff00);    // yellow
+    export const surroundingParcelsMaskMaterial = createMaskMaterial(0xff4500);      // orange
+    export const roadMaskMaterial = createMaskMaterial(0x000000);                    // black
+    export const siteMaskMaterial = createMaskMaterial(0x00ff00);                    // green
 </code></pre>
 </ul>
 
