@@ -1,0 +1,162 @@
+---
+title:  "Attention Is All You Need"
+layout: post
+emoji: /emoji/brain.png
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/1706.03762">Attention Is All You Need</a>
+    </li>
+    <li>
+        <a href="https://pytorch.org/docs/stable/generated/torch.nn.Transformer.html">torch.nn.Transformer</a>
+    </li>
+    <li>
+        <a href="https://pytorch.org/docs/stable/generated/torch.nn.MultiheadAttention.html">torch.nn.MultiheadAttention</a>
+    </li>
+    <br>
+    <i>keywords to search: 
+        <a href="https://medium.com/humanscape-tech/rnn-recurrent-neural-network-%EC%88%9C%ED%99%98%EC%8B%A0%EA%B2%BD%EB%A7%9D-%EC%9D%84-%EC%9D%B4%ED%95%B4%ED%95%B4%EB%B3%B4%EC%9E%90-1697a5472af2">
+            RNN, 
+        </a>
+        LSTM, 
+        Gated RNN
+    </i>
+    <br><br>
+    <ol>
+        <li>
+            Introduction
+        </li>
+            <ul>
+                <li>
+                    Recurrent models typically factor computation along the symbol positions of the input and output sequences.
+                    Inherently seqquential nature of Recurrent model precludes parallelization within training examples, 
+                    which becomes critical at longer sequence lengths, as memory constraints limit batching across examples.
+                </li>
+                <li>
+                    <a href="https://en.wikipedia.org/wiki/Attention_(machine_learning)">Attention</a> mechanisms have become an integral part of sequence modeling and transduction models in various tasks, 
+                    <mark>allowing modeling of dependencies without regard to their distance in the input or output sequences.</mark>
+                </li>
+                <li>
+                    In this work we propose the <b>Transformer</b>, a model architecture eschewing recurrence and instead relying entirely on an attention mechanism to draw global dependencies between input and output.
+                </li>
+            </ul>
+        <!-- <br>
+        <li>
+            Background
+        </li>
+            <ul>
+                <li>
+                    Self-attention is an attention mechanism relating different positions of a single sequence in order to compute a representation of the sequence.
+                </li>
+            </ul> -->
+        <br>
+        <li>
+            Model Architecture
+        </li>
+            <ul>
+                <li>
+                    Most competitive neural sequence transduction models have an <b>encoder-decoder structure</b>.
+                    The encoder maps an input sequence of symbol representations \((x_1, \, ..., \, x_n) \) to a sequence of continuous representations \(z = (z_1, \, ..., \, z_n) \).
+                    Given \(z\), the decoder then generates an output sequence \((y_1, \, ..., \, y_m ) \).
+                </li>
+                <li>
+                    At each step the model is <b>auto-regressive</b>, consuming the previously generated symbols as additional input when generating the next.
+                    <figure>
+                        <img src="/img/attention-is-all-you-need-1.png" width="50%">
+                        <figcaption>Transformer model architecture</figcaption>
+                    </figure>
+                </li>
+                <br>
+                <li>
+                    The Transformer follows this overall architecture using stacked self-attention and point-wise (position-wise), 
+                    fully connected layers for both the encoder and decoder, shown in the left and right halves of Figure 1, respectively.
+                </li>
+                <br>
+                        <li>
+                            Encoder and Decoder stacks
+                        </li>
+                            <ul type="circle">
+                                <li>
+                                    <b>Encoder</b>: Each layer has two sub-layers.
+                                    The first is a multi-head self-attention mechanism, and the second is a simple, position-wise fully connected feed-forward network. 
+                                    <mark>We employ a residual connection around each of the two sub-layers</mark>, followed by <a href="https://velog.io/@tri2601/Layer-Normalization#:~:text=%EB%95%8C%20%ED%95%B4%EB%8B%B9%EB%90%98%EB%8A%94%20%EB%8C%80%EC%83%81%EB%93%A4%EC%9D%B4%EB%8B%A4.)-,%EB%B0%98%EB%A9%B4%20layer%20normalization%EC%97%90%EC%84%9C%EB%8A%94%20%EC%95%84%EB%9E%98%EC%99%80%20%EA%B0%99%EC%9D%B4%20%ED%95%98%EB%82%98%EC%9D%98%20%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%97%90%EC%84%9C%20Feature%20%EB%8C%80%EC%83%81%EC%9C%BC%EB%A1%9C%EB%A7%8C%20%ED%91%9C%EC%A4%80%ED%99%94%EA%B0%80%20%EC%9D%BC%EC%96%B4%EB%82%98%EB%8A%94%20%EA%B2%83%EC%9D%84%20%ED%99%95%EC%9D%B8%ED%95%A0%20%EC%88%98%20%EC%9E%88%EB%8B%A4.,-%EC%A6%89%2C%20layer%20normalization">layer normalization</a>.
+                                    The output of each sub-layer is as:
+                                    \[
+                                        \,\\
+                                        \text{LayerNorm}(x + \text{Sublayer}(x))
+                                        \,\\
+                                    \]
+                                </li>
+                                <li>
+                                    <b>Decoder</b>: The decoder inserts a third sub-layer, which performs multi-head
+                                    attention over the output of the encoder stack.
+                                    Similar to the encoder, we employ residual connections around each of the sub-layers, followed by layer normalization. 
+                                    <!-- <mark> -->
+                                        The masking, combined with fact that the output embeddings are offset by one position, ensures that the
+                                        predictions for position \(i\) can depend only on the known outputs at positions less than \(i\).
+                                    <!-- </mark> -->
+                                </li>
+                            </ul>
+                        <br>
+                        <li>
+                            Attention
+                        </li>
+                            <ul type="circle">
+                                <li>
+                                    An attention function can be described as mapping a query and a set of key-value pairs to an output,
+                                    where the query, keys, values, and output are all vectors.
+                                    The output is computed as a weighted sum of the values.
+
+                                    <figure>
+                                        <img src="/img/attention-is-all-you-need-2.png" width="85%">
+                                        <figcaption>From the left, Scaled Dot-Product Attention · Multi-Head Attention</figcaption>
+                                    </figure>
+                                </li>
+                                <br>
+                                <li>
+                                    Scaled Dot-Product Attention
+                                </li>
+                                    <ul>
+                                        <li>
+                                            The input consists of queries and keys of dimension \(d_k\), and values of dimension \(d_v\).
+                                            We compute the dot products of the query with all keys, divide each by
+                                            \(\sqrt{d_k} \), and apply a softmax function to obtain the weights on the values.
+                                            \[
+                                                \,\\
+                                                \text{Attention}(Q, K, V) = \text{softmax}(\frac{QK^T}{\sqrt{d_k}})V
+                                                \,\\
+                                            \]
+                                        </li>
+                                        <li>
+                                            Dot-product attention is identical to our algorithm, except for the scaling factor of \(\frac{1}{\sqrt{d_k}} \).
+                                        </li>
+                                        <br>
+<pre><code class="python">
+    class ScaledDotProductAttention(nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.softmax = nn.Softmax(dim=-1)
+
+        def forward(self, q, k, v):
+            d_k = torch.tensor(k.size(-1))
+            
+            numerator = torch.mm(q, k.t())
+            denominator = torch.sqrt(d_k)
+
+            return torch.mm(self.softmax(numerator / denominator), v)
+</code></pre>
+                                    </ul>
+                            </ul>
+            </ul>
+    </ol>
+    <!-- <br>
+    <li>
+        Implementation
+    </li> -->
+</ul>
+
+
+<br><br>
