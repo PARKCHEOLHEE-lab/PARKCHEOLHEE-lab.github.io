@@ -126,7 +126,7 @@ emoji: /emoji/brain.png
                                             \(\sqrt{d_k} \), and apply a softmax function to obtain the weights on the values.
                                             \[
                                                 \,\\
-                                                \text{Attention}(Q, K, V) = \text{softmax}(\frac{QK^T}{\sqrt{d_k}})V
+                                                \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^T}{\sqrt{d_k}}\right)V
                                                 \,\\
                                             \]
                                         </li>
@@ -141,15 +141,121 @@ emoji: /emoji/brain.png
             self.softmax = nn.Softmax(dim=-1)
 
         def forward(self, q, k, v):
-            d_k = torch.tensor(k.size(-1))
-            
-            numerator = torch.mm(q, k.t())
-            denominator = torch.sqrt(d_k)
+            attention = self.softmax(
+                torch.matmul(q, k.transpose(-1, -2))    # \(QK^{T}\)
+                / torch.sqrt(torch.tensor(k.size(-1)))  # \(\sqrt(d_{k})\)
+            )
 
-            return torch.mm(self.softmax(numerator / denominator), v)
+            return torch.matmul(attention, v)
+</code></pre>
+                                    </ul>
+                                <br>
+                                <li>
+                                    Multi-Head Attention
+                                </li>
+                                    <ul>
+                                        <li>
+                                            Instead of performing a single attention function with dmodel-dimensional keys, values and queries,
+                                            <mark>
+                                                we found it beneficial to linearly project the queries, keys and values \(h\) times with different, 
+                                                learned linear projections to \(d_{k}\), \(d_{k}\) and \(d_{v}\) dimensions, respectively. 
+                                            </mark>
+                                        </li>
+                                        <li>
+                                            Multi-head attention allows the model to jointly attend to information from different representation
+                                            subspaces at different positions. With a single attention head, averaging inhibits this.
+                                            \[
+                                                \,\\
+                                                \text{MultiHead}(Q, K, V) = \text{Concat(head_1, ..., head_h)}W^O
+                                                \,\\
+                                            \]
+
+                                            where \(head_i = \text{Attention}(QW^Q_i, \, KW^K_i, \, VW^V_i) \).
+                                        </li>
+                                        <li>
+                                            In this work we employ \(h = 8\) parallel attention layers, or heads.
+                                            For each of these we use \(d_k = d_v = d_{model}/h = 64  \). 
+                                        </li>
+                                        <br>
+<pre><code class="python">
+    class MultiHeadAttention(nn.Module):
+        def __init__(self, h=8, d_model=512):
+            super().__init__()
+            self.h = h
+            self.d_model = d_model
+            
+            self.d_k = d_model // h
+
+            self.linear_q = nn.Linear(d_model, d_model)
+            self.linear_k = nn.Linear(d_model, d_model)
+            self.linear_v = nn.Linear(d_model, d_model)
+            self.linear_o = nn.Linear(d_model, d_model)
+
+            self.scaled_dot_product_attention = ScaledDotProductAttention()
+            
+        def forward(self, q, k, v):
+            
+            qw = self.linear_q(q).reshape(q.shape[0], -1, self.h, self.d_k).transpose(1, 2)
+            kw = self.linear_k(k).reshape(q.shape[0], -1, self.h, self.d_k).transpose(1, 2)
+            vw = self.linear_v(v).reshape(q.shape[0], -1, self.h, self.d_k).transpose(1, 2)
+            
+            attention_scores = self.scaled_dot_product_attention(qw, kw, vw).transpose(1, 2)
+            attention_output = self.linear_o(attention_scores.reshape(q.shape[0], -1, self.d_model)) 
+            
+            return attention_output
 </code></pre>
                                     </ul>
                             </ul>
+                        <br>
+                        <li>
+                            Position-wise Feed-Forawrd Networks
+                        </li>
+                            <ul type="circle">
+                                <li>
+                                    In addition to attention sub-layers, each of the layers in our encoder and decoder contains a fully connected feed-forward network, 
+                                    which is applied to each position separately and identically. 
+                                    This consists of two linear transformations with a \(\text{ReLU}\) activation in between.
+                                    \[
+                                        \,\\
+                                        \text{FFN}(x) = \text{max}(0, xW_1 + b_1)W_2 + b_2
+                                        \,\\
+                                    \]
+                                </li>
+                            </ul>
+                            <br>
+                        <li>
+                            Positional Encoding
+                        </li>
+                            <ul type="circle">
+                                <li>
+                                    Since our model contains no recurrence and no convolution, in order for the model to make use of the
+                                    order of the sequence, we must inject some information about the relative or absolute position of the
+                                    tokens in the sequence.
+                                </li>
+                                <li>
+                                    The positional encodings have the same dimension \(d_{model}\) as the embeddings, so that the two can be summed.
+                                    \[
+                                        \,\\
+                                        \begin{aligned}
+                                        PE_{(pos, 2i)} &= sin(pos / 10000^{2i/d_{model}}) \\
+                                        PE_{(pos, 2i + 1)} &= cos(pos / 10000^{2i/d_{model}})
+                                        \end{aligned}
+                                        \,\\
+                                    \]
+
+                                    where \(pos\) is the position and \(i\) is the dimension.
+                                    <br>
+                                    (
+                                        \(pos = 1\)인 경우 첫 번째 단어, \(pos = 2\)인 경우 두 번째 단어. <br>
+                                        \(d_{model} = 512\)인 경우 \(i\) 는 0 ~ 511. <br>
+                                        \(pos\)를 큰 수로 나누어 노말라이즈? <br>
+                                        임베딩 된 단어 벡터들이 서로 가까운 위치에 있으면 비슷한 주기의 포지셔널 인코딩 값을 가지므로,
+                                        단어벡터와 포지셔널 인코딩 값이 더해졌을 때 유사한 값이 됨
+
+                                    )
+                                </li>
+                            </ul>
+                        </ul>
             </ul>
     </ol>
     <!-- <br>
