@@ -75,8 +75,8 @@ emoji: /emoji/brain.png
                     fully connected layers for both the encoder and decoder, shown in the left and right halves of Figure 1, respectively.
                 </li>
                 <br>
-                        <li>
-                            Encoder and Decoder stacks
+                        <li id="encoder-and-decoder-stacks">
+                            <span>Encoder and Decoder stacks</span>
                         </li>
                             <ul type="circle">
                                 <li>
@@ -221,6 +221,22 @@ emoji: /emoji/brain.png
                                         \,\\
                                     \]
                                 </li>
+<pre><code class="python">
+    class FeedForward(nn.Module):
+        def __init__(self, d_model, d_hidden):
+            super().__init__()
+            self.d_model = d_model
+            self.d_hidden = d_hidden
+            
+            self.ff = nn.Sequential(
+                nn.Linear(self.d_model, self.d_hidden),
+                nn.ReLU(),
+                nn.Linear(self.d_hidden, self.d_model)
+            )
+            
+        def forward(self, x):
+            return self.ff(x)
+</code></pre>
                             </ul>
                             <br>
                         <li>
@@ -246,7 +262,7 @@ emoji: /emoji/brain.png
                                     where \(pos\) is the position and \(i\) is the dimension.
                                     <br>
                                     (
-                                        \(pos = 1\)인 경우 첫 번째 단어, \(pos = 2\)인 경우 두 번째 단어. <br>
+                                        \(pos = 0\)인 경우 첫 번째 단어, \(pos = 1\)인 경우 두 번째 단어. <br>
                                         \(d_{model} = 512\)인 경우 \(i\) 는 0 ~ 511. <br>
                                         \(pos\)를 큰 수로 나누어 노말라이즈? <br>
                                         임베딩 된 단어 벡터들이 서로 가까운 위치에 있으면 비슷한 주기의 포지셔널 인코딩 값을 가지므로,
@@ -254,7 +270,103 @@ emoji: /emoji/brain.png
 
                                     )
                                 </li>
+                                <br>
+<pre><code class="python">
+    class PositionalEncoding(nn.Module):
+        def __init__(self, d_model, max_sequence_len=1000):
+            super().__init__()
+            self.d_model = d_model
+            self.max_sequence_len = max_sequence_len
+            
+            self.positional_encoding_table = torch.zeros(self.max_sequence_len, self.d_model)
+
+            pos = torch.arange(0, self.max_sequence_len).unsqueeze(1)
+            _2i = torch.arange(0, self.d_model)[0::2]
+            
+            self.positional_encoding_table[:, 0::2] = torch.sin(pos / 10000 ** (_2i / self.d_model))
+            self.positional_encoding_table[:, 1::2] = torch.cos(pos / 10000 ** (_2i / self.d_model))
+            
+        def forward(self, x):
+            return x + self.positional_encoding_table[:x.size(1), :]
+</code></pre>
                             </ul>
+                        <br>
+                        <li>
+                            Encoder and Decoder Layers
+                        </li>
+                            <ul type="circle">
+                                <li>
+                                    Based on the above, <a href="#encoder-and-decoder-stacks">Encoder and Decoder stacks</a> can be implemented as:
+                                </li>
+                                <br>
+<pre><code class="python">
+    class EncoderLayer(nn.Module):
+        def __init__(self, h=8, d_model=512, d_hidden=2048):
+            super().__init__() 
+            
+            self.h= h
+            self.d_model= d_model
+            self.d_hidden= d_hidden
+
+            self.self_attention = MultiHeadAttention(h=h, d_model=d_model)
+            self.layer_norm_1 = nn.LayerNorm(d_model)
+
+            self.feed_forward = FeedForward(d_model=d_model, d_hidden=d_hidden)
+            self.layer_norm_2 = nn.LayerNorm(d_model)
+
+        def forward(self, x):
+            attention_output = self.self_attention(x, x, x)
+            x = self.layer_norm_1(x + attention_output)
+
+            ff_output = self.feed_forward(x)
+            x = self.layer_norm_2(x + ff_output)
+
+            return x
+
+
+    class DecoderLayer(nn.Module):
+        def __init__(self, h=8, d_model=512, d_hidden=2048):
+            super().__init__()
+            
+            self.h= h
+            self.d_model= d_model
+            self.d_hidden= d_hidden
+            
+            self.self_attention = MultiHeadAttention(h=h, d_model=d_model)
+            self.layer_norm_1 = nn.LayerNorm(d_model)
+
+            self.cross_attention = MultiHeadAttention(h=h, d_model=d_model)
+            self.layer_norm_2 = nn.LayerNorm(d_model)
+
+            self.feed_forward = FeedForward(d_model=d_model, d_hidden=d_hidden)
+            self.layer_norm_3 = nn.LayerNorm(d_model)
+
+        def forward(self, x, encoded_x):
+            
+            attention_output = self.self_attention(x, x, x)
+            x = self.layer_norm_1(x + attention_output)
+            
+            cross_attention_output = self.cross_attention(x, encoded_x, encoded_x)
+            x = self.layer_norm_2(x + cross_attention_output)
+
+            ff_output = self.feed_forward(x)
+            x = self.layer_norm_3(x + ff_output)
+            
+            return x
+</code></pre>
+                            </ul>
+                        </ul>
+                        <br>
+                    <li>
+                        Why Self-Attention
+                    </li>
+                        <ul>
+                            <li>
+                                Parallelization: Self-attention can connect all positions with a constant number of sequential steps, while recurrent layers require sequential operations across the entire sequence. 
+                            </li>
+                            <li>
+                                Interpretability: Self-attention also enhances model interpretability by allowing us to observe how information is distributed across positions.
+                            </li>
                         </ul>
             </ul>
     </ol>
@@ -263,6 +375,10 @@ emoji: /emoji/brain.png
         Implementation
     </li> -->
 </ul>
+<br>
+<p style="text-align: center;">
+    (&nbsp;...&nbsp;)
+</p>
 
 
 <br><br>
