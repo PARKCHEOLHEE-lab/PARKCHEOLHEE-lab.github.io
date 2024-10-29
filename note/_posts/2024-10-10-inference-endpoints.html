@@ -1,0 +1,49 @@
+---
+title:  "HuggingFace Inference Endpoints"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://huggingface.co/docs/inference-endpoints/index">Inference Endpoints</a>
+    </li>
+        <ul>
+            <li>
+                Inference Endpoints offers a secure production solution to <b>easily deploy</b> any Transformers, Sentence-Transformers and Diffusers models from the Hub on dedicated and <b>autoscaling</b> infrastructure managed by Hugging Face.
+            </li>
+            <li>
+                A Hugging Face Endpoint is built from a Hugging Face Model Repository.
+            </li>
+        </ul>
+    <br>
+    <li>
+        <a href="https://huggingface.co/docs/inference-endpoints/guides/custom_handler">Create custom Inference Handler</a>
+    </li>
+    <br>
+    <li>
+        <a href="https://huggingface.co/learn/cookbook/enterprise_dedicated_endpoints">Inference Endpoints (dedicated)</a>
+    </li>
+        <ul>
+            <li>
+                Creating Endpoint
+            </li>
+                <ul>
+                    <li>
+                        <b>Automatic Scale-to-Zero</b>: You can configure your Endpoint to <b>scale to zero GPUs/CPUs after a certain amount of time</b>. Scaled-to-zero Endpoints are not billed anymore.
+                        (restarting the Endpoint requires the model to be re-loaded into memory)
+                    </li>
+                    <li>
+                        <b>Endpoint Security Level</b>: he standard security level is Protected, which requires an <b>authorized HF token</b> for accessing the Endpoint. 
+                        Public Endpoints are accessible by anyone without token authentification.
+                    </li>
+                </ul>
+            <figure>
+                <img src="/img/inference-endpoints-2.png">
+            </figure>
+        </ul>
+</ul>
+
+
+<br><br>
