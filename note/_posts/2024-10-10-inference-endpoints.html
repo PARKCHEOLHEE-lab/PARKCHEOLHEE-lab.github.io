@@ -21,6 +21,67 @@ layout: post
     <li>
         <a href="https://huggingface.co/docs/inference-endpoints/guides/custom_handler">Create custom Inference Handler</a>
     </li>
+        <ul>
+            <li>
+                Hugging Face Endpoints supports all of the Transformers and Sentence-Transformers tasks and can support custom tasks.
+                The customization can be done through a <code>handler.py</code> file in your model repository on the Hugging Face Hub.
+            </li>
+        </ul>
+<pre><code class="python">
+    class EndPointHandlerBaseConfig:
+        
+        ( ... )
+
+
+    class EndpointHandler(EndPointHandlerBaseConfig):
+        
+        def __init__(self, path=""):
+
+            self.controlnet = ControlNetModel.from_pretrained(
+                self.controlnet_model,
+                torch_dtype=torch.float16,
+                use_safetensor=True,
+                variant="fp16",
+                device=DEVICE,
+            )
+            
+            self.pipeline = StableDiffusionXLControlNetPipeline.from_pretrained(
+                self.diffusion_model,
+                controlnet=self.controlnet,
+                torch_dtype=torch.float16,
+                variant="fp16",
+                use_safetensors=True,
+                device=DEVICE,
+            )
+
+            self.pipeline.enable_model_cpu_offload()
+            self.pipeline.load_lora_weights(self.lora_model)
+            self.pipeline.fuse_lora(lora_scale=self.lora_scale)
+            
+            self.inpaint_pipeline = StableDiffusionXLInpaintPipeline.from_pretrained(
+                self.inpainting_model,
+                torch_dtype=torch.float16,
+                variant="fp16",
+                use_safetensors=True,
+                device=DEVICE,
+            )
+
+            self.inpaint_pipeline.enable_model_cpu_offload()
+            self.inpaint_pipeline.load_lora_weights(self.lora_model)
+            self.inpaint_pipeline.fuse_lora(lora_scale=self.lora_scale)
+
+        def __call__(self, data):
+
+            try:
+
+                ( Processing... )
+
+                return {"res": img_base64, "error": None}
+
+            except:
+                return {"res": None, "error": traceback.format_exc()}
+
+</code></pre>
     <br>
     <li>
         <a href="https://huggingface.co/learn/cookbook/enterprise_dedicated_endpoints">Inference Endpoints (dedicated)</a>
@@ -32,7 +93,7 @@ layout: post
                 <ul>
                     <li>
                         <b>Automatic Scale-to-Zero</b>: You can configure your Endpoint to <b>scale to zero GPUs/CPUs after a certain amount of time</b>. Scaled-to-zero Endpoints are not billed anymore.
-                        (restarting the Endpoint requires the model to be re-loaded into memory)
+                        <mark>(restarting the Endpoint requires the model to be re-loaded into memory)</mark>
                     </li>
                     <li>
                         <b>Endpoint Security Level</b>: he standard security level is Protected, which requires an <b>authorized HF token</b> for accessing the Endpoint. 
@@ -41,6 +102,24 @@ layout: post
                 </ul>
             <figure>
                 <img src="/img/inference-endpoints-2.png">
+                <figcaption>Create a new Dedicated Endpoint</figcaption>
+            </figure>
+            <br>
+        <li>
+            Deploying Endpoint
+        </li>
+            <ul>
+                <li>
+                    After successful endpoint creation, the inference endpoint is initialized as Fig 2.
+                </li>
+                <li>
+                    The Endpoint has <code>Initializing</code>, <code>Running</code>, and <code>Scaled to Zero</code> status.
+                </li>
+            </ul>
+            <br>
+            <figure>
+                <img src="/img/inference-endpoints-1.png">
+                <figcaption>Initializing Endpoint</figcaption>
             </figure>
         </ul>
 </ul>
