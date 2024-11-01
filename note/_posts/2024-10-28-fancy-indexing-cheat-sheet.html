@@ -1,0 +1,298 @@
+---
+title:  "Fancy Indexing Cheat Sheet"
+layout: post
+---
+
+https://azanewta.tistory.com/3
+
+<br>
+
+<br>
+<ul>
+    <li>
+        Fancy Indexing Chaet Sheet for <code>torch</code> or <code>numpy</code>
+    </li>
+    <br>
+        <ul>
+            <li>
+                Integer Array Indexing
+<pre><code class="text">
+    >>> tensor = torch.tensor([10, 20, 30, 40, 50])
+    >>> indices = torch.tensor([0, 2, 4])
+    >>> 
+    >>> tensor[indices]
+    tensor([10, 30, 50])
+</code></pre><br>
+            </li>
+            <li>
+                Boolean Indexing
+<pre><code class="text">
+    >>> tensor = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+    >>> mask = tensor >= 5
+    >>>
+    >>> tensor[mask]
+    tensor([5, 6, 7, 8, 9])
+    >>>
+    >>> mask = (tensor > 3) & (tensor < 8)
+    >>> tensor[mask]
+    tensor([4, 5, 6, 7])
+</code></pre><br>
+            </li>
+            <li>
+                Odd, Even Indices Slicing
+<pre><code class="text">
+    >>> tensor = torch.tensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]) 
+    >>> tensor[0::2] 
+    tensor([0, 2, 4, 6, 8])
+    >>>
+    >>> tensor[1::2] 
+    tensor([1, 3, 5, 7, 9])
+</code></pre><br>
+            </li>
+            <li>
+                Column Selection
+<pre><code class="text">
+    >>> tensor = torch.rand(5,5)           
+    >>> tensor
+    tensor([[0.5746, 0.5543, 0.9141, 0.8926, 0.9544],
+            [0.2345, 0.3636, 0.2386, 0.4232, 0.2438],
+            [0.9541, 0.2886, 0.1002, 0.9618, 0.8182],
+            [0.1020, 0.5195, 0.6361, 0.7777, 0.1868],
+            [0.1710, 0.8712, 0.3062, 0.1522, 0.6494]])
+    >>>
+    >>> tensor[:, 2:] 
+    tensor([[0.9141, 0.8926, 0.9544],
+            [0.2386, 0.4232, 0.2438],
+            [0.1002, 0.9618, 0.8182],
+            [0.6361, 0.7777, 0.1868],
+            [0.3062, 0.1522, 0.6494]])
+    >>>
+    >>> tensor[:, 0::2] 
+    tensor([[0.5746, 0.9141, 0.9544],
+            [0.2345, 0.2386, 0.2438],
+            [0.9541, 0.1002, 0.8182],
+            [0.1020, 0.6361, 0.1868],
+            [0.1710, 0.3062, 0.6494]])
+    >>>
+    >>> tensor[:, [1, 2, 4]] 
+    tensor([[0.5543, 0.9141, 0.9544],
+            [0.3636, 0.2386, 0.2438],
+            [0.2886, 0.1002, 0.8182],
+            [0.5195, 0.6361, 0.1868],
+            [0.8712, 0.3062, 0.6494]])
+</code></pre><br>
+            </li>
+            <li>
+                Row Selection
+<pre><code class="text">
+    >>> tensor = torch.randint(low=1, high=5, size=(5, 5)) 
+    >>> tensor
+    tensor([[3, 4, 1, 4, 3],
+            [1, 3, 4, 1, 4],
+            [3, 3, 3, 1, 2],
+            [4, 3, 4, 1, 1],
+            [4, 3, 2, 3, 3]])
+    >>>
+    >>> tensor[[1, 2, 4], :]  
+    tensor([[1, 3, 4, 1, 4],
+            [3, 3, 3, 1, 2],
+            [4, 3, 2, 3, 3]])
+</code></pre><br>
+            </li>
+            </li>
+            <li>
+                Fancy Indexing to Assign New Values
+<pre><code class="text">
+    >>> tensor = torch.eye(5, dtype=int) 
+    >>> tensor
+    tensor([[1, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 1]])
+    >>>
+    >>> tensor_to_assign = torch.tensor([2] * 10).reshape(5, 2) 
+    >>> tensor_to_assign
+    tensor([[2, 2],
+            [2, 2],
+            [2, 2],
+            [2, 2],
+            [2, 2]])
+    >>>
+    >>> tensor[:, 3:] = tensor_to_assign
+    >>> tensor
+    tensor([[1, 0, 0, 2, 2],
+            [0, 1, 0, 2, 2],
+            [0, 0, 1, 2, 2],
+            [0, 0, 0, 2, 2],
+            [0, 0, 0, 2, 2]])
+</code></pre><br>
+            </li>
+            <li>
+                Ellipsis (...) Indexing
+<pre><code class="text">
+    >>> tensor = torch.randint(low=0, high=3, size=(3, 5, 5)) 
+    >>> tensor
+    tensor([[[2, 2, 0, 2, 1],
+             [0, 0, 2, 1, 2],
+             [2, 1, 2, 0, 0],
+             [2, 0, 2, 1, 2],
+             [1, 0, 1, 0, 2]],
+    
+            [[2, 0, 1, 0, 1],
+             [0, 2, 0, 1, 1],
+             [1, 1, 2, 2, 1],
+             [1, 1, 0, 2, 2],
+             [2, 2, 2, 0, 2]],
+    
+            [[0, 0, 0, 1, 2],
+             [1, 1, 2, 2, 2],
+             [0, 2, 0, 2, 2],
+             [1, 0, 1, 1, 0],
+             [0, 1, 1, 2, 2]]])
+    >>>
+    >>> tensor[..., [1, 3, 4]]  
+    tensor([[[2, 2, 1],
+             [0, 1, 2],
+             [1, 0, 0],
+             [0, 1, 2],
+             [0, 0, 2]],
+    
+            [[0, 0, 1],
+             [2, 1, 1],
+             [1, 2, 1],
+             [1, 2, 2],
+             [2, 0, 2]],
+    
+            [[0, 1, 2],
+             [1, 2, 2],
+             [2, 2, 2],
+             [0, 1, 0],
+             [1, 2, 2]]])
+    >>>
+    >>> tensor[:, :, [1, 3, 4]] 
+    tensor([[[2, 2, 1],
+            [0, 1, 2],
+            [1, 0, 0],
+            [0, 1, 2],
+            [0, 0, 2]],
+
+            [[0, 0, 1],
+            [2, 1, 1],
+            [1, 2, 1],
+            [1, 2, 2],
+            [2, 0, 2]],
+
+            [[0, 1, 2],
+            [1, 2, 2],
+            [2, 2, 2],
+            [0, 1, 0],
+            [1, 2, 2]]])
+    >>>
+    >>> tensor[:, :, [1, 3, 4]] == tensor[..., [1 ,3, 4]]
+    tensor([[[True, True, True],
+             [True, True, True],
+             [True, True, True],
+             [True, True, True],
+             [True, True, True]],
+    
+            [[True, True, True],
+             [True, True, True],
+             [True, True, True],
+             [True, True, True],
+             [True, True, True]],
+    
+            [[True, True, True],
+             [True, True, True],
+             [True, True, True],
+             [True, True, True],
+             [True, True, True]]])
+</code></pre><br>
+            </li>
+            <li>
+                Masked Attention Pattern
+<pre><code class="text">
+    >>> tensor = torch.randn(5, 5) 
+    >>> tensor
+    tensor([[ 2.6905,  0.7315, -1.7664, -0.3756,  0.5078],
+            [ 0.6439, -0.0957, -0.8937, -0.0906, -0.1703],
+            [-0.3668,  1.4109,  1.6311, -0.4336, -0.5390],
+            [-0.2582,  0.2531,  0.2944,  2.2941,  0.0825],
+            [-2.1098, -0.1884, -1.1419,  0.0273,  0.4367]])
+    >>>
+    >>> mask = torch.triu(torch.ones(5, 5), diagonal=1).bool()
+    >>> mask
+    tensor([[False,  True,  True,  True,  True],
+            [False, False,  True,  True,  True],
+            [False, False, False,  True,  True],
+            [False, False, False, False,  True],
+            [False, False, False, False, False]])
+    >>>
+    >>> tensor[mask] = float("-inf") 
+    >>> tensor
+    tensor([[ 2.6905,    -inf,    -inf,    -inf,    -inf],
+            [ 0.6439, -0.0957,    -inf,    -inf,    -inf],
+            [-0.3668,  1.4109,  1.6311,    -inf,    -inf],
+            [-0.2582,  0.2531,  0.2944,  2.2941,    -inf],
+            [-2.1098, -0.1884, -1.1419,  0.0273,  0.4367]])
+</code></pre><br>
+            </li>
+            <li>
+                Dummy Axis for Broadcasting
+<pre><code class="text">
+    >>> tensor_1 = torch.tensor([1, 2, 3, 4, 5])
+    >>> tensor_1.shape
+    torch.Size([5])
+    >>>
+    >>> tensor_2 = torch.tensor([1, 0.6, 0.3])
+    >>> tensor_2.shape
+    torch.Size([3])
+    >>>
+    >>> tensor_1 + tensor_2
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    RuntimeError: The size of tensor a (5) must match the size of tensor b (3) at non-singleton dimension 0
+    >>>
+    >>> tensor_1[:, None] 
+    tensor([[1],
+            [2],
+            [3],
+            [4],
+            [5]])
+    >>>
+    >>> tensor_1[:, None].shape
+    torch.Size([5, 1])
+    >>>
+    >>> tensor_1[:, None] + tensor_2
+    tensor([[2.0000, 1.6000, 1.3000],
+            [3.0000, 2.6000, 2.3000],
+            [4.0000, 3.6000, 3.3000],
+            [5.0000, 4.6000, 4.3000],
+            [6.0000, 5.6000, 5.3000]])
+</code></pre><br>
+            </li>
+            <li>
+                Row and Column Selection with Dummy Axis
+<pre><code class="text">
+    >>> tensor = torch.randint(0, 9, (4,4)) 
+    >>> tensor
+    tensor([[2, 1, 0, 2],
+            [5, 6, 4, 4],
+            [4, 6, 4, 1],
+            [7, 4, 4, 3]])
+    >>>
+    >>> row = torch.tensor([0, 2])
+    >>> col = torch.tensor([1, 3])
+    >>>
+    >>> tensor[row, col] 
+    tensor([1, 1])
+    >>>
+    >>> tensor[row[:, None], col] 
+    tensor([[1, 2],
+            [6, 1]])
+</code></pre>
+        </ul>
+        
+</ul>
+
+<br><br>
