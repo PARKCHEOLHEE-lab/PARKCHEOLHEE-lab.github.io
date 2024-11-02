@@ -52,7 +52,7 @@
         <div style="margin-top: -0.1em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
               
-              <div class="useBottomLine" style="display: flex; justify-content: space-between;">
+              <div class="{% if forloop.last == false %}useBottomLine{% endif %}" style="display: flex; justify-content: space-between;">
                 <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center;">
                   {% if post.emoji %}
                     <img src="{{ post.emoji }}" class="emoji-img"> {{ post.title }}
