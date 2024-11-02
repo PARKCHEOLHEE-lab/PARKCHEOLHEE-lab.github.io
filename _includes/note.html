@@ -47,9 +47,9 @@
       {% assign unpinned_posts = site.categories.note | where_exp: "post", "post.emoji != '/emoji/pin.png'" %}
       {% assign all_posts = pinned_posts | concat: unpinned_posts %}
       
-      {% for post in all_posts %}
-
-        <div style="margin-top: -0.1em">
+      <div id="posts-container">
+        {% for post in all_posts %}
+          <div class="post-item" style="display: none; margin-top: -0.1em">
             <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
               
               <div class="useBottomLine" style="display: flex; justify-content: space-between;">
@@ -71,8 +71,53 @@
                 </time>
               </div>
             </div>
+          </div>
+        {% endfor %}
+
+        <div class="post-item" id="load-more" style="display: none; margin-top: -0.1em">
+          <div class="onClickDiv">
+            <div style="display: flex; justify-content: space-between;">
+              <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center; font-weight: 100;">
+                <img src="/emoji/default.png" class="emoji-img">Load more
+              </h4>
+              <span class="useGray" style="font-size: smaller; margin-top: 0.5em; margin-bottom: 0.5em;"></span>
+            </div>
+          </div>
         </div>
-      {% endfor %}
+      </div>
+
+      <script>
+        const postsPerPage = 5;
+        const postItems = document.querySelectorAll('.post-item:not(#load-more)');
+        let currentlyShown = 0;
+
+        function showMorePosts() {
+          const start = currentlyShown;
+          const end = Math.min(start + postsPerPage, postItems.length);
+          
+          for (let i = start; i < end; i++) {
+            postItems[i].style.display = 'block';
+          }
+          
+          currentlyShown = end;
+          
+          if (currentlyShown >= postItems.length) {
+            document.getElementById('load-more').style.display = 'none';
+          } else {
+            document.getElementById('load-more').style.display = 'block';
+          }
+        }
+
+        // 초기 포스트 로드
+        showMorePosts();
+
+        // Load more 버튼의 초기 표시 상태 설정
+        document.getElementById('load-more').style.display = 
+          currentlyShown < postItems.length ? 'block' : 'none';
+
+        // Load more 버튼 이벤트 리스너
+        document.getElementById('load-more').addEventListener('click', showMorePosts);
+      </script>
   {% endif %}
 
   <!-- <div style="text-align: center;"> -->
