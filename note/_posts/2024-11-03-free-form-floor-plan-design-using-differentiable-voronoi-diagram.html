@@ -23,9 +23,9 @@ emoji: /emoji/brain.png
                     </li> -->
                     <li>
                         Recent data-driven methods have employed deep learning to create floor plans. 
-                        However, <mark>these learning-based methods often fail
+                        However, these learning-based methods often fail
                         to support unconventional room shapes and new constraints that are
-                        not assumed in a specific training dataset.</mark>
+                        not assumed in a specific training dataset.
                     </li>
                     <li>
                         Unfortunately, the existing methods are not suitable 
@@ -43,7 +43,7 @@ emoji: /emoji/brain.png
                         Specifically, <b>one room is defined using multiple Voronoi cells</b> that are implicitly
                         defined based on the distance to the
                         Voronoi sites(centroids of the voronoi cells) and support topology changes,
-                        <mark>which facilitates flexible exploration of room connectivity</mark>
+                        which facilitates flexible exploration of room connectivity
                         during optimization.
                     </li>
                     <li>
@@ -150,6 +150,101 @@ emoji: /emoji/brain.png
                             </li>
                         </ul>
                 </ul>
+            <br>
+            <li>
+                Method
+            </li>
+                <ol type="i">
+                    <li>
+                        Floor plan representation
+                    </li>
+                        <ul>
+                            <li>
+                                The user provides a 2D region \(\Omega\), which is the outline of the available space.
+                                Given the region, a connected and bounded shape in the 2D space \(\mathbb{R}^2\), 
+                                we intend to compute a partition of \(\Omega\) into multiple rooms. 
+                            </li>
+                            <br>
+                            <li>
+                                <b>Voronoi diagram</b>: To achieve topological flexibility in the connectivity 
+                                between rooms, we use the Voronoi diagram to represent the
+                                partition. A Voronoi diagram is generated from a set of points,
+                                called sites \(\mathcal{S} = \{s_1 \,...\, s_N\}\). 
+                                Each site \(s_i\) is assiciated with a region \(\mathcal{C}_i\) called cell, 
+                                which comprises the points whose nearest site is the cell's site, i.e.,
+                                \[
+                                    \,\\
+                                    \mathcal{C}_i = \{ \mathbf{x} \in \Omega \, | \, ||\, \mathbf{x}-s_i \,|| \leq ||\, \mathbf{x}-s_j \,|| \text{ for all } i \neq j \}
+                                    \,\\
+                                \]
+                            </li>
+                            <li>
+                                <b>Voronoi vertex</b>: The cells take polygonal shapes, whose corner
+                                vertices are called Voronoi vertices. We denote the set of all the
+                                Voronoi vertices in the diagram as \(\mathcal{V} = \{ \mathbf{v}_1 \, ... \, \mathbf{v}_M \}\).
+                                <br>
+                                To compute the deformation of the room boundary from the site
+                                motion, classifying the Voronoi vertices into the following three
+                                types is convenient (see Fig 1 above): 
+                                \(\text{(a)}\) the intersection of the three bisectors, 
+                                \(\text{(b)}\) the intersection of one bisector and the boundary \(\Omega\),
+                                and \(\text{(c)}\) the vertex forming the corner of \(\Omega\).
+                                Unlike \(\text{(a)}\) and \(\text{(b)}\), the position of \(\text{(c)}\) does not depend on the Voronoi sites and
+                                is constant during our optimization.
+                                <br>
+                                <figure>
+                                    <img src="/img/floor-plan-1.png" width="60%">
+                                    <figcaption>
+                                        The Voronoi diagram shows the partition of the input
+                                        region \(\Omega\) by a set of points called sites
+                                        \(\mathcal{S}\). 
+                                        The corners of the Voronoi cells are Voronoi vertices \(\mathcal{V}\). 
+                                        The Voronoi vertex is either a vertex of \(\Omega\) (c), on the boundary edge (b), or inside \(\Omega\) (a). 
+                                        The combination of multiple cells represents a room.
+                                    </figcaption>
+                                </figure>
+                            </li>
+                            <br>
+                            <li>
+                                <b>Room representation</b>:
+                                A typical floor plan is complex and thus its room cannot be represented by
+                                a single Voronoi cell. To increase the representation capability, 
+                                we combine multiple cells to represent one room (see Fig 1 right-most). 
+                                This is concretely achieved by associating each site with one
+                                of the rooms, which is determined at the initialization and then remains constant.
+                            </li>
+                            <br>
+                            <li>
+                                <b>Initialization</b>: 
+                                At the time of initialization, <b>
+                                    we randomly generate
+                                    a user-specified number of sites
+                                </b> in the input region
+                                \(\Omega\). To ensure that no two sites are excessively close to each other, we use the
+                                <a href="https://lifeisforu.tistory.com/545">Poisson disk sampling</a> with the dart-throwing algorithm.
+                                Note that the areas of individual sites are not constrained during the optimization, 
+                                and the room area of the output plan is governed by the area loss explained later.
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Floor plan optimization
+                    </li>
+                    <ul>
+                        <li>
+                            We optimize the shape and connectivity of the rooms by moving the positions of the sites.
+                            <mark>The sites are moved to minimize the scalar loss function \(\mathcal{L}\) that formulates the desirable properties of the rooms.</mark>
+                            Since the optimization variables are continuous values
+                            of 2D coordinates, they can be easily incorporated into the optimization framework using the gradients of \(\mathcal{L}\).
+                        </li>
+                        <li>
+                            During the optimization, we do not strictly constrain the site to be inside the region \(\Omega\). 
+                            Instead, by allowing the sites to move freely outside \(\Omega\), we can
+                            handle a concave input region \(\Omega\).
+                            
+                        </li>
+                    </ul>
+                </ol>
         </ol>
     <br>
     <li>
