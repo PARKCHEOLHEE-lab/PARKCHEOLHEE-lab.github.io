@@ -182,7 +182,7 @@ emoji: /emoji/brain.png
                                 <b>Voronoi vertex</b>: The cells take polygonal shapes, whose corner
                                 vertices are called Voronoi vertices. We denote the set of all the
                                 Voronoi vertices in the diagram as \(\mathcal{V} = \{ \mathbf{v}_1 \, ... \, \mathbf{v}_M \}\).
-                                <br>
+                                <br><br>
                                 To compute the deformation of the room boundary from the site
                                 motion, classifying the Voronoi vertices into the following three
                                 types is convenient (see Fig 1 above): 
@@ -198,8 +198,8 @@ emoji: /emoji/brain.png
                                         The Voronoi diagram shows the partition of the input
                                         region \(\Omega\) by a set of points called sites
                                         \(\mathcal{S}\). 
-                                        The corners of the Voronoi cells are Voronoi vertices \(\mathcal{V}\). 
-                                        The Voronoi vertex is either a vertex of \(\Omega\) (c), on the boundary edge (b), or inside \(\Omega\) (a). 
+                                        The corners of the Voronoi cells are Voronoi vertices \(\mathcal{V}\).
+                                        The Voronoi vertex is either a vertex of \(\Omega\) \(\text{(c)}\), on the boundary edge \(\text{(b)}\), or inside \(\Omega\) \(\text{(a)}\). 
                                         The combination of multiple cells represents a room.
                                     </figcaption>
                                 </figure>
@@ -237,11 +237,67 @@ emoji: /emoji/brain.png
                             Since the optimization variables are continuous values
                             of 2D coordinates, they can be easily incorporated into the optimization framework using the gradients of \(\mathcal{L}\).
                         </li>
+                        <br>
                         <li>
                             During the optimization, we do not strictly constrain the site to be inside the region \(\Omega\). 
                             Instead, by allowing the sites to move freely outside \(\Omega\), we can
                             handle a concave input region \(\Omega\).
+                        </li>
+                        <br>
+                        <li>
+                            <b>Differentiable Voronoi diagram</b>: We differentiate these components
+                            with respect to the site positions \(\mathcal{S}\) using the chainr rele
+                            by computing the gradients \(\partial\mathcal{V} / \partial\mathcal{S} \).
+                            The positions of the Voronoi vertices change linearly with the infinitesimal movement of the sites.
+                            However, this change does not affect the loss or gradient computation, which is performed independently for each iteration.
+                        </li>
+                        <br>
+                        <li>
+                            <b>Loss function</b>: We update the coordinates of the sites \(\mathcal{S}\) to minimize the loss \(\mathcal{L}\).
+                            Specifically, our loss \(\mathcal{L}\) is defined as the weighted sum of the different losses as
+                            \[
+                                \,\\
+                                \begin{align*}
+                                \mathcal{S}^{*} &= \arg \min_{\mathcal{S}} \mathcal{L}(\mathcal{S}, \mathcal{V}(\mathcal{S})) \\
+                                \mathcal{L} &= \mathcal{L}_{\text{wall}} + \mathcal{L}_{\text{area}} + \mathcal{L}_{\text{fix}} + \mathcal{L}_{\text{topo}} + \mathcal{L}_{\text{L1oyd}}
+                                \end{align*}
+                                \,\\
+                            \]
+
+                            We use gradient-based optimization to minimize the loss function \(\mathcal{L}\) in the above.
+                            Each time the sites are moved by the optimization, the Voronoi diagram is updated.
+                            <br><br>
+                            We use \(\mathcal{L}_{\text{fix}}\) to fix some of the sites. 
+                            For instance, the entrance to the house is specified by the user by fixing the sites related to the entrance there.
+                        </li>
+                        <br>
+                        <li>
+                            <b>Wall loss</b>: 
+                            As the unconstrained Voronoi diagram typically produce 
+                            undesirable fluctuations in the wall orientations, 
+                            we design a tailored loss function to regularize the wall complexity.
+                            Inspired by the <a href="https://arxiv.org/pdf/1910.02926">Cubic Stylization</a>, 
+                            we regularize the \(\mathcal{L}_1\) norm of the wall length.
+                            \(L_1\) norm is defined as \(v_x + v_y\) (norm of \(x\) + norm of \(y\)), 
+                            <mark>
+                                therefore the \(\mathcal{L}_{\text{wall}}\) has the minimal when vector \(\mathbb{v}_j - \mathbb{v}_i\) is vertical of horizontal.
+                            </mark>
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{wall}} = w_{\text{wall}} \sum_{(v_i, v_j) \, \in \, \mathcal{E}} ||\, \mathbb{v}_i - \mathbb{v}_j \,||_{L1}
+                                \,\\
+                            \]
                             
+                            where \(\mathcal{E}\) denotes the set of edges of the Voronoi cells between two
+                            adjacent rooms and the \(\mathbb{v}_i\) and \(\mathbb{v}_j\) denote the Voronoi vertices belonging to the edge.
+                            <br>
+
+                            <figure>
+                                <img src="/img/floor-plan-2.png" width="80%">
+                                <figcaption>
+                                    Computation of loss functions <br>
+                                </figcaption>
+                            </figure>
                         </li>
                     </ul>
                 </ol>
