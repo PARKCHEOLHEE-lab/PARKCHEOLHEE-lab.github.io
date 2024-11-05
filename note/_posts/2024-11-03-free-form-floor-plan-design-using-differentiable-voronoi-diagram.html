@@ -259,7 +259,7 @@ emoji: /emoji/brain.png
                                 \,\\
                                 \begin{align*}
                                 \mathcal{S}^{*} &= \arg \min_{\mathcal{S}} \mathcal{L}(\mathcal{S}, \mathcal{V}(\mathcal{S})) \\
-                                \mathcal{L} &= \mathcal{L}_{\text{wall}} + \mathcal{L}_{\text{area}} + \mathcal{L}_{\text{fix}} + \mathcal{L}_{\text{topo}} + \mathcal{L}_{\text{L1oyd}}
+                                \mathcal{L} &= \mathcal{L}_{\text{wall}} + \mathcal{L}_{\text{area}} + \mathcal{L}_{\text{fix}} + \mathcal{L}_{\text{topo}} + \mathcal{L}_{\text{Lloyd}}
                                 \end{align*}
                                 \,\\
                             \]
@@ -299,9 +299,79 @@ emoji: /emoji/brain.png
                                 </figcaption>
                             </figure>
                         </li>
+                        <br>
+                        <li>
+                            <b>Area loss</b>: The area of each room is specified by the user. 
+                            We minimize the quadratic difference between the current room areas and
+                            the user-specified targets. Here, \(\bar{A}_r\) denotes the target area for the room \(r\).
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{area}} = w_{\text{area}} \sum_{r=1}^{\#Room} ||\, A_r(\mathcal{V}) - \bar{A}_r \,||^2
+                                \,\\
+                            \]
+
+                            
+                        </li>
+                        <br>
+                        <li>
+                            <b>Lloyd loss</b>: To regulate the site density, we design a loss function inspired by the <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/On-Centroidal-Voronoi-Tessellation-Energy-Smoothness-and-Fast-Computation.pdf">Lloyd's algorithm</a>.
+                            Here, \(\mathbb{c}_i \) denotes the centroid of the \(i\)-th Voronoi cell.
+                            This is useful for attracting these exterior sites inside \(\Omega\).
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{Lloyd}} = w_{\text{Lloyd}} \sum_{i=1}^N ||\, \mathbb{s}_i - \mathbb{c}_i \,||^2
+                                \,\\
+                            \]
+                        </li>
+                        <br>
+                        <li>
+                            <b>Topology loss</b>: We design the topology loss such that each room is
+                            a single connected region, and the specified connections between
+                            rooms are achieved. We move the site to satisfy the desired topology by setting the goal position
+                            \(\mathbb{t}_i\) for each site
+                            \(\mathbb{s}_i\) as
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{topo}} = w_{\text{topo}} \sum_{i=1}^N ||\, \mathbb{s}_i - \mathbb{t}_i \,||^2
+                                \,\\
+                            \]
+
+                            The goal position
+                            \(\mathbb{t}_i\)
+                            can be automatically computed as the nearest
+                            site to the site from the same group.
+
+                            <br>
+                            <figure>
+                                <img src="/img/floor-plan-3.png" width="80%">
+                                <figcaption>
+                                    The positions of target sites for topology loss
+                                </figcaption>
+                            </figure>
+                            <br>
+                            For each room, we
+                            first group the sites belonging to that room into groups of adjacent
+                            sites. If multiple groups are present, that is, a room is split into
+                            separated regions, 
+                            <mark>
+                                we set the target position of the site \(\mathbb{t}_i\)
+                                as the
+                                nearest site to that group.
+                            </mark>
+                            <br><br>
+                            If a room is connected in one piece, we examine the connectivity
+                            between two different rooms specified by the user. If two rooms
+                            that are specified as “connected” in the input are not adjacent, we
+                            compute the nearest pair of sites from each room and then set the
+                            positions as the target positions for each other.
+                        </li>
                     </ul>
                 </ol>
         </ol>
+    <br>
+    <p style="text-align: center;">
+        (&nbsp;...&nbsp;)
+    </p>
     <br>
     <li>
         <a href="https://github.com/nobuyuki83/floor_plan">https://github.com/nobuyuki83/floor_plan</a>
