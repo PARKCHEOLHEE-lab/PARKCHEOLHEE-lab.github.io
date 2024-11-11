@@ -1,0 +1,65 @@
+---
+title:  "nohup"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://janakiev.com/blog/python-background/">Running a Python Script in the Background in Linux</a>
+    </li>
+        <ul>
+            <li>
+                You can run the script with <code>nohup</code> which ignores the hangup signal. This means that you can close the terminal without stopping the execution.
+                Also, don’t forget to add & so the script runs in the background:
+            </li>
+<pre><code class="python">
+    # test_handler.py
+
+    from handler import EndpointHandler
+    handler = EndpointHandler()
+    for _ in range(100):
+
+        (...)
+
+        response = handler(
+            data={
+                "base_image": base_image,
+                "material_image": material_image,
+                "prompt_material": prompt_material,
+                "seed": seed,
+            }, 
+        )
+        
+        (...)
+</code></pre>
+<pre><code class="text">
+    nohup python test_handler.py &
+</code></pre><br>
+<li>
+    The output will be saved <code>.log</code> file:
+<pre><code class="text">
+    nohup python test_handler.py > output.log &
+    [1] 1729
+</code></pre><br>
+            </li>
+            <li>
+                You can find the process and its process Id with this command:
+<pre><code class="text">
+    ps aux | grep test_handler.py
+    root      1729 10.2  0.2 29499332 541108 pts/2 SNl  11:08   0:07 python test_handler.py
+    root      3007  0.0  0.0   4032  2008 pts/2    S+   11:09   0:00 grep --color=auto --exclude-dir=.bzr --exclude-dir=CVS --exclude-dir=.git --exclude-dir=.hg --exclude-dir=.svn --exclude-dir=.idea --exclude-dir=.tox test_handler.py
+</code></pre><br>
+            </li>
+            <li>
+                You can kill it with the kill command with PID:
+<pre><code class="text">
+    kill 1729
+</code></pre>
+            </li>
+        </ul>
+</ul>
+
+
+<br><br>
