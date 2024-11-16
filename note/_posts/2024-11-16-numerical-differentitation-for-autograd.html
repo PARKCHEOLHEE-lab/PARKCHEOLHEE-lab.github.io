@@ -1,0 +1,84 @@
+---
+title:  "numerical differentiation for autograd"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://ok-lab.tistory.com/146">Numerical differentiation</a>
+    </li>
+        <ul>
+            <li>
+                Numerical differentiation is a method used to approximate a derivative using <b>finite perturbation</b> differences. 
+                There are three basic methods for numerical differentiation: Forward, Backward, and Central difference methods.
+            </li>
+            <li>
+                It can be used when you don't have the derived function but need to perform gradient-based optimization.
+                In a computer, if the finite perturbation value is too small, 
+                the rounding error may become significant, leading to inaccurate results in the approximation of the derivative.
+                ( \( 10^{-4} \sim 10^{-6} \) )
+            </li>
+            <br>
+            <li>
+                Forward difference method (전방 차분)
+            </li>
+                <ul>
+                    <li>
+                        The forward difference method approximates the derivative of a function 
+                        by using the value of the function at the current point and a <b>small step forward</b>.
+                        \[
+                            \,\\
+                            f'(x) = \lim_{h\rightarrow0} \frac{f(x + h) - f(x)}{h}
+                            \,\\
+                        \]
+                    </li>
+                </ul>
+            <li>
+                Backward difference method (후방 차분)
+            </li>
+                <ul>
+                    <li>
+                        The backward difference method approximates the derivative of a function 
+                        by using the value of the function at the current point and a <b>small step backward</b>.
+                        \[
+                            \,\\
+                            f'(x) = \lim_{h\rightarrow0} \frac{f(x - h) - f(x)}{h}
+                            \,\\
+                        \]
+                    </li>
+                </ul>
+            <li>
+                Central difference method (중앙 차분)
+            </li>
+                <ul>
+                        <li>
+                            The central difference method approximates the derivative 
+                            by <b>using both the forward and backward steps around the point</b>, 
+                            which can give a more accurate estimate.
+                            \[
+                                \begin{align*}
+                                \,\\
+                                f'(x) &= \lim_{h \, \rightarrow \, 0} \, \frac{1}{2} \cdot \left( \frac{f(x + h) - f(h)}{h} - \frac{f(x - h) - f(h)}{h}  \right)
+                                \\\,\\
+                                &= \lim_{h \, \rightarrow \, 0} \, \frac{1}{2} \cdot \frac{f(x + h) - f(x - h)}{h}
+                                \\\,\\
+                                &= \lim_{h \, \rightarrow \, 0} \, \frac{f(x + h) - f(x - h)}{2h}
+                                \,\\
+                                \end{align*}
+                            \]
+                        </li>
+                </ul>
+            <br>
+        </ul>
+    <li>
+        Geometric application with Shapley and <a href="https://pytorch.org/tutorials/beginner/basics/autogradqs_tutorial.html">torch.autograd</a>
+    </li>
+</ul>
+
+<span style="display: block; margin-left: -2em;">
+    {% include embed.html url="/notebooks/numerical-differentitation-for-autograd.html" %}
+</span>
+
+<br><br>
