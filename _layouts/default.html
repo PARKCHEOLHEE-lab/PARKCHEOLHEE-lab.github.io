@@ -105,13 +105,19 @@ a:hover {
     }
     }
 
-  function figNumberSetter() {
-    figCaptions = document.getElementsByTagName("figcaption");
-    for (let i = 0; i < figCaptions.length; i++) {
-      figNum = i + 1;
-      figCaptions[i].innerHTML = "Fig." + String(figNum) + ": " + figCaptions[i].innerHTML
+    function figNumberSetter() {
+      figCaptions = document.getElementsByTagName("figcaption");
+      for (let i = 0; i < figCaptions.length; i++) {
+        figNum = i + 1;
+        innerString = figCaptions[i].innerHTML
+        
+        if (figCaptions[i].classList.contains("nofig")) {
+          figCaptions[i].innerHTML = innerString;
+        } else {
+          figCaptions[i].innerHTML = "Fig." + String(figNum) + ": " + innerString;
+        }
+      }
     }
-  }
 
   TOCidSetter();
   getTOC();
