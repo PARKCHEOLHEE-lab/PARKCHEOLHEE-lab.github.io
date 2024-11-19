@@ -1,0 +1,104 @@
+---
+title:  "Python Slack SDK"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://api.slack.com/apps">https://api.slack.com/apps</a>
+    </li>
+    <li>
+        <a href="https://tools.slack.dev/python-slack-sdk/web">Python Slack SDK</a>
+    </li>
+        <ul>
+            <li>
+                Creating slack notifier with <code>slack-sdk</code>
+            </li>
+        </ul>
+</ul>
+
+<pre><code class="python">
+    def send_slack_notification(build_request_logs_unique_code, duration, ok=True):
+
+        client = WebClient(token=SLACK_TOKEN)
+        
+        with open(os.path.join(current_directory, "landbook-rendering", "package.json")) as f:
+            package_json = json.load(f)
+            landbook_rendering_version = package_json["version"]
+        
+        # Message to notify
+        report_link = f"https://####.########.##/###_#######?##=###&######_####={build_request_logs_unique_code}"
+        message = f"""Landbook Diffusion Notification 💡
+        - version: `{RENDERER_VERSION}`
+        - landbook-rendering version: `{landbook_rendering_version}`
+        - namespace: `{NAMESPACE}`
+        - landbook env: `{LANDBOOK_ENV}`
+        - workflow name: `{WORKFLOW_NAME}`
+        - unique code: `{UNIQUE_CODE}`
+        - labs report link: {report_link}
+        - duration: {duration:.5f} seconds
+        - message: image generation has {"*succeeded* ✅" if ok else "*failed* ❌"}
+        """
+        
+        # Retrieve channel id
+        channel_id = None
+        response = client.conversations_list(limit=1000)
+        for channel in response["channels"]:
+            if channel["name"] == SLACK_CHANNEL_NAME:
+                channel_id = channel["id"]
+                break
+
+        if channel_id is None:
+            return
+                
+        # Join the channel
+        client.conversations_join(channel=channel_id)
+
+        # Send messages to the channel
+        message_response = client.chat_postMessage(
+            channel=channel_id,
+            text=message,
+            unfurl_links=False,
+            unfurl_media=False
+        )
+        
+        # Send the used json data
+        json_path = os.path.join(current_directory, "########-#########/#######-#####/####.json")
+        with open(json_path, "rb") as f:
+            client.files_upload_v2(
+                channels=channel_id,
+                file=f,
+                thread_ts=message_response["ts"],
+                title=json_path,
+                filename=json_path
+            )
+        
+        # If failed, early return
+        if not ok:
+            return
+
+        image_paths = [
+            os.path.join(current_directory, UNIQUE_CODE, "######_#######/#.png"),
+            os.path.join(current_directory, UNIQUE_CODE, "#######_#.png"),
+            os.path.join(current_directory, UNIQUE_CODE, "#######_#.png"),
+        ]
+        
+        # Send the images
+        for image_path in image_paths:
+            with open(image_path, "rb") as f:
+                client.files_upload_v2(
+                    channels=channel_id,
+                    file=f,
+                    thread_ts=message_response["ts"],
+                    title=image_path,
+                    filename=image_path
+                )
+</code></pre>
+
+<figure>
+    <img src="/img/python-slack-sdk-1.png" width="100%">
+</figure>
+
+<br><br>
