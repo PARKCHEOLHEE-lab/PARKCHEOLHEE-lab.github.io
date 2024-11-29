@@ -1,0 +1,168 @@
+---
+title: "Floor Plan generation with Voronoi Diagram"
+layout: post
+hashtag: "#voronoi-diagram #numerical-differentiation"
+comment: true
+splitter: 2
+featured: false
+inprogress: false
+thumbnail: /img/floor-plan-generation-with-voronoi-diagram-thumbnail.gif
+---
+
+<div id="toc"></div>
+
+<h3>Introduction</h3>
+<div class="article">
+
+    This project is to <a href="http://parkcheolhee-lab.github.io/free-form-floor-plan-design-using-differentiable-voronoi-diagram/">review</a> 
+    and implement the paper for <a href="https://www.dropbox.com/scl/fi/culi7j1v14r9ax98rfmd6/2024_pg24_floorplan.pdf?rlkey=s5xwncuybrtsj5vyphhn61u0h&e=3&dl=0">Free-form Floor Plan Design using Differentiable Voronoi Diagram</a>.
+    In Deep learning or any gradient-based optimization approach, it uses only tensors to compute gradients, but I think it is not intuitive in geometries.  
+    Therefore, I aim to integrate the tensor operations and the geometric operations using <code>Pytorch</code>, <code>Shapely</code> to compute gradients.
+    The biggest difference between the paper and this project is whether using autograd. 
+    In the paper, they used the <b>Differentiable Voronoi</b> Diagram to compute gradient but, I used <b>Numerical Differentiation</b>.
+
+    <figure style="display: flex;">
+      <img src="/img/floor-plan-generation-with-voronoi-diagram-6.png" width="40%">
+      <img src="/img/floor-plan-generation-with-voronoi-diagram-3.gif" width="40%">
+    </figure>
+    <figcaption>From the left, initial state · optimization process</figcaption>
+
+  <br><br>
+
+  So, what is the numerical differentiation?
+
+</div><br><br>
+
+<h3>Numerical Differentiation</h3>
+<div class="article">
+
+  In computational mathematics <a href="http://parkcheolhee-lab.github.io/numerical-differentitation-for-autograd/">numerical differentiation</a> 
+  is a method used to approximate a derivative using finite perturbation differences.
+  <!--break-->
+  Unlike automatic differentiation by differentiable voronoi diagram used in the original paper, 
+  this approach calculates derivatives by evaluating the function at multiple nearby points.
+
+  There are three basic methods for numerical differentiation. In this, central difference method is used to compute gradient.
+
+<br><br>
+
+<figure>
+  <img src="/img/floor-plan-generation-with-voronoi-diagram-1.png" width="80%">
+  <figcaption>
+    Basic methods for the numerical differentiation
+    <br>
+    Central Difference method:
+    \[
+    \begin{align*}
+    \,\\
+    f'(x) &= \lim_{h \, \rightarrow \, 0} \, \frac{1}{2} \cdot \left( \frac{f(x + h) - f(h)}{h} - \frac{f(x - h) - f(h)}{h}  \right)
+    \\\,\\
+    &= \lim_{h \, \rightarrow \, 0} \, \frac{1}{2} \cdot \frac{f(x + h) - f(x - h)}{h}
+    \\\,\\
+    &= \lim_{h \, \rightarrow \, 0} \, \frac{f(x + h) - f(x - h)}{2h}
+    \,\\
+    \end{align*}
+  \]
+  </figcaption>
+</figure>
+
+<br><br>
+
+The \(h \,(\text{or  } dx)\) in the expression is a perturbation value that determines the accuracy of the approximation. 
+As \(h\) approaches zero, the numerical approximation gets closer to the true derivative. 
+However, in practice, we cannot use an infinitesimally small value due to computational limitations and floating-point precision. 
+Choosing an appropriate step size is crucial. Too large values lead to poor approximations, while too small values can cause numerical instability due to rounding errors.
+A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-6}\). In this implementation, I used \(h = 10^{-6}\) as the perturbation value.
+
+</div><br><br>
+
+<h3>Expression of Loss functions</h3>
+<div class="article">
+  In the paper, the key loss functions to optimize floor plans consists of four parts.
+  The below contents are excerpted from the paper:
+  <ol>
+    <li>
+      <b>Wall loss</b>: 
+      As the unconstrained Voronoi diagram typically produce 
+      undesirable fluctuations in the wall orientations, 
+      we design a tailored loss function to regularize the wall complexity.
+      Inspired by the <a href="https://arxiv.org/pdf/1910.02926">Cubic Stylization</a>, 
+      we regularize the \(\mathcal{L}_1\) norm of the wall length.
+      \(L_1\) norm is defined as \(v_x + v_y\) (norm of \(x\) + norm of \(y\)), 
+          therefore the \(\mathcal{L}_{\text{wall}}\) has the minimal when vector \(\mathbb{v}_j - \mathbb{v}_i\) is vertical of horizontal.
+      \[
+          \,\\
+          \mathcal{L}_{\text{wall}} = w_{\text{wall}} \sum_{(v_i, v_j) \, \in \, \mathcal{E}} ||\, \mathbb{v}_i - \mathbb{v}_j \,||_{L1}
+          \,\\
+      \]
+      
+      where \(\mathcal{E}\) denotes the set of edges of the Voronoi cells between two
+      adjacent rooms and the \(\mathbb{v}_i\) and \(\mathbb{v}_j\) denote the Voronoi vertices belonging to the edge.
+    </li>
+    <br>
+    <li>
+      <b>Area loss</b>: The area of each room is specified by the user. 
+      We minimize the quadratic difference between the current room areas and
+      the user-specified targets. Here, \(\bar{A}_r\) denotes the target area for the room \(r\).
+      \[
+          \,\\
+          \mathcal{L}_{\text{area}} = w_{\text{area}} \sum_{r=1}^{\#Room} ||\, A_r(\mathcal{V}) - \bar{A}_r \,||^2
+          \,\\
+      \]
+    </li>
+    <br>
+    <li>
+        <b>Lloyd loss</b>: To regulate the site density, we design a loss function inspired by the <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/On-Centroidal-Voronoi-Tessellation-Energy-Smoothness-and-Fast-Computation.pdf">Lloyd's algorithm</a>.
+        Here, \(\mathbb{c}_i \) denotes the centroid of the \(i\)-th Voronoi cell.
+        This is useful for attracting these exterior sites inside \(\Omega\).
+        \[
+            \,\\
+            \mathcal{L}_{\text{Lloyd}} = w_{\text{Lloyd}} \sum_{i=1}^N ||\, \mathbb{s}_i - \mathbb{c}_i \,||^2
+            \,\\
+        \]
+    </li>
+    <br>
+    <li>
+      <b>Topology loss</b>: We design the topology loss such that each room is
+      a single connected region, and the specified connections between
+      rooms are achieved. We move the site to satisfy the desired topology by setting the goal position
+      \(\mathbb{t}_i\) for each site
+      \(\mathbb{s}_i\) as
+      \[
+          \,\\
+          \mathcal{L}_{\text{topo}} = w_{\text{topo}} \sum_{i=1}^N ||\, \mathbb{s}_i - \mathbb{t}_i \,||^2
+          \,\\
+      \]
+
+      The goal position
+      \(\mathbb{t}_i\)
+      can be automatically computed as the nearest
+      site to the site from the same group.
+      For each room, we
+      first group the sites belonging to that room into groups of adjacent
+      sites. If multiple groups are present, that is, a room is split into
+      separated regions, 
+          we set the target position of the site \(\mathbb{t}_i\)
+          as the
+          nearest site to that group.
+  </li>
+  </ul>
+</div><br><br>
+
+<h3>Implementation of loss functions</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Initializing parameters</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Initializing parameters</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Future works</h3>
+<div class="article">
+</div><br><br>
+
+<br><br>
