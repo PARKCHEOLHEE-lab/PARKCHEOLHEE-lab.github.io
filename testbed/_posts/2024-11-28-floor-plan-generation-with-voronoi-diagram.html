@@ -11,23 +11,32 @@ thumbnail: /img/floor-plan-generation-with-voronoi-diagram-thumbnail.gif
 
 <div id="toc"></div>
 
-<h3>Introduction</h3>
+<h3>Introduction 🔹</h3>
 <div class="article">
 
     This project is to <a href="http://parkcheolhee-lab.github.io/free-form-floor-plan-design-using-differentiable-voronoi-diagram/">review</a> 
     and implement the paper for <a href="https://www.dropbox.com/scl/fi/culi7j1v14r9ax98rfmd6/2024_pg24_floorplan.pdf?rlkey=s5xwncuybrtsj5vyphhn61u0h&e=3&dl=0">Free-form Floor Plan Design using Differentiable Voronoi Diagram</a>.
     In Deep learning or any gradient-based optimization approach, it uses only tensors to compute gradients, but I think it is not intuitive in geometries.  
-    Therefore, I aim to integrate the tensor operations and the geometric operations using <code>Pytorch</code>, <code>Shapely</code> to compute gradients.
+    Therefore, I aim to integrate the tensor operations and the geometric operations using <code>Pytorch</code>, <code>Shapely</code>.
     The biggest difference between the paper and this project is whether using autograd. 
-    In the paper, they used the <b>Differentiable Voronoi</b> Diagram to compute gradient but, I used <b>Numerical Differentiation</b>.
-
+    In the paper, they used the <b>Differentiable Voronoi</b> Diagram for chaining gradient flow, 
+    but, I used <b>Numerical Differentiation</b> to approximate the gradients directly. 
     <br>
 
-    <figure style="display: flex;">
+    <!-- <figure style="display: flex;">
       <img src="/img/floor-plan-generation-with-voronoi-diagram-6.png" width="40%">
       <img src="/img/floor-plan-generation-with-voronoi-diagram-3.gif" width="40%">
     </figure>
-    <figcaption>From the left, initial state · optimization process</figcaption>
+    <figcaption>From the left, initial state · optimization process</figcaption> -->
+    
+    <figure style="display: flex;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-2.gif" width="40%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-3.gif" width="40%">
+    </figure>
+    <figure style="display: flex; margin-top: -2em;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-4.gif" width="40%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-5.gif" width="40%">
+    </figure>
 
   <br><br>
 
@@ -49,11 +58,11 @@ thumbnail: /img/floor-plan-generation-with-voronoi-diagram-thumbnail.gif
 <br><br>
 
 <figure>
-  <img src="/img/floor-plan-generation-with-voronoi-diagram-1.png" width="80%">
+  <img src="/img/floor-plan-generation-with-voronoi-diagram-1.png" width="90%">
   <figcaption>
     Basic methods for the numerical differentiation
     <br>
-    Central Difference method:
+    Central difference method:
     \[
     \begin{align*}
     \,\\
@@ -72,7 +81,7 @@ thumbnail: /img/floor-plan-generation-with-voronoi-diagram-thumbnail.gif
 
 The \(h \,(\text{or  } dx)\) in the expression is a perturbation value that determines the accuracy of the approximation. 
 As \(h\) approaches zero, the numerical approximation gets closer to the true derivative. 
-However, in practice, we cannot use an infinitesimally small value due to computational limitations and floating-point precision. 
+However, in practice, we cannot use an infinitely small value due to computational limitations and floating-point precision. 
 Choosing an appropriate step size is crucial. Too large values lead to poor approximations, while too small values can cause numerical instability due to rounding errors.
 A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-6}\). In this implementation, I used \(h = 10^{-6}\) as the perturbation value.
 
@@ -91,7 +100,7 @@ A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-
       Inspired by the <a href="https://arxiv.org/pdf/1910.02926">Cubic Stylization</a>, 
       we regularize the \(\mathcal{L}_1\) norm of the wall length.
       \(L_1\) norm is defined as \(v_x + v_y\) (norm of \(x\) + norm of \(y\)), 
-          therefore the \(\mathcal{L}_{\text{wall}}\) has the minimal when vector \(\mathbb{v}_j - \mathbb{v}_i\) is vertical of horizontal.
+          therefore the \(\mathcal{L}_{\text{wall}}\) has the minimal when vector \(\mathbb{v}_j - \mathbb{v}_i\) is vertical or horizontal.
       \[
           \,\\
           \mathcal{L}_{\text{wall}} = w_{\text{wall}} \sum_{(v_i, v_j) \, \in \, \mathcal{E}} ||\, \mathbb{v}_i - \mathbb{v}_j \,||_{L1}
@@ -475,23 +484,121 @@ Therefore, I used Python's built-in multiprocessing module to improve the perfor
   </ol>
 
   <figure>
-    <img src="/img/floor-plan-generation-with-voronoi-diagram-7.png" width="100%">
+    <img src="/img/floor-plan-generation-with-voronoi-diagram-7.png" width="95%">
   </figure>
   <figcaption>Process of parameters initialization</figcaption>
 
   <br><br>
 
-  Secondly, I used the KMeans clustering algorithm to assign cell indices per each site. 
+  Secondly, I used the <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/fe727e51ca5c8c52dd1e65e879571a08437200e7/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/generator.py#L32-L38">KMeans</a> clustering algorithm to assign cell indices per each site.
+  Distance-based KMeans algorithm groups sites based on their spatial proximity, which helps ensure that rooms are formed from adjacent cells. 
+  By pre-clustering the sites, I created initial room assignments that are already spatially coherent, 
+  reducing the possibility of disconnected room regions during optimization.
   Using this approach, the optimizer converges more stably. Let me give an example:
+
+  <figure style="display: flex;">
+    <img src="/img/floor-plan-generation-with-voronoi-diagram-8.gif" width="40%">
+    <img src="/img/floor-plan-generation-with-voronoi-diagram-9.gif" width="40%">
+  </figure>
+  <figcaption>
+    Floor plan generation on 300 iterations
+    <br>
+    From the left, optimization without KMeans · optimization with KMeans
+  </figcaption>
+
+  <br><br>
+
+  As you can see in the figure above, KMeans makes the loss flow more smoothly and converge faster. 
+  Without KMeans, the optimization process shows erratic behavior with disconnected rooms. 
+  In contrast, when using KMeans for initial room assignments, the optimization maintains spatial coherence throughout the process, leading to:
+
+  <ul>
+    <li>
+        Faster convergence to the target room areas
+    </li>
+    <li>
+        More stable wall alignments
+    </li>
+    <li>
+        Reduced possibility of rooms splitting into disconnected regions
+    </li>
+  </ul>
+
+  <br>
+
+  This improvement in optimization stability is particularly important for complex floor plans with multiple rooms and specific area requirements.
 
 </div><br><br>
 
-<h3>Results</h3>
+<h3>Experiments</h3>
 <div class="article">
+
+    Finally, I'll conclude this article by attaching the experimental results optimized by 800 iterations. 
+    The boundaries for experiments are used in the original paper and <a href="https://github.com/nobuyuki83/floor_plan">repository</a>. 
+    Please refer to this project <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram">repository</a> for the entire code.    
+
+    <figure style="display: flex;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-13.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-14.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-12.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-11.png" width="23%">
+    </figure>
+
+    <figure style="display: flex; margin-top: -2em;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-16.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-15.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+    </figure>
+
+    <figure style="display: flex; margin-top: -2em;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+    </figure>
+
+    <figure style="display: flex; margin-top: -2em;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-20.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+    </figure>
+
+    <figure style="display: flex; margin-top: -2em;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+    </figure>
+
+    <figure style="display: flex;">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+        <img src="/img/floor-plan-generation-with-voronoi-diagram-10.png" width="23%">
+    </figure>
+
+
+
 </div><br><br>
 
 <h3>Future works</h3>
 <div class="article">
-</div><br><br>
+    <ul>
+        <li>
+            <b>Set entrance</b>: In the paper, to set entrance of the plan it uses \(\mathcal{L}_{\text{fix}}\) loss function.
+        </li>
+        <li>
+            <b>Graph-based contraint</b>: In the paper, to set and ensure the rooms' adjacencies it uses graph-based constraint.
+        </li>
+        <li>
+            <b>Improve computational performance</b>: Optimize the code to run faster (converting used language, or implementing differentiable voronoi diagram).
+        </li>
+        <li>
+            <b>Handle deadspaces</b>: Set the loss function for deadspace \(\mathcal{L}_{\text{deadspace}}\) to exclude infeasible plans.
+        </li>
+    </ul>
+</div>
 
 <br><br>
