@@ -21,6 +21,8 @@ thumbnail: /img/floor-plan-generation-with-voronoi-diagram-thumbnail.gif
     The biggest difference between the paper and this project is whether using autograd. 
     In the paper, they used the <b>Differentiable Voronoi</b> Diagram to compute gradient but, I used <b>Numerical Differentiation</b>.
 
+    <br>
+
     <figure style="display: flex;">
       <img src="/img/floor-plan-generation-with-voronoi-diagram-6.png" width="40%">
       <img src="/img/floor-plan-generation-with-voronoi-diagram-3.gif" width="40%">
@@ -36,7 +38,7 @@ thumbnail: /img/floor-plan-generation-with-voronoi-diagram-thumbnail.gif
 <h3>Numerical Differentiation</h3>
 <div class="article">
 
-  In computational mathematics <a href="http://parkcheolhee-lab.github.io/numerical-differentitation-for-autograd/">numerical differentiation</a> 
+  <a href="http://parkcheolhee-lab.github.io/numerical-differentitation-for-autograd/">Numerical differentiation</a> 
   is a method used to approximate a derivative using finite perturbation differences.
   <!--break-->
   Unlike automatic differentiation by differentiable voronoi diagram used in the original paper, 
@@ -151,13 +153,340 @@ A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-
 
 <h3>Implementation of loss functions</h3>
 <div class="article">
+  As I mentioned in the Introduction, to implement the loss functions above for the forward propagation I used Shapely and Pytorch as below.
+  Total <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/main/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/loss.py#L23-L213">loss</a> is defined as a weighted sum of the above losses, and then using it, the Voronoi diagram generates a floor plan.
+  \[
+    \,\\
+    \begin{align*}
+    \mathcal{S}^{*} &= \arg \min_{\mathcal{S}} \mathcal{L}(\mathcal{S}, \mathcal{V}(\mathcal{S})) \\
+    \mathcal{L} &= \mathcal{L}_{\text{wall}} + \mathcal{L}_{\text{area}} + \mathcal{L}_{\text{fix}} + \mathcal{L}_{\text{topo}} + \mathcal{L}_{\text{Lloyd}}
+    \end{align*}
+    \,\\
+\]
+<pre><code class="python">
+    class FloorPlanLoss(torch.autograd.Function):
+        @staticmethod
+        def compute_wall_loss(rooms_group: List[List[geometry.Polygon]], w_wall: float = 1.0):
+            loss_wall = 0.0
+            for room_group in rooms_group:
+                room_union = ops.unary_union(room_group)
+                if isinstance(room_union, geometry.MultiPolygon):
+                    room_union = list(room_union.geoms)
+                else:
+                    room_union = [room_union]
+
+                for room in room_union:
+                    t1 = torch.tensor(room.exterior.coords[:-1])
+                    t2 = torch.roll(t1, shifts=-1, dims=0)
+                    loss_wall += torch.abs(t1 - t2).sum().item()
+
+                    for interior in room.interiors:
+                        t1 = torch.tensor(interior.coords[:-1])
+                        t2 = torch.roll(t1, shifts=-1, dims=0)
+                        loss_wall += torch.abs(t1 - t2).sum().item()
+
+            loss_wall = torch.tensor(loss_wall)
+            loss_wall *= w_wall
+
+            return loss_wall
+
+        @staticmethod
+        def compute_area_loss(
+            cells: List[geometry.Polygon],
+            target_areas: List[float],
+            room_indices: List[int],
+            w_area: float = 1.0,
+        ):
+            current_areas = [0.0] * len(target_areas)
+
+            for cell, room_index in zip(cells, room_indices):
+                current_areas[room_index] += cell.area
+
+            current_areas = torch.tensor(current_areas)
+            target_areas = torch.tensor(target_areas)
+
+            area_difference = torch.abs(current_areas - target_areas)
+
+            loss_area = torch.sum(area_difference)
+            loss_area **= 2
+            loss_area *= w_area
+
+            return loss_area
+
+        @staticmethod
+        def compute_lloyd_loss(cells: List[geometry.Polygon], sites: torch.Tensor, w_lloyd: float = 1.0):
+            valids = [(site.tolist(), cell) for site, cell in zip(sites, cells) if not cell.is_empty]
+            valid_centroids = torch.tensor([cell.centroid.coords[0] for _, cell in valids])
+            valid_sites = torch.tensor([site for site, _ in valids])
+
+            loss_lloyd = torch.norm(valid_centroids - valid_sites, dim=1).sum()
+            loss_lloyd **= 2
+            loss_lloyd *= w_lloyd
+
+            return loss_lloyd
+
+        @staticmethod
+        def compute_topology_loss(rooms_group: List[List[geometry.Polygon]], w_topo: float = 1.0):
+            loss_topo = 0.0
+            for room_group in rooms_group:
+                room_union = ops.unary_union(room_group)
+                if isinstance(room_union, geometry.MultiPolygon):
+                    largest_room, *_ = sorted(room_union.geoms, key=lambda r: r.area, reverse=True)
+
+                    loss_topo += len(room_union.geoms)
+
+                    for room in room_group:
+                        if not room.intersects(largest_room) and not room.is_empty:
+                            loss_topo += largest_room.centroid.distance(room)
+
+            loss_topo = torch.tensor(loss_topo)
+            loss_topo **= 2
+            loss_topo *= w_topo
+
+            return loss_topo
+
+
+        ( ... )
+
+
+        @staticmethod
+        def forward(
+            ctx: FunctionCtx,
+            sites: torch.Tensor,
+            boundary_polygon: geometry.Polygon,
+            target_areas: List[float],
+            room_indices: List[int],
+            w_wall: float,
+            w_area: float,
+            w_lloyd: float,
+            w_topo: float,
+            w_bb: float,
+            w_cell: float,
+            save: bool = True,
+        ) -> torch.Tensor:
+            cells = []
+            walls = []
+    
+            sites_multipoint = geometry.MultiPoint([tuple(point) for point in sites.detach().numpy()])
+            raw_cells = list(shapely.voronoi_polygons(sites_multipoint, extend_to=boundary_polygon).geoms)
+            for cell in raw_cells:
+                intersected_cell = cell.intersection(boundary_polygon)
+    
+                intersected_cell_iter = [intersected_cell]
+                if isinstance(intersected_cell, geometry.MultiPolygon):
+                    intersected_cell_iter = list(intersected_cell.geoms)
+    
+                for intersected_cell in intersected_cell_iter:
+                    exterior_coords = torch.tensor(intersected_cell.exterior.coords[:-1])
+                    exterior_coords_shifted = torch.roll(exterior_coords, shifts=-1, dims=0)
+                    walls.extend((exterior_coords - exterior_coords_shifted).tolist())
+                    cells.append(intersected_cell)
+    
+            cells_sorted = []
+            raw_cells_sorted = []
+            for site_point in sites_multipoint.geoms:
+                for ci, (cell, raw_cell) in enumerate(zip(cells, raw_cells)):
+                    if raw_cell.contains(site_point):
+                        cells_sorted.append(cell)
+                        cells.pop(ci)
+                        raw_cells_sorted.append(raw_cell)
+                        raw_cells.pop(ci)
+                        break
+    
+            rooms_group = [[] for _ in torch.tensor(room_indices).unique()]
+            for cell, room_index in zip(cells_sorted, room_indices):
+                rooms_group[room_index].append(cell)
+    
+            loss_wall = torch.tensor(0.0)
+            if w_wall > 0:
+                loss_wall = FloorPlanLoss.compute_wall_loss(rooms_group, w_wall=w_wall)
+    
+            loss_area = torch.tensor(0.0)
+            if w_area > 0:
+                loss_area = FloorPlanLoss.compute_area_loss(cells_sorted, target_areas, room_indices, w_area=w_area)
+    
+            loss_lloyd = torch.tensor(0.0)
+            if w_lloyd > 0:
+                loss_lloyd = FloorPlanLoss.compute_lloyd_loss(cells_sorted, sites, w_lloyd=w_lloyd)
+    
+            loss_topo = torch.tensor(0.0)
+            if w_topo > 0:
+                loss_topo = FloorPlanLoss.compute_topology_loss(rooms_group, w_topo=w_topo)
+    
+            loss_bb = torch.tensor(0.0)
+            if w_bb > 0:
+                loss_bb = FloorPlanLoss.compute_bb_loss(rooms_group, w_bb=w_bb)
+    
+            loss_cell_area = torch.tensor(0.0)
+            if w_cell > 0:
+                loss_cell_area = FloorPlanLoss.compute_cell_area_loss(cells_sorted, w_cell=w_cell)
+    
+            if save:
+                ctx.save_for_backward(sites)
+                ctx.room_indices = room_indices
+                ctx.target_areas = target_areas
+                ctx.boundary_polygon = boundary_polygon
+                ctx.w_wall = w_wall
+                ctx.w_area = w_area
+                ctx.w_lloyd = w_lloyd
+                ctx.w_topo = w_topo
+                ctx.w_bb = w_bb
+                ctx.w_cell = w_cell
+    
+            loss = loss_wall + loss_area + loss_lloyd + loss_topo + loss_bb + loss_cell_area
+    
+            return loss, [loss_wall, loss_area, loss_lloyd, loss_topo, loss_bb, loss_cell_area]
+</code></pre>
+
+<br><br>
+
+Since I tried to intuitively convert the loss functions to Python codes with Shapely, there are some differences compared to the original.  
+
+</div><br><br>
+
+<h3>Backward with numerical differentiation</h3>
+<div class="article">
+Using numerical differentiation is not efficient in terms of computational performance.
+This is because it requires multiple function evaluations at nearby points to approximate derivatives.
+As you can see in the <code>backward</code> method, computational performance is influenced by the number of given sites.
+Therefore, I used Python's built-in multiprocessing module to improve the performance of <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/main/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/loss.py#L215-L314">backward</a> propagation. 
+<pre><code class="python">
+    @staticmethod
+    def _backward_one(args):
+        (
+            sites,
+            i,
+            j,
+            epsilon,
+            boundary_polygon,
+            target_areas,
+            room_indices,
+            w_wall,
+            w_area,
+            w_lloyd,
+            w_topo,
+            w_bb,
+            w_cell,
+        ) = args
+
+        perturbed_sites_pos = sites.clone()
+        perturbed_sites_neg = sites.clone()
+        perturbed_sites_pos[i, j] += epsilon
+        perturbed_sites_neg[i, j] -= epsilon
+
+        loss_pos, _ = FloorPlanLoss.forward(
+            None,
+            perturbed_sites_pos,
+            boundary_polygon,
+            target_areas,
+            room_indices,
+            w_wall,
+            w_area,
+            w_lloyd,
+            w_topo,
+            w_bb,
+            w_cell,
+            save=False,
+        )
+
+        loss_neg, _ = FloorPlanLoss.forward(
+            None,
+            perturbed_sites_neg,
+            boundary_polygon,
+            target_areas,
+            room_indices,
+            w_wall,
+            w_area,
+            w_lloyd,
+            w_topo,
+            w_bb,
+            w_cell,
+            save=False,
+        )
+
+        return i, j, (loss_pos - loss_neg) / (2 * epsilon)
+
+    @runtime_calculator
+    @staticmethod
+    def backward(ctx: FunctionCtx, _: torch.Tensor, __):
+        sites = ctx.saved_tensors[0]
+        room_indices = ctx.room_indices
+        target_areas = ctx.target_areas
+        boundary_polygon = ctx.boundary_polygon
+        w_wall = ctx.w_wall
+        w_area = ctx.w_area
+        w_lloyd = ctx.w_lloyd
+        w_topo = ctx.w_topo
+        w_bb = ctx.w_bb
+        w_cell = ctx.w_cell
+
+        epsilon = 1e-6
+
+        grads = torch.zeros_like(sites)
+
+        multiprocessing_args = [
+            (
+                sites,
+                i,
+                j,
+                epsilon,
+                boundary_polygon,
+                target_areas,
+                room_indices,
+                w_wall,
+                w_area,
+                w_lloyd,
+                w_topo,
+                w_bb,
+                w_cell,
+            )
+            for i in range(sites.size(0))
+            for j in range(sites.size(1))
+        ]
+
+        with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+            results = pool.map(FloorPlanLoss._backward_one, multiprocessing_args)
+
+        for i, j, grad in results:
+            grads[i, j] = grad
+
+        return grads, None, None, None, None, None, None, None, None, None, None
+</code></pre>
+
 </div><br><br>
 
 <h3>Initializing parameters</h3>
 <div class="article">
+  In optimization problems, the initial parameters significantly affect the final results.
+  Firstly, I initialized the Voronoi diagram's <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/fe727e51ca5c8c52dd1e65e879571a08437200e7/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/generator.py#L56-L74">sites</a> such that the sites were generated at the center of a given floor plan:
+  <ol>
+    <li>
+      <b>Random Sites Generation</b>: Generate initial random sites using uniform distribution.
+    </li>
+    <li>
+      <b>Moving to Center of Boundary</b>: Shift all sites so they are centered within the floor plan boundary.
+    </li>
+    <li>
+      <b>Outside Sites Adjustment</b>: Adjust any sites that fall outside the boundary by moving them inward.
+    </li>
+    <li>
+      <b>Voronoi Diagram</b>: Generate Voronoi diagram using sites.
+    </li>
+  </ol>
+
+  <figure>
+    <img src="/img/floor-plan-generation-with-voronoi-diagram-7.png" width="100%">
+  </figure>
+  <figcaption>Process of parameters initialization</figcaption>
+
+  <br><br>
+
+  Secondly, I used the KMeans clustering algorithm to assign cell indices per each site. 
+  Using this approach, the optimizer converges more stably. Let me give an example:
+
 </div><br><br>
 
-<h3>Initializing parameters</h3>
+<h3>Results</h3>
 <div class="article">
 </div><br><br>
 
