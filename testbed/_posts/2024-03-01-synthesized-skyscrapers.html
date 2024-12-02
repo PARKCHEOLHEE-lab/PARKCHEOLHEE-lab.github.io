@@ -132,7 +132,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
 
     The first step for preparing data to train DeepSDF model is to gather the 3d models of the skyscrapers. I used the <a href="https://3dwarehouse.sketchup.com/">3dwarehouse</a> to download the free 3d models.
     I downloaded the following models in the below figure. From the left, CCTV headquarters · Mahanakhon · Hearst Tower · Bank of China · Empire State Building · Transamerica Pyramid · The Shard · Gherkin London · Taipei 101 · Shanghai World Financial Center · One World Trade Center · Lotte Tower · Kingdom Centre · China Zun · Burj Al Arab.
-    The 15 raw data I gathered is in this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/tree/main/deepSDF/data/raw-skyscrapers">link</a>.
+    The 15 raw data I gathered is in this <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/tree/main/deep_sdf/data/raw-skyscrapers">link</a>.
     <br><br>
     <figure>
         <img src="/img/synthesized-skyscrapers-4.png" width="100%">
@@ -294,7 +294,7 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
 <h3>Synthesizing skyscrapers infinitely</h3>
 <div class="article">
     Lastly, let me synthesize skyscrapers by interpolating them or using arithmetic operations.
-    Through the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/6b62d93d538087d29166ce7a523134dac5bd046f/deepSDF/synthesize.py#L190">following code</a>, you can generate infinite data of different shapes, starting by synthesizing latent vectors for the initial 15 buildings.
+    Through the <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/blob/main/deep_sdf/src/synthesize.py#L193-L289">following code</a>, you can generate infinite data of different shapes, starting by synthesizing latent vectors for the initial 15 buildings.
     In this time, to synthesize them, I used 128x128x128(=2097152) grid points resolution.
 
 <pre><code class="python">
@@ -403,7 +403,7 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
     Since the function used above for synthesizing skyscrapers records data, we can use the data to check the parents of the synthesized skyscrapers.
     The process involves tracking back from any given synthesized design to its origins using graph-based analysis. 
     This helps us to <code>understand how specific designs are derived</code> and the influence of original models on synthesized outcomes.
-    Therefore, to track the synthesized skyscrapers, I used the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/aae3bdad2a91fdc87218f11d185ae67dbd7362fc/deepSDF/synthesize.py#L327-L368">BFS</a>.
+    Therefore, to track the synthesized skyscrapers, I used the <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/blob/main/deep_sdf/src/synthesize.py#L292-L324">BFS</a>.
 
 
     <br><br>
