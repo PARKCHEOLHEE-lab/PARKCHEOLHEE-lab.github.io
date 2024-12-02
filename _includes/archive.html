@@ -72,7 +72,7 @@
                 {% endfor %}
               </p>
               {% if post.thumbnail %}
-                <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;">
+                <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" loading="lazy">
               {% endif %}
             </div>
             {% if post.done %}
@@ -116,7 +116,7 @@
                   {% endfor %}
                 </p>
                 {% if post.thumbnail %}
-                  <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;">
+                  <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" loading="lazy">
                 {% endif %}
               </div>
               {% if post.done %}
@@ -162,7 +162,7 @@
                     {% endfor %}
                   </p>
                   {% if post.thumbnail %}
-                    <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;">
+                    <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" loading="lazy">
                   {% endif %}
                 </div>
                 {% if post.done %}
