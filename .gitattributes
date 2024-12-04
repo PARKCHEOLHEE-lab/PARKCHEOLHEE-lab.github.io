@@ -1,1 +1,2 @@
 /img/floor-plan-generation-with-voronoi-diagram/** filter=lfs diff=lfs merge=lfs -text
+/img/intuitive-understanding-linear-algebra/** filter=lfs diff=lfs merge=lfs -text
