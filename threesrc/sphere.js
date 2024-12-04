@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import dat from "https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js";
-import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
 
 
 class Box {

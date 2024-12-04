@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
 import { OBJLoader } from "https://threejs.org/examples/jsm/loaders/OBJLoader.js";
 
 class DomIno {
@@ -28,7 +28,7 @@ class DomIno {
   }
 
   _setLights() {
-      const directionalLight = new THREE.DirectionalLight(0x808080, 3);
+      const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
       directionalLight.position.set(-15, 10, 10);
       directionalLight.shadow.camera.near = 0.5
       directionalLight.shadow.camera.far = 40
@@ -69,6 +69,19 @@ class DomIno {
       function ( object ) {
         object.traverse(function ( child ) {
           if (child.isMesh) {
+
+              const materials = [];
+              for (let i = 0; i < child.material.length; i++) {
+                materials.push(
+                  new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    shininess: 200,
+                    specular: new THREE.Color(0x111111),
+                  })
+                )
+              }
+              
+              child.material = materials
               child.geometry.center();
 
               child.geometry.computeBoundingBox();
@@ -76,13 +89,24 @@ class DomIno {
               child.castShadow = true;
               child.receiveShadow = true;
 
-              const edges = new THREE.WireframeGeometry(child.geometry)
-              const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial({color: 0xcfcfcf}) )
-              line.position.y = child.geometry.boundingBox.max.y;
-              line.renderOrder = 1;
-      
+              // const edgesGeometry = new THREE.EdgesGeometry(child.geometry, 30); // 30 degrees threshold
+              // const edgesMaterial = new THREE.LineBasicMaterial({ 
+              //   color: 0xffffff,
+              //   linewidth: 1
+              // });
+              // const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+              // edges.position.y = child.geometry.boundingBox.max.y;
+              // edges.renderOrder = 1; // Ensure edges render on top
+              
+              
+              // const edges = new THREE.WireframeGeometry(child.geometry)
+              // const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial({color: 0xcfcfcf}) )
+              // line.position.y = child.geometry.boundingBox.max.y;
+              // line.renderOrder = 1;
+              
               scene.add( object );
               // scene.add(line);
+              // scene.add(edges);
             }
           }
         )
