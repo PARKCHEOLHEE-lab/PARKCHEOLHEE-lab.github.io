@@ -11,3 +11,6 @@
 /img/parallel-execution-within-gh/** filter=lfs diff=lfs merge=lfs -text
 /img/drafting-with-ai/** filter=lfs diff=lfs merge=lfs -text
 /img/analysis-of-apt-state-spaces/** filter=lfs diff=lfs merge=lfs -text
+/img/plan-to-model/** filter=lfs diff=lfs merge=lfs -text
+/img/klemens-torggler-door/** filter=lfs diff=lfs merge=lfs -text
+/img/quadtree/** filter=lfs diff=lfs merge=lfs -text
