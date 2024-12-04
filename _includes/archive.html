@@ -20,6 +20,21 @@
 
 </style>
 
+<script>
+  // Initialize Highlight.js
+  hljs.highlightAll();
+
+  function handleImageError(img) {
+    const originalSrc = img.src;
+
+    if (originalSrc.includes("media.githubusercontent.com")) return;
+    
+    const githubMediaUrl = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/dev/" + img.src.split("/").slice(-3).join("/");
+    
+    img.src = githubMediaUrl;
+  }
+</script>
+
 <article>
   <header><h2>{{ include.title | default: page.title }}</h2></header>
   <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
@@ -72,7 +87,7 @@
                 {% endfor %}
               </p>
               {% if post.thumbnail %}
-                <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror="this.src='{{ post.thumbnail_lfs }}'">
+                <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handleImageError(this)>
               {% endif %}
             </div>
             {% if post.done %}
@@ -116,7 +131,7 @@
                   {% endfor %}
                 </p>
                 {% if post.thumbnail %}
-                  <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror="this.src='{{ post.thumbnail_lfs }}'">
+                  <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handleImageError(this)>
                 {% endif %}
               </div>
               {% if post.done %}
@@ -162,7 +177,7 @@
                     {% endfor %}
                   </p>
                   {% if post.thumbnail %}
-                    <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror="this.src='{{ post.thumbnail_lfs }}'">
+                    <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handleImageError(this)>
                   {% endif %}
                 </div>
                 {% if post.done %}
