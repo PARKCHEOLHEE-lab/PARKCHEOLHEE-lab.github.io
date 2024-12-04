@@ -9,3 +9,5 @@
 /img/latent-masses/** filter=lfs diff=lfs merge=lfs -text
 /img/the-selfish-gene/** filter=lfs diff=lfs merge=lfs -text
 /img/parallel-execution-within-gh/** filter=lfs diff=lfs merge=lfs -text
+/img/drafting-with-ai/** filter=lfs diff=lfs merge=lfs -text
+/img/analysis-of-apt-state-spaces/** filter=lfs diff=lfs merge=lfs -text
