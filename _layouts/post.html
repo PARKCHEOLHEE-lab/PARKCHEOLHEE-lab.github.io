@@ -10,12 +10,14 @@ layout: default
   // Initialize Highlight.js
   hljs.highlightAll();
 
-  function handleImageError(img) {
+  function handle_image_error(img) {
     const originalSrc = img.src;
 
     if (originalSrc.includes("media.githubusercontent.com")) return;
     
     const githubMediaUrl = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/dev/" + img.src.split("/").slice(-3).join("/");
+
+    console.log(githubMediaUrl)
     
     img.src = githubMediaUrl;
   }
