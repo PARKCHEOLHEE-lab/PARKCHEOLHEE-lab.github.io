@@ -5,7 +5,7 @@ hashtag: "#algorithm #python #multiprocessing"
 featured: false
 comment: true
 splitter: 1
-thumbnail: /img/parallel-1.gif
+thumbnail: /img/parallel-execution-within-gh/parallel-1.gif
 ---
 
 <div id="toc"></div>
@@ -82,7 +82,7 @@ Because it executes simultaneously as much as <code>cpu_count</code>, you don't 
     Now, let's improve the performance of a real algorithm by applying multiprocessing (This task corresponds to defining f(x) you saw above).
     There is the algorithm that finds <code>MIR</code> (Maximal Inner Rectangle) for a given polygon like the following.
     <figure>
-        <img src="/img/parallel-1.gif" width="100%">
+        <img src="/img/parallel-execution-within-gh/parallel-1.gif" width="100%" onerror=handle_image_error(this)>
         <figcaption>Algorithm for finding MIR</figcaption>
     </figure><br>
 
@@ -166,7 +166,7 @@ Perhaps GhPython is Iron Python implemented by .NET Framework, so you could use 
     In the case of parallel processing, the result can be obtained <code>4x</code> times faster. If you have more inputs, you can expect a bigger performance boost.
     <br><br>
     <figure>
-        <img src="/img/parallel-2.png" width="60%">
+        <img src="/img/parallel-execution-within-gh/parallel-2.png" width="60%" onerror=handle_image_error(this)>
         <figcaption>Compare execution time for Parallel vs. Sequential</figcaption>
     </figure><br>
     The code for the above is in <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/mir/mir.py">this link</a>.

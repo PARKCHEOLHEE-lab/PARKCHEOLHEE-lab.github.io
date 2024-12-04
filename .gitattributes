@@ -3,3 +3,9 @@
 /img/polygon-segmentation/** filter=lfs diff=lfs merge=lfs -text
 /img/landbook-rendering-with-diffuser/** filter=lfs diff=lfs merge=lfs -text
 /img/synthesized-skyscrapers/** filter=lfs diff=lfs merge=lfs -text
+/img/seeing-is-solving/** filter=lfs diff=lfs merge=lfs -text
+/img/shape-conditional-gan/** filter=lfs diff=lfs merge=lfs -text
+/img/local-coordinate-system/** filter=lfs diff=lfs merge=lfs -text
+/img/latent-masses/** filter=lfs diff=lfs merge=lfs -text
+/img/the-selfish-gene/** filter=lfs diff=lfs merge=lfs -text
+/img/parallel-execution-within-gh/** filter=lfs diff=lfs merge=lfs -text
