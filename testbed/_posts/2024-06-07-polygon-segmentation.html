@@ -5,7 +5,7 @@ hashtag: "#geometry #deep-learning #graph-neural-network #link-prediction"
 comment: true
 splitter: 2
 featured: false
-thumbnail: /img/polygon-segmentation-thumbnail-1.png
+thumbnail: /img/polygon-segmentation/polygon-segmentation-thumbnail-1.png
 ---
 
 <script type="text/javascript" async
@@ -23,13 +23,13 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     <br><br>
     
     <figure style="display: flex;">
-        <img src="/img/polygon-segmentation-0.png" width="45%">
-        <img src="/img/polygon-segmentation-1.png" width="45%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-0.png" width="45%" onerror=handle_image_error(this)>
+        <img src="/img/polygon-segmentation/polygon-segmentation-1.png" width="45%" onerror=handle_image_error(this)>
     </figure>
     
     <figure style="display: flex;">
-        <img src="/img/polygon-segmentation-3.png" width="45%">
-        <img src="/img/polygon-segmentation-2.png" width="45%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-3.png" width="45%" onerror=handle_image_error(this)>
+        <img src="/img/polygon-segmentation/polygon-segmentation-2.png" width="45%" onerror=handle_image_error(this)>
     </figure>
 
     <figcaption>
@@ -62,7 +62,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     When dealing with a graph in machine learning, it is expressed as a feature matrix depicting the characteristics of points. When the number of features is \( f \), the dimension of the feature matrix \( X \) is \( n \times f \).
 
     <figure>
-        <img src="/img/polygon-segmentation-4.png" width="90%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-4.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             <a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479">Understanding of the graph expression</a> <br>
             In this figure, \( n = 4 \), \( f = 3 \) <br> 
@@ -94,7 +94,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     Through this, the model can better comprehend the complex shapes and features of geometry.
 
     <figure>
-        <img src="/img/polygon-segmentation-5.png" width="90%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-5.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             Convolution operations<br>
             From the left, <a href="https://arxiv.org/abs/1901.00596">2D Convolution · Graph Convolution</a>
@@ -121,7 +121,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     First, let's collect raw polygons from <a href="https://www.vworld.kr/dtna/dtna_fileDataList_s001.do">vworld</a>. Below is a part of all the raw polygons I collected from vworld.
 
     <figure>
-        <img src="/img/polygon-segmentation-6.png" width="95%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-6.png" width="95%" onerror=handle_image_error(this)>
         <figcaption>
             Somewhere in Seoul.shp
         </figcaption>
@@ -143,7 +143,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     Then, I need to convert these data into graph form. Here is an example of hand labeling:
     
     <figure>
-        <img src="/img/polygon-segmentation-8.png" width="100%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-8.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Land polygon in Gangbukgu, Seoul <br>
             From the left, raw polygon & labeled link · adjacency matrix · feature matrix
@@ -336,10 +336,10 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     The first is good case, and the second is bad case. 
     
     <figure>
-        <img src="/img/polygon-segmentation-9.png" width="70%">
-        <!-- <img src="/img/polygon-segmentation-11.png" width="70%"> -->
-        <img src="/img/polygon-segmentation-10.png" width="70%">
-        <!-- <img src="/img/polygon-segmentation-12.png" width="70%"> -->
+        <img src="/img/polygon-segmentation/polygon-segmentation-9.png" width="70%" onerror=handle_image_error(this)>
+        <!-- <img src="/img/polygon-segmentation/polygon-segmentation-11.png" width="70%"> -->
+        <img src="/img/polygon-segmentation/polygon-segmentation-10.png" width="70%" onerror=handle_image_error(this)>
+        <!-- <img src="/img/polygon-segmentation/polygon-segmentation-12.png" width="70%"> -->
         <figcaption>
             Results of the algorithm<br>
             From the left, triangulations · segmentations · oriented bounding boxes for segmentations
@@ -349,7 +349,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     Since these problems cannot be handled by my naive algorithm, I first used the algorithm to process the raw polygon data and then labeled it manually like the following.
     So now I have approximately 40000 data with augmented originals. The all dataset can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/tree/main/polygon_segmentation_with_gcn/data/processed">here</a>.
     <figure>
-        <img src="/img/polygon-segmentation-13.png" width="100%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-13.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Some data for training<br>
         </figcaption>
@@ -525,7 +525,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     It then sorts the generated links in order of connection strength, and the predictor decides how many links to use.
 
     <figure>
-        <img src="/img/polygon-segmentation-15.png" width="100%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-15.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/5052a9e5ea1d740f7a98c3d07b249e233030435c/polygon_segmentation_with_gcn/src/model.py#L327-L462">Inference</a> process<br>
             From the top, topk segmentations · segmentation selected by predictor
@@ -546,7 +546,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     </ul>
     
     <figure>
-        <img src="/img/polygon-segmentation-18.png" width="80%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-18.png" width="80%" onerror=handle_image_error(this)>
         <figcaption>
             Losses and metrics for 500 epochs
         </figcaption>
@@ -559,7 +559,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     High performance on negative samples might not accurately reflect the model's ability to identify positive cases correctly.
 
     <figure>
-        <img src="/img/polygon-segmentation-19.png" width="100%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-19.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Evaluate some test data qualitatively
         </figcaption>
@@ -583,7 +583,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
     </ul>
     
     <figure>
-        <img src="/img/polygon-segmentation-20.png" width="90%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-20.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             An example for the geometric loss calculation <br>
             From the left, loss: -0.000478528 · loss: -0.999999994
@@ -596,7 +596,7 @@ thumbnail: /img/polygon-segmentation-thumbnail-1.png
 
     
     <figure>
-        <img src="/img/polygon-segmentation-21.png" width="85%">
+        <img src="/img/polygon-segmentation/polygon-segmentation-21.png" width="85%" onerror=handle_image_error(this)>
         <figcaption>
             Geometric losses for 500 epochs <br>
             From the left, train geometric loss · validation geometric loss
