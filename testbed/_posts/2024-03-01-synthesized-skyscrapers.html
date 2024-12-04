@@ -4,7 +4,7 @@ layout: post
 hashtag: "#geometry #deep-learning #generative-design #deep-sdf"
 comment: true
 splitter: 1
-thumbnail: /img/synthesized-skyscrapers-8.gif
+thumbnail: /img/synthesized-skyscrapers/synthesized-skyscrapers-8.gif
 ---
 
 <script type="text/javascript" async
@@ -22,7 +22,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
 
     <br><br>
     <figure>
-        <img src="/img/synthesized-skyscrapers-2.jpg" width="60%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-2.jpg" width="60%" onerror=handle_image_error(this)>
         <figcaption>
             <a href="https://www.archdaily.com/198946/shou-sugi-ban-bytr-architects">Physical model examination by humans</a><br>
             Shou Sugi Ban / BYTR Architects
@@ -57,7 +57,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
     
     <br><br>
     <figure>
-        <img src="/img/synthesized-skyscrapers-1.png" width="60%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-1.png" width="60%" onerror=handle_image_error(this)>
         <figcaption>
             <a href="https://arxiv.org/pdf/1901.05103.pdf">SDF representation applied to the Stanford Bunny</a><br>
             (a) Way to decide sign: If the point is on the surface, SDF = 0<br>
@@ -86,7 +86,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
 
     
     <figure>
-        <img src="/img/synthesized-skyscrapers-3.png" width="90%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-3.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             Recovered CCTV headquarters from the SDFs<br>
             top 3, original 3d model · resolution 8 · resolution 16 <br>
@@ -135,7 +135,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
     The 15 raw data I gathered is in this <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/tree/main/deep_sdf/data/raw-skyscrapers">link</a>.
     <br><br>
     <figure>
-        <img src="/img/synthesized-skyscrapers-4.png" width="100%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-4.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Skyscrapers
         </figcaption>
@@ -151,7 +151,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
     i.e., the farthest point of the model is set to 1. If we use the normalization method used generally, it doesn't reflect the relative height of the skyscrapers.
 
     Therefore, in this project, the height of the <code>highest model</code> among all skyscrapers data is set to 1 and normalized.
-    <img src="/img/synthesized-skyscrapers-6.png" width="80%">
+    <img src="/mg/synthesized/img/synthesized-skyscrapers-6.png" width="80%" onerror=handle_image_error(this)>
     <figcaption>
         Normalized skyscrapers <br>
         From the left, the lowest building (Gherkin London) · the highest building (One World Trade Center)
@@ -163,7 +163,7 @@ thumbnail: /img/synthesized-skyscrapers-8.gif
     The DeepSDF model's feed-forward networks have the following architecture. It is composed of 8 fully connected layers, denoted as "FC" on the diagram.
     As you can see in the below figure, the dimension of the input X excepting latent vectors consists of (x, y, z) 3.
     <br><br>
-    <img src="/img/synthesized-skyscrapers-5.png" width="80%">
+    <img src="/mg/synthesized/img/synthesized-skyscrapers-5.png" width="80%" onerror=handle_image_error(this)>
     <figcaption>
         The feed-forward network for DeepSDF model <br>
     </figcaption>
@@ -263,8 +263,8 @@ At the end of each epoch loop, I added code to reconstruct the skyscraper to <co
 
 
 <figure>
-    <img src="/img/synthesized-skyscrapers-8.gif" width="30%">
-    <img src="/img/synthesized-skyscrapers-7.gif" width="80%">
+    <img src="/mg/synthesized/img/synthesized-skyscrapers-8.gif" width="30%" onerror=handle_image_error(this)>
+    <img src="/mg/synthesized/img/synthesized-skyscrapers-7.gif" width="80%" onerror=handle_image_error(this)>
 </figure>
 <figcaption style="text-align: center; margin-top: 1em">
     Training process for 150 epochs <br>
@@ -277,7 +277,7 @@ In the below figure, the buildings in the left row are reconstructed by the mode
 
 <br><br><br>
 <figure>
-    <img src="/img/synthesized-skyscrapers-9.gif" width="100%">
+    <img src="/mg/synthesized/img/synthesized-skyscrapers-9.gif" width="100%" onerror=handle_image_error(this)>
 </figure><br>
 <figcaption style="text-align: center; margin-top: 1em">
     Comparing reconstructed skyscrapers vs. originals
@@ -387,7 +387,7 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
 </code></pre><br>
 
 <figure>
-    <img src="/img/synthesized-skyscrapers-10-min.gif" width="100%">
+    <img src="/mg/synthesized/img/synthesized-skyscrapers-10-min.gif" width="100%" onerror=handle_image_error(this)>
 </figure><br>
 <figcaption style="text-align: center; margin-top: 1em">
     From 15 skyscrapers to the 450 skyscrapers <br>
@@ -415,23 +415,23 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
     <br><br>
     
     <figure style="display: flex;">
-        <img src="/img/synthesized-skyscrapers-14.png" width="48%">
-        <img src="/img/synthesized-skyscrapers-19.png" width="48%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-14.png" width="48%" onerror=handle_image_error(this)>
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-19.png" width="48%" onerror=handle_image_error(this)>
     </figure>
     
     <figure style="display: flex;">
-        <img src="/img/synthesized-skyscrapers-12.png" width="48%">
-        <img src="/img/synthesized-skyscrapers-15.png" width="48%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-12.png" width="48%" onerror=handle_image_error(this)>
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-15.png" width="48%" onerror=handle_image_error(this)>
     </figure>
     
     <figure style="display: flex;">
-        <img src="/img/synthesized-skyscrapers-16.png" width="48%">
-        <img src="/img/synthesized-skyscrapers-17.png" width="48%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-16.png" width="48%" onerror=handle_image_error(this)>
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-17.png" width="48%" onerror=handle_image_error(this)>
     </figure>
     
     <figure style="display: flex;">
-        <img src="/img/synthesized-skyscrapers-18.png" width="48%">
-        <img src="/img/synthesized-skyscrapers-13.png" width="48%">
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-18.png" width="48%" onerror=handle_image_error(this)>
+        <img src="/mg/synthesized/img/synthesized-skyscrapers-13.png" width="48%" onerror=handle_image_error(this)>
     </figure><br>
 
     <figcaption>
