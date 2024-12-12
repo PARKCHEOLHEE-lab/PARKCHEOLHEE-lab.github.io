@@ -1,0 +1,48 @@
+---
+title:  "Chamfer Distance"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="">Chamfer Distance</a>
+    </li>
+        <ul>
+            <li>
+                In computer vision and 3D graphics,
+                Chamfer distance is a distance function that estimates the similarity between two point clouds.
+                For two point clouds \( P = \{p_1, p_2, \, ..., \, p_m\} \) and \( Q - \{q_1, q_2, \, ..., \, q_n\} \),
+                the chamfer distance is defined as follows:
+                \[
+                    \,\\
+                        \text{Chamfer Distance}(P, Q) = \sum_{p \in P} \min_{q \in Q} \|p - q\|^2_2 \,\, + \sum_{q \in Q} \min_{p \in P} \|q - p\|^2_2
+                    \,\\
+                \]
+            </li>
+            <ul>
+                <li>
+                    The left term computes the distance from each \(p\) to the nearest \(q\).
+                    Specifically, it first finds the minimum distance between \(p\) and \(Q\), and then adds it to \(P\).
+                    Since the terms are symmetric, the right term performs the same operation, finding the distance from each \(q\) to the nearest \(p\) and adding it to \(Q\).
+                        \[
+                            \,\\
+                            \sum_{p \in P} \min_{q \in Q} \|p - q\|^2_2
+                            \,\\
+                        \]
+                </li>
+            </ul>
+            <br>
+            <li>
+                Normalization term can be added when the point clouds have significant differences in size or density.
+                \[
+                \,\\
+                    \text{Chamfer Distance}(P, Q) = \frac{1}{|P|}\sum_{p \in P} \min_{q \in Q} \|p - q\|^2_2 \,\, + \frac{1}{|Q|}\sum_{q \in Q} \min_{p \in P} \|q - p\|^2_2
+                \,\\
+            \]
+            </li>
+        </ul>
+</ul>
+
+<br><br>
