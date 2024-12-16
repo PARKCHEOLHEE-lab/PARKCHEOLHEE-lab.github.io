@@ -55,7 +55,7 @@ emoji: /emoji/brain.png
                     </li>
                 </ul>
                 <br>
-                <ol type="i">
+                <ol type="I">
                     <li>
                         Problem scenario
                     </li>
@@ -73,6 +73,53 @@ emoji: /emoji/brain.png
                                     come from parametric families of distributions \(p_{\theta} (\mathbf{z}) \) and \(p_{\theta} (\mathbf{x}|\mathbf{z}) \)
                                 </mark>, and that their <a href="https://blog.naver.com/mykepzzang/220835810657">PDFs</a> are differentiable almost everywhere w.r.t both \(\theta\) and \(\mathbf{z} \)
                             </li>
+                            <li>
+                                We are interested in, and propose a solution to, problems in the above scenario:
+                                    <ol type="i">
+                                        <li>
+                                            Efficient approximate ML or MAP estimation for the parameters \(\theta\).
+                                        </li>
+                                        <li>
+                                            Efficient approximate posterior inference of the latent variable \(\mathbf{z}\) given an observed value \(\mathbf{x}\)
+                                            for a choice of parameters \(\theta\). This is useful for coding or data representation tasks.
+                                        </li>
+                                    </ol>
+                            </li>
+                            <br>
+                            <li>
+                                For the purpose of solving the above problems, let us introduce a recognition model \(q_{\phi}(\mathbf{z}|\mathbf{x})\)
+                                : an approximation to the intractable true posterior \(p_{\theta}(\mathbf{z}|\mathbf{x}) \).
+                            </li>
+                            <li>
+                                From a coding theory perspective, the unobserved variables \(\mathbf{z}\) have an interpretation as a latent representation.
+                                In this paper we will therefore also <mark>refer to the recognition model \(q_{\phi}(\mathbf{z}|\mathbf{x})\) as a probabilistic encoder</mark>,
+                                since given a datapoint \(\mathbf{x}\) it produces a distribution over the possible values of the code \(\mathbf{z}\) from which the datapoint \(\mathbf{x}\) could have been generated.
+
+                                <ol type="i">
+                                    <li>
+                                        \(q_{\phi}(\mathbf{z}|\mathbf{x})\) is the encoder, mapping \(\mathbf{x}\) to a distribution over \(\mathbf{z}\)
+                                    </li>
+                                    <li>
+                                        \(p_{\theta}(\mathbf{z}|\mathbf{x}) \) is the decoder, generating \(\mathbf{x}\) from the latent variable \(\mathbf{z}\)
+                                    </li>
+                                </ol>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        The variational bound
+                    </li>
+                        <ul>
+                            <li>
+                                The marginal likelihood is composed of a sum over the marginal likelihoods of individual datapoints
+                                \(\log p_{\theta} (\mathbf{x}^{(1)}, ..., \, \mathbf{x}^{(N)} ) \,=\, \sum^{N}_{i=1} \log p_{\theta}(\mathbf{x}^{(i)}) \), which can each be rewritten as:
+                                
+                                \[
+                                    \,\\
+                                       \log p_{\theta} (\mathbf{x}^{(i)}) = \text{D}_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \| p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) + \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})
+                                    \,\\
+                                \]
+                            </li>
                         </ul>
                 </ol>
         </ol>
@@ -81,3 +128,4 @@ emoji: /emoji/brain.png
 <br><br>
 
 <!-- https://chatgpt.com/g/g-LmRBZpu94-arxivgpt/c/675d0ffd-09d4-8011-a3b6-26de75359fed -->
+ <!-- https://nbviewer.org/github/dreamgonfly/VAE/blob/master/variational_autoencoder.ipynb -->
