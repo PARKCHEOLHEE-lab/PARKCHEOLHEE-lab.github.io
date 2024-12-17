@@ -111,12 +111,32 @@ emoji: /emoji/brain.png
                     </li>
                         <ul>
                             <li>
-                                The marginal likelihood is composed of a sum over the marginal likelihoods of individual datapoints
+                                The marginal likelihood(also known as Bayesian evidence) is composed of a sum over the marginal likelihoods of individual datapoints
                                 \(\log p_{\theta} (\mathbf{x}^{(1)}, ..., \, \mathbf{x}^{(N)} ) \,=\, \sum^{N}_{i=1} \log p_{\theta}(\mathbf{x}^{(i)}) \), which can each be rewritten as:
                                 
                                 \[
                                     \,\\
                                        \log p_{\theta} (\mathbf{x}^{(i)}) = \text{D}_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \,\|\, p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) + \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})
+                                    \,\\
+                                \]
+
+                                where \( \text{D}_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \,\|\, p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) \ge 0 \).
+                                At the minimum, it is zero when \( q_{\phi}(\mathbf{z} | \mathbf{x}) \) eaxctly equals \(p_{\theta}(\mathbf{z} | \mathbf{x}) \).
+
+                            </li>
+                            <br>
+                            <li>
+                                The first RHS term is the 
+                                <a href="https://angeloyeo.github.io/2020/10/27/KL_divergence.html#:~:text=KL%20divergence%3A%20%EC%A0%95%EB%B3%B4%20%EC%97%94%ED%8A%B8%EB%A1%9C%ED%94%BC%EC%9D%98%20%EC%83%81%EB%8C%80%EC%A0%81%20%EB%B9%84%EA%B5%90">
+                                    KL divergence
+                                </a> of the approximate from the true posterior.
+                                Since this KL-divergence is non-negative, the RHS term 
+                                \(\mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})\) is called the (variational) 
+                                lower boun(Evidence Lower Bound, ELBO)
+                                on the marginal likelihood of datapoint \(i\), and can be written as:
+                                \[
+                                    \,\\
+
                                     \,\\
                                 \]
                             </li>
