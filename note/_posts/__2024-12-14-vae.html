@@ -130,14 +130,40 @@ emoji: /emoji/brain.png
                                 <a href="https://angeloyeo.github.io/2020/10/27/KL_divergence.html#:~:text=KL%20divergence%3A%20%EC%A0%95%EB%B3%B4%20%EC%97%94%ED%8A%B8%EB%A1%9C%ED%94%BC%EC%9D%98%20%EC%83%81%EB%8C%80%EC%A0%81%20%EB%B9%84%EA%B5%90">
                                     KL divergence
                                 </a> of the approximate from the true posterior.
-                                Since this KL-divergence is non-negative, the RHS term 
+                                Since this KL-divergence is non-negative, the second RHS term 
                                 \(\mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})\) is called the (variational) 
                                 lower boun(Evidence Lower Bound, ELBO)
-                                on the marginal likelihood of datapoint \(i\), and can be written as:
+                                on the marginal likelihood of datapoint \(i\).
+                            </li>
+                            <li>
+                                We want to differentiate and optimize the lower bound 
+                                \(\mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})\) w.r.t both the variational
+                                parameters \(\phi\) and generative parameters \(\theta\).
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        The SGVB estimator and AEVB algorithm
+                    </li>
+                        <ul>
+                            <li>
+                                In this section we introduce a practical estimator of the lower bound and its derivatives w.r.t the parameters.
                                 \[
-                                    \,\\
-
-                                    \,\\
+                                    \begin{array}{l}
+                                    \hline
+                                    \textbf{Algorithm 1} \text{ Minibatch version of the Auto-Encoding VB (AEVB) algorithm. Either of the two} \\
+                                    \text{SGVB estimators in section 2.3 can be used. We use settings } M = 100 \text{ and } L = 1 \text{ in experiments.} \\
+                                    \hline
+                                    \quad \theta, \phi \leftarrow \text{Initialize parameters} \\
+                                    \quad \textbf{repeat} \\
+                                    \qquad \mathbf{X}^M \leftarrow \text{Random minibatch of } M \text{ datapoints (drawn from full dataset)} \\
+                                    \qquad \epsilon \leftarrow \text{Random samples from noise distribution } p(\epsilon) \\
+                                    \qquad \mathbf{g} \leftarrow \nabla_{\theta,\phi}\tilde{\mathcal{L}}^M(\theta, \phi; \mathbf{X}^M, \epsilon) \text{ (Gradients of minibatch estimator)} \\
+                                    \qquad \theta, \phi \leftarrow \text{Update parameters using gradients } \mathbf{g} \text{ (e.g. SGD or Adagrad)} \\
+                                    \quad \textbf{until } \text{convergence of parameters } (\theta, \phi) \\
+                                    \quad \textbf{return } \theta, \phi \\
+                                    \hline
+                                    \end{array}
                                 \]
                             </li>
                         </ul>
