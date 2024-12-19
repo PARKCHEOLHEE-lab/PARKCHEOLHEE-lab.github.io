@@ -1,0 +1,71 @@
+---
+title:  "KL-Divergence"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence">KL-divergence</a>
+    </li>
+        <ul>
+            <li>
+                In mathematical statistics, the Kullback-Leibler (KL) divergence (also called relative entropy and I-divergence), denoted
+                \(\text{D}_{KL} (P \, \| \, Q) \), is a type of <b>statistical distance</b>: 
+                <mark>
+                    a measure of how much a model probability distribution \(Q\) is different from a true probability distribution \(P\).
+                </mark>
+            </li>
+            <li>
+                While it is a measure of how different two distributions are, and in some sense is thus a 
+                <b>"distance"</b>, it is not actually a metric, which is the most familiar and formal type of distance.
+            </li>
+            <li>
+                <mark>Relative entropy is always a non-negative real number</mark>, 
+                with value 0 if and only if the two distributions in question are identical.
+            </li>
+            <li>
+                For discrete probability distributions \(P\) and \(Q\) defined on the same sample space, \(\mathcal{X}\),
+                the KL-divergence from \(Q\) to \(P\) is defined to be:
+                \[
+                    \,\\
+                    \text{D}_{KL} (P \, \| \, Q) = \sum_{x \in \mathcal{X}} P(x) \log \left(\frac{P(x)}{Q(x)}\right)
+                    \,\\
+                \]
+            </li>
+            <br>
+            <li>
+                For continuous probability distributions, the sum is replaced by an integral,
+                where \(p\) and \(q\) denote the probability densities of \(P\) and \(Q\) respectively.
+                \[
+                    \,\\
+                    \text{D}_{KL} (P \, \| \, Q) = \displaystyle\int\limits_{\qquad-\infty}^{\qquad\infty} p(x) \log \left(\frac{p(x)}{q(x)}\right) dx
+                    \,\\
+                \]
+            </li>
+        </ul>
+</ul>
+
+<span style="display: block;"></span>
+    {% include embed.html url="/notebooks/kl-divergence.html" %}
+</span>
+
+<br><br>
+
+<ul>
+    <li>
+        References
+    </li>
+        <ul>
+            <li>
+                <a href="https://angeloyeo.github.io/2020/10/27/KL_divergence.html">https://angeloyeo.github.io/2020/10/27/KL_divergence.html</a>
+            </li>
+            <li>
+                <a href="https://bigdatamaster.tistory.com/153">https://bigdatamaster.tistory.com/153</a>
+            </li>
+        </ul>
+</ul>
+
+<br><br>
