@@ -209,6 +209,32 @@ emoji: /emoji/brain.png
                                     \end{array}
                                 \]
                             </li>
+                            <li>
+                                Under certain mild conditions outlined in section 2.4 for a chosen approximate posterior
+                                \(q_{\phi}(\mathbf{z}|\mathbf{x}) \)
+                                we can reparameterize the random variable \(\tilde{z} \sim q_{\phi}(\mathbf{z}|\mathbf{x}) \)
+                                using a differentiable transformation \(g_{\phi}(\epsilon, \mathbf{x}) \)
+                                of an noise variable \(\epsilon\):
+                                \[
+                                    \,\\
+                                    \tilde{z} = g_{\phi}(\epsilon, \mathbf{x}) \quad \text{with} \quad \epsilon \sim p(\epsilon)
+                                    \,\\
+                                \]
+
+                                <mark>The reparameterization trick is a method that makes the sampling process differentiable.</mark>
+                                Instead of sampling directly from \(q_{\phi}(\mathbf{z}|\mathbf{x})\), we sample a random noise \(\epsilon\)
+                                and transform it using the function \(g_{\phi}\). This allows us to compute gradients and train the network using
+                                backpropagation.
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        The reparameterizationi trick
+                    </li>
+                        <ul>
+                            <li>
+                                
+                            </li>
                         </ul>
                 </ol>
         </ol>
