@@ -116,13 +116,12 @@ emoji: /emoji/brain.png
                                 
                                 \[
                                     \,\\
-                                       \log p_{\theta} (\mathbf{x}^{(i)}) = \text{D}_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \,\|\, p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) + \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})
+                                       \log p_{\theta} (\mathbf{x}^{(i)}) = D_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \,\|\, p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) + \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})
                                     \,\\
                                 \]
 
-                                where \( \text{D}_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \,\|\, p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) \ge 0 \).
+                                where \( D_{KL}( q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) \,\|\, p_{\theta}(\mathbf{z}|\mathbf{x}^{(i)}) ) \ge 0 \).
                                 At the minimum, it is zero when \( q_{\phi}(\mathbf{z} | \mathbf{x}) \) eaxctly equals \(p_{\theta}(\mathbf{z} | \mathbf{x}) \).
-
                             </li>
                             <br>
                             <li>
@@ -133,8 +132,52 @@ emoji: /emoji/brain.png
                                 Since this KL-divergence is non-negative, the second RHS term 
                                 \(\mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})\) is called the (variational) 
                                 lower boun(Evidence Lower Bound, ELBO)
-                                on the marginal likelihood of datapoint \(i\).
+                                on the marginal likelihood of datapoint \(i\), can be written as:
+                                \[
+                                    \,\\
+                                    \log p_{\theta}(\mathcal{x}^{(i)}) \ge \mathcal{L}(\theta, \phi; \mathcal{x}^{(i)})
+                                    = \mathbb{E}_{q \phi (\mathbf{z}|\mathbf{x})} [-\log q_{\phi}(\mathbf{z}|\mathbf{x}) + \log p_{\theta}(\mathbf{x}, \mathbf{z})]
+                                    \,\\
+                                \]
+
+                                where the joint probability decomposition \( p_{\theta}(\mathbf{x}, \mathbf{z}) = p_{\theta}(\mathbf{x}|\mathbf{z})p_{\theta}(\mathbf{z}) \) is applied:
+                                \[
+                                    \,\\
+                                    \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) = \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} 
+                                    \big[\log p_{\theta}(\mathbf{x}|\mathbf{z}) + \log p_{\theta}(\mathbf{z}) - \log q_{\phi}(\mathbf{z}|\mathbf{x})\big]
+                                    \,\\
+                                \]
+                            
+                                To include the KL divergence, we use its definition:
+                                \[
+                                \,\\
+                                D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z})) = 
+                                \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log q_{\phi}(\mathbf{z}|\mathbf{x}) - \log p_{\theta}(\mathbf{z})\big].
+                                \,\\
+                                \]
+                            
+                                Rearranging this definition gives:
+                                \[
+                                \,\\
+                                \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log p_{\theta}(\mathbf{z})\big] - 
+                                \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log q_{\phi}(\mathbf{z}|\mathbf{x})\big] = 
+                                -D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z})).
+                                \,\\
+                                \]
+                            
+                                Substituting this into the ELBO, we have:
+                                \[
+                                \,\\
+                                \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) = - D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z}))
+                                + \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log p_{\theta}(\mathbf{x}|\mathbf{z})\big] 
+                                \,\\
+                                \]
+                                
+                                The first term, the <mark>KL divergence term</mark>, regularizes the approximate posterior \(q_{\phi}(\mathbf{z}|\mathbf{x})\) to be close to the prior \(p_{\theta}(\mathbf{z})\).
+                                The second term represents the <mark>reconstruction term</mark>, which measures how well the data can be reconstructed given the latent variables. 
+                                
                             </li>
+                            <br>
                             <li>
                                 We want to differentiate and optimize the lower bound 
                                 \(\mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})\) w.r.t both the variational
