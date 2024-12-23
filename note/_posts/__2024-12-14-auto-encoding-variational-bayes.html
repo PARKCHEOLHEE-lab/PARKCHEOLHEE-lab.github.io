@@ -233,10 +233,80 @@ emoji: /emoji/brain.png
                     </li>
                         <ul>
                             <li>
-                                
+                                In order to solve our problem we invoked an alternative method for generating samples from
+                                \(q_{\phi}(\mathbf{z}|\mathbf{x}) \).
+                                Let $\mathbf{z}$ be a continuous random variable, and $z \sim q_{\phi}(\mathbf{z}|\mathbf{x}) $
+                                be some conditional distribution. 
+                                \[
+                                    \,\\
+                                    \mathbf{z} = g_{\phi}(\epsilon, \mathbf{x})
+                                    \,\\
+                                \]
+ 
+                                where $\epsilon$ is an auxiliary variable with independent marginal $p(\epsilon)$, and $g_{\phi}(.) $
+                                is some vector-valued function parameterized by $\phi$.
+                            </li>
+                            <li>
+                                Take, for example, let $z \sim p(z|x) = \mathcal{N}(\mu, \sigma^2) $.
+                                In this case, a valid reparameterization is $z = \mu + \sigma \epsilon $,
+                                where $\epsilon$ is an auxiliary noise variable $\epsilon \sim \mathcal{N}(0, 1) $. 
+
+                                <br><br>
+                                (
+                                    직접 샘플링하면 미분할 수 없으므로, 인코더 파라미터 $\phi$에 의해 입력 데이터 $\mathbf{x}$가 
+                                    잠재변수 $z$의 분포를 매핑하고 $\mu$와 $\sigma$를 추정.
+                                    그 후 정규분포 $\epsilon \sim \mathcal{N}(0, 1) $에서 샘플링된 노이즈를 사용하여 잠재변수 $z$를 생성.
+                                    <mark>텐서 그래프 연결 유지</mark>.
+                                )
                             </li>
                         </ul>
                 </ol>
+            <br>
+            <li>
+                Example: Variational Auto-Encoder
+            </li>
+                <ul>
+                    <li>
+                        In this section we'll give an example where we use a neural network for the probability <b>encoder</b> $q_{\phi}(\mathbf{z}|\mathbf{x}) $
+                        (the approximation to the posterior of the generative (<b>decoder</b>) model $p_{\theta}(\mathbf{x}, \mathbf{z})$) .
+                        \[
+                            \,\\
+                            \log q_{\phi}(\mathbf{z}|\mathbf{x}^{(i)}) = \log \mathcal{N} (\mathbf{z}; \mu^{(i)}, \sigma^{2(i)} \mathbf{I})
+                            \,\\
+                        \]
+                        where the mean and s.d. of the approximate posterior,
+                        $\mu^{(i)}$ and $\sigma^{(i)} $, are outputs of the encoding MLP,
+                        i.e. nonlinear functions of datapoint $\mathbf{x}^{(i)}$ and the variational parameters $\phi$.
+                    </li>
+                    <li>
+                        As explained in section reparameterization trick, we sample from the posterior $\mathbf{z}^{(i, l)} \sim q_{\phi}(\mathbf{z}|{x}^{(i)}) $
+                        using
+                        \[
+                            \,\\
+                            g_{\phi}( \mathbf{x}^{(i)}, \epsilon^{(l)} ) = \mu^{(i)} + \sigma^{(i)} \odot \epsilon^{(l)}
+                            \,\\
+                        \]
+
+                        where $\epsilon^{(l)} \sim \mathcal{N}(0, \mathbf{I}) $. With $\odot$ we signify an element-wise product.
+                        <br><br>
+                        (
+                            <br>
+                            　$\mathcal{N}(0, \mathbf{I})$: 평균이 $0$이고 분산이 $\mathbf{I}$로서, $\mathbf{z} \in \mathbb{R}^d $ 형태.
+                            <br>
+                            　$\mathcal{N}(0, 1)$: 평균이 $0$이고 분산이 $1$로서, $z \in \mathbb{R} $ 형태.
+                            <br>
+                        )
+
+                        \[
+                            \,\\
+                            \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) \simeq \frac{1}{2} \sum^J_{j=1} \left( 1 + \log((\sigma_j^{(i)})^2) - (\mu_j^{(i)})^2 - (\sigma_j^{(i)})^2 \right) + \frac{1}{L} \sum^L_{l=1} \log p_{\theta}(\mathbf{x}^{(i)}|\mathbf{z}^{(i,l)})
+                            \,\\
+                            \]
+
+                        where $\mathbf{z}^{(i, l)} = \mu^{(i)} + \sigma{(i)} \odot \epsilon^{(l)} $ and $\epsilon \sim \mathcal{L}(0, \mathbf{I}) $
+                        <br><br>
+                    </li>
+                </ul>
         </ol>
 </ul>
 
