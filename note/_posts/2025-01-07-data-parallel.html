@@ -1,0 +1,97 @@
+---
+title:  "DataParallel"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://pytorch.org/docs/stable/generated/torch.nn.DataParallel.html#dataparallel">DataParallel</a>
+        <ul>
+            <li>
+                Implements data parallelism.
+            </li>
+            <li>
+                This container parallelizes the application of the given module by splitting the input across the specified devices.
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Examples
+        <ul>
+            <li>
+                Let's say the model consists of two parts: the generator and the allocator.
+                It includes attributes for the <code>wall_generator</code> and the <code>room_allocator</code>.
+<pre><code class="python">
+    class PlanGenerator(nn.Module):
+        """Floor plan generator consisting of the `WallGenerator` and `RoomAllocator`"""
+
+        def __init__(self, configuration: Configuration):
+            super().__init__()
+
+            self.configuration = configuration
+
+            self.wall_generator = WallGenerator(
+                in_channels=self.configuration.WALL_GENERATOR_IN_CHANNELS,
+                out_channels=self.configuration.WALL_GENERATOR_OUT_CHANNELS,
+                size=self.configuration.IMAGE_SIZE,
+                channels_step=self.configuration.WALL_GENERATOR_CHANNELS_STEP,
+                encoder_repeat=self.configuration.WALL_GENERATOR_REPEAT,
+            )
+
+            self.room_allocator = RoomAllocator(
+                in_channels=self.configuration.ROOM_ALLOCATOR_IN_CHANNELS,
+                out_channels=self.configuration.ROOM_ALLOCATOR_OUT_CHANNELS,
+                size=self.configuration.IMAGE_SIZE,
+                channels_step=self.configuration.ROOM_ALLOCATOR_CHANNELS_STEP,
+                encoder_repeat=self.configuration.ROOM_ALLOCATOR_REPEAT,
+            )
+
+            self.to(self.configuration.DEVICE)
+
+        def forward(
+            self, floor_batch: torch.Tensor, walls_batch: torch.Tensor, masking: bool = False
+        ) -> Tuple[torch.Tensor, torch.Tensor]:
+
+            generated_walls = self.wall_generator(floor_batch)
+            allocated_rooms = self.room_allocator(walls_batch)
+
+            if masking:
+                generated_walls_masked = self.mask(generated_walls, floor_batch)
+                allocated_rooms_masked = self.mask(allocated_rooms, floor_batch)
+
+                return generated_walls_masked, allocated_rooms_masked
+
+            return generated_walls, allocated_rooms
+</code></pre>
+            </li>
+            <br>
+            <li>Check whether GPUs are multiple, and convert them if they are multiple. 
+                If using attributes of the model is needed, they can be used through <code>Model.module</code> like the following.
+<pre><code class="python">
+    has_multiple_gpus = torch.cuda.device_count() > 1
+    model = PlanGenerator(configuration)
+
+    if has_multiple_gpus:
+        model = nn.dataParallel(model)
+        
+    wall_generator_optimizer, room_allocator_optimizer = _get_optimizers(
+        model.module.wall_generator if has_multiple_gpus else model.wall_generator,
+        model.module.room_allocator if has_multiple_gpus else model.room_allocator,
+        configuration,
+        states,
+    )
+</code></pre>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+ 
+<br><br>
+
+
+<br><br>
