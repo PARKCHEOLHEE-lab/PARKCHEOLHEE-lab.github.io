@@ -1,0 +1,32 @@
+---
+title:  "ghdoc.Path"
+layout: post
+---
+
+<br>
+<ul>
+    <li>
+        Getting abs path in Grasshopper Python using <code>ghdoc.Path</code>
+        <ul>
+            <li>
+                <a href="https://www.grasshopper3d.com/forum/topics/gh-filename-is-python">https://www.grasshopper3d.com/forum/topics/gh-filename-is-python</a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<pre><code class="python">
+    import os
+
+    print(__file__)
+    print(os.getcwd())
+    print(ghdoc.Path)
+    print(os.path.dirname(ghdoc.Path))
+
+    # rhinocode:///grasshopper/1/ebaead15-b02e-4a87-9bc0-2ada5ffa3b90/31a185be-15b8-4730-b0a9-62bb309db609
+    # C:\Program Files\Rhino 8\System
+    # C:\Users\park1\OneDrive\Documents\foobar.gh
+    # C:\Users\park1\OneDrive\Documents
+</code></pre>
+
+<br><br>
