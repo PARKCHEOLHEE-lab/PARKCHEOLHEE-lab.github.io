@@ -1,0 +1,73 @@
+---
+title:  "Building-GAN: Graph-Conditioned Architectural Volumetric Design Generation"
+layout: post
+emoji: /emoji/brain.png
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/2104.13316">Building-GAN: Graph-Conditioned Architectural Volumetric Design Generation</a>
+        <ol>
+            <li>
+                Introduction
+                <ul>
+                    <li>
+                        We propose <b>voxel graph</b>, <mark>a novel 3D representation that can encode irregular voxel grids with non-uniform space partitioning.</mark>
+                        To bridge between the input program graph and the
+                        output voxel graph, we design a pointer-based cross-modal
+                        modules in our generative adversarial graph network. The
+                        pointer module can be used not only for message passing,
+                        but also as a decoder to output probability over a dynamic
+                        set of valid programs.
+                    </li>
+                    <li>
+                        In summary, our main contributions are: 
+                        1) a new 3D representation, voxel graph;
+                        2) a <b>graph-conditioned</b> generative adversarial network (GAN) using GNN and pointer-based cross-modal module;
+                        3) an automated pipeline to generate valid volumetric designs through simple interaction;
+                        4) a synthetic dataset that contains 120,000 volumetric design and their corresponding program graphs. We will share the code, model, and dataset.
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Related Work
+                <ol type="I">
+                    <li>
+                        Voxel Representations
+                        <ul>
+                            <li>
+                                Regular grid representation using voxels, such as <b>occupancy grids</b>, 
+                                has been studied since the 3D extension of 2D convolution.
+                                However, due to the dense representation for sparse
+                                occupancy, voxel representation is notorious for its cubic
+                                computational cost and poor scalability to higher resolutions and larger sizes.
+                            </li>
+                            <li>
+                                Our proposed voxel graph combines voxel-based and
+                                graph-based representations by encoding voxels into graph
+                                nodes.
+                            </li>
+                            <figure>
+                                <img src="/img/building-gan/building-gan-0.png" width="100%">
+                                <figcaption>
+                                    Left: the hierarchical program graph. 
+                                    Right: the irregular grid with non-uniform voxel size and the equivalent voxel graph.
+                                </figcaption>
+                            </figure>
+                        </ul>
+                    </li>
+                </ol>
+            </li>
+            <br>
+            <li>
+                Representation and Data Collection
+            </li>
+        </ol>
+    </li>
+</ul>
+
+<br><br>
