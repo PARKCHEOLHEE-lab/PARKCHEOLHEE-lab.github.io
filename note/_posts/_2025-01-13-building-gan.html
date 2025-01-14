@@ -65,9 +65,212 @@ emoji: /emoji/brain.png
             <br>
             <li>
                 Representation and Data Collection
+                <ul>
+                    <li>
+                        Target program ratio (TPR) defines theapproximate ratio between programs. 
+                        For example, office :corridor : restroom : elevator : stairs = 50 : 20 : 15 : 5 : 10.
+                        Both TPR and FAR are encoded into the program graph. 
+                    </li>
+                    <li>
+                        Another input is a valid design space, which may be ir-regular due to building codes. 
+                        The design space can befurther partitioned freely based on architect's decisions orstatistical heuristics.
+                        Inspired by this partitioning process, we invent the representation, voxel graph.
+                    </li>
+                </ul>
+                <br>
+                <ol type="I">
+                    <li>
+                        Data Collection
+                        <ul>
+                            <li>
+                                Since there is no publicly available dataset for volu-metric designs from real buildings, 
+                                we create a synthetic dataset with 120,000 volumetric designs for commercial buildings <b>using parametric models</b>.
+                                The heuristics behindthe parametric models are based on the rules and knowl-edge provided by professional architects.
+                            </li>
+                            
+                            <figure>
+                                <img src="/img/building-gan/building-gan-1.png" width="80%">
+                                <figcaption>
+                                    Left: an example of valid design space. 
+                                    Right: an example of volumetric design within the valid design space
+                                </figcaption>
+                            </figure>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Hierarchial Program Graph
+                        <ul>
+                            <li>
+                                Given a building datum, we first construct 2D program
+                                graphs for each story. Each program node feature includes
+                                the program type and the story level.
+                                A program edge shows
+                                the two programs are connected by a door or opening. 
+                                <mark>
+                                    To construct the 3D program graph, we stack all 2D program
+                                    graphs and chain the stairs and elevators,
+                                </mark>
+                                since they are the
+                                only paths for moving vertically.
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Voxel Graph
+                        <ul>
+                            <li>
+                                Each node represents a voxel and the voxel information
+                                (coordinate and dimension) is stored as node features.
+                                It allows non-uniform space
+                                partitioning, which <b>avoids over-discretization</b> when using
+                                the uniform voxel size.
+                            </li>
+                            <li>
+                                Theoretically, voxel nodes can encode arbitrary 3D primitives, 
+                                but in this paper, only cuboids with varying sizes are
+                                used to build up the approximated valid design space. 
+                                <mark>
+                                    When parsing the data, the space partition is defined by the projection of all 2D layouts.
+                                </mark>
+                            </li>
+                            <li>
+                                In real-world practice, walls tend to
+                                align across different stories for structural stability 
+                                or construction considerations, 
+                                <b>
+                                    which leads to a reduced amount of voxels in the space partition
+                                </b>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </li>
+            <br>
+            <li>
+                Method
+                <ul>
+                    <li>
+                        We formulate the framework as a graph-conditioned
+                        GAN. The generator is composed by two GNNs for the program graph and voxel graph, 
+                        connected by a cross-modal pointer module. The discriminator is composed by a GNN
+                        with two decoders to evaluate design from both building
+                        and story level.
+                        
+                        <figure>
+                            <img src="/img/building-gan/building-gan-2.png" width="100%">
+                            <figcaption>
+                                An overview of Building-GAN. 
+                                Top: the Program GNN, Voxel GNN, and Cross-Modal Pointer Module for the generator. 
+                                Bottom: the discriminator with the building and story level decoders.
+                            </figcaption>
+                        </figure>
+                    </li>
+                </ul>
+                <br>
+                <ol type="I">
+                    <li>
+                        Generator
+                        <ol type="i">
+                            <li>
+                                Program GNN
+                                <ul>
+                                    <li>
+                                        Denote random program noise as \(z^p\), FAR limit as \(F\), 
+                                        program node feature \(i\) as \(x_i\), 
+                                        neighbor of node \(i\) as \(N e(i)\), node cluster of \(i\)'s pro-
+                                        gram type as \(Cl(i)\), target program ratio of \(i\)'s program type
+                                        as \(r_{Cl(i)}\), multi-layer perceptron as \(MLP\) , mean pooling as
+                                        \(Mean\), and concatenation operator as \([·, ·]\).
+                                    </li>
+                                    <li>
+                                        We first map the node feature to the embedding space \((1)\),
+                                        then compute message passing T times. 
+                                        In each message passing step, we compute the message from neighboring nodes \((2)\)
+                                        and mean pool all nodes with the same program type as the master note embedding \((3)\).
+                                        Lastly, we update the node embeddings with residual learning to avoid gradient vanishing \((4)\).
+                                        After T = 5 steps of message passing, the final embedding of program node \(i\) is denoted as \(x^T_i\).
+                                        \[
+                                            \begin{align}
+                                            \,\\
+                                            x^0_i &= MLP^p_{enc}([x_i, z^p_i, F]) \tag{1} \\\\
+                                            m^t_i &= \frac{1}{|Ne(i)|} \sum_{j \in Ne(i)} MLP^p_{message}([x^t_i, x^t_j]) \tag{2} \\\\
+                                            c^t_i &= Mean_{j \in Cl(i)}(\{x^t_j\}) \tag{3} \\\\
+                                            x^{t+1}_i &= x^t_i + MLP^p_{update}([x^t_i, m^t_i, r_{Cl(i)}c^t_i, F]) \tag{4}
+                                            \,\\
+                                            \end{align}
+                                        \]
+                                    </li>
+                                </ul>
+                            </li>
+                            <br>
+                            <li>
+                                Voxel GNN
+                                <ul>
+                                    <li>
+                                        The input voxel features \(v_k\) and voxel noise \(z^v_k\) are first 
+                                        encoded by the voxel GNN encoder. To better encode the story
+                                        index, we choose <b>positional encoding</b> and add it to the processed embedding \((5)\).
+                                    </li>
+                                    <li>
+                                        Instead of appending the absolute coordinates in voxel features, we use the relative displacements
+                                        \(p_k - p_l\) in message computation \((6)\).
+                                        Voxel node embeddings are updated with residual learning \((7)\).
+                                        \[
+                                            \begin{align}
+                                            \,\\
+                                            v^0_k &= MLP^v_{enc}([v_k, z^v_k]) + PE(story_k) \tag{5} \\\\
+                                            n^t_k &= \sum_{l \in Ne(k)} MLP^v{message} \,\, ([v^t_k, v^t_l, p_k - p_l]) \tag{6} \\\\
+                                            v^t_k &= v^t_k + MLP^v_{update}(v^t_k, n^t_k) \tag{7}
+                                            \,\\
+                                            \end{align}
+                                        \]
+                                    </li>
+                                </ul>
+                            </li>
+                            <br>
+                            <li>
+                                Pointer-based Cross-Modal Module
+                                <ul>
+                                    <li>
+                                        After processing the program graph with the program GNN,
+                                        the final embedding of program nodes can be viewed as the
+                                        virtual "blueprint" of a design. Therefore, it is necessary to
+                                        "look" at this blueprint to generate the output. 
+                                    </li>
+                                    <li>
+                                        To bridge between the program graph and the voxel graph, 
+                                        we introduce a <b>pointer-based cross-modal module</b>.
+                                        We cannot use a fixed length output to model program
+                                        type distribution since 1) <mark>
+                                            different stories can have different
+                                            numbers of program nodes to choose
+                                        </mark>from, for example,
+                                        one floor has five rooms and another one has seven rooms;
+                                        and 2) if there are two program nodes with the same program type, 
+                                        we want to differentiate between the two nodes,
+                                        such as two restrooms in the same floor.
+                                    </li>
+                                    <li>
+                                        The pointer module returns three terms:
+                                        \(mask_k, att_k\) and \(v^{t+1}_k \, (8) \).
+                                        \(mask_k\) is used as a soft prediction whether the voxel node \(k\) is used or not \((9)\).
+                                        If it is not used, it is left unused and has no program type.
+                                        Otherwise, \(att_k\) is the attention distribution over the set of program nodes on the same floor \((10, 11) \).
+                                        An updated embedding \(v^{t+1}_k \) is computed by the weighted sum of the program embeddings \(x^T_i\) multiplied by the soft prediction
+                                        \(mask_k\) with residual learning \((12) \).
+                                    </li>
+                                </ul>
+                            </li>
+                        </ol>
+                    </li>
+                </ol>
             </li>
         </ol>
     </li>
 </ul>
 
 <br><br>
+
+<!-- https://chatgpt.com/c/67864115-3190-8011-9997-5e82a571962e -->
