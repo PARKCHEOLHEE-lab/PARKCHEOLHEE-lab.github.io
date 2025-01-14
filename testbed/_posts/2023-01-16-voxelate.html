@@ -69,6 +69,77 @@ thumbnail: /img/voxelate-5.png
     <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L101-L111">Examples</a> include <code>interior voxels, exterior voxels, corner voxels, and roof voxels</code> etc.
     <br><br>
 
+<pre><code class="python">
+    def __get_voxels_condition_list(self):
+        inside_grid_centroid_integer = [int(b) for b in self.inside_grid_centroid]
+        voxel_3d_list = self.__get_reshaped_list(inside_grid_centroid_integer, *self.cols)
+        
+        
+        roof_3d_list = self.__get_default_3d_list()
+        exterior_3d_list = self.__get_default_3d_list()
+        exterior_both_3d_list = self.__get_default_3d_list()
+        exterior_corner_3d_list = self.__get_default_3d_list()
+        exterior_corner_u_3d_list = self.__get_default_3d_list()
+        exterior_corner_o_3d_list = self.__get_default_3d_list()
+        
+        for zi, z_list in enumerate(voxel_3d_list):
+            prev_zi = (zi - 1) % len(voxel_3d_list)
+            next_zi = (zi + 1) % len(voxel_3d_list)
+            
+            for yi, y_list in enumerate(z_list):
+                prev_yi = (yi - 1) % len(z_list)
+                next_yi = (yi + 1) % len(z_list)
+                
+                for xi, x in enumerate(y_list):
+                    prev_x = bool(y_list[(xi - 1) % len(y_list)])
+                    next_x = bool(y_list[(xi + 1) % len(y_list)])
+                    back_x = bool(z_list[prev_yi][xi])
+                    frnt_x = bool(z_list[next_yi][xi])
+                    
+                    exterior_count = [prev_x, next_x, back_x, frnt_x].count(False)
+                    
+                    is_roof = bool(x) and not bool(voxel_3d_list[next_zi][yi][xi])
+                    is_exterior_both = bool(x) and (not prev_x and not next_x) or (not back_x and not frnt_x)
+                    is_exterior = bool(x) and any([not prev_x, not next_x, not back_x, not frnt_x]) and not is_exterior_both
+                    is_exterior_corner = bool(x) and exterior_count == 2 and not is_exterior_both
+                    is_exterior_corner_u = bool(x) and exterior_count == 3
+                    is_exterior_corner_o = bool(x) and exterior_count == 4
+                    
+                    if is_roof:
+                        roof_3d_list[zi][yi][xi] = 1
+                    if is_exterior:
+                        exterior_3d_list[zi][yi][xi] = 1
+                    if is_exterior_both:
+                        exterior_both_3d_list[zi][yi][xi] = 1
+                    if is_exterior_corner:
+                        exterior_corner_3d_list[zi][yi][xi] = 1
+                    if is_exterior_corner_o:
+                        exterior_corner_o_3d_list[zi][yi][xi] = 1
+                    if is_exterior_corner_u:
+                        exterior_corner_u_3d_list[zi][yi][xi] = 1
+                        
+        interior_3d_list = self.__get_default_3d_list()
+        for zi, (z_list, e_list) in enumerate(zip(voxel_3d_list, exterior_3d_list)):
+            for yi, (z, e) in enumerate(zip(z_list, e_list)):
+                for xi, (zx, ex) in enumerate(zip(z, e)):
+                    interior_3d_list[zi][yi][xi] = zx - ex
+        
+        grid_3d_list = self.__get_reshaped_list(self.grid, *self.cols)
+        
+        return (
+            voxel_3d_list, 
+            grid_3d_list, 
+            roof_3d_list, 
+            exterior_3d_list, 
+            exterior_both_3d_list,
+            exterior_corner_3d_list, 
+            exterior_corner_o_3d_list,
+            exterior_corner_u_3d_list,
+            interior_3d_list
+        )
+</code></pre>
+<br><br>
+
     To determine the ROOF voxel, simply <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L587-L592">check the condition</a> of the upper voxel. 
     Likewise, to determine the CORNER voxel, simply check previous voxel, next voxel, front voxel, back voxel.
     The diagram below shows how red voxels are estimated to be CORNER voxels. Please refer to the link above for detailed code related to determining the voxel condition.
@@ -94,6 +165,40 @@ thumbnail: /img/voxelate-5.png
             VoxelUnits <br> From the left, Exterior · Exterior both · Exterior corner · Exterior corner O · Exterior corner U 
         </figcaption>
     </figure>
+    <br><br>
+
+<pre><code class="python">
+    class VoxelUnits:
+        def __init__(self, exterior_unit, exterior_both_unit, exterior_corner_unit, exterior_corner_o_unit, exterior_corner_u_unit):
+            self.unit_bounding_box = gh.BoundingBox(exterior_unit, WORLD_XY).box
+            self.exterior_unit_centroid = gh.Volume(self.unit_bounding_box).centroid
+            
+            self.voxel_face_edges = gh.DeconstructBrep(self.unit_bounding_box.ToBrep().Faces[0].ToBrep()).edges
+            self.scale_factor = self.voxel_size / self.voxel_face_edges[0].GetLength()
+            
+            self.rotated_exterior_unit = self.__get_scaled_unit(exterior_unit)
+            self.rotated_exterior_both_unit = self.__get_scaled_unit(exterior_both_unit)
+            self.rotated_exterior_corner_unit = self.__get_scaled_unit(exterior_corner_unit)
+            self.rotated_exterior_corner_u_unit = self.__get_scaled_unit(exterior_corner_u_unit)
+            self.rotated_exterior_corner_o_unit = self.__get_scaled_unit(exterior_corner_o_unit)
+            
+        def __get_joined_mesh(self, unit):
+            return gh.MeshJoin(rg.Mesh.CreateFromBrep(unit, rg.MeshingParameters(0)))
+            
+        def __get_rotated_unit(self, unit):
+            return gh.Rotate(
+                self.__get_joined_mesh(unit),
+                self.converted_sun_facing_angle, 
+                self.exterior_unit_centroid
+            ).geometry
+            
+        def __get_scaled_unit(self, unit):
+            return gh.Scale(
+                self.__get_rotated_unit(unit),
+                self.exterior_unit_centroid,
+                self.scale_factor
+            ).geometry if self.is_needed_resize else self.__get_rotated_unit(unit)
+</code></pre>
 
     <br><br>
     Finally, I'll wrap up the article by showing some examples of each of the above VoxelUnits applied. See the <a href="https://github.com/PARKCHEOLHEE-lab/fff/tree/main/voxelate">link</a> for details.
