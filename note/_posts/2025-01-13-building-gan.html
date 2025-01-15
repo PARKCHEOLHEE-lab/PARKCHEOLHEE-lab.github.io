@@ -191,16 +191,18 @@ emoji: /emoji/brain.png
                                         and mean pool all nodes with the same program type as the master note embedding \((3)\).
                                         Lastly, we update the node embeddings with residual learning to avoid gradient vanishing \((4)\).
                                         After T = 5 steps of message passing, the final embedding of program node \(i\) is denoted as \(x^T_i\).
-                                        \[
-                                            \begin{align}
-                                            \,\\
-                                            x^0_i &= MLP^p_{enc}([x_i, z^p_i, F]) \tag{1} \\\\
-                                            m^t_i &= \frac{1}{|Ne(i)|} \sum_{j \in Ne(i)} MLP^p_{message}([x^t_i, x^t_j]) \tag{2} \\\\
-                                            c^t_i &= Mean_{j \in Cl(i)}(\{x^t_j\}) \tag{3} \\\\
-                                            x^{t+1}_i &= x^t_i + MLP^p_{update}([x^t_i, m^t_i, r_{Cl(i)}c^t_i, F]) \tag{4}
-                                            \,\\
-                                            \end{align}
-                                        \]
+                                        <div style="width: 80%;">
+                                            \[
+                                                \begin{align}
+                                                \,\\
+                                                x^0_i &= MLP^p_{enc}([x_i, z^p_i, F]) \tag{1} \\\\
+                                                m^t_i &= \frac{1}{|Ne(i)|} \sum_{j \in Ne(i)} MLP^p_{message}([x^t_i, x^t_j]) \tag{2} \\\\
+                                                c^t_i &= Mean_{j \in Cl(i)}(\{x^t_j\}) \tag{3} \\\\
+                                                x^{t+1}_i &= x^t_i + MLP^p_{update}([x^t_i, m^t_i, r_{Cl(i)}c^t_i, F]) \tag{4}
+                                                \,\\
+                                                \end{align}
+                                            \]
+                                        </div>
                                     </li>
                                 </ul>
                             </li>
@@ -217,7 +219,8 @@ emoji: /emoji/brain.png
                                         Instead of appending the absolute coordinates in voxel features, we use the relative displacements
                                         \(p_k - p_l\) in message computation \((6)\).
                                         Voxel node embeddings are updated with residual learning \((7)\).
-                                        \[
+                                        <div style="width: 80%;">
+                                            \[
                                             \begin{align}
                                             \,\\
                                             v^0_k &= MLP^v_{enc}([v_k, z^v_k]) + PE(story_k) \tag{5} \\\\
@@ -225,7 +228,8 @@ emoji: /emoji/brain.png
                                             v^t_k &= v^t_k + MLP^v_{update}(v^t_k, n^t_k) \tag{7}
                                             \,\\
                                             \end{align}
-                                        \]
+                                            \]
+                                        </div>
                                     </li>
                                 </ul>
                             </li>
@@ -260,19 +264,21 @@ emoji: /emoji/brain.png
                                         Otherwise, \(att_k\) is the attention distribution over the set of program nodes on the same floor \((10, 11) \).
                                         An updated embedding \(v^{t+1}_k \) is computed by the weighted sum of the program embeddings \(x^T_i\) multiplied by the soft prediction
                                         \(mask_k\) with residual learning \((12) \).
-                                        \[
-                                            \begin{align}
-                                            \,\\
-
-                                            mask_k, att_k, v^{t+1}_k &= Pointer(v^t_k, \{ x^T_i \}) \tag{8} \\\\
-                                            mask_k &= \sigma(MLP(v^t_k)) \tag{9} \\\\
-                                            e_{k, i} &= \theta^T \tanh(W_x x^{T_i} + W_v v^{t_k}) \tag{10} \\\\
-                                            att_k &= \text{gumbel softmax} (e_k) \tag{11} \\\\ 
-                                            v^{t+1}_k &= v^t_k + mask_k \sum_i att_{k, i} x^T_i \tag{12}
-
-                                            \,\\
-                                            \end{align}
-                                        \]
+                                        <div style="width: 80%;">
+                                            \[
+                                                \begin{align}
+                                                \,\\
+    
+                                                mask_k, att_k, v^{t+1}_k &= Pointer(v^t_k, \{ x^T_i \}) \tag{8} \\\\
+                                                mask_k &= \sigma(MLP(v^t_k)) \tag{9} \\\\
+                                                e_{k, i} &= \theta^T \tanh(W_x x^{T_i} + W_v v^{t_k}) \tag{10} \\\\
+                                                att_k &= \text{gumbel softmax} (e_k) \tag{11} \\\\ 
+                                                v^{t+1}_k &= v^t_k + mask_k \sum_i att_{k, i} x^T_i \tag{12}
+    
+                                                \,\\
+                                                \end{align}
+                                            \]
+                                        </div>
                                     </li>
                                 </ul>
                             </li>
@@ -287,16 +293,18 @@ emoji: /emoji/brain.png
                                 After T = 12 message passing steps, two separate decoders are used. 
                                 A graph-level max-pooling decoder evaluates the design as a whole 
                                 while a story-level max-pooling decoder evaluates the per-story layouts individually.
-                                \[
-                                    \begin{align}
-                                    \,\\
-
-                                    o^{global} &= MLP^{dec}_{global}( \sum_k v^T_k ) \tag{13} \\\\
-                                    o^{story} &= Mean_{story} s( MLP^{dec}_{story} ( \sum_{k \in s} v^T_k ) ) \tag{14}
-
-                                    \,\\
-                                    \end{align}
-                                \]
+                                <div style="width: 80%;">
+                                    \[
+                                        \begin{align}
+                                        \,\\
+    
+                                        o^{global} &= MLP^{dec}_{global}( \sum_k v^T_k ) \tag{13} \\\\
+                                        o^{story} &= Mean_{story} s( MLP^{dec}_{story} ( \sum_{k \in s} v^T_k ) ) \tag{14}
+    
+                                        \,\\
+                                        \end{align}
+                                    \]
+                                </div>
                             </li>
                         </ul>
                     </li>
