@@ -28,7 +28,7 @@ emoji: /emoji/brain.png
                         1) a new 3D representation, voxel graph;
                         2) a <b>graph-conditioned</b> generative adversarial network (GAN) using GNN and pointer-based cross-modal module;
                         3) an automated pipeline to generate valid volumetric designs through simple interaction;
-                        4) a synthetic dataset that contains 120,000 volumetric design and their corresponding program graphs. We will share the code, model, and dataset.
+                        4) a synthetic dataset that contains 120,000 volumetric design and their corresponding program graphs.
                     </li>
                 </ul>
             </li>
@@ -52,7 +52,7 @@ emoji: /emoji/brain.png
                                 nodes.
                             </li>
                             <figure>
-                                <img src="/img/building-gan/building-gan-0.png" width="100%">
+                                <img src="/img/building-gan/building-gan-0.png" width="100%" onerror=handle_image_error(this)>
                                 <figcaption>
                                     Left: the hierarchical program graph. 
                                     Right: the irregular grid with non-uniform voxel size and the equivalent voxel graph.
@@ -89,7 +89,7 @@ emoji: /emoji/brain.png
                             </li>
                             
                             <figure>
-                                <img src="/img/building-gan/building-gan-1.png" width="80%">
+                                <img src="/img/building-gan/building-gan-1.png" width="80%" onerror=handle_image_error(this)>
                                 <figcaption>
                                     Left: an example of valid design space. 
                                     Right: an example of volumetric design within the valid design space
@@ -159,7 +159,7 @@ emoji: /emoji/brain.png
                         and story level.
                         
                         <figure>
-                            <img src="/img/building-gan/building-gan-2.png" width="100%">
+                            <img src="/img/building-gan/building-gan-2.png" width="100%" onerror=handle_image_error(this)>
                             <figcaption>
                                 An overview of Building-GAN. 
                                 Top: the Program GNN, Voxel GNN, and Cross-Modal Pointer Module for the generator. 
@@ -260,12 +260,62 @@ emoji: /emoji/brain.png
                                         Otherwise, \(att_k\) is the attention distribution over the set of program nodes on the same floor \((10, 11) \).
                                         An updated embedding \(v^{t+1}_k \) is computed by the weighted sum of the program embeddings \(x^T_i\) multiplied by the soft prediction
                                         \(mask_k\) with residual learning \((12) \).
+                                        \[
+                                            \begin{align}
+                                            \,\\
+
+                                            mask_k, att_k, v^{t+1}_k &= Pointer(v^t_k, \{ x^T_i \}) \tag{8} \\\\
+                                            mask_k &= \sigma(MLP(v^t_k)) \tag{9} \\\\
+                                            e_{k, i} &= \theta^T \tanh(W_x x^{T_i} + W_v v^{t_k}) \tag{10} \\\\
+                                            att_k &= \text{gumbel softmax} (e_k) \tag{11} \\\\ 
+                                            v^{t+1}_k &= v^t_k + mask_k \sum_i att_{k, i} x^T_i \tag{12}
+
+                                            \,\\
+                                            \end{align}
+                                        \]
                                     </li>
                                 </ul>
                             </li>
                         </ol>
                     </li>
+                    <br>
+                    <li>
+                        Discriminator
+                        <ul>
+                            <li>
+                                We take a similar architecture as voxel GNN, but without using the pointer modules.
+                                After T = 12 message passing steps, two separate decoders are used. 
+                                A graph-level max-pooling decoder evaluates the design as a whole 
+                                while a story-level max-pooling decoder evaluates the per-story layouts individually.
+                                \[
+                                    \begin{align}
+                                    \,\\
+
+                                    o^{global} &= MLP^{dec}_{global}( \sum_k v^T_k ) \tag{13} \\\\
+                                    o^{story} &= Mean_{story} s( MLP^{dec}_{story} ( \sum_{k \in s} v^T_k ) ) \tag{14}
+
+                                    \,\\
+                                    \end{align}
+                                \]
+                            </li>
+                        </ul>
+                    </li>
                 </ol>
+            </li>
+            <br>
+            <li>
+                Conclusion
+                <ul>
+                    In this paper, We invent a 3D representation, voxel
+                    graph, to represent building designs, and design a generator 
+                    with a cross-modal pointer module to connect the program graph and voxel graph.
+                    Our extensive evaluations,
+                    including user testing and user study, show that architects
+                    can create numerous valid and valuable designs by interacting with Building-GAN. 
+                    Future works include enforcing the
+                    constraints, such as connectivity, TPR, and FAR, as well as
+                    extending the voxel graph for non-cuboid geometries.
+                </ul>
             </li>
         </ol>
     </li>
