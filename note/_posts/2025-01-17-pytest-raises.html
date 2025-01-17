@@ -12,7 +12,10 @@ layout: post
         <ul>
             <li>
                 Assert that a code block/function call raises an exception type, or one of its subclasses.
-                Use pytest.raises as a context manager, which will capture the exception of the given type, or any of its subclasses.
+                Use <code>pytest.raises</code> as a context manager, which will capture the exception of the given type, or any of its subclasses.
+            </li>
+            <li>
+                The context manager produces an <code>ExceptionInfo</code> object which can be used to inspect the details of the captured exception
             </li>
         </ul>
     </li>
