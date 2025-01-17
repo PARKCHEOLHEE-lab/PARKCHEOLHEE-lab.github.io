@@ -1,0 +1,46 @@
+---
+title:  "pytest.raises"
+layout: post
+--- 
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://docs.pytest.org/en/stable/reference/reference.html#pytest-raises">pytest.raises</a>
+        <ul>
+            <li>
+                Assert that a code block/function call raises an exception type, or one of its subclasses.
+                Use pytest.raises as a context manager, which will capture the exception of the given type, or any of its subclasses.
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<pre><code class="python">
+    def continuous(start: float, end: float, count: int) -> List[float]:
+        if start > end:
+            raise ValueError("Start must be <= end.")
+        if count < 0:
+            raise ValueError("Count must be non-negative.")
+        return [random.uniform(start, end) for _ in range(count)]
+
+        
+    def test_continuous():
+        assert len(continuous(start=0, end=1, count=5)) == 5
+        assert len(continuous(start=0, end=1, count=0)) == 0
+        assert all(0 <= x <= 10 for x in continuous(start=0, end=10, count=100))
+
+        with pytest.raises(ValueError) as exc_info:
+            continuous(start=10, end=0, count=5)
+        assert exc_info.type is ValueError
+
+        with pytest.raises(ValueError) as exc_info:
+            continuous(start=0, end=10, count=-1)
+        assert exc_info.type is ValueError
+</pre></code>
+
+
+
+<br><br>
