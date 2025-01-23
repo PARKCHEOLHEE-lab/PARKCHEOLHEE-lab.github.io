@@ -1,0 +1,68 @@
+---
+title:  "scriptcontext.sticky"
+layout: post
+--- 
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://github.com/mcneel/rhinoscriptsyntax/blob/rhino-8.x/Scripts/scriptcontext.py">scriptcontext.sticky</a>
+        <ul>
+            <li>
+                A persistent dictionary in Rhino's Python environment that maintains values between script runs
+            </li>
+            <li>
+                Similar to Python's <code>globals()</code> but persists data even after script completion
+            </li>
+            <li>
+                Useful for:
+                <ul>
+                    <li>Sharing data between different scripts</li>
+                    <li>Storing configuration settings</li>
+                    <li><mark>Caching computed values</mark></li>
+                    <li>Maintaining state between script executions</li>
+                </ul>
+            </li>
+            <li>
+                Values stored in sticky dictionary remain until:
+                <ul>
+                    <li>Rhino is closed</li>
+                    <li>Explicitly removed using <code>del sc.sticky["key"]</code></li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Example
+    </li>
+<pre><code class="python">
+    import scriptsyntax as sc
+
+    def foo():
+        print("bar")
+
+    sc.sticky["foo"] = foo
+</pre></code>
+
+<pre><code class="python">
+    import scriptsyntax as sc
+
+    foo = sc.sticky["foo"]
+    foo()
+    >>> bar
+</pre></code>
+<br>
+<figure>
+    <img src="/img/scriptsyntax-sticky/scriptcontext-sticky-0.png" width="100%" onerror=handle_image_error(this)>
+    <figcaption>Example of how to use scriptsyntax.sticky</figcaption>
+</figure>
+</ul>
+
+
+
+
+
+<br><br>
