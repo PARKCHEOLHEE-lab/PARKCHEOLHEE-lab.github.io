@@ -1,0 +1,68 @@
+---
+title:  "Message Passing"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_gnn.html">Message Passing</a>
+        <ul>
+            <li>
+                Generalizing the convolution operator to irregular domains is typically expressed as a neighborhood aggregation or message passing scheme.
+                With \(x^{(k-1)}_i \in \mathbb{R}^{F} \) denoting node features of node \(i\) in layer \( (k-1) \) 
+                and \(\mathbf{e}_{j,i} \in \mathbb{R}^{D} \) denoting (optional) edge features from node \(j\) to node \(i\),
+                message passing graph neural networks can be described as
+                \[
+                    \,\\
+                    x^{(k)}_i = \gamma^{(k)} \left( x^{(k-1)}_i, \bigoplus_{j \in \mathcal{N}(i)} \phi^{(k)} \left(x^{(k-1)}_i, x^{(k-1)}_j, \mathbf{e}_{ij}\right) \right)
+                    \,\\
+                \]
+
+                where \( \bigoplus \) denotes a differentiable, permutation invariant function, e.g., sum, mean or max, and
+                \(\gamma\) and \(\phi\) denoe differentiable functions such as MLPs.
+            </li>
+            <br>
+            <li>
+                Pytorch Geometric <code>MessagePassing</code> Base Class
+                <ul>
+                    <li>
+                        <code>MessagePassing(aggr="add", flow="source_to_target", node_dim=-2)</code> 
+                        defines the aggregation scheme to use (<code>"add"</code>, <code>"mean"</code> or <code>"max"</code>) 
+                        and the flow direction of message passing (either <code>"source_to_target"</code> or <code>"target_to_source"</code>).
+                    </li>
+                    <li>
+                        The user has to define the functions \(\phi\), i.e. <code>message()</code>, and \(\gamma\), i.e. <code>update()</code>,
+                        as well as the aggregation scheme to use, i.e. <code>aggr="add"</code>, <code>aggr="mean"</code> or <code>aggr="max"</code>.
+                    </li>
+                    <li>
+                        <code>MessagePassing.propagate()</code> takes in the edge indices and all additional data which is needed to construct messages and to update node embeddings.
+                    </li>
+                    <li>
+                        <code>MessagePassing.message()</code> constructs messages to node \(i\) in analogy to \(\phi\) for each edge
+                        \((j, i) \in \mathcal{E} \) if <code>flow="source_to_target"</code> and \((i,j) \in \mathcal{E} \) if <code>flow="target_to_source"</code>.
+                        In addition, tensors passed to <code>propagate()</code> can be mapped to the respective nodes \(i\) and \(j\)
+                        by appending <code>_i</code> or <code>_j</code> to the variable name, e.g. <code>x_i</code> and <code>x_j</code>. 
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+<br>
+<span style="display: block;"></span>
+    {% include embed.html url="/notebooks/message-passing.html" %}
+</span>
+
+<br><br>
+
+
+<!-- 
+
+    https://greeksharifa.github.io/pytorch/2021/09/04/MP/
+    https://happysky12.tistory.com/18
+    https://pytorch-geometric.readthedocs.io/en/latest/tutorial/create_gnn.html
+    https://pytorch-geometric.readthedocs.io/en/latest/generated/torch_geometric.nn.conv.MessagePassing.html#torch_geometric.nn.conv.MessagePassing
+
+-->
