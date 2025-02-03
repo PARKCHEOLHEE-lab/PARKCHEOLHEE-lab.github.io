@@ -179,8 +179,8 @@ emoji: /emoji/brain.png
                                     <li>
                                         Denote random program noise as \(z^p\), FAR limit as \(F\), 
                                         program node feature \(i\) as \(x_i\), 
-                                        neighbor of node \(i\) as \(N e(i)\), node cluster of \(i\)'s pro-
-                                        gram type as \(Cl(i)\), target program ratio of \(i\)'s program type
+                                        neighbor of node \(i\) as \(N e(i)\), node cluster of \(i\)'s program type as \(Cl(i)\), 
+                                        target program ratio of \(i\)'s program type
                                         as \(r_{Cl(i)}\), multi-layer perceptron as \(MLP\) , mean pooling as
                                         \(Mean\), and concatenation operator as \([·, ·]\).
                                     </li>
@@ -188,7 +188,7 @@ emoji: /emoji/brain.png
                                         We first map the node feature to the embedding space \((1)\),
                                         then compute message passing T times. 
                                         In each message passing step, we compute the message from neighboring nodes \((2)\)
-                                        and mean pool all nodes with the same program type as the master note embedding \((3)\).
+                                        and mean pool all nodes with the same program type as the master node embedding \((3)\).
                                         Lastly, we update the node embeddings with residual learning to avoid gradient vanishing \((4)\).
                                         After T = 5 steps of message passing, the final embedding of program node \(i\) is denoted as \(x^T_i\).
                                         <div style="width: 80%;">
