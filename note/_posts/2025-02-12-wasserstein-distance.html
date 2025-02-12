@@ -1,0 +1,84 @@
+---
+title:  "Wasserstein Distance (Earth Mover's Distance)"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        Intuitive understanding of Wasserstein Distance (Earth Mover's Distance)
+        <ul>
+            <li>
+                Unsupervised Learning is about directly learning the distribution \(\mathbf{P(x)}\) of data \(\mathbf{x}\), 
+                unlike supervised learning method that has training data \(\mathbf{x}\) with label \(\mathbf{y}\).
+            </li>
+            <li>
+                This method <mark>measures the distance between two distributions</mark>. (there is a method called <a href="https://parkcheolhee-lab.github.io/kl-divergence/">KL-Divergence</a>)
+            </li>
+            <li>
+                The Wasserstein distance (or the EM distance) is the cost of the cheapest transport plan. 
+                In the example below, both plans have different cost and the Wasserstein distance (minimum cost) is two.
+                <figure>
+                    <img src="/img/wasserstein-distance/wasserstein-distance-0.webp" width="70%">
+                </figure>
+                <br>
+                In the top row, there is a distribution on positions \(3\), \(4\) (each with mass \(1\)) and positions \(6\), \(7\) (each with mass \(2\)).
+                In the bottom row, the masses on positions \(3\), \(4\), \(6\), \(7\) are rearranged \((2, 1)\) at \(3\) and \(4\), and \((2, 1)\) at \(6\) and \(7\).
+
+                Therefore, in the discrete distribution, the Wasserstein distance is the sum of the absolute differences of the positions of the masses.
+
+                \[
+                    \,\\
+                    W = \sum_i^N |\delta_i|
+                    \,\\                
+                \]
+
+                where the \(\delta_i = P_i -Q_i \), and the \(\delta_{i+1} = \delta_i + P_{i} - Q_{i} \).
+                The \(N\) is the number of the <b>piles</b> in the discrete distribution.
+            </li>
+            <br>
+            <li>
+                Instead of having discrete piles of mass at specific points, you now have continuous masses (<b>dirt</b>).
+                \[
+                    \,\\
+                    W(\mathbf{P}_r, \mathbf{P}_g) = \inf_{\gamma \in \Pi(\mathbf{P}_r, \mathbf{P}_g)} \mathbb{E}_{(x,y) \sim \gamma} [\|x-y\|]
+                    \,\\
+                \]
+
+                where \(\mathbf{P}_r\) and \(\mathbf{P}_g\) are two probability distributions,
+                \(\Pi(\mathbf{P}_r, \mathbf{P}_g)\) is the set of all joint probability distributions of \(\mathbf{P}_r\) and \(\mathbf{P}_g\),
+
+                \(\| x - y \|\) is the <b>distance</b> to move from \(x \sim \mathbf{P}_r\) to \(y \sim \mathbf{P}_g\).
+                \(\inf\) means finding the minimum value of the set (lower bound).
+
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        References
+        <ul>
+            <li>
+                <a href="https://velog.io/@kite_day/Wasserstain-Distance-Earth-Movers-distance-%EA%B0%9C%EB%85%90-%EC%A7%81%EA%B4%80%EC%A0%81%EC%9C%BC%EB%A1%9C-%EC%9D%B4%ED%95%B4%ED%95%98%EA%B8%B0">https://velog.io/@kite_day/Wasserstain-Distance-Earth-Movers-distance</a>
+            </li>
+            <li>
+                <a href="https://jonathan-hui.medium.com/gan-wasserstein-gan-wgan-gp-6a1a2aa1b490#:~:text=WGAN%20%E2%80%94%20%EC%9D%B4%EC%8A%88-,%EB%A6%BD%EC%8B%9C%EC%B8%A0%20%EC%A0%9C%EC%95%BD,-%ED%81%B4%EB%A6%AC%ED%95%91%EC%9D%84%20%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%20%EB%B9%84%ED%8F%89%EA%B0%80">https://jonathan-hui.medium.com/gan-wasserstein-gan-wgan-gp</a>
+            </li>
+            <li>
+                <a href="https://ahjeong.tistory.com/7">https://ahjeong.tistory.com/7</a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<!-- 
+
+https://jonathan-hui.medium.com/gan-wasserstein-gan-wgan-gp-6a1a2aa1b490#:~:text=WGAN%20%E2%80%94%20%EC%9D%B4%EC%8A%88-,%EB%A6%BD%EC%8B%9C%EC%B8%A0%20%EC%A0%9C%EC%95%BD,-%ED%81%B4%EB%A6%AC%ED%95%91%EC%9D%84%20%EC%82%AC%EC%9A%A9%ED%95%98%EB%A9%B4%20%EB%B9%84%ED%8F%89%EA%B0%80
+https://ahjeong.tistory.com/7
+https://ko.wikipedia.org/wiki/%EB%A6%BD%EC%8B%9C%EC%B8%A0_%EC%97%B0%EC%86%8D_%ED%95%A8%EC%88%98
+https://velog.io/@nonlunch/Lipschitz-Condition
+
+-->
+
+<br><br>
