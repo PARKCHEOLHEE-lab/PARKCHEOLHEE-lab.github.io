@@ -86,6 +86,40 @@ layout: post
 
 
 </code></pre>
+        <br>
+        <li>
+            Application of Gumbel-Softmax on the graph data
+            <ul>
+                <li>
+                    Computes the probability per index
+                </li>
+            </ul>
+        </li>
+        <br>
+<pre><code class="python">
+    class GumbelSoftmax(nn.Module):
+        def __init__(self):
+            super().__init__()
+
+        def forward(self, logits, edge_index, tau=1.0):
+            g = -torch.log(-torch.log(torch.rand_like(logits)))
+            y = torch.softmax((logits + g) / tau, dim=0)
+
+            num_nodes = edge_index.max().item() + 1
+
+            # Computes the probability per index.
+            y_max = torch_scatter.scatter_max(
+                src=y,
+                index=edge_index,
+                dim_size=num_nodes,
+            )[1]
+
+            y_hard = torch.zeros_like(y)
+            y_hard.scatter_(-1, y_max.to(y.device), 1.0)
+            y_hard = y_hard - y.detach() + y
+
+            return y.unsqueeze(1), y_hard.unsqueeze(1)
+</code></pre>
         </ul>
     </li>
 </ul>
