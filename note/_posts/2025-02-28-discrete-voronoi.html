@@ -1,0 +1,35 @@
+---
+title:  "Discrete Voronoi"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        Discrete Voronoi
+
+        <ol>
+            <li>
+                Creates a uniform grid
+            </li>
+            <li>
+                Computes pairwise distances between sites and grid points
+            </li>
+            <li>
+                Flips the sign to negative number so that the minimum distance is the maximum probability
+            </li>
+            <li>
+                Converts distances to probabilities using softmax
+            </li>
+            <li>
+                Assigns each grid point to nearest site using argmax
+            </li>
+        </ol>
+    </li>
+</ul>
+<span style="display: block;"></span>
+    {% include embed.html url="/notebooks/discrete-voronoi.html" %}
+</span>
+
+<br><br>
