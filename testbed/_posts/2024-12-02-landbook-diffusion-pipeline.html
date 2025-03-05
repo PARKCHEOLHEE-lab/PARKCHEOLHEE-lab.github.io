@@ -1,0 +1,467 @@
+---
+title: "Landbook Diffusion Pipeline"
+layout: post
+hashtag: "#diffusers #landbook #huggingface"
+comment: true
+splitter: 1
+featured: false
+inprogress: false
+thumbnail: /img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-thumbnail.png
+---
+
+<div id="toc"></div>
+
+<h3>Introduction</h3>
+<div class="article">
+
+  <a href="https://www.landbook.net/">Landbook</a> is a service that supports all the steps of new construction development for small and medium-sized land investors.
+  Landbook's AI architect service provides building owners with various architectural design proposals 
+  by considering different plot sizes, zoning areas, and building regulations for each region.
+
+
+  <figure>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-0.png" width="90%" onerror=handle_image_error(this)>
+    <figcaption>
+      Landbook's AI architect service
+    </figcaption>
+  </figure>
+
+  <br>
+
+  This project is to develop a pipeline that renders the final result of the Landbook AI architect service by using a generative image model such as diffusers.
+  By taking 3D modeling data as input and generating realistic images that closely resemble actual buildings,
+  it allows building owners to visualize and review what their design proposals would look like when actually constructed.
+
+  Unlike conventional 3D rendering, this aims to provide high-quality visualization that considers both the texture of actual buildings
+  and their harmony with the surrounding environment by utilizing AI-based generative models.
+  <!--break-->
+
+
+</div><br><br>
+
+<h3>Pipeline Overview</h3>
+<div class="article">
+  
+  The comprehensive pipeline below ensures that the final output not only accurately represents the architectural design 
+  but also provides a realistic visualization that helps building owners better understand how the building will look in reality.
+
+  The pipeline consists of the following steps:
+  <ol>
+    <li>
+      <b>2D Plans Generation:</b> The process begins with generating 2D floor plans that serve as the foundation for the building design.
+    </li>
+    <li>
+      <b>3D Building Generation:</b> The 2D plans are transformed into a 3D building model with proper dimensions and structure.
+    </li>
+    <li>
+      <b>Three.js Plot:</b> The 3D model is plotted in Three.js, allowing for interactive visualization and manipulation.
+    </li>
+    <li>
+      <b>Camera Adjustment:</b> The viewing angle and camera position are carefully adjusted to capture the building from the most appropriate perspective.
+    </li>
+    <li>
+      <b>Scale Figures:</b> Human figures, trees, and vehicles are added to provide scale reference and context to the scene.
+    </li>
+    <li>
+      <b>Masking:</b> Different parts of the building and environment are masked with distinct colors to define materials and surfaces (shown in the color-coded visualization).
+    </li>
+    <li>
+      <b>Canny Edge Detection:</b> Edge detection is applied to create clear building outlines and structural details.
+    </li>
+    <li>
+      <b>Highlighting:</b> Important architectural features and edges are emphasized through highlighting.
+    </li>
+    <li>
+      <b>Base Image Generation:</b> A base image with proper shading and basic textures is created.
+    </li>
+    <li>
+      <b>Inpainting & Refining:</b> Multiple iterations of inpainting and refinement are performed to add realistic textures and details.
+    </li>
+    <li>
+      <b>Final Rendering:</b> The process concludes with a fully rendered, photorealistic visualization of the building design.
+    </li>
+  </ol>
+
+
+
+  <figure>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-1.png" width="100%" onerror=handle_image_error(this)>
+    <figcaption>
+      Pipeline Diagram
+    </figcaption>
+  </figure>
+
+</div><br><br>
+
+<h3>Camera Position Estimation</h3>
+<div class="article">
+
+  The camera position estimation is a crucial step in capturing the building from the most effective viewpoint. The algorithm determines the camera position appropriately 
+  by considering the building's dimensions, plot layout, and road positions.
+
+  <ol>
+    <li>
+      <b>Road-Based Positioning</b>
+      <ul>
+        <li>
+          Identifies the widest road adjacent to the building plot
+        </li>
+        <li>
+          Uses the road's centroid as a reference point for camera placement
+        </li>
+        <li>
+          Ensures the building is viewed from a natural street-level perspective
+        </li>
+      </ul>
+    </li>
+    <li>
+      <b>Vector Calculation</b>
+      <ul>
+        <li>
+          Creates a horizontal vector aligned with the widest road (X vector)
+        </li>
+        <li>
+          Creates a vertical vector by rotating the horizontal vector 90 degrees (Y vector)
+        </li>
+        <li>
+          These vectors form the basis for determining the camera's viewing direction
+        </li>
+      </ul>
+    <li>
+      <b>Height Determination and Distance Calculation</b>
+      <ul>
+        <li>
+          Calculates optimal camera height using two criteria
+        </li>
+        <li>
+          Selects the maximum value between these criteria to ensure proper building coverage
+        </li>
+        <li>
+          Uses trigonometry to compute the ideal distance between camera and building
+        </li>
+      </ul>
+    </li>
+  </ol>
+  
+  <figure>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-2.png" width="100%" onerror=handle_image_error(this)>
+    <figcaption>
+      Camera Position Estimation Diagram
+    </figcaption>
+  </figure>
+
+  <br>
+
+<pre><code class="typescript">
+    const estimateCameraPosition = (
+      data: BuildingStateInfo,
+      buildingHeightEstimated: number,
+      fov: number,
+    ) => {
+
+      const parcelPolygon = data.plotOutline
+
+      // Obtain the widest road object.
+      // The widest road object is computed by widthRaw + edgeLength
+      let widestWidth = -Infinity;
+      let widestRoad = undefined;
+      data.roadWidths.forEach((road) => {
+        if (widestWidth < road["widthRaw"] + road["edge"].getLength()) {
+          widestWidth = road["widthRaw"]
+          widestRoad = road
+        }
+      })
+      
+      // Get the centroid of the widest road
+      const widestRoadCentroid = Util.centroid(widestRoad["edge"])
+
+      // Get the coordinates of the widest road edge
+      const widestRoadEdgeCooridntaes = widestRoad["edge"]._points._coordinates
+
+      // X vector from the widest road edge direction
+      const widestRoadEdgeHVector = {
+        x: widestRoadEdgeCooridntaes[0].x - widestRoadCentroid.x,
+        y: widestRoadEdgeCooridntaes[0].y - widestRoadCentroid.y,
+      }
+
+      // Compute the norm of the widest road edge vector
+      const widestRoadEdgeHVectorNorm = Math.sqrt(widestRoadEdgeHVector.x ** 2 + widestRoadEdgeHVector.y ** 2)
+
+      // Normalize X vector
+      const widestRoadEdgeHVectorUnit = {
+        x: widestRoadEdgeHVector.x / widestRoadEdgeHVectorNorm,
+        y: widestRoadEdgeHVector.y / widestRoadEdgeHVectorNorm,
+      }
+
+      // Create Y vector by rotating the X vector 90 degrees
+      const radian = 90 * Math.PI / 180;
+      const widestRoadEdgeVVectorUnit = {
+        x: widestRoadEdgeHVectorUnit.x * Math.cos(radian) - widestRoadEdgeHVectorUnit.y * Math.sin(radian),
+        y: widestRoadEdgeHVectorUnit.x * Math.sin(radian) + widestRoadEdgeHVectorUnit.y * Math.cos(radian)
+      }
+
+      // Define height criteria
+      const parcelLongestDistance = calculateLongestDistance(parcelPolygon)
+      const heightCriterion1 = buildingHeightEstimated / 2
+      let heightCriterion2 = parcelLongestDistance / 3
+
+
+      (...)
+
+
+      // Determine the camera height based on the height criteria
+      const cameraHeight = Math.max(heightCriterion1, heightCriterion2);
+
+      // Compute the distance. C is an arbitarary constant
+      const distance = ((cameraHeight / 2) / Math.tan((fov / 2) * (Math.PI / 180))) * C;
+
+      // Estimate the final camera position
+      const position = new Vector3(
+        widestRoadCentroid.x + (widestRoadEdgeHVectorUnit.x + widestRoadEdgeVVectorUnit.x) * distance,
+        Math.max(-cameraHeight / 2, -10),
+        widestRoadCentroid.y + (widestRoadEdgeHVectorUnit.y + widestRoadEdgeVVectorUnit.y) * -distance
+      );
+
+      return position
+    }
+</code></pre>
+
+</div><br><br>
+
+<h3>Scale Figures</h3>
+<div class="article">
+
+  Scale figures serve as essential contextual elements for the diffusion model to understand and generate more realistic architectural visualizations. 
+  By incorporating human figures, trees, and vehicles into the scene, 
+  we provide the model with crucial reference points that help it comprehend the <b>spatial relationships and scale of the architecture</b> it needs to generate.
+
+  <figure>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-3.png" width="100%" onerror=handle_image_error(this)>
+    <figcaption>
+      <a href="https://archi-monarch.com/scale-in-architectural/">Scale Figures</a>
+    </figcaption>
+  </figure>
+
+  <br>
+
+  The presence of these contextual elements also guides the model in generating appropriate lighting, shadows, and atmospheric effects. 
+  When the model sees a human figure or a tree in the scene, it can <b>better interpret the scale</b> of lighting effects and environmental interactions that should be present in the final rendering. 
+  This helps create more convincing and naturally integrated architectural visualizations.
+
+  <br><br>
+
+  In our pipeline, these scale elements are placed before the diffusion process begins. 
+  The model uses these references to better understand the intended size and proportions of the building, 
+  which significantly improves the quality and accuracy of the generated images. 
+  Human figures are particularly important as they provide the diffusion model with a <b>scale reference</b> that helps maintain consistent and realistic proportions throughout the generation process.
+
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-4.png" width="50%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
+  </figure>
+  <figcaption>
+    Landbook AI Architect result w/ and w/o scale figures
+  </figcaption>
+
+</div><br><br>
+
+<h3>Material Masking</h3>
+<div class="article">
+  <a href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> provided by three.js is used to mask the materials of the building and the environment.
+  ShaderMaterial is a material rendered with custom shaders. A shader is a small program written in GLSL that runs on the GPU. 
+
+  <br><br>
+  
+  Since ShaderMaterial allows users to write custom shaders, 
+  we can create specialized masking materials by defining specific colors for different architectural elements. 
+  These masking materials help segment the 3D model into distinct parts that can be processed separately by the diffusion model. 
+
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-6.png" width="50%" onerror=handle_image_error(this)>
+  </figure>
+  <figcaption>
+    Material Masking
+  </figcaption>
+  
+  <br>
+
+<pre><code class="typescript">
+    const createMaskMaterial = (color: number) => {
+      return new THREE.ShaderMaterial({
+        uniforms: {
+          color: { value: new THREE.Color(color) }
+        },
+        vertexShader: `
+          void main() {
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 color;
+          void main() {
+            gl_FragColor = vec4(color, 1.0);
+          }
+        `
+      });
+    };
+    
+    export const glassMaskMaterial = createMaskMaterial(0xff0000);                   // red
+    export const glassPanesMaskMaterial = createMaskMaterial(0x00ffff);              // cyan
+    export const columnsMaskMaterial = createMaskMaterial(0xff00ff);                 // magenta
+    export const wallMaskMaterial = createMaskMaterial(0x0000ff);                    // blue
+    export const surroundingBuildingsMaskMaterial = createMaskMaterial(0xffff00);    // yellow
+    export const surroundingParcelsMaskMaterial = createMaskMaterial(0xff8e00);      // orange
+    export const roadMaskMaterial = createMaskMaterial(0x000000);                    // black
+    export const siteMaskMaterial = createMaskMaterial(0x00ff00);                    // green
+    export const railMaskMaterial = createMaskMaterial(0xbc00bc);                    // purple
+    export const carMaskMaterial = createMaskMaterial(0xbcbcbc);                     // gray
+    export const treeMaskMaterial = createMaskMaterial(0xc38e4d);                    // brown
+    export const personMaskMaterial = createMaskMaterial(0x00a800);                  // darkgreen
+    export const pathMaskMaterial = createMaskMaterial(0xc0e8f6);                    // skyblue
+    export const parkingLineMaskMaterial = createMaskMaterial(0x000080)              // darkblue
+</code></pre>
+
+</div><br><br>
+
+<h3>EndpointHandler 🤗</h3>
+<div class="article">
+
+  The diffusion process in our pipeline utilizes multiple specialized models from the <a href="https://huggingface.co/models">HuggingFace</a> Diffusers library to generate photorealistic architectural visualizations. 
+  The process consists of three main stages: initial generation, targeted inpainting, and final refinement.
+  The pipeline begins with <code>StableDiffusionXLControlNetPipeline</code> using a <code>ControlNet</code> model trained on <b>canny</b> edge detection. 
+
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-22.png" width="50%" onerror=handle_image_error(this)>
+  </figure>
+  <figcaption>
+    Canny edge detection, highlighting the main building, hatching some parts
+  </figcaption>
+
+  <br>
+
+  This stage takes the edge information from our 3D model and generates a base image. 
+  The <code>ControlNet</code> helps ensure that the generated base image follows the precise geometric outlines of the building design with the help of the prompt:
+
+<pre><code class="python">
+    self.prompt_positive_base = ", ".join(
+        [
+            "<>", 
+            "[Bold Boundary of given canny Image is A Main Building outline]",
+            "[Rich Street Trees]", "[Pedestrians]", "[Pedestrian path with hatch pattern paving stone]", 
+            "[Driving Cars on the asphalt roads]", "At noon", "[No Clouds at the sky]", "First floor parking lot", 
+            "glass with simple mullions", "BLENDED DIVERSE ARCHITECTURAL MATERIALS", "Korean city context",  "REALISTIC MATERIAL TEXTURE",
+            "PROPER PERSPECTIVE VIEW",  "PROPER ARCHITECTURAL SCALE", "8k uhd", "masterpiece", "[Columns placed at the corner of the main building]"
+            "best quality", "ultra detailed", "professional lighting", "Raw photo", "Fujifilm XT3", "high quality",
+        ]
+    )
+</code></pre>
+
+<br><br>
+
+After the initial generation, the pipeline performs a series of targeted inpainting operations using <code>StableDiffusionXLInpaintPipeline</code>. 
+The inpainting process follows a specific order to handle different architectural elements.
+Each inpainting step uses crafted prompts and masks to ensure appropriate material textures and architectural details are generated for each element.
+After each inpainting step, it is merged with the base image to <b>create a new base image</b>.
+
+<ol>
+  <li>
+    Road surfaces with asphalt texturing
+  </li>
+  <li>
+    Surrounding parcels and pedestrian paths
+  </li>
+  <li>
+    Background elements including sky
+  </li>
+  <li>
+    Surrounding buildings with appropriate architectural details
+  </li>
+</ol>
+( ... )
+<br>
+
+<figure style="display: flex;">
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-6.png" width="23%" onerror=handle_image_error(this)>
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-23.png" width="23%" onerror=handle_image_error(this)>
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-24.png" width="23%" onerror=handle_image_error(this)>
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-25.png" width="23%" onerror=handle_image_error(this)>
+</figure>
+
+<figure style="display: flex;">
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-26.png" width="23%" onerror=handle_image_error(this)>
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-27.png" width="23%" onerror=handle_image_error(this)>
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-28.png" width="23%" onerror=handle_image_error(this)>
+  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-29.png" width="23%" onerror=handle_image_error(this)>
+</figure>
+<figcaption>
+Masked images
+</figcaption>
+
+<br><br>
+
+The last stage uses <code>StableDiffusionXLImg2ImgPipeline</code> to refine the overall image, enhancing the coherence and realism of the rendering image. 
+This refinement process focuses on improving overall image quality through better resolution and detail enhancement. 
+
+<br><br>
+
+It adjusts lighting and shadows to create more natural and realistic effects, 
+ensures consistent material appearances across different surfaces of the building, 
+and fine-tunes architectural details to maintain design accuracy. 
+These refinements work together to produce a final visualization that is both architecturally accurate and visually compelling.
+
+</div><br><br>
+
+<h3>Results</h3>
+<div class="article">
+  After applying the multi-stage diffusion pipeline described above, 
+  we can get the following results which demonstrate the effectiveness of our approach in generating high-quality architectural renderings with consistent materials, lighting, and architectural details.
+
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-7.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-8.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-9.png" width="32%" onerror=handle_image_error(this)>
+  </figure>
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-16.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-17.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-18.png" width="32%" onerror=handle_image_error(this)>
+  </figure>
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-13.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-14.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-15.png" width="32%" onerror=handle_image_error(this)>
+  </figure>
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-19.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-20.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-21.png" width="32%" onerror=handle_image_error(this)>
+  </figure>
+  <figure style="display: flex;">
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-10.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-11.png" width="32%" onerror=handle_image_error(this)>
+    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-12.png" width="32%" onerror=handle_image_error(this)>
+  </figure>
+</div><br><br>
+
+<h3>Future Works</h3>
+<div class="article">
+
+  While our current pipeline successfully generates realistic architectural rendering images, there are several areas for potential improvement and future development:
+
+  <ul>
+    <li>
+      <b>Material Diversity Enhancement</b>: The system could be improved to handle more diverse surrounding building facade textures and materials, along with better material interaction and weathering effects to create more realistic environmental contexts.
+    </li>
+    <li>
+      <b>Sky Condition Variations</b>: Future development could include support for different times of day, various weather effects and cloud patterns, and dynamic atmospheric conditions to provide more options for visualization scenarios.
+    </li>
+    <li>
+      <b>Road Detail Improvements</b>: The pipeline could be enhanced to generate more detailed road surfaces, including various pavement types, road markings, surface wear patterns, and better integration with surrounding elements.
+    </li>
+  </ul>
+
+</div><br><br>
+
+<br><br>
