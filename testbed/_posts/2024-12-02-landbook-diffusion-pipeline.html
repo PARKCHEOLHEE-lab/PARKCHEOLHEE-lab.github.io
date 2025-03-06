@@ -137,8 +137,13 @@ thumbnail: /img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-thumbnai
           Selects the maximum value between these criteria to ensure proper building coverage
         </li>
         <li>
-          Uses trigonometry to compute the ideal distance between camera and building
-        </li>
+          Uses trigonometry to compute the ideal distance between camera and building as follows.
+          
+          \[
+          \tan(\theta) = \frac{h}{d}, \quad d = \frac{h}{\tan(\theta)}
+          \]
+          
+          where \(d\) is the distance between camera and widestRoadCentroid, \(h\) is the height of the camera, and \(\theta = \frac{\text{fov}}{2} \times \frac{\pi}{180}\)         </li>
       </ul>
     </li>
   </ol>
