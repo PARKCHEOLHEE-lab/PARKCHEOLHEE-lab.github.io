@@ -1,0 +1,128 @@
+---
+title:  "Two Points Perspective in threejs"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        Two Points Perspective
+        <ul>
+            <li>
+                It has two vanishing points, and all vertical lines are parallel.
+            </li>
+            <li>
+                In threejs, the z of the camera and the z of the orbitTarget must be the same.
+            </li>
+        </ul>
+        <figure>
+            <img src="/img/two-points-perspective.jpg" width="60%">
+            <figcaption><a href="https://www.sherrybarrettart.com/blog/two-point-perspective">Two Points Perspective</a></figcaption>
+        </figure>
+    </li>
+    <li>
+        threejs scenes
+        <ul>
+            <li>
+                The left scene has different z values for the orbitTarget and the camera. The right scene has the same z value for both.
+            </li>
+        </ul>
+
+    <div style="display: flex; width: 100%;">
+        <div id="container1" style="width: 50%; height: 50vh;"></div>
+        <div id="container2" style="width: 50%; height: 50vh;"></div>
+    </div>
+    <br><br>
+    <figcaption>w/o and w/ parallel vertical lines</figcaption>
+    <br><br>
+    <figure style="display: flex;">
+        <img src="/img/two-points-perspective-2.png" alt="" width="45%">
+        <img src="/img/two-points-perspective-1.png" alt="" width="45%">
+    </figure>
+    <figcaption>w/o and w/ parallel vertical lines</figcaption>
+    </li>
+    <li>
+        References
+        <ul>
+            <li>
+                <a href="https://jsfiddle.net/vdmoLu41/">https://jsfiddle.net/vdmoLu41/</a>
+            </li>
+            <li>
+                <a href="https://jsfiddle.net/kaevbudx/">https://jsfiddle.net/kaevbudx/</a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+    
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three/build/three.module.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+
+    // First scene
+    const container1 = document.getElementById('container1');
+    
+    const camera1 = new THREE.PerspectiveCamera( 100, container1.clientWidth / container1.clientHeight, 0.01, 10 );
+    camera1.position.z = 1;
+    camera1.rotation.x = -7 * Math.PI/180;
+
+    const scene1 = new THREE.Scene();
+    scene1.background = new THREE.Color(0xffffff);
+
+    const geometry1 = new THREE.BoxGeometry( 0.2, 2.5, 0.5, 1, 15, 1 );
+    const material1 = new THREE.MeshNormalMaterial( { wireframe: true } );
+
+    const mesh1 = new THREE.Mesh( geometry1, material1 );
+    mesh1.rotation.y = Math.PI / 2;
+    scene1.add( mesh1 );
+
+    const renderer1 = new THREE.WebGLRenderer( { antialias: true } );
+    renderer1.setSize( container1.clientWidth, container1.clientHeight );
+    renderer1.setAnimationLoop( animation1 );
+    container1.appendChild( renderer1.domElement );
+
+    // Second scene
+    const container2 = document.getElementById('container2');
+    
+    const camera2 = new THREE.PerspectiveCamera( 100, container2.clientWidth / container2.clientHeight, 0.01, 10 );
+    camera2.position.z = 1;
+
+    const scene2 = new THREE.Scene();
+    scene2.background = new THREE.Color(0xffffff);
+
+    const geometry2 = new THREE.BoxGeometry( 0.2, 2.5, 0.5, 1, 15, 1 );
+    const material2 = new THREE.MeshNormalMaterial( { wireframe: true } );
+
+    const mesh2 = new THREE.Mesh( geometry2, material2 );
+    mesh2.rotation.y = Math.PI / 2;
+    scene2.add( mesh2 );
+
+    const renderer2 = new THREE.WebGLRenderer( { antialias: true } );
+    renderer2.setSize( container2.clientWidth, container2.clientHeight );
+    renderer2.setAnimationLoop( animation2 );
+    container2.appendChild( renderer2.domElement );
+
+    // animations
+    function animation1( time ) {
+        camera1.position.y = Math.sin( time / 1000 );
+        renderer1.render( scene1, camera1 );
+    }
+
+    function animation2( time ) {
+        camera2.position.y = Math.sin( time / 1000 );
+        renderer2.render( scene2, camera2 );
+    }
+</script>
+
+
+<br><br>
