@@ -1,0 +1,86 @@
+---
+title: "Half-Plane Clipping"
+layout: post
+---
+
+<ul>
+    <li>
+        Half-Plane Clipping
+        <ul>
+
+            <li>
+                Defining the Half-Plane:<br>
+                Given a point \( s \) and a unit vector \( \mathbf{n} \), the half-plane is defined as follows.
+                Where \(s\) is the clipping line's reference point,
+                points satisfying \((\mathbf{x} - s) \cdot \mathbf{n} \le 0\) are inside the half-plane, while those with \((\mathbf{x} - s) \cdot \mathbf{n} > 0\) are outside.
+                
+                \[
+                \{\, \mathbf{x} \in \mathbb{R}^2 \mid (\mathbf{x} - s) \cdot \mathbf{n} \le 0 \}
+                \]
+
+            </li>
+            <br>
+            <li>
+                <a href="https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm">Sutherland-Hodgman Algorithm</a>:<br>
+                This algorithm clips a polygon against a half-plane by processing each edge and determining intersections.
+                <ul>
+                    <li>
+                        <b>Step 1: Determine if a Point is Inside</b><br>
+                        For a vertex \( \mathbf{x} \) of the polygon, check:
+                        \[
+                        (\mathbf{x} - s) \cdot \mathbf{n} \le 0
+                        \]
+                        If true, \( \mathbf{x} \) is inside the half-plane.
+                    </li>
+                    <li>
+                        <b>Step 2: Edge Intersection</b><br>
+                        For an edge with endpoints \( \mathbf{p} \) and \( \mathbf{q} \), parameterize the edge:
+                        \[
+                        \mathbf{x}(t) = \mathbf{p} + t(\mathbf{q} - \mathbf{p}), \quad t \in [0,1]
+                        \]
+                        To find the intersection \( \mathbf{x}(t) \) with the half-plane boundary, set:
+                        \[
+                        (\mathbf{x}(t) - s) \cdot \mathbf{n} = 0
+                        \]
+                        Substituting the parameterization:
+                        \[
+                        (\mathbf{p} - s) \cdot \mathbf{n} + t\, (\mathbf{q} - \mathbf{p}) \cdot \mathbf{n} = 0
+                        \]
+                        Solving for \( t \):
+                        \[
+                        t = -\frac{(\mathbf{p} - s) \cdot \mathbf{n}}{(\mathbf{q} - \mathbf{p}) \cdot \mathbf{n} + 1 \times 10^{-8}}
+                        \]
+                        This \( t \) determines the intersection point:
+                        \[
+                        \mathbf{x}_{\text{inter}} = \mathbf{p} + t(\mathbf{q} - \mathbf{p})
+                        \]
+                    </li>
+                    <li>
+                        <b>Step 3: Clipping the Polygon</b><br>
+                        For each polygon edge:
+                        <ul>
+                            <li>If both endpoints are inside, add the endpoint \( \mathbf{q} \) to the output.</li>
+                            <li>If one endpoint is inside and the other is outside, add the computed intersection point.</li>
+                            <li>If both endpoints are outside, discard the edge.</li>
+                        </ul>
+                        The resulting set of vertices forms the clipped polygon.
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <b>Conclusion:</b><br>
+                The process of half-plane clipping with the Sutherland–Hodgman algorithm involves:
+                <br>
+                - Defining the half-plane with \( s \) and \( \mathbf{n} \)<br>
+                - Determining point inclusion via \((\mathbf{x} - s) \cdot \mathbf{n} \le 0\)<br>
+                - Computing intersection points using linear interpolation:
+                \[
+                t = -\frac{(\mathbf{p} - s) \cdot \mathbf{n}}{(\mathbf{q} - \mathbf{p}) \cdot \mathbf{n} + \epsilon}
+                \]
+                <br>
+                This mathematical framework ensures accurate clipping, which is crucial for various geometric and graphical applications.
+            </li>
+        </ul>
+    </li>
+
+</ul>
