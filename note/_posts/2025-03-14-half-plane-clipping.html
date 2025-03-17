@@ -1,0 +1,93 @@
+---
+title: "Half-Plane Clipping"
+layout: post
+---
+
+<ul>
+    <li>
+        Half-Plane Clipping
+        <ul>
+
+            <li>
+                Defining the Half-Plane:<br>
+                Given a point \( s \) and a unit vector \( \mathbf{n} \), the half-plane is defined as follows.
+                Where \(s\) is the clipping line's reference point,
+                and points satisfying \((\mathbf{x} - s) \cdot \mathbf{n} \le 0\) are in the half-plane, while those with \((\mathbf{x} - s) \cdot \mathbf{n} > 0\) are outside.
+                The \( \mathbf{n} \) is a normal vector of the half-plane.
+                
+                \[
+                \{\, \mathbf{x} \in \mathbb{R}^2 \mid (\mathbf{x} - s) \cdot \mathbf{n} \le 0 \}
+                \]
+
+            </li>
+            <br>
+            <li>
+                <a href="https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm">Sutherland-Hodgman Algorithm</a>:<br>
+                This algorithm clips a polygon against a half-plane by processing each edge and determining intersections.
+                <ul>
+                    <br>
+                    <li>
+                        <b>Step 1: Determine whether a point is in the half-plane</b><br>
+                        For a vertex \( \mathbf{x} \) of the polygon, check the below condition. 
+                        If true, \( \mathbf{x} \) is in the half-plane.
+                        \[
+                        (\mathbf{x} - s) \cdot \mathbf{n} \le 0
+                        \]
+                    </li>
+                    <br>
+                    <li>
+                        <b>Step 2: Edge Intersection</b><br>
+                        For an edge with endpoints \( \mathbf{p} \) and \( \mathbf{c} \), parameterize the edge. 
+                        Here, when \(t\) is \(0\), the point is \( \mathbf{p} \), and when \(t\) is \(1\), the point is \( \mathbf{c} \).
+                        \[
+                        \mathbf{x} = \mathbf{p} + t(\mathbf{c} - \mathbf{p}), \quad t \in [0,1]
+                        \]
+                        To find the intersection \( \mathbf{x} \) with the half-plane boundary, set:
+                        \[
+                        (\mathbf{x} - s) \cdot \mathbf{n} = 0
+                        \]
+                        Substituting the parameterization:
+                        \[
+                            (\mathbf{p} + t(\mathbf{c} - \mathbf{p}) - s) \cdot \mathbf{n} = 0
+                            \,\\
+                            (\mathbf{p} - s) \cdot \mathbf{n} + t\, (\mathbf{c} - \mathbf{p}) \cdot \mathbf{n} = 0
+                        \]
+                        <!-- \[
+                        (\mathbf{p} - s) \cdot \mathbf{n} + t\, (\mathbf{c} - \mathbf{p}) \cdot \mathbf{n} = 0
+                        \] -->
+                        Solving for \( t \):
+                        \[
+                        t = -\frac{(\mathbf{p} - s) \cdot \mathbf{n}}{(\mathbf{c} - \mathbf{p}) \cdot \mathbf{n}}
+                        \]
+                        This \( t \) determines the intersection point:
+                        \[
+                        \mathbf{x}_{\text{intersection}} = \mathbf{p} + t(\mathbf{c} - \mathbf{p})
+                        \]
+                    </li>
+                    <br>
+                    <li>
+                        <b>Step 3: Clipping the Polygon</b><br>
+                        For each polygon edge:
+                        <ul>
+                            <li>If both endpoints are in the half-plane, add the endpoint \( \mathbf{c} \) to the output.</li>
+                            <li>If one endpoint is in the half-plane and the other is outside, add the computed intersection point.</li>
+                            <li>If both endpoints are outside, discard the edge.</li>
+                        </ul>
+                        The resulting set of vertices forms the clipped polygon.
+                        <figure style="display: flex;">
+                            <img src="/img/half-plane-clipping-0.png" style="width: 33%;">
+                            <img src="/img/half-plane-clipping-1.png" style="width: 33%;">
+                            <img src="/img/half-plane-clipping-2.png" style="width: 33%;">
+                        </figure>
+                        <figure style="display: flex;">
+                            <img src="/img/half-plane-clipping-3.png" style="width: 33%;">
+                            <img src="/img/half-plane-clipping-4.png" style="width: 33%;">
+                            <img src="/img/half-plane-clipping-5.png" style="width: 33%;">
+                        </figure>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+
+</ul>
