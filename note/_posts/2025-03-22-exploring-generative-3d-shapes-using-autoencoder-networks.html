@@ -1,0 +1,73 @@
+---
+title:  "Exploring Generative 3D Shapes Using Autoencoder Networks"
+layout: post
+emoji: /emoji/brain.png
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="chrome-extension://hmigninkgibhdckiaphhmbgcghochdjc/pdfjs/web/viewer.html?file=file%3A%2F%2F%2FC%3A%2FUsers%2Fpark1%2FOneDrive%2F%25EB%25B0%2594%25ED%2583%2595%2520%25ED%2599%2594%25EB%25A9%25B4%2F2017_siggatb_ExploringGenerative3DShapes.pdf">
+            Exploring Generative 3D Shapes Using Autoencoder Networks
+        </a>
+        <ol>
+            <li>
+                Introduction
+                <ul>
+                    <li>
+                        3D shapes have not gained full benefit from machine learning,
+                        despite the vast number of 3D shapes now available on the internet.
+                        This is mainly because the machine learning algorithms require
+                        the consistent representation of input and output data such as an
+                        orthogonally aligned grid (i.e., pixels in the images).
+                    </li>
+                    <li>
+                        Unstructured
+                        triangle meshes are the most popular surface representation in
+                        the computer graphics, but their topological structures are usually
+                        different from one another, hindering the use of machine learning.
+                    </li>
+                    <li>
+                        In this paper, we present a new <b>parameterization technique</b> for
+                        efficiently converting a given unstructured mesh into one with a
+                        manifold mesh with consistent connectivity using depth information. 
+                        We achieve compact and explicit parameterization of a 3D shape by representing the shape as a <b>height field</b>
+                    </li>
+                    <li>
+                        The main benefits of our parameterization are the generation ofinput and output data that is ready for machine learning (Figure 1-middle).
+                        From many shapes in the same category, our autoencoder network constructs a manifold of these shapes.
+                        Using the low dimensional representation from the autoencoder, we can generateand explore a <mark>variation of the 3D shapes at the interactive rate</mark>
+                        <br><br>
+                        <figure>
+                            <img src="/img/exploring-generative-3d-shapes-using-autoencoder-networks/exploring-generative-3d-shapes-using-autoencoder-networks-0.png" width="100%" onerror=handle_image_error(this)>
+                            <figcaption>
+                                From the left, <br> 
+                                Unstructured mesh · <br> 
+                                Quad mesh with a consistent topology that is compactly parameterized as a height map · <br> 
+                                Synthesized new shapes 
+                            </figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        Ourcontributions are summarized as follows:
+                        <ul>
+                            <li>
+                                A compact and efficient parameterization of 3D shapes.
+                            </li>
+                            <li>
+                                An autoencoder to construct a manifold of 3D shapes.
+                            </li>
+                            <li>
+                                A direct manipulation <mark>interface to explore generative shapes</mark>.
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </li>
+</ul>
+
+<br><br>
