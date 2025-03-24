@@ -9,12 +9,12 @@ emoji: /emoji/brain.png
 
 <ul>
     <li>
-        <a href="chrome-extension://hmigninkgibhdckiaphhmbgcghochdjc/pdfjs/web/viewer.html?file=file%3A%2F%2F%2FC%3A%2FUsers%2Fpark1%2FOneDrive%2F%25EB%25B0%2594%25ED%2583%2595%2520%25ED%2599%2594%25EB%25A9%25B4%2F2017_siggatb_ExploringGenerative3DShapes.pdf">
+        <a href="http://www.nobuyuki-umetani.com/publication/2017_siggatb_explore/2017_siggatb_ExploringGenerative3DShapes.pdf">
             Exploring Generative 3D Shapes Using Autoencoder Networks
         </a>
         <ol>
             <li>
-                Introduction
+                INTRODUCTION
                 <ul>
                     <li>
                         3D shapes have not gained full benefit from machine learning,
@@ -63,6 +63,22 @@ emoji: /emoji/brain.png
                                 A direct manipulation <mark>interface to explore generative shapes</mark>.
                             </li>
                         </ul>
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                PARAMETERIZATION OF 3D SHAPES
+                <ul>
+                    <li>
+                        In computer graphics, 3D geometries are often available as <a href="https://en.wikipedia.org/wiki/Polygon_soup#:~:text=A%20polygon%20soup%20is%20a%20set%20of%20unorganized%20polygons%2C%20typically%20triangles%2C%20before%20the%20application%20of%20any%20structuring%20operation%2C%20such%20as%20e.g.%20octree%20grouping.%5B1%5D">polygon soup</a>
+                        which are usually non-manifold and un-oriented triangle meshes
+                        which may contain self-intersections. 
+                        It is very challenging to construct a consistent representation of such unstructured data.
+                    </li>
+                    <li>
+                        Our parameterization constructs a quad mesh with consistent topology to explicitly represent 3D shapes.
+                        The quad mesh is efficiently computed from the depth map from the multi-view projection. 
                     </li>
                 </ul>
             </li>
