@@ -80,6 +80,213 @@ emoji: /emoji/brain.png
                         Our parameterization constructs a quad mesh with consistent topology to explicitly represent 3D shapes.
                         The quad mesh is efficiently computed from the depth map from the multi-view projection. 
                     </li>
+                    <br>
+                    <ol type="I">
+                        <li>
+                            Depth Map
+                            <ul type="circle">
+                                <li>
+                                    First, we set up a <b>bounding box</b>
+                                    that encloses all the training
+                                    shapes. Then, we <mark>
+                                        divide a face of
+                                        the bounding box to construct a
+                                        Cartesian grid
+                                    </mark>. From each center
+                                    of the grid cell, we shoot a ray in
+                                    the inward direction \(-\vec{N}\), where \(\vec{N}\) is the normal of the bounding box face.
+                                </li>
+                                <li>
+                                    For all the grid cells,
+                                    we record the depth, i.e., the distance the rays traveled before intersecting any of the triangles in
+                                    the object.
+                                </li>
+                                <li>
+                                    Since the training shapes are always inside bounding
+                                    box, the depth takes value in the range \((0, D_{max}]\), where \(D_{max}\)
+                                    is the maximum depth of the bounding box for the grids whose
+                                    ray does not intersect with the shape. 
+                                </li>
+                                <figure>
+                                    <img src="/img/exploring-generative-3d-shapes-using-autoencoder-networks/exploring-generative-3d-shapes-using-autoencoder-networks-1.png" width="40%" onerror=handle_image_error(this)>
+                                    <figcaption>
+                                        Depth computation
+                                    </figcaption>
+                                </figure>
+                                <li>
+                                    For the car shapes, we use
+                                    the bounding box that has the dimensions \(\text{2m} \times \text{2m} \times \text{6m} \). Each face
+                                    of the bounding box is divided in the resolution where the grid
+                                    size \(\Delta_{grid} \) is \(\text{1cm} \).
+                                </li>
+                            </ul>
+                        </li>
+                        <br>
+                        <li>
+                            Shrink Wrapping Parameterization
+                            <ul type="circle">
+                                <li>
+                                    We propose to use the shrink wrapping approach [Kobbelt et al .
+                                    1999] to consistently parameterize the 3D shapes for machine learning. 
+                                    <b>Shrink wrapping</b> is a technique used to construct a subdivision
+                                    connectivity mesh by projecting the vertices onto the target mesh
+                                    while iteratively subdividing a coarse base mesh.
+                                </li>
+                                <li>
+                                    In this paper, we
+                                    use a cube as the base mesh because most of the cars have a box-like
+                                    geometry in a coarse resolution.
+                                </li>
+                                <li>
+                                    We predefine the projection direction \(\vec{d}\) for each subdividing vertex of the cube
+                                    such that only the projection height \(h\) determines the positions of the vertices.
+                                    <figure>
+                                        <img src="/img/exploring-generative-3d-shapes-using-autoencoder-networks/exploring-generative-3d-shapes-using-autoencoder-networks-2.png" width="40%" onerror=handle_image_error(this)>
+                                        <figcaption>
+                                            Predefined projection direction \(\vec{d}\)
+                                        </figcaption>
+                                    </figure>
+                                </li>
+                                <li>
+                                    This
+                                    constant direction projection instead of
+                                    variable directions helps to reduce the
+                                    number of parameters to encode the
+                                    movement of a vertex from three variables (XYZ displacement)
+                                    to a single variable (scalar height). 
+                                    \[
+                                        \,\\
+                                        v_{new} = v_{original} + s \cdot \vec{d}
+                                        \,\\
+                                    \]
+                                </li>
+                                <li>
+                                    If the vertex is on
+                                    the edge between the faces with normal -x and +z, the projection
+                                    direction would be \(\vec{d} = (-1, 0, +1)\). If the vertex is at the corner
+                                    surrounded by the three faces with normals +x, -y, and -z, the 
+                                    projection direction will be \(\vec{d} = (+1, -1, -1)\). The integer values of the
+                                    XYZ components of the projection direction help to accelerate the
+                                    computation of the following ray intersection method.
+                                </li>
+                                <li>
+                                    Given the set of depth surfaces \(\mathcal{S}\) for an
+                                    object, we first move the eight corner vertices of the base cube
+                                    onto the object’s surface. The corner vertex should be placed such
+                                    that the base cube approximates the object as much as possible.
+                                </li>
+                                <li>
+                                    In each subdivision iteration, we subdivide the cube mesh in half by adding vertices at the center of the
+                                    edges and quad faces. From each newly added vertex,
+                                    we shoot a ray in the direction \(\vec{d}\) to find the first intersection point
+                                    \(\mathbf{p}_s\) against all the depth surfaces \(\mathbf{s} \in \mathcal{S}\)
+                                    From each newly added vertex,
+                                    we shoot a ray in the direction \(\vec{d}\) to find the first intersection point
+                                    \(\mathbf{p}_s\) against all the depth surfaces \(\mathbf{s} \in \mathcal{S}\).
+                                    If the ray does not intersect
+                                    with a depth surface, we shoot a ray in an opposite direction \(-\vec{d}\).
+                                </li>
+                                <li>
+                                    We denote \(\delta h\) the projection height, i.e.,
+                                    how far the original subdivision point is projected to reach the
+                                    intersection point \(\mathbf{p}\) in the direction of the ray \(\vec{d}\)
+                                    <figure>
+                                        <img src="/img/exploring-generative-3d-shapes-using-autoencoder-networks/exploring-generative-3d-shapes-using-autoencoder-networks-3.png" width="80%" onerror=handle_image_error(this)>
+                                        <figcaption>
+                                            Shrink wrapping
+                                        </figcaption>
+                                    </figure>
+                                </li>
+                            </ul>
+                        </li>
+                    </ol>
+                </ul>
+            </li>
+            <br>
+            <li>
+                MACHINE LEARNING
+                <ol type="I">
+                    <li>
+                        Autoencoder Network
+                        <ul type="circle">
+                            <li>
+                                So far, we have described how a 3D shape is parameterized in a
+                                fix-sized high dimensional vector. This high dimensional space
+                                is very difficult to explore manually because there are too many
+                                parameters to tweak.
+                            </li>
+                            <li>
+                                Here, we use the
+                                autoencoder technique to construct nonlinear mapping between
+                                a reduced number of parameters to high-dimensional parameters.
+                                <figure>
+                                    <img src="/img/exploring-generative-3d-shapes-using-autoencoder-networks/exploring-generative-3d-shapes-using-autoencoder-networks-4.png" width="80%" onerror=handle_image_error(this)>
+                                    <figcaption>
+                                        Autoencoder Network
+                                    </figcaption>
+                                </figure>
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </li>
+            <br>
+            <li>
+                RESULT
+                <ul>
+                    <li>
+                        Since the output of the network is fully determined by the input of these ten neurons, 
+                        we can synthesize new shapes by changing input values \(\mathbf{q}\) for the decoder between zero and
+                        one, which is the range of the sigmoid function.
+                        <figure>
+                            <img src="/img/exploring-generative-3d-shapes-using-autoencoder-networks/exploring-generative-3d-shapes-using-autoencoder-networks-5.png" width="80%" onerror=handle_image_error(this)>
+                            <figcaption>
+                                From the top, <br>
+                                Examples of input and output of our autoencoder network <br>
+                                Synthesized car shapes
+                            </figcaption>
+                        </figure>
+                    </li>
+                    <br>
+                    <ol type="I">
+                        Interactive Exploration
+                        <ul>
+                            <li>
+                                So far, we have described the
+                                method used to consistently parameterize shapes and reduce
+                                their dimensions using the autoencoder. 
+                                <mark>
+                                    However, it is sometimes difficult to determine how
+                                    to manipulate the parameters \(\mathbf{q}\)
+                                    to obtain a desirable shape
+                                </mark> since
+                                the relationship between parameters and the resulting shape is not obvious. 
+                            </li>
+                            <li>
+                                Hence, our interface
+                                allows the user to interactively specify \(\mathbf{x}^{'}_{i}\)
+                                which is the target position for a vertex \(i\) to steer the synthesis results (see the inset figure).
+                                The interface runs the optimization of the input of the decoder
+                                parameter \(\mathbf{q}\) such that the position of the output shape's vertex
+                                \(\mathbf{x}_{i} (\mathbf{q})\) is as close as possible by minimizing the following error
+                                \[
+                                    \,\\
+                                    E(\mathbf{q}) = ||\mathbf{x}_{i} (\mathbf{q}) - \mathbf{x}^{'}_{i}||_{2}
+                                    \,\\
+                                \]
+
+                                we could analytically compute the gradient of 
+                                the error \(E\) concerning the low-dimensional parameter \(\mathbf{q}\)
+                                Once the
+                                gradient is computed, we update the parameter using the <a href="https://darkpgmr.tistory.com/58">Newton-Raphson</a> iterations 
+                            </li>
+                            <br><br>
+                            <div class="youtube-container">
+                                <iframe src="https://www.youtube.com/embed/25xQs0Hs1z0?start=69" frameborder="0" allowfullscreen></iframe>
+                                <figcaption>Interactive Exploration</figcaption>
+                            </div>
+                        </ul>
+                    </ol>
                 </ul>
             </li>
         </ol>
