@@ -74,7 +74,8 @@ class Box {
           font: font,
           size: 2,
           height: 0,
-          curveSegments: 12
+          curveSegments: 12,
+          depth: 0.1
         }
       )
       
