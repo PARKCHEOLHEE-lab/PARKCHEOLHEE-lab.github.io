@@ -1,0 +1,73 @@
+---
+title:  "extrapolation"
+layout: post
+---
+
+<br>
+
+<div class="chat-message user">
+  <div class="message-content">
+    <p>데이터 기반의 모든 딥러닝 모델은 interpolation으로 볼 수 있을것 같은데 extrapolation도 잘 하도록 만드는 기법이 있나?</p>
+  </div>
+</div>
+
+<div class="chat-message assistant">
+  <div class="message-content">
+    <p>좋은 질문이야. 딥러닝 모델이 보통 잘하는 건 <strong>interpolation</strong>—즉, 훈련 데이터 분포 안에서의 일반화지. 반면, <strong>extrapolation</strong>—훈련 데이터 분포 바깥의 예측—은 전통적인 딥러닝 모델이 매우 어려워하는 영역이야. 그럼에도 불구하고, extrapolation을 잘 하도록 설계하거나 학습하는 몇 가지 방법론들이 있어. 아래에 정리해볼게:</p>
+
+    <h3>1. Inductive Bias를 강화하는 아키텍처 설계</h3>
+    <ul>
+      <li><mark><strong>Neural ODE</strong></mark>, <strong>Fourier Neural Operator (FNO)</strong>, <strong>Graph Neural Networks (GNN)</strong> 등은 내재적으로 구조화된 inductive bias를 가지고 있어서 훈련 데이터 바깥에서도 더 일반화된 행동을 할 수 있음.</li>
+      <li>예를 들어 FNO는 PDE 해석 문제에서 데이터 범위를 넘어선 영역에도 더 나은 예측력을 보임.</li>
+    </ul>
+
+    <hr>
+
+    <h3>2. <mark>Symbolic Regression</mark> 또는 <mark>Modular Network</mark></h3>
+    <ul>
+      <li>신경망을 수치 함수 근사기가 아니라 <strong>기호적 규칙</strong>을 배우는 모델로 바꾸는 접근.</li>
+      <li>예: <mark><strong>Neural Symbolic Models</strong></mark>, <strong>Neural Programmer</strong>, 또는 <strong>Meta Learning</strong> 기반의 symbolic expression 학습.</li>
+      <li>이런 모델은 예측이 아닌 <strong>규칙이나 방정식 자체를 유도</strong>하므로, extrapolation이 자연스럽게 가능해짐.</li>
+    </ul>
+
+    <hr>
+
+    <h3>3. <mark>Causal Inference</mark> 기반 모델링</h3>
+    <ul>
+      <li>일반적인 deep learning은 상관관계에 집중하지만, <strong>인과관계를 학습</strong>하게 되면 extrapolation에 더 강해짐.</li>
+      <li>예: <strong>Invariant Risk Minimization (IRM)</strong>, <strong>Causal Representation Learning</strong>.</li>
+      <li>인과 관계는 domain shift나 distributional change에도 더 강건한 일반화를 가능하게 함.</li>
+    </ul>
+
+    <h3>4. Compositional Generalization & Modular Networks</h3>
+    <ul>
+      <li>인간처럼 <strong>작은 단위의 규칙/기능을 조합해서 새로운 상황에 대응</strong>할 수 있도록 학습하는 방식.</li>
+      <li>예: <strong>Meta Networks</strong>, <strong>Neural Module Networks</strong>, <strong>Compositional Attention Networks</strong> 등.</li>
+    </ul>
+
+    <hr>
+
+    <h3>5. Out-of-Distribution (OOD) Generalization 학습 기법</h3>
+    <ul>
+      <li>훈련 과정에서 일부러 distribution shift를 유도해 OOD 대응력을 강화하는 기법들.</li>
+      <li>예: <strong>Domain Generalization</strong>, <strong>Data Augmentation for OOD</strong>, <strong>Style Invariance Learning</strong> 등.</li>
+    </ul>
+
+    <hr>
+
+    <h3>참고할 만한 논문 / 자료</h3>
+    <ul>
+      <li><a href="https://arxiv.org/abs/2110.00222">Barak Pearlmutter - Learning Function Representations that Generalize Outside the Training Data</a></li>
+      <li><a href="https://arxiv.org/abs/2010.08895">Fourier Neural Operators</a></li>
+      <li><a href="https://arxiv.org/abs/2110.05488">Causal Representation Learning</a></li>
+    </ul>
+
+    <hr>
+
+    <p><strong>즉, extrapolation을 위해서는 단순히 더 큰 모델이 아니라, 구조적인 inductive bias, 인과 추론, 기호 기반 접근, 모듈화된 학습 등이 핵심 포인트야.</strong></p>
+
+    <p><strong>Q1:</strong> 딥러닝 모델이 interpolation은 잘하지만 extrapolation은 어려운 구조적인 이유는 뭘까?</p>
+    <p><strong>Q2:</strong> Fourier Neural Operator와 같은 모델이 어떻게 distribution 바깥으로의 일반화를 가능하게 만드는가?</p>
+    <p><strong>Q3:</strong> Symbolic regression 기반의 딥러닝 모델은 실제 물리 문제나 공학 문제에서 어떻게 적용되고 있나?</p>
+  </div>
+</div>
