@@ -1,0 +1,91 @@
+---
+title:  "Latent Points"
+layout: post
+emoji: /emoji/storm.png
+---
+
+
+<br>
+
+<ul>
+    <li>
+        Latent Points
+        <ul>
+            <li>
+                Embedding Vector \(\mathbf{z} \in \mathbb{R}^{N \times 72}\) has to have information about shape
+            </li>
+            <li>
+                \(N\) is the number of shapes, \(72\) dimensions are reshaped to latent points \(p \in \mathbb{R}^{26 \times 3}\)
+            </li>
+            <li>
+                UI that can interpolate shapes by moving points
+                <figure>
+                    <img src="/img/latent-points/latent-points-0.png" width="100%" onerror=handle_image_error(this)>
+                    <figcaption>Latent Points</figcaption>
+                </figure>
+            </li>
+            <br>
+            <li>
+                Latent points computation
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<pre><code class="python">
+    def _compute_latent_points(self, mesh: trimesh.Trimesh) -> np.ndarray:
+            
+        box_mesh = trimesh.creation.box(bounds=mesh.bounds)
+        box_mesh.vertices = box_mesh.vertices @ np.array([[0.95, 0, 0], [0, 0.95, 0], [0, 0, 1]])
+        box_mesh_subdivided = box_mesh.subdivide()
+        
+        (min_x, min_y, min_z), (max_x, max_y, max_z) = box_mesh.bounds
+        
+        nearest_indices = []
+        for i, vertex in enumerate(box_mesh_subdivided.vertices):
+            is_bottom_edge_midpoint = (
+                np.allclose(vertex, (np.array([min_x, min_y, min_z]) + np.array([max_x, min_y, min_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([min_x, max_y, min_z]) + np.array([max_x, max_y, min_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([min_x, min_y, min_z]) + np.array([max_x, max_y, min_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([min_x, min_y, min_z]) + np.array([min_x, max_y, min_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([max_x, min_y, min_z]) + np.array([max_x, max_y, min_z])) * 0.5)
+            )
+            
+            is_top_edge_midpoint = (
+                np.allclose(vertex, (np.array([min_x, min_y, max_z]) + np.array([max_x, min_y, max_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([min_x, max_y, max_z]) + np.array([max_x, max_y, max_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([min_x, min_y, max_z]) + np.array([max_x, max_y, max_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([min_x, min_y, max_z]) + np.array([min_x, max_y, max_z])) * 0.5) 
+                or np.allclose(vertex, (np.array([max_x, min_y, max_z]) + np.array([max_x, max_y, max_z])) * 0.5)
+            )
+            
+            if is_bottom_edge_midpoint or is_top_edge_midpoint:
+                ray_origin = vertex
+                ray_direction = np.array([0, 0, 1])
+                
+                if is_top_edge_midpoint:
+                    ray_direction *= -1
+                
+                locations, *_ = mesh.ray.intersects_location(
+                    ray_origins=[ray_origin], 
+                    ray_directions=[ray_direction]
+                )
+                
+                if len(locations) > 0:
+                    new_vertex = locations[0]
+                    box_mesh_subdivided.vertices[i] = new_vertex
+                else:
+                    nearest_indices.append(i)
+
+            else:
+                nearest_indices.append(i)
+            
+        nearest_vertices = mesh.nearest.on_surface(box_mesh_subdivided.vertices[nearest_indices])[0]
+        box_mesh_subdivided.vertices[nearest_indices] = nearest_vertices
+
+        return box_mesh_subdivided.vertices
+</code></pre>
+
+
+<br><br>
