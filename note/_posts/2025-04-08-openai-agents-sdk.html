@@ -1,0 +1,355 @@
+---
+title:  "OpenAI Agents SDK"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        OpenAI Agents SDK
+        <ul>
+            <li>
+                <a href="https://openai.github.io/openai-agents-python/agents/">Agents</a> are the core building block in your apps. An agent is a large language model (LLM), configured with instructions and tools.
+                The most common properties of an agent you'll configure are:
+                <ul>
+                    <li>
+                        <code>instructions</code>: also known as a developer message or system prompt.
+                    </li>
+                    <li>
+                        <code>model</code>: which LLM to use, and optional <code>model_settings</code> to configure model tuning parameters like temperature, top_p, etc.
+                    </li>
+                    <li>
+                        <mark><code>tools</code>: Tools that the agent can use to achieve its tasks.</mark>
+                        <code>@function_tool</code> decorator is used to define a tool.
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                By default, agents produce plain text (i.e. str) outputs. 
+                If you want the agent to produce a particular type of output, you can use the <code>output_type</code> parameter.
+                <mark>When you pass an <code>output_type</code>, that tells the model to use structured outputs instead of regular plain text responses.</mark> 
+<pre><code class="python">
+    from pydantic import BaseModel
+    from agents import Agent
+
+
+    class CalendarEvent(BaseModel):
+        name: str
+        date: str
+        participants: list[str]
+
+    agent = Agent(
+        name="Calendar extractor",
+        instructions="Extract calendar events from text",
+        output_type=CalendarEvent,
+    )
+</code></pre>
+            </li>
+            <br>
+            <li>
+                Supplying a list of tools doesn't always mean the LLM will use a tool. 
+                You can force tool use by setting <code>ModelSettings.tool_choice</code>. Valid values are:
+                <ul>
+                    <li>
+                        <code>auto</code>, which allows the LLM to decide whether or not to use a tool.
+                    </li>
+                    <li>
+                        <code>required</code>, which requires the LLM to use a tool (but it can intelligently decide which tool).
+                    </li>
+                    <li>
+                        <code>none</code>, which requires the LLM to not use a tool.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        <a href="https://github.com/PARKCHEOLHEE-lab/segment-selector">Segment Selector</a>: AI-assisted polygon segment selection
+        <ul>
+            <li>
+              This is a PoC that explores the possibilities of AI-assisted geometric tasks using OpenAI Agents SDK. 
+              The things to check are:
+                <ul>
+                    <li>Parameterization of geometric context (prompt → parameters)</li>
+                    <li>How AI can understand and process geometric context</li>
+                    <li>Methods for providing geometric context to AI systems</li>
+                    <li>AI's ability to make decisions based on geometric context</li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                The role of the agent is to <b>select segments from a polygon based on the user's request like "select the top left segment".</b>
+                The user's request is given as a natural language prompt, and the agent will select the segments based on the prompt.
+            </li>
+            <br>
+            <li>
+                Direction Context: Given the user's request, the agent will select the directions and segments from the polygon based on the <b>similarity</b> between the direction vectors.
+<pre><code class="python">
+    class SegmentSelectorConfiguration:
+        DIRECTION_VECTORS = {
+            "right": (1, 0),
+            "left": (-1, 0),
+            "top": (0, 1),
+            "bottom": (0, -1),
+            "right_top": (1, 1),
+            "left_top": (-1, 1),
+            "left_bottom": (-1, -1),
+            "right_bottom": (1, -1),
+            "right_up": (0.866, 0.5),
+            "up_right": (0.5, 0.866),
+            "up_left": (-0.5, 0.866),
+            "left_up": (-0.866, 0.5),
+            "left_down": (-0.866, -0.5),
+            "down_left": (-0.5, -0.866),
+            "down_right": (0.5, -0.866),
+            "right_down": (0.866, -0.5),
+        }
+
+        # normalize direction vectors
+        for key, value in DIRECTION_VECTORS.items():
+            DIRECTION_VECTORS[key] = np.array(value) / np.linalg.norm(np.array(value))
+
+        assert np.allclose(np.linalg.norm(list(DIRECTION_VECTORS.values()), axis=1), 1.0)
+
+
+    class SegmentSelector:
+        def _get_segment_similarities(
+            self,
+            target_vector: Tuple[float, float],
+            similarity_threshold: float,
+        ) -> List[Tuple[int, float]]:
+            segments_vectors = self._compute_segments_vectors(self.polygon_segments)
+
+            similarities = []
+            for idx, vector in enumerate(segments_vectors):
+                similarity = np.dot(vector, target_vector)
+                mask = similarity >= similarity_threshold
+                if mask.sum().item() >= len(vector) // SegmentSelectorConfiguration.MASK_MATCHING_DIVIDER:
+                    similarities.append((idx, similarity[mask].sum()))
+
+            return similarities
+
+        def _select_segments_by_vector(
+            self,
+            target_vector: Tuple[float, float],
+            n_per_direction: int,
+            similarity_threshold: float,
+        ) -> List[int]:
+            similarities = self._get_segment_similarities(
+                target_vector,
+                similarity_threshold,
+            )
+
+            similarities.sort(key=lambda x: x[1], reverse=True)
+
+            sorted_indices = [idx for idx, _ in similarities]
+
+            return sorted_indices[:n_per_direction]
+
+        @staticmethod
+        @function_tool
+        def get_target_vector(direction: str) -> List[float]:
+            """Get the vector for a given direction"""
+            try:
+                return SegmentSelectorConfiguration.DIRECTION_VECTORS[direction].tolist()
+
+            except:
+                traceback.print_exc()
+                raise Exception
+</code></pre>
+            </li>
+            <br>
+            <li>
+                Visualization of the agent's behavior
+                <figure style="display: flex;">
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-0.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-1.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-2.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-3.png" style="width: 24%;" onerror=handle_image_error(this)>
+                </figure>
+                <figcaption>
+                    From the left,
+                    <br>
+                    f"Select all segments in the right bottom of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select the top left segments of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select 4 segments in the right and left of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select randomly 3 segments of the following polygon: {BOUNDARY_COORDS}",
+                </figcaption>
+                <br>
+                <figure style="display: flex;">
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-4.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-5.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-6.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-7.png" style="width: 24%;" onerror=handle_image_error(this)>
+                </figure>
+                <figcaption>
+                    From the left,
+                    <br>
+                    f"Select all segments of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select any one segment of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select 2 segments in the right and left of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select randomly half of the segments of the following polygon: {BOUNDARY_COORDS}",
+                </figcaption>
+                <br>
+                <figure style="display: flex;">
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-8.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-9.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-10.png" style="width: 24%;" onerror=handle_image_error(this)>
+                    <img src="/img/openai-agents-sdk/openai-agents-sdk-11.png" style="width: 24%;" onerror=handle_image_error(this)>
+                </figure>
+                <figcaption>
+                    From the left,
+                    <br>
+                    f"Select index 3 segment of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select indices 3, 5, 6, 1 segment of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select segments with odd indices of the following polygon: {BOUNDARY_COORDS}",
+                    <br>
+                    f"Select indices any 3 segments from the indices 0, 1, 2, 3, 4 of the following polygon: {BOUNDARY_COORDS}",
+                </figcaption>
+                <br>
+<pre><code class="python">
+    import os
+    import sys
+    import pytest
+    
+    from agents import Agent, Runner
+
+    sys.path.append(os.path.abspath(os.path.join(__file__, "../../src")))
+
+    from src.testsets import TestSets
+    from src.selector import SegmentSelector, SegmentSelectorConfiguration, SegmentSelectorOutput
+
+    
+    @pytest.fixture(scope="module")
+    def agent():
+        return Agent(
+            name=SegmentSelectorConfiguration.NAME,
+            model=SegmentSelectorConfiguration.MODEL_NAME,
+            model_settings=SegmentSelectorConfiguration.MODEL_SETTINGS,
+            instructions=SegmentSelectorConfiguration.INSTRUCTIONS,
+            output_type=SegmentSelectorOutput,
+            tools=SegmentSelector.tools(),
+        )
+        
+    @pytest.fixture(scope="module")
+    def testsets():
+        return TestSets()
+    
+    def test_a(agent, testsets):
+        testcase_a = testsets.TestcaseA
+        
+        # f"Select all segments in the right bottom of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_a.TEXTS[0]
+        response = Runner.run_sync(agent, request)
+        assert 8 in response.final_output.selected_indices
+        assert 7 in response.final_output.selected_indices
+        assert 1 not in response.final_output.selected_indices
+        assert 2 not in response.final_output.selected_indices
+    
+        # f"Select the top left segments of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_a.TEXTS[1]
+        response = Runner.run_sync(agent, request)
+        assert 1 in response.final_output.selected_indices
+        assert 2 in response.final_output.selected_indices
+        assert 8 not in response.final_output.selected_indices
+        assert 7 not in response.final_output.selected_indices
+    
+    
+        # f"Select 4 segments in the right and left of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_a.TEXTS[2]
+        response = Runner.run_sync(agent, request)
+        assert 2 in response.final_output.selected_indices
+        assert 8 in response.final_output.selected_indices
+        assert len(response.final_output.selected_indices) == 4
+    
+        # f"Select randomly 3 segments of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_a.TEXTS[3]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 3
+    
+    def test_b(agent, testsets):
+        testcase_b = testsets.TestcaseB
+    
+        # f"Select all segments of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_b.TEXTS[0]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 10
+    
+        # f"Select any one segment of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_b.TEXTS[1]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 1
+        
+        # f"Select 2 segments in the right and left of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_b.TEXTS[2]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 2
+        assert (
+            0 in response.final_output.selected_indices
+            or 1 in response.final_output.selected_indices
+        )
+        assert (
+            5 in response.final_output.selected_indices
+            or 6 in response.final_output.selected_indices
+        )
+        
+        # f"Select randomly half of the segments of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_b.TEXTS[3]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 5
+        
+    def test_c(agent, testsets):
+        testcase_c = testsets.TestcaseC
+        
+        # f"Select index 3 segment of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_c.TEXTS[0]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 1
+        assert response.final_output.selected_indices[0] == 3
+        
+        # f"Select indices 3, 5, 6, 1 segment of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_c.TEXTS[1]
+        response = Runner.run_sync(agent, request)
+        assert len(response.final_output.selected_indices) == 4
+        assert sorted(response.final_output.selected_indices) == sorted([3, 5, 6, 1])
+        
+        # f"Select segments with odd indices of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_c.TEXTS[2]
+        response = Runner.run_sync(agent, request)
+        assert all(i % 2 == 1 for i in response.final_output.selected_indices)
+        
+        # f"Select indices any 3 segments from the indices 0, 1, 2, 3, 4 of the following polygon: {BOUNDARY_COORDS}"
+        request = testcase_c.TEXTS[3]
+        response = Runner.run_sync(agent, request)
+        assert all(i in [0, 1, 2, 3, 4] for i in response.final_output.selected_indices)
+</code></pre>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<!-- 
+문서를 좀 더 살펴봐야할듯
+결국 다 정의해줘야함. 마법은 없음.
+
+그러나 에이전트에게 더 자율성을 줄 수 있을것 같음.
+에이전트가 프롬프트와 인스트럭션을 기반으로 함수를 스스로 판단하여 호출하기 때문에 절차적으로 코드를 짜듯이 tools를 정의하기 어려움.
+아직 적응을 못한것일지도. 
+
+json schema 작성 대신 pydantic으로 structured output 리턴 가능 -> 코드 양 축소
+
+-->
+
+
+<br><br>

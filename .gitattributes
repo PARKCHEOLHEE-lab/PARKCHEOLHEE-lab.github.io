@@ -16,3 +16,8 @@
 /img/quadtree/** filter=lfs diff=lfs merge=lfs -text
 /img/building-gan/** filter=lfs diff=lfs merge=lfs -text
 /img/lookback/** filter=lfs diff=lfs merge=lfs -text
+/img/exploring-generative-3d-shapes-using-autoencoder-networks/** filter=lfs diff=lfs merge=lfs -text
+/img/4o-image-generation/** filter=lfs diff=lfs merge=lfs -text
+/img/latent-points/** filter=lfs diff=lfs merge=lfs -text
+/img/openai-agents-sdk/** filter=lfs diff=lfs merge=lfs -text
+/img/half-plane-clipping/** filter=lfs diff=lfs merge=lfs -text
