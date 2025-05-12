@@ -107,12 +107,14 @@ a:hover {
 
     function figNumberSetter() {
       figCaptions = document.getElementsByTagName("figcaption");
+      figNum = 0;
       for (let i = 0; i < figCaptions.length; i++) {
-        figNum = i + 1;
+        figNum += 1;
         innerString = figCaptions[i].innerHTML
         
         if (figCaptions[i].classList.contains("nofig")) {
           figCaptions[i].innerHTML = innerString;
+          figNum -= 1;
         } else {
           figCaptions[i].innerHTML = "Fig." + String(figNum) + ": " + innerString;
         }

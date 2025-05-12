@@ -1,0 +1,74 @@
+---
+title:  "Metrics"
+layout: post
+---
+
+<br>
+
+<ul>
+    <li>
+        Metrics for binary classification
+        
+        <ul>
+            <li>
+                Confusion Matrix
+            </li>
+            <br>
+            <div style="display: flex; justify-content: center;">
+                <table style="text-align: center;" width="70%">
+                    <tr>
+                        <th style="background-color: white;">Confusion Matrix</th>
+                        <th style="background-color: white;">Predicted Positive</th>
+                        <th style="background-color: white;">Predicted Negative</th>
+                    </tr>
+                    <tr>
+                        <th style="background-color: rgb(245, 245, 245);">Actual Positive</th>
+                        <td style="background-color: rgb(245, 245, 245);">TP</td>
+                        <td style="background-color: rgb(245, 245, 245);">FN</td>
+                    </tr>
+                    <tr>
+                        <th style="background-color: white;">Actual Negative</th>
+                        <td style="background-color: white;">FP</td>
+                        <td style="background-color: white;">TN</td>
+                    </tr>
+                </table>
+            </div>
+            <br><br>
+            <li>
+                Accuracy (정확도): 전체 예측한 것 중 올바르게 예측한 것의 비율.
+                    \[
+                        \,\\
+                        \text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}
+                        \,\\
+                    \]
+            </li>
+            <br>
+            <li>
+                Precision (정밀도): 모델이 참으로 예측한 것 중 실제로 참인 것의 비율.
+                    \[
+                        \,\\
+                        \text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+                        \,\\
+                    \]
+            </li>
+            <li>
+                Recall (재현율): 실제 참인 것 중 모델이 참으로 예측한 비율.
+                    \[
+                        \,\\
+                        \text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+                        \,\\
+                    \]
+            </li>
+            <li>
+                F1 Score: 정밀도와 재현율의 조화평균, 두 지표 간의 균형을 제공.
+                    \[
+                        \,\\
+                        \text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+                        \,\\
+                    \]
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<br><br>
