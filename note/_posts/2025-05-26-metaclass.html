@@ -1,0 +1,137 @@
+---
+title:  "metaclass"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://docs.python.org/3/library/abc.html#abc.ABCMeta">metaclass</a>
+        <ul>
+            <li>
+                A metaclass is a class that creates other classes
+            </li>
+            <li>
+                Just as a class defines how an instance behaves, a metaclass defines how a class behaves
+            </li>
+            <li>
+                The most common use case is to modify class creation and deletion behavior
+            </li>
+            <li>
+                <b>
+                    Metaclass's <code>__new__</code> is called during class definition, not during instance creation
+                </b>
+            </li>
+            <li>
+                Think of metaclass as a <mark>decorator for classes</mark> - it wraps and modifies classes just like decorators wrap and modify functions
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Example
+        <ul>
+            <li>
+                The <code>BaseAgentMeta</code> metaclass wraps the <code>call</code> method to measure API call execution time
+            </li>
+            <li>
+                In this example, <code>BaseAgentMeta.__new__</code> modifies the class namespace before the class is created
+            </li>
+        </ul>
+<pre><code class="python">
+    import time
+    import copy
+
+    from abc import ABC, abstractmethod, ABCMeta
+
+    from openai import OpenAI
+
+
+    class BaseAgentMeta(ABCMeta):
+        @staticmethod
+        def runtime_calculator(func):
+            def wrapper(self, *args, **kwargs):
+                start_time = time.time()
+                result = func(self, *args, **kwargs)
+                end_time = time.time()
+                print(f"{func.__qualname__} Time taken: {end_time - start_time} seconds")
+                return result
+
+            return wrapper
+
+        def __new__(metaclass, name, bases, namespace):
+            namespace["call"] = metaclass.runtime_calculator(namespace["call"])
+
+            return super().__new__(metaclass, name, bases, namespace)
+
+
+    class BaseAgent(ABC, metaclass=BaseAgentMeta):
+        _system_prompt = None
+        _output_default = None
+        _output_format = None
+        _call_payload = None
+
+        def __init__(self, client: OpenAI):
+            self.client = client
+            self.current_payload = None
+
+        @property
+        def system_prompt(self):
+            if self._system_prompt is None:
+                raise NotImplementedError
+
+            return self._system_prompt
+
+        @property
+        def output_default(self):
+            if self._output_default is None:
+                raise NotImplementedError
+
+            return self._output_default
+
+        @property
+        def output_format(self):
+            if self._output_format is None:
+                raise NotImplementedError
+
+            return self._output_format
+
+        @property
+        def call_payload(self):
+            if self._call_payload is None:
+                raise NotImplementedError
+
+            return copy.deepcopy(self._call_payload)
+
+        @abstractmethod
+        def call(self):
+            """Interface for calling the agent."""
+            raise NotImplementedError
+
+        def create_payload(self, prompt_user: str):
+            # Get copied payload
+            call_payload = self.call_payload
+            call_payload["input"] = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": prompt_user},
+            ]
+
+            # Store the last payload
+            self.current_payload = call_payload
+
+            return call_payload
+
+
+    # *******************Agent.call Time taken: 1.6251204013824463 seconds
+    # *******************Agent.call Time taken: 1.1683950424194336 seconds
+    # *******************Agent.call Time taken: 6.725451707839966 seconds
+    # ********************Agent.call Time taken: 1.3004052639007568 seconds
+    # ************Agent.call Time taken: 0.9431052207946777 seconds
+    # ******Agent.call Time taken: 2.2339024543762207 seconds
+</code></pre>
+    </li>
+</ul>
+
+<br><br>
