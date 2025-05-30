@@ -1,0 +1,198 @@
+---
+title:  "Inductive Bias"
+layout: post
+---
+
+<br>
+
+<div class="chat-message user">
+  <div class="message-content">
+    <p>CNN은 이미지의 국소적인 특징을 계층적으로 추상화하여 고차원 표현을 구성함으로써 최종 결과를 도출하는데, 이러한 방식처럼 구조적 가정을 내포한 모델 설계를 볼 때, inductive bias를 heuristic의 일종으로 이해할 수 있을까?</p>
+  </div>
+</div>
+
+<div class="chat-message assistant">
+  <div class="message-content">
+    <p>말씀하신 CNN(Convolutional Neural Network)의 구조를 중심으로 "inductive bias"와 "heuristic"의 개념을 연결하려는 시도는 인공지능의 본질을 고민하는 깊은 사유입니다. 이에 대해 <strong>두 개념의 정의와 관계, 그리고 CNN의 예시를 통해서 그 관계를 정리</strong>해드리겠습니다.</p>
+
+    <hr>
+
+    <h3>🔹 Inductive Bias란?</h3>
+    <p><strong>Inductive Bias</strong>는 모델이 학습 데이터로부터 일반화할 수 있도록 설계된 <strong>사전 가정(prior assumptions)</strong>입니다.</p>
+    <p>즉, 무한한 가능성 중에서 어떤 함수 공간을 좁게 설정해 학습을 가능하게 만드는 것이라 할 수 있습니다.</p>
+    <ul>
+      <li>예: CNN은 <strong>"근처 픽셀 간의 연관성이 높다"</strong>, <strong>"특징은 공간적으로 반복된다"</strong>는 가정을 갖고, 이로 인해 <strong>convolution 연산과 weight sharing</strong>이라는 구조를 취합니다.</li>
+      <li>이는 학습 데이터를 적게 사용하면서도 좋은 일반화 성능을 내게 하는 핵심 설계 철학입니다.</li>
+    </ul>
+
+    <hr>
+
+    <h3>🔹 Heuristic이란?</h3>
+    <p><strong>Heuristic</strong>은 어떤 문제를 푸는 데 있어 <strong>보편적인 규칙이나 직관적인 기준</strong>을 의미합니다. 즉, 최적이 아니더라도 <strong>실용적 해결</strong>을 가능하게 만드는 전략입니다.</p>
+    <ul>
+      <li>흔히 사용되는 예: "가까운 점부터 탐색한다", "최단 경로를 먼저 고려한다" 등의 직관적 판단</li>
+      <li>일반적으로 heuristic은 수학적으로 정당화되기보다는 경험적이고 실용적입니다.</li>
+    </ul>
+
+    <hr>
+
+    <h3>🔹 CNN에서의 Inductive Bias vs Heuristic</h3>
+    <table>
+      <tr>
+        <th align="left">구분</th>
+        <th align="left">Inductive Bias</th>
+        <th align="left">Heuristic</th>
+      </tr>
+      <tr>
+        <td>정의</td>
+        <td>모델의 설계에 내재된 <strong>사전 가정</strong></td>
+        <td>문제 해결을 위한 <strong>경험적 규칙</strong></td>
+      </tr>
+      <tr>
+        <td>예시</td>
+        <td>CNN에서의 지역성, 파라미터 공유</td>
+        <td>탐색 시 '가장 밝은 픽셀 먼저 보기' 등의 규칙</td>
+      </tr>
+      <tr>
+        <td>역할</td>
+        <td><strong>학습 일반화</strong>를 유도</td>
+        <td><strong>문제 해결 속도</strong>나 단순화를 유도</td>
+      </tr>
+      <tr>
+        <td>정당성</td>
+        <td>통계적/수학적 구조에 근거</td>
+        <td>경험적, 직관적, 때로는 비공식적</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <p>CNN의 설계 철학(예: 지역성 가정, translational invariance)은 <strong>엄밀히 말하면 inductive bias</strong>입니다. 하지만 이를 <strong>"local feature로부터 global meaning을 조립하겠다"는 실용적 발상</strong>으로 본다면, 이를 <strong>heuristic한 성향을 가진 inductive bias</strong>라고도 해석할 수 있습니다.</p>
+
+    <p>즉, <strong>모든 heuristic이 inductive bias는 아니지만</strong>, <strong>inductive bias는 어떤 면에서 잘 설계된 heuristic이 될 수 있습니다.</strong></p>
+
+    <hr>
+
+    <h3>🔸 결론</h3>
+    <p><strong>CNN의 inductive bias는 heuristic이라고 볼 수 있느냐?</strong><br>
+    → <strong>엄밀히는 inductive bias지만</strong>, 그 bias가 실용적 목적(예: 효율적 학습, 연산 축소)에 근거해 설계되었다면 <strong>heuristic적 성격도 함께 가진다</strong>고 이해하시면 됩니다.</p>
+
+    <hr>
+
+    <p><strong>Q1:</strong> 다른 딥러닝 아키텍처(RNN, GNN 등)에서의 inductive bias는 각각 어떤 특징이 있는가요?</p>
+    <p><strong>Q2:</strong> inductive bias가 너무 강하면 학습 성능에 어떤 부작용이 생길 수 있나요?</p>
+    <p><strong>Q3:</strong> self-attention 기반의 Transformer는 inductive bias가 약하다는 말이 많은데, 그게 왜 의미 있는 차이인가요?</p>
+  </div>
+</div>
+
+<br><br>
+
+<div class="chat-message user">
+  <div class="message-content">
+    <p>사전 가정이라는 것이 경험적으로 도출된 결과인 점에서 같은 의미로 볼 수 있는것 아닌가?</p>
+  </div>
+</div>
+
+<div class="chat-message assistant">
+  <div class="message-content">
+    <p>말씀하신 <strong>"사전 가정(inductive bias)"이 결국 경험에서 도출된 결과라면, 그것을 heuristic과 같은 의미로 볼 수 있는 것 아니냐</strong>는 질문은 <strong>AI 모델 설계의 철학적 기초를 묻는 깊은 탐구</strong>입니다. 이 문제에 대해 다음과 같이 정리드리겠습니다.</p>
+
+    <hr>
+
+    <h4>🔹 핵심 질문</h4>
+    <blockquote><strong>"Inductive bias가 결국 과거의 경험에서 유도된 것이라면, heuristic과 본질적으로 같은 것이라 볼 수 있지 않은가?"</strong></blockquote>
+
+    <hr>
+
+    <h4>🔸 공통점: 둘 다 '경험 기반의 일반화 전략'</h4>
+    <table>
+      <tr>
+        <th align="left">항목</th>
+        <th align="left">Inductive Bias</th>
+        <th align="left">Heuristic</th>
+      </tr>
+      <tr>
+        <td><strong>출처</strong></td>
+        <td>인간 또는 이론적 경험에서 유도된 설계 철학</td>
+        <td>실무적 경험과 직관에서 도출된 규칙</td>
+      </tr>
+      <tr>
+        <td><strong>목적</strong></td>
+        <td>모델이 적은 데이터로도 일반화 가능하게 하기</td>
+        <td>복잡한 문제를 빠르게 근사적으로 해결하기</td>
+      </tr>
+      <tr>
+        <td><strong>형태</strong></td>
+        <td>구조, 연산 방식, 가정 등 (e.g., locality, weight sharing)</td>
+        <td>if-then 규칙, 탐색 전략, 직관적 기준 등</td>
+      </tr>
+      <tr>
+        <td><strong>근거</strong></td>
+        <td>통계적 추정, 학습 이론</td>
+        <td>경험적 성공, 실험적 관찰</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <p>➡️ <strong>즉, 둘 다 과거의 경험과 데이터로부터 도출된 문제 해결 전략</strong>이라는 점에서 분명 공통점을 가집니다.</p>
+
+    <hr>
+
+    <h4>🔸 차이점: 모델 설계의 <strong>기본 가정 vs 적용 규칙</strong></h4>
+    <table>
+      <tr>
+        <th align="left">항목</th>
+        <th align="left">Inductive Bias</th>
+        <th align="left">Heuristic</th>
+      </tr>
+      <tr>
+        <td><strong>적용 위치</strong></td>
+        <td>모델 아키텍처/가정 수준</td>
+        <td>알고리즘 실행/문제 해결 수준</td>
+      </tr>
+      <tr>
+        <td><strong>역할</strong></td>
+        <td>어떤 해를 학습할 것인가의 범위를 제한</td>
+        <td>어떻게 빠르게 해를 찾을 것인가에 초점</td>
+      </tr>
+      <tr>
+        <td><strong>정당화 방식</strong></td>
+        <td>통계적 학습 이론(VC dimension, regularization 등)</td>
+        <td>실용적 판단, 탐색 효율성</td>
+      </tr>
+      <tr>
+        <td><strong>예</strong></td>
+        <td>"이미지는 지역적으로 의미 있는 패턴이 있다" → CNN 구조</td>
+        <td>"먼저 중심에서부터 탐색해라" → 이미지 인식 초기화 방식</td>
+      </tr>
+    </table>
+
+    <br>
+
+    <p>➡️ <strong>Inductive bias는 모델 설계에 내재된 구조적 제약</strong>,<br>
+    ➡️ <strong>Heuristic은 구체적 문제 해결을 위한 실행 전략</strong>입니다.</p>
+
+    <hr>
+
+    <h4>🔸 결론: <strong>유사하되, 수준이 다르다</strong></h4>
+    <p>Inductive bias는 <strong>heuristic에서 발전된 개념</strong>으로 이해할 수 있으며,<br>
+    <strong>잘 정립된 heuristic이 반복적으로 효과를 보이며 구조화되었을 때 inductive bias가 됩니다.</strong></p>
+    <p>즉,</p>
+    <blockquote><strong>"모든 inductive bias는 넓은 의미에서 heuristic적 기반을 갖고 있다. 하지만 모든 heuristic이 inductive bias는 아니다."</strong></blockquote>
+
+    <hr>
+
+    <h4>🔹 비유로 요약</h4>
+    <ul>
+      <li><strong>Heuristic</strong>: "경험상 이 방향이 좋아 보여" → <i>실행 전략</i></li>
+      <li><strong>Inductive Bias</strong>: "그 방향이 좋다는 전제를 아예 구조에 박자" → <i>설계 철학</i></li>
+    </ul>
+
+    <hr>
+
+    <p><strong>Q1:</strong> 과거의 경험에서 유도된 heuristic이 inductive bias로 발전한 실제 사례는 어떤 것이 있나요?</p>
+    <p><strong>Q2:</strong> inductive bias가 너무 강하면 오히려 데이터로부터 새로운 패턴을 못 배우게 되는 경우도 있지 않나요?</p>
+    <p><strong>Q3:</strong> heuristic과 inductive bias 중 어떤 것을 우선적으로 설계에 반영해야 할까요? 그리고 그 기준은 어떻게 결정되나요?</p>
+  </div>
+</div>
