@@ -1,4 +1,4 @@
-title: "parkcheolhee-lab"
+title: "latentspace."
 author: "pch"
 description: "<b style=\"color: #9c9c9c; font-weight: 200; font-size: smaller\">parkcheolhee-lab</b>"
 permalink: /:title/
@@ -19,7 +19,7 @@ minimal: false             # use a dark header
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {title: "testbed", file: "testbed.html"}
-  - {title: "note", file: "note.html"}
+  - {title: "notebook", file: "notebook.html"}
   # - {title: "three", file: "threebed.html"}
   # - {title: "r!　", file: "retrospection.html"}
   # - {title: "　", file: "retrospection.html"}
