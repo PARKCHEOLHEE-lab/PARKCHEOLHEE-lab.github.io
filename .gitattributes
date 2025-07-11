@@ -21,4 +21,3 @@
 /img/latent-points/** filter=lfs diff=lfs merge=lfs -text
 /img/openai-agents-sdk/** filter=lfs diff=lfs merge=lfs -text
 /img/half-plane-clipping/** filter=lfs diff=lfs merge=lfs -text
-/knou/** filter=lfs diff=lfs merge=lfs -text
