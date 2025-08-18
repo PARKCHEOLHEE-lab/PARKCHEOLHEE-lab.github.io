@@ -2,3 +2,80 @@
 title:  "inspect.getsource"
 layout: post
 ---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://docs.python.org/3/library/inspect.html#inspect.getsource">inspect.getsource(<i>object </i>)</a>
+        <ul>
+            <li>
+                Return the text of the source code for an object. The argument may be a module, class, method, function, traceback, frame, or code object. The source code is returned as a single string. An OSError is raised if the source code cannot be retrieved. A TypeError is raised if the object is a built-in module, class, or function.
+<pre><code class="python">
+    import inspect
+
+    def foo() -> str:
+        """say "foo"
+    
+        Returns:
+            str: "bar"
+        """
+        return "bar"
+    
+    if __name__ == "__main__":
+        print(inspect.getsource(foo))
+
+        ### def foo() -> str:
+        ### """say foo
+        ### 
+        ### Returns:
+        ###     str: "bar"
+        ### """
+        ### return "bar"
+</code></pre>
+            </li>
+            <br>
+            <li>
+                When including code snippets in LLM context engineering, 
+                the prompt must be updated every time if the code changes. 
+                This approach can lead to context omissions. In such cases, <code>inspect.getsource</code> can be very useful.
+            </li>
+            <ul>
+                <li>
+                    asis
+<pre><code class="python">
+    system_prompt = f"""
+        The fitness function is a weighted sum value based on the above weights and the components.
+        ```python
+            final_term = (
+                weights.weight_a * fitness_a  
+                + weights.weight_b * fitness_b
+                + weights.weight_c * fitness_c
+                + weights.weight_d * fitness_d
+                + weights.weight_e * fitness_e
+                + weights.weight_f * fitness_f
+                + weights.weight_g * fitness_g 
+
+                (...)
+
+            )
+        ```
+    """
+</code></pre>
+                </li>
+                <li>
+                    tobe
+
+<pre><code class="python">
+    system_prompt = f"""
+        The fitness function is a weighted sum value based on the above weights and the components.
+        ```python
+            {inspect.getsource(get_final_term)}
+        ```
+    """
+</code></pre>
+                </li>
+            </ul>
+        </ul>
+    </li>
+</ul>
