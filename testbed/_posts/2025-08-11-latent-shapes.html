@@ -272,12 +272,6 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
         return loss_mean, loss_shape_mean
 </code></pre>
 
-    <!-- 
-        decoder 모델의 state를 저장하는 플래그로써 loss train, loss val의 weighted sum을 사용합니다. 
-        weights는 각각 0.1, 1.0으로 설정하여 validation 일반화 성능을 중점적으로 평가하여 저장되도록 하며, 
-        약간의 train 가중치를 주어 학습된 데이터도 잘 복원할 수 있도록 합니다. 
-    -->
-
     <br><br>
 
     The flag for saving the decoder model's state uses the <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/trainer.py#L282-L285">weighted sum</a> of the training loss and validation loss. 
@@ -343,7 +337,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
     reconstruct api request는 다음과 같이 정의되며, 마칭큐브 알고리즘 특성상 resolution 크기에 따라 복원능력과 복원속도에 대한 트레이드오프가 있으므로 사용자가 조절가능하도록 합니다.
     -->
 
-    Here, we briefly describe the implementation of the demo GIF shown in the introduction section. 
+    Here, I briefly describe the implementation of the demo GIF shown in the introduction section. 
     First, <code>FastAPI</code> is used as the communication layer connecting the interface with the model. 
     The API returns results in JSON format, where both the reconstruction outputs and latent shape data are represented as mesh data based on vertices and faces.
 
@@ -555,9 +549,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
         <li>
             <a href="https://www.rhino3d.com/en/features/shrinkwrap/">https://www.rhino3d.com/en/features/shrinkwrap/</a>
         </li>
-        <li>
+        <!-- <li>
             <a href="https://docs.blender.org/manual/en/latest/modeling/modifiers/deform/shrinkwrap.html">https://docs.blender.org/manual/en/latest/modeling/modifiers/deform/shrinkwrap.html</a>
-        </li>
+        </li> -->
         <li>
             <a href="https://threejs.org/docs/#examples/en/controls/TransformControls">https://threejs.org/docs/#examples/en/controls/TransformControls</a>
         </li>
