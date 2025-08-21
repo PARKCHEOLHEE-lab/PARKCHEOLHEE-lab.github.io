@@ -1,0 +1,338 @@
+---
+title: "Voxels to Graph"
+layout: post
+hashtag: "#graph #gnn #building-gan"
+comment: true
+splitter: 1
+featured: false
+inprogress: false
+thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
+---
+
+<div id="toc"></div>
+
+<h3>Introduction 🔗</h3>
+<div class="article">
+    This project explores the key contributions of <a href="https://arxiv.org/pdf/2104.13316">Building-GAN</a> by AutodeskAILab: 
+    1) a novel 3D representation called <strong>voxel graph</strong> that can encode <strong>irregular voxel grids</strong> with non-uniform space partitioning, overcoming limitations of traditional regular voxel grids, and 
+    2) a graph-conditioned generative adversarial network (GAN) leveraging graph neural networks (GNNs). 
+    The implementation uses their <a href="https://github.com/AutodeskAILab/Building-GAN?tab=readme-ov-file">dataset</a> to study these approaches.
+
+    <figure>
+        <img src="/img/voxel-to-graph/voxel-to-graph-0.gif" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+          Generated Buildings
+        </figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Raw Data</h3>
+<div class="article">
+
+    In the Data Collection part of the paper, it says that the dataset was created as follows:
+    <br><br>
+    Since there is no publicly available dataset for volumetric designs from real buildings, we create a synthetic
+    dataset with 120,000 volumetric designs for commercial buildings using parametric models. 
+    The heuristics behind the parametric models are based on the rules and knowledge provided by professional architects. 
+    
+    <!--break-->
+    
+    Although these parametric models are able to explore possible volumetric designs, they are not capable of fitting the constraints.
+    Therefore, we generate the designs first and then compute the voxel graph, program graph, FAR, and TPR for each design. 
+
+    (...)
+    
+    <strong>Here, we consider 6 program types: lobby/corridor, restroom, stairs, elevator, office, and mechanical room.</strong> 
+    Each program node feature includes the program type and the story level.
+
+    <br><br>
+
+    Each datum of the created dataset consists of three JSONs as follows:
+    <ol>
+        <li>
+            <strong>graph_global_*.json</strong>: 
+            contains the FAR (Floor Area Ratio), program ratios, and program types (6 program types described above + void type).
+
+<pre><code class="json">
+    {
+        "far": 3.1144640998959425,
+        "global_node": [
+            {
+                "type": 3,
+                "proportion": 0.04811226194453724,
+            
+                (...)
+            },
+            {
+                "type": 0,
+                "proportion": 0.25526227865018364,
+            
+                (...)
+            },
+
+            (...)
+        ]
+    }
+</code></pre>
+<figcaption class="nofig">
+    graph_global_*.json
+</figcaption><br>
+        </li>
+        <li>
+            <strong>graph_local_*.json</strong>: 
+            contains the nodes. 
+            Each node has the following attributes:
+            floor \(\text{F}\) (the floor level on which the node is placed), 
+            program type \(\text{T}\), index \(\text{I}\), and neighbors that indicate connectivity between nodes.
+            In the local graph, the unique index of each node is created as \(\text{[F, T, I]}\), 
+            and the neighbors contain these unique indices.
+            In the example below, the first node's unique index is \(\text{[0, 3, 0]}\), 
+            and it has \(\text{[1, 3, 0]}\) as a neighbor. 
+            Similarly, the node with index \(\text{[1, 3, 0]}\) has \(\text{[0, 3, 0]}\) as a neighbor.
+<pre><code class="json">
+    {
+        "node": [
+            {
+                "floor": 0,
+                "type": 3,
+                "type_id": 0,
+                "neighbors": [[0, 0, 0], [1, 3, 0]]
+            
+                (...)
+            },
+            {
+                "floor": 1,
+                "type": 3,
+                "type_id": 0,
+                "neighbors": [[1, 0, 0], [2, 3, 0], [0, 3, 0]]
+            
+                (...)
+            },
+            
+            (...)
+        ]
+    }
+</code></pre>
+<figcaption class="nofig">
+    graph_local_*.json
+</figcaption><br>
+        </li>
+        <li>
+            <strong>voxel_*.json</strong>: 
+            contains the voxel voxel nodes. Each voxel node has the following attributes: 
+            location (it serves as a unique index in the voxel graph), 
+            program type, 
+            dimension (depth, height, width of an irregular voxel), 
+            coordinate (center of the voxel),
+            and neighbors that indicate connectivity between nodes.
+
+<pre><code class="json">
+    {
+        "voxel_node": [
+            {
+                "location": [0, 2, 7],
+                "type": 3,
+                "coordinate": [0.0, 20.0, 37.0],
+                "dimension": [7.0, 3.0, 3.0],
+                "neighbors": [[1, 2, 7], [0, 1, 7], [0, 3, 7], [0, 2, 6]]
+            
+                (...)
+            },
+            {
+                "location": [1, 2, 7],
+                "type": 3,
+                "coordinate": [7.0, 20.0, 37.0],
+                "dimension": [4.0, 3.0, 3.0],
+                "neighbors": [[0, 2, 7], [2, 2, 7], [1, 1, 7], [1, 3, 7], [1, 2, 6]]
+            
+                (...)
+            },
+            
+            (...)
+        ]
+    }
+</code></pre>
+<figcaption class="nofig">
+    voxel_*.json
+</figcaption>
+        </li>
+    </ol>
+
+</div><br><br>
+
+<h3>Representing Voxels as a Graph</h3>
+<div class="article">
+
+    
+    A Graph data structure consists of vertices and edges \(G(V, E)\).
+    The vertices are sometimes also referred to as nodes 
+    and the edges are lines or arcs that connect any two nodes in the graph.
+
+    The graph data structure can be represented as an adjacency list (or matrix) to indicate connectivity between nodes.
+
+    <br><br>
+
+    To convert voxel data into a graph structure, we need to assign an index for each voxel.
+    The index of each voxel is \(\text{(x, y, z)} \)-shaped structure, and it is unique, so that the index can be converted to \(\text{(0, 1, 2,} \cdot \cdot \cdot \text{, n)} \)-shaped structure.
+    As each voxel is a node, the last index of the node is the number of voxels-1.
+
+    Since the voxel is a cuboid-shaped geometry, connectivity between voxel nodes can be determined by the 3D 6-way connectivity.
+    In the figure below, let's see the uppermost voxel with index \(319\) of the right diagram.
+    This voxel's program type is the office type with a blue color, and the voxels located at its bottom (index \(255\)) and right (index \(318\)) also have the same program type, 
+    while the other voxels facing it are empty. 
+
+    <br><br>
+    
+    The voxel with index \(319\) can be seen as it is connected to indices \(255\) and \(318\).
+    Using this system, two nodes in a graph are considered connected if they have the same program type and are adjacent to each other by the  3D 6-way connectivity system
+    (Also, even if the program types of the two voxels are not the same, they can be connected by common spaces such as a corridor, a lobby, and an elevator).
+    Therefore, using the adjacency list representation, it can be expressed as \(\text{319: [255, 318]}\).
+
+    <figure>
+        <img src="/img/voxel-to-graph/voxel-to-graph-1.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Voxel to Graph <br>
+            From the left, Unique Index · Adjacency List Representation
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    Each node in the graph data has the same shape features as other nodes.
+    As I mentioned above, each voxel is converted into a node, so the node's features are the voxel's geometric attributes.
+
+    In the raw data, each voxel node has the following features: coordinate \((3)\), dimension \((3)\), and location \((3)\) 
+    (<code>voxel_graph_features</code> is a flattened vector \((9)\) containing all three).
+    Additionally, the FAR \((1)\) feature from <strong>graph_global_*.json</strong> and the floor level \((1)\) of each voxel are combined as part of the node features.
+    The final feature vector of each node has a length of \((11)\); therefore, each graph is represented as an \((\text{N}, 11)\)-shaped matrix, where \(\text{N}\) is the number of nodes.
+
+    <br><br>
+
+    Here, I will skip the details of processing the local graph. 
+    You can find the code for processing the local graph at this <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py#L16-L41">link</a>.
+
+    <br><br>
+
+<pre><code class="python">
+    class VoxelGraphData:
+        def __init__(self, voxel_graph_data: dict):
+            voxel_graph_types_onehot = voxel_graph_data["voxel_graph_types_onehot"]
+            voxel_graph_features = voxel_graph_data["voxel_graph_features"]
+            voxel_graph_far_per_node = torch.zeros(voxel_graph_types_onehot.shape[0], 1) + voxel_graph_data["far"]
+            voxel_graph_floor_levels_normalized = voxel_graph_data["voxel_graph_floor_levels_normalized"].unsqueeze(0).t()
+
+            self.x = torch.cat(
+                [
+                    voxel_graph_features,
+                    voxel_graph_far_per_node,
+                    voxel_graph_floor_levels_normalized,
+                ],
+                dim=1,
+            )
+
+            self.data_number = voxel_graph_data["data_number"]
+            self.voxel_graph_types = voxel_graph_data["voxel_graph_types"]
+            self.voxel_graph_types_onehot = voxel_graph_types_onehot
+            self.edge_index = voxel_graph_data["voxel_graph_edge_indices"]
+            self.voxel_graph_floor_levels = voxel_graph_data["voxel_graph_floor_levels"]
+            self.voxel_graph_node_coordinate = voxel_graph_data["voxel_graph_node_coordinate"]
+            self.voxel_graph_node_dimension = voxel_graph_data["voxel_graph_node_dimension"]
+            self.voxel_graph_location = voxel_graph_data["voxel_graph_location"]
+            self.voxel_graph_node_ratio = voxel_graph_types_onehot * voxel_graph_data["voxel_graph_node_ratio"]
+            self.voxel_graph_node_ratio = self.voxel_graph_node_ratio.max(dim=1)[0].unsqueeze(1)
+</code></pre>
+
+<br><br>
+
+    Here, since PyTorch Geometric is used for training models with graphs, 
+    node features and the connectivity between nodes are represented as <code>x</code> and <code>edge_index</code>, respectively.
+
+    Each graph is instantiated by <code>Data</code> of PyTorch Geometric.
+    The raw data, excluding <code>x</code> and <code>edge_index</code>, can also be passed as kwargs to be used during training or evaluation.
+    The thing to note is that, in training with graphs, mini-batching is performed at the node level. 
+    Therefore, you must ensure that each data field matches the number of nodes; otherwise, problems may occur during batching.
+
+<pre><code class="python">
+    class GraphDataset(Dataset):
+        def __init__(self, configuration: Configuration):
+            super().__init__()
+            self.configuration = configuration
+            
+            (...)
+
+            self.voxel_graph_data = []
+            for local_graph_file, voxel_graph_file in zip(self.local_graph_data_files, self.voxel_graph_data_files):
+                assert local_graph_file.split("/")[-1].split("_")[0] == voxel_graph_file.split("/")[-1].split("_")[0]
+                
+                (...)
+    
+                voxel_graph = torch.load(voxel_graph_file)
+                self.voxel_graph_data.append(
+                    Data(
+                        x=voxel_graph.x,
+                        edge_index=voxel_graph.edge_index,
+                        voxel_level=voxel_graph.voxel_graph_floor_levels,
+                        type=voxel_graph.voxel_graph_types,
+                        types_onehot=voxel_graph.voxel_graph_types_onehot,
+                        coordinate=voxel_graph.voxel_graph_node_coordinate,
+                        dimension=voxel_graph.voxel_graph_node_dimension,
+                        location=voxel_graph.voxel_graph_location,
+                        node_ratio=voxel_graph.voxel_graph_node_ratio,
+                        data_number=[voxel_graph.data_number] * voxel_graph.x.shape[0],
+                    )
+                )
+    
+        def __getitem__(self, i):
+            return self.local_graph_data[i], self.voxel_graph_data[i]
+    
+        def __len__(self):
+            return len(self.local_graph_data)
+</code></pre>
+    <br><br>
+
+    If you are curious about how to convert voxels into a graph at the code level, 
+    you can check the detailed logic through the following <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py">link</a>.
+
+</div><br><br>
+
+<h3>Modeling</h3>
+<div class="article">
+
+    The GNN model can be broadly divided into link prediction and node classification tasks.
+    <!-- 
+
+        gnn 모델은 크게 link pred, node pred 태스크로 구분될 수 있다. 
+        여기서는 local graph와 voxel graph가 주어졌을 때 개별 복셀이 가져야 할 노드를 생성하는 것이므로 node pred에 해당한다.
+
+        voxel-wise node class prediction
+        matched_x, voxel-wise z concat
+        gumbel softmax
+        sanity checking
+    -->
+</div><br><br>
+
+<h3>Training</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Qualitative Evaluation</h3>
+<div class="article">
+</div><br><br>
+
+<h3>References</h3>
+<div class="article">
+    <ul>
+        <li>
+            <a href="https://arxiv.org/pdf/2104.13316">https://arxiv.org/pdf/2104.13316</a>
+        </li>
+        <li>
+            <a href="https://arxiv.org/pdf/1406.2661">https://arxiv.org/pdf/1406.2661</a>
+        </li>
+        <li>
+            <a href="https://kaen2891.tistory.com/81">https://kaen2891.tistory.com/81</a>
+        </li>
+    </ul>
+</div><br><br>
+
+<br><br>
