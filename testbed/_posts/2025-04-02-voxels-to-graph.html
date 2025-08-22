@@ -6,7 +6,7 @@ comment: true
 splitter: 1
 featured: false
 inprogress: false
-thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
+thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 ---
 
 <div id="toc"></div>
@@ -19,7 +19,7 @@ thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
     The implementation uses their <a href="https://github.com/AutodeskAILab/Building-GAN?tab=readme-ov-file">dataset</a> to study these approaches.
 
     <figure>
-        <img src="/img/voxel-to-graph/voxel-to-graph-0.gif" width="100%" onerror=handle_image_error(this)>
+        <img src="/img/voxels-to-graph/voxels-to-graph-0.gif" width="100%" onerror=handle_image_error(this)>
         <figcaption>
           Generated Buildings
         </figcaption>
@@ -177,20 +177,26 @@ thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
     The index of each voxel is \(\text{(x, y, z)} \)-shaped structure, and it is unique, so that the index can be converted to \(\text{(0, 1, 2,} \cdot \cdot \cdot \text{, n)} \)-shaped structure.
     As each voxel is a node, the last index of the node is the number of voxels-1.
 
-    Since the voxel is a cuboid-shaped geometry, connectivity between voxel nodes can be determined by the 3D 6-way connectivity.
-    In the figure below, let's see the uppermost voxel with index \(319\) of the right diagram.
-    This voxel's program type is the office type with a blue color, and the voxels located at its bottom (index \(255\)) and right (index \(318\)) also have the same program type, 
-    while the other voxels facing it are empty. 
-
     <br><br>
     
-    The voxel with index \(319\) can be seen as it is connected to indices \(255\) and \(318\).
-    Using this system, two nodes in a graph are considered connected if they have the same program type and are adjacent to each other by the  3D 6-way connectivity system
-    (Also, even if the program types of the two voxels are not the same, they can be connected by common spaces such as a corridor, a lobby, and an elevator).
-    Therefore, using the adjacency list representation, it can be expressed as \(\text{319: [255, 318]}\).
+    Since the voxel is a cuboid-shaped geometry, connectivity between voxel nodes can be determined by the 3D 6-way connectivity.
+    In the figure below, let's see the uppermost voxel with index \(319\) of the right diagram.
+    
+    Among the six faces of this voxel, only three (right, front, and bottom) are connected to adjacent voxels.
+    The other faces do not touch any neighboring voxels. According to the 3D 6-way connectivity system, the node with index \(319\) has neighbor nodes with indices \(255\), \(311\), and \(318\).
+    Therefore, using the adjacency list representation, it can be expressed as \(\text{319: [255, 311, 318]}\).
+
+    Similarly, by the same logic, the node with index \(24\) has faces that are adjacent to four voxels located to the left, right, front, and top.
+    Therefore, using the adjacency list representation, it can be expressed as \(\text{24: [16, 25, 32, 88]}\).
+
+    <br><br>
+
+    In this system, <b>the number of neighboring voxel nodes is at least 3 and at most 6</b>, since a voxel is a cuboid-shaped geometry with 6 faces.
+
+    <br><br>
 
     <figure>
-        <img src="/img/voxel-to-graph/voxel-to-graph-1.png" width="100%" onerror=handle_image_error(this)>
+        <img src="/img/voxels-to-graph/voxels-to-graph-1.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Voxel to Graph <br>
             From the left, Unique Index · Adjacency List Representation
@@ -253,6 +259,8 @@ thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
     The thing to note is that, in training with graphs, mini-batching is performed at the node level. 
     Therefore, you must ensure that each data field matches the number of nodes; otherwise, problems may occur during batching.
 
+    <br><br>
+
 <pre><code class="python">
     class GraphDataset(Dataset):
         def __init__(self, configuration: Configuration):
@@ -300,15 +308,76 @@ thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
 <div class="article">
 
     The GNN model can be broadly divided into link prediction and node classification tasks.
+    In the paper, the model generates voxels given a local graph and a voxel graph, so the task corresponds to node prediction.
+    
+    <!-- 
+        학습 구조는 아래 다이어그램으로 간단히 나타낼 수 있습니다. 기본적으로 gan 구조를 따르며, generator와 discriminator는 GNN이 기반입니다.
+
+        일반적으로 wgan-gp 구조에서 Wasserstein 손실 + GP를 사용하거나, bce만 사용하지만 학습이 되지 않아서 bce+gp 를 결합하여 학습해보니 학습이 더 잘되어 임의로 설정한 구조임. 
+    -->
+
+    
+    <figure>
+        <img src="/img/voxels-to-graph/voxels-to-graph-2.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+          Generated Buildings
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+<pre><code class="python">
+    class VoxelGNNGenerator(nn.Module):
+        def __init__(self, configuration: Configuration):
+            super().__init__()
+
+            (...)
+
+        def forward(self, local_graph, voxel_graph, z):
+            device = local_graph.x.device
+
+            matched_x = torch.zeros((voxel_graph.x.shape[0], local_graph.x.shape[1]), device=device)
+
+            for type_idx in torch.unique(voxel_graph.type):
+                voxel_mask = voxel_graph.type == type_idx
+                local_mask = local_graph.type == type_idx
+
+                if local_mask.sum() > 0:
+                    matched_x[voxel_mask] = local_graph.x[local_mask].mean(dim=0)
+
+            encoded_local = self.local_graph_encoder(matched_x.to(self.local_graph_encoder[0].weight.device))
+            combined_features = torch.cat(
+                [encoded_local, voxel_graph.x.to(encoded_local.device), z.squeeze(0).to(encoded_local.device)], dim=-1
+            )
+
+            x = self.mlp_encoder(combined_features)
+            encoded = self.encoder(x=x, edge_index=voxel_graph.edge_index)
+
+            final_features = torch.cat([encoded, x, encoded_local, voxel_graph.x, z.squeeze(0)], dim=-1)
+
+            logits = self.decoder(final_features)
+
+            label_soft = torch.nn.functional.gumbel_softmax(logits, tau=1.0)
+            label_hard = torch.zeros_like(label_soft)
+            label_hard.scatter_(-1, label_soft.argmax(dim=1, keepdim=True), 1.0)
+            label_hard = label_hard - label_soft.detach() + label_soft
+
+            return logits, label_hard, label_soft
+</code></pre>
     <!-- 
 
-        gnn 모델은 크게 link pred, node pred 태스크로 구분될 수 있다. 
-        여기서는 local graph와 voxel graph가 주어졌을 때 개별 복셀이 가져야 할 노드를 생성하는 것이므로 node pred에 해당한다.
+        모델은 generator와 discriminator로 구성됩니다. 공통적으로 local graph와 voxel graph를 입력으로 사용하고, 
+        추가적으로 generator는 noise z를 discriminator는 generator가 만들어낸 voxel graph의 node class를 입력으로 받습니다. 
+        
+
 
         voxel-wise node class prediction
-        matched_x, voxel-wise z concat
+        matched_x, voxel-wise z concat (복셀 컨디션이 같더라도 다른 주어진 조건들에 의해서 결과가 달라져야할 수 있으므로 noise를 통해 표현력을 높이려는 의도같음)
         gumbel softmax
         sanity checking
+
+
+
     -->
 </div><br><br>
 
@@ -327,10 +396,16 @@ thumbnail: /img/voxel-to-graph/voxel-to-graph-thumbnail.gif
             <a href="https://arxiv.org/pdf/2104.13316">https://arxiv.org/pdf/2104.13316</a>
         </li>
         <li>
+            <a href="https://www.youtube.com/watch?v=eA4aBKKjiCk">https://www.youtube.com/watch?v=eA4aBKKjiCk</a>
+        </li>
+        <li>
             <a href="https://arxiv.org/pdf/1406.2661">https://arxiv.org/pdf/1406.2661</a>
         </li>
         <li>
             <a href="https://kaen2891.tistory.com/81">https://kaen2891.tistory.com/81</a>
+        </li>
+        <li>
+            <a href="https://blog.naver.com/qbxlvnf11/223168163836">https://blog.naver.com/qbxlvnf11/223168163836</a>
         </li>
     </ul>
 </div><br><br>
