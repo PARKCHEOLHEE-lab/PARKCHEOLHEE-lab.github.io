@@ -319,6 +319,16 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
     <!-- 
         학습 구조는 아래 다이어그램으로 간단히 나타낼 수 있습니다. 기본적으로 gan 구조를 따르며, generator와 discriminator는 GNN이 기반입니다.
 
+        당신의 구조: class는 생성 산출물, D는 “geometry와 이 label이 진짜 조합인가?”를 판별.
+
+        Discriminator가 라벨을 입력으로 받는 건 “무의미”가 아니라, “geometry–label 조합이 진짜인가?”를 학습하는 데 꼭 필요합니다.
+
+        따라서 현재 구조는 ACGAN이 아니라, Label-as-Output GAN이라 할 수 있고, 이 경우 G의 CE 보조 손실은 학습 안정성을 높이는 좋은 선택입니다.
+
+        논문에서 제공하는 데이터는 120,000개 이지만 모두 학습하기에는 gpu가 충분하지 않으므로 6000개의 데이터만 사용하여 학습했다. 
+
+        
+
         일반적으로 wgan-gp 구조에서 Wasserstein 손실 + GP를 사용하거나, bce만 사용하지만 학습이 되지 않아서 bce+gp 를 결합하여 학습해보니 학습이 더 잘되어 임의로 설정한 구조임. 
     -->
 
@@ -408,6 +418,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         </li>
         <li>
             <a href="https://arxiv.org/pdf/1406.2661">https://arxiv.org/pdf/1406.2661</a>
+        </li>
+        <li>
+            <a href="https://arxiv.org/pdf/1610.09585">https://arxiv.org/pdf/1610.09585</a>
         </li>
         <li>
             <a href="https://kaen2891.tistory.com/81">https://kaen2891.tistory.com/81</a>
