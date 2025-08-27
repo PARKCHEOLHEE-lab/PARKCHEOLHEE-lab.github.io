@@ -329,16 +329,22 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 
     <br><br>
 
-    The detailed code of VoxelGNNGenerator is as follows. 
+    The detailed code of VoxelGNNGenerator is as follows.
+    The very first step in the generator's forward pass is to compute <code>matched_x</code>,
+    which is matched by combining features from the local graph and the voxel graph.
+
+    The local graph is a bubble diagram that abstractly represents the building's spatial composition, 
+    so it and the voxel graph have different numbers of nodes and cannot be matched 1:1.
+    Therefore, their features are combined by aggregating nodes of the same type, using averaging.
+
+    <br><br>
+
+
     
     <!-- 
 
-        generator의 forward pass는 다음과 같습니다. 
+        이후 인코더 모듈에 통과시켜 
 
-        먼저 local graph의 feature와 voxel graph의 feature를 결합시킨 matched_x를 계산합니다. 
-        local graph는 건축가들이 건물이 어떤 공간구성을 갖게 될지에 대해 표현한 bubble diagram으로서 건물의 추상적 표현이라고 볼 수 있습니다.
-        따라서 voxel graph와 1:1로 매칭될수는 없고 feature의 shape과 노드의 개수가 다르므로 동일한 타입의 노드를 평균을 사용하여 결합시켜줍니다. 
-        
         matched_x, voxel-wise z concat (복셀 컨디션이 같더라도 다른 주어진 조건들에 의해서 결과가 달라져야할 수 있으므로 noise를 통해 표현력을 높이려는 의도같음)
 
 
