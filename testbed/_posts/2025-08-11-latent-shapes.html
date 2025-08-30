@@ -11,7 +11,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
 <div id="toc"></div>
 
-<h3>Introduction</h3>
+<h3>Objectives</h3>
 <div class="article">
 
   
@@ -23,7 +23,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
   This project takes inspiration from this <a href="https://parkcheolhee-lab.github.io/latent-points/">perspective</a> and explores two main conceptions:
   <strong>1) Latent vectors with geometric shape ─</strong> exploring what happens if we give the latent vectors a geometric structure, and how that might help us better understand or control the results;
-  <strong>2) Interactive manipulation using the latent vector ─</strong> making it possible for people to easily change and play with the latent vectors, so they can see and understand the effects right away and create new shapes or designs interactively.
+  <strong>2) Interactive manipulation using the latent vector ─</strong> making it possible for people to easily change and play with the latent vectors, <mark>so they can see and understand the effects right away and create new shapes or designs interactively.</mark>
 
   <br><br>
 
@@ -35,7 +35,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
   </figure>
 </div><br><br>
 
-<h3>Data Preparation</h3>
+<h3>Data Preprocessing</h3>
 <div class="article">
     This project is based on the chair dataset (03001627) from ShapeNetCore. You can access the original data <a href="https://huggingface.co/datasets/ShapeNet/ShapeNetCore">here</a>.
   <!--break-->
@@ -94,7 +94,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
 </div><br><br>
 
-<h3>Architecture</h3>
+<h3>Model Architecture</h3>
 <div class="article">
 
     The training target to optimize consists of <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/model.py#L36-L155">SDFDecoder</a> and the LatentShapes. 
@@ -121,7 +121,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
                 assert torch.all(self.noise >= noise_min)
                 assert torch.all(self.noise <= noise_max)
 
-            # initialize latent shapes with noise
+            # initialize latent shapes with noise to multi-vector embeddings
             self.embedding = nn.Parameter(latent_shapes + self.noise)
 
         def forward(self, class_number: torch.Tensor) -> torch.Tensor:
@@ -159,7 +159,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
 </div><br><br>
 
-<h3>Training Models</h3>
+<h3>Training & Memory Strategy</h3>
 <div class="article">
 
     In this project, NVIDIA GeForce RTX 4090 is used to train models for 120 epochs using only \(50\) chairs of data. 
@@ -292,7 +292,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
 </div><br><br>
 
-<h3>Qualitative Evaluation</h3>
+<h3>Reconstruction & Linear Interpolation</h3>
 <div class="article">
 
     The following figure shows the results of reconstructing 50 trained chairs using latent shape embeddings and the decoder (the marching cubes algorithm was applied at a resolution of \(192^3\)).
@@ -311,7 +311,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
     The data on the left and right represent the inputs to be interpolated, while the center shows the result interpolated according to the specified ratios. 
     The following ratios were used \( \text{[[0.50, 0.50], [0.30, 0.70], [0.60, 0.40], [0.45, 0.55]]} \).
 
-    Although this approach is effective for data generation, it remains difficult to predict the specific changes that occur when only a portion of the latent vector is manipulated. 
+    Although this approach is effective for data interpolation, it remains difficult to predict the specific changes that occur when only a portion of the latent vector is manipulated. 
     Particularly, it isn't easy to predict which components of the vector correspond to specific geometric parts.
     
     <figure>
@@ -328,7 +328,7 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
 </div><br><br>
 
-<h3>Interactive Manipulation</h3>
+<h3>Interactive Manipulation UI</h3>
 <div class="article">
 
     <!-- 
