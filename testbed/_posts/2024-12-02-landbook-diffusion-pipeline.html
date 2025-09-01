@@ -417,6 +417,87 @@ ensures consistent material appearances across different surfaces of the buildin
 and fine-tunes architectural details to maintain design accuracy. 
 These refinements work together to produce a final visualization that is both architecturally accurate and visually compelling.
 
+<br><br>
+
+<pre><code class="python">
+
+    class EndpointHandler(configs.Configurations, EndpointHandlerHelper):
+
+        (...)
+
+        def __call__(self, data):
+
+            (...)
+            
+            with torch.inference_mode():
+            logging.info("##################################### Generating Image ...")
+            generated_image = self.pipeline(
+                image=image,
+                generator=generator,
+                prompt=self.prompt_positive_base.replace("<>", data["prompt_material"]),
+                negative_prompt=self.prompt_negative,
+                num_inference_steps=self.num_inference_steps,
+                guidance_scale=self.guidance_scale,
+                controlnet_conditioning_scale=self.controlnet_conditioning_scale,
+            ).images[0]
+            
+            self._cleanup()
+
+            logging.info("##################################### Inpainting Image ...")
+            for order in self.inpainting_order:
+                generated_image = self._inpaint(
+                    generator=generator,
+                    image_to_inpaint=generated_image,
+                    material_image=material_image,
+                    canny_image=canny_image,
+                    size=base_image.size,
+                    order=order,
+                    data=data,
+                    configs=copy.deepcopy(self.inpainting_configs),
+                )
+                
+                self._cleanup()
+            
+            self._cleanup()
+            
+            logging.info("##################################### Refining Image ... ")
+            generated_image = self.refine_pipeline(
+                image=generated_image,
+                prompt=self.refining_prompt_positive,
+                prompt_negative=self.refining_prompt_negative,
+                num_inference_steps=int(self.refining_num_inference_steps / self.refining_strength),
+                guidance_scale=self.refining_guidance_scale,
+                strength=self.refining_strength,
+                generator=generator,
+                aesthetic_score=self.refining_aesthetic_score,
+                negative_aesthetic_score=self.refining_negative_aesthetic_score,
+            ).images[0]
+                
+            self._cleanup()
+            
+            logging.info("##################################### Reducing saturation ... ")
+            mask_islands_image = self._create_mask_islands(surrounding_buildings_mask)
+            for mask_island in mask_islands_image:
+                interpolation_factor = torch.rand(1, generator=generator, device=generator.device).item()
+                saturation_factor = (1 - interpolation_factor) * self.saturation_low + interpolation_factor * self.saturation_high
+                generated_image = self._reduce_saturation(
+                    generated_image, 
+                    mask_island, 
+                    factor=saturation_factor
+                )
+
+            buffered = BytesIO()
+            generated_image.save(buffered, format="PNG")
+            img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+            if self.save_config_path is not None:
+            self._save_config(seed, self.save_config_path)
+
+            logging.info("##################################### Image generation is completed! ")
+
+            return {"res": img_base64, "error": None}
+</code></pre>
+
 </div><br><br>
 
 <h3>Results</h3>
