@@ -9,7 +9,14 @@
     {% if include.post.last_modified_at %}
       {{ include.post.last_modified_at }}
     {% elsif include.post.at %}
-      {{ include.post.date | date: date_format }} <i>@ {{ include.post.at }}</i>
+      {{ include.post.date | date: date_format }} 
+      <i>
+        {% if include.post.at == "Spacewalk" %}
+          <a  style="color: #66a1ff;" href="https://spacewalk.tech/" target="_blank" rel="noopener">＠ {{ include.post.at }}</a>
+        {% else %}
+          ＠ {{ include.post.at }}
+        {% endif %}
+      </i>
     {% else %}
       {{ include.post.date | date: date_format }}
     {% endif %}
