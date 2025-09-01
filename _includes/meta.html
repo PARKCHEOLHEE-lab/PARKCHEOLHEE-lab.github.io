@@ -8,6 +8,8 @@
   <time datetime="{{ include.post.date | date_to_xmlschema }}">
     {% if include.post.last_modified_at %}
       {{ include.post.last_modified_at }}
+    {% elsif include.post.at %}
+      {{ include.post.date | date: date_format }} <i>@ {{ include.post.at }}</i>
     {% else %}
       {{ include.post.date | date: date_format }}
     {% endif %}
