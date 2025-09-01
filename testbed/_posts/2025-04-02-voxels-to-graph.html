@@ -1,7 +1,7 @@
 ---
 title: "Voxels to Graph"
 layout: post
-hashtag: "#graph #gnn #building-gan"
+hashtag: "#graph #gnn #building-gan #voxel"
 comment: true
 splitter: 1
 featured: false
@@ -52,7 +52,7 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
     <ol>
         <li>
             <strong>graph_global_*.json</strong>: 
-            contains the FAR (Floor Area Ratio), program ratios, and program types (6 program types described above + void type).
+            contains the FAR (Floor Area Ratio), site area (Total land area to build a building), program ratios, and program types (6 program types described above + void type).
 
 <pre><code class="json">
     {
@@ -305,12 +305,12 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 
 </div><br><br>
 
-<h3>Modeling</h3>
+<h3>VoxelGNNs</h3>
 <div class="article">
 
     The GNN model can be broadly divided into link prediction and node classification tasks.
-    In the paper, the model generates voxels given a local graph and a voxel graph, so the task corresponds to <strong>node prediction</strong>.
-    The diagram below provides a brief illustration of the training process. The process follows a GAN architecture, in which both the generator and discriminator are based on Graph Neural Networks.
+    In the paper, the model generates a building consisting of voxels with labels given a local graph and a voxel graph, so the task corresponds to <strong>node prediction</strong>.
+    The diagram below provides a brief illustration of the training process. The process follows a WGAN-GP architecture, in which both the generator and discriminator are based on Graph Neural Networks.
 
     <br><br>
 
@@ -337,46 +337,21 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
     The local graph is a bubble diagram that abstractly represents the building's spatial composition, 
     so it and the voxel graph have different numbers of nodes and cannot be matched 1:1.
     Therefore, their features are combined by aggregating nodes of the same type, using averaging.
+    In this way, <strong>the features of the local graph nodes are abstractly combined for each type of voxel node</strong>.
 
     <br><br>
 
+    Then, the abstractly combined graph features are passed through the <code>matched_features_encoder</code> module for encoding.
+    Next, these encoded matched features are concatenated with the original voxel graph features and the noise vector <code>z</code> to create <code>combined_features</code>.
 
-    
-    <!-- 
+    This concatenation serves multiple purposes:
+    the voxel graph features <strong>preserve the geometric details</strong>, 
+    and the noise vector <code>z</code> enables the model to <strong>produce diverse outputs even with the same conditions.</strong>
 
-        이후 인코더 모듈에 통과시켜 
+    <br><br>
 
-        matched_x, voxel-wise z concat (복셀 컨디션이 같더라도 다른 주어진 조건들에 의해서 결과가 달라져야할 수 있으므로 noise를 통해 표현력을 높이려는 의도같음)
-
-
-        당신의 구조: class는 생성 산출물, D는 “geometry와 이 label이 진짜 조합인가?”를 판별.
-
-        Discriminator가 라벨을 입력으로 받는 건 “무의미”가 아니라, “geometry–label 조합이 진짜인가?”를 학습하는 데 꼭 필요합니다.
-
-        따라서 현재 구조는 ACGAN이 아니라, Label-as-Output GAN이라 할 수 있고, 이 경우 G의 CE 보조 손실은 학습 안정성을 높이는 좋은 선택입니다.
-
-        논문에서 제공하는 데이터는 120,000개 이지만 모두 학습하기에는 gpu가 충분하지 않으므로 6000개의 데이터만 사용하여 학습했다. 
-
-        
-
-        일반적으로 wgan-gp 구조에서 Wasserstein 손실 + GP를 사용하거나, bce만 사용하지만 학습이 되지 않아서 bce+gp 를 결합하여 학습해보니 학습이 더 잘되어 임의로 설정한 구조임. 
-    -->
-
-    
-    <!-- 
-
-        모델은 generator와 discriminator로 구성됩니다. 공통적으로 local graph와 voxel graph를 입력으로 사용하고, 
-        추가적으로 generator는 noise z를 discriminator는 generator가 만들어낸 voxel graph의 node class를 입력으로 받습니다. 
-        
-
-
-        voxel-wise node class prediction
-        gumbel softmax
-        sanity checking
-
-
-
-    -->
+    The <code>combined_features</code> are then passed through the <code>mlp_encoder</code> to produce encoded graph features, which serve as the input to the <code>encoder</code> of VoxelGNNGenerator.
+    The encoder performs message passing using the voxel graph's edge connections to generate node embeddings.
 
     <br><br>
 
@@ -389,43 +364,164 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 
         def forward(self, local_graph, voxel_graph, z):
             device = local_graph.x.device
-
+    
             matched_x = torch.zeros((voxel_graph.x.shape[0], local_graph.x.shape[1]), device=device)
-
+    
             for type_idx in torch.unique(voxel_graph.type):
                 voxel_mask = voxel_graph.type == type_idx
                 local_mask = local_graph.type == type_idx
-
+    
                 if local_mask.sum() > 0:
                     matched_x[voxel_mask] = local_graph.x[local_mask].mean(dim=0)
-
-            encoded_local = self.local_graph_encoder(matched_x.to(self.local_graph_encoder[0].weight.device))
-            combined_features = torch.cat(
-                [encoded_local, voxel_graph.x.to(encoded_local.device), z.squeeze(0).to(encoded_local.device)], dim=-1
+    
+            encoded_matched_features = self.matched_features_encoder(
+                matched_x.to(self.matched_features_encoder[0].weight.device)
             )
-
+    
+            combined_features = torch.cat(
+                [
+                    encoded_matched_features, 
+                    voxel_graph.x.to(encoded_matched_features.device), 
+                    z.squeeze(0).to(encoded_matched_features.device)
+                ], dim=-1
+            )
+    
             x = self.mlp_encoder(combined_features)
             encoded = self.encoder(x=x, edge_index=voxel_graph.edge_index)
-
-            final_features = torch.cat([encoded, x, encoded_local, voxel_graph.x, z.squeeze(0)], dim=-1)
-
+    
+            final_features = torch.cat([encoded, x, encoded_matched_features, voxel_graph.x, z.squeeze(0)], dim=-1)
+    
             logits = self.decoder(final_features)
 
+            # https://github.com/AutodeskAILab/Building-GAN/blob/master/util.py
             label_soft = torch.nn.functional.gumbel_softmax(logits, tau=1.0)
             label_hard = torch.zeros_like(label_soft)
             label_hard.scatter_(-1, label_soft.argmax(dim=1, keepdim=True), 1.0)
             label_hard = label_hard - label_soft.detach() + label_soft
-
+    
             return logits, label_hard, label_soft
 </code></pre>
+
+
+    <br><br>
+
+    Finally, the model creates <code>final_features</code> by concatenating the encoded output with all previous feature representations: 
+    the encoder output, the initial combined features, the encoded matched features, the original voxel features, and the noise vector.
+    This rich feature representation is passed through a decoder to produce <code>logits</code> for each voxel's class prediction.
+
+    <br><br>
+
+    In this project, auxiliary losses are used in addition to WGAN-GP: calculating the FAR of the building generated by the model and the ratio of voxel types.
+    For this purpose, the <code>logits</code> need to be converted to hard labels, but using simple argmax would break the gradient, so <strong>Gumbel Softmax</strong> is used.
+
+    \[
+        y_i = \frac{\exp( ( \log(\pi_i) + g_i ) / \tau)}{\sum_{j=1}^{K} \exp( ( \log(\pi_j) + g_j ) / \tau)}
+    \]
+
+    <br>
+
+    The temperature parameter \(\tau\) controls how discrete the output is: 
+    when \(\tau\) is close to \(0\), the output becomes like a one-hot vector (hard), 
+    when \(\tau = 1.0\) the output is soft, and when \(\tau\) approaches \(\infty\), the output becomes almost uniform.
+
+
+    <!--
+        여기서 \tau 값이  0에 가까울 수록 onehot vector에 가까워지고 1.0이면 soft, inf이면 거의 uniform distribution가 됨
+    -->
+        <!--
+    -->
+
+    <br>
+
+
+    <br><br>
+    
+    <!-- 
+
+        generator의 로스는 다음과 같이 계산된다 .....
+
+        lambda는 각각 1.0, 0.0, .... 이 사용됐다.
+ 
+        논문에서 제공하는 데이터는 120,000개 이지만 모두 학습하기에는 gpu가 충분하지 않으므로 6000개의 데이터만 사용하여 학습했다. 
+
+    -->
+
+    
+<pre><code class="python">
+    def _compute_generator_loss(self, local_graph, voxel_graph, logits, label_hard):
+
+        d_fake = self.discriminator(local_graph, voxel_graph, label_hard)
+        if self.configuration.USE_WGANGP:
+            g_loss_adv = -d_fake.mean()
+        
+        else:
+            g_loss_adv = torch.nn.functional.binary_cross_entropy(d_fake, torch.ones_like(d_fake))
+            
+        g_loss_adv *= self.configuration.LAMBDA_ADV
+        
+        g_loss_label = torch.nn.functional.cross_entropy(logits, voxel_graph.type)
+        g_loss_label *= self.configuration.LAMBDA_LABEL
+
+        label_ratio_g = label_hard.squeeze(0).sum(dim=0) / voxel_graph.num_nodes
+        label_ratio = voxel_graph.types_onehot.sum(dim=0) / voxel_graph.num_nodes
+
+        g_loss_ratio = torch.nn.functional.l1_loss(label_ratio_g[:-2], label_ratio[:-2])
+        g_loss_ratio *= self.configuration.LAMBDA_RATIO
+
+        g_loss_ratio_voids = torch.nn.functional.l1_loss(label_ratio_g[-2:], label_ratio[-2:])
+        g_loss_ratio_voids *= self.configuration.LAMBDA_RATIO_VOID
+        
+        voxel_types_generated = label_hard.squeeze(0).argmax(dim=1)
+            
+        far_unique = []
+        far_unique_generated = []
+
+        si = 0
+        for gi in range(voxel_graph.num_graphs):
+            each_voxel_graph = voxel_graph[gi]
+            each_far = each_voxel_graph.x[0][9]
+            each_dimension = each_voxel_graph.x[:, 3:6] * self.configuration.NORMALIZATION_FACTOR_DIMENSION
+            
+            ei = si + each_voxel_graph.num_nodes
+            each_voxel_types_generated = voxel_types_generated[si:ei]
+            each_dimension_to_use = each_dimension[each_voxel_types_generated != self.configuration.VOID]
+            
+            each_gfa = (each_dimension_to_use[:, 1] * each_dimension_to_use[:, 2]).sum()
+            each_far_generated = each_gfa / each_voxel_graph.site_area[0]
+            
+            far_unique.append(each_far)
+            far_unique_generated.append(each_far_generated)
+            
+            si = ei
+            
+        g_loss_far = torch.nn.functional.l1_loss(torch.tensor(far_unique_generated), torch.tensor(far_unique))
+        g_loss_far *= self.configuration.LAMBDA_FAR
+        
+        g_loss = g_loss_adv + g_loss_ratio + g_loss_label + g_loss_ratio_voids + g_loss_far
+        
+        return g_loss
+</code></pre>
+
+    <!-- 
+     
+    -->
+
 </div><br><br>
 
 <h3>Training</h3>
 <div class="article">
 </div><br><br>
 
-<h3>Qualitative Evaluation</h3>
+<h3>Building Generation</h3>
 <div class="article">
+</div><br><br>
+
+<h3>Next Steps</h3>
+<div class="article">
+    <!-- 
+    - 일조사선 
+    - FID score
+     -->
 </div><br><br>
 
 <h3>References</h3>
@@ -433,6 +529,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
     <ul>
         <li>
             <a href="https://arxiv.org/pdf/2104.13316">https://arxiv.org/pdf/2104.13316</a>
+        </li>
+        <li>
+            <a href="https://github.com/AutodeskAILab/Building-GAN">https://github.com/AutodeskAILab/Building-GAN</a>
         </li>
         <li>
             <a href="https://www.youtube.com/watch?v=eA4aBKKjiCk">https://www.youtube.com/watch?v=eA4aBKKjiCk</a>
@@ -448,6 +547,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         </li>
         <li>
             <a href="https://blog.naver.com/qbxlvnf11/223168163836">https://blog.naver.com/qbxlvnf11/223168163836</a>
+        </li>
+        <li>
+            <a href="https://haawron.tistory.com/21">https://haawron.tistory.com/21</a>
         </li>
     </ul>
 </div><br><br>
