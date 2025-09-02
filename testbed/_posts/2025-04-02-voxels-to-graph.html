@@ -13,13 +13,18 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 
 <h3>Introduction 🔗</h3>
 <div class="article">
-    This project explores the key contributions of <a href="https://arxiv.org/pdf/2104.13316">Building-GAN</a> by AutodeskAILab: 
-    1) a novel 3D representation called <strong>voxel graph</strong> that can encode <strong>irregular voxel grids</strong> with non-uniform space partitioning, overcoming limitations of traditional regular voxel grids, and 
+    This project <mark>explores the key contributions of <a href="https://arxiv.org/pdf/2104.13316">Building-GAN</a> by AutodeskAILab: 
+    1) a novel 3D representation called <strong>voxel graph</strong> that can encode <strong>irregular voxel grids</strong></mark> with non-uniform space partitioning, overcoming limitations of traditional regular voxel grids, and 
     2) a graph-conditioned generative adversarial network (GAN) leveraging graph neural networks (GNNs). 
     The implementation uses their <a href="https://github.com/AutodeskAILab/Building-GAN?tab=readme-ov-file">dataset</a> to study these approaches.
+    First, let's examine the structure of the raw data in the next section.
 
     <figure>
-        <img src="/img/voxels-to-graph/voxels-to-graph-0.gif" width="100%" onerror=handle_image_error(this)>
+        <div style="width:100%; overflow:hidden; display:flex; justify-content:center;">
+            <img src="/img/voxels-to-graph/voxels-to-graph-0.gif" 
+                 style="width:110%; max-width:none; margin-left:-10%; margin-right:-10%;" 
+                 onerror="handle_image_error(this)">
+        </div>
         <figcaption>
           Generated Buildings
         </figcaption>
@@ -519,6 +524,7 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 <h3>Next Steps</h3>
 <div class="article">
     <!-- 
+    - building generation interface implementation
     - 일조사선 
     - FID score
      -->
