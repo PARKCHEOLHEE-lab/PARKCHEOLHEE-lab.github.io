@@ -1,0 +1,163 @@
+---
+title:  "likelihood"
+layout: post
+---
+
+
+<ul>
+    <li>
+        Likelihood
+        <ul>
+            <li>
+                Likelihood is a function or measurement that evaluates how well a set of observed data is explained by a model or parameter.
+            </li>
+            <li>
+                example: there are two boxes \(\text{A, B}\), which contain the following balls, respectively:
+                <br>
+
+                <div style="display: flex; justify-content: center; align-items: center; margin: 20px 0;">
+                    <canvas style="padding-top: 0em; padding-bottom: 0em;" id="boxDiagram" width="800" height="230"></canvas>
+                </div>
+
+            </li>
+            <li>
+                For the observed data \(\vcenter{\hbox{$\Huge \bullet$}}\), likelihoods are:
+                \[
+                    
+                    L ( \text{A} \,|\, \vcenter{\hbox{$\Huge \bullet$}} ) = P ( \vcenter{\hbox{$\Huge \bullet$}} \,|\, \text{A} ) = 1/2 \quad \quad
+                    L ( \text{B} \,|\, \vcenter{\hbox{$\Huge \bullet$}} ) = P ( \vcenter{\hbox{$\Huge \bullet$}} \,|\, \text{B} ) = 2/3
+                \] 
+            </li>
+            <br>
+            <li>
+                Here, the vertical axis represents the probability of each possible observation under a fixed distribution.
+                The horizontal axis represents the likelihood, that is, how well an observed datum is explained when evaluated under different models or parameter values.
+                \[
+                    \begin{array}{l}
+                    \quad P ( \vcenter{\hbox{$\Huge \bullet$}} \,|\, \text{A} ) = 1/2 \quad \quad P ( \vcenter{\hbox{$\Huge \bullet$}} \,|\, \text{B} ) = 2/3 \,\bigg\} \text{likelihood} \\
+                    \underbrace{\quad P(\bigcirc \mid \text{A}) = 1/2 \quad}_{\text{probability}} \quad P(\bigcirc \mid \text{B}) = 1/3
+                    \end{array}
+                \]
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<figure>
+    <img src="/img/likelihood/likelihood.png" width="100%" onerror=handle_image_error(this)>
+</figure>
+
+<br><br>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const canvas = document.getElementById("boxDiagram");
+    const ctx = canvas.getContext("2d");
+
+    const ball_size = 12;
+    const font_size = 25;
+    const font = font_size + "px PT Sans";
+    
+    const center_x = canvas.width / 2;
+    const box_width = 150;
+    const box_height = 120;
+    const box_spacing = 200;
+    const box_entrance_width = 30
+    
+    const box_a_x = center_x - box_spacing / 2 - box_width / 2;
+    const box_a_y = 40;
+    
+    const box_b_x = center_x + box_spacing / 2 - box_width / 2;
+    const box_b_y = 40;
+
+    const color_black = "#000000";
+    const color_white = "#ffffff";
+    const text_align = "center";
+    const line_width = 2;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = color_black;
+    ctx.lineWidth = line_width;
+    ctx.strokeRect(box_a_x, box_a_y, box_width, box_height);
+    
+    ctx.strokeStyle = color_white;
+    ctx.strokeRect(box_a_x + box_width / 2 - (box_entrance_width / 2), box_a_y, box_entrance_width, box_entrance_width);
+
+    ctx.strokeStyle = color_black;
+    ctx.strokeStyle = color_black;
+    ctx.lineWidth = line_width;
+    ctx.beginPath();
+    ctx.moveTo(box_a_x + box_width / 2 - (box_entrance_width / 2), box_a_y);
+    ctx.lineTo(box_a_x + box_width / 2 - box_entrance_width , box_a_y - box_entrance_width / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(box_a_x + box_width / 2 + (box_entrance_width / 2), box_a_y);
+    ctx.lineTo(box_a_x + box_width / 2 + box_entrance_width , box_a_y - box_entrance_width / 2);
+    ctx.stroke();
+
+    ctx.fillStyle = color_black;
+    ctx.font = font;
+    ctx.textAlign = text_align;
+    ctx.fillText("A", box_a_x + box_width / 2, box_height * 1.6);
+    
+    ctx.fillStyle = color_black;
+    ctx.beginPath();
+    ctx.arc(box_a_x + 45, box_a_y + 60, ball_size, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.fillStyle = color_white;
+    ctx.strokeStyle = color_black;
+    ctx.lineWidth = line_width;
+    ctx.beginPath();
+    ctx.arc(box_a_x + 105, box_a_y + 60, ball_size, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+    
+    ctx.strokeStyle = color_black;
+    ctx.lineWidth = line_width;
+    ctx.strokeRect(box_b_x, box_b_y, box_width, box_height);
+    
+    ctx.strokeStyle = color_white;
+    ctx.strokeRect(box_b_x + box_width / 2 - (box_entrance_width / 2), box_b_y, box_entrance_width, box_entrance_width);
+
+    ctx.strokeStyle = color_black;
+    ctx.strokeStyle = color_black;
+    ctx.lineWidth = line_width;
+    ctx.beginPath();
+    ctx.moveTo(box_b_x + box_width / 2 - (box_entrance_width / 2), box_b_y);
+    ctx.lineTo(box_b_x + box_width / 2 - box_entrance_width , box_b_y - box_entrance_width / 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(box_b_x + box_width / 2 + (box_entrance_width / 2), box_b_y);
+    ctx.lineTo(box_b_x + box_width / 2 + box_entrance_width , box_b_y - box_entrance_width / 2);
+    ctx.stroke();
+    
+    ctx.fillStyle = color_black;
+    ctx.font = font;
+    ctx.textAlign = text_align;
+    ctx.fillText("B", box_b_x + box_width/2, box_height * 1.6);
+    
+    ctx.fillStyle = color_black;
+    ctx.beginPath();
+    ctx.arc(box_b_x + 115, box_b_y + 40, ball_size, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.fillStyle = color_black;
+    ctx.beginPath();
+    ctx.arc(box_b_x + 75, box_b_y + 80, ball_size, 0, 2 * Math.PI);
+    ctx.fill();
+    
+    ctx.fillStyle = color_white;
+    ctx.strokeStyle = color_black;
+    ctx.lineWidth = line_width;
+    ctx.beginPath();
+    ctx.arc(box_b_x + 35, box_b_y + 40, ball_size, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.stroke();
+});
+</script>
+
+<br><br>

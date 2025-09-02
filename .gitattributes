@@ -24,3 +24,4 @@
 /img/latent-shapes/** filter=lfs diff=lfs merge=lfs -text
 /img/eigenvalues-eigenvectors/** filter=lfs diff=lfs merge=lfs -text
 /img/voxels-to-graph/** filter=lfs diff=lfs merge=lfs -text
+/img/likelihood/** filter=lfs diff=lfs merge=lfs -text

@@ -29,9 +29,11 @@ thumbnail: /img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-thumbnai
 
   <br>
 
-  This project is to develop a pipeline that renders the final result of the Landbook AI architect service by using a generative image model such as diffusers.
+  This project is to develop a pipeline that <strong>renders the final result of the Landbook AI architect service by using a generative image model</strong> such as diffusers.
   By taking 3D modeling data as input and generating realistic images that closely resemble actual buildings,
-  it allows building owners to visualize and review what their design proposals would look like when actually constructed.
+  <mark>
+    it allows building owners to visualize and review what their design proposals would look like when actually constructed.
+  </mark>
 
   Unlike conventional 3D rendering, this aims to provide high-quality visualization that considers both the texture of actual buildings
   and their harmony with the surrounding environment by utilizing AI-based generative models.
@@ -422,76 +424,79 @@ These refinements work together to produce a final visualization that is both ar
 <pre><code class="python">
 
     class EndpointHandler(configs.Configurations, EndpointHandlerHelper):
+        def __init__(self, path="", save_config_path=None, existing_config_path=None):
+            
+            self.path = path
+            self.save_config_path = save_config_path
+            self.existing_config_path = existing_config_path
 
-        (...)
+            (...)
 
         def __call__(self, data):
 
             (...)
             
             with torch.inference_mode():
-            logging.info("##################################### Generating Image ...")
-            generated_image = self.pipeline(
-                image=image,
-                generator=generator,
-                prompt=self.prompt_positive_base.replace("<>", data["prompt_material"]),
-                negative_prompt=self.prompt_negative,
-                num_inference_steps=self.num_inference_steps,
-                guidance_scale=self.guidance_scale,
-                controlnet_conditioning_scale=self.controlnet_conditioning_scale,
-            ).images[0]
-            
-            self._cleanup()
-
-            logging.info("##################################### Inpainting Image ...")
-            for order in self.inpainting_order:
-                generated_image = self._inpaint(
+                logging.info("##################################### Generating Image ...")
+                generated_image = self.pipeline(
+                    image=image,
                     generator=generator,
-                    image_to_inpaint=generated_image,
-                    material_image=material_image,
-                    canny_image=canny_image,
-                    size=base_image.size,
-                    order=order,
-                    data=data,
-                    configs=copy.deepcopy(self.inpainting_configs),
-                )
+                    prompt=self.prompt_positive_base.replace("<>", data["prompt_material"]),
+                    negative_prompt=self.prompt_negative,
+                    num_inference_steps=self.num_inference_steps,
+                    guidance_scale=self.guidance_scale,
+                    controlnet_conditioning_scale=self.controlnet_conditioning_scale,
+                ).images[0]
                 
                 self._cleanup()
-            
-            self._cleanup()
-            
-            logging.info("##################################### Refining Image ... ")
-            generated_image = self.refine_pipeline(
-                image=generated_image,
-                prompt=self.refining_prompt_positive,
-                prompt_negative=self.refining_prompt_negative,
-                num_inference_steps=int(self.refining_num_inference_steps / self.refining_strength),
-                guidance_scale=self.refining_guidance_scale,
-                strength=self.refining_strength,
-                generator=generator,
-                aesthetic_score=self.refining_aesthetic_score,
-                negative_aesthetic_score=self.refining_negative_aesthetic_score,
-            ).images[0]
+
+                logging.info("##################################### Inpainting Image ...")
+                for order in self.inpainting_order:
+                    generated_image = self._inpaint(
+                        generator=generator,
+                        image_to_inpaint=generated_image,
+                        material_image=material_image,
+                        canny_image=canny_image,
+                        size=base_image.size,
+                        order=order,
+                        data=data,
+                        configs=copy.deepcopy(self.inpainting_configs),
+                    )
+                    
+                    self._cleanup()
                 
-            self._cleanup()
-            
-            logging.info("##################################### Reducing saturation ... ")
-            mask_islands_image = self._create_mask_islands(surrounding_buildings_mask)
-            for mask_island in mask_islands_image:
-                interpolation_factor = torch.rand(1, generator=generator, device=generator.device).item()
-                saturation_factor = (1 - interpolation_factor) * self.saturation_low + interpolation_factor * self.saturation_high
-                generated_image = self._reduce_saturation(
-                    generated_image, 
-                    mask_island, 
-                    factor=saturation_factor
-                )
+                logging.info("##################################### Refining Image ... ")
+                generated_image = self.refine_pipeline(
+                    image=generated_image,
+                    prompt=self.refining_prompt_positive,
+                    prompt_negative=self.refining_prompt_negative,
+                    num_inference_steps=int(self.refining_num_inference_steps / self.refining_strength),
+                    guidance_scale=self.refining_guidance_scale,
+                    strength=self.refining_strength,
+                    generator=generator,
+                    aesthetic_score=self.refining_aesthetic_score,
+                    negative_aesthetic_score=self.refining_negative_aesthetic_score,
+                ).images[0]
+                    
+                self._cleanup()
+                
+                logging.info("##################################### Reducing saturation ... ")
+                mask_islands_image = self._create_mask_islands(surrounding_buildings_mask)
+                for mask_island in mask_islands_image:
+                    interpolation_factor = torch.rand(1, generator=generator, device=generator.device).item()
+                    saturation_factor = (1 - interpolation_factor) * self.saturation_low + interpolation_factor * self.saturation_high
+                    generated_image = self._reduce_saturation(
+                        generated_image, 
+                        mask_island, 
+                        factor=saturation_factor
+                    )
 
             buffered = BytesIO()
             generated_image.save(buffered, format="PNG")
             img_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
 
             if self.save_config_path is not None:
-            self._save_config(seed, self.save_config_path)
+                self._save_config(seed, self.save_config_path)
 
             logging.info("##################################### Image generation is completed! ")
 
@@ -530,6 +535,69 @@ These refinements work together to produce a final visualization that is both ar
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-11.png" width="32%" onerror=handle_image_error(this)>
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-12.png" width="32%" onerror=handle_image_error(this)>
   </figure>
+</div><br><br>
+
+<h3>Slack Integration for Monitoring & QA</h3>
+
+<div class="article">
+    
+The pipeline integrates with Slack to provide immediate notifications about rendering jobs, 
+including success/failure status, performance metrics, and links to detailed reports. 
+<strong>This allows our team to quickly identify and address any issues with generated image quality that arise during production.</strong>
+
+<pre><code class="python">
+    def send_slack_notification(build_request_logs_unique_code: str, duration: float, ok: bool = True):
+
+        client = WebClient(token=SLACK_TOKEN)
+        
+        with open(os.path.join(current_directory, "landbook-rendering", "package.json")) as f:
+            package_json = json.load(f)
+            landbook_rendering_version = package_json["version"]
+        
+        # Message to notify
+        report_link = f"https://####.########.##/###_#######?##=###&######_####={build_request_logs_unique_code}"
+        message = f"""Landbook Diffusion Notification 💡
+        - version: `{RENDERER_VERSION}`
+        - landbook-rendering version: `{landbook_rendering_version}`
+        - namespace: `{NAMESPACE}`
+        - landbook env: `{LANDBOOK_ENV}`
+        - workflow name: `{WORKFLOW_NAME}`
+        - unique code: `{UNIQUE_CODE}`
+        - labs report link: {report_link}
+        - duration: {duration:.5f} seconds
+        - message: image generation has {"*succeeded* ✅" if ok else "*failed* ❌"}
+        """
+        
+        (...)
+        
+        # Send the used json data
+        json_path = os.path.join(current_directory, "########-#########/#######-#####/####.json")
+        with open(json_path, "rb") as f:
+            client.files_upload_v2(
+                channels=channel_id,
+                file=f,
+                thread_ts=message_response["ts"],
+                title=json_path,
+                filename=json_path
+            )
+        
+        (...)
+
+        # Send the images
+        for image_path in image_paths:
+            with open(image_path, "rb") as f:
+                client.files_upload_v2(
+                    channels=channel_id,
+                    file=f,
+                    thread_ts=message_response["ts"],
+                    title=image_path,
+                    filename=image_path
+                )
+</code></pre>
+
+    <figure>
+        <img src="/img/python-slack-sdk-1.png" width="100%">
+    </figure>
 </div><br><br>
 
 <h3>Future Works</h3>
