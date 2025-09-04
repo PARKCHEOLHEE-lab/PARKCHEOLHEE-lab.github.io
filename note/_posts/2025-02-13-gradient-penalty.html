@@ -13,7 +13,7 @@ layout: post
                 A function \(f(x)\) is called \(K\)-Lipschitz if there exists a constant \(K\) such that for all points \(x_1, x_2\)
                 \[
                     \,\\
-                    | f(x_1) - f(x_2) | \leq K | x_1 - x_2 |               
+                    \| f(x_1) - f(x_2) \| \leq K \| x_1 - x_2 \|               
                     \,\\                
                 \]
 
@@ -25,16 +25,37 @@ layout: post
             </li>
             <br>
             <li>
-                If we divide both sides by \(| x_1 - x_2 |\), we get:
+                If we divide both sides by \(\| x_1 - x_2 \|\), we get:
                 \[
                     \,\\
-                    \frac{| f(x_1) - f(x_2) |}{| x_1 - x_2 |} \leq K
+                    \frac{\| f(x_1) - f(x_2) \|}{\| x_1 - x_2 \|} \leq K
                     \,\\
                 \]
 
                 This means that the slope (or gradient) of the function is bounded by \(K\). <br>
                 The left hand side is the mean rate of change, which measures how much the function changes between two points. <br>
                 Thus the function cannot grow or shrink faster than a line with slope \(K\).
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Weight Clipping
+        <ul>
+            <li>
+                For the above expression, let \(f\) be the model's weights \(W\):
+                 \[
+                    
+                        \,\\
+                        \frac{\| f(x_1) - f(x_2) \|}{\| x_1 - x_2 \|} = \frac{\| W(x_1) - W(x_2) \|}{\| x_1 - x_2 \|}
+                        \,\\
+                 \]
+
+                The ratio between the model's output and the input in the above formula is bounded by \(K\). 
+                That is, as \(W\) increases, the norm increases, and thus the Lipschitz constant also increases.
+
+                weight clipping이 lipshitz 모든 weight에 대해서 \(| w_{ij} | \leq c \) 로 제한하므로
+                따라서  “∣wij∣|w\_{ij}|∣wij​∣가 클수록 operator norm도 커질 수밖에 없으므로, clipping은 간접적으로 Lipschitz 상수를 제한하는 효과를 줌
             </li>
         </ul>
     </li>
@@ -57,7 +78,7 @@ layout: post
                         \(\hat{x}\) are interpolated samples between real data \(x\) and generated data \(g(z)\), defined as:
                         \[
                             \,\\
-                            \hat{x} = \epsilon x + (1 - \epsilon) g(z), \text{where} \epsilon \sim U[0, 1]
+                            \hat{x} = \epsilon x + (1 - \epsilon) g(z) \,\, \text{where,} \,\, \epsilon \sim U[0, 1]
                             \,\\
                         \]
                     </li>
@@ -96,14 +117,14 @@ layout: post
         d_interpolated = self.discriminator(interpolated)
 
         # Get the gradients w.r.t. the interpolated data
-        gradients = torch.autograd.grad(
+        gradients, *_ = torch.autograd.grad(
             outputs=d_interpolated,
             inputs=interpolated,
             grad_outputs=torch.ones_like(d_interpolated).to(self.DEVICE),
             create_graph=True,
             retain_graph=True,
             only_inputs=True,
-        )[0]
+        )
 
         # Compute the gradient penalty
         gradients = gradients.view(batch_size, -1)
