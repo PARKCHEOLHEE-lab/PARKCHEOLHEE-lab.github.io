@@ -53,6 +53,19 @@ layout: post
                 \(\inf\) means finding the minimum value of the set (lower bound).
 
             </li>
+            <br>
+            <li>
+                However, in actual GAN model training, the amount of computation required to compute directly is too large, 
+                so the dual form of <strong>Kantorovich-Rubinstein duality</strong> theorem is used:
+                \[
+                    \,\\
+                    W(\mathbf{P}_r, \mathbf{P}_g) = \sup_{\|f\|_L \leq 1} \left( \, \mathbb{E}_{x \sim p_r}[f(x)] - \mathbb{E}_{x \sim p_g}[f(x)] \, \right)   
+                    \,\\
+                \]
+
+                where \(\|f\|_{L \leq 1} \) means that the \(f\) is a 1-Lipschitz function. 
+                In other words, computing Wasserstein distance is equivalent to finding a 1-Lipschitz function \(f\) that maximizes the difference between its expectations under the real and generated distributions.
+            </li>
         </ul>
     </li>
     <br>
