@@ -51,11 +51,11 @@
   {% endfor %}
 
   {% if page.id == "testbed" %}
-    {% if progress_count != 0 %}
-      <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p><br>
-    {% endif %}
     {% if featured_count != 0 %}
-      <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured projects&nbsp;</u></b></p>
+      <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured&nbsp;</u></b></p><br>
+    {% endif %}
+    {% if progress_count != 0 %}
+      <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p>
     {% endif %}
     <p style="margin-top: -1em">　</p>
     
