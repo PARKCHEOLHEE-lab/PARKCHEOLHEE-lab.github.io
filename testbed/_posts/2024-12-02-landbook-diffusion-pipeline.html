@@ -479,17 +479,6 @@ These refinements work together to produce a final visualization that is both ar
                 ).images[0]
                     
                 self._cleanup()
-                
-                logging.info("##################################### Reducing saturation ... ")
-                mask_islands_image = self._create_mask_islands(surrounding_buildings_mask)
-                for mask_island in mask_islands_image:
-                    interpolation_factor = torch.rand(1, generator=generator, device=generator.device).item()
-                    saturation_factor = (1 - interpolation_factor) * self.saturation_low + interpolation_factor * self.saturation_high
-                    generated_image = self._reduce_saturation(
-                        generated_image, 
-                        mask_island, 
-                        factor=saturation_factor
-                    )
 
             buffered = BytesIO()
             generated_image.save(buffered, format="PNG")
