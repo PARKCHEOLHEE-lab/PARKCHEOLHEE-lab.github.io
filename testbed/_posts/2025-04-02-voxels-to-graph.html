@@ -5,7 +5,7 @@ hashtag: "#graph #gnn #building-gan #voxel"
 comment: true
 splitter: 1
 featured: false
-inprogress: true
+inprogress: false
 thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
 ---
 
@@ -271,6 +271,7 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
     class GraphDataset(Dataset):
         def __init__(self, configuration: Configuration):
             super().__init__()
+
             self.configuration = configuration
             
             (...)
@@ -473,16 +474,13 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
             
         g_loss_adv *= self.configuration.LAMBDA_ADV
         
-        g_loss_label = torch.nn.functional.cross_entropy(logits, voxel_graph.type)
-        g_loss_label *= self.configuration.LAMBDA_LABEL
-
         label_ratio_g = label_hard.squeeze(0).sum(dim=0) / voxel_graph.num_nodes
         label_ratio = voxel_graph.types_onehot.sum(dim=0) / voxel_graph.num_nodes
 
-        g_loss_ratio = torch.nn.functional.l1_loss(label_ratio_g[:-2], label_ratio[:-2])
+        g_loss_ratio = torch.nn.functional.mse_loss(label_ratio_g[:-2], label_ratio[:-2])
         g_loss_ratio *= self.configuration.LAMBDA_RATIO
 
-        g_loss_ratio_voids = torch.nn.functional.l1_loss(label_ratio_g[-2:], label_ratio[-2:])
+        g_loss_ratio_voids = torch.nn.functional.mse_loss(label_ratio_g[-2:], label_ratio[-2:])
         g_loss_ratio_voids *= self.configuration.LAMBDA_RATIO_VOID
         
         voxel_types_generated = label_hard.squeeze(0).argmax(dim=1)
@@ -508,30 +506,202 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
             
             si = ei
             
-        g_loss_far = torch.nn.functional.l1_loss(torch.tensor(far_unique_generated), torch.tensor(far_unique))
+        g_loss_far = torch.nn.functional.mse_loss(torch.tensor(far_unique_generated), torch.tensor(far_unique))
         g_loss_far *= self.configuration.LAMBDA_FAR
         
-        g_loss = g_loss_adv + g_loss_ratio + g_loss_label + g_loss_ratio_voids + g_loss_far
+        g_loss = g_loss_adv + g_loss_ratio + g_loss_ratio_voids + g_loss_far
         
         return g_loss
 </code></pre>
+
+    <br><br>
+
+    The lambdas for the generator are carefully balanced to ensure stable training.
+    The adversarial loss takes priority with \(\lambda_{\text{adv}} = 1.0\), 
+    while the auxiliary losses for program type ratios and FAR are weighted at \(\lambda_{\text{ratio}} = 0.1\) and \(\lambda_{\text{far}} = 0.1\) respectively.
+    This configuration allows the model to focus primarily on generating buildings' program distribution while maintaining architectural constraints.
+
+    <!-- 
+    auxiliary loss 계산시 l1 loss를 사용한 이유는? 
+    라플라스 분포. 모델이 생성한 레이블 결과에 따른 ratio는 곧 FAR과 관련되어 있음.
+    voxelgnngenerator는 타겟팅하는 far에 대한 입력을 받아서 컨디셔널하게 생성하므로 모델의 생성 결과에 따른 
+    far의 값이 라플라스 분포의 평균 주변에 밀집해있을 것이라고 가정하고 주변 값 근처에서 생성하고 업데이트 되도록 설정 
+     -->
 </div><br><br>
 
 <h3>Training VoxelGNNs</h3>
 <div class="article">
+
+    For this implementation, a subset of 10,000 graphs from the total 120,000 dataset is used.
+
+    The monitoring results from training on 10,000 graph data for 1,000 epochs are as follows.
+    Each metric commonly used for evaluating classification models was measured. All graphs show convergence.
+
+    
+    <figure>
+        <img src="/img/voxels-to-graph/voxels-to-graph-3.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Metrics <br>
+            From the left, Generator Loss · Accuracy · Recall · Precision · F1 
+        </figcaption>
+    </figure>
+
+    <br><br>
+        
+    However, since the total number of nodes within the 10,000 data samples is approximately 4,000,000 nodes, due to the large number of nodes,
+    even if misclassified labels are mixed in, the metrics cannot reflect the performance differences.
+    
+    Also, since VoxelGNNGenerator performs node-wise label prediction,
+    there is a problem in that <strong>it is difficult to evaluate the generation quality at the graph level.</strong>
+
+
+    <figure>
+        <img src="/img/voxels-to-graph/voxels-to-graph-4.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Graph-wise f1 scores <br>
+            From the left, 
+            Minimum f1 score of training dataset <br>
+            Minimum f1 score of validation dataset <br>
+            Weighted sum of f1 scores 
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+<!-- <pre><code class="text">
+    voxel_types_ratio: [
+        [-1, 1342993, 0.3365],  # void (exterior)
+        [0, 522887, 0.13101],   # lobby/corridor
+        [1, 253412, 0.06349],   # restroom
+        [2, 109624, 0.02747],   # stairs
+        [3, 197512, 0.04949],   # elevator
+        [4, 1520140, 0.38088],  # office
+        [5, 44545, 0.01116]     # mechanical room
+    ]
+</code></pre> -->
+
+    To address this problem, the validation method <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/fd906a029e1c085b3b27c9641c912a938c50aa67/building_gan/src/trainer.py#L412-L435">computes the graph-wise f1 scores</a> on both training and validation datasets.
+    <strong>By calculating f1 scores for node labels separately for each graph, we can evaluate the quality of each building</strong>, 
+    even though generating these metrics takes more time.
+    Therefore, the model selection criterion \(\mathcal{C}\) uses a weighted sum of the worst-performing graphs from both sets.
+    The model is saved when the weighted sum of f1 score improves, calculated as, where \(w_{\text{t}} = 0.05\) and \(w_{\text{v}} = 1.0\).
+
+    \[
+        \,\\
+            \mathcal{C} = 
+            \min_{g \,\in\, G_{\text{t}}} \text{f1}(g) \cdot w_{\text{t}} 
+            + \min_{g \,\in\, G_{\text{v}}} \text{f1}(g) \cdot w_{\text{v}}
+        \,\\
+    \]
+
+<pre><code class="python">
+    current_f1_score = (
+        f1_score_min_train * self.configuration.F1_SCORE_TRAIN_WEIGHT
+        + f1_score_min_validation * self.configuration.F1_SCORE_VALIDATION_WEIGHT
+    )
+    
+    if best_f1_score < current_f1_score:
+        best_f1_score = current_f1_score
+
+        torch.save(
+            {
+                "epoch_start": epoch,
+                "epoch_end": epoch_end,
+                "best_f1_score": best_f1_score,
+                "f1_score_train": f1_score_train,
+                "f1_score_validation": f1_score_validation,
+                "f1_score_min_train": f1_score_min_train,
+                "f1_score_min_validation": f1_score_min_validation,
+                "recall_score_train": recall_score_train,
+                "recall_score_validation": recall_score_validation,
+                "accuracy_score_train": accuracy_score_train,
+                "accuracy_score_validation": accuracy_score_validation,
+                "generator": self.generator.state_dict(),
+                "discriminator": self.discriminator.state_dict(),
+                "optimizer_generator": self.optimizer_generator.state_dict(),
+                "optimizer_discriminator": self.optimizer_discriminator.state_dict(),
+                "scheduler_generator": self.scheduler_generator.state_dict(),
+            },
+            os.path.join(self.log_dir, "states.pt"),
+        )
+</code></pre>
+
+    <br><br>
+
+    
+        Graph-based models operate with <strong>graphs as batch, but since computations are performed at the node level,
+        even when the batch size remains constant, the number of nodes varies with each input</strong>.
+
+    Therefore, when using <code>BatchNorm</code>, statistical instability can occur in graphs with fewer nodes.
+    Particularly when using running mean and variance in <code>eval()</code> mode, performance may drop significantly. 
+    This is because graphs with fewer nodes tend to have larger differences from the overall training distribution.
+    As a solution to this issue, <code>LayerNorm</code> can be used. It performs normalization independently for each node across the feature dimension</strong>,
+    making it more suitable for graphs with varying numbers of nodes and providing more stable performance during evaluation.
+
+    <!-- 그래프 기반의 모델은 배치 단위가 그래프이지만, 계산은 노드단위로 계산되므로 배치 개수가 늘 동일하더라도 매번 다른 노드의 개수가 입력으로 들어오게 된다.
+    따라서 batch normalization을 사용하는 경우, 노드 수가 적은 그래프에서는 통계적 불안정성이 발생할 수 있다.
+    특히 eval() 모드에서 running mean과 variance를 사용할 때, 성능이 크게 저하될 가능성이 있다. 
+    이는 그래프의 노드 수가 적을수록 전체 학습 분포와의 차이가 커지기 때문이다.
+    이에 대한 해결책으로 layer normalization을 사용할 수 있다. Layer normalization은 각 노드에 대해 독립적으로 feature 차원에서 정규화를 수행하므로, 
+    노드 수가 다양한 그래프에 더 적합하며 평가 시에도 더 안정적인 성능을 제공한다. -->
+
+    <figure>
+        <img src="/img/voxels-to-graph/voxels-to-graph-6.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            BatchNorm vs. LayerNorm in validation<br>
+            From the left, BatchNorm · LayerNorm
+        </figcaption>
+    </figure>
+
 </div><br><br>
 
 <h3>Building Generation</h3>
 <div class="article">
+
+    Finally, by passing the test dataset through the trained VoxelGNNGenerator model, we can obtain results like the following.
+    
+    <figure>
+        <img src="/img/voxels-to-graph/voxels-to-graph-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Generated Buildings w/ Test Dataset
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+
 </div><br><br>
 
-<h3>Next Steps</h3>
+<h3>Future Works</h3>
 <div class="article">
-    <!-- 
-    - building generation interface implementation
-    - 일조사선 
-    - FID score
-     -->
+
+    This project revealed several important findings to me. 
+    The most significant discovery was that layer normalization performs significantly better than batch normalization when working with graphs that have varying numbers of nodes. 
+    This insight will be helpful for building better graph neural networks in the future. 
+
+    <br><br>
+    In the future, I will try the following things:
+
+    <ul>
+        <li>
+            <strong>Implement Building Generation Interface</strong>: Develop an interface in web or CAD plugin format that allows for easy drawing of two input graphs and quickly generating scheme designs for buildings
+        </li>
+        <li>
+            <strong>Apply Sun Light Regulation</strong>: Apply building regulations, particularly the fundamental daylight regulations, to generate design proposals that comply with these requirements
+        </li>
+        <li>
+            <strong>Evaluate with metrics for generative model</strong>: Implement more reliable methods for measuring generative model quality, such as FID score, Inception score, and other established metrics
+        </li>
+        <!-- <li>
+            Implement Building Generation Interface: web or cad plugin 형태로 두 입력 그래프를 만들고 빠르게 건물에 대한 scheme design을 할 수 있는 인터페이스 구현
+        </li>
+        <li>
+            Apply Sun Light Regulation: 건축 법규 중 가장 기본이 되는 일조 사선을 반영하여 설계안을 생성할 수 있도록 적용용
+        </li>
+        <li>
+            Evaluate with metrics for generative model: 생성모델의 품질 측정에 대해서 더 신뢰도 높은 방식으로 .... fid score, inception....
+        </li> -->
+    </ul>
 </div><br><br>
 
 <h3>References</h3>
