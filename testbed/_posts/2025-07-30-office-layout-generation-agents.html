@@ -1,0 +1,103 @@
+---
+title: "Office Layout Generation Agents"
+layout: post
+hashtag: "#agent #generative-design #llm"
+comment: true
+splitter: 2
+featured: false
+inprogress: true
+at: Spacewalk
+thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-thumbnail.png
+---
+
+<div id="toc"></div>
+
+<h3>PlanNext</h3>
+<div class="article">
+
+    <a href="https://plannext.ai/en">PlanNext</a> is API service that designs office layouts using natural language. 
+    PlanNext is a cloud-based API that uses a Large Language Model to help you design optimized office floor plans. 
+    By interpreting your text-based input, PlanNext automatically generates a layout divided into essential work zones: Focus, Collaboration, Social, Functional, Service, and Private.
+
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-1.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
+    <figcaption>Visualized results from PlanNext API</figcaption>
+
+    <br><br>
+    <!-- 이 플로우차트는 AI 기반 사무실 레이아웃 자동 생성 시스템의 전체 파이프라인을 보여줍니다.
+    사용자가 자연어로 레이아웃 요구사항을 입력하면, Agent Orchestration이 이를 분석해 필요한 전문 에이전트들을 선택합니다. 방향성, 워크스테이션, 영역 비율, 밀도, 가중치, 인접성 등의 에이전트가 각각의 영역에서 요구사항을 해석합니다다.
+    모든 에이전트의 분석 결과는 구조화된 데이터로 변환되어 최적화 엔진으로 전달됩니다. 최적화 엔진은 환경을 초기화하고 최적화 알고리즘을 통해 반복적으로 솔루션을 개선합니다. 
+    각 세대마다 평가 함수로 품질을 측정하고 최적해를 갱신하며, 수렴 조건을 만족할 때까지 이 과정을 반복합니다. -->
+
+    This flow chart shows the complete pipeline of an LLM-based office layout generation system.
+    When a user requests layout requirements in natural language, Orchestration Agent analyzes this and selects the necessary specialized agents. 
+    Agents for directions, workstations, area ratios, density, weights, adjacency, etc., each interpret the requirements from their perspective.
+    All agent analysis results are converted into structured data and sent to the optimization engine. 
+    The optimization engine initializes the environment using the interpretations and iteratively improves solutions through optimization algorithms.
+    Each generation measures quality with evaluation functions, updates the optimal solution, and repeats this process until convergence conditions are met.
+
+
+  <!--break-->
+    <br><br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-0.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
+    <figcaption>PlanNext Abstract Workflow</figcaption>
+
+  <br><br>
+
+</div><br><br>
+
+<h3>Base Agent Design</h3>
+<div class="article"></div><br><br>
+
+<h3>Agents Orchestration</h3>
+<div class="article">
+  <!-- 
+    with asyncio.gather 
+  -->
+</div><br><br>
+
+<h3>Geometric Context Engineering</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Optimization Environment</h3>
+<div class="article">
+</div><br><br>
+
+
+<h3>References & Resources</h3>
+<div class="article"></div>
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/2309.03409">Large Language Models as Optimizers</a>
+    </li>
+    <li>
+        <a href="https://arxiv.org/pdf/2412.02193">LAYOUTVLM: Differentiable Optimization of 3D Layoutvia Vision-Language Models</a>
+    </li>
+    <li>
+        <a href="https://blog.langchain.com/the-rise-of-context-engineering/">The rise of "context engineering"</a>
+    </li>
+    <li>
+        <a href="https://github.com/ChatHouseDiffusion/chathousediffusion">https://github.com/ChatHouseDiffusion/chathousediffusion</a>
+    </li>
+    <li>
+        <a href="https://spacewalkcorp.notion.site/Segment-Selection-of-a-Polygon-using-Agent-s-Function-Calling-1e405430cf55805abfb1fa02a7ba5a1f">Segment Selection of a Polygon using Agent’s Function Calling </a>
+    </li>
+    <li>
+        <a href="https://openai.github.io/openai-agents-python/">OpenAI Agents SDK</a>
+    </li>
+    <li>
+        <a href="https://medium.com/@kakooee.reza/deep-reinforcement-learning-for-architectural-space-layout-design-part-i-915a8cbefc42">Deep Reinforcement Learning for Architectural Space Layout Design — Part I</a>
+    </li>
+    <li>
+        <a href="https://www.smartplanai.com/product">https://www.smartplanai.com/product</a>
+    </li>
+    <li>
+        <a href="https://tilegpt.github.io/">TileGPT: Generative Design through Quality-Diversity Data Synthesis and Language Models</a>
+    </li>
+</ul>
+
+<br><br>
