@@ -3,7 +3,7 @@ title: "Office Layout Generation Agents"
 layout: post
 hashtag: "#agent #generative-design #llm"
 comment: true
-splitter: 2
+splitter: 1
 featured: false
 inprogress: true
 at: Spacewalk
@@ -32,13 +32,13 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 
     This flow chart shows the complete pipeline of an LLM-based office layout generation system.
     When a user requests layout requirements in natural language, Orchestration Agent analyzes this and selects the necessary specialized agents. 
+    <!--break-->
     Agents for directions, workstations, area ratios, density, weights, adjacency, etc., each interpret the requirements from their perspective.
     All agent analysis results are converted into structured data and sent to the optimization engine. 
     The optimization engine initializes the environment using the interpretations and iteratively improves solutions through optimization algorithms.
     Each generation measures quality with evaluation functions, updates the optimal solution, and repeats this process until convergence conditions are met.
 
 
-  <!--break-->
     <br><br>
     <figure>
         <img src="/img/office-layout-generation-agents/office-layout-generation-agents-0.png" width="100%" onerror=handle_image_error(this)>
