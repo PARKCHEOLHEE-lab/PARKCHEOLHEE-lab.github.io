@@ -1,0 +1,337 @@
+---
+title:  "LayoutVLM: Differentiable Optimization of 3D Layout via Vision-Language Models"
+layout: post
+emoji: /emoji/brain.png
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://arxiv.org/pdf/2412.02193">LayoutVLM: Differentiable Optimization of 3D Layout via Vision-Language Models</a>
+        <ol start="0">
+            <li>
+                Review Purpose
+                <ul>
+                    <li>
+                        
+                        <!-- 본 논문 리뷰는 스페이스워크에서 아파트, 주택 등 주거공간의 가구 배치를 LLM 
+                        기반 제품으로 고도화하는 연구 과정에서 진행하게 되었습니다. 
+                        실제로 논문에서 제안하는 방식과 저희가 시도한 접근법이 유사한 부분이 있어, 
+                        차이점 및 인사이트 등을 파악하기 위해 리뷰하고자 합니다. -->
+
+                        As part of our research to improve our LLM-based product at Spacewalk for furniture placement in apartments and houses, I will review this paper.
+                        The method used in the LayoutVLM paper is similar to ours, so I hope to understand the differences and gain insights.
+                        <figure style="display: flex;">
+                            <img src="/img/layout-vlm/layout-vlm-1.gif" width="40%" onerror==handle_image_error(this)>
+                            <img src="/img/layout-vlm/layout-vlm-2.gif" width="50%" onerror==handle_image_error(this)>
+                        </figure>
+                        <figcaption>LayoutVLM Demo</figcaption>
+                        <br>
+                        <figure>
+                            <img src="/img/layout-vlm/layout-vlm-0.gif" width="100%" onerror==handle_image_error(this)>
+                        </figure>
+                        <br>
+                        <figcaption>Spacewalk's PoC for LLM-based furniture placement</figcaption>
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Introduction
+                <ul>
+                    <li> 
+                        In this paper, we advance this goal by addressing 
+                        <mark>
+                            <strong>open-universe layout generation</strong>, 
+                            which involves creating diverse layouts based on unlabeled 3D assets and free-form language instructions.
+                        </mark>
+                    </li>
+                    <li>
+                        Traditional scene synthesis and layout generation methods 
+                        are often <strong>
+                            constrained by predefined object categories
+                            and patterns
+                        </strong> of object placements learned from synthetic
+                        scene datasets
+                    </li>
+                    <li>
+                        LayoutVLM uses <strong>visually marked images</strong>, 
+                        allowing accurate estimation of object placements
+                        within the scene, especially when existing objects exist
+                    </li>
+                    <li>
+                        we introduce a
+                        novel scene layout representation that can be <mark>
+                            combined with
+                            <strong>differentiable optimization</strong> to generate diverse layouts
+                        </mark>. The
+                        scene representation builds on two complementary representations—<strong>numerical pose estimates</strong> and spatial relations
+                        with matching differentiable objectives.
+                    </li>
+                    <li>
+                        More specifically, LayoutVLM first
+                        predicts numerical object poses as initialization for the optimization process. 
+                        Then, LayoutVLM jointly optimizes
+                        for physics-based objectives and spatial relations, each with
+                        their corresponding differentiable objectives.
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Related Work
+                <ul>
+                    <li>
+                        The advent of Large Multimodal
+                        Models (LMMs) has enabled open-vocabulary 3D scene syn-
+                        thesis, supporting the flexible generation of scenes without
+                        dependence on predefined labels or categories
+                    </li>
+                    <li>
+                        <a href="https://arxiv.org/pdf/2305.15393">LayoutGPT</a> prompt language models to directly
+                        generate 3D Layouts for indoor scenes
+                    </li>
+                    <li>
+                        <a href="https://arxiv.org/pdf/2312.09067">Holodeck</a> uses LLMs to generate spatial scene graphs 
+                        and then uses the specified scene graph to optimize object placements
+                    </li>
+                    <li>
+                        LayoutVLM also falls into this line of work, but instead of
+                        using LLMs, <strong>
+                            we generate scene layout representations from
+                            image and text inputs using VLMs
+                        </strong>
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Problem Formulation
+                <ul>
+                    <li>
+                        The problem of open-universe 3D layout generation is to
+                        arrange any assets within a 3D environment based on natural
+                        language instructions. 
+                    </li>
+                    <li>
+                        Formally, given a layout criterion \(\ell_{\text{layout}} \) in natural language,
+                        a space defined by four walls oriented along the cardinal directions \({w_1,...,w_4} \),
+                        and a set of \(N\) 3D meshes \({m1,...,m_N}\),
+                        the goal is to create a 3d scene that faithfully represents the provided textual description.
+                    </li>
+                    <li>
+                        We assume that the input 3D objects upright and an off-the-shelf vision-language model 
+                        (VLM) (i.e., GPT-4o) is employed to determine their front-facing orientations
+                    </li>
+                    <li>
+                        The VLM also annotates each object with a short textual description
+                        \(s_i\),  and the dimensions of its axis-aligned bounding box after
+                        rotating to face the \(+x\) axis will be represented as \(b_i \in \mathbb{R}^3 \)
+                    </li>
+                    <li>
+                        The target output of layout generation is each object's pose
+                        \(p_i = (x_i,y_i,z_i,\theta_i) \), including the object's 3D position and rotation about the \(z\)-axis
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                LayoutVLM
+                <ul>
+                    <li>
+                        Our approach employs vision-language models (VLMs) to generate code for
+                        our proposed <strong>scene layout representation</strong> that specifies both an initial layout
+                        \(\hat{p}_{i=1}^{\tiny{N}} \), as well as a set of spatial relations between assets (and walls).
+                        
+                        <figure>
+                            <img src="/img/layout-vlm/layout-vlm-3.png" width="100%" onerror==handle_image_error(this)>
+                        </figure>
+                        <figcaption>Process of generating 3D scene layout with Vision-Language Models</figcaption>
+                    </li>
+                    <br>
+                    <li>
+                        This representation is then used to produce the final object placements through optimization:
+                            \[
+                                \begin{aligned}
+                                \,\\
+                                &\arg\min \left( \mathcal{L}_{\text{semantic}} + \mathcal{L}_{\text{physics}} \right), \\
+                                &{\{p_i\}_{i=1}^{\tiny{N}}}
+                                \end{aligned}
+                                
+                                \\
+                                \quad\text{initial solution } \{\hat{p}_i\}_{i=1}^N.
+                                \,\\
+                            \]
+                         where \(\mathcal{L}_{\text{semantic}} \) is the objective function decoded from the scene
+                         layout representation and \(\mathcal{L}_{\text{physics}} \) is the objective function we employ
+                         to ensure physical plausibility
+                    </li>
+                </ul>
+                <br>
+                <ol type="A">
+                    <li>
+                        Scene Layout Representation
+                        <ul>
+                            <li>
+                                Our representation includes (a) numerical estimates of object poses \(\hat{p}_{i=1}^{\tiny{N}} \)
+                                and (b) spatial relations with differentiable objectives. 
+                                <strong>Initial estimates provide a starting point for optimization</strong>, while
+                                differentiable objectives guide the process, addressing the
+                                challenge of directly predicting physically plausible layouts.
+                                <mark>
+                                    The initial layout is key in the optimization process, as poor
+                                    initialization can lead to a suboptimal layout
+                                </mark>
+                                <figure style="display: flex;">
+                                    <img src="/img/layout-vlm/layout-vlm-4.png" width="40%" onerror==handle_image_error(this)>
+                                    <img src="/img/layout-vlm/layout-vlm-5.png" width="40%" onerror==handle_image_error(this)>
+                                </figure> 
+                                <figcaption>Example Scene Representation</figcaption>
+                            </li>
+                            <br>
+                            <li>
+                                <strong>Differentiable Spatial Relations.</strong>
+                                The goal of these spatial relations is twofold: (a) to capture the semantics of
+                                the input language instruction and (b) to preserve these semantics during optimization for physical plausibility
+                                To design a set of spatial
+                                relations that can capture a wide range of semantics for
+                                indoor scenes, we devise five expressive spatial relations:
+                                <mark>
+                                two <strong>positional objectives</strong> (i.e., \(\text{distance}\), \(\text{on_top_of}\) ), 
+                                two <strong>orientational objectives</strong> (i.e., \(\text{align_with}\), \(\text{point_towards}\)), and
+                                one <strong>wall-related objective</strong> (i.e., \(\text{against_wall}\)) 
+                                </mark>
+                                that pertains to both the position and orientation of an asset
+                                The below table presents the notations and meanings of
+                                these spatial relations. Formally, we denote a set of spatial
+                                relations derived from a scene layout representation as \(\mathcal{R}\)
+                                <br><br>
+                                \[
+                                \begin{array}{lll}
+                                \hline
+                                \textbf{Type} & \textbf{Notation} & \textbf{Explanation} \\
+                                \hline
+                                \text{Positional} & \mathcal{L}_{\text{distance}}(p_i, p_j, d_{\min}, d_{\max}) & \text{The distance between the two assets should fall within the range } [d_{\min}, d_{\max}] \\
+                                \text{Positional} & \mathcal{L}_{\text{on_top_of}}(p_i, p_j, b_i, b_j) & \text{Position one asset on top of another.} \\
+                                \text{Rotational} & \mathcal{L}_{\text{align_with}}(p_i, p_j, \phi) & \text{Align two assets at a specified angle } \phi. \\
+                                \text{Rotational} & \mathcal{L}_{\text{point_towards}}(p_i, p_j, \phi) & \text{Orient one asset to face another with an offset angle } \phi. \\
+                                \text{Mix} & \mathcal{L}_{\text{against_wall}}(p_i, w_j, b_i) & \text{Place an asset again wall } w_j. \\
+                                \hline
+                                \\
+                                \end{array}
+                                \]
+                                <figcaption class="nofig">
+                                    Table 1. Spatial Relation Definition
+                                </figcaption>
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Generating Scene Layout Representation with Vision-Language Models
+                        <ul>
+                            <li>
+                                <strong>Visual Prompting.</strong> The VLM's input includes 
+                                rendered images of the 3D scene and individual asset views.
+                                Prior research has shown that visual cues can improve 
+                                VLMs' object recognition and spatial reasoning.
+                                We provide two types of visual annotations for layout generation: 
+                                <mark>
+                                    <strong>coordinate points in the 3D space spaced 2 meters</strong>
+                                    apart to help the VLM gauge dimensions and scale
+                                </mark> and visualizations 
+                                of coordinate frames to maintain consistent spatial
+                                references. We also annotate the <mark>
+                                    <strong>front-facing orientations</strong>
+                                    of each object with directional arrows, which is essential
+                                    for generating rotational constraints
+                                </mark> like \(\text{aligned_with}\) or
+                                \(\text{point_towards}\).
+                            </li>
+                            <br>
+                            <li>
+                                <strong>Self-Consistent Decoding.</strong>
+                                One key challenge is that VLMs
+                                struggle with spatial planning; while <strong>
+                                    they may successfully
+                                    generate spatial relations for pairs of objects, they tend to
+                                    fail at accounting for overall layout coherence
+                                </strong>.
+                                We introduce
+                                self-consistent decoding for our scene layout representation.
+                                Different from standard self-consistency, which selects
+                                the most consistent answer from multiple reasoning paths
+                                following the same format, we require the two distinct but
+                                mutually reinforcing representations predicted by the VLM
+                                to self-consistent. After self-consistent decoding, 
+                                we can formally describe the semantic part of the
+                                optimization loss as:
+                                \[
+                                    \,\\
+                                    \mathcal{L}_{\text{semantic}} = \sum_{\mathcal{L} \, \in \, \mathcal{R}} 
+                                    \mathbb{1} \, \left[\, \mathcal{L}_i (\hat{p}_i, \hat{p}_j, \lambda) \le \epsilon \, \right] \cdot \mathcal{L}_i (p_i, p_j, \lambda)
+                                    \,\\
+                                \]
+
+                                where \(\hat{p}_i \) and \(\hat{p}_j \) are the initial estimated poses,
+                                \(\lambda \) represents the additional parameters in the functions (refer to Table 1),
+                                and \(\epsilon\) is a <strong>
+                                    threshold value for determining whether the differentiable spatial relation
+                                    \(\mathcal{L}\) is satisfied
+                                </strong> in the initial estimates
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Differentiable Optimization
+                        <ul>
+                            <li>
+                                To generate a scene from the estimated object poses and
+                                differentiable constraints, we jointly optimize all objects
+                                according to the specified constraints over a set number
+                                of iterations. <mark>
+                                    In addition to the spatial relational functions
+                                    generated by the VLM, we impose <strong>Distance-IoU loss</strong> on
+                                    objects' 3D oriented bounding box for collision
+                                    avoidance:
+                                </mark>
+                                \[
+                                    \,\\
+                                    \mathcal{L}_{\text{physics}} = \sum_{i=1}^N \sum_{\substack{j=1 \\ j \ne i}}^N \mathcal{L}_{\tiny{\text{DIoU}}} (p_i, p_j, b_i, b_j)
+                                    \,\\
+                                \]
+                                \(\mathcal{L}_{\text{semantic}} \) and \(\mathcal{L}_{\text{physics}} \)
+                                form the final objective function for the optimization problem.
+                                With the objective function, we can
+                                confine objects within the boundary and avoid unwanted
+                                intersections, ensuring physically valid layouts
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Finetuning VLMs with Scene Datasets
+                    </li>
+                </ol>
+            </li>
+            <br>
+            <li>
+                Experiments
+            </li>
+            <br>
+            <li>
+                Conclusion
+            </li>
+        </ol>
+    </li>
+</ul>
+<br><br>
+<div style="text-align: justify;">
+        objective function을 agent가 스스로 정의하고 코딩해서 최적화의 목표로 삼지 않는 한 레이아웃의 자유도는 제한적일 것임.
+        그럼에도 개발자가 objective function을 지정하는 것 자체는 레이아웃의 baseline quality를 조절할 수 있다는 점에서 있음.
+</div>
+
+<br><br>
