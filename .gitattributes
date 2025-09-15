@@ -25,3 +25,4 @@
 /img/eigenvalues-eigenvectors/** filter=lfs diff=lfs merge=lfs -text
 /img/voxels-to-graph/** filter=lfs diff=lfs merge=lfs -text
 /img/likelihood/** filter=lfs diff=lfs merge=lfs -text
+/img/layout-vlm/** filter=lfs diff=lfs merge=lfs -text
