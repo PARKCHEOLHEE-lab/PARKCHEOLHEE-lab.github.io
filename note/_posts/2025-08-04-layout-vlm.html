@@ -228,7 +228,7 @@ emoji: /emoji/brain.png
                             </li>
                         </ul>
                     </li>
-                    <br>
+                    <br><br>
                     <li>
                         Generating Scene Layout Representation with Vision-Language Models
                         <ul>
@@ -257,8 +257,8 @@ emoji: /emoji/brain.png
                                 struggle with spatial planning; while <strong>
                                     they may successfully
                                     generate spatial relations for pairs of objects, they tend to
-                                    fail at accounting for overall layout coherence
-                                </strong>.
+                                    fail at accounting for overall layout coherence.
+                                </strong>
                                 We introduce
                                 self-consistent decoding for our scene layout representation.
                                 Different from standard self-consistency, which selects
@@ -314,16 +314,117 @@ emoji: /emoji/brain.png
                     <br>
                     <li>
                         Finetuning VLMs with Scene Datasets
+                        <ul>
+                            <li>
+                                This scene representation can be automatically 
+                                extracted from scene layout datasets without requiring manual
+                                annotations.
+                                Specifically, given a set of posed objects in a
+                                3D scene, we apply the preprocessing procedure to obtain both textual descriptions and oriented
+                                bounding boxes for each object
+                            </li>
+                            <li>
+                                The resulting scene representation includes both raw object poses and the satisfied spatial
+                                relations, <mark>
+                                    which we then use to fine-tune VLMs to generate
+                                    these scene representations from input objects and scene renderings
+                                </mark>
+                            </li>
+                            <li>
+                                In our implementation, we use:
+                                <ul type="circle">
+                                    <li>
+                                        3D-Front dataset
+                                    </li>
+                                    <li>
+                                        closed-source GPT-4o
+                                    </li>
+                                    <li>
+                                        open-source LLaVa-NeXT-Interleave
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
                     </li>
                 </ol>
             </li>
             <br>
             <li>
                 Experiments
+                <ol type="A">
+                    <li>
+                        Experimental Setup
+                        <ul>
+                            <li>
+                                <strong>Evaluation.</strong> 
+                                In our evaluation, we assess models’ abilities
+                                in 1) open-vocabulary language instructions, 
+                                2) predicting layouts for objects beyond predefined categories, 
+                                and 3) generating accurate object placements within boundaries while avoiding collisions 
+                            </li>
+                            <li>
+                                <strong>Evaluation Metrics.</strong>
+                                Physical plausibility is measured using the \(\text{Collision-Free Score (CF)}\) and
+                                \(\text{In-Boundary Score (IB)}\). All assets are enforced to be placed,
+                                with remaining assets randomly placed if a method fails.
+                                Semantic coherence is assessed using \(\text{Positional Coherency (Pos.)}\) 
+                                and \(\text{Rotational Coherency (Rot.)}\), measuring alignment with the input prompt 
+                                To evaluate semantic coherence
+                                across layouts <mark>
+                                    without groundtruth, we use GPT-4o to score
+                                    layouts based on top-down and side-view renderings and
+                                    the language instructions.
+                                </mark>
+                                We also introduce the \(\text{Physically-Grounded Semantic Alignment Score (PSA)}\) 
+                                to assess physical plausibility and semantic
+                                alignment, <strong>assigning 0 if assets cannot be feasibly placed.</strong>
+                                \(\text{PSA}\) is calculated simply the GPT-4o rating weighted by
+                                physical plausibility. Scores range from 0 to 100, with higher
+                                scores indicating better performance
+                            </li>
+                        </ul>
+                    </li>
+                    <br>
+                    <li>
+                        Ablaion Study
+                        <ul>
+                            <li>
+                                w/o Visual          
+                            </li>
+                            <li>
+                                w/o Self-Consistency
+                            </li>
+                            <li>
+                                w/o Constraint
+                            </li>
+                            <li>
+                                The results indicate
+                                that spatial constraints are crucial for ensuring physical
+                                validity, particularly in preventing object overlap, while a
+                                good numerical initialization contributes to better semantic
+                                scores
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
             </li>
             <br>
             <li>
                 Conclusion
+                <ul>
+                    <li>
+                        With the scene
+                        layout representation combined with self-consistent decoding, 
+                        differentiable optimization, and visual prompting, we
+                        demonstrated significant improvements over existing LLM
+                        and constraint-based approaches
+                    </li>
+                    <li>
+                        While LAYOUTVLM
+                        shows promise, it has limitations, including occasional 
+                        <strong>failures in generating valid layouts due to suboptimal VLM initializations</strong> 
+                    </li>
+                </ul>
             </li>
         </ol>
     </li>
