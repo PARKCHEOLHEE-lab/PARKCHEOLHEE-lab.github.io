@@ -13,7 +13,7 @@ layout: post
                 A function \(f(x)\) is called \(K\)-Lipschitz if there exists a constant \(K\) such that for all points \(x_1, x_2\)
                 \[
                     \,\\
-                    \| f(x_1) - f(x_2) \| \leq K \| x_1 - x_2 \|               
+                    | f(x_1) - f(x_2) | \leq K \| x_1 - x_2 \|               
                     \,\\                
                 \]
 
@@ -28,7 +28,7 @@ layout: post
                 If we divide both sides by \(\| x_1 - x_2 \|\), we get:
                 \[
                     \,\\
-                    \frac{\| f(x_1) - f(x_2) \|}{\| x_1 - x_2 \|} \leq K
+                    \frac{| f(x_1) - f(x_2) |}{\| x_1 - x_2 \|} \leq K
                     \,\\
                 \]
 
@@ -47,15 +47,16 @@ layout: post
                  \[
                     
                         \,\\
-                        \frac{\| f(x_1) - f(x_2) \|}{\| x_1 - x_2 \|} = \frac{\| W(x_1) - W(x_2) \|}{\| x_1 - x_2 \|}
+                        \frac{| f(x_1) - f(x_2) |}{\| x_1 - x_2 \|} = \frac{| W(x_1) - W(x_2) |}{\| x_1 - x_2 \|}
                         \,\\
                  \]
 
                 The ratio between the model's output and the input in the above formula is bounded by \(K\). 
                 That is, as \(W\) increases, the norm increases, and thus the Lipschitz constant also increases.
-
-                weight clipping이 lipshitz 모든 weight에 대해서 \(| w_{ij} | \leq c \) 로 제한하므로
-                따라서  “∣wij∣|w\_{ij}|∣wij​∣가 클수록 operator norm도 커질 수밖에 없으므로, clipping은 간접적으로 Lipschitz 상수를 제한하는 효과를 줌
+                <br>
+                (weight clipping은 각 weight \(w_{ij}\)를 \(-c \leq w_{ij} \leq c\) 범위로 제한하는 방법.
+                개별 weight 값들이 제한되면 각 layer의 출력 변화량이 제한되어, 
+                결과적으로 전체 함수의 Lipschitz 상수가 간접적으로 제한되는 효과를 가짐.)
             </li>
         </ul>
     </li>
