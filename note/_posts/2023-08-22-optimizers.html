@@ -1,0 +1,157 @@
+---
+title:  "Optimizers"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        Stochastic Gradient Descent (SGD)
+        <ul>
+            <li>
+                The most basic optimization method.  
+                It updates the weights only using the current gradient, and <strong>depends on the learning rate</strong> \(\eta\).
+                \[
+                    W_{t+1} = W_t - \eta \cdot \frac{\partial L}{\partial W_t}
+                \]
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Momentum
+        <ul>
+            <li>
+                It adds an 관성, which helps <strong>escape local minima</strong>.
+                Here, \(\beta\) controls how much past gradients affect the next weights.
+                (
+                    SGD에서의 \(g_t\)는 매 미니배치마다 샘플이 다르기 때문에 방향이 요동치지만,
+                    Momentum에서 \(v_{t+1}\)은 현재 기울기 + 과거 기울기들의 가중합이므로 일관된 방향을 유지함
+                )
+                \[
+                    \begin{aligned}
+                    v_{t+1} &= \beta \, v_t + g_t, \quad \text{where} \quad g_t = \frac{\partial L}{\partial W_t}, \,\, v_0 = 0
+                    \,\\
+                    W_{t+1} &= W_t - \eta \cdot v_{t+1}
+                    \end{aligned}
+                \]
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Adagrad
+        <ul>
+            <li>
+                <strong>Adaptive Learning Rate</strong>. A parameter-wise adaptive method, where each parameter has its own effective learning rate.
+                \[
+                    \begin{aligned}
+                    G_{t} &= G_{t-1} + g_t^2, \quad \text{where} \quad g_t = \frac{\partial L}{\partial W_t}, \,\, G_0 = 0
+                    \,\\
+                    W_{t+1} &= W_t - \eta \cdot \frac{1}{\sqrt{G_{t} + \epsilon}} \odot g_t
+                    \end{aligned}
+                \]
+                <br>
+                Here, \(\eta\) is the <strong>global learning rate</strong> (same for all parameters), and
+                \(\frac{1}{\sqrt{G_t + \epsilon}} \) is an adaptive <strong>scaling factor</strong> applied element-wise. 
+                The \(\epsilon\) is to prevent ZeroDivisionError.
+                (
+                    \(g_t\)를 제곱함으로써 방향(부호)에 대한 정보는 없애고 크기만 보존한 다음 
+                    기울기가 클수록 비선형적으로 더 크게 반영.
+                    따라서 \(G_t\)가 클수록 크게 변동하는 파라미터에 대해서는 학습률이 줄어들고 
+                    작은 기울기를 가진 파라미터는 학습률이 유지됨. 
+                )
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Root Mean Square Propagation (RMSProp)
+        <ul>
+            <li>
+                It uses Exponential Moving Average, EMA(지수이동평균):
+
+                \[
+                    \begin{aligned}
+                    E_t &= \beta \, E_{t-1} + (1 - \beta) \, x_t, \quad 0 \le \beta \lt 1, \quad \beta = \text{decay factor}
+                    \,\\
+                    \,\\
+                    E_t &= (1 - \beta)\, x_t + \beta\,(1-\beta)\,x_{t-1} + \beta^2\, (1-\beta)\, x_{t-2} + \cdots
+                    \end{aligned}
+                \]
+
+                <br>
+                which gives more <strong>weight to recent gradients</strong>. (Adagrad에서 학습률이 점점 0에 수렴하는 문제 보완)
+                \[
+                    \begin{aligned}
+                    G_t &= \beta \, G_{t-1} + (1 - \beta) \, g_t^2 , \quad \text{where} \quad g_t = \frac{\partial L}{\partial W_t}
+                    \\
+                    W_{t+1} &= W_t - \eta \cdot \frac{1}{\sqrt{G_t + \epsilon}} \, \odot \, g_t
+                    \end{aligned}
+                \]
+                <br>
+                substituting \(G_{t-1}\):
+                \[
+                    \begin{aligned}
+                    G_{t-1} &= \beta \, G_{t-2} + (1 - \beta) \, g_{t-1}^2 
+                    \,\\
+                    \,\\
+                    G_t &= \beta \, ( \beta \, G_{t-2} + (1 - \beta) \, g_{t-1}^2 ) + (1 - \beta) \, g_t^2
+                    \,\\
+                    \,\\
+                    G_t &= \beta^2 \, G_{t-2} + \beta \, (1 - \beta) \, g_{t-1}^2 + (1 - \beta)\, g_t^2
+                    \end{aligned}
+                \]
+                <br>
+                substituting \(G_{t-2} \):
+                \[
+                    \begin{aligned}
+                    G_{t-2} &= \beta \, G_{t-3} + (1 - \beta) \, g_{t-2}^2
+                    \,\\
+                    \,\\
+                    G_t &= \beta^2 \, ( \beta\, G_{t-3} + (1 - \beta )\, g_{t-2}^2 ) + \beta \, (1 - \beta) \, g_{t-1}^2 + (1 - \beta)\, g_t^2
+                    \,\\
+                    \,\\
+                    G_t &= \beta^3\, G_{t-3} + \beta^2 \, (1 - \beta)\, g_{t-2}^2 + \beta \, (1 - \beta) \, g_{t-1}^2 + (1 - \beta)\, g_t^2
+                    \end{aligned}
+                \]
+                <br>
+                generalizing \(G_t\):
+                \[
+                    G_t = (1 - \beta)\, g_t^2 + \beta\,(1 - \beta)\, g_{t-1}^2 + \beta^2 \, (1 - \beta)\, g_{t-2}^2 + 
+                    \cdot \cdot \cdot + 
+                    \beta^t \, (1 - \beta)\, g_0^2
+                \]
+            </li>
+        </ul>
+    </li>
+    <br>
+    <li>
+        Adaptive Moment Estimation (Adam)
+        <ul>
+            <li>
+                Momentum + RMSProp
+                \[
+                    \begin{aligned}
+                    m_t &= \beta_1 \, m_{t-1} + (1 - \beta_1)\, g_t, \quad m_0 = 0
+                    \,\\
+                    \,\\
+                    v_t &= \beta_2 \, v_{t-1} + (1 - \beta_2)\, g_t^2, \quad v_0 = 0
+                    \,\\
+                    \,\\
+                    W_{t+1} &= W_t - \eta \cdot \frac{\hat{m_t}}{\sqrt{\hat{v_t}} + \epsilon}
+                    \,\\
+                    \hat{m_t} &= \frac{m_t}{1 - \beta_1^t}, \quad \hat{v_t} = \frac{v_t}{1 - \beta_2^t}
+                    \end{aligned}
+                \]
+                <br>
+                \(m_0\), \(v_0\)이 0에서 시작하므로 초기에 과소추정된 기울기를 보정하기 위해 \(\hat{m_t}, \hat{v_t}\) 사용
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<br><br>
