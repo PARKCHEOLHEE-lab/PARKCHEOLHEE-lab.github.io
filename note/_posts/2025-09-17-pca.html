@@ -1,0 +1,135 @@
+---
+title:  "Principal Component Analysis"
+layout: post
+---
+
+
+<br>
+
+
+<ul>
+    <li>
+        Principal Component Analysis
+        <ul>
+            <li>
+                The objective of <mark>PCA is to find the <strong>axes that maximize the variance</strong> of high dimensional data</mark>, 
+                and then project it into a low dimensional space. 
+            </li>
+            <br>
+            <li>
+                PCA is not just a process of reducing dimensions, 
+                but rather it finds the axes that best explain the essential structure of the data.
+            </li>
+            <br>
+            <li>
+                <strong>Covariance Matrix</strong>
+                <ul>
+                    <li>
+                        For the data matrix \(\hat{X} \in \mathbb{R}^{n \times d}\), covariance matrix \(\Sigma\) is defined as follows,
+                        where the \(n\) is the number of samples, \(d\) is the number of features, 
+                        and \(\Sigma_{ij} = Cov(\hat{X}_i, \hat{X}_j) \) means a covariance between feature \(i\) and feature \(j\).
+                        \[
+                            \begin{aligned}
+                            \,\\
+                                \Sigma &= \frac{1}{n}\hat{X}^{\top}\hat{X} \quad \in \mathbb{R}^{d \times d}
+                                \,\\
+                                \,\\
+                                \Sigma &= \frac{1}{n}
+                                \begin{bmatrix}
+                                dot(\hat{X}_1, \hat{X}_1) & dot(\hat{X}_1, \hat{X}_2) & \cdots & dot(\hat{X}_1, \hat{X}_d) \\
+                                dot(\hat{X}_2, \hat{X}_1) & dot(\hat{X}_2, \hat{X}_2) & \cdots & dot(\hat{X}_2, \hat{X}_d) \\
+                                \vdots & \vdots & \ddots & \vdots \\
+                                dot(\hat{X}_d, \hat{X}_1) & dot(\hat{X}_d, \hat{X}_2) & \cdots & dot(\hat{X}_d, \hat{X}_d)
+                                \end{bmatrix}
+                            \,\\
+                            \end{aligned}
+                        \]
+                    </li>
+                    <br>
+                    <li>
+                        Let the data matrix \(X\) be as follows, where each row is a sample and each column is a variable.
+                        \[
+                            \,\\
+                            X = 
+                            \begin{bmatrix}
+                            -6 &  2 \\
+                             6 &  4 \\
+                             3 & -5 \\
+                            -5 & -4 \\
+                            -5 & -9
+                            \end{bmatrix}
+                            \,\\
+                            \,\\
+                        \]
+
+                        For this data, we can obtain the centralized data matrix \(\hat{X}\) with zero mean by using \(\mu = [ -1.4, -2.4 ]\):
+                        \[
+                            \,\\
+                            \hat{X} = 
+                            \begin{bmatrix}
+                            -4.6 &  4.4 \\
+                             7.4 &  6.4 \\
+                             4.4 & -2.6 \\
+                            -3.6 & -1.6 \\
+                            -3.6 & -6.6
+                            \end{bmatrix}
+                            \,\\
+                            \,\\
+                        \]
+                        
+                        Here, the covariance matrix is calculated using the definition above:
+                        \[
+                            \,\\
+                                \Sigma = 
+                                \frac{1}{5} 
+                                \begin{bmatrix}
+                                121.2 & 45.2 \\
+                                45.2 & 113.2
+                                \end{bmatrix}
+                                =
+                                \begin{bmatrix}
+                                \color{red}{24.24} & \color{green}{9.04} \\
+                                \color{green}{9.04} & \color{blue}{22.64}
+                                \end{bmatrix}
+                            \,\\
+                            \,\\
+                        \]
+                        
+                        where, from a 
+                        <a href="https://angeloyeo.github.io/2019/07/27/PCA.html#:~:text=%EA%B7%B8%EB%A6%BC%204.%20%EA%B3%B5%EB%B6%84%EC%82%B0%ED%96%89%EB%A0%AC%20Matrix%201%EC%9D%98%20%EA%B0%81%20%EC%9B%90%EC%86%8C%EB%93%A4%EC%9D%B4%20%EC%9D%98%EB%AF%B8%ED%95%98%EB%8A%94%20%EA%B2%83">
+                            geometric perspective
+                        </a>,
+                        the diagonal elements \(\Sigma_{11}\) and \(\Sigma_{22}\) are the variances along the x-axis and y-axis, respectively.
+                        The off-diagonal elements \(\Sigma_{12}\) and \(\Sigma_{21}\) represent the <span style="color: green;">covariance</span> between x and y,
+                        which indicates how much x and y change together.
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Eigenvectors of Covirance Matrix
+            </li>
+        </ul>
+    </li>
+    <!-- 
+        https://chatgpt.com/c/68cb9d08-f9d8-8321-be60-8008a3f1eba6
+    -->
+    <br>
+    <li>
+        References
+        <ul>
+            <li>
+                <a href="https://angeloyeo.github.io/2019/07/27/PCA.html">https://angeloyeo.github.io/2019/07/27/PCA.html</a>
+            </li>
+            <li>
+                <a href="https://angeloyeo.github.io/2020/11/19/eigen_decomposition.html">https://angeloyeo.github.io/2020/11/19/eigen_decomposition.html</a>
+            </li>
+            <li>
+                <a href="https://ranasinghiitkgp.medium.com/principal-component-analysis-pca-with-code-on-mnist-dataset-da7de0d07c22">https://ranasinghiitkgp.medium.com/principal-component-analysis</a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+<br><br>
