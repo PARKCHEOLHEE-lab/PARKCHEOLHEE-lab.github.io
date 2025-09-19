@@ -12,8 +12,8 @@ layout: post
         Principal Component Analysis
         <ul>
             <li>
-                The objective of <mark>PCA is to find the <strong>axes that maximize the variance</strong> of high dimensional data</mark>, 
-                and then project it into a low dimensional space. 
+                The objective of <mark>PCA is to find the axes that maximize the variance of data</mark>, 
+                and then project it into the lower dimensional space. 
             </li>
             <br>
             <li>
@@ -99,21 +99,144 @@ layout: post
                         <a href="https://angeloyeo.github.io/2019/07/27/PCA.html#:~:text=%EA%B7%B8%EB%A6%BC%204.%20%EA%B3%B5%EB%B6%84%EC%82%B0%ED%96%89%EB%A0%AC%20Matrix%201%EC%9D%98%20%EA%B0%81%20%EC%9B%90%EC%86%8C%EB%93%A4%EC%9D%B4%20%EC%9D%98%EB%AF%B8%ED%95%98%EB%8A%94%20%EA%B2%83">
                             geometric perspective
                         </a>,
-                        the diagonal elements \(\Sigma_{11}\) and \(\Sigma_{22}\) are the variances along the x-axis and y-axis, respectively.
-                        The off-diagonal elements \(\Sigma_{12}\) and \(\Sigma_{21}\) represent the <span style="color: green;">covariance</span> between x and y,
-                        which indicates how much x and y change together.
+                        the diagonal elements \(\Sigma_{11}\) and \(\Sigma_{22}\) are the variances along the \(\color{red}{\text{x-axis}}\) and \(\color{blue}{\text{y-axis}}\), respectively.
+                        The symmetric off-diagonal elements \(\Sigma_{12}\) and \(\Sigma_{21}\) represent the \(\color{green}{\text{covariance}}\) between x and y,
+                        which indicates how much x and y change together. 
+<!-- 
+                        <br><br>
+                        At this point, a natural question arises:  
+                        How can we extract from the covariance matrix the directions that maximize the variance of the data?  
+                        This leads us to the concepts of eigenvalues and eigenvectors.
+-->
                     </li>
                 </ul>
             </li>
             <br>
             <li>
-                Eigenvectors of Covirance Matrix
+                <strong>Eigenvalues and Eigenvectors of Covariance Matrix</strong>
+                <ul>
+                    <li>
+                        Due to the geometric properties of the covariance matrix,
+                        <mark>
+                        we can find the principal component with the maximum variance
+                        by computing its <a href=""https://parkcheolhee-lab.github.io/eigenvalues-eigenvectors/"">eigenvalues, eigenvectors</a>.
+                        Here, the eigenvalues indicate the amount of variance of each eigenvector
+                        </mark>.
+
+                        <!-- 공분산행렬의 이러한 기하학적 특성으로 인해, 우리는 공분산행렬의 고유값(eigenvalue)과 고유벡터(eigenvector)를 
+                        구함으로써 데이터의 분산이 가장 큰 방향(주성분, principal component)을 찾을 수 있습니다. 
+                        즉, 공분산행렬의 고유벡터는 데이터 분포의 주축 방향을 나타내고, 고유값은 그 방향으로의 분산(정보의 크기)을 의미합니다.  -->
+                    </li>
+                    <br>
+                    <li>
+                        Why do the eigenvalues of each eigenvector represent the variance? 
+
+
+                        <br><br>
+                    
+                        For the centered data matrix, \(\hat{X} \in \mathbb{R}^{n \times d}\)
+                        projecting all samples onto direction \(v\) gives:
+                    
+                        \[
+                            \,\\
+                            \hat{X}v \in \mathbb{R}^{n \times 1}.
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        The variance of the vector obtained by projecting all data onto \(v\) 
+                        can be written as follows, according to the definition above:
+                    
+                        \[  
+                            \,\\
+                            \begin{aligned}
+                            \text{Var}(\hat{X}v) 
+                            &= \frac{1}{n} (\hat{X}v)^\top \hat{X}v
+                            \,\\
+                            \,\\
+                            &= \frac{1}{n} v^\top \hat{X}^\top \hat{X} v
+                            \,\\
+                            \,\\
+                            &= v^\top \left( \frac{1}{n} \hat{X}^\top \hat{X} \right) v
+                            \end{aligned}
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        The covariance matrix is defined as \( \Sigma = \frac{1}{n}\hat{X}^\top \hat{X} \),
+                        so it can be rewritten:
+                    
+                        \[
+                            \,\\
+                            \text{Var}(\hat{X}v) = v^\top \Sigma \, v
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        If \(v\) is an eigenvector of \(\Sigma\), 
+                        by the definition of eigenvectors \(\Sigma v = \lambda v\), we can obtain the following:
+                    
+                        \[
+                            \begin{aligned}
+                            \,\\
+                            v^\top \Sigma \, v &= v^\top \lambda v 
+                            \,\\
+                            \,\\
+                            &= \lambda \, (v^\top v)
+                            \,\\
+                            \,\\
+                            \end{aligned}
+                        \]
+                    
+                        Normalizing \(v\) to be \(\|v\|=1\) gives \(v^\top v = 1\).
+                        Therefore:
+                    
+                        \[
+                            \,\\
+                            \text{Var}(\hat{X}v) = \lambda.
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        Hence, the eigenvalue \(\lambda\) directly represents the variance of the data along its corresponding eigenvector \(v\).
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                <!-- Eigenvectors of Covirance Matrix -->
+                <strong>Eigendecomposition of Covariance Matrix</strong>
+                <ul>
+                    <li>
+
+                        <!--
+                            분산이 가장 큰 고유벡터를 찾는다는 것은,
+                            존재하는 모든 고유벡터와 고유값을 계산해야 한다는 것을 의미한다. 
+                            그리고 모든 고유벡터를 단위벡터로 만들고, 고유값이 큰 순서대로 정렬하면 그것이 제 1 주성분이 된다.  
+
+                            따라서 어떤 행렬을 ...
+                        -->
+
+                        <!-- How can we find the new axes that maximize the variance of the data?
+                        This is where the eigendecomposition of the covariance matrix comes in.
+                        행렬 \(A\)의 고유벡터들이 서도 독립이라면 다음과 같이 분해될 수 있다.
+                        \[
+                            \,\\
+                            A = P \Lambda P^{-1}
+                            \,\\
+                            \,\\
+                        \]
+                        여기서 \(P\)는 고유벡터를 열벡터로 하는 행렬, \(\Lambda\)는 고유값을 대각원소로 하는 대각행렬이다. -->
+
+                    </li>
+                </ul>
             </li>
         </ul>
     </li>
     <!-- 
         https://chatgpt.com/c/68cb9d08-f9d8-8321-be60-8008a3f1eba6
     -->
+    <br>
     <br>
     <li>
         References
@@ -128,6 +251,10 @@ layout: post
                 <a href="https://ranasinghiitkgp.medium.com/principal-component-analysis-pca-with-code-on-mnist-dataset-da7de0d07c22">https://ranasinghiitkgp.medium.com/principal-component-analysis</a>
             </li>
         </ul>
+    </li>
+    <br>
+    <li>
+        Notebook
     </li>
 </ul>
 
