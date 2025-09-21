@@ -1,0 +1,159 @@
+---
+title:  "Attention? Attention!"
+layout: post
+emoji: /emoji/eyes.png
+---
+
+
+<div id="toc"></div>
+
+
+<div class="article">
+
+    This is based on the post <a href="https://lilianweng.github.io/posts/2018-06-24-attention/">Attention? Attention!</a> 
+
+    <!-- <br><br><br><br> -->
+
+    <hr>
+    <br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/shiba-example-attention.png" width="100%">
+        <figcaption>
+            A Shiba Inu in a men's outfit. The credit of the original photo goes to 
+            <br>
+            Instagram <a href="https://www.instagram.com/mensweardog/?hl=en">@mensweardog</a>.
+        </figcaption>
+    </figure><br>
+
+    Given a small patch of an image, pixels in the rest provide clues what should be displayed there. 
+    <strong>We expect to see a pointy ear in the yellow box because we have seen a dog's nose, another pointy ear on the right</strong> (stuff in the red boxes).
+    However, the sweater and blanket at the bottom (stuff in the gray boxes) would not be as helpful as those doggy features.
+    
+    <br><br>
+
+    Similarly, we can explain the relationship between words in one sentence or close context. 
+    <strong>When we see "eating", we expect to encounter a food word very soon.</strong> 
+
+    Attention in deep learning can be broadly interpreted as a vector of importance weights:
+    in order to predict or infer one element, such as a pixel in an image or a word in a sentence, 
+    <strong>we estimate using the attention vector how strongly it is correlated with (attends to) other elements.</strong>
+
+    <br><br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/sentence-example-attention.png" width="70%">
+        <figcaption>
+            One word "attends" to other words in the same sentence differently.
+        </figcaption>
+    </figure><br>
+</div><br><br>
+
+<h3>
+    What's Wrong with Seq2Seq Model?
+</h3>
+<div class="article">
+    The seq2seq model normally has an encoder-decoder architecture, composed of:
+    <ul>
+        <li>
+            An <strong>encoder</strong> processes the input sequence and compresses the information into a context vector of a fixed length. 
+            This representation is expected to be a good summary of the meaning of the whole source sequence.
+        </li>
+        <li>
+            A <strong>decoder</strong> is initialized with the context vector to emit the transformed output. 
+            The early work only used the last state of the encoder network as the decoder initial state.
+        </li>
+        <figure>
+            <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-example.png" width="80%">
+            <figcaption>
+                The encoder-decoder model, translating the sentence "she is eating a green apple" to Chinese
+            </figcaption>
+        </figure>
+        <br>
+        <figure>
+            <img src="https://colah.github.io/posts/2015-08-Understanding-LSTMs/img/RNN-unrolled.png" width="70%">
+            <figcaption>
+                An unrolled recurrent neural network diagram <br> 
+                taken from <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">Understanding-LSTMs</a>
+            </figcaption>
+        </figure><br>
+
+        A critical and apparent disadvantage of this fixed-length context vector design 
+        is incapability of remembering long sentences. 
+        <strong>
+            Often it has forgotten the first part once it completes processing the whole input.
+        </strong>
+            The attention mechanism was born to resolve this problem.
+    </ul>
+</div><br><br>
+
+<h3>Born for Translation</h3>
+<div class="article">
+    Rather than building a single context vector out of the encoder's last hidden state, 
+    the secret sauce invented by attention is to create <strong>shortcuts</strong> between the context vector and the entire source input. 
+    While the context vector has access to the entire input sequence, we don’t need to worry about forgetting.
+
+    <br><br>
+
+    The context vector consumes three pieces of information:
+    <ul>
+        <li>
+            encoder hidden states
+        </li>
+        <li>
+            decoder hidden states
+        </li>
+        <li>
+            alignment between source and target
+        </li>
+    </ul>
+
+    <br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-attention.png" width="100%">
+        <figcaption>The encoder-decoder model with additive attention mechanism
+            <br>
+            in <a href="https://arxiv.org/pdf/1409.0473">Neural Machine Translation by Jointly Learning to Align and Translate</a>
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    Now let's define the attention mechanism. Say, we have a source sequence \(\mathbf{x}\) of length \(n\)
+    and try to output a target sequence \(\mathbf{y} \) of lenfth \(m\) (variables in bold indicate that they are vectors):
+    \[
+        \begin{aligned}
+        \mathbf{x} &= [x_1, x_2, \dots, x_n] \\
+        \mathbf{y} &= [y_1, y_2, \dots, y_m]
+        \end{aligned}
+    \]
+
+</div><br><br>
+
+<h3>A Family of Attention Mechanisms</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>Transformer</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>Self-Attention GAN</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>References</h3>
+<div class="article">
+    <ul>
+        <li>
+            <a href="https://lilianweng.github.io/posts/2018-06-24-attention/">https://lilianweng.github.io/posts/2018-06-24-attention/</a>
+        </li>
+        <li>
+            <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">https://colah.github.io/posts/2015-08-Understanding-LSTMs/</a>
+        </li>
+    </ul>
+</div>
+
+
+<br><br>
