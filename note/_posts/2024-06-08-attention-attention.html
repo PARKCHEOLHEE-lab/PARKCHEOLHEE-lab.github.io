@@ -19,9 +19,9 @@ emoji: /emoji/eyes.png
     <figure>
         <img src="https://lilianweng.github.io/posts/2018-06-24-attention/shiba-example-attention.png" width="100%">
         <figcaption>
-            A Shiba Inu in a men's outfit. The credit of the original photo goes to 
+            A Shiba Inu in a men's outfit. The credit of the original photo goes to Instagram 
             <br>
-            Instagram <a href="https://www.instagram.com/mensweardog/?hl=en">@mensweardog</a>.
+            <a href="https://www.instagram.com/mensweardog/?hl=en">@mensweardog</a>.
         </figcaption>
     </figure><br>
 
@@ -71,8 +71,8 @@ emoji: /emoji/eyes.png
         <figure>
             <img src="https://colah.github.io/posts/2015-08-Understanding-LSTMs/img/RNN-unrolled.png" width="70%">
             <figcaption>
-                An unrolled recurrent neural network diagram <br> 
-                taken from <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">Understanding-LSTMs</a>
+                An unrolled recurrent neural network diagram taken from
+                <br>  <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">Understanding-LSTMs</a>
             </figcaption>
         </figure><br>
 
@@ -109,9 +109,9 @@ emoji: /emoji/eyes.png
     <br>
     <figure>
         <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-attention.png" width="100%">
-        <figcaption>The encoder-decoder model with additive attention mechanism
+        <figcaption>The encoder-decoder model with additive attention mechanism in 
             <br>
-            in <a href="https://arxiv.org/pdf/1409.0473">Neural Machine Translation by Jointly Learning to Align and Translate</a>
+            <a href="https://arxiv.org/pdf/1409.0473">Neural Machine Translation by Jointly Learning to Align and Translate</a>
         </figcaption>
     </figure>
 
@@ -120,11 +120,92 @@ emoji: /emoji/eyes.png
     Now let's define the attention mechanism. Say, we have a source sequence \(\mathbf{x}\) of length \(n\)
     and try to output a target sequence \(\mathbf{y} \) of lenfth \(m\) (variables in bold indicate that they are vectors):
     \[
+        \,\\
         \begin{aligned}
         \mathbf{x} &= [x_1, x_2, \dots, x_n] \\
         \mathbf{y} &= [y_1, y_2, \dots, y_m]
         \end{aligned}
+        \,\\
+        \,\\
     \]
+
+    The encoder is a bidirectional RNN with a forward hidden state \(\overrightarrow{h}_i \) and a backward one \(\overleftarrow{h}_i\).
+    A simple concatenation of two represents the encoder state.
+    \[
+        \,\\
+        h_i = [\overrightarrow{h}_i^\top; \overleftarrow{h}_i^\top]^\top, i=1,\dots,n
+        \,\\
+        \,\\
+    \]
+
+    The decoder network has hidden state \(s_t = f(s_{t-1}, \, y_{t-1}, \, c_t  ) \)
+    for the output word at position \(t\, (t = 1, \, \dots, \, m) \),
+    where the <strong>context vector</strong> \(c_t = \sum_{i=1}^n \alpha_{t,i} \, h_i \) <strong>is a sum of hidden states of the input sequence, weighted by alignment scores.</strong>
+    The alignment model assigns a score \(\alpha_{t,i}\) to the pair of input at position \(i\)
+    and output at position \(t\), \( (y_t, x_i) \), baed on how well they match.
+    \[
+        \,\\
+        a_{t,i} = \frac{\exp(\text{score}(s_{t-1}, h_i))}{\sum_{i'=1}^n \exp(\text{score}(s_{t-1}, h_{i'}))} 
+        \,\\
+        \,\\
+    \]
+
+    The set of \( {\alpha_{t,i}} \) are weights defining how much of each source hidden state
+    should be considered for each output.
+    In Bahdanau's paper, the alignment score \(\alpha\) is parameterized by a
+    feed-forward network with a single hidden layer, and this network is jointly
+    trained with other parts of the model.
+    The score function is therefore in the following form, given 
+    that \(\tanh\) is used as the non-linear activation function:
+
+    \[
+        \,\\
+        \text{score}(s_t, h_i) = \mathbf{v}_a^\top \tanh(\mathbf{W}_a[s_t; h_i])
+        \,\\
+        \,\\
+    \]
+
+    where both \(\mathbf{v}_a\) and \(\mathbf{W_a}\) are weight matrices to be learned in the alignment model.
+
+    <br><br>
+
+<pre><code class="python">
+    class BahdanauAttention(nn.Module):
+        def __init__(self, hidden_size):
+            super(BahdanauAttention, self).__init__()
+            self.Wa = nn.Linear(hidden_size, hidden_size)
+            self.Ua = nn.Linear(hidden_size, hidden_size)
+            self.Va = nn.Linear(hidden_size, 1)
+
+        def forward(self, query, keys):
+            # query: s_{t-1}
+            # keys: h_i  
+
+            scores = self.Va(torch.tanh(self.Wa(query) + self.Ua(keys)))
+            scores = scores.squeeze(2).unsqueeze(1)
+
+            weights = F.softmax(scores, dim=-1)
+            context = torch.bmm(weights, keys)
+
+            return context, weights
+</code></pre>
+<figcaption class="nofig">Additive Attention taken from
+    <br>
+     <a href="https://docs.pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html#:~:text=class%20BahdanauAttention(,context%2C%20weights">NLP From Scratch: Translation with a Sequence to Sequence Network and Attention</a>
+</figcaption>
+    <br><br>
+
+    The matrix of alignment scores is a nice byproduct to explicitly show the <strong>correlation between source and target</strong> words.
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/bahdanau-fig3.png" width="70%">
+        <figcaption>
+            Alignment Matrix
+        </figcaption>
+    </figure>
+
+    <!-- 
+        https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc
+    -->
 
 </div><br><br>
 
@@ -151,6 +232,9 @@ emoji: /emoji/eyes.png
         </li>
         <li>
             <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">https://colah.github.io/posts/2015-08-Understanding-LSTMs/</a>
+        </li>
+        <li>
+            <a href="https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc">https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc</a>
         </li>
     </ul>
 </div>
