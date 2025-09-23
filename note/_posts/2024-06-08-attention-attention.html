@@ -17,13 +17,14 @@ emoji: /emoji/eyes.png
     <hr>
     <br>
     <figure>
-        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/shiba-example-attention.png" width="100%">
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/shiba-example-attention.png" width="70%">
         <figcaption>
             A Shiba Inu in a men's outfit. The credit of the original photo goes to Instagram 
             <br>
             <a href="https://www.instagram.com/mensweardog/?hl=en">@mensweardog</a>.
         </figcaption>
-    </figure><br>
+    </figure>
+    <br><br>
 
     Given a small patch of an image, pixels in the rest provide clues what should be displayed there. 
     <strong>We expect to see a pointy ear in the yellow box because we have seen a dog's nose, another pointy ear on the right</strong> (stuff in the red boxes).
@@ -40,11 +41,11 @@ emoji: /emoji/eyes.png
 
     <br><br>
     <figure>
-        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/sentence-example-attention.png" width="70%">
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/sentence-example-attention.png" width="50%">
         <figcaption>
             One word "attends" to other words in the same sentence differently.
         </figcaption>
-    </figure><br>
+    </figure>
 </div><br><br>
 
 <h3>
@@ -62,19 +63,21 @@ emoji: /emoji/eyes.png
             The early work only used the last state of the encoder network as the decoder initial state.
         </li>
         <figure>
-            <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-example.png" width="80%">
+            <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-example.png" width="70%">
             <figcaption>
                 The encoder-decoder model, translating the sentence "she is eating a green apple" to Chinese
             </figcaption>
         </figure>
         <br>
         <figure>
-            <img src="https://colah.github.io/posts/2015-08-Understanding-LSTMs/img/RNN-unrolled.png" width="70%">
+            <img src="https://colah.github.io/posts/2015-08-Understanding-LSTMs/img/RNN-unrolled.png" width="60%">
             <figcaption>
                 An unrolled recurrent neural network diagram taken from
                 <br>  <a href="https://colah.github.io/posts/2015-08-Understanding-LSTMs/">Understanding-LSTMs</a>
             </figcaption>
-        </figure><br>
+        </figure>
+        
+        <br><br>
 
         A critical and apparent disadvantage of this fixed-length context vector design 
         is incapability of remembering long sentences. 
@@ -108,7 +111,7 @@ emoji: /emoji/eyes.png
 
     <br>
     <figure>
-        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-attention.png" width="100%">
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-attention.png" width="70%">
         <figcaption>The encoder-decoder model with additive attention mechanism in 
             <br>
             <a href="https://arxiv.org/pdf/1409.0473">Neural Machine Translation by Jointly Learning to Align and Translate</a>
@@ -145,7 +148,7 @@ emoji: /emoji/eyes.png
     and output at position \(t\), \( (y_t, x_i) \), baed on how well they match.
     \[
         \,\\
-        a_{t,i} = \frac{\exp(\text{score}(s_{t-1}, h_i))}{\sum_{i'=1}^n \exp(\text{score}(s_{t-1}, h_{i'}))} 
+        a_{t,i} = \frac{\exp(\text{score}(s_{t-1}, h_i))}{\sum\limits_{i'=1}^n \exp(\text{score}(s_{t-1}, h_{i'}))} 
         \,\\
         \,\\
     \]
@@ -197,7 +200,7 @@ emoji: /emoji/eyes.png
 
     The matrix of alignment scores is a nice byproduct to explicitly show the <strong>correlation between source and target</strong> words.
     <figure>
-        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/bahdanau-fig3.png" width="70%">
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/bahdanau-fig3.png" width="50%">
         <figcaption>
             Alignment Matrix
         </figcaption>
@@ -209,14 +212,124 @@ emoji: /emoji/eyes.png
 
 </div><br><br>
 
-<h3>A Family of Attention Mechanisms</h3>
+<!-- <h3>A Family of Attention Mechanism</h3>
 <div class="article">
+    With the help of the attention, the dependencies between source and target sequences are not restricted by the in-between distance anymore! 
+    Given the big improvement by attention in machine translation, it soon got extended into the computer vision field and
+    people started exploring various other forms of attention mechanisms.
 
+    <br><br>
+
+    Below is a summaty table of several popular attention mechanism and corresponding alignment score functions:
+
+    <br><br>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Alignment score function</th>
+                <th>Citation</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Content-base attention</td>
+                <td class="has-jax"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="19" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>score</mtext><mo stretchy="false">(</mo><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo>,</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mtext>cosine</mtext><mo stretchy="false">[</mo><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo>,</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">]</mo></math></mjx-assistive-mml></mjx-container></td>
+                <td><a href="https://arxiv.org/abs/1410.5401">Graves2014</a></td>
+            </tr>
+            <tr>
+                <td>Additive(*)</td>
+                <td class="has-jax"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="20" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D42F TEX-B"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.247em; margin-left: 0px;"><mjx-mi class="mjx-n" size="s"><mjx-c class="mjx-c22A4"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.298em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-mi class="mjx-n" space="2"><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c6E"></mjx-c><mjx-c class="mjx-c68"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D416 TEX-B"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c5B"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c3B"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c5D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>score</mtext><mo stretchy="false">(</mo><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo>,</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><msubsup><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">v</mi></mrow><mi>a</mi><mi mathvariant="normal">⊤</mi></msubsup><mi>tanh</mi><mo data-mjx-texclass="NONE">⁡</mo><mo stretchy="false">(</mo><msub><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">W</mi></mrow><mi>a</mi></msub><mo stretchy="false">[</mo><msub><mi mathvariant="bold-italic">s</mi><mrow data-mjx-texclass="ORD"><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>;</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">]</mo><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container></td>
+                <td><a href="https://arxiv.org/pdf/1409.0473.pdf">Bahdanau2015</a></td>
+            </tr>
+            <tr>
+                <td>Location-Base</td>
+                <td class="has-jax"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="21" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D6FC TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msub><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mtext class="mjx-n" space="4"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c66"></mjx-c><mjx-c class="mjx-c74"></mjx-c><mjx-c class="mjx-c6D"></mjx-c><mjx-c class="mjx-c61"></mjx-c><mjx-c class="mjx-c78"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D416 TEX-B"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mi>α</mi><mrow data-mjx-texclass="ORD"><mi>t</mi><mo>,</mo><mi>i</mi></mrow></msub><mo>=</mo><mtext>softmax</mtext><mo stretchy="false">(</mo><msub><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">W</mi></mrow><mi>a</mi></msub><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container><br>Note: This simplifies the softmax alignment to only depend on the target position.</td>
+                <td><a href="https://arxiv.org/pdf/1508.04025.pdf">Luong2015</a></td>
+            </tr>
+            <tr>
+                <td>General</td>
+                <td class="has-jaxhas-jax"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="22" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.26em; margin-left: 0px;"><mjx-mi class="mjx-n" size="s"><mjx-c class="mjx-c22A4"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-msub><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D416 TEX-B"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>score</mtext><mo stretchy="false">(</mo><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo>,</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><msubsup><mi mathvariant="bold-italic">s</mi><mi>t</mi><mi mathvariant="normal">⊤</mi></msubsup><msub><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">W</mi></mrow><mi>a</mi></msub><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container><br>where <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="23" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-msub><mjx-texatom texclass="ORD"><mjx-mi class="mjx-b"><mjx-c class="mjx-c1D416 TEX-B"></mjx-c></mjx-mi></mjx-texatom><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D44E TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><msub><mrow data-mjx-texclass="ORD"><mi mathvariant="bold">W</mi></mrow><mi>a</mi></msub></math></mjx-assistive-mml></mjx-container> is a trainable weight matrix in the attention layer.</td>
+                <td><a href="https://arxiv.org/pdf/1508.04025.pdf">Luong2015</a></td>
+            </tr>
+            <tr>
+                <td>Dot-Product</td>
+                <td class="has-jax"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="24" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-msubsup space="4"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.26em; margin-left: 0px;"><mjx-mi class="mjx-n" size="s"><mjx-c class="mjx-c22A4"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>score</mtext><mo stretchy="false">(</mo><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo>,</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><msubsup><mi mathvariant="bold-italic">s</mi><mi>t</mi><mi mathvariant="normal">⊤</mi></msubsup><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub></math></mjx-assistive-mml></mjx-container></td>
+                <td><a href="https://arxiv.org/pdf/1508.4025.pdf">Luong2015</a></td>
+            </tr>
+            <tr>
+                <td>Scaled Dot-Product(^)</td>
+                <td class="has-jax"><mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" tabindex="0" ctxtmenu_counter="25" style="font-size: 113.1%; position: relative;"><mjx-math class="MJX-TEX" aria-hidden="true"><mjx-mtext class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c72"></mjx-c><mjx-c class="mjx-c65"></mjx-c></mjx-mtext><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c2C"></mjx-c></mjx-mo><mjx-msub space="2"><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mfrac space="4"><mjx-frac><mjx-num><mjx-nstrut></mjx-nstrut><mjx-mrow size="s"><mjx-msubsup><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D494 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.26em; margin-left: 0px;"><mjx-mi class="mjx-n" size="s"><mjx-c class="mjx-c22A4"></mjx-c></mjx-mi><mjx-spacer style="margin-top: 0.18em;"></mjx-spacer><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msubsup><mjx-msub><mjx-mi class="mjx-b mjx-i"><mjx-c class="mjx-c1D489 TEX-BI"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D456 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line></mjx-line><mjx-row><mjx-den><mjx-dstrut></mjx-dstrut><mjx-msqrt size="s"><mjx-sqrt><mjx-surd><mjx-mo class="mjx-n"><mjx-c class="mjx-c221A"></mjx-c></mjx-mo></mjx-surd><mjx-box style="padding-top: 0.281em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D45B TEX-I"></mjx-c></mjx-mi></mjx-box></mjx-sqrt></mjx-msqrt></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac></mjx-math><mjx-assistive-mml unselectable="on" display="inline"><math xmlns="http://www.w3.org/1998/Math/MathML"><mtext>score</mtext><mo stretchy="false">(</mo><msub><mi mathvariant="bold-italic">s</mi><mi>t</mi></msub><mo>,</mo><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><msubsup><mi mathvariant="bold-italic">s</mi><mi>t</mi><mi mathvariant="normal">⊤</mi></msubsup><msub><mi mathvariant="bold-italic">h</mi><mi>i</mi></msub></mrow><msqrt><mi>n</mi></msqrt></mfrac></math></mjx-assistive-mml></mjx-container><br>Note: very similar to the dot-product attention except for a scaling factor; where n is the dimension of the source hidden state.</td>
+                <td><a href="http://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf">Vaswani2017</a></td>
+            </tr>
+        </tbody>
+      </table>
+</div><br><br> -->
+
+<h3>Self-Attention</h3>
+<div class="article">
+    Self-attention, also known as intra-attention, is an <strong>
+        attention mechanism relating different positions
+        of a single sequence in order to compute a representation of the same sequence.
+    </strong>
+    The long short-term memory network paper used self-attention to do machine reading. 
+    In the example below, the self-attention mechanism enables us to learn the correlation between the current words and the previous part of the sentence.
+
+    <br><br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/cheng2016-fig1.png" width="50%">
+        <figcaption>
+            The current word is in red and the size of the blue shade indicates the activation level taken from
+            <br>  <a href="https://arxiv.org/pdf/1601.06733">Long Short-Term Memory-Networks for Machine Reading</a>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/attention-attention/attention-attention-0.png" width="50%" onerror=handle_image_error(this)>
+        <figcaption>
+            Examples of intra-attention
+            <br>  <a href="https://arxiv.org/pdf/1601.06733">Long Short-Term Memory-Networks for Machine Reading</a>
+        </figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Soft vs Hard Attention</h3>
+<div class="article">
+    In the Show, Attend and Tell paper,
+    attention mechanism is applied to images to generate captions.
+    The image is first encoded by a CNN to extract features. 
+    Then a LSTM decoder consumes the convolution features to produce descriptive words one by one.
+    A visualization of the attention weights clearly shows which areas of the image the model is attending.
+
+    <figure>
+        <img src="/img/attention-attention/attention-attention-1.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Visualization of the attention for each generated word taken from 
+            <br> <a href="">Neural Image Caption Generation with Visual Attention</a>
+        </figcaption>
+    </figure>
+    <br><br>
+
+    <ul>
+        <li>
+            <strong>Soft</strong> Attention: 
+            the alignment weights are learned and placed "softly" over <strong>all patches in the source image</strong>.
+        </li>
+        <li>
+            <strong>Hard</strong> Attention:
+            only <strong>selects one patch</strong> of the image to attent to at a time.
+        </li>
+    </ul>
+</div><br><br>
+
+<h3>Pointer Network</h3>
+<div class="article">
 </div><br><br>
 
 <h3>Transformer</h3>
 <div class="article">
-
 </div><br><br>
 
 <h3>Self-Attention GAN</h3>
@@ -235,6 +348,15 @@ emoji: /emoji/eyes.png
         </li>
         <li>
             <a href="https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc">https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc</a>
+        </li>
+        <li>
+            <a href="https://docs.pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html">https://docs.pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html</a>
+        </li>
+        <li>
+            <a href="https://www.kaggle.com/code/shourabhpayal/cnn-lstm-pytorch-image-captioning">https://www.kaggle.com/code/shourabhpayal/cnn-lstm-pytorch-image-captioning</a>
+        </li>
+        <li>
+            <a href="https://chatgpt.com/c/68d25a51-804c-8324-9742-d4a814faf30d">https://chatgpt.com/c/68d25a51-804c-8324-9742-d4a814faf30d</a>
         </li>
     </ul>
 </div>
