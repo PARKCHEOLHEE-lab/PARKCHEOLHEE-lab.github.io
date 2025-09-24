@@ -62,6 +62,7 @@ emoji: /emoji/eyes.png
             A <strong>decoder</strong> is initialized with the context vector to emit the transformed output. 
             The early work only used the last state of the encoder network as the decoder initial state.
         </li>
+        <br>
         <figure>
             <img src="https://lilianweng.github.io/posts/2018-06-24-attention/encoder-decoder-example.png" width="70%">
             <figcaption>
@@ -199,6 +200,7 @@ emoji: /emoji/eyes.png
     <br><br>
 
     The matrix of alignment scores is a nice byproduct to explicitly show the <strong>correlation between source and target</strong> words.
+    <br><br>
     <figure>
         <img src="https://lilianweng.github.io/posts/2018-06-24-attention/bahdanau-fig3.png" width="50%">
         <figcaption>
@@ -302,7 +304,7 @@ emoji: /emoji/eyes.png
     The image is first encoded by a CNN to extract features. 
     Then a LSTM decoder consumes the convolution features to produce descriptive words one by one.
     A visualization of the attention weights clearly shows which areas of the image the model is attending.
-
+    <br><br>
     <figure>
         <img src="/img/attention-attention/attention-attention-1.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
@@ -324,16 +326,94 @@ emoji: /emoji/eyes.png
     </ul>
 </div><br><br>
 
-<h3>Pointer Network</h3>
-<div class="article">
-</div><br><br>
-
 <h3>Transformer</h3>
 <div class="article">
-</div><br><br>
+    It presented a lot of improvements to the soft attention and make it possible to do seq2seq modeling without recurrent network units.
+    The transformer adopts the scaled dot-product attention: 
+    the output is a weighted sum of the values, where the 
+    <strong>weight assigned to each value is determined by the dot-product of the query with all the keys:</strong>
+    \[
+        \,\\
+        \text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{n}})\mathbf{V}
+        \,\\
+        \,\\
+    \]
 
-<h3>Self-Attention GAN</h3>
-<div class="article">
+    Rather than only computing the attention once, the multi-head mechanism runs through the scaled dot-product attention multiple times in parallel.
+    The independent attention outputs are simply concatenated and linearly transformed into the expected dimensions.
+    
+    <br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/multi-head-attention.png" width="30%">
+        <figcaption>
+            Multi-head scaled dot-product attention mechanism
+        </figcaption>
+    </figure>
+    <br><br>
+    
+    According to the paper, “multi-head attention allows the model to <strong>jointly attend to information from different representation subspaces</strong> at different positions. 
+    With a single attention head, averaging inhibits this.”
+    
+
+    \[
+        \,\\
+        \begin{aligned}
+        \text{MultiHead}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) &= [\text{head}_1; \dots; \text{head}_h]\mathbf{W}^O \\
+        \text{where head}_i &= \text{Attention}(\mathbf{Q}\mathbf{W}^Q_i, \mathbf{K}\mathbf{W}^K_i, \mathbf{V}\mathbf{W}^V_i)
+        \end{aligned}
+        \,\\
+        \,\\
+    \]
+
+    where \( \mathbf{W}^Q_i \), \( \mathbf{W}^K_i \), \( \mathbf{W}^V_i \), and \( \mathbf{W}^O \) are parameter matrices to be learned.
+
+    <br><br><br>
+
+    The encoder generates an attention-based representation with capability to locate a specific piece of information.
+    Each layer has a multi-head self-attention layer and a simple position-wise fully connected feed-forward network.
+    Each sub-layer adopts a residual connection and a layer normalization. 
+    The encoder layer can be stacked \(N\) times because every sub-layer outputs the same dimension of \(d_{model} = 512\).
+
+    <br><br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/transformer-encoder.png" width="50%">
+        <figcaption>
+            The transformer's encoder
+        </figcaption>
+    </figure>
+
+    <br><br>
+    
+    Each decoder layer consists of three sub-layers: 
+    (1) a masked multi-head self-attention mechanism, 
+    (2) a multi-head cross-attention mechanism, and 
+    (3) a position-wise fully connected feed-forward network.
+    Similar to the encoder, each sub-layer adopts a residual connection and a layer normalization.
+    The first masked multi-head self-attention mechanism is modified to prevent positions from attending to subsequent positions, 
+    as we don't want to look into the future of the target sequence when predicting the current position.
+    
+    <br><br>
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/transformer-decoder.png" width="45%">
+        <figcaption>
+            The transformer's decoder
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    Both the source and target sequences first go through embedding layers to produce data of the same dimension \(d_{model} = 512 \).   
+    To preserve the position information, a sinusoid-wave-based positional encoding is applied and summed with the embedding output.
+    A softmax and linear layer are added to the final decoder output.
+
+    <br><br>
+
+    <figure>
+        <img src="https://lilianweng.github.io/posts/2018-06-24-attention/transformer.png" width="100%">
+        <figcaption>
+            The full model architecture of the transformer
+        </figcaption>
+    </figure>
 
 </div><br><br>
 
@@ -350,7 +430,7 @@ emoji: /emoji/eyes.png
             <a href="https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc">https://chatgpt.com/c/68cfcbff-bb9c-8331-a868-a8fb0f5d09bc</a>
         </li>
         <li>
-            <a href="https://docs.pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html">https://docs.pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html</a>
+            <a href="https://docs.pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html">https://docs.pytorch.org/seq2seq_translation_tutorial</a>
         </li>
         <li>
             <a href="https://www.kaggle.com/code/shourabhpayal/cnn-lstm-pytorch-image-captioning">https://www.kaggle.com/code/shourabhpayal/cnn-lstm-pytorch-image-captioning</a>
