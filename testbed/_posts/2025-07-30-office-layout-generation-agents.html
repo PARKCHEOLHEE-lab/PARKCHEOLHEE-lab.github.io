@@ -49,12 +49,132 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 </div><br><br>
 
 <h3>Base Agent Design</h3>
-<div class="article"></div><br><br>
+<div class="article">
+
+    The <code>BaseAgent</code> abstract class defines the interface and shared behaviors. 
+    It includes abstract methods for key functionalities that must be implemented by all derived agents.
+    <br><br>
+
+    Each agent must define the following attributes:
+
+    1) <code>system_prompt</code>: contains the agent's specialized domain knowledge and explicit instructions for the LLM. 
+    2) <code>output_format</code>: strictly specifies the structure and data types of the LLM's output. 
+    3) <code>output_default</code>: provides default values for the agent's output if the LLM call fails or returns an unexpected result.
+    4) <code>call_payload</code>: predefines the parameter template for OpenAI API calls. This includes model selection, temperature, max tokens, and other relevant settings, ensuring consistent and reproducible agent behavior.
+    <br><br>
+
+<pre><code class="python">
+    class BaseAgent(ABC, metaclass=BaseAgentMeta):
+        _system_prompt = None
+        _output_default = None
+        _output_format = None
+        _call_payload = None
+
+        def __init__(self, client: Union[OpenAI, AsyncOpenAI]):
+            self.client = client
+
+        @abstractmethod
+        def sync_call(self):
+            raise NotImplementedError
+
+        @abstractmethod
+        def async_call(self):
+            raise NotImplementedError
+        
+        (...)
+</code></pre>
+<figcaption class="nofig">
+    BaseAgent abstract class
+</figcaption><br><br>
+
+    Below is a simplified example of a <code>WeightsAgent</code> that inherits from <code>BaseAgent</code>. 
+    This agent is responsible for assigning weights to an objective function that has multiple components, 
+    so that the assigned weights are used to compute a weighted sum. 
+    The code below shows how to define the required attributes and output structure using <a href="https://docs.pydantic.dev/latest/">Pydantic BaseModel</a>.
+
+<br><br>
+
+<pre><code class="python">
+    class Weight(BaseModel):
+        weight: float
+
+
+    class Weights(BaseModel):
+        weight_a: Weight
+        weight_b: Weight
+        weight_c: Weight
+
+
+    class WeightsAgent(BaseAgent):
+        _system_prompt = """You are an assignor who works on assigning weights to our objective function."""
+        _output_format = Weights
+        _output_default = Weights(
+            weight_a=Weight(weight=1.0),
+            weight_b=Weight(weight=1.0),
+            weight_c=Weight(weight=1.0),
+        )
+        _call_payload = {
+            "model": CONFIG.MODEL_NAME,
+            "input": None,
+            "text_format": _output_format,
+        }
+
+        def __init__(self, client: Union[OpenAI, AsyncOpenAI]):
+            super().__init__(client)
+
+        (...)
+    
+        def sync_call(self, prompt_user: str, normalize: bool = True) -> Weights:
+            try:
+                response = self.client.responses.parse(**self.create_payload(prompt_user))
+                weights = response.output_parsed
+
+                if normalize:
+                    self._normalize(weights)
+
+                return weights
+
+            except:
+                traceback.print_exc()
+                return self.output_default
+
+        async def async_call(self, prompt_user: str, normalize: bool = True) -> Weights:
+            try:
+                response = await self.client.responses.parse(**self.create_payload(prompt_user))
+                weights = response.output_parsed
+
+                if normalize:
+                    self._normalize(weights)
+
+                return weights
+
+            except:
+                traceback.print_exc()
+                return self.output_default
+    
+</code></pre>
+    
+    <br><br>
+
+    According to the abstract methods of the base agent, <code>sync_call</code> and <code>async_call</code> can be defined as follows.
+    Both functions perform the same task and return the same result. The only difference is whether async/await syntax is used.
+
+    <br><br>
+        
+    If there are only a few agents, calling the API for each agent sequentially may not cause significant delays.
+    However, in environments with many agents that must interpret user prompts and return results, 
+    processing time increases linearly with the number of agents.
+    <strong>So, it is necessary to wrap multiple API calls with async/await so that they can be requested simultaneously</strong>.
+    I will discuss this further in the Agents Orchestration section.
+</div><br><br>
 
 <h3>Numerical Reasoning</h3>
 <div class="article">
     <!-- 
         with 'reasoning' param
+        모델에 따라서 reasoning parameter를 지원하지 않는 경우가 존재하므로 
+        reasoning 파라밑터를 임의로 추가해줄 수 있습니다.
+        먼저 다음과 같이 pydantic basemodel을 정의해주고 true false에 따라 왜 그런 결과를 추론했는지를 강제할 수 있습니다.
      -->
 </div><br><br>
 
@@ -67,6 +187,15 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
   <!-- 
     with asyncio.gather 
   -->
+</div><br><br>
+
+<h3>Unit Testing for LLM Results</h3>
+<div class="article">
+    <!-- 
+        LLM은 동일한 프롬프트에 대해서도 다른 결과를 만들어낼 수 있으므로 
+        그 결과에 대한 신뢰도나 일관성이 매 업데이트마다 달라질 수 있으므로 다음과 같이
+        테스트케이스들을 작성하여 PR이 머지되기 전에 그 결과를 확인해야 한다. 
+    -->
 </div><br><br>
 
 <h3>Optimization Environment</h3>
@@ -90,7 +219,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
         <a href="https://github.com/ChatHouseDiffusion/chathousediffusion">https://github.com/ChatHouseDiffusion/chathousediffusion</a>
     </li>
     <li>
-        <a href="https://spacewalkcorp.notion.site/Segment-Selection-of-a-Polygon-using-Agent-s-Function-Calling-1e405430cf55805abfb1fa02a7ba5a1f">Segment Selection of a Polygon using Agent’s Function Calling </a>
+        <a href="https://spacewalkcorp.notion.site/Segment-Selection-of-a-Polygon-using-Agent-s-Function-Calling-1e405430cf55805abfb1fa02a7ba5a1f">Segment Selection of a Polygon using Agent's Function Calling </a>
     </li>
     <li>
         <a href="https://openai.github.io/openai-agents-python/">OpenAI Agents SDK</a>
@@ -103,6 +232,12 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     </li>
     <li>
         <a href="https://tilegpt.github.io/">TileGPT: Generative Design through Quality-Diversity Data Synthesis and Language Models</a>
+    </li>
+    <li>
+        <a href="https://sourcemaking.com/design_patterns/template_method">https://sourcemaking.com/design_patterns/template_method</a>
+    </li>
+    <li>
+        <a href="https://joshua-j-morley.medium.com/ai-agent-architectures-and-concepts-for-the-new-world-63d173a4b29f">https://joshua-j-morley.medium.com/ai-agent-architectures</a>
     </li>
 </ul>
 
