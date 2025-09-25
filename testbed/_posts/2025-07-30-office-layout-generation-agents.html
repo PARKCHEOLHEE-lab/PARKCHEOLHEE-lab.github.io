@@ -81,7 +81,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
         
         (...)
 </code></pre>
-<figcaption class="nofig">
+<figcaption class="snip">
     BaseAgent abstract class
 </figcaption><br><br>
 
@@ -125,7 +125,9 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
         def sync_call(self, prompt_user: str, normalize: bool = True) -> Weights:
             try:
                 response = self.client.responses.parse(**self.create_payload(prompt_user))
+                
                 weights = response.output_parsed
+                assert all(isinstance(v.weight, float) for _, v in weights)
 
                 if normalize:
                     self._normalize(weights)
@@ -139,7 +141,9 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
         async def async_call(self, prompt_user: str, normalize: bool = True) -> Weights:
             try:
                 response = await self.client.responses.parse(**self.create_payload(prompt_user))
+
                 weights = response.output_parsed
+                assert all(isinstance(v.weight, float) for _, v in weights)
 
                 if normalize:
                     self._normalize(weights)
@@ -151,7 +155,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
                 return self.output_default
     
 </code></pre>
-<figcaption class="nofig">
+<figcaption class="snip">
     WeightsAgent derived from BaseAgent
 </figcaption>
     
@@ -165,22 +169,131 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     If there are only a few agents, calling the API for each agent sequentially may not cause significant delays.
     However, in environments with many agents that must interpret user prompts and return results, 
     processing time increases linearly with the number of agents.
-    <strong>So, it is necessary to wrap multiple API calls with async/await so that they can be requested simultaneously</strong>.
+    <strong>So, it is necessary to wrap multiple API calls with async/await so that they can be requested concurrently</strong>.
     I will discuss this further in the Agents Orchestration section.
-</div><br><br>
-
-<h3>Numerical Reasoning</h3>
-<div class="article">
-    <!-- 
-        with 'reasoning' param
-        모델에 따라서 reasoning parameter를 지원하지 않는 경우가 존재하므로 
-        reasoning 파라밑터를 임의로 추가해줄 수 있습니다.
-        먼저 다음과 같이 pydantic basemodel을 정의해주고 true false에 따라 왜 그런 결과를 추론했는지를 강제할 수 있습니다.
-     -->
 </div><br><br>
 
 <h3>Geometric Context Engineering</h3>
 <div class="article">
+
+    The office layout agents must interpret the user's prompts together with the given geometric conditions.
+    Examples of these conditions include the boundaries of the space or the location of columns.
+    In this context, geometric context engineering refers to the process of structuring spatial information in a way that LLMs can comprehend and utilize for decision-making.
+    
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-3.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
+    <figcaption>
+        An example of direction-based segment selection with
+        <br>
+        <i>"Select 4 segments in the right and left of the following polygon"</i>
+    </figcaption>
+    <br><br>
+
+    <!-- 
+        방향 기반의 polygon segment selection에서, 에이전트가 "오른쪽", "왼쪽", "동쪽", "서쪽" 등과 같은 방향 정보를 
+        어떻게 이해하고 처리할 수 있을지에 대해 고민해볼 필요가 있다. 
+        예를 들어, 사용자가 "폴리곤의 오른쪽에 있는 4개의 세그먼트를 선택해줘"라고 요청할 때, 
+        에이전트는 '오른쪽'이라는 자연어 방향 정보를 수치적 방향 벡터((1, 0))로 변환 (or predefined vector selection)하고, 
+        각 세그먼트의 방향성과 비교하여 유사도가 높은 세그먼트를 선택하는 방식으로 동작할 수 있다. 
+        이러한 방식으로, 추상적인 공간적 지시를 구체적인 기하학적 연산으로 연결하는 것이 중요하다.
+    -->
+    
+        In direction-based polygon segment selection, it is important to consider how the agent can understand and process directional information 
+        such as 'right', 'left', 'east', and 'west'. 
+        <br><br>
+        For example, when a user requests, <i>"Place all meeting rooms on the right side"</i> 
+        the agent can convert the natural language direction 'right' into a direction vector (e.g., [1, 0]) or select a predefined vector, 
+        then compare this with the direction of each segment to select those with the highest similarity. 
+        In this way, it is crucial to connect abstract spatial instructions to geometric operations.
+
+    <br><br>
+
+<pre><code class="python">
+    class SegmentSelectionAgentConfiguration:
+        DIRECTION_VECTORS = {
+            "right": (1, 0),  
+            "left": (-1, 0),  
+            "top": (0, 1),  
+            "bottom": (0, -1),  
+            "right_top": (1, 1),  
+            "left_top": (-1, 1),  
+            "left_bottom": (-1, -1),  
+            "right_bottom": (1, -1),  
+            
+            (...)
+        }
+
+        (...)
+
+
+    class SegmentSelectionAgent(BaseAgent):
+
+        (...)
+
+        def _compute_segments_vectors(self, segments: List[LineString]) -> List[List[float]]:
+            vectors = []
+            for segment in segments:
+                divided_points = self._divide_segment(
+                    segment, 
+                    SegmentSelectionAgentConfiguration.SEGMENT_DIVISION_COUNT
+                )
+
+                centroid_to_segment = divided_points - self.polygon_centroid_np
+                centroid_to_segment /= np.linalg.norm(centroid_to_segment, axis=1, keepdims=True)
+
+                assert np.allclose(np.linalg.norm(centroid_to_segment, axis=1), 1.0)
+
+                vectors.append(centroid_to_segment.tolist())
+
+            return vectors
+
+        def _compute_segment_similarities(
+            self,
+            target_vector: Tuple[float, float],
+            similarity_threshold: float,
+        ) -> List[Tuple[int, float]]:
+            segments_vectors = self._compute_segments_vectors(self.polygon_segments)
+
+            similarities = []
+            for idx, vectors in enumerate(segments_vectors):
+                cosine_similarities = np.dot(vectors, target_vector)
+                # cos(θ) = x · y, where ||x|| and ||y|| are both 1.0.
+                
+                mask = cosine_similarities >= similarity_threshold
+                if mask.sum().item() >= len(vectors) // SegmentSelectionAgentConfiguration.MASK_MATCHING_DIVIDER:
+                    similarities.append((idx, cosine_similarities[mask].sum()))
+
+            return similarities
+
+        (...)
+</code></pre>
+<figcaption class="snip">
+    SegmentSelectionAgent derived from BaseAgent
+</figcaption>
+
+    <br><br>
+
+    The <code>SegmentSelectionAgent</code> demonstrates this approach by dividing each polygon segment into multiple points and computing direction vectors from the polygon centroid to these points.
+    By normalizing these vectors to unit length, the agent can use simple dot product to calculate cosine similarities. 
+    <strong>This allows the agent to infer the vector most similar to a target vector(selected from the user's prompt) and select the segment</strong>  in that direction.
+    The implementation using function calling can be found in this <a href="https://github.com/PARKCHEOLHEE-lab/segment-selector">repository</a>.
+
+</div><br><br>
+
+<h3>Numerical Reasoning</h3>
+<div class="article">
+
+    <!-- For the prompt 
+    <i>"Generate an office layout with a kitchen, a pantry, two storages, and three meeting rooms"</i>,
+    we expect the agent to output 1 kitchen, 1 pantry, 2 storages, and 3 meeting rooms. 
+    With the prompt and the cheapest model <code>gpt-5-nano-2025-08-07</code> among GPT-5 model series,  -->
+
+        <!-- with 'reasoning' param
+        모델에 따라서 reasoning parameter를 지원하지 않는 경우가 존재하므로 
+        reasoning 파라밑터를 임의로 추가해줄 수 있습니다.
+        먼저 다음과 같이 pydantic basemodel을 정의해주고 true false에 따라 왜 그런 결과를 추론했는지를 강제할 수 있습니다. -->
+
 </div><br><br>
 
 <h3>Agents Orchestration</h3>
@@ -199,10 +312,17 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     -->
 </div><br><br>
 
-<h3>Optimization Environment</h3>
+<h3>Converting User Requests into Optimization Problems</h3>
 <div class="article">
+    <!-- 
+        사용자의 텍스트 기반 요청을 optimization problem으로 전환. from text-based request to optimization problem
+        weights agent 예제를 통해 유추할 수 있을 것입니다.
+    -->
 </div><br><br>
 
+<h3>Tasks in progress</h3>
+<div class="article">
+</div><br><br>
 
 <h3>References & Resources</h3>
 <div class="article"></div>
