@@ -81,7 +81,7 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         ]
     }
 </code></pre>
-<figcaption class="nofig">
+<figcaption class="snip">
     graph_global_*.json
 </figcaption><br>
         </li>
@@ -120,7 +120,7 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         ]
     }
 </code></pre>
-<figcaption class="nofig">
+<figcaption class="snip">
     graph_local_*.json
 </figcaption><br>
         </li>
@@ -159,7 +159,7 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         ]
     }
 </code></pre>
-<figcaption class="nofig">
+<figcaption class="snip">
     voxel_*.json
 </figcaption>
         </li>
@@ -254,6 +254,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
             self.voxel_graph_node_ratio = voxel_graph_types_onehot * voxel_graph_data["voxel_graph_node_ratio"]
             self.voxel_graph_node_ratio = self.voxel_graph_node_ratio.max(dim=1)[0].unsqueeze(1)
 </code></pre>
+<figcaption class="snip">
+    VoxelGraphData class
+</figcaption>
 
 <br><br>
 
@@ -304,6 +307,10 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         def __len__(self):
             return len(self.local_graph_data)
 </code></pre>
+<figcaption class="snip">
+    GraphDataset class
+</figcaption>
+
     <br><br>
 
     If you are curious about how to convert voxels into a graph at the code level, 
@@ -407,6 +414,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
     
             return logits, label_hard, label_soft
 </code></pre>
+<figcaption class="snip">
+    VoxelGNNGenerator
+</figcaption>
 
 
     <br><br>
@@ -513,6 +523,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
         
         return g_loss
 </code></pre>
+<figcaption class="snip">
+    \( \text{Loss}_{\text{G}} \) computation
+</figcaption>
 
     <br><br>
 
@@ -625,6 +638,9 @@ thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
             os.path.join(self.log_dir, "states.pt"),
         )
 </code></pre>
+<figcaption class="snip">
+    Condition to save model status
+</figcaption>
 
     <br><br>
 

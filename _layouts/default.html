@@ -106,17 +106,36 @@ a:hover {
     }
 
     function figNumberSetter() {
-      figCaptions = document.getElementsByTagName("figcaption");
-      figNum = 0;
-      for (let i = 0; i < figCaptions.length; i++) {
-        figNum += 1;
-        innerString = figCaptions[i].innerHTML
-        
-        if (figCaptions[i].classList.contains("nofig")) {
-          figCaptions[i].innerHTML = innerString;
-          figNum -= 1;
+      const figCaptions = document.getElementsByTagName("figcaption");
+      
+      const figKey = "fig"
+      const figCaptionsPerClass = {};
+      for (const figCaption of figCaptions) {
+        const figCaptionName = figCaption.classList.value;
+        if (figCaptionName.length === 0) {
+          if (!figCaptionsPerClass.hasOwnProperty(figKey)) {
+            figCaptionsPerClass[figKey] = [];
+          }
+          figCaptionsPerClass[figKey].push(figCaption);
         } else {
-          figCaptions[i].innerHTML = "Fig." + String(figNum) + ": " + innerString;
+          if (!figCaptionsPerClass.hasOwnProperty(figCaptionName)) {
+              figCaptionsPerClass[figCaptionName] = [];
+          }
+          figCaptionsPerClass[figCaptionName].push(figCaption);
+        }
+      }
+
+      const nofigKey = "nofig"
+      for (const key in figCaptionsPerClass) {
+        const eachFigCaptions = figCaptionsPerClass[key];
+        const keyFirstUppercase = key.charAt(0).toUpperCase() + key.slice(1)
+        for (let i = 0; i < eachFigCaptions.length; i++) { 
+          const figNum = i + 1;
+          const eachFigCaption = eachFigCaptions[i];
+
+          if (key !== nofigKey) {
+            eachFigCaption.innerHTML = `${keyFirstUppercase} ${String(figNum)}: ${eachFigCaption.innerHTML}`
+          }
         }
       }
     }

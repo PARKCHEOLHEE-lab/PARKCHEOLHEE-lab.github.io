@@ -127,6 +127,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
         def forward(self, class_number: torch.Tensor) -> torch.Tensor:
             return self.embedding[class_number]
 </code></pre>
+<figcaption class="snip">
+    LatentShapes with multi-vector embeddings
+</figcaption>
 
     <br><br>
 
@@ -207,6 +210,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
             return xyz, sdf, class_number, latent_shape, faces
 </code></pre>
+<figcaption class="snip">
+    Dataset class
+</figcaption>
 
     <br><br>
 
@@ -271,6 +277,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
 
         return loss_mean, loss_shape_mean
 </code></pre>
+<figcaption class="snip">
+    Training iteration
+</figcaption>
 
     <br><br>
 
@@ -396,6 +405,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Reconstruction failed: {str(e)}")
 </code></pre>
+<figcaption class="snip">
+    Reconstruction API
+</figcaption>
 
     <br><br>
 
@@ -472,6 +484,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
         }
     }
 </code></pre>
+<figcaption class="snip">
+    SelectionBox & TransformControls
+</figcaption>
 
     <br><br>
 
@@ -515,6 +530,9 @@ thumbnail: /img/latent-shapes/latent-shapes-thumbnail.gif
         scene.add(latent_shape_wireframe);
     }
 </code></pre>
+<figcaption class="snip">
+    Updating LatentShapes
+</figcaption>
 
     <br><br>
 
