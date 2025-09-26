@@ -181,7 +181,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     In this context, geometric context engineering refers to the process of structuring spatial information in a way that LLMs can comprehend and utilize for decision-making.
     
     <figure>
-        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-3.png" width="100%" onerror=handle_image_error(this)>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-3.png" width="85%" onerror=handle_image_error(this)>
     </figure>
     <figcaption>
         An example of direction-based segment selection with
@@ -284,15 +284,162 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 <h3>Numerical Reasoning</h3>
 <div class="article">
 
-    <!-- For the prompt 
-    <i>"Generate an office layout with a kitchen, a pantry, two storages, and three meeting rooms"</i>,
-    we expect the agent to output 1 kitchen, 1 pantry, 2 storages, and 3 meeting rooms. 
-    With the prompt and the cheapest model <code>gpt-5-nano-2025-08-07</code> among GPT-5 model series,  -->
+    For the prompt 
+    <i>"Generate an office layout with a kitchen, a pantry, two storages and lounges, three meeting rooms"</i>,
+    we expect the agent to output 1 kitchen, 1 pantry, 2 storages, 2 lounges, and 3 meeting rooms, 
+    which can be represented as the structured output on the left below.
+
+    However, with the prompt above and a cheap model, you may receive unexpected results.
+    Since LLMs are not deterministic systems, <strong>the output can vary each time, even with the same prompt</strong>.
+    The result on the right below is an example I encountered during development.
+
+    <div style="display: flex; justify-content: center; gap: 15px;">
+        <div style="width: 50%;">
+<pre><code class="json">
+    "program_counts": {
+        "kitchen": {"count": 1}, 
+        "pantry": {"count": 1}, 
+        "storage": {"count": 2}, 
+        "meeting_room": {"count": 3}
+    } 
+</code></pre>
+        </div>
+        <div style="width: 50%;">
+<pre><code class="json">
+    "program_counts": {
+        "kitchen": {"count": 1}, 
+        "pantry": {"count": -1}, 
+        "storage": {"count": -1}, 
+        "meeting_room": {"count": 3}
+    } 
+</code></pre>
+        </div>
+    </div>
+    <figcaption class="snip">
+        Expected structured output vs. Actual structured output
+    </figcaption>
+
+    <br><br>
+
+    
+        In such situations, <strong>asking the model to provide reasoning for its output can help you obtain more accurate results.</strong>
+        This approach can be easily applied even to models that do not have a built-in reasoning parameter.
+        You simply need to add a reasoning field to the output format.
+
+        <br><br>
+
+        For example, by adding a <code>reasoning</code> field as shown below, 
+        you can receive not only the count for each space, but also the rationale behind it. 
+        This increases the reliability of the results and is also very helpful for future debugging or improving your system prompts. 
+        The <code>reasoning</code> field can be a simple explanation such as 'explicitly mentioned in the prompt' 
+        or, in cases that require more complex inference, the model can describe its reasoning process in natural language.
+
+        <br><br>
+        Below are examples of the Pydantic BaseModel before and after adding the reasoning field, as well as a sample output that includes reasoning.
+    
+    <div style="display: flex; justify-content: center; gap: 15px;">
+        <div style="width: 50%;">
+<pre><code class="python">
+    class ProgramCount(BaseModel):
+        count: int
+
+
+    class ProgramCounts(BaseModel):
+        kitchen: ProgramCount
+        pantry: ProgramCount
+        storage: ProgramCount
+        meeting_room: ProgramCount
+
+
+        (...)
+</code></pre>
+        </div>
+        <div style="width: 50%;">
+<pre><code class="python">
+    class ProgramCount(BaseModel):
+        count: int
+        reasoning: str
+
+
+    class ProgramCounts(BaseModel):
+        kitchen: ProgramCount
+        pantry: ProgramCount
+        storage: ProgramCount
+        meeting_room: ProgramCount
+
+        (...)
+</code></pre>
+        </div>
+    </div>
+
+<pre style="margin-top: 0;"><code class="json">
+    "program_counts": {
+        "kitchen": {"count": 1, "reasoning": "The prompt explicitly requests a kitchen."}, 
+        "pantry": {"count": 1, "reasoning": "The prompt explicitly requests a pantry."}, 
+        "storage": {"count": 1, "reasoning": "The prompt explicitly requests two storage spaces."}, 
+        "meeting_room": {"count": 3, "reasoning": "The prompt explicitly requests three meeting rooms."}
+    } 
+</code></pre>
+<figcaption class="snip">
+    w/o and w/ reasoning
+    <br>
+    w/o reasoning (left top) · w/ reasoning (right top) · output w/ reasoning (bottom) 
+</figcaption>
+
+
+
+<br><br>
+
+
+    <!-- 
+
+    그러나 temperature를 고정시키더라도 LLM은 동일한 프롬프트에 대해서 매번 동일한 답변을 만들어내지는 않습니다.
+
+     
+    -->
 
         <!-- with 'reasoning' param
         모델에 따라서 reasoning parameter를 지원하지 않는 경우가 존재하므로 
         reasoning 파라밑터를 임의로 추가해줄 수 있습니다.
         먼저 다음과 같이 pydantic basemodel을 정의해주고 true false에 따라 왜 그런 결과를 추론했는지를 강제할 수 있습니다. -->
+
+<!-- <pre><code class="python">
+    class ProgramCount(BaseModel):
+        count: int
+        reasoning: str
+
+    class ProgramCounts(BaseModel):
+        lounge: Program
+        focus_zone: Program
+        meeting_room: Program
+        toilet: Program
+
+        (...)
+
+    class ProgramCountsAgent(BaseAgent):
+        (...)
+
+    
+
+        async def async_call(
+            self, prompt_user: str, reasoning: bool = False
+        ) -> AssignmentOptimizationTarget:
+            try:
+                assignment_target_counts = await self.client.responses.parse(
+                    **self.create_payload(
+                        f"prompt_user: {prompt_user}\n\n reasoning: {reasoning}"
+                    )
+                )
+                return assignment_target_counts.output_parsed
+    
+            except:
+                traceback.print_exc()
+                return self.output_default
+
+</code></pre>
+<figcaption class="snip">
+    ProgramCountsAgent derived from BaseAgent
+</figcaption> -->
 
 </div><br><br>
 
@@ -320,7 +467,11 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     -->
 </div><br><br>
 
-<h3>Tasks in progress</h3>
+<h3>Results</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Tasks</h3>
 <div class="article">
 </div><br><br>
 
