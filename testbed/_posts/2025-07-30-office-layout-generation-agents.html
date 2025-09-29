@@ -552,7 +552,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
             coroutines = [coroutine for _, coroutine in tasks]
             results = await asyncio.gather(*coroutines)
 
-            results_dict = {task[0]: result for task, result in zip(tasks, results)}
+            results_dict = {name: result for (name, _), result in zip(tasks, results)}
 
             if orchestration.handoff_agent_a:
                 aggregation.__dict__.update(results_dict["agent_a_output"])
