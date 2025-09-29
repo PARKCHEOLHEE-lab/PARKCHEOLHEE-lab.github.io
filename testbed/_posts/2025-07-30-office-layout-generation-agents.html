@@ -549,7 +549,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
             if orchestration.handoff_agent_c:
                 tasks.append(("agent_c_output", AgentC.async_call(prompt_user)))
             
-            coroutines = [coroutine_task[1] for coroutine_task in tasks]
+            coroutines = [coroutine for _, coroutine in tasks]
             results = await asyncio.gather(*coroutines)
 
             results_dict = {task[0]: result for task, result in zip(tasks, results)}
