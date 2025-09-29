@@ -387,10 +387,6 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 </figcaption>
 
 
-
-<br><br>
-
-
     <!-- 
 
     그러나 temperature를 고정시키더라도 LLM은 동일한 프롬프트에 대해서 매번 동일한 답변을 만들어내지는 않습니다.
@@ -443,31 +439,217 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 
 </div><br><br>
 
-<h3>Agents Orchestration</h3>
+<h3>Orchestrating Multiple Agents</h3>
 <div class="article">
-  <!-- 
-    with asyncio.gather 
-  -->
+
+    When working with multiple specialized agents that need to interpret user prompts simultaneously, 
+    <strong>orchestration becomes crucial for time performance and cost efficiency</strong>. 
+    As mentioned in the Base Agent Design section, processing time increases linearly with the number of agents when called sequentially.
+    For a system with a large number of agents, this could result in significant delays.
+
+    <br><br>
+    <figure>
+        <img src="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/_images/sequential-pattern.svg#lightbox" width="70%">
+        <img src="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/_images/concurrent-pattern.svg#lightbox" width="80%">
+    </figure>
+    <figcaption>
+        <a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/_images/sequential-pattern.svg#lightbox">Sequential Pattern</a>
+        & <a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns#concurrent-orchestration">Concurrent Pattern</a>
+    </figcaption>
+
+    <br><br>
+
+    Since each agent interprets the same user prompt from their specialized perspective (directions, weights, program counts, etc.), 
+    these operations are independent and can be executed concurrently with <code>asyncio.gather</code>.    
+
+    <br><br>
+
+    The orchestration pattern shown above demonstrates how to efficiently coordinate multiple specialized agents.
+    This approach scales well as new agents are added to the system, 
+    since the concurrent execution time remains <strong>bounded by the slowest individual agent</strong> rather than growing linearly.
+
+    <br><br>
+
+    Below is a simplified example of <code>OrchestrationAgent</code>, which is <strong>responsible for determining which specialized agents should be handed off</strong> based on the user's prompt. 
+    The orchestration agent analyzes the natural language input and decides which agents are relevant for the specific request, 
+    helping to optimize both execution time and API costs by avoiding unnecessary agent calls.
+
+    <br><br>
+
+<pre><code class="python">
+    class Orchestration(BaseModel):
+        handoff_agent_a: bool
+        handoff_agent_b: bool
+        handoff_agent_c: bool
+
+    
+    class OrchestrationAgent(BaseAgent):
+        _system_prompt = f"""
+            You are an orchestration agent for an office layout system.
+
+            {inspect.getsource(AgentA)}
+            {inspect.getsource(AgentB)}
+            {inspect.getsource(AgentC)}
+        """
+        _output_format = Orchestration
+        _output_default = Orchestration(
+            handoff_agent_a=True,
+            handoff_agent_b=True,
+            handoff_agent_c=True,
+        )
+        _call_payload = {
+            "model": CONFIG.MODEL_NAME,
+            "input": None,
+            "text_format": _output_format,
+        }
+        
+        ( ... )
+
+        async def async_call(self, prompt_user: str) -> Orchestration:
+            try:
+                response = await self.client.responses.parse(**self.create_payload(prompt_user))
+                return response.output_parsed
+
+            else:
+                traceback.print_exc()
+                return self.output_default
+</code></pre>
+<figcaption class="snip">
+    OrchestrationAgent class
+</figcaption>
+    <br><br>
+
+    The <code>concurrent_call</code> function below demonstrates a practical implementation of agent orchestration. 
+    It starts by initializing an <code>Aggregation</code> object with default values from each agent, 
+    ensuring that the system has fallback data even if some agents fail to execute properly. 
+    Only the selected agents are then added to the tasks.
+
+    <br><br>
+
+<pre><code class="python">
+    class Aggregation(BaseModel):
+        agent_a_output = OutputA
+        agent_b_output = OutputB
+        agent_c_output = OutputC
+
+
+    async def concurrent_call(prompt_user: str, orchestration: Orchestration) -> Aggregation:
+        aggregation = Aggregation(
+            agent_a_output=AgentA.output_default
+            agent_b_output=AgentB.output_default
+            agent_c_output=AgentC.output_default
+        )
+
+        try:
+            tasks = []
+            if orchestration.handoff_agent_a:
+                tasks.append(("agent_a_output", AgentA.async_call(prompt_user)))
+            if orchestration.handoff_agent_b:
+                tasks.append(("agent_b_output", AgentB.async_call(prompt_user)))
+            if orchestration.handoff_agent_c:
+                tasks.append(("agent_c_output", AgentC.async_call(prompt_user)))
+            
+            coroutines = [coroutine_task[1] for coroutine_task in tasks]
+            results = await asyncio.gather(*coroutines)
+
+            results_dict = {task[0]: result for task, result in zip(tasks, results)}
+
+            if orchestration.handoff_agent_a:
+                aggregation.__dict__.update(results_dict["agent_a_output"])
+            if orchestration.handoff_agent_b:
+                aggregation.__dict__.update(results_dict["agent_b_output"])
+            if orchestration.handoff_agent_c:
+                aggregation.__dict__.update(results_dict["agent_c_output"])
+
+        except:
+            traceback.print_exc()
+
+        return aggregation
+</code></pre>
+<figcaption class="snip">
+    An example of concurrent call
+</figcaption>
+
+    <br><br>
+        
+    By using <code>asyncio.gather</code>, the total execution time becomes approximately equal to the slowest agent's response time, 
+    rather than the sum of all agents' response times. For example, if 6 agents each take 2-3 seconds to respond, 
+    sequential execution would require 12-18 seconds, while concurrent execution completes in just 2-3 seconds.
+
+    
+    <div style="display: flex; justify-content: center; gap: 15px;">
+        <div style="width: 50%;">
+<pre><code class="json">
+    *******************Agent.sync_call Time taken: 1.0785422325134277 seconds
+    ****************Agent.sync_call Time taken: 1.7512624263763428 seconds
+    ********************Agent.sync_call Time taken: 2.7220466136932373 seconds
+    ********************Agent.sync_call Time taken: 1.4213175773620605 seconds
+    ************Agent.sync_call Time taken: 1.2441699504852295 seconds
+    ******Agent.sync_call Time taken: 1.68034029006958 seconds
+
+    (...)
+
+    API Call Duration: 18.15 seconds
+</code></pre>
+        </div>
+        <div style="width: 50%;">
+<pre><code class="json">
+
+
+
+
+
+
+
+
+
+    API Call Duration: 3.15 seconds
+
+</code></pre>
+        </div>
+    </div>
+<figcaption class="snip">
+    Sequential Call vs. Concurrent Call in Practice
+</figcaption>
+
+    <!-- Running multiple agents in parallel, e.g. via Python primitives like <code>asyncio.gather</code>. 
+    This is useful for speed when you have multiple tasks that don't depend on each other. -->
+
+    <!-- 
+        with asyncio.gather 
+    -->
+
 </div><br><br>
 
-<h3>Unit Testing for LLM Results</h3>
+<!-- <h3>Unit Testing for LLM Results</h3>
 <div class="article">
-    <!-- 
         LLM은 동일한 프롬프트에 대해서도 다른 결과를 만들어낼 수 있으므로 
         그 결과에 대한 신뢰도나 일관성이 매 업데이트마다 달라질 수 있으므로 다음과 같이
         테스트케이스들을 작성하여 PR이 머지되기 전에 그 결과를 확인해야 한다. 
-    -->
-</div><br><br>
+</div><br><br> -->
 
 <h3>Converting User Requests into Optimization Problems</h3>
 <div class="article">
     <!-- 
         사용자의 텍스트 기반 요청을 optimization problem으로 전환. from text-based request to optimization problem
         weights agent 예제를 통해 유추할 수 있을 것입니다.
+
+        여기서는 Evolution Strategy algorithm 랜덤서치 기반의 최적화 환경을 사용합니다.
+        이러한 환경은 미분이 가능하도록 신경 쓸 필요가 없으므로 geometry 기반의 파라메트릭 환경에 쉽게 적용할 수 있기 때문에 
+        흔히 사용되는 최적화 기법중 하나입니다.
+
+        예를들어 어떤 공간의 인접관계에 대한 유저의 요청이 있었고, 
+        이를 해석하는 에이전트가 어떤 공간의 인접관계에 대한 pair를 structured output으로 전달했다고 상상해 봅시다.
+
+        ...
+
+        이러한 공간간의 관계는 그래프 형태로 표현가능하며 
+
+        
     -->
 </div><br><br>
 
-<h3>Results</h3>
+<h3>Generation Results</h3>
 <div class="article">
 </div><br><br>
 
@@ -510,6 +692,12 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     </li>
     <li>
         <a href="https://joshua-j-morley.medium.com/ai-agent-architectures-and-concepts-for-the-new-world-63d173a4b29f">https://joshua-j-morley.medium.com/ai-agent-architectures</a>
+    </li>
+    <li>
+        <a href="https://openai.github.io/openai-agents-python/multi_agent/">https://openai.github.io/openai-agents-python/multi_agent/</a>
+    </li>
+    <li>
+        <a href="https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns">https://learn.microsoft.com/en-us/azure/architecture/ai-ml/guide/ai-agent-design-patterns</a>
     </li>
 </ul>
 
