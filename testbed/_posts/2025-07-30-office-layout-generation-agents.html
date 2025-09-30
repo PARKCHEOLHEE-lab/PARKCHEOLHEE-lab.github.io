@@ -630,20 +630,82 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 
 <h3>Converting User Requests into Optimization Problems</h3>
 <div class="article">
+
+    
+    This chapter covers the process of converting user requests into optimization problems based on 
+    the agent's interpretation results to satisfy those requirements.
+    Agents struggle with predicting continuous values, and their performance significantly drops when tasked 
+    with directly inferring these values in spatial contexts as vectors (e.g., coordinates). 
+
+    <br><br>
+    Subsequently, we need an approach that combines discrete value reasoning with optimization. then, construct an optimization environment to find spatial arrangements that satisfy these relationships. 
+    This project uses Evolution Strategy-based random search optimization algorithms, such as genetic algorithms. 
+    This ES-based algorithm is easy to use for geometry-based problems because <strong>it does not need the environment to be differentiable</strong>.
+
+    <br><br>
+
+    For example, if a user requests <i>"I want the meeting room and lounge to be close to each other"</i>, 
+    the agent interprets this as a structured pairwise relationship: "meeting room - lounge adjacency." 
+    The model then selects an appropriate objective function to include in the final optimization objective.
+
+    The user request can be expressed as minimizing the distance between the meeting room and lounge polygons:
+    \[
+        \,\\
+        \min \; d(\text{polygon}_m, \, \text{polygon}_l)
+        \,\\
+    \]
+
+    where \(d(\cdot, \cdot)\) represents the minimum L2 distance between the two polygons.
+
+    <br><br>
+
+    <!-- Similarly, 
+
+    마찬가지로, 유저가 "n개의 책상, n개의 미팅룸이 있는 오피스를 만들어줘" 와 같은 요청을 한다면...  -->
+
+    
+    Similarly, if a user requests <i>"Create an office with \(n\) desks and \(m\) meeting rooms"</i>, 
+    the agent interprets this as specific count requirements for different space types. 
+    This becomes a constraint satisfaction problem where the optimization must ensure the generated layout contains exactly the specified number of each space type.
+
+    <br><br>
+
+    The optimization objective can be expressed as:
+
+    \[
+        \,\\
+        \min \sum_i \left|\, \text{count}_i^{\text{actual}} - \text{count}_i^{\text{target}} \right|
+        \,\\
+        \,\\
+    \]
+    
+
+    The system combines multiple objective functions using weighted sums, where the weights are determined by the <code>WeightsAgent</code> based on the user's priorities:
+    \[
+        \,\\
+        \min \sum_{j} w_j \cdot f_j(\mathbf{x})
+        \,\\
+    \]
+
+    where \(w_j\) is the weight assigned by the agent, \(f_j\) is individual objective function, and \(\mathbf{x}\) represents the layout parameters being optimized.
+
+        
     <!-- 
-        사용자의 텍스트 기반 요청을 optimization problem으로 전환. from text-based request to optimization problem
-        weights agent 예제를 통해 유추할 수 있을 것입니다.
 
-        여기서는 Evolution Strategy algorithm 랜덤서치 기반의 최적화 환경을 사용합니다.
-        이러한 환경은 미분이 가능하도록 신경 쓸 필요가 없으므로 geometry 기반의 파라메트릭 환경에 쉽게 적용할 수 있기 때문에 
-        흔히 사용되는 최적화 기법중 하나입니다.
+        이번 챕터에서는 사용자의 요청(프롬프트)을 에이전트가 해석한 결과를 바탕으로, 
+        해당 요구를 충족시키기 위한 최적화 문제로 변환하는 과정을 다룹니다.
+        에이전트는 continuous 값을 예측하는 것은 어려워 하고, 공간상에서 이 값을 직접적으로 벡터의 (e.g. coordinates) 형태로서 
+        추론하도록 하면 능력이 크게 떨어지므로 discrete 값에 대한 추론 + 최적화를 하는 방식이 필요합니다.
 
-        예를들어 어떤 공간의 인접관계에 대한 유저의 요청이 있었고, 
-        이를 해석하는 에이전트가 어떤 공간의 인접관계에 대한 pair를 structured output으로 전달했다고 상상해 봅시다.
+        이후, 이러한 관계를 만족시키는 공간 배치를 찾기 위해 최적화 환경을 구성합니다. 
+        이 프로젝트에서는 유전알고리즘과 같은 Evolution Strategy 계열의 랜덤 서치 기반의 최적화 알고리즘을 사용합니다. 
+        이 방식은 미분 가능성에 구애받지 않으므로, 파라메트릭(geometry 기반) 환경에도 쉽게 적용할 수 있다는 장점이 있습니다.
 
-        ...
+        예를 들어, 사용자가 "회의실과 휴게실이 가까웠으면 좋겠다"와 같은 공간 배치에 대한 요구를 입력하면, 
+        에이전트는 이를 "회의실-휴게실 인접"과 같은 구조화된 쌍(pair) 정보로 해석합니다.
 
-        이러한 공간간의 관계는 그래프 형태로 표현가능하며 
+        요약하면, 에이전트가 해석한 유저 요구를 구조화된 제약 조건(그래프)으로 변환하고, 
+        이를 만족하는 공간 배치를 찾기 위해 진화 전략 기반의 최적화 기법을 적용하는 것이 본 챕터의 핵심입니다.
 
         
     -->
@@ -651,9 +713,18 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 
 <h3>Generation Results</h3>
 <div class="article">
+    <figure>
+        <img src="" alt="">
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "generate an office layout with a lobby near to core, two kitchens and storages, three meeting rooms"
+            </i>
+        </figcaption>
+    </figure>
 </div><br><br>
 
-<h3>Tasks</h3>
+<h3>Limitation</h3>
 <div class="article">
 </div><br><br>
 
