@@ -5,7 +5,7 @@ hashtag: "#agent #generative-design #llm"
 comment: true
 splitter: 1
 featured: false
-inprogress: true
+inprogress: false
 at: Spacewalk
 thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-thumbnail.png
 ---
@@ -30,7 +30,7 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     각 세대마다 평가 함수로 품질을 측정하고 최적해를 갱신하며, 수렴 조건을 만족할 때까지 이 과정을 반복합니다. -->
 
     This flow chart shows the complete pipeline of an LLM-based office layout generation system.
-    When a user requests layout requirements in natural language, Orchestration Agent analyzes this and selects the necessary specialized agents. 
+    When a user requests layout requirements in natural language, <code>OrchestrationAgent</code> analyzes this and selects the necessary specialized agents. 
     <!--break-->
     Agents for directions, workstations, area ratios, density, weights, adjacency, etc., each interpret the requirements from their perspective.
     <strong>All agent analysis results are converted into structured data and sent to the optimization engine. </strong>
@@ -647,78 +647,117 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
     For example, if a user requests <i>"I want the meeting room and lounge to be close to each other"</i>, 
     the agent interprets this as a structured pairwise relationship: "meeting room - lounge adjacency." 
     The model then selects an appropriate objective function to include in the final optimization objective.
+    The user request can be expressed as maximizing the proximity between the meeting room and lounge polygons,
+    where \(d(\cdot, \cdot)\) represents the L2 distance between two points. Here, the closest points of the two polygons are used.
 
-    The user request can be expressed as minimizing the distance between the meeting room and lounge polygons:
     \[
         \,\\
-        \min \; d(\text{polygon}_m, \, \text{polygon}_l)
+        \max \; -d(\text{polygon}_m, \, \text{polygon}_l)
         \,\\
     \]
-
-    where \(d(\cdot, \cdot)\) represents the minimum L2 distance between the two polygons.
-
-    <br><br>
-
-    <!-- Similarly, 
-
-    마찬가지로, 유저가 "n개의 책상, n개의 미팅룸이 있는 오피스를 만들어줘" 와 같은 요청을 한다면...  -->
 
     
     Similarly, if a user requests <i>"Create an office with \(n\) desks and \(m\) meeting rooms"</i>, 
     the agent interprets this as specific count requirements for different space types. 
-    This becomes a constraint satisfaction problem where the optimization must ensure the generated layout contains exactly the specified number of each space type.
-
-    <br><br>
-
-    The optimization objective can be expressed as:
+    This becomes a constraint satisfaction problem where the optimization must maximize the count accuracy.
+    The optimization for counting objective can be expressed as:
 
     \[
         \,\\
-        \min \sum_i \left|\, \text{count}_i^{\text{actual}} - \text{count}_i^{\text{target}} \right|
-        \,\\
+        \max \; -\sum_i \left|\, \text{count}_i^{\text{actual}} - \text{count}_i^{\text{target}} \right|
         \,\\
     \]
     
+    The system combines multiple objective functions using weighted sums, where the weights are determined by the <code>WeightsAgent</code> based on the user's priorities.
+    Here, \(w_j\) is the weight assigned by the agent, \(f_j\) is individual objective function, and \(\mathbf{x}\) represents the layout parameters being optimized.
 
-    The system combines multiple objective functions using weighted sums, where the weights are determined by the <code>WeightsAgent</code> based on the user's priorities:
     \[
         \,\\
-        \min \sum_{j} w_j \cdot f_j(\mathbf{x})
+        \max \; \sum_{j=1}^{k} w_j \cdot f_j(\mathbf{x})
         \,\\
     \]
 
-    where \(w_j\) is the weight assigned by the agent, \(f_j\) is individual objective function, and \(\mathbf{x}\) represents the layout parameters being optimized.
 
-        
-    <!-- 
-
-        이번 챕터에서는 사용자의 요청(프롬프트)을 에이전트가 해석한 결과를 바탕으로, 
-        해당 요구를 충족시키기 위한 최적화 문제로 변환하는 과정을 다룹니다.
-        에이전트는 continuous 값을 예측하는 것은 어려워 하고, 공간상에서 이 값을 직접적으로 벡터의 (e.g. coordinates) 형태로서 
-        추론하도록 하면 능력이 크게 떨어지므로 discrete 값에 대한 추론 + 최적화를 하는 방식이 필요합니다.
-
-        이후, 이러한 관계를 만족시키는 공간 배치를 찾기 위해 최적화 환경을 구성합니다. 
-        이 프로젝트에서는 유전알고리즘과 같은 Evolution Strategy 계열의 랜덤 서치 기반의 최적화 알고리즘을 사용합니다. 
-        이 방식은 미분 가능성에 구애받지 않으므로, 파라메트릭(geometry 기반) 환경에도 쉽게 적용할 수 있다는 장점이 있습니다.
-
-        예를 들어, 사용자가 "회의실과 휴게실이 가까웠으면 좋겠다"와 같은 공간 배치에 대한 요구를 입력하면, 
-        에이전트는 이를 "회의실-휴게실 인접"과 같은 구조화된 쌍(pair) 정보로 해석합니다.
-
-        요약하면, 에이전트가 해석한 유저 요구를 구조화된 제약 조건(그래프)으로 변환하고, 
-        이를 만족하는 공간 배치를 찾기 위해 진화 전략 기반의 최적화 기법을 적용하는 것이 본 챕터의 핵심입니다.
-
-        
-    -->
 </div><br><br>
 
 <h3>Generation Results</h3>
 <div class="article">
     <figure>
-        <img src="" alt="">
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-4.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             prompt_user: <br> 
             <i>
-                "generate an office layout with a lobby near to core, two kitchens and storages, three meeting rooms"
+                "Office layout that specifically reflects the following: 30 workstations, three meeting rooms on the west side, two lounges, 1 kitchen, 1 pantry"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "Generate an office layout with a lobby near to core, two kitchens and storages, three meeting rooms"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-6.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "I want an office for me and my team of 60 people"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-7.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "Generate an office layout with: two lounges, two kitchens, a toilet, three meeting rooms"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-8.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "Design a traditional law office emphasizing privacy, enclosed offices"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-9.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "Private rooms on the left bottom sides. Five meeting rooms. Some functional and social zones"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-10.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "Design a layout with 50% desk zones, and 20% collaboration zones, 10% functional zones, 20% social zones"
+            </i>
+        </figcaption>
+    </figure>
+    <br>
+    <figure>
+        <img src="/img/office-layout-generation-agents/office-layout-generation-agents-11.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            prompt_user: <br> 
+            <i>
+                "Create a hyper-dense layout for a call center"
             </i>
         </figcaption>
     </figure>
@@ -726,6 +765,25 @@ thumbnail: /img/office-layout-generation-agents/office-layout-generation-agents-
 
 <h3>Limitation</h3>
 <div class="article">
+    <!--     
+    objective function을 agent가 스스로 정의하고 코딩해서 최적화의 목표로 삼지 않는 한 레이아웃의 자유도는 제한적일 것임.
+    그럼에도 개발자가 objective function을 지정하는 것 자체는 레이아웃의 baseline quality를 조절할 수 있다는 점에서 의미가 있음. 
+    -->
+
+    While the agent-based office layout generation system demonstrates promising capabilities, several fundamental limitations constrain its potential for broader application.
+
+    <br><br>
+
+    The system's layout flexibility remains inherently limited unless agents can autonomously define and code their own objective functions for optimization targets. 
+    Currently, many different types of objective functions are predefined by developers.
+    <strong>This means the system can only optimize for spatial relationships and constraints that have been explicitly programmed</strong>. 
+
+    <br><br>
+
+    However, <strong>specifying objective functions itself provides meaningful value in controlling the baseline quality of generated layouts</strong>. 
+    By defining the evaluation metrics, developers can ensure that fundamental spatial design principles are maintained. 
+    This includes accessibility requirements, functional adjacencies, and geometric constraints (aspect ratio, size, etc.) that are essential for practical office environments.
+
 </div><br><br>
 
 <h3>References & Resources</h3>
