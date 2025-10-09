@@ -5,9 +5,16 @@ done: true
 emoji: /emoji/books.png
 ---
 
+<style>
+    .mml-example {
+        background-color: rgb(245, 245, 245);
+        padding: 1em;
+    }
+</style>
+
 <br>
 
-<ul>
+<!-- <ul>
     <img src="/img/mathematics-for-machine-learning-1.jpg" width="20%">
     <br>
     <li>
@@ -16,6 +23,247 @@ emoji: /emoji/books.png
     <li>
         <a href="https://mml-book.github.io/book/mml-book.pdf">https://mml-book.github.io/book/mml-book.pdf</a>
     </li>
+</ul> -->
+
+
+<div id="toc"></div>
+
+<ul>
+    <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-1.jpg" width="20%" style="box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);">
+    <br>
+    <li>
+        <a href="https://mml-book.github.io/">Mathematics for Machine Learning</a>, Marc Peter Disenroth, A. Aldo Faisal, Cheng Soon Ong
+    </li>
 </ul>
 
-<br><br>
+<br>
+
+<h3>1. Introduction</h3>
+<div class="article">
+    We believe that the mathematical foundations of machine learning 
+    are important in order to understand fundamental principles upon
+    which more complicated machine learning systems are built. 
+    Understanding these principles can facilitate creating new machine learning solutions,
+    understanding and debugging existing approaches, and learning about the
+    inherent assumptions and limitations of the methodologies we are working with.
+
+    <br><br>
+
+    A model is typically used to describe a process for generating data, similar 
+    to the dataset at hand. Therefore, good models can also be thought
+    of as simplified versions of the real (unknown) data-generating process,
+    capturing aspects that are relevant for modeling the data and extracting
+    hidden patterns from it. 
+
+    <br><br>
+
+    Let us summarize the main concepts of machine learning that we cover in this book
+    <ul>
+        <li>
+            We represent data as vectors
+        </li>
+        <li>
+            We choose an appropriate model, either using the probabilistic or optimization view
+        </li>
+        <li>
+            We learn from available data by using numerical optimization methods
+            with the aim that the model performs well on data not used for training.
+        </li>
+    </ul>
+</div><br><br>
+
+<h3>2. Linear Algebra</h3>
+<div class="article">
+
+    Linear algebra is the study of vectors and certain rules to manipulate vectors.
+    The vectors many of us know from school are
+    called "geometric vectors", which are usually denoted by a small arrow
+    above the letter, e.g., \(\overrightarrow{x}\) and \(\overrightarrow{y}\).
+    Interpreting vectors as geometric vectors 
+    enables us to use our intuitions about direction and magnitude to
+    reason about mathematical operations.
+
+    <br><br>
+
+    Here are some examples of such vector objects:
+    <ol>
+        <li>
+            <strong>Geometric vectors</strong>.
+            Two geometric vectors \(\overrightarrow{\boldsymbol{x}}\), \(\overrightarrow{\boldsymbol{y}}\)
+            can be added, such that \(\overrightarrow{\boldsymbol{x}} + \overrightarrow{\boldsymbol{y}} = \overrightarrow{\boldsymbol{z}}\)
+            is another geometric vector.
+            Furthermore, multiplication by a scalar \(\lambda \overrightarrow{\boldsymbol{x}}, \lambda \in \mathbf{R} \),
+            is also a geometric vector.
+
+            Interpreting vectors as geometric vectors 
+            enables us to use our intuitions about direction and magnitude to
+            reason about mathematical operations.
+        </li>
+        <li>
+            <strong>Polynomials are also vectors</strong>. 
+            Two polynomials can be added together,  which results in another polynomial; and they can
+            be multiplied by a scalar \(\lambda \in \mathbb{R}\) and the result is a polynomial as well.
+            Note that polynomials are very different from geometric vectors. While
+            geometric vectors are concrete “drawings”, polynomials are abstract
+            concepts. However, they are both vectors in the sense.
+        </li>
+        <li>
+            <strong>Audio signals are vectors</strong>. 
+            Audio signals are represented as a series of numbers.
+            We can add audio signals together, and their sum is a new
+            audio signal. If we scale an audio signal, we also obtain an audio signal.
+        </li>
+        <li>
+            <strong>Elements of \(\mathbb{R}^n\) are vectors</strong> (tuples of \(n\) real numbers).
+            \(\mathbb{R}^n \) is more abstract than polynomials, and it is the concept we focus on in this book. For instance,
+            
+            \[
+                \,\\
+                \boldsymbol{a} = 
+                \begin{bmatrix}
+                1 \\
+                2 \\
+                3
+                \end{bmatrix}
+                \in \mathbb{R}^3
+                \,\\
+            \]
+
+            Adding two vectors \(\boldsymbol{a}, \boldsymbol{b} \in \mathbb{R}^n \)
+            component-wise results in another vector: \(\boldsymbol{a}+\boldsymbol{b}=\boldsymbol{c} \in \mathbb{R}^n \).
+            Moreover, multiplying \(\boldsymbol{a} \in \mathbb{R}^n \) by \(\lambda \in \mathbb{R} \) results in a scaled vector \(\lambda a \in \mathbb{R}^n\).
+            Considering vectors as elements of \(\mathbb{R}^n\) has an additional benefit that
+            it loosely corresponds to arrays of real numbers on a computer. 
+            Many programming languages support array operations, which allow for convenient implementation of algorithms that involve vector operations.
+        </li>
+    </ol>
+    <br>
+
+    Linear algebra focuses on the similarities between these vector concepts.
+    We will largely focus on vectors in \(\mathbb{R}^n\) since most algorithms in linear algebra are formulated in \(\mathbb{R}^n\)
+
+    <br><br>
+
+    One major idea in mathematics is the idea of "closure". 
+    This is the question: 
+    What is the set of all things that can result from my proposed operations? 
+    In the case of vectors: 
+    What is the set of vectors that can result by
+    starting with a small set of vectors, and adding them to each other and
+    scaling them? This results in a vector space. The concept of
+    a vector space and its properties underlie much of machine learning.
+
+    <br><br>
+
+    Linear algebra plays an important role in machine learning and 
+    general mathematics. The concepts introduced in this chapter are further expanded to include the idea of geometry.
+    <br><br>
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-2.png" width="80%" onerror=handle_image_error(this)>
+        <figcaption>
+            A mind map of the concepts where Linear Algebra is used in other parts
+            
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    <h4>2.1 Systems of Linear Equations</h4>
+    Systems of linear equations play a central part of linear algebra. Many
+    problems can be formulated as systems of linear equations, and linear
+    algebra gives us the tools for solving them.
+
+    <br><br>
+    <div class="mml-example">
+        <strong>Example 2.2</strong>
+        <br>
+        The system of linear equations
+        \[
+            \,\\
+            \begin{matrix}
+            x_1  & + & x_2 & + & x_3  & = & 3 & (1) \\
+            x_1  & - & x_2 & + & 2x_3 & = & 2 & (2) \\
+            2x_1 &   &     & + & 3x_3 & = & 1 & (3)
+            \end{matrix}
+            \,\\
+        \]
+        has no solution: Adding the first two equations yields \(2x_1+3_3 = 5 \),
+        which constradicts the third equation \((3)\).
+        <br><br>
+
+        Let us have a look at the system of linear equations
+        \[
+            \,\\
+            \begin{matrix}
+            x_1 & + & x_2 & + & x_3  & = & 3 & (1) \\
+            x_1 & - & x_2 & + & 2x_3 & = & 2 & (2) \\
+                &   & x_2 & + & x_3  & = & 2 & (3)
+            \end{matrix}
+            \,\\
+        \]
+        From the first and third equation, it follows that \(x_1 = 1\).
+        From \((1)+(2)\), we get \(2x_1 + 3x_3 = 5 \), i.e., \(x_3 = 1\).
+        From \((3)\), we then get that \(x_2 = 1\).
+        Therefore \((1,1,1)\) is the only possible and unique solution.
+
+        <br><br>
+
+        As a third example, we consider
+        \[
+            \,\\
+            \begin{matrix}
+            x_1  & + & x_2 & + & x_3  & = & 3 & (1) \\ 
+            x_1  & - & x_2 & + & 2x_3 & = & 2 & (2) \\
+            2x_1 &   &     & + & 3x_3 & = & 5 & (3)
+            \end{matrix}
+            \,\\
+        \]
+        Since \((1)+(2)=(3)\), we can obmit the third equation.
+        From \((1)\) and \((2)\), we get \(2_x1 = 5-3x_3 \) and \(2x_2 = 1 + x_3\).
+        We can define \(x_3 = a \in \mathbb{R}\) as a free variable, 
+        such that any triplet is a solution of the system of linear equations, i.e., we can obtain a
+        solution set that contains infinitely many solutions.
+        \[
+            \,\\
+            \left( \frac{5}{2}-\frac{3}{2}a, \quad \frac{1}{2}+\frac{1}{2}a, \quad a \right)
+            \,\\
+        \]
+    </div>
+    <br><br>
+
+    In general, for a real-valued system of linear equations we obtain either no, exactly one, or infinitely many solutions. 
+
+    <br><br>
+
+    <strong><i>Remark</i> (Geometric Interpretation of Systems of Linear Equations)</strong>.
+    In a system of linear equations with two variables \(x_1, x_2\), each linear equation
+    define a line on the \(x_1, x_2\text{-plane}\).
+    Since a solution to a system of linear
+    equations must satisfy all equations simultaneously, the solution set is the
+    intersection of these lines.
+    This intersection set can be a line (if the linear
+    equations describe the same line), a point, or empty (when the lines are
+    parallel).
+    \[
+        \,\\
+        \begin{align}
+        4x_1 + 4x_2 &= 5 \\
+        2x_1 - 4x_2 &= 1
+        \end{align}
+        \,\\
+    \]
+
+    For the above system, we can get geometric intuition of the solution by plotting both equations as lines in the \(x_1, x_2\)-plane. 
+    The point where the two lines intersect represents the unique solution to the system.
+
+    <br><br>
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-3.png" width="50%" onerror=handle_image_error(this)>
+        <figcaption>
+            The solution space of a system of two linear equations with two variables
+            <br>
+            can be geometrically interpreted as the intersection of two lines
+        </figcaption>
+    </figure>
+
+</div><br><br>
