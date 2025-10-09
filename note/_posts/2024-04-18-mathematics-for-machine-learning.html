@@ -9,6 +9,7 @@ emoji: /emoji/books.png
     .mml-example {
         background-color: rgb(245, 245, 245);
         padding: 1em;
+        overflow: auto;
     }
 </style>
 
@@ -235,7 +236,7 @@ emoji: /emoji/books.png
 
     <br><br>
 
-    <strong><i>Remark</i> (Geometric Interpretation of Systems of Linear Equations)</strong>.
+    <strong><i>Remark</i></strong> (Geometric Interpretation of Systems of Linear Equations).
     In a system of linear equations with two variables \(x_1, x_2\), each linear equation
     define a line on the \(x_1, x_2\text{-plane}\).
     Since a solution to a system of linear
@@ -266,4 +267,302 @@ emoji: /emoji/books.png
         </figcaption>
     </figure>
 
+    <br><br>
+
+    <h4>2.2 Matrices</h4>
+    Matrices play a central role in linear algebra. They can be used to compactly represent systems of linear equations,
+    but they also represent linear functions (linear mappings).
+
+    <br><br>
+
+    <strong>Definition 2.1 (Matrix)</strong>. With \(m, n \in \mathbb{N} \) a real-valued \((m,n)\) matrix \(A\) is an
+    \(m\cdot n\)-tuple of elements \(a_{ij}, i=1, ..., m, \, j=1, ..., n\), which ordered
+    according to a rectangular scheme consisting of \(m\) rows and \(n\) columns:
+    \[
+        \,\\
+        A = 
+        \begin{bmatrix}
+        a_{11} & a_{12} & \cdots & a_{1n} \\
+        a_{21} & a_{22} & \cdots & a_{2n} \\
+        \vdots & \vdots &        & \vdots \\
+        a_{m1} & a_{m2} & \cdots & a_{mn} 
+        \end{bmatrix}
+        ,\quad  a_{ij} \in \mathbb{R}
+        \,\\
+    \]
+
+    \((1, n)\) or \((n, 1)\) matrices are called row/column vectors.
+    \(\mathbb{R}^{m \times n}\) is the set of all real-valued \((m,n)\)-matrices. \(A\in \mathbb{R}^{m \times n} \) can be
+    equivalently represented as \(a \in \mathbb{R}^{mn} \) by stacking all \(n\) columns of the matrix into a long vector.
+
+    <br><br>
+
+    <h4>2.2.1 Matrix Addition and Multiplication</h4>
+    The sum of two matrices \(A \in \mathbb{R}^{m \times n} \), \(B \in \mathbb{R}^{m \times n} \) is defined as the element-wise sum.
+    For matrices \(A \in \mathbb{R}^{m \times n} \), \(B \in \mathbb{R}^{n \times k} \), the elements of the product 
+    \(C = AB \in \mathbb{R}^{m \times k} \) are computed as 
+    \[
+        \,\\
+        c_{ij} = \sum_{l=1}^{n} a_{il} b_{lj}, \quad i = 1, ..., m, \quad j = 1, ..., k
+        \,\\
+    \]
+
+    This means, to compute element \(c_{ij}\) we multipy the elements of the \(i\)th row of \(A\)
+    with the \(j\)th column of \(B\) and sum them up. We will call this the dot product of the corresponding row and column.
+
+    <br><br>
+    
+    <strong><i>Remark</i></strong>. Matrices can only be multiplied if their "neighboring" dimensions match.
+    For instance, an \(n \times k \)-matrix \(A\) can be multiplied with a \(k \times m \)-matrix \(B\),
+    but only from the left side:
+    \[
+        \,\\
+        \underbrace{A}_{n \times k} \; \underbrace{B}_{k \times m} = \underbrace{C}_{n \times m}
+        \,\\
+    \]
+
+    The product \(BA\) is not defined if \(m \neq n\) since the neighboring dimensions do not match.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong>. Matrix multiplication is not defined as an element-wise operation on matrix elements,
+    i.e., \(c_{ij} \neq a_{ij} b_{ij} \), and is called a Hadamard product.
+    
+    <br><br>
+    <div class="mml-example">
+        <strong>Example 2.3</strong>
+        <br>
+        For \(
+            A = 
+            \begin{bmatrix}
+                1 & 2 & 3 \\
+                3 & 2 & 1
+            \end{bmatrix} \in \mathbb{R}^{2 \times 3}, \quad
+
+            B = 
+            \begin{bmatrix}
+                0 & 2 \\
+                1 & -1 \\
+                0 & 1
+            \end{bmatrix} \in \mathbb{R}^{3 \times 2}
+        \),　we obtain
+
+        \[
+            \,\\
+            AB = 
+            \begin{bmatrix}
+            1 & 2 & 3 \\
+            3 & 2 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                0 & 2 \\
+                1 & -1 \\
+                0 & 1
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                2 & 3 \\
+                2 & 5 
+            \end{bmatrix} \in \mathbb{R}^{2 \times 2}
+            \,\\
+            \,\\
+            BA = 
+            \begin{bmatrix}
+            0 & 2 \\
+            1 & -1 \\
+            0 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+            1 & 2 & 3 \\
+            3 & 2 & 1
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+            6 & 4 & 2 \\
+            -2 & 0 & 2 \\
+            3 & 2 & 1
+            \end{bmatrix} \in \mathbb{R}^{3 \times 3}
+            \,\\
+        \]
+    </div>
+    <br><br>
+
+    From this example, we can already see that the matrix multiplication is not commutative, i.e., \(AB \neq BA\).
+
+    <br><br>
+    
+    <strong>Definition 2.2 (Identity Matrix)</strong>. In \(\mathbb{R}^{n\times m} \), we define the identity matrix
+    as the \(n \times m \)-matrix containing \(1\) on the diagonal and \(0\) everywhere else.
+
+    \[
+        \,\\
+        I_n = 
+        \begin{bmatrix}
+        1      & 0 & \cdots & 0 & \cdots & 0 \\
+        0      & 1 & \cdots & 0 & \cdots & 0 \\
+        \vdots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+        0 & 0 & \cdots & 1 & \cdots & 0 \\
+        \vdots & \vdots & \ddots & \vdots & \ddots & \vdots \\
+        0 & 0 & \cdots & 0 & \cdots & 1
+        \end{bmatrix} \in \mathbb{R}^{n\times n}
+        \,\\
+    \]
+
+    Now that we defined matrix multiplication, matrix addition and the
+    identity matrix, let us have a look at some properties of matrices: 
+
+    <ul>
+        <li>
+            Associativity:
+            \[
+                \forall A \in \mathbb{R}^{m\times n}, \quad B \in \mathbb{R}^{n \times p}, \quad C \in \mathbb{R}^{p \times q}: \,\, (AB)C = A(BC)
+            \]
+        </li>
+        <li>
+            Distributivity:
+            \[
+                \begin{align}
+                \forall A, B \in \mathbb{R}^{m \times n}, \quad C, D \in \mathbb{R}^{n \times p}:& \,\, (A+B)C = AC+BC \\
+                                                                                                 & \,\, A(C+D) = AC+AD
+                \end{align}
+            \]
+        </li>
+        <li>
+            Multiplication with the identity matrix:
+            \[
+                \forall A \in \mathbb{R}^{m \times n}: \,\, I_m A = AI_n = A
+            \]
+        </li>
+    </ul>
+    <br><br>
+
+    <h4>2.2.2 Inverse and Transpose</h4>
+    <strong>Definition 2.3 (Inverse)</strong>. 
+    Consider a square matrix \(A \in \mathbb{R}^{n \times n} \).
+    Let matrix \(B \in \mathbb{R}^{n \times n} \) have he property that \(AB = I_n = BA\).
+    \(B\) is called the inverse of \(A\) and denoted by \(A^{-1}\).
+
+    <br><br>
+
+    Unfortunately, not every matrix \(A\) possesses an inverse \(A^{-1}\). 
+    If the inverse does exist, \(A\) is called regular/invertible/nonsingular, otherwise
+    singular/noninvertible. When the matrix inverse exists, it is unique.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong> (Existence of the Inverse of a \(2 \times 2\) matrix). Consider a matrix
+    \[  
+        \,\\
+        A := 
+        \begin{bmatrix}
+        a_{11} & a_{12} \\
+        a_{21} & a_{22} 
+        \end{bmatrix} \in \mathbb{R}^{2 \times 2}
+        \,\\
+    \]
+
+    If we multiply \(A\) with
+    \[
+        \,\\
+        B := 
+        \begin{bmatrix}
+            a_{22} & -a_{12} \\
+            -a_{21} & a_{11}
+        \end{bmatrix}
+        \,\\
+    \]
+
+    we obtain
+    \[
+        \,\\
+        \begin{align}
+        AB = 
+        \begin{bmatrix}
+        a_{11}a_{22} - a_{12}a_{21} & 0 \\
+        0 & a_{11}a_{22} - a_{12}a_{21}
+        \end{bmatrix}
+        &= (a_{11}a_{22} - a_{12}a_{21}) \, I  \\
+        &= \det (A) \, I
+        \end{align}
+        \,\\
+    \]
+
+    Therefore
+    \[
+        \,\\
+        A^{-1} = \frac{1}{a_{11}a_{22}-a_{12}a_{21}} 
+        \begin{bmatrix}
+        a_{22} & -a_{12} \\
+        -a_{21} & a_{11}
+        \end{bmatrix}
+        \,\\
+    \]
+
+    if and only if \(\det(A) \neq 0\). Furthermore we can generally use the determinant to check whether a matrix is invertible.
+
+    <br><br>
+    <div class="mml-example">
+        <strong>Example 2.4 (Inverse Matrix)</strong>
+        <br>
+        The matrices
+        \[
+            \,\\
+            A = 
+            \begin{bmatrix}
+                1 & 2 & 1 \\
+                4 & 4 & 5 \\
+                6 & 7 & 7
+            \end{bmatrix}
+            , \quad
+            B = 
+            \begin{bmatrix}
+                -7 & -7 & 6 \\
+                2 & 1 & -1 \\
+                4 & 5 & -4 
+            \end{bmatrix}
+            \,\\
+            \,\\
+            \begin{align}
+            AB &= 
+            \begin{bmatrix}
+            -7+4+4   & -7+2+5   & 6-2-4 \\
+            -28+8+20 & -28+4+25 & 24-4-20 \\
+            -42+14+28 & -42+7+35 & 36-7-28
+            \end{bmatrix}
+            = 
+            \begin{bmatrix}
+            1 & 0 & 0 \\
+            0 & 1 & 0 \\
+            0 & 0 & 1
+            \end{bmatrix}
+            = I
+
+            \,\\
+            \,\\
+            BA &= 
+            \begin{bmatrix}
+               -7-28+36 & -14-28+42 & -7-35+42 \\
+                2+4-6   & 4+4-7     & 2+5-7 \\
+                4+20-24 & 8+20-28   & 4+25-28
+            \end{bmatrix}
+            = 
+            \begin{bmatrix}
+            1 & 0 & 0 \\
+            0 & 1 & 0 \\
+            0 & 0 & 1
+            \end{bmatrix}
+            = I
+            \end{align}
+            \,\\
+        \]
+
+        are inverse to each other since \(AB = I = BA\)
+    </div>
+
+    <br><br>
+
+    <strong>Definition 2.4 (Transpose)</strong>. For \(A \in \mathbb{R}^{m \times n} \)
+    the matrix \(B \in \mathbb{R}^{n \times m} \) with \(b_{ij}=a_{ji} \) is called the transpose of \(A\).
+    We write \(B = A^{\top} \).
+    
 </div><br><br>
