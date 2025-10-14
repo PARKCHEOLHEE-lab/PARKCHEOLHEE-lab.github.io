@@ -798,7 +798,7 @@ emoji: /emoji/books.png
     \]
 
     Following the same line of reasoning, we express the fourth column of the
-    matrix sing the first two columns and generate another set as 
+    matrix using the first two columns and generate another set as 
     \[
         \,\\
         \begin{bmatrix}
@@ -1624,9 +1624,583 @@ emoji: /emoji/books.png
             <li>
                 \( (\mathbb{Z}, +) \) is an Abelian group.
             </li>
+            <li>
+                \( (\mathbb{N}_0, +) \) is not a group, where \(\mathbb{N}_0 := \mathbb{N} \cup \{0\} \):
+                Although \( (\mathbb{N}_0, +) \) possesses a neutral element \((0)\), the inverse elements are missing.
+            </li>
+            <li>
+                \( (\mathbb{Z}, \cdot) \) is not a group: Although \( (\mathbb{Z}, \cdot) \) contains a neutral element
+                \((1)\), the inverse elements for any \(z \in \mathbb{Z} \setminus \{\pm 1\} \) are missing.
+                In addition, \(0 \in \mathbb{Z} \) cannot have an inverse element since 
+                the equation \(0 \cdot x = 1 \) cannot be satisfied for any \(x \in \mathbb{Z}\).
+            </li>
+            <li>
+                \( (\mathbb{R}, \cdot) \) is not a group since \(0\) does not possess an inverse element.
+            </li>
+            <li>
+                \( (\mathbb{R} \setminus \{0\}, \cdot) \) is Abelian.
+            </li>
+            <li>
+                \( (\mathbb{R}^n, +), (\mathbb{Z}^n, + ), n \in \mathbb{N} \) are Abelian if \(+\)
+                is defined componentwise, i.e.,
+                \[
+                    \,\\
+                    (x_1, \cdots, x_n) + (y_1, \cdots, y_n) = (x_1 + y_1, \cdots, x_n + y_n)
+                    \,\\
+                \]
+                Then, \( (x_1, \cdots, x_n)^{-1} := (-x_1, \cdots, -x_n) \) is the inverse element and
+                \(e = (0, \cdots, 0) \) is the neutral element. 
+                For example, if \( x = (1, 2, 3, 4, 5) \), then its inverse is
+                \[
+                    \,\\
+                    x^{-1}  = (-1, -2, -3, -4, -5)
+                    \,\\
+                \]
+
+                and by adding them componentwise, we obtain the neutral element:
+                \[
+                    \,\\
+                    (1-1, \,\, 2-2, \,\, 3-3, \,\, 4-4, \,\, 5-5) = (0, \,\, 0, \,\, 0, \,\, 0, \,\, 0).
+                    \,\\
+                \]
+            </li>
+            <li>
+                \( (\mathbb{R}^{m \times n}, +) \), the set of \(m \times n\)-matrices is Abelian (with componentwise addition)
+            </li>
+            <li>
+                \( (\mathbb{R}^{n \times n}, \cdot ) \), the set of \(n \times n\)-matrices with matrix multiplication
+                <ul>
+                    <li>
+                        Closure and associativity follow directly from the definition of matrix multiplication
+                        \[
+                            \,\\
+                                (A \cdot B) \cdot C = A\cdot (B \cdot C)
+                            \,\\
+                        \]
+                    </li>
+                    <li>
+                        The identity matrix \(I_n\) is the neutral element
+                        \[
+                            \,\\
+                            I_n \cdot A = A \cdot I_n = A
+                            \,\\
+                        \]
+                    </li>
+                    <li>
+                        For a regular matrix \( A \in \mathbb{R}^{n \times n} \), the inverse element \( A^{-1} \) exists. 
+                        If \( A \) is singular, it does not have an inverse element.
+                        <br><br>
+                        The set of all regular (invertible) matrices forms a group under matrix multiplication,
+                        denoted by \( GL(n, \mathbb{R}) = \{ A \in \mathbb{R}^{n \times n} \mid \det(A) \neq 0 \} \),
+                        which is called the General Linear Group. 
+                        <br><br>
+                        Therefore, \( (GL(n, \mathbb{R}), \cdot) \) is a group. 
+                        However, since matrix multiplication is not commutative, the group is not Abelian.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <br><br>
+
+    <h4>2.4.2 Vector Spaces</h4>
+    <strong>Definition 2.9 (Vector Space)</strong>. A real-valued vector space \(V = \mathcal{V, +, \cdot}\) is
+    a set \(\mathcal{V} \) with two operations
+    \[
+        \,\\
+        \begin{align}
+        +     &: \mathcal{V} \times \mathcal{V} \rightarrow \mathcal{V} \\
+        \cdot &: \mathbb{R}  \times \mathcal{V} \rightarrow \mathcal{V}
+        \end{align}
+        \,\\
+    \]
+
+    where \( (\mathcal{V}, +) \) is an abelian group.
+    The elements \(x \in V\) are called vectors. The neutral element of \( (\mathcal{V}, +) \)
+    is the ero vector \( [0, ..., 0]^{\top} \), and the operation \(+\) is called vector addition.
+    The elements \(\lambda \in \mathbb{R} \) are called scalars and the operation \( \cdot \) is a multiplication by scalars. 
+    
+    <br><br>
+
+    <strong><i>Remark</i></strong>. A vector multiplication \(ab, \,\, a, b \in \mathbb{R}^n\), is not defined.
+    By treating vectors as \(n \times 1\) matrices, we can use the matrix multiplication.
+    Only the following multiplications for vectors are defined: \(ab^{\top} \in \mathbb{R}^{n\times n}\) (outer product),
+    \( a^{\top}b \in \mathbb{R} \) (inner/scalar/dot product). 
+    \[
+        \,\\
+        a = 
+        \begin{bmatrix}
+            0\\
+            1\\
+            2
+        \end{bmatrix}, \,\,
+        b = 
+        \begin{bmatrix}
+            3\\
+            4\\
+            5
+        \end{bmatrix}
+
+        \,\\
+        \,\\
+
+        \begin{align}
+        ab^{\top} &= 
+        \begin{bmatrix}
+            0\\
+            1\\
+            2
+        \end{bmatrix}
+        \begin{bmatrix}
+            3&4&5
+        \end{bmatrix}
+        = 
+        \begin{bmatrix}
+            0 & 0 & 0 \\
+            3 & 4 & 5 \\
+            6 & 8 & 10 
+        \end{bmatrix}
+
+        \,\\
+        \,\\
+
+        a^{\top}b &= 
+        \begin{bmatrix}
+            0&1&2
+        \end{bmatrix}
+        \begin{bmatrix}
+            3\\
+            4\\
+            5
+        \end{bmatrix}
+        = 14
+        \end{align}
+        \,\\
+    \]
+
+    <h4>2.4.3 Vector Subspaces</h4>
+    Intuitively, they are
+    sets contained in the original vector space with the property that when
+    we perform vector space operations on elements within this subspace, we
+    will never leave it. In this sense, they are "closed".
+
+    <br><br>
+
+    <strong>Definition 2.10 (Vector Subspace)</strong>. 
+    Let \(V = (\mathcal{V}, +, \cdot) \) be a vector space and
+    \(\mathcal{U} \subseteq \mathcal{V}, \mathcal{U} \neq \emptyset \).
+    Then \(U = (\mathcal{U}, +, \cdot) \) is called vector subspace of \(V\) (or linear subspace)
+    if \(U\) is a vector space with the vector space operations \(+\) and \(\cdot\)
+    restricted to \(\mathcal{U} \times \mathcal{U} \) and \( \mathbb{R} \times \mathcal{U} \).
+    We write \( U \subseteq V \) to denote a subspace \(U\) of \(V\).
+
+    <br><br>
+
+    If \(\mathcal{U} \subseteq \mathcal{V} \) and \(V\) is a vector space, then \(U\) naturally inherits 
+    the operations of \(V\), that is,
+    \[
+        \,\\
+        \begin{align}
+        +     &: \mathcal{U} \times \mathcal{U} \rightarrow \mathcal{U} \\
+        \cdot &: \mathbb{R}  \times \mathcal{U} \rightarrow \mathcal{U}
+        \end{align}
+        \,\\
+    \]
+
+    For \(U\) to be a subspace of \(V\), the following conditions must hold:
+    <ol>
+        <li>
+            neutral element (zero vector): 
+            \[
+                \mathcal{U} \neq \emptyset, \, \boldsymbol{0} \in \mathcal{U}
+            \]
+        </li>
+        <li>
+            closure:
+            \[
+                \begin{align}
+                &\forall \lambda \in \mathbb{R} \, \forall x \in \mathcal{U} : \lambda x \in \mathcal{U}
+                \,\\
+                &\forall x, y \in \mathcal{U} : x + y \in \mathcal{U}
+                \end{align}
+            \]
+        </li>
+    </ol>
+
+    <br>
+    
+    <div class="mml-example">
+        <strong>Example 2.12 (Vector Subspaces)</strong>
+        <ul>
+            <li>
+                For every vector space \(V\), the trivial subspaces are \(V\) itself and \( \{\boldsymbol{0}\}\).
+            </li>
+            <li>
+                Only example \(D\) in the figure below is a subspace of \(\mathbb{R}^2 \).
+                In \(A\) and \(C\), the closure property is violated; \(B\) does not contain \(\boldsymbol{0}\).
+            </li>
+            <figure>
+                <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-4.png" width="100%" onerror=handle_image_error(this)>
+                <figcaption>
+                    Only \(D\) is a subspace
+                </figcaption>
+            </figure>
         </ul>
 
     </div>
+
+    <br><br>
+
+    <strong><i>Remark</i></strong>. Every subspace \(U \subseteq (\mathbb{R}^n, +, \cdot) \) is the solution
+    space of a homogeneous system of linear equations \(Ax = 0\) for \(x \in \mathbb{R}^n\).
+    \[
+        \,\\
+        A(\boldsymbol{0}) = \boldsymbol{0}
+        \,\\
+        \,\\
+        A(x_1) = \boldsymbol{0}, \,\, A(x_2) = \boldsymbol{0} 
+        \,\\
+        \,\\
+        A(x_1 + x_2) = A(x_1) + A(x_2) = \boldsymbol{0} + \boldsymbol{0} = \boldsymbol{0}
+        \,\\
+        \,\\
+        A(\lambda x_1) = \lambda A(X_1) = \lambda \cdot \boldsymbol{0} = \boldsymbol{0}
+        \,\\
+    \]
+
+    <h4>2.5 Linear Independence</h4>
+    The closure property guarantees that we
+    end up with another vector in the same vector space. It is possible to find
+    a set of vectors with which we can represent every vector in the vector
+    space by adding them together and scaling them. 
+    This set of vectors is a basis. Before we get concepts of the basis,
+    we will need to introduce the concepts of linear combinations and linear independence.
     
+    <br><br>
+
+    <strong>Definition 2.11 (Linear Combination)</strong>.
+    Consider a vector space \(V\) and a finite number of vectors \(x_1, ..., x_k \in V \).
+    Then, every \(v \in V\) of the form
+    \[
+        \,\\
+        v = \lambda_1 x_1 + \cdots + \lambda_k x_k = \sum_{i=1}^k \lambda_i x_i \in V
+        \,\\
+    \]
+
+    with \(\lambda_1, ..., \lambda_k \in \mathbb{R} \) is a linear combination of the vectors \(x_1, ..., x_k \).
+
+    <br><br>
+
+    The \(\boldsymbol{0} \)-vector can always be written as the linear combination of \(k\) vectors \(x_1, ..., x_k \)
+    because \(\boldsymbol{0} = \sum_{i=1}^k 0x_i \) is always true, and is trivial.
+        \[
+            \,\\
+            \boldsymbol{0} = 0x_1 + \cdots + 0x_k
+            \,\\
+        \]
+
+    In the following, we are interested in non-trivial linear combinations of a set of vectors to represet \(\boldsymbol{0}\),
+    i.e., linear combinations of vectors \(x_1, ..., x_k \), where not all coefficients \(\lambda_i\)in are \(0\).
+
+    <br><br>
+
+    <strong>Definition 2.12 (Linear (In)dependence)</strong>.
+    Let us consider a vector space \(V\) with \(k\in \mathbb{N}\) and \(x_1, ..., x_k \in V  \).
+    If there is a non-trivial linear combination, such that \(\boldsymbol{0} = \sum_{i=1}^k \lambda_i x_i  \)
+    with at least one \(\lambda_i \neq 0\), the vectors are linearly dependent.
+    \[
+        \,\\
+        \begin{align}
+        x_3 &= 2x_1 - 3x_2 \\
+        0   &= 2x_1 - 3x_2 - x_3
+        \end{align}
+        \,\\
+    \]
+    
+    In contrast,
+    \(\boldsymbol{0} = \lambda_1 x_1 + \cdots + \lambda_k x_k\),
+    only the trivial solution exists, i.e.,
+    \(\lambda_1 = \cdots = \lambda_k = 0\),
+    the vectors \(x_1, \dots, x_k\) are said to be linearly independent.
+    \[
+        \,\\
+        x_1 = 
+        \begin{bmatrix}
+            1\\
+            0\\
+        \end{bmatrix},
+        \,\, 
+        x_2 = 
+        \begin{bmatrix}
+            0\\
+            1\\
+        \end{bmatrix}
+        \,\\
+        \,\\
+        \lambda_1 
+        \begin{bmatrix}
+            1\\
+            0\\
+        \end{bmatrix}
+        + \lambda_2 
+        \begin{bmatrix}
+            0\\
+            1\\
+        \end{bmatrix} = 
+        0 
+        \begin{bmatrix}
+            1\\
+            0\\
+        \end{bmatrix}
+        + 0 
+        \begin{bmatrix}
+            0\\
+            1\\
+        \end{bmatrix} = 
+        
+        \boldsymbol{0}
+        \,\\
+    \]
+
+    <strong><i>Remark</i></strong>. 
+    The following properties are useful to find out whether vectors are linearly independent:
+    <ul>
+        <li>
+            \(k\) vectors are either linearly dependent or independent. There is no third option.
+        </li>
+        <li>
+            If at least one of the vectors \(x_1, ..., x_k \) is \(\boldsymbol{0}\) then they are linearly dependent.
+            The same vectors exist, they are linearly dependent.
+        </li>
+        <li>
+            The vectors \( \{ x_1, ..., x_k : x_i \neq 0, i = 1, ..., k \}, k \ge 2 \), are linearly dependent
+            if and only if (at least) one of them is a linear combination of the others.
+            In particular, if one vector is a multiple of another vector, i.e., \(x_i = \lambda x_j, \lambda \in \mathbb{R} \ \)
+            then the vectors linearly dependent.
+        </li>
+        <li>
+            A practical way of checking whether vectors are linearly independent
+            is to use Gaussian elimination: Write all vectors as columns
+            of a matrix \(A\) and perform Gaussian elimination until the matrix is in
+            row echelon form (the reduced row-echelon form is unnecessary here).
+        </li>
+        <li>
+            The non-pivot columns can be expressed as linear combinations of the pivot columns.
+            For example, the row-echelon form
+            
+            \[
+                x_1 = 
+                \begin{bmatrix}
+                    1\\
+                    0\\
+                    0
+                \end{bmatrix}, \quad
+                x_2 = 
+                \begin{bmatrix}
+                    2\\
+                    1\\
+                    0
+                \end{bmatrix}, \quad
+                x_3 = 
+                \begin{bmatrix}
+                    3\\
+                    1\\
+                    0
+                \end{bmatrix}
+
+                \,\\
+                \,\\
+                
+                A = 
+                \begin{bmatrix}
+                    1 & 2 & 3 \\
+                    0 & 1 & 1 \\
+                    0 & 0 & 0
+                \end{bmatrix}
+            \]
+
+            tells us that the first and the second columns are pivot columns.
+            The third column is a non-pivot column because it can be expressed \(x_1 + x_2\). 
+        </li>
+        <li>
+            All column vectors are linearly independent if and only if all columns are pivot columns.
+        </li>
+    </ul>
+
+    <br>
+
+    <div class="mml-example">
+        <strong>Example 2.14</strong>
+        <br>
+        Consider \(\mathbb{R}^4\) with
+        \[
+            \,\\
+            x_1 = 
+            \begin{bmatrix}
+                1 \\
+                2 \\
+                -3 \\
+                4 \\
+            \end{bmatrix}, \quad
+            x_2 = 
+            \begin{bmatrix}
+                1 \\
+                1 \\
+                0 \\
+                2 \\
+            \end{bmatrix}, \quad
+            x_3 = 
+            \begin{bmatrix}
+                -1 \\
+                -2 \\
+                1 \\
+                1 \\
+            \end{bmatrix}, \quad
+            
+            A = 
+            \begin{bmatrix}
+                1 & 1 & -1 \\
+                2 & 1 & -2 \\
+                -3 & 0 & 1 \\
+                4 & 2 & 1
+            \end{bmatrix}
+            \,\\
+        \]
+
+        To check whether they are linearly independent, perform elementary row operations
+        until we identify the pivot columns:
+        \[
+            \,\\
+            \begin{align}
+            A &=
+            \begin{bmatrix}
+                1 & 1 & -1 \\
+                2 & 1 & -2 \\
+                -3 & 0 & 1 \\
+                4 & 2 & 1
+            \end{bmatrix}
+            \,\\
+            \,\\
+            & \Rightarrow
+            \begin{bmatrix}
+                1 & 1 & -1 \\
+                0 & 1 & 0 \\
+                -3 & 0 & 1 \\
+                4 & 2 & 1
+            \end{bmatrix}
+            \Rightarrow
+            \begin{bmatrix}
+                1 & 1 & -1 \\
+                0 & 1 & 0 \\
+                0 & 3 & -2 \\
+                0 & 2 & -5
+            \end{bmatrix}
+            \Rightarrow
+            \begin{bmatrix}
+                1 & 1 & -1 \\
+                0 & 1 & 0 \\
+                0 & 0 & 1 \\
+                0 & 0 & 5
+            \end{bmatrix}
+            \,\\
+            \,\\
+            &\Rightarrow
+            \begin{bmatrix}
+                1 & 1 & -1 \\
+                0 & 1 & 0 \\
+                0 & 0 & 1 \\
+                0 & 0 & 0
+            \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        Here, every column of the matrix is a pivot column.
+        Therefore, there is no non-trivial solution, and we require \(\lambda_1 = 0, \lambda_2 = 0, \lambda_3 = 0 \)
+        to solve the equation system. Hence, the vectors \(x_1, x_2, x_3 \) are linearly independent.
+    </div>
+
+    <br><br>
+
+    <!-- <strong><i>Remark</i></strong>. Consider a vector space \(V\) with \(k\) linearly independent vectors
+    \(b_1, ..., b_k\) and \(m\) linear combinations
+    \[
+        \,\\
+        x_1 = \sum_{i=1}^{k} \lambda_{i1} b_i
+        \,\\
+        \,\\
+        \vdots
+        \,\\
+        \,\\
+        x_m = \sum_{i=1}^{k} \lambda_{im} b_i
+        \,\\
+    \]
+
+    Defining \(\boldsymbol{B} = [b_1, ..., b_k] \) as the matrix whose columns are the linearly independent
+    vectors, we can write
+    \[
+        \,\\
+        x_j = \boldsymbol{B} \boldsymbol{\lambda}_j, 
+        \quad \boldsymbol{\lambda}_j = 
+        \begin{bmatrix}
+            \lambda_{1j} \\
+            \vdots \\
+            \lambda_{kj}
+        \end{bmatrix}
+        , \quad
+        j = 1, ..., n
+        \,\\
+    \]
+
+    <br><br> -->
+
+    <strong><i>Remark</i></strong>. In a vector space \(V\), \(m\) linear combinations of \(k\) vectors are
+    linearly dependent if \(m > k\).
+
+    <br><br>
+
+    <h4>2.6 Basis and Rank</h4>
+    In a vector space \(V\) , we are particularly interested in sets of vectors \(\mathcal{A}\) that
+    possess the property that any vector \(v \in V\) can be obtained by a linear
+    combination of vectors in \(\mathcal{A}\).
+
+    <br><br>
+
+    <h4>2.6.1 Generating Set and Basis</h4>
+    <strong>Definition 2.13 (Generating Set and Span)</strong>.
+    Consider a vector space \(V - (\mathcal{V}, +, \cdot) \) and set of vectors
+    \(\mathcal{A} = \{ a_1, ..., a_k\} \subseteq \mathcal{V} \).
+    If every vector \(v \in \mathcal{V} \) can be expressed as a linear combination of \(a_1, ..., a_k \),
+    \(\mathcal{A}\) is called a generating set of \(V\).
+    The set of all linear combinations of vectors in \(\mathcal{A} \) is called the span of \(\mathcal{A}\).
+    If \(\mathcal{A}\) spans the vector space \(V\), we write
+    \[
+        \,\\
+        \begin{align}
+        V &= \text{span}[\mathcal{A}] \\
+          &= \text{span}[a_1, ..., a_k]
+        \end{align}
+        \,\\
+    \]
+
+    <strong>Definition 2.14 (Basis)</strong>. 
+    Consider a vector space \(V = (\mathcal{V}, +, \cdot) \) and \(\mathcal{A} \subseteq \mathcal{V}\).
+    A generating set \(\mathcal{A}\) of \(V\) is called minimal if there exists no smaller set
+    \(\tilde{\mathcal{A}} \subsetneq \mathcal{A} \subseteq \mathcal{V}\) that spans \(V\).
+    Every linearly independent generating set of \(V\) is minimal and is called a basis of \(V\).
+    For example, consider the following two generating sets in \(\mathbb{R}^2\).
+    \[
+        \,\\
+        \mathcal{A}_1 = \{(1, 0), (0, 1)\}, \quad \mathcal{A}_2 = \{(1, 0), (0, 1), (1, 1)\}
+        \,\\
+    \]
+
+    However, there is an unnecessary vector \( (1, 1) \in mathcal{A}_2\)
+    since \( (1, 1) = (1, 0) + (0, 1) \). 
+    Therefore, even if we remove \((1, 1)\) from \(\mathcal{A}_2\),
+    the remaining vectors can still generate \(\mathbb{R}^2\)
+    Hence, \(\mathcal{A}_2\) is a generating set but not a minimal,
+    while \(\mathcal{A}_1\) is a minimal generating set, that is a basis of \(\mathbb{R}^2\).
 
 </div><br><br>
