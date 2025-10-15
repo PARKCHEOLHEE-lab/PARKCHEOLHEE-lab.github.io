@@ -68,44 +68,28 @@ a:hover {
 
 <script>
 
-  function TOCidSetter() {
-
-    let emojiRegex = /\p{Emoji}/u;
-    let specialPattern = /[`~!@#$%^&*|\\\'\";:\/?]/gi;
-    let h3Tags = document.getElementsByTagName("h3");
-    
-    for (let i=0; i<h3Tags.length; i++) {
-
-      let eachInnerText = h3Tags[i].innerText
-      if (emojiRegex.test(eachInnerText)) {
-        eachInnerText = eachInnerText.replaceAll(/\p{Emoji}/ug, "");
-      }
-
-      if (specialPattern.test(eachInnerText)) {
-        eachInnerText = eachInnerText.replaceAll(specialPattern, "")
-      }
-      h3Tags[i].id = eachInnerText.toLowerCase().replaceAll(" ", "-");
-    }
-
-  }
-
   function getTOC() {
-    toc = "<ul class='section-nav'>";
+    let toc = "<ul class='section-nav'>";
 
-    h3Tags = document.getElementsByTagName("h3");
-    if (h3Tags.length > 0) {
-        for (let i=0; i < h3Tags.length; i++) {
-          h3TagTitle = h3Tags[i].innerText
-          toc += "<li><a href=\"#" + h3Tags[i].id + "\">" + h3TagTitle + "</a></li>";
+    const h3h4_tags = document.querySelectorAll("h3, h4");
+    for (const h_tag of h3h4_tags) {
+      h_tag.id = h_tag.innerText.toLowerCase().replaceAll(" ", "-");
+    }
 
+    for (const h_tag of h3h4_tags) {
+      if (h_tag.nodeName === "H3") {
+        toc += "<li><a href=\"#" + h_tag.id + "\">" + h_tag.innerText + "</a></li>";
+      } else {
+        toc += "<ul><li><a href=\"#" + h_tag.id + "\">" + h_tag.innerText + "</a></li></ul>"
       }
-
-      toc += "</ul><br><br>";
-      document.getElementById("toc").innerHTML += toc;
-    }
     }
 
-    function figNumberSetter() {
+    toc += "</ul><br><br>";
+    document.getElementById("toc").innerHTML += toc;
+    
+    }
+
+    function generateFigNums() {
       const figCaptions = document.getElementsByTagName("figcaption");
       
       const figKey = "fig"
@@ -140,9 +124,8 @@ a:hover {
       }
     }
 
-  TOCidSetter();
   getTOC();
-  figNumberSetter();
+  generateFigNums();
 
 </script>
 
