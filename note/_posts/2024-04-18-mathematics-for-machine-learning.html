@@ -2192,15 +2192,594 @@ emoji: /emoji/books.png
     For example, consider the following two generating sets in \(\mathbb{R}^2\).
     \[
         \,\\
-        \mathcal{A}_1 = \{(1, 0), (0, 1)\}, \quad \mathcal{A}_2 = \{(1, 0), (0, 1), (1, 1)\}
+        \mathcal{A}_1 = 
+        \left\{ 
+            \begin{bmatrix}1 \\ 0 \end{bmatrix}, \begin{bmatrix}0 \\ 1 \end{bmatrix}
+        \right\}, 
+        \quad 
+        \mathcal{A}_2 = 
+        \left\{
+            \begin{bmatrix}1 \\ 0 \end{bmatrix}, \begin{bmatrix}0 \\ 1 \end{bmatrix}, \begin{bmatrix}1 \\ 1 \end{bmatrix}
+        \right\}
         \,\\
     \]
 
-    However, there is an unnecessary vector \( (1, 1) \in mathcal{A}_2\)
-    since \( (1, 1) = (1, 0) + (0, 1) \). 
-    Therefore, even if we remove \((1, 1)\) from \(\mathcal{A}_2\),
+    However, there is an unnecessary vector \( [1, 1]^{\top} \in \mathcal{A}_2\)
+    since \( [1, 1]^{\top} = [1, 0]^{\top} + [0, 1]^{\top} \). 
+    Therefore, even if we remove \([1, 1]^{\top}\) from \(\mathcal{A}_2\),
     the remaining vectors can still generate \(\mathbb{R}^2\)
     Hence, \(\mathcal{A}_2\) is a generating set but not a minimal,
     while \(\mathcal{A}_1\) is a minimal generating set, that is a basis of \(\mathbb{R}^2\).
 
+    <br><br>
+
+    Let \(V = (\mathcal{V}, +, \cdot) \) be a vector space and \(\mathcal{B} \subseteq \mathcal{V}, \mathcal{B} \neq \emptyset \).
+    Then, the following statements are equivalent:
+    <ul>
+        <li>
+            \(\mathcal{B}\) is a basis of \(V\).
+        </li>
+        <li>
+            \(\mathcal{B}\) is a minimal generating set.
+        </li>
+        <li>
+            \(\mathcal{B}\) is a maximal linearly independent set of vectors in \(V\),
+            i.e., adding any other vector to this set will make it linearly dependent.
+        </li>
+        <li>
+            Every vector \(x \in V \) is a linear combination of vectors from \(\mathcal{B}\),
+            and every linear combination is unique.
+        </li>
+    </ul>
+
+    <br>
+
+    <div class="mml-example">
+        <strong>Example 2.16</strong>
+        <ul>
+            <li>
+                In \(\mathbb{R}^n\), the standard basis is
+                \[
+                    \mathcal{B} =
+                    \left\{
+                        \begin{bmatrix}
+                            1 \\
+                            0 \\
+                            \vdots \\
+                            0
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            0 \\
+                            1 \\
+                            \vdots \\
+                            0
+                        \end{bmatrix},
+                        \ldots,
+                        \begin{bmatrix}
+                            0 \\
+                            0 \\
+                            \vdots \\
+                            1
+                        \end{bmatrix}
+                    \right\}
+                \]
+            </li>
+            <li>
+                in \(\mathbb{R}^3\), the standard basis is
+                \[
+                \mathcal{B} =
+                \left\{
+                    \begin{bmatrix}
+                        1 \\
+                        0 \\
+                        0
+                    \end{bmatrix},
+                    \begin{bmatrix}
+                        0 \\
+                        1 \\
+                        0
+                    \end{bmatrix},
+                    \begin{bmatrix}
+                        0 \\
+                        0 \\
+                        1
+                    \end{bmatrix}
+                \right\}
+            \]
+            </li>
+            <li>
+                Different bases in \(\mathbb{R}^3\) are
+                \[
+                    \mathcal{B}_1 =
+                    \left\{
+                        \begin{bmatrix}
+                            1 \\
+                            0 \\
+                            0 \\
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            1 \\
+                            1 \\
+                            0 \\
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            1 \\
+                            1 \\
+                            1 \\
+                        \end{bmatrix}
+                    \right\}, \quad
+                    \mathcal{B}_2 = \left\{
+                        \begin{bmatrix}
+                            0.5 \\
+                            0.8 \\
+                            0.4 \\
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            1.8 \\
+                            0.3 \\
+                            0.3 \\
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            -2.2 \\
+                            -1.3 \\
+                            3.5 \\
+                        \end{bmatrix}
+                    \right\}, \quad
+
+                \]
+            </li>
+            <li>
+                The set 
+                \[
+                    \mathcal{A} = 
+                    \left\{
+                        \begin{bmatrix}
+                            1 \\
+                            2 \\
+                            3 \\
+                            4 \\
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            2 \\
+                            -1 \\
+                            0 \\
+                            2 \\
+                        \end{bmatrix},
+                        \begin{bmatrix}
+                            1 \\
+                            1 \\
+                            0 \\
+                            4 \\
+                        \end{bmatrix}
+                    \right\}
+                \]
+
+                is linearly independent, but not a generating set (and no basis) of \(\mathbb{R}^4\):
+                For instance, the vector \([0,0,0,1]^{\top} \) cannot be obtained by a linear combination of elements in \(\mathcal{A}\).
+            </li>
+        </ul>
+    </div>
+       
+    <br><br>
+
+    <strong><i>Remark</i></strong>. Every vector space \(V\) possesses a basis \(\mathcal{B}\).
+    The Example 2.16 shows that there can be many bases of a vector space \(V\), i.e., there is no unique basis. 
+    For example, the following are all bases of \(\mathbb{R}^2\):
+    \[
+        \,\\
+            \mathcal{B}_1 = 
+            \left\{
+                \begin{bmatrix}
+                    1 \\
+                    0
+                \end{bmatrix},
+                \begin{bmatrix}
+                    0 \\
+                    1
+                \end{bmatrix}
+            \right\}, \quad
+            \mathcal{B}_2 = 
+            \left\{
+                \begin{bmatrix}
+                    1 \\
+                    1
+                \end{bmatrix},
+                \begin{bmatrix}
+                    1 \\
+                    -1
+                \end{bmatrix}
+            \right\}
+        \,\\
+    \]
+
+    However, all bases possess the same number of elements, the basis vectors.
+    In other words, in \(\mathbb{R}^n\) space, every basis consists of exactly
+    \(n\) linearly independent vectors.
+    This means that any set of \(n\) linearly independent vectors in \(\mathbb{R}^n\)
+    automatically forms a basis, and no smaller or larger set of vectors can do so.
+    Therefore, all possible bases of \(\mathbb{R}^n\) contain exactly \(n\) basis vectors.
+
+    <br><br>
+
+    We only consider finite-dimensional vector spaces \(V\).
+    In this case, the dimension of \(V\) is the numer of basis vectors of \(V\),
+    and we write \(\dim(V)\).
+    \[
+        \mathcal{B} = 
+        \left\{
+            \begin{bmatrix}
+                1 \\
+                0 \\
+                0 \\
+            \end{bmatrix}, 
+            \begin{bmatrix}
+                0 \\
+                1 \\
+                0 \\
+            \end{bmatrix}, 
+            \begin{bmatrix}
+                0 \\
+                0 \\
+                1 \\
+            \end{bmatrix} 
+        \right\}, \quad
+
+        \dim(\mathcal{V}) = 3
+    \]
+        
+    If \(U \subseteq V\) is a subspace of \(V\), then \(\dim(U) \le \dim(V) \)
+    and \(\dim(U) = \dim(V) \) if and only if \(U = V\).
+    Intuitively, the dimension of a vector space can be thought of as the number of independent directions
+    in this vector space.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong>.
+    A basis of a subspace \(U = \text{span}[x_1, ..., x_m] \subseteq \mathbb{R}^n\) can be found
+    by executing the following steps:
+    <ol>
+        <li>
+            Write the spanning vectors as columns of a matrix \(A\).
+        </li>
+        <li>
+            Determine the row-echelon form of \(A\).
+        </li>
+        <li>
+            The spanning vectors associated with the pivot columns are a basis of \(U\).
+        </li>
+    </ol>
+
+    <br>
+
+    <div class="mml-example">
+        <strong>Example 2.17 (Determining a Basis)</strong>
+        <br>
+        Let \(U \subseteq \mathbb{R}^3\) be spanned by four vectors
+        \[
+            \,\\
+                x_1 =
+                \begin{bmatrix} 
+                    1\\
+                    0\\
+                    0\\
+                \end{bmatrix} 
+                , \quad
+                x_2 = 
+                \begin{bmatrix} 
+                    2\\
+                    0\\
+                    0\\
+                \end{bmatrix}
+                , \quad
+                x_3 = 
+                \begin{bmatrix}
+                    0\\
+                    1\\
+                    1\\ 
+                \end{bmatrix}
+                , \quad
+                x_4 = 
+                \begin{bmatrix} 
+                    0\\
+                    2\\
+                    2\\
+                \end{bmatrix}
+            \,\\
+        \]
+
+        we are interested in finding out wich vectors can form a basis for \(U\).        
+        For this, we need to check whether \(x_1, ..., x_4\) are linearly independent.
+        \[
+            \,\\
+            [x_1, x_2, x_3, x_4] = 
+            \begin{bmatrix}
+                1 & 2 & 0 & 0\\
+                0 & 0 & 1 & 2\\
+                0 & 0 & 1 & 2\\
+            \end{bmatrix}
+            \,\,
+            \xrightarrow{\text{RREF}}
+            \,\,
+            \begin{bmatrix}
+                1 & 2 & 0 & 0 \\
+                0 & 0 & 1 & 2 \\
+                0 & 0 & 0 & 0 \\
+            \end{bmatrix}
+            \,\\
+        \]
+
+        There are two pivot columns (\(x_1, x_3 \)). Since the pivot columns indicate
+        which set of vectors is linearly independent, we see form the row-echelon form that \(x_1, x_3\)
+        are linearly independent (because the system of linear equations \(\lambda_1 x_1 + \lambda_3 x_3 = 0\) can be 
+        only solved with \(\lambda_1 = \lambda_3 = 0\)).
+        Therefore \(\{ x_1, x_3\} \) is a basis of \(U\).
+    </div>
+
+    <br><br>
+    <h4>2.6.2 Rank</h4>
+    The number of linearly independent columns of a matrix \(A \in \mathbb{R}^{n \times n} \)
+    equals to the number of linearly independent rows. 
+    It is called the rank of \(A\) and is denoted by
+    \[
+        \,\\
+        \text{rk}(A)
+        \,\\
+    \]
+
+    <strong><i>Remark</i></strong>. The rank of a matrix has some important properties:
+    <ul>
+        <li>
+            \(\text{rk}(A) = \text{rk}(A^{\top}) \), i.e., the column rank equals to the row rank.
+        </li>
+        <li>
+            The columns of \(A \in \mathbb{R}^{m \times n}  \) span a subspace \(U \subseteq \mathbb{R}^{m}  \)
+            with \(\dim(U) =\text{rk}(A)\).
+            Later we will call this subspace the image or range.
+            A basis of \(U\) can be found by applying Gaussian elimination to \(A\) to identify the pivot columns.
+        </li>
+        <li>
+            The rows of \(A\in \mathbb{R}^{m\times n} \) span subspace \(W \subseteq \mathbb{R}^n \)
+            with \(\dim(W) = \text{rk}(A) \). A basis of \(W\) can be found by applying Gaussian elimination to \(A^{\top}\).
+        </li>
+        <li>
+            A matrix \(A \in \mathbb{R}^{m \times n} \) has full rank
+            if its rank equals the largeest possible rank for a matrix of the same dimensions.
+            \[
+                \text{rk}(A) = \min (m, n)
+            \]
+            
+            Otherwise \(A\) is rank deficient.
+            Let \(B \in \mathbb{R}^{4\times3} \)
+            \[
+                B =
+                \begin{bmatrix}
+                    1 & 0 & 0 \\
+                    0 & 1 & 0 \\
+                    0 & 0 & 1 \\
+                    1 & 1 & 1 \\
+                \end{bmatrix}
+                \,\,
+                \xrightarrow{R4-R3-R2-R1}
+                \,\,
+                \begin{bmatrix}
+                    1 & 0 & 0 \\
+                    0 & 1 & 0 \\
+                    0 & 0 & 1 \\
+                    0 & 0 & 0 \\
+                \end{bmatrix}
+            \]
+            The rank of matrix \(B\) is \(\text{rk}(B) = 3\), \(\text{rk}(B) = 3 = \min(4, 3) \).
+            Thus \(B\) is full rank.
+        </li>
+    </ul>
+    <br><br>
+
+    <h4>2.7 Linear Mappings</h4>
+    We will study mappings on vector spaces that preserve their structure,
+    which will allow us to define the concept of a coordinate.
+    In the beginning of the chapter, we said that vectors are objects that can be
+    added together and multiplied by a scalar, and the resulting object is still
+    a vector. We wish to preserve this property when applying the mapping:
+    \[
+        \,\\
+        \begin{align}
+        \Phi (x + y) &= \Phi(x) + \Phi(y) \text{(1) Additivity} \\
+        \Phi(\lambda x) &= \lambda \Phi(x) \text{(2) homogeneity}
+        \end{align}
+        \,\\
+    \]
+
+    The mapping \(\Phi\) is linear if both conditions are satisfied.
+
+    <br><br>
+
+    <strong>Definition 2.15 (Linear Mapping)</strong>.
+    For vector spaces \(V, W\), a mapping \(\Phi : V \rightarrow W \) is called a linear mapping 
+    (or vector space homomorphism / linear transformation) if 
+    \[
+        \,\\
+        \forall x, y \in V \, \forall \lambda, \psi \in \mathbb{R} : 
+        \Phi(\lambda x + \psi y) = \lambda (\Phi(x)) + \psi (\Phi(y))
+        \,\\
+    \]
+
+    We can represent linear mappings as matrices.
+
+    <br><br>
+
+    <strong>Definition 2.16 (Injective, Surjective, Bijective)</strong>.
+    Consider a mapping \(\Phi : \mathcal{V} \rightarrow \mathcal{W} \), where \(\mathcal{V}, \mathcal{W}\)
+    can be arbitarary sets. Then \(\Phi\) is called
+    <ul>
+        <li>
+            Injective if \(\forall x, y \in \mathcal{V} : \Phi(x) = \Phi(y) \Rightarrow x = y \).
+        </li>
+        <li>
+            Surjective if \(\Phi(\mathcal{V}) = \mathcal{W}  \).
+        </li>
+        <li>
+            Bijective if it is injective and surjective.
+        </li>
+    </ul>
+
+    A is bijective \(\Phi\) can be undone, i.e. there exists a mapping \(\Psi : \mathcal{W} \rightarrow \mathcal{V} \)
+    so that \(\Psi \circ \Phi(x) = x \). This mapping \(\Psi \) is then called the inverse of \(\Phi\) and normally denoted by \(\Phi^{-1}\).
+    <ul>
+        <li>
+            Isomorphism:
+            \(\Phi : V \rightarrow W\) is called an isomorphism if \(\Phi\) is linear and bijective.
+        </li>
+        <li>
+            Endomorphism:
+            \(\Phi : V \rightarrow V\) is called an endomorphism if \(\Phi\) is linear.
+        </li>
+        <li>
+            Automorphism:
+            \(\Phi : V \rightarrow V\) is called an automorphism if \(\Phi\) is linear and bijective.
+        </li>
+        <li>
+            We define \(\text{id}_V: V \rightarrow V, x \mapsto x \) as the identity mapping or identity automorphism in \(V\).
+        </li>
+    </ul>
+
+    <br>
+
+    <strong>Theorem 2.17</strong>. Finite-dimensional vector spaces \(V\) and \(W\) are isomorphic
+    if and only if \(\dim(V) = \dim(W)\).
+    Intuitively, this means
+    that vector spaces of the same dimension are kind of the same thing, as
+    they can be transformed into each other without incurring any loss.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong>. Consider vector spaces \(V, W, X\). Then:
+    <ul>
+        <li>
+            For linear mappings \(\Phi : V \rightarrow W \) and \(\Psi : W \rightarrow X \),
+            the mapping \(\Psi \circ \Phi : V \rightarrow W \) is also linear.
+        </li>
+        <li>
+            If \(\Phi : V \rightarrow W\) is an isomorphism, then \(\Phi^{-1} : W \rightarrow V \) is an isomorphism too.
+        </li>
+    </ul>
+
+    <br>
+    <h4>2.7.1 Matrix Representation of Linear Mappings</h4>
+    Any \(n\)-dimensional vector space is isomorphic to \(\mathbb{R}^n\) (Therorem 2.17).
+    In the following, the order of the basis vectors will be important. Therefore, we write
+    \[
+        \,\\
+        B = (b_1, ..., b_n)
+        \,\\
+    \]
+
+    and call ordered basis of \(V\).
+
+    <br><br>
+
+    <strong>Definition 2.18 (Coordinates)</strong>.
+    Consider a vector space \(V\) and an ordered basis \(B = (b_1, ..., b_n) \) of \(V\).
+    For any \(x \in V\), we obtain a unique representation (linear combination)
+    \[
+        \,\\
+        x = \alpha_1 b_1 + \cdots + \alpha_n b_n
+        \,\\
+    \]
+
+    of \(x\) with respect to \(B\). Then \(\alpha_1, ..., \alpha_n\) are the coordinates of \(x\) with respect to \(B\), and the vector
+    \[
+        \,\\
+        \boldsymbol{\alpha} = 
+        \begin{bmatrix}
+            \alpha_1 \\
+            \vdots \\
+            \alpha_n
+        \end{bmatrix}
+        \in \mathbb{R}^n
+        \,\\
+    \]
+
+    is the coordinate vector (coordinate representation) of \(x\) with respect to the ordered basis \(B\).
+    A basis effectively defines a coordinate system. We are familiar with the
+    Cartesian coordinate system in two dimensions,
+    which is spanned by the standard basis vectors \(e_1\), \(e_2\). 
+    In this coordinate system, a vector \(x \in \mathbb{R}^2\)
+    has a representation that tells us how to linearly combine \(e_1\) and \(e_2\) to
+    obtain \(x\). However, any basis of \(\mathbb{R}^2\) defines a valid coordinate system,
+    and the same vector \(x\) from before may have a different coordinate representation in the \((b_1, b_2)\) basis.
+
+
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-5.png" width="75%" onerror=handle_image_error(this)>
+        <figcaption>
+            Two different coordinate systems defined by two sets of basis vectors
+        </figcaption>
+    </figure>
+
+    <br>
+
+    In the figure above, the coordinates of \(x\) with
+    respect to the standard basis \(e_1, e_2\) is \([2, 2]^{\top}\). However, with respect to
+    the basis \(b_1, b_2\) the same vector \(x\) is represented as \([1.09, 0.72]^{\top}\), 
+    i.e., \(x = 1.09b_1 + 0.72b_2\).
+
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Example 2.20</strong>
+        <br>
+        Consider the vector \(x \in \mathbb{R}^2\) with coordinates \( [2, 3]^{\top} \) 
+        with respect to the standard basis \((e_1, e_2)\) of \(\mathbb{R}^2\). 
+        This standard basis allows us to write \(\color{blue}{x = 2e_1 + 3e_2}\).
+        However, we do not have to choose the standard basis to represent the vector \(x\).
+
+        <br><br>
+
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-6.png" width="20%">
+            <figcaption>
+                Different coordinate
+                representations of a
+                vector \(x\), depending
+                on the choice of
+                basis
+            </figcaption>
+        </figure>
+        <br>
+        If we use \( b_1 = [1, -1]^{\top},\ b_2 = [1, 1]^{\top} \) as the basis,
+        the vector \(x\) can be represented as \(\color{orange}{x = -\frac{1}{2} b_1 + \frac{5}{2} b_2}\).
+        </div>
+
+        <!-- <br><br>
+        <strong>Definition 2.19 (Transformation Matrix)</strong>. -->
+
+
+    </div>
+
+
 </div><br><br>
+
+<!-- <h3>Analytic Geometry</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>Matrix Decompositions</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>Vector Calculus</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>Probability and Distributions</h3>
+<div class="article">
+
+</div><br><br>
+
+<h3>Continuous Optimization</h3>
+<div class="article">
+
+</div><br><br> -->
