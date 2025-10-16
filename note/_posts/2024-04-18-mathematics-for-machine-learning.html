@@ -2583,8 +2583,10 @@ emoji: /emoji/books.png
     \[
         \,\\
         \begin{align}
-        \Phi (x + y) &= \Phi(x) + \Phi(y) \text{(1) Additivity} \\
-        \Phi(\lambda x) &= \lambda \Phi(x) \text{(2) homogeneity}
+        \begin{aligned}
+        \Phi (x + y) &= \Phi(x) + \Phi(y) \quad  &\text{Additivity} \\
+        \Phi(\lambda x) &= \lambda \Phi(x) \quad &\text{Homogeneity}
+        \end{aligned}
         \end{align}
         \,\\
     \]
@@ -2750,9 +2752,388 @@ emoji: /emoji/books.png
         the vector \(x\) can be represented as \(\color{orange}{x = -\frac{1}{2} b_1 + \frac{5}{2} b_2}\).
         </div>
 
-        <!-- <br><br>
-        <strong>Definition 2.19 (Transformation Matrix)</strong>. -->
+        <br><br>
+        <strong>Definition 2.19 (Transformation Matrix)</strong>.
+        Consider vector spaces \(V, W\) with corresponding ordered bases \(B = (b_1, ..., b_n) \)
+        and \(C = (c_1, ..., c_m)\).
+        Moreover, we consider a linear mapping \(\Phi : V \rightarrow W  \). For \(j\in \{1,...,n\}\)
+        \[
+            \,\\
+                \Phi(b_j) = \alpha_{1j} c_1 + \cdots + \alpha_{mj} c_m = \sum_{i=1}^m \alpha{ij}c_i
+            \,\\
+        \]
+        is the unique representation of \(\Phi(b_j)\) with respect to \(C\).
+        where, \(\alpha_{ij}\) is defined as
+        \[
+            \,\\
+            A_{\Phi}(i, j) = \alpha_{ij}
+            \,\\
+        \]    
+        For example, consider the bases of \(V\) and \(W\) as follows:
+        \[
+            \,\\
+                \begin{align}
+                B = 
+                \begin{bmatrix}
+                    1 & 0\\
+                    0 & 1\\
+                \end{bmatrix} \quad &\Rightarrow \quad
+                b_1 = 
+                \begin{bmatrix}
+                    1 \\
+                    0
+                \end{bmatrix}, \,\,
+                b_2 = 
+                \begin{bmatrix}
+                    0 \\
+                    1
+                \end{bmatrix}
 
+                \,\\
+                \,\\
+
+                C = 
+                \begin{bmatrix} 
+                    1 & 2 \\
+                    3 & 0 \\
+                    0 & -1 \\
+                \end{bmatrix} \quad &\Rightarrow \quad
+                c_1 = 
+                \begin{bmatrix}
+                    1 \\
+                    3 \\
+                    0
+                \end{bmatrix}, \,\,
+                c_2 = 
+                \begin{bmatrix}
+                    2 \\
+                    0 \\
+                    -1
+                \end{bmatrix}
+                \end{align}
+            \,\\
+        \]
+
+        Here, the unique representation of \(\Phi(b_1)\) is
+        \[
+            \,\\
+                \begin{align}
+                \Phi(b_1) &= 
+                \begin{bmatrix}
+                    1 & 2\\
+                    3 & 0\\
+                    0 & -1
+                \end{bmatrix}
+                \begin{bmatrix}
+                    1\\
+                    0
+                \end{bmatrix}
+                = 
+                \begin{bmatrix}
+                    1\\
+                    3\\
+                    0
+                \end{bmatrix}
+                \,\\
+                \,\\
+
+                &= 1 \cdot c_1 + 0 \cdot c_2 = c_1
+                \end{align}
+            \,\\
+        \]
+
+        The coordinates of \(\Phi(b_j)\) with respect to the ordered basis \(C\) of \(W\)
+        are the \(j\)-th column of \(A_{\Phi}\).
+        Consider vector spaces \(V, W\) with ordered bases \(B, C\) and a linear mapping \(\Phi: V \rightarrow W\)
+        with transformation matrix \(A_{\Phi}\).
+        If \(\hat{x}\) is the coordinate vector of \(x\in V\) with respect to \(B\) and \(\hat{y}\) the coordinate vector
+        of \(y = \Phi(x) \in W \) with respect to \(C\), then
+        \[
+            \,\\
+                \hat{y} = A_{\Phi}\hat{x}
+            \,\\
+        \]
+
+        This means that the transformation matrix can be used to map coordinates
+        with respect to an ordered basis in \(V\) to coordinates with respect to an
+        ordered basis in \(W\).
+
+        <br><br>
+
+        <div class="mml-example">
+            <strong>Example 2.22 (Linear Transformations of Vectors)</strong>
+            <br>
+
+            We consider three linear transformations of a set of vectors in \(\mathbb{R}^2\) with 
+            \[
+                \,\\
+                A_1 =
+                \begin{bmatrix} 
+                    \cos(\frac{\pi}{4}) & -\sin(\frac{\pi}{4}) \\ 
+                    \sin(\frac{\pi}{4}) & \cos(\frac{\pi}{4})
+                \end{bmatrix}, \quad
+                A_2 = 
+                \begin{bmatrix} 
+                    2 & 0 \\
+                    0 & 1
+                \end{bmatrix}, \quad
+                A_3 = \frac{1}{2} 
+                \begin{bmatrix} 
+                    3 & -1 \\
+                    1 & -1
+                \end{bmatrix}
+                \,\\
+            \]
+
+            The figure below shows three examples of linear transformations applied to a set of vectors.
+            In the figure, the original data on the far left shows the vectors in \(\mathbb{R}^2\).
+            The vectors are arranged in a square, with each dot corresponding to \((x_1, x_2)\)-coordinates.
+            When we use matrix \(A_1\) to apply linear transformations to the original vectors, we obtain the second vectors,
+            which is rotated by \(45^{\small{\circ}}\).
+            If we apply \(A_2\), the data will be stretched along the x-axis by a factor of \(2\).
+
+            <figure>
+                <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-7.png" onerror=handle_image_error(this)>
+                <figcaption>
+                    From the left, <br>
+                    Original data ·
+                    Rotation by 45° ·
+                    Stretch along the horizontal axis ·
+                    General linear mapping
+                </figcaption>
+            </figure>
+        </div>
+        
+        <br><br>
+
+        <h4>2.7.2 Basis Change</h4> 
+        <strong><i>Remark</i></strong>.
+        In the following, we will have a closer look at how transformation matrices
+        of a linear mapping \(\Phi: V \rightarrow W \) change if we change the bases in \(V\) and \(W\).
+
+        We effectively get different coordinate representations of the
+        identity mapping \(\text{id}_{V}\).
+        In the context of Figure 4, this would mean to
+        map coordinates with respect to \((e_1, e_2)\) onto coordinates with respect to
+        \((b1, b2)\) without changing the vector \(x\).
+        By changing the basis and correspondingly the representation of vectors, the transformation matrix with
+        respect to this new basis can have a particularly simple form that allows
+        for straightforward computation.
+
+        <br><br>
+
+        Consider a vector \(x\) with coordinates \((2, 3)\) in the standard basis of \(\mathbb{R}^2\).
+        In this basis, the vector \(x\) is represented as \(2 e_1 + 3 e_2\).
+        If we choose the basis \(a = [1, 0]^{\top} = c_1\) and \(b = [1, 3]^{\top} = c_2\), \(C = \{[c_1, c_2]\}\) then \(x\) can be represented as \(c_1 + c_2\).
+
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-8.png" width="50%" onerror=handle_image_error(this)>
+            <figcaption>
+                <a href="https://plusthemath.tistory.com/251">Basis Change</a>. <br>
+                Different coordinate representations
+                \[
+                    \,\\
+                    \left[
+                        x
+                    \right]_E = 
+                    \begin{bmatrix}
+                        2 \\ 
+                        3
+                    \end{bmatrix}, \quad
+                    \left[
+                        x
+                    \right]_C = 
+                    \begin{bmatrix}
+                        1 \\ 
+                        1
+                    \end{bmatrix}
+                    \,\\
+                \]
+            </figcaption>
+        </figure>
+
+        <br>
+
+        <strong><i>Remark</i></strong> (Basis Change Transformation Matrix).
+        A basis change transformation matrix is a matrix that converts the coordinate representation of a vector
+        \(x\) from one basis \(B = \(b_1, b_2)\) to another basis \(\hat{B} = \(\hat{b_1}, \hat{b_2})\).
+        In general the vector \(x\) can be written as
+        \[
+            \,\\
+            x = b_1 x  + b_2 x  = \hat{b_1} \hat{x}  + \hat{b_2} \hat{x} 
+            \,\\
+        \]
+
+        If each vector of \(B\) is expressed in terms of \(\hat{B}\) as
+
+        \[
+            \,\\
+                b_1 = p \hat{b_1} + r \hat{b_2}
+                \\
+                b_2 = q \hat{b_1} + s \hat{b_2}
+            \,\\
+        \]
+
+        then
+
+        \[
+            \,\\
+            [x]_{\hat{B}}
+            =
+            \begin{bmatrix}
+                p & q \\
+                r & s
+            \end{bmatrix}^{-1}
+            [x]_{B}
+            \,\\
+        \]
+
+        The matrix 
+        \[
+            \,\\
+            [P]^{B}_{\hat{B}}
+            =
+            \begin{bmatrix}
+                p & q \\
+                r & s
+            \end{bmatrix}^{-1}
+            \,\\
+        \]
+
+        is called the basis change transformation matrix from \(B\) to \(\hat{B}\).
+        For example, consider the coordinates \( (x, y) \) in the standard basis \(E\) of \(\mathbb{R}^2\),
+        and the coordinates \(\hat{x}, \hat{y}\) in the basis \(C = \{ [1, 0]^{\top}, [1, 3]^{\top} \}\).
+        \[
+            \,\\
+            \begin{align}
+            x 
+            \begin{bmatrix}
+                1\\
+                0
+            \end{bmatrix}
+            + 
+            y
+            \begin{bmatrix}
+                0\\
+                1
+            \end{bmatrix}
+            &=
+            \hat{x}
+            \begin{bmatrix}
+                1\\
+                0
+            \end{bmatrix}
+            +
+            \hat{y}
+            \begin{bmatrix}
+                1\\
+                3
+            \end{bmatrix}
+
+            \,\\
+            \,\\
+            
+            \Rightarrow
+            \begin{bmatrix}
+                1 & 0\\
+                0 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                x \\
+                y 
+            \end{bmatrix}
+            &=
+            \begin{bmatrix}
+                1 & 1 \\
+                0 & 3
+            \end{bmatrix}
+            \begin{bmatrix}
+                \hat{x} \\
+                \hat{y}
+            \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        Therefore, 
+
+        \[
+            \,\\
+            \begin{align}
+            \begin{bmatrix}
+                \hat{x} \\
+                \hat{y}
+            \end{bmatrix}
+            &= 
+            \begin{bmatrix}
+                1 & 0 \\
+                0 & 1 \\
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 & 1 \\
+                0 & 3 \\
+            \end{bmatrix}^{-1}
+            \begin{bmatrix}
+                x \\
+                y
+            \end{bmatrix}
+
+            \,\\
+            \,\\
+
+            &= 
+
+            \frac{1}{3}
+            \begin{bmatrix}
+                3 & -1 \\
+                0 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                x \\
+                y
+            \end{bmatrix}
+
+            \end{align}
+            \,\\
+        \]
+
+        Here, \( \frac{1}{3}\begin{bmatrix} 3 & -1 \\ 0 & 1 \end{bmatrix} \) is the basis change transformation matrix,
+        denoted by \( [P]_E^C \). In other words, it is the matrix
+        that maps the coordinates in \(E\) to those in \(C\).
+        To express the vector \((2, 3)\) in the standard basis \(E\) (Fig. 7) as coordinates relative to the basis \(C\),
+        we can multiply it by \([P]_E^C\) as obtained above to get its representation in basis \(B\):
+        \[
+            \,\\
+            \begin{align}
+            [P]_E^C 
+            \begin{bmatrix}
+                2 \\
+                3
+            \end{bmatrix}
+            &= 
+            \frac{1}{3}
+            \begin{bmatrix}
+                3 & -1 \\
+                0 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                2 \\
+                3
+            \end{bmatrix}
+            \,\\
+            \,\\
+            &=
+            \begin{bmatrix}
+                1 \\
+                1
+            \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        <!-- <strong>Therorem 2.20 (Basis Change)</strong>.
+
+        <br><br> -->
 
     </div>
 
