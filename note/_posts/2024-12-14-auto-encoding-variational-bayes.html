@@ -133,20 +133,24 @@ emoji: /emoji/brain.png
                                 \(\mathcal{L}(\theta, \phi; \mathbf{x}^{(i)})\) is called the (variational) 
                                 lower boun(Evidence Lower Bound, ELBO)
                                 on the marginal likelihood of datapoint \(i\), can be written as:
-                                \[
-                                    \,\\
-                                    \log p_{\theta}(\mathcal{x}^{(i)}) \ge \mathcal{L}(\theta, \phi; \mathcal{x}^{(i)})
-                                    = \mathbb{E}_{q \phi (\mathbf{z}|\mathbf{x})} [-\log q_{\phi}(\mathbf{z}|\mathbf{x}) + \log p_{\theta}(\mathbf{x}, \mathbf{z})]
-                                    \,\\
-                                \]
+                                <div class="latex-container">
+                                    \[
+                                        \,\\
+                                        \log p_{\theta}(\mathcal{x}^{(i)}) \ge \mathcal{L}(\theta, \phi; \mathcal{x}^{(i)})
+                                        = \mathbb{E}_{q \phi (\mathbf{z}|\mathbf{x})} [-\log q_{\phi}(\mathbf{z}|\mathbf{x}) + \log p_{\theta}(\mathbf{x}, \mathbf{z})]
+                                        \,\\
+                                    \]
+                                </div>
 
                                 where the joint probability decomposition \( p_{\theta}(\mathbf{x}, \mathbf{z}) = p_{\theta}(\mathbf{x}|\mathbf{z})p_{\theta}(\mathbf{z}) \) is applied:
-                                \[
-                                    \,\\
-                                    \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) = \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} 
-                                    \big[\log p_{\theta}(\mathbf{x}|\mathbf{z}) + \log p_{\theta}(\mathbf{z}) - \log q_{\phi}(\mathbf{z}|\mathbf{x})\big]
-                                    \,\\
-                                \]
+                                <div class="latex-container">
+                                    \[
+                                        \,\\
+                                        \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) = \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} 
+                                        \big[\log p_{\theta}(\mathbf{x}|\mathbf{z}) + \log p_{\theta}(\mathbf{z}) - \log q_{\phi}(\mathbf{z}|\mathbf{x})\big]
+                                        \,\\
+                                    \]
+                                </div>
                             
                                 To include the KL divergence, we use its definition:
                                 \[
@@ -157,21 +161,25 @@ emoji: /emoji/brain.png
                                 \]
                             
                                 Rearranging this definition gives:
-                                \[
-                                \,\\
-                                \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log p_{\theta}(\mathbf{z})\big] - 
-                                \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log q_{\phi}(\mathbf{z}|\mathbf{x})\big] = 
-                                -D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z})).
-                                \,\\
-                                \]
+                                <div class="latex-container">
+                                    \[
+                                    \,\\
+                                    \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log p_{\theta}(\mathbf{z})\big] - 
+                                    \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log q_{\phi}(\mathbf{z}|\mathbf{x})\big] = 
+                                    -D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z})).
+                                    \,\\
+                                    \]
+                                </div>
                             
                                 Substituting this into the ELBO, we have:
-                                \[
-                                \,\\
-                                \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) = - D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z}))
-                                + \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log p_{\theta}(\mathbf{x}|\mathbf{z})\big] 
-                                \,\\
-                                \]
+                                <div class="latex-container">
+                                    \[
+                                    \,\\
+                                    \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) = - D_{KL}(q_{\phi}(\mathbf{z}|\mathbf{x}) \| p_{\theta}(\mathbf{z}))
+                                    + \mathbb{E}_{q_{\phi}(\mathbf{z}|\mathbf{x})} \big[\log p_{\theta}(\mathbf{x}|\mathbf{z})\big] 
+                                    \,\\
+                                    \]
+                                </div>
                                 
                                 The first term, the <mark>KL divergence term</mark>, regularizes the approximate posterior \(q_{\phi}(\mathbf{z}|\mathbf{x})\) to be close to the prior \(p_{\theta}(\mathbf{z})\).
                                 The second term represents the <mark>reconstruction term</mark>, which measures how well the data can be reconstructed given the latent variables. 
@@ -191,23 +199,25 @@ emoji: /emoji/brain.png
                         <ul>
                             <li>
                                 In this section we introduce a practical estimator of the lower bound and its derivatives w.r.t the parameters.
-                                \[
-                                    \begin{array}{l}
-                                    \hline
-                                    \textbf{Algorithm 1} \text{ Minibatch version of the Auto-Encoding VB (AEVB) algorithm. Either of the two} \\
-                                    \text{SGVB estimators in section 2.3 can be used. We use settings } M = 100 \text{ and } L = 1 \text{ in experiments.} \\
-                                    \hline
-                                    \quad \theta, \phi \leftarrow \text{Initialize parameters} \\
-                                    \quad \textbf{repeat} \\
-                                    \qquad \mathbf{X}^M \leftarrow \text{Random minibatch of } M \text{ datapoints (drawn from full dataset)} \\
-                                    \qquad \epsilon \leftarrow \text{Random samples from noise distribution } p(\epsilon) \\
-                                    \qquad \mathbf{g} \leftarrow \nabla_{\theta,\phi}\tilde{\mathcal{L}}^M(\theta, \phi; \mathbf{X}^M, \epsilon) \text{ (Gradients of minibatch estimator)} \\
-                                    \qquad \theta, \phi \leftarrow \text{Update parameters using gradients } \mathbf{g} \text{ (e.g. SGD or Adagrad)} \\
-                                    \quad \textbf{until } \text{convergence of parameters } (\theta, \phi) \\
-                                    \quad \textbf{return } \theta, \phi \\
-                                    \hline
-                                    \end{array}
-                                \]
+                                <div class="latex-container">
+                                    \[
+                                        \begin{array}{l}
+                                        \hline
+                                        \textbf{Algorithm 1} \text{ Minibatch version of the Auto-Encoding VB (AEVB) algorithm. Either of the two} \\
+                                        \text{SGVB estimators in section 2.3 can be used. We use settings } M = 100 \text{ and } L = 1 \text{ in experiments.} \\
+                                        \hline
+                                        \quad \theta, \phi \leftarrow \text{Initialize parameters} \\
+                                        \quad \textbf{repeat} \\
+                                        \qquad \mathbf{X}^M \leftarrow \text{Random minibatch of } M \text{ datapoints (drawn from full dataset)} \\
+                                        \qquad \epsilon \leftarrow \text{Random samples from noise distribution } p(\epsilon) \\
+                                        \qquad \mathbf{g} \leftarrow \nabla_{\theta,\phi}\tilde{\mathcal{L}}^M(\theta, \phi; \mathbf{X}^M, \epsilon) \text{ (Gradients of minibatch estimator)} \\
+                                        \qquad \theta, \phi \leftarrow \text{Update parameters using gradients } \mathbf{g} \text{ (e.g. SGD or Adagrad)} \\
+                                        \quad \textbf{until } \text{convergence of parameters } (\theta, \phi) \\
+                                        \quad \textbf{return } \theta, \phi \\
+                                        \hline
+                                        \end{array}
+                                    \]
+                                </div>
                             </li>
                             <li>
                                 Under certain mild conditions outlined in section 2.4 for a chosen approximate posterior
@@ -296,12 +306,14 @@ emoji: /emoji/brain.png
                             　$\mathcal{N}(0, 1)$: 평균이 $0$이고 분산이 $1$로서, $z \in \mathbb{R} $ 형태.
                             <br>
                         )
-
-                        \[
-                            \,\\
-                            \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) \simeq \frac{1}{2} \sum^J_{j=1} \left( 1 + \log((\sigma_j^{(i)})^2) - (\mu_j^{(i)})^2 - (\sigma_j^{(i)})^2 \right) + \frac{1}{L} \sum^L_{l=1} \log p_{\theta}(\mathbf{x}^{(i)}|\mathbf{z}^{(i,l)})
-                            \,\\
+                        
+                        <div class="latex-container">
+                            \[
+                                \,\\
+                                \mathcal{L}(\theta, \phi; \mathbf{x}^{(i)}) \simeq \frac{1}{2} \sum^J_{j=1} \left( 1 + \log((\sigma_j^{(i)})^2) - (\mu_j^{(i)})^2 - (\sigma_j^{(i)})^2 \right) + \frac{1}{L} \sum^L_{l=1} \log p_{\theta}(\mathbf{x}^{(i)}|\mathbf{z}^{(i,l)})
+                                \,\\
                             \]
+                        </div>
 
                         where $\mathbf{z}^{(i, l)} = \mu^{(i)} + \sigma{(i)} \odot \epsilon^{(l)} $ and $\epsilon \sim \mathcal{L}(0, \mathbf{I}) $
                         <br><br>
