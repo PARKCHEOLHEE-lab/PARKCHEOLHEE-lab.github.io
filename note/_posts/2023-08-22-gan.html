@@ -67,7 +67,7 @@ emoji: /emoji/brain.png
                         This method attempts to match the <b>gradient of the data distribution</b> with the gradient of the model's distribution.
                         \[
                             \,\\
-                                \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})} \, [\, \|\ \nabla_{\mathbf{x}}\,\log p_\theta(\mathbf{x}) - \nabla_{\mathbf{x}} \log p_{data}(\mathbf{x}) \|^2 \,]
+                                \mathbb{E}_{\mathbf{x} \sim p_{data}(\mathbf{x})} \, [\, \|\ \nabla_{\mathbf{x}}\,\log p_\theta(\mathbf{x}) - \nabla_{\mathbf{x}} \log p_{data}(\mathbf{x}) \|_2^2 \,]
                             \,\\
                         \]
                         <ul type="circle">
