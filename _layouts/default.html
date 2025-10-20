@@ -63,70 +63,10 @@ a:hover {
 {% endif %}
 {% endif %}
 
-
-
-
+<script src="/js/utils.js"></script>
 <script>
-
-  function getTOC() {
-    let toc = "<ul class='section-nav'>";
-
-    const h3h4_tags = document.querySelectorAll("h3, h4");
-    for (const h_tag of h3h4_tags) {
-      h_tag.id = h_tag.innerText.toLowerCase().replaceAll(" ", "-");
-    }
-
-    for (const h_tag of h3h4_tags) {
-      if (h_tag.nodeName === "H3") {
-        toc += "<li><a href=\"#" + h_tag.id + "\">" + h_tag.innerText + "</a></li>";
-      } else {
-        toc += "<ul><li><a href=\"#" + h_tag.id + "\">" + h_tag.innerText + "</a></li></ul>"
-      }
-    }
-
-    toc += "</ul><br><br>";
-    document.getElementById("toc").innerHTML += toc;
-    
-    }
-
-    function generateFigNums() {
-      const figCaptions = document.getElementsByTagName("figcaption");
-      
-      const figKey = "fig"
-      const figCaptionsPerClass = {};
-      for (const figCaption of figCaptions) {
-        const figCaptionName = figCaption.classList.value;
-        if (figCaptionName.length === 0) {
-          if (!figCaptionsPerClass.hasOwnProperty(figKey)) {
-            figCaptionsPerClass[figKey] = [];
-          }
-          figCaptionsPerClass[figKey].push(figCaption);
-        } else {
-          if (!figCaptionsPerClass.hasOwnProperty(figCaptionName)) {
-              figCaptionsPerClass[figCaptionName] = [];
-          }
-          figCaptionsPerClass[figCaptionName].push(figCaption);
-        }
-      }
-
-      const nofigKey = "nofig"
-      for (const key in figCaptionsPerClass) {
-        const eachFigCaptions = figCaptionsPerClass[key];
-        const keyFirstUppercase = key.charAt(0).toUpperCase() + key.slice(1)
-        for (let i = 0; i < eachFigCaptions.length; i++) { 
-          const figNum = i + 1;
-          const eachFigCaption = eachFigCaptions[i];
-
-          if (key !== nofigKey) {
-            eachFigCaption.innerHTML = `${keyFirstUppercase} ${String(figNum)}: ${eachFigCaption.innerHTML}`
-          }
-        }
-      }
-    }
-
-  getTOC();
-  generateFigNums();
-
+  generate_table_of_contents()
+  generate_figure_numbers()
 </script>
 
 </html>

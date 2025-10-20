@@ -20,20 +20,7 @@
 
 </style>
 
-<script>
-  // Initialize Highlight.js
-  hljs.highlightAll();
-
-  function handle_image_error(img) {
-    const originalSrc = img.src;
-
-    if (originalSrc.includes("media.githubusercontent.com")) return;
-    
-    const githubMediaUrl = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/dev/" + img.src.split("/").slice(-3).join("/");
-    
-    img.src = githubMediaUrl;
-  }
-</script>
+<script src="/js/utils.js"></script>
 
 <article>
   <header><h2>{{ include.title | default: page.title }}</h2></header>
@@ -63,7 +50,7 @@
         {% assign sorted_hashtag = post.hashtag | split: " " %}
     
       <div style="margin-top: -0.2em">
-        <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+        <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
           {% if post.featured %}
             <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
           {% elsif post.inprogress %}
@@ -113,7 +100,8 @@
 
       {% if post.featured %}
         <div style="margin-top: -0.2em">
-          <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+          <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
+
             {% if post.featured %}
               <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
             {% else %}
@@ -159,7 +147,7 @@
 
         {% if post.inprogress %}
           <div style="margin-top: -0.2em">
-            <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+            <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
               {% if post.inprogress %}
                 <h3><u class="WIPUnderline">{{ post.title }}</u></h3>
               {% else %}

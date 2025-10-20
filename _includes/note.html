@@ -33,6 +33,8 @@
 
 </style>
 
+<script src="/js/utils.js"></script>
+
 <article>
   <header><h2>{{ include.title | default: page.title }}</h2></header>
   <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
@@ -50,7 +52,7 @@
       {% for post in all_posts %}
 
         <div style="margin-top: -0.1em">
-            <div class="onClickDiv" onclick="location.href='{{ post.url | relative_url }}';">
+            <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
               
               <div class="{% if forloop.last == false %}useBottomLine{% endif %}" style="display: flex; justify-content: space-between;">
                 <h4 class="post-title" style="margin: 0em; margin-left: -0.4em; color: rgb(70, 70, 70); display: flex; align-items: center;">

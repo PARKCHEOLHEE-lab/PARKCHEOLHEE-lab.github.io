@@ -4,21 +4,10 @@ layout: default
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/stackoverflow-light.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
-
-
+<script src="/js/utils.js"></script>
 <script>
   // Initialize Highlight.js
   hljs.highlightAll();
-
-  function handle_image_error(img) {
-    const originalSrc = img.src;
-
-    if (originalSrc.includes("media.githubusercontent.com")) return;
-    
-    const githubMediaUrl = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/dev/" + img.src.split("/").slice(-3).join("/");
-
-    img.src = githubMediaUrl;
-  }
 </script>
 
 <script type="text/x-mathjax-config">
