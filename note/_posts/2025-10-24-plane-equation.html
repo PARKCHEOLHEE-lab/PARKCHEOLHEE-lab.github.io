@@ -1,0 +1,63 @@
+---
+title:  "Plane Equation"
+layout: post
+---
+
+<br>
+
+<div class="article">
+    A plane in 3D coordinate space is determined by a point and a vector that is perpendicular to the plane.
+    
+    <br><br>
+    Let \(P_0 = (x_0, y_0, z_0) \) be the point given, 
+    and \(n\) the orthogonal vector.
+    Also let \(P = (x, y, z)\) be any point in the plane, and \(r\) and \(r_0\) the position vectors of 
+    points \(P\) and \(P_0\), respectively.
+    
+    Now, if we let \(n = (a,b,c) \), then since \(\overrightarrow{P_0 P} \) is perpendicular to \(n\), we have
+    \[
+        \,\\
+        \begin{align}
+            \overrightarrow{P_0 P} \cdot n &= (P - P_0) \cdot n \\
+                                            &= (x - x_0, y - y_0, z - z_0) \cdot (a, b, c) \\
+                                            &= a(x - x_0) + b(y - y_0) + c(z - z_0) \\
+                                            &= ax + by + cz - (ax_0 + by_0 + cz_0) \\
+        \end{align}
+        \,\\
+    \]
+        
+    This expression must be zero for all points \( P \) on the plane, 
+    because the vector \( \overrightarrow{P_0P} \) is orthogonal to \( n \).  
+    We define the constant term
+
+    \[
+        \,\\
+        d = -(ax_0 + by_0 + cz_0)
+        \,\\
+    \]
+
+    and thus obtain the plane equation in its scalar form:
+
+    \[
+        \,\\
+        ax + by + cz + d = 0
+        \,\\
+    \]
+
+    In vector form, the plane can be written as below if we let \(p = P - P_0\)
+    \[
+        \,\\
+        p \cdot n = 0
+        \,\\
+    \]
+
+    That is, for every point \( P \) on the plane, the vector \( P - P_0 \) is orthogonal to \( n \), 
+    meaning the dot product between \( n \) and \( P - P_0 \) is \(0\).  
+    Conversely, any point that satisfies this condition must lie on the plane defined by \( n \) and \( P_0 \).
+
+    <span style="display: block; margin-left: -3em;">
+        {% include embed.html url="/notebooks/plane-equation.html" %}
+    </span>
+</div>
+
+<br><br>
