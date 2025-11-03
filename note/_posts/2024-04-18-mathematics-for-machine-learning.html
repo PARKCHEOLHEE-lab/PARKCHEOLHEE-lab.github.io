@@ -2956,7 +2956,7 @@ emoji: /emoji/books.png
 
         <strong><i>Remark</i></strong> (Basis Change Transformation Matrix).
         A basis change transformation matrix is a matrix that converts the coordinate representation of a vector
-        \(x\) from one basis \(B = \(b_1, b_2)\) to another basis \(\hat{B} = \(\hat{b_1}, \hat{b_2})\).
+        \(x\) from one basis \(B = (b_1, b_2)\) to another basis \(\hat{B} = (\hat{b_1}, \hat{b_2})\).
         In general the vector \(x\) can be written as
         \[
             \,\\
@@ -3131,36 +3131,102 @@ emoji: /emoji/books.png
             \,\\
         \]
 
-        <!-- <strong>Therorem 2.20 (Basis Change)</strong>.
+        <h4>2.7.3 Image and Kernel</h4>
+        The image and kernel of a linear mapping are vector subspaces with certain important properties.
+        
+        
+        <br><br>
 
-        <br><br> -->
+        <strong>Definition 2.23</strong> (Image and Kernel).
+
+        <br><br>
+
+        For \(\Phi : V \rightarrow W\), we define the kernel/nullspace
+        \[
+            \,\\
+            \ker(\Phi) := \Phi^{-1}(0w) = \{ v \in V: \Phi(v) = 0w \}
+            \,\\
+        \]
+
+        and the image/range
+        \[
+            \,\\
+            \text{Im}(\Phi) := \Phi(V) = \{ w \in W | \exists v \in V: \Phi(v) = w \}
+            \,\\
+        \]
+
+
+        Intuitively, the kernel is the set of vectors \(v \in V\) that \(\Phi\) maps onto the neutral element \(\boldsymbol{0}_W \in W\).
+        The image is the set of vectors \(w \in W\) that can be reached by \(\Phi\) from any vector in \(V\).
+
+        <br><br>
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-9.png" width="70%" onerror=handle_image_error(this)>
+            <figcaption>
+                Kernel and image of a linear mapping
+            </figcaption>
+        </figure>
+        <br><br>
+
+        <strong><i>Remark</i></strong>.
+        Consider a linear mapping \(\Phi : V \rightarrow W \), where \(V, W\) are vector spaces:
+        <ul>
+            <li>
+                It always holds that \(\Phi(\boldsymbol{0}_V) = \boldsymbol{0}_W \) and,
+                therefore, \(\boldsymbol{0}_V \in \ker (\Phi) \).
+                In particular, the null space is never empty.
+            </li>
+            <li>
+                \(\text{Im}(\Phi) \subseteq W\) is a subspace of \(W\), 
+                and \(\ker(\Phi) \subseteq V\) is a subspace of \(V\).
+            </li>
+            <li>
+                \(\Phi\) is injective (one to one) if and only if \(\ker(\Phi) = \{\boldsymbol{0}\}\).
+            </li>
+            <li>
+                \(\text{rk}(A) = \dim(\text{Im}(\Phi)) \)
+            </li>
+            <li>
+                The kernel/null space \(\ker(\Phi)\) is the general solution to the homogeneous system of 
+                inear equations \(\boldsymbol{A}x = \boldsymbol{0}\)
+            </li>
+            <li>
+                \(\dim(\ker(\Phi)) + \dim(\text{Im})(\Phi) = \dim(V) \)
+            </li>
+            <li>
+                If \(\dim(V) = \dim(W)\), the the three-way equivalence
+                \[
+                    \Phi \text{ is injective} \Longleftrightarrow \Phi \text{ is surjective} \Longleftrightarrow \Phi \text{ is bijective}
+                \]
+            </li>
+        </ul>
 
     </div>
 
 
 </div><br><br>
 
-<!-- <h3>Analytic Geometry</h3>
+<!-- <h3>3. Analytic Geometry</h3>
 <div class="article">
 
-</div><br><br>
+</div><br><br> -->
 
-<h3>Matrix Decompositions</h3>
+<!-- <h3>Matrix Decompositions</h3>
 <div class="article">
 
-</div><br><br>
+</div><br><br> -->
 
-<h3>Vector Calculus</h3>
+<!-- <h3>Vector Calculus</h3>
 <div class="article">
 
-</div><br><br>
+</div><br><br> -->
 
-<h3>Probability and Distributions</h3>
+<!-- <h3>Probability and Distributions</h3>
 <div class="article">
 
-</div><br><br>
+</div><br><br> -->
 
-<h3>Continuous Optimization</h3>
+<!-- <h3>Continuous Optimization</h3>
 <div class="article">
 
 </div><br><br> -->
