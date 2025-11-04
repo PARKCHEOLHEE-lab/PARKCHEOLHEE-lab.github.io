@@ -3206,10 +3206,221 @@ emoji: /emoji/books.png
 
 </div><br><br>
 
-<!-- <h3>3. Analytic Geometry</h3>
+<h3>3. Analytic Geometry</h3>
 <div class="article">
 
-</div><br><br> -->
+    In this chapter, we
+    will look at geometric vectors and compute their lengths and distances
+    or angles between two vectors.
+    Inner products and their corresponding norms and metrics capture
+    the intuitive notions of similarity and distances.
+
+    <br><br>
+
+    <h4>3.1 Norms</h4>
+    <strong>Definition 3.1</strong> (Norm).
+    A norm on a vector space \(V\) is a function
+    \[
+        \,\\
+        \begin{align}
+        \| \cdot \| : V &\rightarrow \mathbb{R}, \\
+                      x &\mapsto \| x \|
+        \end{align}
+        \,\\
+    \]
+
+    which assigns each vector \(x\) its length \(\| x \| \in \mathbb{R} \),
+    such that for all \(\lambda \in \mathbb{R}\) and \(x, y \in V\) the following hold:
+    <ul>
+        <li>
+            Absolutely homogeneous: \(\| \lambda x \| = |\lambda| \| x \| \)
+        </li>
+        <li>
+            Triangle inequality: \( \| x + y \| \leq \| x \| + \| y \| \)
+        </li>
+        <li>
+            Positive definite: \( \| x \| \ge 0 \) and \(\| x \| = 0 \Longleftrightarrow x = \boldsymbol{0} \)
+        </li>
+    </ul>
+
+    For any triangle, the sum of the lengths of any two sides must be greater than or equal to the length
+    of the remaining side.
+
+    <br><br>
+    <div class="mml-example">
+        <strong>Example 3.1 (Manhattan Norm)</strong>
+        <br>
+        The Manhattan norm on \(\mathbb{R}^n\) is defined for \(x \in \mathbb{R}^n \) as
+        \[
+            \,\\
+                \| x \|_1 := \sum_{i=1}^n | x_i |
+            \,\\
+        \]
+
+        where \( | \cdot | \) is the absolute value, \(x_i\) is the \(i^{th} \) element of the vector \(x\).
+        The left side of Fig.9 below shows all vectors \(x \in \mathbb{R}^2\) with \(\|x \|_1 = 1\).
+        The Manhattan norm is also called L1 norm.
+
+        <br><br><br>
+
+        <strong>Example 3.2 (Euclidean Norm)</strong>
+        <br>
+        The Euclidean norm of \(x \in \mathbb{R}^n \) is defined as
+        \[
+            \,\\
+            \| x \|_2 := \sqrt{ \sum_{i=1}^n x_i^2 } = \sqrt{x^{\top}x}
+            \,\\
+        \]
+
+        and computes the Euclidean distance of \(x\) from the origin.
+        The right side of Fig.9 shows all vectors \(x \in \mathbb{R}^2 \) with \( \|x\|_2 = 1 \).
+        The Euclidean norm is also called L2 norm.
+
+        <br><br>
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-10.png" width="60%" onerror=handle_image_error(this)>
+            <figcaption>
+                From the left, Manhattan norm · Euclidean norm
+                <br>
+                The red lines indiceate the set of vectors with norm 1
+            </figcaption>
+        </figure>
+    </div>
+
+    <br><br>
+
+    <h4>3.2 Inner Products</h4>
+    A major purpose of inner products is to determine whether
+    vectors are orthogonal to each other.
+
+    <br><br>
+
+    <h4>3.2.1 Dot Product</h4>
+    We may already be familiar with a particular type of inner product,
+    the scalar product/dot product in \(\mathbb{R}^n\), which is given by
+    \[
+        \,\\
+            \boldsymbol{x}^{\top}\boldsymbol{y} = \sum_{i=1}^nx_i y_i
+        \,\\
+    \]
+
+    <h4>3.2.2 General Inner Products</h4>
+    <strong>Definition 3.2.</strong> Let \(V\) be a vector space and \(\Omega : V \times V \rightarrow \mathbb{R} \)
+    be a mapping that takes two vectors and maps them onto a real number. Then
+    <ul>
+        <li>
+            \(\Omega\) is called symmetric if \(\Omega(x, y) = \Omega(y, x), \forall x, y \in V  \).
+        </li>
+        <li>
+            \(\Omega\) is called positive definite if
+            \[
+                \forall x \in V \setminus \{\boldsymbol{0}\} : \Omega(x, x) > 0, \quad \Omega(\boldsymbol{0}, \boldsymbol{0}) = 0.
+            \]
+        </li>
+        <!-- <li>
+            Typically write \( \langle x, y \rangle \) instead of \(\Omega(x, y)\).
+            \[
+                \langle x, y \rangle = x_1 y_1 + x_2 y_2 + \cdots + x_n y_n
+            \]
+        </li> -->
+    </ul>
+
+    <br>
+
+    <h4>3.2.3 Symmetric, Positive Definite Matrices</h4>
+    Consider an \(n\)-dimensional vector space \(V\) with an inner product \( \langle \cdot, \cdot \rangle : V \times V \rightarrow \mathbb{R} \)
+    and an ordered basis \(B = b_1, cdots, b_n \) of \(V\).
+    Any vectors \(x, y \in V \) can be written as linear combinations of the basis vectors
+    so that \(x = \sum_{i=1}^n \psi_i b_i \in V \) and \( y = \sum_{j=1}^n \lambda_j b_j \in V \) for suitable \(\psi_i, \lambda_j \in \mathbb{R} \).
+    Due to the bilinearity of the inner product, it holds for all \(x, y \in V\) that
+    \[
+        \,\\
+            \langle x, y \rangle = 
+            \left\langle \sum_{i=1}^n \psi_i b_i,\,\, \sum_{j=1}^n \lambda_j b_j \right\rangle =
+            \sum_{i=1}^n \sum_{j=1}^n \psi_i \langle b_i, b_j \rangle \lambda_j
+        \,\\    
+    \]
+
+    The mid expression expanded by bilinearity as
+    \[
+        \,\\
+        \left\langle \sum_{i=1}^n \psi_i b_i,\,\, \sum_{j=1}^n \lambda_j b_j \right\rangle = 
+        \sum_{i=1}^n \psi_i \left\langle b_i, \sum_{j=1}^n \lambda_j b_j \right\rangle
+
+        \,\\
+        \,\\
+
+        \left\langle b_i, \sum_{j=1}^n \lambda_j b_j \right\rangle = \sum_{j=1}^n \lambda_j \langle b_i, b_j \rangle
+
+        \,\\
+        \,\\
+
+        \left\langle \sum_{i=1}^n \psi_i b_i,\,\, \sum_{j=1}^n \lambda_j b_j \right\rangle =
+        \sum_{i=1}^n \sum_{j=1}^n \psi_i \langle b_i, b_j \rangle \lambda_j
+
+        \,\\
+    \]
+
+    In the matrix form, 
+    where
+    \(\hat{x} = (\psi_1, \cdots, \psi_n)^\top\),
+    \(\hat{y} = (\lambda_1, \cdots, \lambda_n)^\top\),
+
+    \[
+        \,\\
+        \langle x, y \rangle = \hat{x}^{\top}A\hat{y} = \sum_{i, j} \psi_i A_{ij} \lambda_j
+        \,\\
+    \]
+
+    where, \(\hat{x}, \hat{y}\) are the coordinates of \(x\) and \(y\) with respect to the basis \(B\).
+    \(A_{ij}\) is \(\langle b_i, b_j \rangle \):
+    \[
+        \,\\
+        A = 
+        \begin{bmatrix}
+        \langle b_1, b_1 \rangle & \langle b_1, b_2 \rangle & \cdots \\
+        \langle b_2, b_1 \rangle & \langle b_2, b_2 \rangle & \cdots \\
+        \vdots & \vdots & \ddots
+        \end{bmatrix}
+        \,\\
+    \]
+
+    The inner product \( \langle \cdot, \cdot \rangle \)
+    is uniquely determined through \(A\).
+    The symmetry of the inner product also means that \(A\) is symmetric.
+    Furthermore, the positive definiteness of the inner product implies that
+    \[
+        \,\\
+            \forall x \in V \setminus \{ 0 \} : x^\top Ax > 0
+        \,\\
+    \]
+
+    <br>
+
+    <strong>Definition 3.4</strong> (Symmetric, Positive Definite Matrix).
+    A symmetric matrix \(A \in \mathbb{R}^{n \times n} \) that satisfies the positive definiteness above is called
+    symmetric, positive definite, or just positive definite.
+    If \(x^\top Ax \ge 0\), then \(A\) is called symmetric, positive semidefinite. 
+
+    <br><br>
+
+    The following properties hold if \(A\in\mathbb{R}^{n \times n}\) is symmetric and positive definite:
+    <ul>
+        <li>
+            The null space (kernel) of \(A\) consists only of \(\boldsymbol{0}\) because
+            \(x^\top Ax > 0, \) for all \(x \neq \boldsymbol{0}\). Therefore 
+            \[
+                \ker(A) = \{\boldsymbol{0}\}
+            \]
+        </li>
+    </ul>
+
+    <br>
+
+    <!-- <h4>3.3 Lengths and Distances</h4> -->
+    
+
+</div><br><br>
 
 <!-- <h3>Matrix Decompositions</h3>
 <div class="article">
