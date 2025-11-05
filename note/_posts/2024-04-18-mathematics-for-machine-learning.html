@@ -3417,9 +3417,303 @@ emoji: /emoji/books.png
 
     <br>
 
-    <!-- <h4>3.3 Lengths and Distances</h4> -->
-    
+    <h4>3.3 Lengths and Distances</h4>
+    <strong><i>Remark</i></strong> <a href="https://en.wikipedia.org/wiki/Cauchy%E2%80%93Schwarz_inequality">(Cauchy-Schwarz Inequality)</a>.
+    For an inner product vector space \((V, \langle \cdot, \cdot \rangle) \)
+    the induced norm \(\| \cdot \|\) satisfies the Cauchy-Schwarz inequality
+    \[
+        \,\\
 
+        | \langle x, y \rangle |^2 \le \langle x, x \rangle  \langle y, y \rangle
+
+        \Longleftrightarrow
+
+        | \langle x, y \rangle | \le \sqrt{ \langle x, x \rangle  \langle y, y \rangle } = \|x\| \|y\|
+        \,\\
+    \]
+
+    Consider two vectors \(x, y \in \mathbb{R}^2 \)
+    \[
+        \,\\
+        x = [1, 2], \quad y = [3, 4].
+        \,\\
+    \]
+
+    First, compute the inner product:
+    \[
+        \,\\
+        \begin{align}
+        \langle x, y \rangle &= 1 \times 3 + 2 \times 4 \\
+                             &= 11
+        \end{align}
+        \,\\
+    \]
+
+    Then, compute the norms:
+    \[
+        \,\\
+        \begin{align}
+        \|x\| = \sqrt{1^2 + 2^2} &= \sqrt{5} \approx 2.23606797749979 \\
+        \|y\| = \sqrt{3^2 + 4^2} &= 5 \\
+        \end{align}
+        \,\\
+    \]
+
+    Now compare both sides of the Cauchy-Schwarz inequality:
+    \[
+        \,\\
+        | \langle x, y \rangle | = 11, \quad \|x\| \|y\| = 5\sqrt{5} \approx 11.180339887498949
+        \,\\
+    \]
+
+    Therefore, 
+    \[
+        \,\\
+        | \langle x, y \rangle | = 11 \le 11.180339887498949 = \|x\| \|y\|
+        \,\\
+    \]
+
+    <br><br>
+    
+    <strong>Definition 3.6</strong> (Distance and Metric).
+    Consider an inner product space \( (V, \langle \cdot, \cdot \rangle) \). Then
+    \[
+        \,\\
+        d(x, y) := \|x - y\| = \sqrt{ \langle x-y , x-y \rangle }
+        \,\\
+    \]
+
+    is called the distance between \(x\) and \(y\) for \(x, y \in V\).
+    If we use the dot product as the inner product, then the distance is called Euclidean distance.
+
+    <br><br>
+
+    The mapping \(d\) is called a metric
+    \[
+        \,\\
+        \begin{align}
+        d : V \times V &\rightarrow \mathbb{R} \\
+                (x, y) &\mapsto d(x, y)
+        \end{align}
+        \,\\
+    \]
+
+    A metric \(d\) satisfies the following:
+    <ol>
+        <li>
+            \(d\) is positive definite, i.e., \(d(x, y) \ge 0 \) for all \(x, y \in V\) and \(d(x, y) = 0 \Longleftrightarrow x = y \).
+        </li>
+        <li>
+            \(d\) is symmetric, i.e., \(d(x, y) = d(y, x) \) for all \(x, y \in V\).
+        </li>
+        <li>
+            Triangle inequality: \(d(x,z) \le d(x,y) + d(y,z) \) for all \(x, y, z \in V\).
+        </li>
+    </ol>
+
+    <strong><i>Remark</i></strong>.
+    We observe that \(\langle x, y \rangle\ \) and \(d(x, y) \) behave in opposite directions.
+    Very similar \(x\) and \(y\) will result in a large value for the inner product and a small value for the metric.
+
+    <br><br>
+
+    <h4>3.4 Angles and Orthogonality</h4>
+    We use the Cauchy-Schwarz inequality to define angles \(\theta\) in inner product spaces between two vectors \(x, y\).
+    Assume that \(x \neq 0, y \neq 0\).
+
+    First, divide both sides of the Cauchy-Schwarz inequality by \( \|x\| \|y\| \).
+    Two vectors are not zero vectors. therefore, \(\|x\| \ge 0, \y\| \ge 0 \), and the direction of inequality are not changed.
+
+    \[
+        \,\\
+        |\langle x, y \rangle| \le \|x\| \|y\|
+        \Longleftrightarrow
+        \frac{ | \langle x, y \rangle | }{ \|x\|\|y\| } \le 1
+        \,\\
+    \]
+
+    Based on the definition of absolute value \( |a| \le 1 \Longleftrightarrow -1 \le a \le 1 \), we get
+    \[
+        \,\\
+        -1 \le \frac{ \langle x, y \rangle }{ \|x\| \|y\| } \le 1
+        \,\\
+    \]
+
+    Therefore, there exists a unique \(\theta \in [0, \pi] \).
+    The number \(\theta\) is the angle between the two vectors \(x, y\).
+    \[
+        \,\\
+        \cos \theta = \frac{ \langle x, y \rangle }{ \|x\| \|y\| }
+        \,\\
+    \]
+
+    Intuitively, the angle between two vectors tells us how similar their orientations are.
+    Based on the above, the inner product can be rewritten as
+    \[
+        \,\\
+        \langle x, y \rangle = \|x\| \|y\| \cos \theta
+        \,\\
+    \]
+
+    <br>
+
+    <div class="mml-example">
+        <strong>Example 3.6 (Angle between Vectors)</strong>
+        <br>
+        Let us compute the angle between \(x = [1, 1]^\top \in \mathbb{R}^2 \) and \( y = [-1, 1]^\top \in \mathbb{R}^2 \).
+        We use the dot product as the inner product. Then we get
+        \[
+            \,\\
+            \begin{align}
+            \cos \theta &= \frac{ \langle x, y \rangle }{ \|x\| \|y\| } \\
+                        &= \frac{ 1 \times (-1) + 1 \times 1 }{ \sqrt{1^2 + 1^2} \times \sqrt{(-1)^2 + 1^2} } \\
+                        &= \frac{0}{2} \\
+                        &= 0
+            \end{align}
+            \,\\
+        \]
+
+        and the angle between the two vectors is \(\arccos (0) = \frac{\pi}{2} = 90^{\small{\circ}}\)
+    </div>
+
+    <br><br>
+    A key feature of the inner product is that it allows us to characterize vectors that are orthogonal.
+
+    <br><br>
+    <strong>Definition 3.7</strong> (Orthogonality).
+    Two vectors \(x\) and \(y\) are orthogonoal if and only if \( \langle x, y, \rangle = 0\) and we write \(x \perp y \).
+    If \( \| x \| = \| y \| = 1 \), i.e., the vectors are unit vectors, then \(x\) and \(y\) are orthonormal.
+    An implication of this definition is that the \(\boldsymbol{0}\)-vector is orthogonal to every vector in the vector space.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong>. Geometrically we can think of orthogonal vectors as having a right angle with respect to a specific inner product.
+
+    <br><br>
+
+    <strong>Definition 3.8</strong> (Orthogonoal Matrix).
+    A square matrix \(A \in \mathbb{R}^{n \times n} \) is an orthogonal matrix
+    if and only if its columns are orthonormal so that
+    \[
+        \,\\
+        AA^\top = I = A^\top A
+        \,\\
+    \]
+
+    which implies that 
+    \[
+        \,\\
+        A^\top = A^{-1}
+        \,\\
+    \]
+    i.e., the inverse is obtained by simply transposing the matrix.
+
+    <br><br>
+
+    Transformations by orthogonal matrices are special because the length of a vector \(x\) is not changed
+    when transforming it using an orthogonal matrix \(A\).
+    Moreover, the angle  between any two vectors \(x, y\) is also unchanged when transforming both of them using
+    an orthogonal matrix \(A\). Assuming the dot product as the inner product,
+    the angle between \(Ax\) and \(Ay\) is given as
+    \[
+        \,\\
+        \begin{align}
+        \cos \theta &= \frac{ ( Ax )^\top ( Ay ) }{ \| Ax \| \| Ay \| }
+        \,\\
+        \,\\
+                    &= \frac{ x^\top A^\top Ay }{ \sqrt{ (Ax)^\top Ax  (Ay)^\top Ay } }
+        \,\\
+        \,\\
+                    &= \frac{ x^\top A^\top Ay }{ \sqrt{ (x^\top A^\top A x) (y^\top A^\top A y) }}
+        \,\\
+        \,\\
+                    &= \frac{ x^\top y }{ \sqrt{ (x^\top x) (y^\top y) } }
+        \,\\
+        \,\\
+                    &= \frac{ x^\top y }{ \|x\| \|y\|  }
+        \end{align}
+        \,\\
+    \]
+
+    which gives exactly the angle between \(x\) and \(y\).
+    This means that ortohonal matrices \(A\) with \( A^\top = A^{-1} \) preserve both angles and distances.
+    It turns out that orthogonal matrices define transformations that are rotations.
+
+    <br><br>
+
+    <h4>3.5 Orthonormal Basis</h4>
+    We will discuss the special case where the basis
+    vectors are orthogonal to each other and where the length of each basis
+    vector is 1. We will call this basis then an orthonormal basis.
+
+    <br><br>
+
+    <strong>Definition 3.9</strong> (Orthonormal Basis).
+    Consider an \(n\)-dimensional vector space \(V\) and a basis \( \{ \boldsymbol{b}_1, \cdots, \boldsymbol{b}_n \} \) of \(V\).
+    \[
+        \,\\
+        \begin{align}
+        \langle \boldsymbol{b}_i, \boldsymbol{b}_j \rangle &= 0 \quad \text{for} \,\, i \neq j \\
+        \langle \boldsymbol{b}_i, \boldsymbol{b}_i \rangle &= 1
+        \end{align}
+        \,\\
+    \]
+
+    for all \(i, j = 1, \cdots, n\) then the basis is called an orthonormal basis (ONB).
+
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Exampe 3.8 (Orthonormal Basis)</strong>
+        <br>
+        The standard basis for a Euclidean vector space \( \mathbb{R}^n \) is an
+        orthonormal basis, where the inner product is the dot product of vectors.
+        In \(\mathbb{R}^2\), consider the vectors
+        \[
+            \,\\
+            b_1 = [1, 1]^\top, \quad b_2 = [1, -1]^\top
+            \,\\
+        \]
+
+        To normalize them, divide \( b_1 \) by \( \| b_1 \|  \),
+        and divdie \( b_2 \) by \( \|b_1\| \).
+        \[
+            \,\\
+            \begin{align}
+            \tilde{b}_1 &= \frac{1}{\| b_1 \|} [1, 1]^\top = \frac{1}{\sqrt{2}} [1, 1]^\top
+            \,\\
+            \,\\
+            \tilde{b}_2 &= \frac{1}{\| b_2 \|} [1, -1]^\top  = \frac{1}{\sqrt{2}} [1, -1]^\top
+            \end{align}
+            \,\\
+        \]
+
+        Then, compute \( \tilde{b}_1^\top \tilde{b}_2 \) and \( \| \tilde{b}_1 \|, \| \tilde{b}_2 \| \) 
+        \[
+            \,\\
+                \tilde{b}_1^\top \tilde{b}_2 = 
+                \begin{bmatrix}
+                    \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}}
+                \end{bmatrix}
+                \begin{bmatrix}
+                    \frac{1}{\sqrt{2}} \\ 
+                    -\frac{1}{\sqrt{2}}
+                \end{bmatrix} =
+                \frac{1}{2} - \frac{1}{2} = 0
+            \,\\
+            \,\\
+            \,\\
+
+            \| \tilde{b}_1 \| = \sqrt{\left( \frac{1}{\sqrt{2}} \cdot \frac{1}{\sqrt{2}} \right) + \left( \frac{1}{\sqrt{2}} \cdot \frac{1}{\sqrt{2}} \right)} = \sqrt{ \frac{1}{2} + \frac{1}{2} } = 1
+            \,\\
+            \,\\
+            \,\\
+            \| \tilde{b}_2 \| = \sqrt{\left( \frac{1}{\sqrt{2}} \cdot \frac{1}{\sqrt{2}} \right) + \left( -\frac{1}{\sqrt{2}} \cdot (-\frac{1}{\sqrt{2}}) \right)} = \sqrt{ \frac{1}{2} + \frac{1}{2} } = 1
+            \,\\
+        \]
+
+        Therefore, the vectors \( \tilde{b}_1, \tilde{b}_2 \) form an orthonormal basis. 
+    </div>
 </div><br><br>
 
 <!-- <h3>Matrix Decompositions</h3>
