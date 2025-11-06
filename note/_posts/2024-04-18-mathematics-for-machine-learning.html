@@ -3522,7 +3522,7 @@ emoji: /emoji/books.png
     Assume that \(x \neq 0, y \neq 0\).
 
     First, divide both sides of the Cauchy-Schwarz inequality by \( \|x\| \|y\| \).
-    Two vectors are not zero vectors. therefore, \(\|x\| \ge 0, \y\| \ge 0 \), and the direction of inequality are not changed.
+    Two vectors are not zero vectors. therefore, \(\|x\| \ge 0, \|y\| \ge 0 \), and the direction of inequality are not changed.
 
     \[
         \,\\
@@ -3668,14 +3668,14 @@ emoji: /emoji/books.png
         <br>
         The standard basis for a Euclidean vector space \( \mathbb{R}^n \) is an
         orthonormal basis, where the inner product is the dot product of vectors.
-        In \(\mathbb{R}^2\), consider the vectors
+        In \(\mathbb{R}^2\), consider the orthogonal vectors \(b_1, b_2\)
         \[
             \,\\
             b_1 = [1, 1]^\top, \quad b_2 = [1, -1]^\top
             \,\\
         \]
 
-        To normalize them, divide \( b_1 \) by \( \| b_1 \|  \),
+        To make \(b_1\) and \(b_2\) orthonormal, divide \(b_1\) by \( \| b_1 \| \),
         and divdie \( b_2 \) by \( \|b_1\| \).
         \[
             \,\\
@@ -3714,6 +3714,245 @@ emoji: /emoji/books.png
 
         Therefore, the vectors \( \tilde{b}_1, \tilde{b}_2 \) form an orthonormal basis. 
     </div>
+
+    <br><br>
+
+    <h4>3.6 Orthogonal Complement</h4>
+    Consider a \(D\)-dimensional vector space \(V\) and
+    an \(M\)-dimensional subspace \(U \subseteq V \).
+    Then its orthogonal complement \(U^\perp\) is a \( (D-M) \)-dimensional subspace
+    of \(V\) and contains all vectors in \(V\) that are orthogonal to every vector in \(U\).
+    Furthermore, \(U \cap U^\perp = \{ \boldsymbol{0}\} \).
+
+    <br><br>
+
+    <h4>3.7 Inner Product of Functions</h4>
+    <!-- The inner products we discussed so far were defined for vectors with a
+    finite number of entries.  -->
+    We can think of a vector \(x\in \mathbb{R}^n\) as a function
+    with \(n\) function values.
+
+    An inner product of two functions \( u: \mathbb{R} \rightarrow \mathbb{R} \)
+    and \( v: \mathbb{R} \rightarrow \mathbb{R} \)
+    can be defined as the definite integral
+    \[
+        \,\\
+            \langle u, v \rangle := \int_a^b u(x)v(x)\, dx
+        \,\\
+    \]
+
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-11.png" width="80%" onerror=handle_image_error(this)>
+        <figcaption>
+            Integrand of \(f(x) = \sin(x) \cos(x)\)
+        </figcaption>
+    </figure>
+    <br><br>
+
+    <h4>3.8 Orthogonal Projections</h4>
+    In machine learning, we often deal
+    with data that is high-dimensional. High-dimensional data is often hard
+    to analyze or visualize. 
+    
+    <br><br>
+    However, high-dimensional data quite often possesses 
+    the property that only a few dimensions contain most information,
+    and most other dimensions are not essential to describe key properties
+    of the data.
+    When we compress or visualize high-dimensional data, we
+    will lose information. To minimize this compression loss, we ideally find
+    the most informative dimensions in the data. 
+
+    <br><br>
+
+    In this chapter, we will discuss
+    some of the fundamental tools for data compression. More specifically, we
+    can project the original high-dimensional data onto a lower-dimensional
+    feature space.
+
+    <br><br>
+
+    For example, machine learning algorithms, such as 
+    principal component analysis (PCA), and deep auto-encoders,
+    heavily exploit the idea of dimensionality reduction.
+
+    <br><br>
+
+    <strong>Definition 3.10</strong> (Projection).
+    Let \(V\) be a vector space and \(U \subseteq V\) a subspace of \(V\).
+    A linear mapping \(\pi: V \rightarrow U\) is called a projection if the following holds
+    \[
+        \,\\
+        \pi^2 = \pi
+        \,\\
+    \]
+
+    Since linear mappings can be expressed by transformation matrices, 
+    the matrix representation also satisfies the property above.
+    \[
+        \,\\
+        P^2_\pi = P_\pi
+        \,\\
+    \] 
+
+    <br>
+    <h4>3.8.1 Projection onto One-Dimensional Subspaces (Lines)</h4>
+    Using geometric arguments, let us characterize some properties of the projection \(\pi_U (x)\)
+    , where \(b \in \mathbb{R}^n\), and the subspace is \(U \subseteq \mathbb{R}^n\) spanned by \(b\).
+    <br><br>
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-12.png" width="60%" onerror=handle_image_error(this)>
+        <figcaption>
+            Orthogonal Projections
+        </figcaption>
+    </figure>
+    <br>
+    <ul>
+        <li>
+            The projection \(\pi_U (x) \) is closest to \(x\),
+            where "closest" implies that the distance \( \| x - \pi_U (x) \| \) is minimal.
+        </li>
+        <li>
+            The vector \(\pi_U (x) - x\) is orthogonal to \(U\).
+        </li>
+        <li>
+            The orthogonality condition yields \( \langle \pi_U (x) - x, b \rangle = 0 \). 
+        </li>
+        <li>
+            The projection \(\pi_U (x)\) of \(x\) onto \(U\) must be an element of \(U\).
+            Hence, \(\pi_U (x) = \lambda b\) for some \(\lambda \in \mathbb{R}\).
+        </li>
+        <li>
+            The projected vector can be obtained by the dot product and normalized basis \(\tilde{b} = \frac{b}{\|b\|} \)
+            \[
+                \pi_U (x) = (x^\top \tilde{b}) \tilde{b}
+            \]
+        </li>
+    </ul>
+
+    <br>
+
+    In the following steps, we determine the \(\lambda\), 
+    the projection \(\pi_U (x) \in U\), and the projection matrix \(P_{\pi}\) that maps any \(x \in \mathbb{R}^n\) onto \(U\).
+    <br><br>
+    Finding \(\lambda\). The orthogonality condition yields
+    \[
+        \,\\
+        \langle x-\pi_U (x), b \rangle = 0 \Longleftrightarrow \langle x - \lambda b, b \rangle = 0
+        \,\\
+    \]
+
+    In the vector form, the right expression is
+    \[
+        \,\\
+        \langle x - \lambda b, b \rangle = 0 \,\, \Longrightarrow \,\, (x - \lambda b)^\top b = 0
+        \,\\
+    \]
+
+    By expanding it, we get
+    \[
+        \,\\
+        \begin{align}
+        (x - \lambda b)^\top b &= (x^\top - (\lambda b)^\top) b  
+        \,\\
+        \,\\
+                                &= x^\top b - \lambda (b^\top b)
+        \,\\
+        \,\\
+                                &= 0
+        \end{align}
+        \,\\
+    \]
+
+    Now, solve the expression for \(\lambda\)
+    \[
+        \,\\
+        x^\top b - \lambda (b^\top b) = 0
+        \,\\
+        \,\\
+        \lambda = \frac{x^\top b}{b^\top b} = \frac{b^\top x}{\|b\|^2}
+        \,\\
+    \]
+
+    Therefore, 
+    \[
+        \,\\
+        \pi_U (x) = \lambda b = \frac{b^\top x}{\|b\|^2} b
+        \,\\
+    \]
+
+    Hence,
+
+    \[
+        \,\\
+        \pi_U (x) = \lambda b = b \lambda = P_\pi (x) = b\frac{b^\top x}{\|b\|^2} = \frac{b b^\top}{\|b\|^2}x
+        \,\\ 
+        \,\\
+        P_\pi = \frac{b b^\top}{\|b\|^2} 
+        \,\\
+    \]
+    
+    Here, the \(bb^\top\) is a symmetric matrix, and \(\|b\|^2 = \langle b, b \rangle \) is a scalar.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong>. The projection matrix \(\pi_U (x) \in \mathbb{R}^n \) is 
+    still an \(n\)-dimensional vector, not a scalar.
+
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Example 3.10 (Projection onto a Line)</strong>
+        <br>
+        Find the projeection matrix \(P_\pi\) onto the line through the origin spanned by \(b = [1, 2, 2]^\top \).
+        \(b\) is a direction and a basis of the one dimensional subspace.
+        Based on the above expression, \(P_\pi\) for \(b\) is
+        \[
+            \,\\
+            \begin{align}
+                P_\pi &= \frac{b b^\top}{\|b\|^2} = \frac{b b^\top}{b^\top b}
+                \,\\
+                \,\\
+                b^\top b &= 1 + 4 + 4 = 9
+                \,\\
+                \,\\
+
+                b b^\top &= 
+                \begin{bmatrix}
+                    1 \\
+                    2 \\
+                    2 \\
+                \end{bmatrix} \begin{bmatrix} 1& 2& 2 \end{bmatrix}
+                = 
+                \begin{bmatrix}
+                    1 & 2 & 2 \\
+                    2 & 4 & 4 \\
+                    2 & 4 & 4 \\
+                \end{bmatrix}
+                \,\\
+                \,\\
+                P_\pi &= \frac{1}{9}
+                \begin{bmatrix}
+                1 & 2 & 2 \\
+                2 & 4 & 4 \\
+                2 & 4 & 4 \\
+                \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        Let us now choose a particular \(x\) and see whether it lies in the subspace spanned by \(b\).
+        The illustration below shows the result of applying the projection matrix \(P_\pi\) to \(x\).
+
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-13.png" width="80%" onerror=handle_image_error(this)>
+            <figcaption>
+                Projection onto a Line
+            </figcaption>
+        </figure>
+
+    </div>
+
 </div><br><br>
 
 <!-- <h3>Matrix Decompositions</h3>
