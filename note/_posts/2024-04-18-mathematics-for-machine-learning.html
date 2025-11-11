@@ -4172,6 +4172,173 @@ emoji: /emoji/books.png
     since an ONB satisfies \(\boldsymbol{B}^\top \boldsymbol{B} = \boldsymbol{I}\).
     This means that we no longer have to compute the inverse, which saves computation time.
 
+    <br><br>
+
+    <h4>3.8.3 Gram-Schmidt Orthogonalization</h4>
+
+    Projections are at the core of the Gram-Schmidt method that allows us to
+    constructively transform any basis \((b_1, \cdots, b_n) \) of \(n\)-dimensional vector space \(V\)
+    into an orthogonal/orthonormal basis \((u_1, \cdots, u_n)\) of \(V\).
+
+    <br><br>
+
+    The Gram-Schmidt orthogonalization method iteratively constructs an orthogonal basis \((u_1, \cdots, u_n) \)
+    from any basis \( (b_1, \cdots, b_n) \) of \(V\) as follows:
+    \[
+        \,\\
+        \begin{align}
+            &u_1 := b_1 \\
+            &u_2 := b2 - \text{proj}_{u_1} (b2) \\
+            &u_3 := b3 - \text{proj}_{u_1} (b3) - \text{proj}_{u_2} (b3)
+            \,\\
+            \,\\
+            &\quad \quad \vdots
+            \,\\
+            \,\\
+            &u_n := b_n - \text{proj}_{u_1} (b_n) - \text{proj}_{u_2} (b_n) - \text{proj}_{u_3} (b_n) - \,\, \cdots \,\,  - \text{proj}_{u_{n-1}} (b_n)
+        \end{align}
+        \,\\
+    \]
+
+    <br>
+
+    <div class="mml-example">
+        <strong>Example 3.12 (Gram-Schmidt Orthogonalization)</strong>
+        <br>
+        Consider a basis \((b_1, b_2)\) of \(\mathbb{R}^2\), where
+        \[
+            \,\\
+
+            b_1 = 
+            \begin{bmatrix}
+                2 \\
+                0 \\
+            \end{bmatrix}, \quad
+            b_2 = 
+            \begin{bmatrix}
+                1 \\
+                1 \\
+            \end{bmatrix}
+            \,\\
+        \]
+        
+        <br>
+        Using the Gram-Schmidt method,
+        \[
+            \,\\
+            \begin{align}
+                &u_1 := b_1 = \begin{bmatrix} 2 \\ 0 \end{bmatrix}
+                \,\\
+                \,\\
+                &u_2 := b_2 - \mathrm{proj}_{u_1}(b_2)
+            \end{align}
+            \,\\
+        \]
+
+        From Example 3.10 (Projection onto a Line), we can compute the projection as 
+        \(\text{proj}_{u_1} (b_2) = \frac{u_1 u_1^\top}{u_1^\top u_1} b_2\).
+        Therefore, \(u_2\) is 
+        \[
+            \,\\
+            \begin{align}
+
+            u_1^\top u_1 &= 
+            \begin{bmatrix}
+                2 & 0
+            \end{bmatrix}
+            \begin{bmatrix}
+                2 
+                \\
+                0
+            \end{bmatrix}
+            = 4
+            \,\\
+            \,\\
+            
+            u_1 u_1^\top &= 
+            \begin{bmatrix}
+                2 
+                \\
+                0
+            \end{bmatrix}
+            \begin{bmatrix}
+                2 & 0
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                4 & 0 \\
+                0 & 0
+            \end{bmatrix}
+            
+            \,\\
+            \,\\
+            \,\\
+            u_2 &= b_2 - \frac{u_1 u_1^{\top}}{u_1^{\top} u_1} b_2 
+            \,\\
+            \,\\
+            
+                &= 
+                \begin{bmatrix}
+                    1 
+                    \\
+                    1
+                \end{bmatrix}
+                -
+                \frac{1}{4}              
+                \begin{bmatrix} 
+                    4 & 0 \\
+                    0 & 0
+                \end{bmatrix}
+                \begin{bmatrix}
+                    1 
+                    \\
+                    1
+                \end{bmatrix}
+                
+            \,\\
+            \,\\
+                
+                &= 
+                \begin{bmatrix}
+                    1
+                    \\
+                    1
+                \end{bmatrix}
+                \begin{bmatrix}
+                    1 & 0 \\
+                    0 & 0
+                \end{bmatrix}
+                \begin{bmatrix}
+                    1
+                    \\
+                    1
+                \end{bmatrix}
+                
+            \,\\
+            \,\\
+                &=
+                \begin{bmatrix}
+                    0
+                    \\
+                    1
+                \end{bmatrix}
+            \end{align}            
+            \,\\
+        \]
+        <br>
+
+        The figure below illustrates the process of constructing the orthogonal basis \(u_1, u_2\) from \(b_1, b_2\) using the Gram-Schmidt method.
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-15.png" width="80%" onerror=handle_image_error(this)>
+            <figcaption>
+                Gram-Schmidt Orthogonalization
+            </figcaption>
+        </figure>
+    </div>
+
+
+
+
 </div><br><br>
 
 <!-- <h3>Matrix Decompositions</h3>
