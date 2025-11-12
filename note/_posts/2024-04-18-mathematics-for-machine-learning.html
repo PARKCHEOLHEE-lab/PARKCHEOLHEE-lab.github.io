@@ -4458,9 +4458,143 @@ emoji: /emoji/books.png
 
     <br><br>
 
-    <h4>3.8.4 Projection onto Affine Subspaces</h4>
+    <h4>3.9 Rotations</h4>
+    A rotation is a linear mapping 
+    that rotates a plane by an angle \(\theta\) about the
+    origin, i.e., the origin is a fixed point. 
 
+    <br><br>
 
+    <h4>3.9.1 Rotations in \(\mathbb{R}^2\)</h4>
+    Consider the standard basis \(e_1 = [1, 0]^\top, e_2 = [0, 1]^\top  \) of \(\mathbb{R}^2\).
+    We aim to rotate this coordinate system by an angle \(\theta\) as illustrated in the figure below.
+    
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-17.png" width="50%" onerror=handle_image_error(this)>
+        <figcaption>Rotations in \(\mathbb{R}^2\)</figcaption>
+    </figure>
+
+    <br><br>
+
+    Note that the rotated
+    vectors are still linearly independent and, therefore, are a basis of \(\mathbb{R}^2\).
+    This means that the rotation performs a basis change.
+
+    Trigonometry allows us to determine the coordinates of the rotated axes with respect to the standard basis in \(\mathbb{R}^2\).
+    We obtain
+    \[
+        \,\\
+            \Phi (e_1) = [ \cos(\theta), \sin(\theta) ]^\top ,\quad
+            \Phi (e_2) = [ -\sin(\theta), \cos(\theta) ]^\top
+        \,\\
+    \]
+
+    In the matrix form, the axes can be represented as \(R(\theta)\)
+    \[
+        \,\\
+        R(\theta) = 
+        \begin{bmatrix}
+            \cos(\theta) & -\sin(\theta) \\
+            \sin(\theta) & \cos(\theta) \\
+        \end{bmatrix}
+        \,\\
+    \]
+
+    You can check whether the rotated basis remains orthogonal by computing the inner product: \(\Phi(e_1)^\top \Phi(e_2) = 0\).
+
+    <br><br>
+
+    <h4>3.9.2 Rotations in \(\mathbb{R}^3 \)</h4>
+    In \(\mathbb{R}^3\), there are three rotations about the three standard basis vectors.
+    We can obtain a general rotation matrix \(R\) by combining the images of the standard basis.
+    Consider the standard basis \(e_1, e_2, e_3\) in \(\mathbb{R}^3\)
+    \[
+        \,\\
+        e_1 = [1, 0, 0]^\top, \quad e_2 = [0, 1, 0]^\top, \quad e_3 = [0, 0, 1]^\top
+        \,\\
+    \]
+
+    Rotation about the \(e_1\)-axis \(R_1(\theta)\) is
+    \[
+        \,\\
+            R_1(\theta) = 
+            \begin{bmatrix}
+                1 & 0 & 0 \\
+                0 & \cos(\theta) & -\sin(\theta) \\
+                0 & \sin(\theta) & \cos(\theta) \\
+            \end{bmatrix}
+        \,\\
+    \]
+
+    Here, the \(e_1\) coordinate is fixed, and the counterclockwise rotation is performed in the \(e_2, e_3\) plane.
+
+    <br><br>
+
+    Rotation about the \(e_2\)-axis \(R_2(\theta)\) is
+    \[
+        \,\\
+        R_2(\theta) = 
+        \begin{bmatrix}
+            \cos(\theta) & 0 & -\sin(\theta) \\
+            0 & 1 & 0 \\
+            \sin(\theta) & 0 & \cos(\theta)
+        \end{bmatrix}
+        \,\\
+    \]
+
+    In this matrix, rotation is performed in the \(e_1, e_3\) plane
+
+    <br><br>
+
+    Rotation about the \(e_3\)-axis \(R_3(\theta)\) is
+    \[
+        \,\\
+        R_3(\theta) = 
+        \begin{bmatrix}
+        \cos(\theta) & -\sin(\theta) & 0 \\
+        \sin(\theta) & \cos(\theta) & 0\\
+        0 & 0 & 1 \\
+        \end{bmatrix}
+        \,\\
+    \]
+
+    The figure below illustrates rotations in \(\mathbb{R}^3\).
+
+    <figure>
+        <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-18.png" width="80%" onerror=handle_image_error(this)>
+        <figcaption>
+            Rotations in \(\mathbb{R}^3\)
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    <h4>3.9.3 Rotations in \(n\) Dimensions</h4>
+    The generalization of rotations from 2D and 3D to n-dimensional Euclidean vector spaces 
+    can be intuitively described as fixing \(n - 2\) dimensions 
+    and restrict the rotation to a two-dimensional plane in the \(n\)-dimensional space.
+    As in the three-dimensional case, we can rotate any plane (two-dimensional subspace of \(\mathbb{R}^n\)).
+
+    <br><br>
+
+    <h4>3.9.4 Properties of Rotations</h4>
+    Rotations exhibit a number of useful properties, which can be derived by
+    considering them as orthogonal matrices.
+    <ul>
+        <li>
+            Rotations preserve distances, i.e., 
+            \( \| x - y \| = \| R_{\theta}(x) - R_{\theta}(y) \| \).
+        </li>
+        <li>
+            Rotations preserve angles, i.e., the angle between \(R_{\theta}(x)\) and \(R_{\theta}(y) \)
+            equals the angle between \(x\) and \(y\).
+        </li>
+        <li>
+            Rotations in three (or more) dimensions are generally not commutative.
+            Therefore, the order in which rotataions are applied is important.
+            Only in two dimensions vector rotataions are commutative.
+        </li>
+    </ul>
 
 </div><br><br>
 
