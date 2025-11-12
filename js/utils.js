@@ -19,12 +19,14 @@ function handle_image_error(img) {
     const url = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/";
 
     try {
-        const github_media_url_main = `${url}${dev}${img.src.split("/").slice(-3).join("/")}`;
+        const github_media_url_main = `${url}${main}${img.src.split("/").slice(-3).join("/")}`;
         img.src = github_media_url_main;
+        console.log(github_media_url_main)
     } catch (error) {
-        const github_media_url_dev = `${url}${main}${img.src.split("/").slice(-3).join("/")}`;
+        const github_media_url_dev = `${url}${dev}${img.src.split("/").slice(-3).join("/")}`;
         img.src = github_media_url_dev;
     }
+
 }
 
 
