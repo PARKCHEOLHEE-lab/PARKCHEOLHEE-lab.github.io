@@ -4331,9 +4331,129 @@ emoji: /emoji/books.png
         <figure>
             <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-15.png" width="80%" onerror=handle_image_error(this)>
             <figcaption>
-                Gram-Schmidt Orthogonalization
+                Gram-Schmidt Orthogonalization in \(\mathbb{R}^2\)
             </figcaption>
         </figure>
+
+        <br><br>
+
+        In \(\mathbb{R}^3\), let \(b_1, b_2, b_3 \) are as follows
+        \[
+            \,\\
+            b_1 = 
+            \begin{bmatrix}
+                2 \\
+                2 \\
+                0 \\
+            \end{bmatrix}, \quad
+            b_2 = 
+            \begin{bmatrix} 
+                -1 \\
+                -1 \\
+                3
+            \end{bmatrix}, \quad
+            b_3 = 
+            \begin{bmatrix}
+                0 \\
+                2 \\
+                0
+            \end{bmatrix}
+            \,\\
+        \]
+
+        <br>
+
+        Applying Gram-Schmidt method, we can obtain orthogonal basis \(u_1, u_2, u_3\) in \(\mathbb{R}^3\)
+        \[
+            \,\\
+            \begin{align}
+                u1 &= b1
+                \,\\
+                \,\\
+                \text{proj}_{u_1} (b_2) &= \frac{u_1 u_1^\top}{u_1^\top u_1} b_2\ = 
+                \begin{bmatrix}
+                    -1 \\
+                    -1 \\
+                    0
+                \end{bmatrix}
+                \,\\
+                \,\\
+                u_2 &= b_2 - \text{proj}_{u_1} (b_2) = 
+                \begin{bmatrix}
+                    0 \\
+                    0 \\
+                    3
+                \end{bmatrix}
+                \,\\
+                \,\\
+                \text{proj}_{u_1} (b_3) &= \frac{u_1 u_1^\top}{u_1^\top u_1} b_3\ = 
+                \begin{bmatrix}
+                    1 \\
+                    1 \\
+                    0
+                \end{bmatrix}
+                \,\\
+                \,\\
+                \text{proj}_{u_2} (b_3) &= \frac{u_2 u_2^\top}{u_2^\top u_2} b_3\ = 
+                \begin{bmatrix}
+                    0 \\
+                    0 \\
+                    0
+                \end{bmatrix}
+                \,\\
+                \,\\
+                u3 &= b_3 - \text{proj}_{u_1} (b_3) - \text{proj}_{u_2} (b_3) = 
+                \begin{bmatrix}
+                    -1 \\
+                    1 \\
+                    0
+                \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        <br>
+
+        The figure below shows the process of constructing the orthogonal basis \(u_1, u_2, u_3\) from \(b_1, b_2, b_3\) in \(\mathbb{R}^3\).
+        
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-16.png" width="80%" onerror=handle_image_error(this)>
+            <figcaption>
+                Gram-Schmidt Orthogonalization in \(\mathbb{R}^3\)
+            </figcaption>
+        </figure>
+
+        <br><br>
+
+        To check whether the constructed orthogonal basis vectors \(u_1, u_2, u_3\) are perpendicular, 
+        we can compute \(U^\top U\), where \(U\) is the matrix whose columns are \(u_1, u_2, u_3\).
+        \[
+            \,\\
+            U^\top U = 
+            \begin{bmatrix}
+                2 & 2 & 0 \\
+                0 & 0 & 3 \\
+                -1 & 1 & 0 \\
+            \end{bmatrix}
+            \begin{bmatrix}
+                2 & 0 & -1 \\
+                2 & 0 & 1 \\
+                0 & 3 & 0 \\
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                8 & 0 & 0 \\
+                0 & 9 & 0 \\
+                0 & 0 & 2 \\
+            \end{bmatrix}
+            \,\\
+        \]
+
+        <br>
+
+        The matrix derived from \(U^\top U\) shows that all off-diagonal elements are zero.
+        This means that all basis vectors are orthogonal to each other, and when performing the inner product with themselves,
+        only the inner product produces a non-zero value.
     </div>
 
 
