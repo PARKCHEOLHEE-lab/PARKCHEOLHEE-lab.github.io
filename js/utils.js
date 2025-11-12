@@ -8,25 +8,26 @@ function handle_click(event, url) {
   }
 
 
-function handle_image_error(img) {
-    // image hosting with lfs
-    const original_src = img.src;
+  function handle_image_error(img) {
+    const tail = img.src.split("/").slice(-3).join("/");
+    const base = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/";
 
-    if (original_src.includes("media.githubusercontent.com")) return;
+    const tried = img.dataset.fallbackTried || "";
 
-    const dev = "dev/";
-    const main = "main/";
-    const url = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/";
-
-    try {
-        const github_media_url_main = `${url}${main}${img.src.split("/").slice(-3).join("/")}`;
-        img.src = github_media_url_main;
-        console.log(github_media_url_main)
-    } catch (error) {
-        const github_media_url_dev = `${url}${dev}${img.src.split("/").slice(-3).join("/")}`;
-        img.src = github_media_url_dev;
+    if (tried === "") {
+        img.dataset.fallbackTried = "dev";
+        img.src = `${base}dev/${tail}`;
+        return;
     }
 
+    if (tried === "dev") {
+        img.dataset.fallbackTried = "main";
+        img.src = `${base}main/${tail}`;
+        img.onerror = null;
+        return;
+    }
+    
+    img.onerror = null;
 }
 
 
