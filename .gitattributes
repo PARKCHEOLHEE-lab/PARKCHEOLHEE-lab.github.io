@@ -28,3 +28,4 @@
 /img/layout-vlm/** filter=lfs diff=lfs merge=lfs -text
 /img/batch-normalization/** filter=lfs diff=lfs merge=lfs -text
 /img/nvitop/** filter=lfs diff=lfs merge=lfs -text
+/img/mathematics-for-machine-learning/** filter=lfs diff=lfs merge=lfs -text
