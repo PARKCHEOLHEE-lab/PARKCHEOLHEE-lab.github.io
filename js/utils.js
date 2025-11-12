@@ -13,10 +13,18 @@ function handle_image_error(img) {
     const original_src = img.src;
 
     if (original_src.includes("media.githubusercontent.com")) return;
-    
-    const github_media_url = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/dev/" + img.src.split("/").slice(-3).join("/");
-    
-    img.src = github_media_url;
+
+    const dev = "dev/";
+    const main = "main/";
+    const url = "https://media.githubusercontent.com/media/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/refs/heads/";
+
+    try {
+        const github_media_url_main = `${url}${dev}${img.src.split("/").slice(-3).join("/")}`;
+        img.src = github_media_url_main;
+    } catch (error) {
+        const github_media_url_dev = `${url}${main}${img.src.split("/").slice(-3).join("/")}`;
+        img.src = github_media_url_dev;
+    }
 }
 
 
