@@ -4598,10 +4598,456 @@ emoji: /emoji/books.png
 
 </div><br><br>
 
-<!-- <h3>Matrix Decompositions</h3>
+<h3>4. Matrix Decompositions</h3>
 <div class="article">
+    In this chapter, we present three aspects of matrices: how
+    to summarize matrices, how matrices can be decomposed, and how these
+    decompositions can be used for matrix approximations.
 
-</div><br><br> -->
+    <br><br>
+
+    <h4>4.1 Determinant and Trace</h4>
+    A determinant is
+    a mathematical object in the analysis and solution of systems of linear
+    equations. Determinants are only defined for square matrices \(A\in \mathbb{n \times n}\).
+    The determinant of a square matrix \(A\in \mathbb{n \times n}\) is a function that maps \(A\)
+    onto a real number.
+
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Example 4.1 (Testing for Matrix Invertibility)</strong>
+        <br>
+        Let us begin with exploring if a square matrix \(A\) is invertible.
+        For \(2 \times 2\) matrices, by the definition of the inverse, 
+        we know that \(AA^{-1} = I\). Then with the definition 2.3 (Inverse), the inverse of \(A\) is
+        \[
+            \,\\
+            A^{-1} = \frac{1}{a_{11}a_{22}-a_{12}a_{21}} 
+            \begin{bmatrix}
+            a_{22} & -a_{12} \\
+            -a_{21} & a_{11}
+            \end{bmatrix}
+            \,\\
+        \]
+
+        Hence, \(A\) is invertible if and only if 
+        \[
+            \,\\
+            a_{11}a_{22} - a_{12}a_{21} \neq 0
+            \,\\
+        \]
+
+        This quantity is the determinant of \(A\in \mathbb{R}^{2\times 2}\), i.e.,
+        \[
+            \,\\
+            \det(A) = 
+            \begin{vmatrix}
+                a_{11} & a_{12} \\
+                a_{21} & a_{22}
+            \end{vmatrix}
+            =
+            a_{11}a_{22} - a_{12}a_{21}
+            \,\\
+        \]
+
+        This example points at the relationship between determinants and the existence of inverse matrices.
+    </div>
+
+    <br><br>
+
+    <strong>Theorem 4.1.</strong> For any square matrix \(A\in \mathbb{R}^{n \times n}\) it holds that \(A\) is invertible
+    if and only if \(\det(A) \neq 0\).
+
+    <br><br>
+    For \(n = 1\),
+    \[
+        \,\\
+        \det(A) = det(a_{11}) = a_{11}
+        \,\\
+    \]
+
+    For \(n = 2\),
+    \[
+        \,\\
+        \det(A) = 
+        \begin{vmatrix}
+            a_{11} & a_{12} \\
+            a_{21} & a_{22}
+        \end{vmatrix}
+        =
+        a_{11}a_{22} - a_{12}a_{21}
+        \,\\
+    \]
+
+    For \(n = 3\) (known as Sarrus' rule),
+    \[
+        \,\\
+        \begin{align}
+        \det(A) = 
+        \begin{vmatrix}
+            a_{11} & a_{12} & a_{13} \\
+            a_{21} & a_{22} & a_{23} \\
+            a_{31} & a_{32} & a_{33} \\
+        \end{vmatrix}
+        = \color{red}{a_{11}a_{22}a_{33} + a_{12}a_{23}a_{31} + a_{13}a_{21}a_{32}} \\
+          \color{blue}{-a_{13}a_{22}a_{31} - a_{11}a_{23}a_{32} - a_{12}a_{21}a_{33}}
+        \end{align}
+        \,\\
+    \]
+
+    Sarrus' rule can be understood intuitively using the augmented matrix.
+    \[
+        \,\\
+        \left[
+        \begin{array}{ccc|cc}
+            \color{red}{a_{11}} & \color{red}{a_{12}} & \color{red}{a_{13}} & a_{11} & a_{12} \\
+            a_{21} & \color{red}{a_{22}} & \color{red}{a_{23}} & \color{red}{a_{21}} & a_{22} \\
+            a_{31} & a_{32} & \color{red}{a_{33}} & \color{red}{a_{31}} & \color{red}{a_{32}} \\ 
+        \end{array}
+        \right]
+        \quad
+        \left[
+        \begin{array}{ccc|cc}
+            a_{11} & a_{12} & \color{blue}{a_{13}} & \color{blue}{a_{11}} & \color{blue}{a_{12}} \\
+            a_{21} & \color{blue}{a_{22}} & \color{blue}{a_{23}} & \color{blue}{a_{21}} & a_{22} \\
+            \color{blue}{a_{31}} & \color{blue}{a_{32}} & \color{blue}{a_{33}} & a_{31} & a_{32} \\ 
+        \end{array}
+        \right]
+        \,\\    
+    \]
+
+    <br>
+
+    <div class="mml-example">
+        <strong>Example 4.2 (Determinants as Measure of Volume)</strong>
+        <br>
+        It turns out that the determinant 
+        \(\det(A)\) is the signed volume of an n-dimensional parallelepiped
+        formed by columns of the matrix \(A\).
+
+        <br><br>
+
+        For \(n=2\), the columns of the matrix form a parallelogram.
+        If the angle between vectors is smaller, the area of a parallelogram shrinks, too.
+        In particular, if \(b, g\) are linearly dependent so that \(b = \lambda g \) for some \(\lambda \in \mathbb{R} \),
+        they no longer form a two-dimensional parallelogram. Therefore, the corresponding area is \(0\).
+
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-19.png" width="45%" onerror=handle_image_error(this)>
+            <figcaption>
+                Parallelogram for \(n=2\), Parallelepiped for \(n=3\).
+            </figcaption>
+        </figure>
+
+        <br><br>
+
+        The sign of the determinant indicates the orientation of the spanning vectors.
+        If flipping the order \(b, g\) to \(g, b\), the columns of \(A = [b, g]\) becomes \(A = [g, b]\) and 
+        the \(A\) has negative area. For example, let \(b\) and \(g\) be standard basis \(b = e_1 = [1, 0]^\top, g = e_2 = [0, 1]^\top\).
+        \[
+            \,\\
+            \begin{align}
+                A &=
+                \begin{bmatrix}
+                    1 & 0 \\
+                    0 & 1
+                \end{bmatrix}, \quad 
+                \det{A} = 1 - 0 = 1
+                \,\\
+                \,\\
+                \tilde{A} &=
+                \begin{bmatrix}
+                    0 & 1 \\
+                    1 & 0
+                \end{bmatrix}, \quad
+                \det(\tilde{A}) = 0 - 1 = -1
+            \end{align}
+            \,\\
+        \]
+
+        <br>
+
+        In \(\mathbb{R}^3\), the absolute value of the determinant of the \(3 \times 3\) matrix \([r, g, b] \) is the 
+        volume of the solid.
+        Thus, the determinant acts as a function that measures the
+        signed volume formed by column vectors composed in a matrix.
+        Let's say that the three linearly independent vectors \(r, g, b\in \mathbb{R}^3\) are given as
+        \[
+            \,\\
+            r = \begin{bmatrix} 1 \\ 0 \\ 0 \end{bmatrix}, \quad 
+            g = \begin{bmatrix} 1 \\ 1 \\ 0 \end{bmatrix}, \quad 
+            b = \begin{bmatrix} 1\\1\\1 \end{bmatrix}
+            \,\\
+        \]
+
+        The vectors given can be represented matrix form as
+        \[
+            \,\\
+            A = [r, g, b] = 
+            \begin{bmatrix}
+                1 & 1 & 1 \\
+                0 & 1 & 1 \\
+                0 & 0 & 1
+            \end{bmatrix}, \quad \det(A) = 1
+            \,\\
+        \]
+    </div>
+
+    <br>
+
+    <strong>Theorem 4.2</strong> (Laplace Expansion)
+    Consider a matrix \(A\in\mathbb{R}^{n\times n}\). Then for all \(j=1, \cdots, n\)
+    <ol>
+        <li>
+            Expansion along column \(j\)
+            \[
+                \,\\
+                \det(A) = \sum_{k=1}^n (-1)^{k+j} a_{kj} \det(A_{k, j})
+                \,\\
+            \]
+        </li>
+        <li>
+            Expansion along row \(j\)
+            \[
+                \,\\
+                \det(A) = \sum_{n=1}^k (-1)^{k+j} a_{jk} \det(A_{j, k})
+                \,\\
+            \]
+        </li>
+    </ol>
+
+    Here, \(A_{k, j}\) is the submatrix of \(A\) that we obtain when deleting row \(k\) and column \(j\).
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Example 4.3 (Laplace Expansion)</strong>
+        <br>
+        Let \(A\) be 
+        \[
+            \,\\
+            A = 
+            \begin{bmatrix}
+            2 & 1 & 3 \\
+            0 & 2 & 1 \\
+            0 & 0 & 2
+            \end{bmatrix}
+            \,\\
+        \]
+
+        To compute the determinant of \(A\), we can use the Laplace Expansion along the first column
+        \[
+            \,\\
+            \begin{align}
+            \det(A) &= 
+            (-1)^{1+1} \cdot 2
+            \begin{pmatrix}
+                2 & 1 \\
+                0 & 2                
+            \end{pmatrix} + 
+            (-1)^{2+1} \cdot 0
+            \begin{pmatrix}
+                1 & 3 \\
+                0 & 2                
+            \end{pmatrix} +
+            (-1)^{3+1} \cdot 0
+            \begin{pmatrix}
+                1 & 3 \\
+                2 & 1                
+            \end{pmatrix}
+            \,\\
+            \,\\
+            &= 2 \cdot 4 + 0 + 0 = 8
+            \end{align}
+            \,\\
+        \]
+
+        Additionally, if the matrix is a triangular matrix, 
+        computing the determinant of \(A\) is simplified to multiplying all the diagonal elements. 
+        In this case, \(2 \times 2 \times 2 = 8\).
+        \[
+            \,\\
+            \det(\tilde{A}) = \prod_{i=1}^n \tilde{A}_{ii}
+            \,\\
+        \]
+
+        where, \(\tilde{A}\) is a triangular matrix.
+    </div>
+
+    <br><br>
+
+    For \(A\in\mathbb{R}^{n\times n}\), the determinant satisfies the following properties
+    <ul>
+        <li>
+            \(\det(AB) = \det(A) \cdot \det(B) \).
+        </li>
+        <li>
+            \(\det(A) = \det(A^\top) \).
+        </li>
+        <li>
+            If \(A\) is invertible (regular), then \(\det(A^{-1}) = \frac{1}{\det(A)} \).
+        </li>
+        <li>
+            Adding a multiple of a column/row to another one does not change \(\det(A)\).
+        </li>
+        <li>
+            Multiplication of a column/row with \(\lambda \in \mathbb{R}\) scales \(\det(A)\) by \(\lambda\). In
+            particular, \(\det(\lambda A) = \lambda^n \det(A) \).
+        </li>
+        <li>
+            Swapping two rows/columns changes the sign of \(\det(A)\).
+        </li>
+    </ul>
+
+    <br>
+
+    <strong>Theorem 4.3.</strong> A square matrix \(A\ in \mathbb{R}^{n \times n}\) has \(\det(A) \neq 0\)
+    if and only if \(\text{rk}(A) = n\). In other words, \(A\) is invertible if and only if it is full rank.
+
+    <br><br>
+
+    <strong>Definition 4.4.</strong> The trace of a square matrix \(A\in \mathbb{R}^{n\times n}\) is defined as
+    \[
+        \,\\
+        \text{tr}(A) := \sum_{i=1}^n A_ii
+        \,\\
+    \]
+
+    The trace is the sum of the diagonal elements of \(A\).
+    The trace staisfies the following properties
+    <ul>
+        <li>
+            \(\text{tr}(A) + \text{tr}(B) = \text{tr}(A + B) \), where \(A, B \in \mathbb{R}^{n \times n} \)
+        </li>
+        <li>
+            \(\text{tr}(\alpha A) = \alpha \text{tr}(A) \), where \(\alpha \in \mathbb{R}, A \in \mathbb{R}^{n \times n} \)
+        </li>
+        <li>
+            \(\text{tr} (I_n) = n \)
+        </li>
+        <li>
+            \(\text{tr}(AB) = \text{tr}(BA) \), where \(A \in \mathbb{R}^{n \times k}, B \in \mathbb{R}^{k \times n} \)
+        </li>
+    </ul>
+
+    The only function that satisfies the above four properties together is trace.
+
+    <br><br>
+
+    The trace is invariant under cyclic permutations, 
+    \[
+        \,\\
+        \text{tr}(AKL) = \text{tr}(KLA)
+        \,\\
+    \]
+
+    for the matrices \( A \in \mathbb{R}^{a \times k}, K \in \mathbb{R}^{k \times l}, L \in \mathbb{R}^{l \times a} \).
+
+    The traces of similar matrices \(A, B\) are the same due to the cyclic permutations.
+    The similar matrix can be defined as \( B = P^{-1} A P \), where \( A, B, P \in \mathbb{R}^{n \times n} \)
+    
+    \[
+        \,\\
+            \begin{align}
+            \text{tr}(B) &= \text{tr}(P^{-1}AP)
+            \,\\
+            \,\\
+                         &= \text{tr}(APP^{-1})
+            \,\\
+            \,\\
+                         &= \text{tr}(AI)
+            \,\\
+            \,\\
+                         &= \text{tr}(A)
+            \end{align}
+        \,\\
+    \]
+
+    Hence, while matrix representations of linear mappings are basis dependent the trace of a linear mapping \(\Phi\) is independent of the basis.
+    
+    <br><br>
+    Consider a mapping \(\Phi: \mathbb{R}^2 \rightarrow \mathbb{R}^2 \) given by
+    \[
+        \,\\
+        \Phi (x, y) = (2x + y, x + 3y)
+        \,\\
+    \]
+    
+    With respect to the standard basis \(\mathcal{B} = \{ [1, 0]^\top, [0, 1]^\top \}\), the mapping \(\Phi\) is represented by
+    \[
+        \,\\
+        \Phi_{\mathcal{B}} = A = 
+        \begin{bmatrix}
+            2 & 1 \\
+            1 & 3
+        \end{bmatrix}, \quad \text{tr}(A) = 2+3 = 5
+        \,\\
+    \]
+
+    Now, choose a new basis \(\mathcal{C} = \{ [1, 1]^\top, [1, 0]^\top \}\). 
+    Then,
+    \[
+        \,\\
+        P = 
+        \begin{bmatrix}
+            1 & 1 \\
+            1 & 0
+        \end{bmatrix}, 
+        \quad P^{-1} = 
+        \begin{bmatrix}
+            0 & 1 \\
+            1 & -1
+        \end{bmatrix}
+        \,\\
+    \]
+
+    Therefore, \(B = P^{-1}AP \) is
+    <div class="latex-container">
+        \[
+            \,\\
+            \begin{align}
+
+            B = P^{-1}AP = 
+            \begin{bmatrix}
+                0 & 1 \\
+                1 & -1
+            \end{bmatrix}
+            \begin{bmatrix}
+                2 & 1 \\
+                1 & 3
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 & 1 \\
+                1 & 0
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                4 & 1 \\
+                -1 & 1
+            \end{bmatrix}, \quad
+            &\text{tr}(B) = 4 + 1 = 5
+            \,\\
+            \,\\
+
+            B = APP^{-1} = AI = A = 
+            \begin{bmatrix}
+                2 & 1 \\
+                1 & 3
+            \end{bmatrix}, \quad
+            &\text{tr}(A) = 2 + 3 = 5
+
+            \end{align}
+            \,\\
+        \]
+    </div>
+    Although the matrices \(A\) and \(B\) are different, 
+    they are similar, and by the cyclic permutation property of the trace, we have 
+    \[
+        \,\\
+        \text{tr}(A) = \text{tr}(B) = 5
+        \,\\
+    \]
+</div><br><br>
 
 <!-- <h3>Vector Calculus</h3>
 <div class="article">
