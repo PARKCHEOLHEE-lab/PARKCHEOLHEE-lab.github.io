@@ -5047,6 +5047,60 @@ emoji: /emoji/books.png
         \text{tr}(A) = \text{tr}(B) = 5
         \,\\
     \]
+
+    <br><br>
+
+    <h4>4.2 Eigenvalues and Eigenvectors</h4>
+    We can interpret linear mappings and their associated transformation matrices by
+    performing an "eigen" analysis.
+
+    <br><br>
+
+    <strong>Definition 4.6.</strong> Let \(A \in \mathbb{R}^{n \times n} \) be a square matrix.
+    Then \(\lambda \mathbb{R}\) is an eigenvalue of \(A\) and \(x\in \mathbb{R}^n \setminus \{0\}\) is the corresponding
+    eigenvector of \(A\) if
+    \[
+        \,\\
+        Ax = \lambda x
+        \,\\
+    \]
+
+    We call this equation the eigenvalue equation.
+
+    <br><br>
+
+    <strong><i>Remark.</i></strong> The following statements are equivalent:
+    <ul>
+        <li>
+            There exists an \(x\in \mathbb{R}^n \setminus \{0\} \) with \(Ax = \lambda x \)
+            or, equivalently, \( (A - \lambda I_n)x = 0 \) can be s olved non-trivially, i.e., \(x \neq 0\).
+        </li>
+        <li>
+            \(\text{rk}(A - \lambda I_n) < n \).
+        </li>
+        <li>
+            \(\det(A - \lambda I_n) = 0 \).
+        </li>
+    </ul>
+
+    <br><br>
+
+    <strong>Definition 4.7 (Colinearity and Codirection).</strong> 
+    Two vectors that point in the same direction are called codirected. Two vectors are collinear if they
+    point in the same or the opposite direction.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong> (Non-uniqueness of eigenvectors).
+    If \(x\) is an eigenvector of \(A\) associated with eigenvalue \(\lambda\),
+    then for any \(c\in \mathbb{R} \setminus \{0\}\) it holds that
+    \(cx\) is an eigenvector of \(A\)
+    \[
+        \,\\
+        A(cx) = cAx = c\lambda x = \lambda(cx)
+        \,\\
+    \]
+
 </div><br><br>
 
 <!-- <h3>Vector Calculus</h3>
