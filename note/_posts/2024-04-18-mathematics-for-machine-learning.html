@@ -5101,6 +5101,46 @@ emoji: /emoji/books.png
         \,\\
     \]
 
+    <br><br>
+
+    <strong>Definition 4.10 (Eigenspace and Eigenspectrun)</strong>.
+    For \(A\ in \mathbb{R}^{n \times n}\), the set of all eigenvectors of \(A\) associated with an eigenvalue \(\lambda\)
+    spans a subspace of \(\mathbb{R}^{n}\), which is called the eigenspace of \(A\) with respect to \(\lambda\)
+    and is denote by \(E_{\lambda}\).
+    The set of all eigenvalues of \(A\) is called the eigenspectrum, or just spectrum of \(A\).
+
+    <br><br>
+
+    If \(\lambda\) is an eigenvalue of \(A\in \mathbb{R}^{n\times n} \),
+    then the corresponding eigenspace \(E_{\lambda}\) is the solution of the linear equations
+    \((A - \lambda I)x = 0 \).
+    Geometrically, the eigenvector corresponding to a nonzero
+    eigenvalue points in a direction that is stretched by the linear mapping.
+
+    <br><br>
+
+    The properties of eigenvalues and eigenvectors include:
+    <ul>
+        <li>
+            A matrix \(A\) and its transpose \(A^\top\) possess the same eigenvalues, but not
+            necessarily the same eigenvectors.
+        </li>
+        <li>
+            The eigenspace \(E_{\lambda}\) is the null space of \(A - \lambda I \) since
+            <div class="latex-container">
+                \[
+                    Ax - \lambda x
+                    \,\, \Longleftrightarrow \,\, Ax - \lambda x = 0 
+                    \,\, \Longleftrightarrow \,\, (A - \lambda I) x = 0
+                    \,\, \Longleftrightarrow \,\, x \in \ker(A - \lambda I)
+                \]
+            </div>
+
+            If \(\det(A - \lambda I = 0)\), then the linear transformation \(A - \lambda I\) is singular.
+            In a geometric sense, a zero determinant means that the transformation flattens the space into a lower-dimensional subspace.
+        </li>
+    </ul>
+
 </div><br><br>
 
 <!-- <h3>Vector Calculus</h3>
