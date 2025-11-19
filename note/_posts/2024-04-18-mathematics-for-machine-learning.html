@@ -3404,6 +3404,78 @@ emoji: /emoji/books.png
 
     <br><br>
 
+    <div class="mml-example">
+        <strong>Example 3.4 (Geometric Intuition of Symmetric, Positive Definite Matrices)</strong>
+        <br>
+        Consider the matrices, and \(x\)
+        \[
+            \,\\
+            A = 
+            \begin{bmatrix}
+                3 & -1 \\
+                -1 & 2
+            \end{bmatrix}
+            , \quad
+            B = 
+            \begin{bmatrix}
+                -3 & -1 \\
+                -1 & 4
+            \end{bmatrix}
+            , \quad
+            x = 
+            \begin{bmatrix}
+                1 \\
+                1
+            \end{bmatrix}
+            \,\\
+        \]
+
+        Results of the \(x^\top Ax\) and \(x^\top Bx\) are as follows respectively 
+        \[
+            \,\\
+            x^\top Ax = 
+            \begin{bmatrix}
+                1 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                3 & -1 \\
+                -1 & 2
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 \\ 1
+            \end{bmatrix} = 3
+
+            \,\\
+            \,\\
+            x^\top Bx = 
+            \begin{bmatrix}
+                1 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                3 & -1 \\
+                -1 & 4
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 \\ 1
+            \end{bmatrix} = -1
+            \,\\
+        \]
+
+        In a geometric perspective, positive definite means that
+        the angle between any vector \(x\) and the vector transformed by the matrix (here, \(Ax\) or \(Bx\))
+        remains between -90 and 90 degrees.
+        The figure below intuitively illustrates the concept of positive definite.
+
+
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-20.png" width="70%" onerror=handle_image_error(this)>
+            <figcaption>Geometric intuition of Positive Definite</figcaption>
+        </figure>
+
+    </div>
+
+    <br><br>
+
     The following properties hold if \(A\in\mathbb{R}^{n \times n}\) is symmetric and positive definite:
     <ul>
         <li>
