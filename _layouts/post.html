@@ -25,15 +25,10 @@ layout: default
 <article>
   
   {% include meta.html post=page %}
-  {{ content }}
-  {% if page.comments != false and site.comments.isso or site.comments.disqus %}
-    <hr>
-    {% if site.comments.isso_domain %}<div id="isso-thread"></div>{% endif %}
-    {% if site.comments.disqus_shortname %}<div id="disqus_thread"></div>{% endif %}
-    <noscript>Please enable JavaScript to view comments.</noscript>
-  {% endif %}
   
-  {% if page.comment %}
+  {{ content }}
+  
+  {% if page.comment != false and page.content != empty %}
     <div class="col-lg-8 col-md-10 mx-auto">
       <hr />
       
