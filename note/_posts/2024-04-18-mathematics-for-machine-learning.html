@@ -4079,17 +4079,17 @@ emoji: /emoji/books.png
                 \boldsymbol{B}^\top x = \boldsymbol{B}^\top \boldsymbol{B\lambda}
                 \,\\
                 \,\\
-                (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top x = (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top \boldsymbol{B\lambda}
+                (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top x = (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top \boldsymbol{B\lambda}
                 \,\\
                 \,\\
-                \boldsymbol{\lambda} = (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top x
+                \boldsymbol{\lambda} = (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top x
                 \,\\
             \]
         </li>
         <li>
             Find the projection \(\pi_U (x) \in U\). We already established that \(\pi_U (x) = \boldsymbol{B\lambda}\)
             \[
-                \pi_U (x) = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top x
+                \pi_U (x) = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top x
                 \,\\
             \]
         </li>
@@ -4097,7 +4097,7 @@ emoji: /emoji/books.png
             Find the projection matrix \(P_\pi\). From the above, we can obtain the projection matrix immediately
             with \(\pi_U (x) = P_\pi (x)\)
             \[
-                P_pi = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top
+                P_{\pi} = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top
                 \,\\
             \]
         </li>
