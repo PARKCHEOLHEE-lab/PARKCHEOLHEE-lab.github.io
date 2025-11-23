@@ -3329,7 +3329,7 @@ emoji: /emoji/books.png
 
     <h4>3.2.3 Symmetric, Positive Definite Matrices</h4>
     Consider an \(n\)-dimensional vector space \(V\) with an inner product \( \langle \cdot, \cdot \rangle : V \times V \rightarrow \mathbb{R} \)
-    and an ordered basis \(B = b_1, cdots, b_n \) of \(V\).
+    and an ordered basis \(B = b_1, \cdots, b_n \) of \(V\).
     Any vectors \(x, y \in V \) can be written as linear combinations of the basis vectors
     so that \(x = \sum_{i=1}^n \psi_i b_i \in V \) and \( y = \sum_{j=1}^n \lambda_j b_j \in V \) for suitable \(\psi_i, \lambda_j \in \mathbb{R} \).
     Due to the bilinearity of the inner product, it holds for all \(x, y \in V\) that
@@ -3401,6 +3401,78 @@ emoji: /emoji/books.png
     A symmetric matrix \(A \in \mathbb{R}^{n \times n} \) that satisfies the positive definiteness above is called
     symmetric, positive definite, or just positive definite.
     If \(x^\top Ax \ge 0\), then \(A\) is called symmetric, positive semidefinite. 
+
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Example 3.4 (Geometric Intuition of Symmetric, Positive Definite Matrices)</strong>
+        <br>
+        Consider the matrices, and \(x\)
+        \[
+            \,\\
+            A = 
+            \begin{bmatrix}
+                3 & -1 \\
+                -1 & 2
+            \end{bmatrix}
+            , \quad
+            B = 
+            \begin{bmatrix}
+                -3 & -1 \\
+                -1 & 4
+            \end{bmatrix}
+            , \quad
+            x = 
+            \begin{bmatrix}
+                1 \\
+                1
+            \end{bmatrix}
+            \,\\
+        \]
+
+        Results of the \(x^\top Ax\) and \(x^\top Bx\) are as follows respectively 
+        \[
+            \,\\
+            x^\top Ax = 
+            \begin{bmatrix}
+                1 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                3 & -1 \\
+                -1 & 2
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 \\ 1
+            \end{bmatrix} = 3
+
+            \,\\
+            \,\\
+            x^\top Bx = 
+            \begin{bmatrix}
+                1 & 1
+            \end{bmatrix}
+            \begin{bmatrix}
+                3 & -1 \\
+                -1 & 4
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 \\ 1
+            \end{bmatrix} = -1
+            \,\\
+        \]
+
+        In a geometric perspective, positive definite means that
+        the angle between any vector \(x\) and the vector transformed by the matrix (here, \(Ax\) or \(Bx\))
+        remains between -90 and 90 degrees.
+        The figure below intuitively illustrates the concept of positive definite.
+
+
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-20.png" width="70%" onerror=handle_image_error(this)>
+            <figcaption>Geometric intuition of Positive Definite</figcaption>
+        </figure>
+
+    </div>
 
     <br><br>
 
@@ -3780,10 +3852,10 @@ emoji: /emoji/books.png
 
     <strong>Definition 3.10</strong> (Projection).
     Let \(V\) be a vector space and \(U \subseteq V\) a subspace of \(V\).
-    A linear mapping \(\pi: V \rightarrow U\) is called a projection if the following holds
+    A linear mapping \(\Phi: V \rightarrow U\) is called a projection if the following holds
     \[
         \,\\
-        \pi^2 = \pi
+        \Phi^2 = \Phi
         \,\\
     \]
 
@@ -4007,17 +4079,17 @@ emoji: /emoji/books.png
                 \boldsymbol{B}^\top x = \boldsymbol{B}^\top \boldsymbol{B\lambda}
                 \,\\
                 \,\\
-                (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top x = (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top \boldsymbol{B\lambda}
+                (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top x = (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top \boldsymbol{B\lambda}
                 \,\\
                 \,\\
-                \boldsymbol{\lambda} = (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top x
+                \boldsymbol{\lambda} = (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top x
                 \,\\
             \]
         </li>
         <li>
             Find the projection \(\pi_U (x) \in U\). We already established that \(\pi_U (x) = \boldsymbol{B\lambda}\)
             \[
-                \pi_U (x) = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top x
+                \pi_U (x) = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top x
                 \,\\
             \]
         </li>
@@ -4025,7 +4097,7 @@ emoji: /emoji/books.png
             Find the projection matrix \(P_\pi\). From the above, we can obtain the projection matrix immediately
             with \(\pi_U (x) = P_\pi (x)\)
             \[
-                P_pi = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top B)^{-1} \boldsymbol{B}^\top
+                P_{\pi} = \boldsymbol{B\lambda} = \boldsymbol{B} (\boldsymbol{B}^\top \boldsymbol{B})^{-1} \boldsymbol{B}^\top
                 \,\\
             \]
         </li>
@@ -5047,6 +5119,271 @@ emoji: /emoji/books.png
         \text{tr}(A) = \text{tr}(B) = 5
         \,\\
     \]
+
+    <br><br>
+
+    <h4>4.2 Eigenvalues and Eigenvectors</h4>
+    We can interpret linear mappings and their associated transformation matrices by
+    performing an "eigen" analysis.
+
+    <br><br>
+
+    <strong>Definition 4.6.</strong> Let \(A \in \mathbb{R}^{n \times n} \) be a square matrix.
+    Then \(\lambda \mathbb{R}\) is an eigenvalue of \(A\) and \(x\in \mathbb{R}^n \setminus \{0\}\) is the corresponding
+    eigenvector of \(A\) if
+    \[
+        \,\\
+        Ax = \lambda x
+        \,\\
+    \]
+
+    We call this equation the eigenvalue equation.
+
+    <br><br>
+
+    <strong><i>Remark.</i></strong> The following statements are equivalent:
+    <ul>
+        <li>
+            There exists an \(x\in \mathbb{R}^n \setminus \{0\} \) with \(Ax = \lambda x \)
+            or, equivalently, \( (A - \lambda I_n)x = 0 \) can be s olved non-trivially, i.e., \(x \neq 0\).
+        </li>
+        <li>
+            \(\text{rk}(A - \lambda I_n) < n \).
+        </li>
+        <li>
+            \(\det(A - \lambda I_n) = 0 \).
+        </li>
+    </ul>
+
+    <br><br>
+
+    <strong>Definition 4.7 (Colinearity and Codirection).</strong> 
+    Two vectors that point in the same direction are called codirected. Two vectors are collinear if they
+    point in the same or the opposite direction.
+
+    <br><br>
+
+    <strong><i>Remark</i></strong> (Non-uniqueness of eigenvectors).
+    If \(x\) is an eigenvector of \(A\) associated with eigenvalue \(\lambda\),
+    then for any \(c\in \mathbb{R} \setminus \{0\}\) it holds that
+    \(cx\) is an eigenvector of \(A\)
+    \[
+        \,\\
+        A(cx) = cAx = c\lambda x = \lambda(cx)
+        \,\\
+    \]
+
+    <br>
+
+    <strong>Definition 4.10 (Eigenspace and Eigenspectrun)</strong>.
+    For \(A\ in \mathbb{R}^{n \times n}\), the set of all eigenvectors of \(A\) associated with an eigenvalue \(\lambda\)
+    spans a subspace of \(\mathbb{R}^{n}\), which is called the eigenspace of \(A\) with respect to \(\lambda\)
+    and is denote by \(E_{\lambda}\).
+    The set of all eigenvalues of \(A\) is called the eigenspectrum, or just spectrum of \(A\).
+
+    <br><br>
+
+    If \(\lambda\) is an eigenvalue of \(A\in \mathbb{R}^{n\times n} \),
+    then the corresponding eigenspace \(E_{\lambda}\) is the solution of the linear equations
+    \((A - \lambda I)x = 0 \).
+    Geometrically, the eigenvector corresponding to a nonzero
+    eigenvalue points in a direction that is stretched by the linear mapping.
+
+    <br><br>
+
+    The properties of eigenvalues and eigenvectors include:
+    <ul>
+        <li>
+            A matrix \(A\) and its transpose \(A^\top\) possess the same eigenvalues, but not
+            necessarily the same eigenvectors.
+        </li>
+        <li>
+            The eigenspace \(E_{\lambda}\) is the null space of \(A - \lambda I \) since
+            <div class="latex-container">
+                \[
+                    Ax - \lambda x
+                    \,\, \Longleftrightarrow \,\, Ax - \lambda x = 0 
+                    \,\, \Longleftrightarrow \,\, (A - \lambda I) x = 0
+                    \,\, \Longleftrightarrow \,\, x \in \ker(A - \lambda I)
+                \]
+            </div>
+
+            If \(\det(A - \lambda I = 0)\), then the linear transformation \(A - \lambda I\) is singular.
+            In a geometric sense, a zero determinant means that the transformation flattens the space into a lower-dimensional subspace.
+        </li>
+    </ul>
+
+    <br><br>
+
+    <div class="mml-example">
+        <strong>Example 4.5 (Computing Eigenvalues, Eigenvectors, and Eigenspaces)</strong>
+        Let us find the eigenvalues and eigenvectors of the matrix \(A \in \mathbb{R}^{2 \times 2} \)
+        \[
+            \,\\
+                A = 
+                \begin{bmatrix}
+                    4 & 2 \\
+                    1 & 3
+                \end{bmatrix}
+            \,\\
+        \]
+
+        By the definition of an eigenvector \(x \neq 0\) and eigenvalue \(\lambda\) of \(A\),
+        we have \(Ax = \lambda x \Longleftrightarrow (A - \lambda I)x = 0\).
+        Since \(x \neq 0\), the matrix \((A - \lambda I)\) must be singular, i.e., its determinant must be zero.
+        Therefore, we need to compute the roots of the characteristic polynomial to find the eigenvalues.
+
+        <br><br>
+
+        The characteristic polynomial is
+        \[
+            \,\\
+            \begin{align}
+            \det(A - \lambda I) &= \det \left( 
+                \begin{bmatrix}    
+                    4 & 2 \\
+                    1 & 3
+                \end{bmatrix}    
+                -
+                \begin{bmatrix}    
+                    \lambda & 0 \\
+                    0 & \lambda
+                \end{bmatrix}    
+            \right)
+            \,\\
+            \,\\
+            &=
+            \det \left(
+                \begin{bmatrix}
+                    4 - \lambda & 2 \\
+                    1 & 3 - \lambda
+                \end{bmatrix}
+            \right)
+            \,\\
+            \,\\
+            &=
+            (4 - \lambda)(3 - \lambda) - 2
+            \,\\
+            \,\\
+            &=
+            \lambda^2 - 7 \lambda + 10
+            \end{align}
+            \,\\
+        \]
+
+        As the determinant of \((A - \lambda I)\) must be zero, the roots of characteristic equation are
+        \[
+            \,\\
+                \begin{align}
+                \lambda^2 - 7 \lambda + 10 &= 0
+                \,\\
+                \,\\
+                (2 - \lambda)(5 - \lambda) &= 0
+                \end{align}
+            \,\\
+        \]
+
+        Therefore, \(\lambda = 2\) and \(\lambda = 5\).
+        
+        <br><br>
+
+        Using the characteristic polynomial and the eigenvalues computed above, we can find the eigenvectors
+        \[
+            \,\\
+            \begin{bmatrix}
+                4 - \lambda & 2 \\
+                1 & 3 - \lambda
+            \end{bmatrix}
+            x = 
+            \begin{bmatrix}
+                0 \\
+                0
+            \end{bmatrix}
+            \,\\
+        \]
+
+        For \(\lambda = 5\), we obtain
+        \[
+            \,\\
+            \begin{bmatrix}
+                4 - 5 & 2 \\
+                1 & 3 - 5
+            \end{bmatrix}
+            \begin{bmatrix}
+                x_1 \\
+                x_ 2
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                -1 & 2 \\
+                1 & -2
+            \end{bmatrix}
+            \begin{bmatrix}
+                x_1 \\
+                x_ 2
+            \end{bmatrix}
+            = 
+            \begin{bmatrix}
+                0 \\
+                0
+            \end{bmatrix}
+            \,\\
+        \]
+
+        Solving the linear equation below, 
+        \[
+            \,\\
+                \begin{matrix}
+                    - & x_1 & + & 2x_2 & = & 0 \\
+                      & x_1 & - & 2x_2 & = & 0
+                \end{matrix}
+            \,\\
+        \]
+
+        we obtain the solution \(x_1 = 2x_2\). Therefore, the eigenvector corresponding the eigenvalue \(\lambda = 5\)
+        spans 
+        \[
+            \,\\
+            e_1 = \text{span} \left[ \begin{bmatrix} 2 \\ 1 \end{bmatrix} \right]
+            \,\\
+        \]
+
+        For \(\lambda = 2\), using the same method, we obtain
+        \[
+            \,\\
+            e_2 = \text{span} \left[ \begin{bmatrix} -1 \\ 1 \end{bmatrix} \right]
+            \,\\
+        \]
+
+        The figure below provides geometric intuition of Eigenvalues, Eigenvectors.
+
+        <br><br>
+        
+        For the vector \(x = [0, -1]^\top\), 
+        applying the linear transformation matrix \(A\) to \(x\) results in \(Ax = [-2, -3]^\top\).
+        In contrast, the eigenvectors painted in green are only scaled by their eigenvalues and do not change direction.
+        <br><br>
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-21.png" width="80%" onerror=handle_image_error(this)>
+            <figcaption>
+                Eigenvalues, Eigenvectors
+            </figcaption>
+        </figure>
+    </div>  
+    
+    <br><br>
+    <strong>Theorem 4.12.</strong> The eigenvectors \(x_1, \cdots, x_n\) of a matrix \(A \in \mathbb{R}^{n \times n} \)
+    with \(n\) distinct eigenvalues \(\lambda_1, \cdots, \lambda_n \) are linearly independent.
+    This theorem states that the eigenvectors of a matrix with \(n\) distinct eigenvalues form a basis of \(\mathbb{R}^n\).
+
+    <br><br>
+
+    <strong>Definition 4.13.</strong>
+    A square matrix \(A \in \mathbb{R}^{n \times n}\) is defective
+    if it possesses fewer that \(n\) linearly independent eigenvectors.
+
+    <br><br>
+
 </div><br><br>
 
 <!-- <h3>Vector Calculus</h3>
