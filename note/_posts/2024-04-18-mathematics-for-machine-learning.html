@@ -5381,8 +5381,122 @@ emoji: /emoji/books.png
     <strong>Definition 4.13.</strong>
     A square matrix \(A \in \mathbb{R}^{n \times n}\) is defective
     if it possesses fewer that \(n\) linearly independent eigenvectors.
+    Looking at the eigenspaces of a defective matrix, 
+    it follows that the sum of the sum of the dimensions of the eigenspaces is less than \(n\).
+
 
     <br><br>
+
+    <!-- <strong>Theorem 4.15 (Spectral Theorem)</strong> -->
+
+    <div class="mml-example">
+        <strong>Example 4.8 (Linear combination of the eigenvectors corresponding to the repeated eigenvalues)</strong>
+        <br>
+        Let the symmetric matrix \(A\) be
+        \[
+            \,\\
+            A = 
+            \begin{bmatrix}
+                3 & 2 & 2 \\
+                2 & 3 & 2 \\
+                2 & 2 & 3
+            \end{bmatrix}
+            \,\\
+        \]
+        
+        The eigenvalues of \(A\) are \(\lambda_1 = 1\) and \(\lambda_2 = 7\),
+        where \(\lambda_1\) is a repeated eigenvalue.
+        For \(\lambda_1 = 1 \,\, \text{(multiplicity 2)} \),
+        its eigenvectors \(E_1, E_2\) are
+        \[
+            \,\\
+            E_1 = \text{span}\left[ 
+                \begin{bmatrix}
+                    -1 \\
+                    1 \\
+                    0
+                \end{bmatrix}
+             \right], \quad
+            
+            E_2 = \text{span}\left[ 
+                \begin{bmatrix}
+                    -1 \\
+                    0 \\
+                    1
+                \end{bmatrix}
+             \right]
+            \,\\
+        \]
+        and for \(\lambda_2 = 7\), its eigenvector is 
+        \[
+            \,\\
+            
+            E_3 = \text{span}\left[ 
+                \begin{bmatrix}
+                    1 \\
+                    1 \\
+                    1
+                \end{bmatrix}
+             \right]
+            \,\\
+        \]
+
+        Computing a linear combination of eigenvectors corresponding to the 
+        repeated eigenvalue \(\lambda_1\) also yields an eigenvector.
+
+        \[
+            \,\\
+            \begin{align}
+
+            E_1 + E_2 &= 
+            \begin{bmatrix}
+                -1 \\
+                1 \\
+                0
+            \end{bmatrix}
+            +
+            \begin{bmatrix}
+                -1 \\
+                0 \\
+                1
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                -2 \\
+                1 \\
+                1
+            \end{bmatrix}
+            \,\\
+            \,\\
+
+            A(E_1+E_2) &= 
+            \begin{bmatrix}
+                3 & 2 & 2 \\
+                2 & 3 & 2 \\
+                2 & 2 & 3
+            \end{bmatrix}
+            \begin{bmatrix}
+                -2 \\
+                1 \\
+                1
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                -2 \\
+                1 \\
+                1
+            \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        <br>
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-22.png" width="100%" onerror=handle_image_error(this)>
+            <figcaption>Linear combination of the eigenvectors corresponding to the repeated eigenvalues</figcaption>
+        </figure>
+
+    </div>
 
 </div><br><br>
 
