@@ -5498,6 +5498,142 @@ emoji: /emoji/books.png
 
     </div>
 
+    <br><br>
+
+    <strong>Theorem 4.16.</strong> The determinant of a matrix \(A \in \mathbb{R}^{n\times n}\) is the product of
+    its eigenvalues, where \(\lambda_i\) are possibly repeated eigenvalues of \(A\).
+    \[
+        \,\\
+        \det(A) = \prod_{i=1}^n \lambda_i
+        \,\\
+    \]
+
+    <br>
+
+    <strong>Theorem 4.17.</strong> The trace of a matrix \(A\in\mathbb{R}^{n\times n}\) is the sum of
+    its eigenvalues, where \(\lambda_i\) are possibly repeated eigenvalues of \(A\).
+    \[
+        \,\\
+        \text{tr}(A) = \sum_{i=1}^n \lambda_i
+        \,\\
+    \]
+
+    <br>
+
+    <h4>4.3 Cholesky Decomposition</h4>
+    <strong>Theorem 4.18 (Cholesky Decomposition).</strong>
+    A symmetric, positive definite matrix \(A\) can be factorized into a product
+    \(A = LL^\top\), where \(L\) is a lower triangular matrix with positive diagonal elements and \(L\) is unique.
+    <div class="latex-container">
+        \[
+            \,\\
+            \begin{bmatrix}
+                a_{11} & \cdots & a_{1n} \\
+                \vdots & \ddots & \vdots \\
+                a_{n1} & \cdots & a_{nn}
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                l_{11} & \cdots & 0 \\
+                \vdots & \ddots & \vdots \\
+                l_{n1} & \cdots & l_{nn}
+            \end{bmatrix}
+            \begin{bmatrix}
+                l_{11} & \cdots & l_{1n} \\
+                \vdots & \ddots & \vdots \\
+                0 & \cdots & l_{nn}
+            \end{bmatrix}
+            \,\\
+        \]
+    </div>
+
+    <br>
+
+    The Cholesky decomposition also allows us to compute determinants very efficiently.
+    Given the Cholesky decomposition \(A=LL^\top\),
+    we know that \(\det(A) = \det(L)\det(L^\top) = \det(L)^2 \). Since \(L\) is a triangular matrix,
+    the determinant is simply the product of its diagonal entries so that \(\det(A) = \prod_i l_{ii}^2 \).
+
+    <br><br>
+
+    <h4>4.4 Eigendecomposition and Diagonalization</h4>
+    In this section, we will discuss how to transform matrices into diagonal form.
+    Recall that two matrices \(A, D\) are similar if there exists an invertible matrix \(P\),
+    such that \(D = P^{-1}AP\).
+    More specifically, we
+    will look at matrices \(A\) that are similar to diagonal matrices \(D\) that contain the eigenvalues of \(A\) on the diagonal.
+
+    <br><br>
+
+    <strong>Definition 4.19 (Diagonalizable).</strong>
+    A matrix \(A\in \mathbb{R}^{n\times n}\) is diagonalizable if there exists an invertible matrix \(P\in \mathbb{R}^{n\times n}\)
+    such that 
+    \[
+        \,\\
+        \begin{align}
+            D = P^{-1}AP \,\, \Longleftrightarrow \,\, &PD = PP^{-1}AP \\  
+                                                       &PD = IAP \\
+                                                       &PD = AP
+        \end{align}
+        \,\\
+    \]
+
+    We can see that his statement holds because
+    \[
+        \,\\
+        \begin{align}
+            AP &= A[p_1, \cdots, p_n] = [Ap_1, \cdots, Ap_n] 
+            \,\\
+            \,\\
+            PD &= [p_1, \cdots, p_n] 
+            \begin{bmatrix} 
+                \lambda_1 & \cdots & 0 \\
+                \vdots & \ddots & \vdots \\
+                0 & \cdots & \lambda_n 
+            \end{bmatrix}
+            = [\lambda_1 p_1, \cdots , \lambda_n p_n]
+        \end{align}
+        \,\\
+    \]
+
+    Thus, \(PD = AP\) implies that
+    \[
+        \,\\
+        \lambda_1 p_1 = A p_1
+        \,\\
+        \vdots
+        \,\\
+        \lambda_n p_n = A p_n
+        \,\\
+    \]
+
+    Therefore, by the definition of Eigenvectors and Eigenvalues \(Ax = \lambda x\), 
+    the columns of \(P\) must be eigenvectors of \(A\).
+
+    The definition of diagonalization requires that \(P \in \mathbb{R}^{n\times n} \) is invertible,
+    i.e., \(P\) has full rank. This requires us to have \(n\) linearly independent eigenvectors
+    \(p_1, \cdots, p_n\), i.e., the \(p_i\) form a basis of \(\mathbb{R}^n\).
+
+    <br><br>
+
+    <strong>Theorem 4.20 (Eigendecomposition).</strong>
+    A square matrix \(A \in \mathbb{R}^{n \times n} \) can be factorized from \(D = P^{-1}AP\) to \(A = PDP^{-1}\),
+    \[
+        \,\\
+        \begin{align}
+            D = P^{-1}AP \,\, \Longleftrightarrow \,\, &PD = PP^{-1}AP \\  
+                                                       &PD = IAP \\
+                                                       &PD = AP \\
+                                                       &PDP^{-1} = APP^{-1} \\
+                                                       &PDP^{-1} = AI \\
+                                                       &PDP^{-1} = A
+        \end{align}
+        \,\\
+    \]
+
+    where \(P \in \mathbb{R}^{n\times n} \) consists of the eigenvectors of \(A\) as column vectors,
+    and \(D\) is a diagonal matrix whose diagonal entries are the eigenvalues of \(A\). 
+
 </div><br><br>
 
 <!-- <h3>Vector Calculus</h3>
