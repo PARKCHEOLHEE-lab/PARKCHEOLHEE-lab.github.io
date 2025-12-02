@@ -3663,7 +3663,7 @@ emoji: /emoji/books.png
 
     <br><br>
 
-    <strong>Definition 3.8</strong> (Orthogonoal Matrix).
+    <strong>Definition 3.8</strong> (Orthogonal Matrix).
     A square matrix \(A \in \mathbb{R}^{n \times n} \) is an orthogonal matrix
     if and only if its columns are orthonormal so that
     \[
@@ -4868,7 +4868,7 @@ emoji: /emoji/books.png
 
     <br>
 
-    <strong>Theorem 4.2</strong> (Laplace Expansion)
+    <strong>Theorem 4.2 (Laplace Expansion)</strong>
     Consider a matrix \(A\in\mathbb{R}^{n\times n}\). Then for all \(j=1, \cdots, n\)
     <ol>
         <li>
@@ -5175,8 +5175,8 @@ emoji: /emoji/books.png
 
     <br>
 
-    <strong>Definition 4.10 (Eigenspace and Eigenspectrun)</strong>.
-    For \(A\ in \mathbb{R}^{n \times n}\), the set of all eigenvectors of \(A\) associated with an eigenvalue \(\lambda\)
+    <strong>Definition 4.10 (Eigenspace and Eigenspectrum)</strong>.
+    For \(A\ \in \mathbb{R}^{n \times n}\), the set of all eigenvectors of \(A\) associated with an eigenvalue \(\lambda\)
     spans a subspace of \(\mathbb{R}^{n}\), which is called the eigenspace of \(A\) with respect to \(\lambda\)
     and is denote by \(E_{\lambda}\).
     The set of all eigenvalues of \(A\) is called the eigenspectrum, or just spectrum of \(A\).
@@ -5381,8 +5381,258 @@ emoji: /emoji/books.png
     <strong>Definition 4.13.</strong>
     A square matrix \(A \in \mathbb{R}^{n \times n}\) is defective
     if it possesses fewer that \(n\) linearly independent eigenvectors.
+    Looking at the eigenspaces of a defective matrix, 
+    it follows that the sum of the sum of the dimensions of the eigenspaces is less than \(n\).
+
 
     <br><br>
+
+    <!-- <strong>Theorem 4.15 (Spectral Theorem)</strong> -->
+
+    <div class="mml-example">
+        <strong>Example 4.8 (Linear combination of the eigenvectors corresponding to the repeated eigenvalues)</strong>
+        <br>
+        Let the symmetric matrix \(A\) be
+        \[
+            \,\\
+            A = 
+            \begin{bmatrix}
+                3 & 2 & 2 \\
+                2 & 3 & 2 \\
+                2 & 2 & 3
+            \end{bmatrix}
+            \,\\
+        \]
+        
+        The eigenvalues of \(A\) are \(\lambda_1 = 1\) and \(\lambda_2 = 7\),
+        where \(\lambda_1\) is a repeated eigenvalue.
+        For \(\lambda_1 = 1 \,\, \text{(multiplicity 2)} \),
+        its eigenvectors \(E_1, E_2\) are
+        \[
+            \,\\
+            E_1 = \text{span}\left[ 
+                \begin{bmatrix}
+                    -1 \\
+                    1 \\
+                    0
+                \end{bmatrix}
+             \right], \quad
+            
+            E_2 = \text{span}\left[ 
+                \begin{bmatrix}
+                    -1 \\
+                    0 \\
+                    1
+                \end{bmatrix}
+             \right]
+            \,\\
+        \]
+        and for \(\lambda_2 = 7\), its eigenvector is 
+        \[
+            \,\\
+            
+            E_3 = \text{span}\left[ 
+                \begin{bmatrix}
+                    1 \\
+                    1 \\
+                    1
+                \end{bmatrix}
+             \right]
+            \,\\
+        \]
+
+        Computing a linear combination of eigenvectors corresponding to the 
+        repeated eigenvalue \(\lambda_1\) also yields an eigenvector.
+
+        \[
+            \,\\
+            \begin{align}
+
+            E_1 + E_2 &= 
+            \begin{bmatrix}
+                -1 \\
+                1 \\
+                0
+            \end{bmatrix}
+            +
+            \begin{bmatrix}
+                -1 \\
+                0 \\
+                1
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                -2 \\
+                1 \\
+                1
+            \end{bmatrix}
+            \,\\
+            \,\\
+
+            A(E_1+E_2) &= 
+            \begin{bmatrix}
+                3 & 2 & 2 \\
+                2 & 3 & 2 \\
+                2 & 2 & 3
+            \end{bmatrix}
+            \begin{bmatrix}
+                -2 \\
+                1 \\
+                1
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                -2 \\
+                1 \\
+                1
+            \end{bmatrix}
+            \end{align}
+            \,\\
+        \]
+
+        <br>
+        <figure>
+            <img src="/img/mathematics-for-machine-learning/mathematics-for-machine-learning-22.png" width="100%" onerror=handle_image_error(this)>
+            <figcaption>Linear combination of the eigenvectors corresponding to the repeated eigenvalues</figcaption>
+        </figure>
+
+    </div>
+
+    <br><br>
+
+    <strong>Theorem 4.16.</strong> The determinant of a matrix \(A \in \mathbb{R}^{n\times n}\) is the product of
+    its eigenvalues, where \(\lambda_i\) are possibly repeated eigenvalues of \(A\).
+    \[
+        \,\\
+        \det(A) = \prod_{i=1}^n \lambda_i
+        \,\\
+    \]
+
+    <br>
+
+    <strong>Theorem 4.17.</strong> The trace of a matrix \(A\in\mathbb{R}^{n\times n}\) is the sum of
+    its eigenvalues, where \(\lambda_i\) are possibly repeated eigenvalues of \(A\).
+    \[
+        \,\\
+        \text{tr}(A) = \sum_{i=1}^n \lambda_i
+        \,\\
+    \]
+
+    <br>
+
+    <h4>4.3 Cholesky Decomposition</h4>
+    <strong>Theorem 4.18 (Cholesky Decomposition).</strong>
+    A symmetric, positive definite matrix \(A\) can be factorized into a product
+    \(A = LL^\top\), where \(L\) is a lower triangular matrix with positive diagonal elements and \(L\) is unique.
+    <div class="latex-container">
+        \[
+            \,\\
+            \begin{bmatrix}
+                a_{11} & \cdots & a_{1n} \\
+                \vdots & \ddots & \vdots \\
+                a_{n1} & \cdots & a_{nn}
+            \end{bmatrix}
+            =
+            \begin{bmatrix}
+                l_{11} & \cdots & 0 \\
+                \vdots & \ddots & \vdots \\
+                l_{n1} & \cdots & l_{nn}
+            \end{bmatrix}
+            \begin{bmatrix}
+                l_{11} & \cdots & l_{1n} \\
+                \vdots & \ddots & \vdots \\
+                0 & \cdots & l_{nn}
+            \end{bmatrix}
+            \,\\
+        \]
+    </div>
+
+    <br>
+
+    The Cholesky decomposition also allows us to compute determinants very efficiently.
+    Given the Cholesky decomposition \(A=LL^\top\),
+    we know that \(\det(A) = \det(L)\det(L^\top) = \det(L)^2 \). Since \(L\) is a triangular matrix,
+    the determinant is simply the product of its diagonal entries so that \(\det(A) = \prod_i l_{ii}^2 \).
+
+    <br><br>
+
+    <h4>4.4 Eigendecomposition and Diagonalization</h4>
+    In this section, we will discuss how to transform matrices into diagonal form.
+    Recall that two matrices \(A, D\) are similar if there exists an invertible matrix \(P\),
+    such that \(D = P^{-1}AP\).
+    More specifically, we
+    will look at matrices \(A\) that are similar to diagonal matrices \(D\) that contain the eigenvalues of \(A\) on the diagonal.
+
+    <br><br>
+
+    <strong>Definition 4.19 (Diagonalizable).</strong>
+    A matrix \(A\in \mathbb{R}^{n\times n}\) is diagonalizable if there exists an invertible matrix \(P\in \mathbb{R}^{n\times n}\)
+    such that 
+    \[
+        \,\\
+        \begin{align}
+            D = P^{-1}AP \,\, \Longleftrightarrow \,\, &PD = PP^{-1}AP \\  
+                                                       &PD = IAP \\
+                                                       &PD = AP
+        \end{align}
+        \,\\
+    \]
+
+    We can see that his statement holds because
+    \[
+        \,\\
+        \begin{align}
+            AP &= A[p_1, \cdots, p_n] = [Ap_1, \cdots, Ap_n] 
+            \,\\
+            \,\\
+            PD &= [p_1, \cdots, p_n] 
+            \begin{bmatrix} 
+                \lambda_1 & \cdots & 0 \\
+                \vdots & \ddots & \vdots \\
+                0 & \cdots & \lambda_n 
+            \end{bmatrix}
+            = [\lambda_1 p_1, \cdots , \lambda_n p_n]
+        \end{align}
+        \,\\
+    \]
+
+    Thus, \(PD = AP\) implies that
+    \[
+        \,\\
+        \lambda_1 p_1 = A p_1
+        \,\\
+        \vdots
+        \,\\
+        \lambda_n p_n = A p_n
+        \,\\
+    \]
+
+    Therefore, by the definition of Eigenvectors and Eigenvalues \(Ax = \lambda x\), 
+    the columns of \(P\) must be eigenvectors of \(A\).
+
+    The definition of diagonalization requires that \(P \in \mathbb{R}^{n\times n} \) is invertible,
+    i.e., \(P\) has full rank. This requires us to have \(n\) linearly independent eigenvectors
+    \(p_1, \cdots, p_n\), i.e., the \(p_i\) form a basis of \(\mathbb{R}^n\).
+
+    <br><br>
+
+    <strong>Theorem 4.20 (Eigendecomposition).</strong>
+    A square matrix \(A \in \mathbb{R}^{n \times n} \) can be factorized from \(D = P^{-1}AP\) to \(A = PDP^{-1}\),
+    \[
+        \,\\
+        \begin{align}
+            D = P^{-1}AP \,\, \Longleftrightarrow \,\, &PD = PP^{-1}AP \\  
+                                                       &PD = IAP \\
+                                                       &PD = AP \\
+                                                       &PDP^{-1} = APP^{-1} \\
+                                                       &PDP^{-1} = AI \\
+                                                       &PDP^{-1} = A
+        \end{align}
+        \,\\
+    \]
+
+    where \(P \in \mathbb{R}^{n\times n} \) consists of the eigenvectors of \(A\) as column vectors,
+    and \(D\) is a diagonal matrix whose diagonal entries are the eigenvalues of \(A\). 
 
 </div><br><br>
 
