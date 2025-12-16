@@ -5500,6 +5500,22 @@ emoji: /emoji/books.png
 
     <br><br>
 
+    <strong>Theorem 4.14.</strong>
+    Given a matrix \(A \in \mathbb{R}^{m \times n}\),
+    we can always obtain a symmetric, positive semidefinite matrix \(S \in \mathbb{R}^{n \times n}\) by defining
+    \[
+        \,\\
+            S := A^\top A
+        \,\\
+    \]
+
+    Symmetry requires \( S = S^\top \),
+    and by inserting, we obtain \(S = A^\top A = (A^\top A)^\top = A^\top (A^\top)^\top = S^\top\).
+    Moreover, positive semidefiniteness requires that \(x^\top Sx \ge 0 \) and inserting, we obtain 
+    \( x^\top Sx = x^\top A^\top Ax = (x^\top A^\top) (Ax) = (Ax)^\top (Ax) \ge 0 \).
+
+    <br><br>
+
     <strong>Theorem 4.15 (Spectral Theorem).</strong>
     If \(A\in\mathbb{R}^{n\times n}\) is symmetric, there exists an orthonormal basis of the corresponding vector space \(V\)
     consisting of eigenvectors of \(A\).
