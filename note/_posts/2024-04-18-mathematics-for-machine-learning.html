@@ -5500,6 +5500,22 @@ emoji: /emoji/books.png
 
     <br><br>
 
+    <strong>Theorem 4.14.</strong>
+    Given a matrix \(A \in \mathbb{R}^{m \times n}\),
+    we can always obtain a symmetric, positive semidefinite matrix \(S \in \mathbb{R}^{n \times n}\) by defining
+    \[
+        \,\\
+            S := A^\top A
+        \,\\
+    \]
+
+    Symmetry requires \( S = S^\top \),
+    and by inserting, we obtain \(S = A^\top A = (A^\top A)^\top = A^\top (A^\top)^\top = S^\top\).
+    Moreover, positive semidefiniteness requires that \(x^\top Sx \ge 0 \) and inserting, we obtain 
+    \( x^\top Sx = x^\top A^\top Ax = (x^\top A^\top) (Ax) = (Ax)^\top (Ax) \ge 0 \).
+
+    <br><br>
+
     <strong>Theorem 4.15 (Spectral Theorem).</strong>
     If \(A\in\mathbb{R}^{n\times n}\) is symmetric, there exists an orthonormal basis of the corresponding vector space \(V\)
     consisting of eigenvectors of \(A\).
@@ -5659,6 +5675,233 @@ emoji: /emoji/books.png
         D = P^\top SP
         \,\\
     \]
+
+    <br>
+
+    <h4>4.41 Geometric Intuition for the Eigendecomposition</h4>
+    Eigendecomposition shows that a linear transformation represented by a matrix can be decomposed into three processes: 
+    'rotate', 'stretch', and 'rotate'.
+
+    <br><br>
+
+    <h4>4.5 Singular Value Decomposotion</h4>
+    The singular value decomposition (SVD) of a matrix is a central matrix
+    decomposition method in linear algebra.
+    It can be applied to all matrices, not only to square matrices, and it always exists.
+
+    <br><br>
+
+    <strong>Theorem 4.22 (SVD Theorem).</strong>
+    Let \(A\in\mathbb{R}^{m\times n}\) be a rectangular matrix.
+    The SVD of \(A\) is a decomposition of the form
+    \[
+        \,\\
+            A = U \Sigma V^\top \,\, \Longleftrightarrow \,\, AV = U \Sigma
+        \,\\
+    \]
+
+    with an orthogonal matrix \(U \in \mathbb{R}^{m \times m}\),
+    an orthogonal matrix \(V \in \mathbb{R}^{n \times n} \),
+    and \(\Sigma\) is an \(m \times n\) diagonal matrix.
+    
+    <br><br>
+
+    The singular value matrix \(\Sigma\) is unique.
+    The matrix \(\Sigma\) is of the same size as \(A\).
+    This means that \(\Sigma\) has a diagonal submatrix that contains the singular values
+    and needs additional zero padding.
+    If \(m > n\), then the \(\Sigma\) has the following shape
+    \[
+        \,\\
+        \Sigma = 
+        \begin{bmatrix}
+            \sigma_1 & 0 & 0 \\
+            0 & \ddots & 0 \\
+            0 & 0 & \sigma_n \\
+            0 & \cdots & 0 \\
+            \vdots & & \vdots \\
+            0 & \cdots & 0
+        \end{bmatrix}
+        \,\\
+    \]
+
+    If \(m < n \), the matrix \(\Sigma\) has
+    \[
+        \,\\
+        \Sigma = 
+        \begin{bmatrix}
+            \sigma_1 & 0 & 0 & 0 & \cdots & 0 \\
+            0 & \ddots & 0 & \vdots & & \vdots \\
+            0 & 0 & \sigma_m & 0 & \cdots & 0
+        \end{bmatrix}
+        \,\\
+    \]
+
+    <br>
+
+    <h4>4.5.2 Construction of the SVD</h4>
+    The SVD of a general matrix shares some similarities with the
+    eigendecomposition of a square matrix
+
+    <br><br>
+
+    <strong><i>Remark.</i></strong> Compare the eigendecomposition of an SPD matrix
+    \[
+        \,\\
+            S = S^\top = PDP^\top
+        \,\\
+    \]
+
+    with the corresponding SVD
+    \[
+        \,\\
+            S = U\Sigma V^\top
+        \,\\
+    \]
+
+    If we set
+
+    \[
+        \,\\
+        U = P = V, \quad D = \Sigma
+        \,\\
+    \]
+
+    we see that the SVD of SPD matrices is their eigendecomposition.
+
+    <br><br>
+
+    Computing the SVD of \(A \in \mathbb{R}^{m \times n} \) is equivalent to finding two sets of orthonormal bases
+    \(U = (u_1, \cdots, u_m) \) and \(V = (v_1, \cdots, v_n) \). From these ordered bases, we will construct the matrices \(U \) and \(V\).
+    The plan is to start with construction the orthonormal set of right-singular vectors \( v_1, \cdots, v_n \in \mathbb{R}^{m} \).
+    Thereafter, we will link the two and require that the orthogonality of the \(v_i\) is preserved under the transformation of \(A\).
+
+    <br><br>
+
+    Let us begin with constructing the right-singular vectors.
+    \[
+        \,\\
+        S = A^\top A = PDP^\top = P 
+        \begin{bmatrix}
+            \lambda_1 & \cdots & 0 \\
+            \vdots & \ddots & \vdots \\
+            0 & \cdots & \lambda_n
+        \end{bmatrix}
+        P^\top
+        \,\\
+    \]
+
+    where \(P\) is an orthogonal matrix, which is composed of the orthonormal eigenbasis.
+    The \(\lambda_i \ge 0\) are the eigenvalues of \(A^\top A\).
+    Injecting the theorem 4.22 into the above yields
+    \[
+        \,\\
+            A^\top A = (U\Sigma V^\top)^\top (U\Sigma V^\top) = V\Sigma^\top U^\top U \Sigma V^\top
+        \,\\
+    \]
+
+    where \(U, V\) are orthogonal matrices. Therefore, with \(U^\top U = I\), we obtain
+    \[
+        \,\\
+        \begin{align}
+        A^\top A \in \mathbb{R}^{n \times n} &= V \Sigma^\top I \Sigma V^\top 
+        \,\\
+        \,\\
+            &= V \Sigma^\top \Sigma V^\top
+        \,\\
+        \,\\
+            &= V 
+            \begin{bmatrix}
+                \sigma_1^2 & 0 & 0 \\
+                0 & \ddots & 0 \\
+                0 & 0 & \sigma_n^2
+            \end{bmatrix}
+            V^\top
+        \end{align}
+        \,\\
+    \]
+
+    Now, we can identify 
+    \[
+        \,\\
+        \begin{align}
+        V^\top &= P^\top
+        \,\\
+        \,\\
+        \sigma_i^2 &= \lambda_i
+        \end{align}
+        \,\\
+    \]
+
+    Therefore, the eigenvectors of \(A^\top A\) that compose \(P\) are the right-singular vectors \(V\).
+    The eigenvalues of \(A^\top A\) are the squared singular values of \(\Sigma\).
+
+    To obtain the left-singular vectors U, we follow a similar procedure.
+    \[
+        \,\\
+        \begin{align}
+            AA^\top \in \mathbb{R}^{m \times m} &= (U\Sigma V^\top)(U\Sigma V^\top)^\top = U\Sigma V^\top V \Sigma^\top U^\top 
+            \,\\
+            \,\\
+                                                &= U
+                                                \begin{bmatrix}
+                                                    \sigma_1^2 & 0 & 0 \\
+                                                    0 & \ddots & 0 \\
+                                                    0 & 0 & \sigma_m^2
+                                                \end{bmatrix}
+                                                U^\top
+        \end{align}
+        \,\\
+    \]
+
+    The orthonormal eigenvectors of \(AA^\top\) are the left-singular vectors U.
+
+    <br><br>
+
+    <h4>4.5.3 Eigenvalue Decompsition vs. Singular Valude Decomposition</h4>
+    Let us consider the eigendecomposition \(A = PDP^{-1} \) and the
+    SVD \(A = U\Sigma V^\top \) and review the core elements of the past sections.
+
+    <ul>
+        <li>
+            The SVD always exists for any matrix \(\mathbb{R}^{m \times n} \).
+            The eigendecomposition is only defined for square matrices \(\mathbb{R}^{n \times n} \)
+            and only exists if we can find a basis of eigenvectors of \(\mathbb{R}^n\).
+        </li>
+        <li>
+            The vectors in the eigendecomposition matrix \(P\) are not necessarily
+            orthogonal, i.e., the change of basis is not a simple rotation and scaling.
+            On the other hand, the vectors in the matrices \(U\) and \(V\) in the SVD are
+            orthonormal, so they do represent rotations.
+        </li>
+        <li>
+            In the SVD, the left- and right-singular vector matrices \(U\) and \(V\) are
+            generally not inverse of each other (they perform basis changes in different vector spaces). 
+            In the eigendecomposition, the basis change matrices \(P\) and \(P^{-1} \)
+            are inverses of each other.
+        </li>
+        <li>
+            In the SVD, the entries in the diagonal matrix \(\Sigma\) are all real and nonnegative.
+        </li>
+        <li>
+            For symmetric matrices, the eigendecomposition and the SVD are one and the same.
+        </li>
+        <li>
+            The SVD and the eigendecomposition are closely related through their projections
+            <ul>
+                <li>
+                    The left-singular vectors of \(A\) are eigenvectors of \(AA^\top\)
+                </li>
+                <li>
+                    The right-singular vectors of \(A\) are eigenvectors of \(A^\topA\)
+                </li>
+                <li>
+                    The nonzero singular values of A are the square roots of the nonzero eigenvalues of 
+                    both \(AA^\top\) and \(A^\top A\).
+                </li>
+            </ul>
+        </li>
+    </ul>
 
 
 </div><br><br>
