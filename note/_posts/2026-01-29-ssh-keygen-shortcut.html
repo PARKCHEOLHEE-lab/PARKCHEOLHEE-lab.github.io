@@ -1,0 +1,23 @@
+---
+title:  "ssh-keygen shortcut"
+layout: post
+---
+
+
+<br>
+
+<pre><code class="bash">
+    ssh-keygen -t ed25519 -C "qhqhahah@naver.com"
+    eval "$(ssh-agent -s)"
+    
+    ssh-add
+    >>> Identity added: ~/.ssh/id_rsa (qhqhahah@naver.com)
+
+    cat ~/.ssh/id_rsa.pub
+
+    git config --global user.email "qhqhahah@naver.com"
+    git config --global user.name "PARKCHEOLHEE-lab"
+</code></pre>
+
+
+<br><br>
