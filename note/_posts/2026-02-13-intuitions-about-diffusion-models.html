@@ -1,0 +1,46 @@
+---
+title:  "Intuitions about Diffusion Models"
+layout: post
+---
+
+<br>
+
+<div style="text-align: justify;">
+    For any final sample $x_0$,
+    there exists infinitely many possible reverse-denoising trajectories
+    that could have produced under the model.
+
+    Diffusion models does not laern one trajectory per sample.
+    It learns a distribution over trajectories.
+
+    <br><br>
+
+    Trajectory is a full sequence from $x_T$ to $x_0$ ($x_T \rightarrow x_{T-1} \rightarrow \cdots \rightarrow x_1 \rightarrow x_0$).
+    Each intermediate $x_t$ is sampled from a probability distribution.
+    Given a noisy $x_t$, the model outputs a distribution of possible slightly less noisy samples $x_{t-1}$.
+    When we sampling, we draw from that distribution. 
+
+    <figure>
+        <img src="/img/intuitions-about-diffusion-models/intuitions-about-diffusion-models-0.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption class="nofig">
+            Intuition about diffusion models
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    Even starting from the same noisy sample $x_T$, 
+    different random draw will produce different trajectories.
+    The model learns direction that reduces noise. A trajectory is simply what you get
+    when you follow these learned local transitions step by step.
+    
+    <br><br><br><br>
+    <hr>
+
+    <figure>
+        <img src="/img/intuitions-about-diffusion-models/intuitions-about-diffusion-models-1.jpg" width="100%" onerror=handle_image_error(this)>
+    </figure>
+</div>
+
+
+<br><br>

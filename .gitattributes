@@ -31,3 +31,4 @@
 /img/mathematics-for-machine-learning/** filter=lfs diff=lfs merge=lfs -text
 /img/rhinomcp/** filter=lfs diff=lfs merge=lfs -text
 /img/distorted-grid-graph/** filter=lfs diff=lfs merge=lfs -text
+/img/intuitions-about-diffusion-models/** filter=lfs diff=lfs merge=lfs -text
