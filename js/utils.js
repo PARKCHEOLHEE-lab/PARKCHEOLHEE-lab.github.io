@@ -54,7 +54,10 @@ function generate_table_of_contents() {
     }
 
     toc += "</ul><br><br>";
-    document.getElementById("toc").innerHTML += toc;
+    const toc_element = document.getElementById("toc");
+    if (toc_element != null) {
+      toc_element.innerHTML += toc;
+    }
 }
 
 
