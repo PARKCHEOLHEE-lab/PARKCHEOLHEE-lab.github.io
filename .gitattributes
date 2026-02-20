@@ -34,4 +34,4 @@
 /img/intuitions-about-diffusion-models/** filter=lfs diff=lfs merge=lfs -text
 /img/styleid/** filter=lfs diff=lfs merge=lfs -text
 /img/styleid/** filter=lfs diff=lfs merge=lfs -text
-img/image-to-scene/** filter=lfs diff=lfs merge=lfs -text
+img/image-to-3d-scene/* filter=lfs diff=lfs merge=lfs -text
