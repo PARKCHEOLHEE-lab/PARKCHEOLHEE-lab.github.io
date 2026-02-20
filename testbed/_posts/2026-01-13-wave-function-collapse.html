@@ -1,0 +1,68 @@
+---
+title: "Wave Function Collapse"
+layout: post
+hashtag: "#generative-design #procedural generation"
+comment: true
+splitter: 2
+inprogress: true
+thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
+---
+
+<div id="toc"></div>
+
+<h3>What is Wave Function Collapse?</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Tileset Preparation</h3>
+<div class="article">
+</div><br><br>
+
+<h3>Implementation</h3>
+<div class="article">
+
+    A 3D implementation of the Wave Function Collapse algorithm for generating modular cat-tower structures. 
+    The algorithm uses 20 predefined tiles (numbered 0-19), where each tile has interface labels ($\text{FREE, OPEN, CLOSED, SUPPORT, EMPTY}$) defined for its six faces ($\pm x, \, \pm y, \, \pm z $).
+
+    The algorithm initializes a 3D grid ($\text{width} \times \text{depth} \times \text{height}$) where each cell can be any of the 20 tiles. 
+    Starting from a seed position, it iteratively collapses cells by selecting the cell with the minimum number of possible tiles, then randomly samples a tile from the possibilities using weighted probabilities. 
+    After each collapse, constraints are propagated to neighboring cells using a BFS approach based on precomputed compatibility matrices. 
+    If a contradiction occurs (a cell has no valid tiles), the algorithm resets and restarts from the initial seed position. 
+    The process continues until all cells are collapsed to a single tile or the maximum iteration count is reached.
+
+    <!--break-->
+<!-- 
+    <div class="latex-container">
+    \[
+        \begin{array}{l}
+        \hline
+        \textbf{Algorithm: } \text{Wave Function Collapse 3D} \\
+        \hline
+        \textbf{Input: } \text{width, depth, height, seed, empty_weight, max_iters, tiles} \\
+        \textbf{Output: } \text{collapsed grid} \\
+        \hline
+        \text{Grid } W \times D \times H; \text{ tiles } \{0,\ldots,19\} \text{ with labels } \{\texttt{FREE, OPEN, CLOSED, SUPPORT, EMPTY}\} \text{ on } \pm x, \pm y, \pm z. \\
+        \quad \text{Precompute } \mathbf{C}_d \in \{0,1\}^{20\times 20} \text{ per direction } d. \ \texttt{FREE} \text{ in } \pm x,\pm y \Rightarrow \text{any}; \text{ else same label.} \\
+        \quad \texttt{states}[z,y,x,t] \leftarrow 1 \ \forall (x,y,z,t); \; \texttt{cell} \leftarrow (\texttt{start_x}, \texttt{start_y}, \texttt{start_z}) \\
+        \quad \textbf{repeat} \\
+        \qquad \textbf{if} \ \text{all cells collapsed} \ \textbf{then break} \\
+        \qquad \textbf{if} \ \neg\texttt{Collapse}(\texttt{cell}) \ \textbf{or} \ \texttt{GetMinKCell}() = \bot \ \textbf{then} \ \text{Reset}; \; \texttt{cell} \leftarrow \text{seed}; \; \textbf{continue} \\
+        \qquad \texttt{cell} \leftarrow \texttt{GetMinKCell}(); \; \textbf{if} \ \texttt{cell} = \text{None} \ \textbf{then break} \\
+        \quad \textbf{until} \ \text{max\_iters} \\
+        \hline
+        \quad \texttt{Collapse}(x,y,z): \ \text{Sample } t \sim \text{Multinomial}(\texttt{states}[z,y,x]\cdot\texttt{weights}); \; \texttt{states}[z,y,x] \leftarrow \mathbf{e}_t \\
+        \qquad \textbf{return} \ \texttt{Propagate}(x,y,z) \\
+        \quad \texttt{Propagate}(x,y,z): \ Q \leftarrow \{(x,y,z)\}; \; \textbf{while} \ Q \neq \emptyset: \\
+        \qquad (x,y,z) \leftarrow Q.\text{pop}(); \; \textbf{for} \ d \in \{\pm x,\pm y,\pm z\}: \ (x',y',z') \leftarrow \text{neighbor}; \\
+        \qquad \quad \texttt{valid} \leftarrow \bigvee_{\{t : \texttt{states}[z,y,x,t]=1\}} \mathbf{C}_d[t,:]; \; \texttt{states}[z',y',x'] \leftarrow \texttt{states} \wedge \texttt{valid}; \; \textbf{if changed} \ Q.\text{push}((x',y',z')) \\
+        \qquad \textbf{return} \ \texttt{False} \ \text{if} \ \exists \text{ cell with no valid tiles else True} \\
+        \quad \texttt{GetMinKCell}(): \ \textbf{return} \ \arg\min_{|\texttt{states}|>1} |\texttt{states}[z,y,x]|; \ \texttt{False} \ \text{if} \ \exists \ |\texttt{states}|=0 \\
+        \hline
+        \end{array}
+    \]
+    </div> -->
+    
+</div><br><br>
+
+
+<br><br>
