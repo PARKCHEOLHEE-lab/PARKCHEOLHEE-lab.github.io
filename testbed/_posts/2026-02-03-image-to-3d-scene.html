@@ -1,11 +1,11 @@
 ---
-title: "Image to 3D Scene"
+title: "Image to 3D Scene Pipeline"
 layout: post
 hashtag: "#sam #sam-3d-objects #generative-design"
 comment: true
-splitter: 0
+splitter: 2
 featured: false
-inprogress: true
+inprogress: false
 at: Visual Media Lab
 thumbnail: /img/image-to-3d-scene/image-to-3d-scene-thumbnail.png
 ---
@@ -23,19 +23,221 @@ thumbnail: /img/image-to-3d-scene/image-to-3d-scene-thumbnail.png
     and segments all interior elements from a single input photo, 
     reconstructs each detected object as an aligned, textured 3D mesh, and assembles them coherently into a recreated scene.
     Applications range from virtual walkthroughs and editing to AR/VR staging and interior design automation.
-     <!--break-->
 </div><br><br>
 
-<h3>Inference w/ Automatic Mask Generation</h3>
+<h3>SAM 3D</h3>
 <div class="article">
+
+    <a href="https://arxiv.org/pdf/2511.16624">SAM 3D</a> Objects represents a new approach 
+    to tackling robust, visually grounded 3D reconstruction and object pose estimation 
+    from a single natural image, reconstructing detailed 3D shapes, textures, and layouts of objects from everyday images. 
+     <!--break-->
+    In these images, small objects, indirect views, and occlusion are frequent, but recognition and context can assist the reconstruction where pixels alone are insufficient. 
+    Using SAM 3D Objects, people can start from an image, select any objects, and quickly generate posed 3D models. This makes it easy to precisely manipulate individual objects in a reconstructed 3D scene, or freely control the camera to view from different perspectives.
+
+    <figure style="display: flex;">
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-0.png" width="45%" onerror=handle_image_error(this)>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-1.png" width="45%" onerror=handle_image_error(this)>
+    </figure>
+    <figcaption>From the left, original image · generated 3D scene</figcaption>
+
+
+    <!-- Computer vision has traditionally focused on multi-view geometry as providing the primary signal for 3D
+    shape. However psychologists (and artists before them) have long known that humans can perceive depth and
+    1
+    arXiv:2511.16624v1 [cs.CV] 20 Nov 2025
+    shape from a single image, e.g. Koenderink et al. (1992) demonstrated this elegantly by showing that humans
+    can estimate surface normals at probe points on an object’s image, which can then be integrated to a full
+    surface. In psychology textbooks these single image cues to 3D shape are called “pictorial cues”, and include
+    information such as in shading and texture patterns, but also recognition - the “familiar object” cue. In
+    computer vision, this line of research dates back to Roberts (1963), who showed that once an image pattern was
+    recognized as a known object, its 3D shape and pose could be recovered. The central insight is that recognition
+    enables 3D reconstruction, an idea that has since resurfaced in different technical instantiations (Debevec
+    et al., 2023; Cashman and Fitzgibbon, 2012; Kar et al., 2015; Gkioxari et al., 2019; Xiang et al., 2025). Note
+    that this permits generalization to novel objects, because even if a specific object has not been seen before, it
+    is made up of parts seen before -->
+
 </div><br><br>
 
 <h3>Profiling</h3>
 <div class="article">
+
+    To measure the wall-clock time of SAM 3D inference on test images, I used the following setup:
+
+    <br><br>
+
+    Inference was run on about 230 individual objects. For each object, the schedule was wait = 0, warmup = 1, active = 3, so four runs per object in total.
+    Only the three active-step wall-clock times were recorded and averaged to get the per-object mean.
+    Time was taken as the difference of <code>time.perf_counter()</code> after calling <code>torch.cuda.synchronize()</code> at each step so the GPU is fully in sync.
+<pre><code class="python">
+
+    (...)
+    
+        with torch_profile(
+            activities=[ProfilerActivity.CPU, ProfilerActivity.CUDA], 
+            schedule=torch.profiler.schedule(wait=args.wait, warmup=args.warmup, active=args.active),
+        ) as profiler:
+            
+            elapsed_times = []
+            for i in range(args.wait + args.warmup + args.active):
+                start = time.perf_counter()
+                
+                generator(args, output_path, use_inference_cache=args.use_inference_cache)
+
+                torch.cuda.synchronize()
+                end = time.perf_counter()
+                
+                gc.collect()
+                torch.cuda.empty_cache()
+
+                profiler.step()
+                if i + 1 > args.wait + args.warmup:                            
+                    
+                    active_step = i - args.wait - args.warmup + 1
+                    elapsed_times.append(end - start)
+
+    (...)
+    
+</code></pre>
+<figcaption class="snip">
+    Profiling wall-clock time of SAM 3D inference
+</figcaption>
+
+<br><br>
+
+On an NVIDIA A5000 GPU (24 GB VRAM), the mean wall-clock time per single-object inference is <code>37.004264873904155 seconds</code>. 
+If model-loading overhead is excluded, runtime is expected to drop by about 20%.
+In this profiling the setup was kept conservative on purpose: the model was reloaded on every run.
+
 </div><br><br>
 
-<h3>Post Processing</h3>
+<h3>Automatic Mask Generation with SAM</h3>
 <div class="article">
+        
+    The goal of this project is to automatically reconstruct a complete, structured 3D scene from a single interior photo by generating meshes for all visible objects.
+    Because SAM 3D does not provide built-in automatic masking of individual objects, it is necessary to develop a custom pipeline. 
+    In this approach, <a href="https://arxiv.org/pdf/2304.02643">Segment Anything</a> (SAM) is used to detect and segment all interior objects within the input image, enabling separate 3D model generation for each detected object mask.
+
+    <figure>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-2.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Automatic mask generation with SAM
+        </figcaption>
+    </figure>
+</div><br><br>
+
+<h3>Post-Processing for Alignment Correction</h3>
+<div class="article">
+
+    <!--
+        fig3은 
+        fig2의 이미지를 입력으로 해서 오토마스킹 파이프라인을 거쳐서
+        sam3d를 이용해서 생성한 3d scene이다. 
+
+        문제는 sam3d를 이용해서 생성한 3d scene의 각 객체의 정렬 방향이 이미지의 방향과 정확히 맞지 않는다는 점과 객체가 평면에 놓여있지 않다는 점이다.
+        이 문제를 해결하기 위해서 각 객체의 정렬 방향을 조정하는 파이프라인을 추가해야 한다.
+    -->
+
+    Figure 3 below shows the 3D scene obtained by running the automatic masking pipeline 
+    and then processing the resulting masks with SAM 3D, using the image from Figure 2 as input.
+
+    However, a main issue is that 
+        the orientation of each object in the generated 3D scene does not always match the actual orientation of the objects in the input image,
+        and the objects are not properly placed on the floor plane.
+    To address this problem, an additional pipeline is needed to correct the alignment of each object's orientation to properly match the image.
+
+
+    <figure>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-3.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            From the left, generated scene · OBB of each object
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    <!-- The method to correct the alignment of each object's orientation is to calculate the OBB of each object,  -->
+    <!-- 
+    
+    alignment correction 로직은 다음의 가정을 기반으로 합니다.
+    The obb+ mode assumes:
+
+        Each object's OBB bottom face is its true bottom.
+        Object bottoms are nearly parallel to the global XY-plane.
+        There are no "floating" (z-offset) objects.
+    
+    
+
+    이러한 가정을 바탕으로 다음 로직이 적용됩니다.
+    각 오브젝트마다 OBB를 구하고 오브젝트별로 적용된 기저의 역행렬을 적용해서 오브젝트별로 회전변환을 없애주고 다시 원래 포지션으로 이동시켜준 다음 z값을 없애서 바닥에 붙여주는 방식
+    -->
+
+    The alignment correction logic relies on these assumptions:
+    <ul>
+        <li>
+            Each object's OBB bottom face is its true bottom.
+        </li>
+        <li>
+            Object bottoms are nearly parallel to the global XY-plane.
+        </li>
+        <li>
+            There are no "floating" objects (there are no objects with a non-zero z-offset).
+        </li>
+    </ul>
+
+    Based on the above, the correction works as follows. 
+    For each object, the OBB is computed, and the inverse of its local basis matrix is applied to undo the object's rotation. 
+    The object is then moved back to its original position, and its z-coordinate is set to zero so that it is snapped to the floor plane.
+
+    This process is inspired by the <a href="https://parkcheolhee-lab.github.io/local-coordinate-system/">local coordinate system</a> transformation,
+    called Plane to Plane.
+    
+    <figure>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-4.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            From the left, before alignment correction · after alignment correction
+        </figcaption>
+    </figure>
+    
+    <figure>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            From the left, before alignment correction · after alignment correction
+        </figcaption>
+    </figure>
+    
+    <figure>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-6.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            From the left, before alignment correction · after alignment correction
+        </figcaption>
+    </figure>
+
+    <figure>
+        <img src="/img/image-to-3d-scene/image-to-3d-scene-7.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            From the left, before alignment correction · after alignment correction
+        </figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Future Works</h3>
+<div class="article">
+
+    <ol>
+        <li>
+            The current alignment correction flattens all objects onto the floor (z = 0), so the relative height between objects is lost. A better way to preserve or estimate z-values is needed for stacked or floating objects.
+        </li>
+        <li>
+            The choice of OBB basis (which axis is "up") is not always consistent across objects, so some meshes may have the wrong upright direction unless we a stable rule for picking the basis is added.
+        </li>
+        <li>
+            Segment Anything should be able to recognize an object that is split into several parts due to occlusion as a single object.
+        </li>
+    </ol>
+    
+
 </div><br><br>
 
 <br><br>
