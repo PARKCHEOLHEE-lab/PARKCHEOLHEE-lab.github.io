@@ -188,9 +188,7 @@ In this profiling the setup was kept conservative on purpose: the model was relo
     Based on the above, the correction works as follows. 
     For each object, the OBB is computed, and the inverse of its local basis matrix is applied to undo the object's rotation. 
     The object is then moved back to its original position, and its z-coordinate is set to zero so that it is snapped to the floor plane.
-
-    This process is inspired by the <a href="https://parkcheolhee-lab.github.io/local-coordinate-system/">local coordinate system</a> transformation,
-    called Plane to Plane.
+    The correction process can be expressed as the following equation:
 
     $$
         \,\\
@@ -204,7 +202,11 @@ In this profiling the setup was kept conservative on purpose: the model was relo
     \(\mathbf{c}\) is the center of the OBB, and
     \(\mathbf{z}_{\mathrm{snap}} = (0, 0, z_{\min})\) is the snap vector with \(z_{\min}\) the minimum \(z\)-coordinate of \(\mathbf{B}_{\mathrm{OBB}}^{-1}(\mathbf{O} - \mathbf{c}) + \mathbf{c}\) over all vertices (so the object is snapped to the floor \(z=0\)).
 
+    <br><br>
     
+    This process is inspired by the <a href="https://parkcheolhee-lab.github.io/local-coordinate-system/">local coordinate system</a> transformation,
+    called Plane to Plane.
+
     <figure>
         <img src="/img/image-to-3d-scene/image-to-3d-scene-4.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
