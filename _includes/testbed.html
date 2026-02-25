@@ -37,148 +37,59 @@
     {% endif %}
   {% endfor %}
 
-  {% if page.id == "testbed" %}
+  <span id="filter-buttons">
     {% if featured_count != 0 %}
-      <p class="onClickDiv" onclick="location.href='../featured'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured&nbsp;</u></b></p><br>
+      <p class="onClickDiv" onclick='filter_posts("featured")' style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured&nbsp;</u></b></p><br>
     {% endif %}
     {% if progress_count != 0 %}
-      <p class="onClickDiv" onclick="location.href='../inprogress'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p>
+      <p class="onClickDiv" onclick='filter_posts("inprogress")' style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p>
     {% endif %}
-    <p style="margin-top: -1em">　</p>
-    
-      {% for post in site.categories.testbed %}
-        {% assign sorted_hashtag = post.hashtag | split: " " %}
-    
-      <div style="margin-top: -0.2em">
-        <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
-          {% if post.featured %}
-            <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
-          {% elsif post.inprogress %}
-              <h3><u class="WIPUnderline">{{ post.title }}</u></h3>
-          {% else %}
-            <h3>{{ post.title }}</h3>
-          {% endif %}
+  </span>
+  <span id="back-button" style="display: none;">
+    <p class="onClickDiv" onclick='filter_posts("all")' style="margin-top: -1.5em; float: right; font-size: smaller;"><b>&nbsp;back to all&nbsp;</b></p>
+    <br>
+  </span>
+  <p style="margin-top: -1em">　</p>
 
-          {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
-          {% assign excerpt_part_size = excerpt_part | size %}
-          
-          <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}<i><span>{% if post.at %} ＠ {{ post.at }}{% endif %}</span></i></time></p>
-          <p style=" text-align: justify; font-size:smaller;">
-            <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-              <p style="margin-bottom: -0.4em;">
-                {% for i in (0..excerpt_part_size) %}
-                  {{ excerpt_part[i] }}.
-                  {% if i == post.splitter %}
-                    <br><br>
-                  {% endif %}
-                {% endfor %}
-              </p>
-              {% if post.thumbnail %}
-                <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handle_image_error(this)>
-              {% endif %}
-            </div>
-            {% if post.done %}
-              <p style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
-            {% else %}
-              <p class="useBottomLine" style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
-            {% endif %}
-          </p>
-        </div>
-      </div>
-      {% endfor %}
-
-  {% elsif page.id == "featured" %}
-    
-    <p class="onClickDiv" onclick="location.href='../testbed'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b>&nbsp;back to the previous&nbsp;</b></p>
-    <p style="margin-top: -1em">　</p>
-    <p style="margin-top: -1em">　</p>
     {% for post in site.categories.testbed %}
       {% assign sorted_hashtag = post.hashtag | split: " " %}
 
-      {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
-      {% assign excerpt_part_size = excerpt_part | size %}
-
-      {% if post.featured %}
-        <div style="margin-top: -0.2em">
-          <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
-
-            {% if post.featured %}
-              <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
-            {% else %}
-              <h3>{{ post.title }}</h3>
-            {% endif %}
-            <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}<i><span>{% if post.at %} ＠ {{ post.at }}{% endif %}</span></i></time></p>
-            <p style=" text-align: justify; font-size:smaller;">
-              <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-                <p style="margin-bottom: -0.4em;">
-                  {% for i in (0..excerpt_part_size) %}
-                    {{ excerpt_part[i] }}.
-                    {% if i == post.splitter %}
-                      <br><br>
-                    {% endif %}
-                  {% endfor %}
-                </p>
-                {% if post.thumbnail %}
-                  <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handle_image_error(this)>
-                {% endif %}
-              </div>
-              {% if post.done %}
-                <p style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
-              {% else %}
-                <p class="useBottomLine" style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
-              {% endif %}
-            </p>
-          </div>
-        </div>
-      {% endif %}
-      
-    {% endfor %}
-
-    {% elsif page.id == "inprogress" %}
-      
-      <p class="onClickDiv" onclick="location.href='../testbed'" style="margin-top: -1.5em; float: right; font-size: smaller;"><b>&nbsp;back to the previous&nbsp;</b></p>
-      <p style="margin-top: -1em">　</p>
-      <p style="margin-top: -1em">　</p>
-    {% for post in site.categories.testbed %}
-        {% assign sorted_hashtag = post.hashtag | split: " " %}
+    <div class="testbed-post" style="margin-top: -0.2em" data-featured="{{ post.featured }}" data-inprogress="{{ post.inprogress }}">
+      <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
+        {% if post.featured %}
+          <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
+        {% elsif post.inprogress %}
+            <h3><u class="WIPUnderline">{{ post.title }}</u></h3>
+        {% else %}
+          <h3>{{ post.title }}</h3>
+        {% endif %}
 
         {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
         {% assign excerpt_part_size = excerpt_part | size %}
 
-        {% if post.inprogress %}
-          <div style="margin-top: -0.2em">
-            <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
-              {% if post.inprogress %}
-                <h3><u class="WIPUnderline">{{ post.title }}</u></h3>
-              {% else %}
-                <h3>{{ post.title }}</h3>
-              {% endif %}
-              <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}<i><span>{% if post.at %} ＠ {{ post.at }}{% endif %}</span></i></time></p>
-              <p style=" text-align: justify; font-size:smaller;">
-                <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-                  <p style="margin-bottom: -0.4em;">
-                    {% for i in (0..excerpt_part_size) %}
-                      {{ excerpt_part[i] }}.
-                      {% if i == post.splitter %}
-                        <br><br>
-                      {% endif %}
-                    {% endfor %}
-                  </p>
-                  {% if post.thumbnail %}
-                    <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handle_image_error(this)>
-                  {% endif %}
-                </div>
-                {% if post.done %}
-                  <p style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
-                {% else %}
-                  <p class="useBottomLine" style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
+        <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}<i><span>{% if post.at %} ＠ {{ post.at }}{% endif %}</span></i></time></p>
+        <p style=" text-align: justify; font-size:smaller;">
+          <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
+            <p style="margin-bottom: -0.4em;">
+              {% for i in (0..excerpt_part_size) %}
+                {{ excerpt_part[i] }}.
+                {% if i == post.splitter %}
+                  <br><br>
                 {% endif %}
-              </p>
-            </div>
+              {% endfor %}
+            </p>
+            {% if post.thumbnail %}
+              <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handle_image_error(this)>
+            {% endif %}
           </div>
-        {% endif %}
-        
-      {% endfor %}
+          {% if post.done %}
+            <p style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
+          {% else %}
+            <p class="useBottomLine" style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
+          {% endif %}
+        </p>
+      </div>
+    </div>
+    {% endfor %}
 
-  {% endif %}
 </article>
