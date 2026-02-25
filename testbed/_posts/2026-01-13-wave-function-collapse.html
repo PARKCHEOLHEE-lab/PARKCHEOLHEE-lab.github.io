@@ -12,6 +12,39 @@ thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
 
 <h3>What is Wave Function Collapse?</h3>
 <div class="article">
+
+    Wave function collapse is a quantum mechanics concept 
+    where a system in a superposition of states 
+    instantly reduces to a single, definite state upon measurement or observation.
+
+    In computer science, the Wave Function Collapse (WFC) algorithm is a technique for generating procedural, 
+    constraint-based content, such as tilemaps or textures, similar to solving a 3D Sudoku puzzle.
+
+    <br><br>
+
+    Each cell in a grid is initially treated as a superposition of all possible states.
+    Rather than sampling all cells simultaneously, WFC proceeds by selecting a single cell, 
+    collapsing its state space to one concrete value, and then propagating the resulting constraints to neighboring cells.
+
+    <figure>
+        <img src="/img/wave-function-collapse/wave-function-collapse-0.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Sudoku puzzle can easily explain how WFC works</figcaption>
+    </figure>
+
+    <br><br>
+
+    The above figure shows intuition of how the WFC algorithm works.
+
+    <br><br>
+    <!--break-->
+
+    Let's first look at the 3x3 block in the right-center of the leftmost image.
+    Each cell in this area has two possible candidate numbers, and the red cells all share the same candidates ($4, 6$).
+    Because the red cells must be filled with either $4$ or $6$, 
+    the state of the blue cell is forced to collapse to $2$ otherwise, a contradiction would occur.
+
+    After the blue cell collapses to $2$, the cell directly above it, which has $2$ and $7$ as candidates, now collapses to $7$.
+
 </div><br><br>
 
 <h3>Tileset Preparation</h3>
@@ -21,8 +54,9 @@ thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
 <h3>Implementation</h3>
 <div class="article">
 
-    A 3D implementation of the Wave Function Collapse algorithm for generating modular cat-tower structures. 
-    The algorithm uses 20 predefined tiles (numbered 0-19), where each tile has interface labels ($\text{FREE, OPEN, CLOSED, SUPPORT, EMPTY}$) defined for its six faces ($\pm x, \, \pm y, \, \pm z $).
+    In this implementation, the algorithm uses 20 predefined tiles (numbered 0-19), 
+    where each tile has interface labels ($\text{FREE, OPEN, CLOSED, SUPPORT, EMPTY}$) 
+    defined for its six faces ($\pm x, \, \pm y, \, \pm z $).
 
     The algorithm initializes a 3D grid ($\text{width} \times \text{depth} \times \text{height}$) where each cell can be any of the 20 tiles. 
     Starting from a seed position, it iteratively collapses cells by selecting the cell with the minimum number of possible tiles, then randomly samples a tile from the possibilities using weighted probabilities. 
@@ -30,7 +64,6 @@ thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
     If a contradiction occurs (a cell has no valid tiles), the algorithm resets and restarts from the initial seed position. 
     The process continues until all cells are collapsed to a single tile or the maximum iteration count is reached.
 
-    <!--break-->
 <!-- 
     <div class="latex-container">
     \[
@@ -70,6 +103,15 @@ thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
 
 <h3>Gallery</h3>
 <div class="article">
+</div><br><br>
+
+<h3>References</h3>
+<div class="article">
+    <ul>
+        <li>
+            <a href="https://en.wikipedia.org/wiki/Wave_function_collapse">https://en.wikipedia.org/wiki/Wave_function_collapse</a>
+        </li>
+    </ul>
 </div><br><br>
 
 
