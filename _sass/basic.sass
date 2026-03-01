@@ -30,7 +30,7 @@ h4
 
 b, strong, th
   font-weight: $font-weight + 200
-  color: rgb(70, 70, 70) !important
+  color: $text-dark !important
 
 p
   text-align: justify
@@ -39,14 +39,14 @@ a
   color: $link-color
   text-decoration: inherit
 
-u.wavyUnderline
-  text-decoration: #0011e3 wavy underline
-  -webkit-text-decoration: wavy underline #0011e3
+u.wavy-underline
+  text-decoration: $featured-color wavy underline
+  -webkit-text-decoration: wavy underline $featured-color
   -webkit-text-decoration-thickness: 5px
 
-u.WIPUnderline
-  text-decoration: underline #1aff00
-  -webkit-text-decoration: underline #1aff00
+u.wip-underline
+  text-decoration: underline $inprogress-color
+  -webkit-text-decoration: underline $inprogress-color
   -webkit-text-decoration-thickness: 2.5px
   text-decoration-thickness: 2.5px
 
@@ -143,8 +143,8 @@ pre
   margin: 0 .1em
   padding: .2em .4em
 
-.titleMain 
-  background: #0011e3
+.title-main 
+  background: $featured-color
   color: #ffffff
   padding-left: 0.5em
   padding-right: 0.5em
@@ -275,3 +275,161 @@ hr
 
 .latex-container
   overflow: auto
+
+// --- Global styles (moved from default.html inline <style>) ---
+
+html
+  overflow: scroll
+  overflow-x: hidden
+  scroll-behavior: smooth
+  &::-webkit-scrollbar
+    width: 0
+    background: transparent
+
+a:hover
+  opacity: 0.5
+  transition: opacity 0.5s ease
+
+// --- Shared list component classes (from note.html/testbed.html inline <style>) ---
+
+.use-bottom-line
+  border-bottom: 1px dotted rgba(128, 128, 128, 0.14)
+
+.use-bottom-line--padded
+  border-bottom: 1px dotted rgba(128, 128, 128, 0.14)
+  padding-bottom: 2em
+
+.clickable
+  cursor: pointer
+  &:hover
+    opacity: 0.5
+    transition: opacity 0.5s ease
+
+.use-gray
+  color: gray
+
+.emoji-image
+  width: 1.25em
+  height: 1.25em
+  margin-left: 0.3em
+  margin-right: 0.5em
+
+.post-row
+  display: flex
+  flex-direction: row
+  align-items: center
+  justify-content: space-between
+
+.title-wrapper
+  flex: 1 1 auto
+  display: flex
+  align-items: center
+  margin-right: 1em
+  overflow: hidden
+
+.post-title
+  margin: 0
+  color: $text-dark
+  white-space: nowrap
+
+.title-scroll
+  display: block
+  width: 100%
+  overflow-x: auto
+  overflow-y: hidden
+  white-space: nowrap
+  -ms-overflow-style: none
+  scrollbar-width: none
+  &::-webkit-scrollbar
+    height: 0px
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-thumb
+    background: transparent
+
+.list-summary
+  margin-top: -1.5em
+  color: gray
+  float: left
+
+.list-filter-button
+  margin-top: -1.5em
+  float: right
+  font-size: smaller
+
+.list-spacer
+  margin-top: -1em
+
+// --- Note-specific classes ---
+
+.note-post-item
+  margin-top: -0.1em
+
+.note-emoji-column
+  flex: 0 0 auto
+  display: flex
+  align-items: center
+  padding-right: 0.2em
+  margin-left: -0.4em
+
+.note-date-column
+  flex: 0 0 auto
+  display: flex
+  align-items: center
+  margin-left: 0.5em
+
+.note-date-time
+  font-size: smaller
+  margin-top: 0.5em
+  margin-bottom: 0.5em
+
+// --- Testbed-specific classes ---
+
+.testbed-post-item
+  margin-top: -0.2em
+
+.testbed-date
+  margin-top: -0.5em
+  margin-bottom: 0.5em
+
+.testbed-excerpt-wrapper
+  display: flex
+  font-size: calc(0.45rem + 0.2vw)
+  text-align: justify
+
+.testbed-excerpt-text
+  margin-bottom: -0.4em
+
+.testbed-thumbnail
+  margin-left: 7em
+  margin-top: 1.2em
+  display: block
+  width: 25%
+  object-fit: cover
+
+.testbed-hashtag
+  margin-top: 3em
+  margin-bottom: 0.5em
+  font-size: calc(0.35rem + 0.2vw)
+  text-align: right
+  color: gray
+
+// --- Embed classes ---
+
+.notebook-container
+  width: 100%
+  overflow-y: hidden
+
+.notebook-iframe
+  width: 100%
+  height: 100%
+  border: none
+
+// --- Meta/config classes ---
+
+.meta-link
+  color: $link-color
+
+.site-description
+  color: #9c9c9c
+  font-weight: 200
+  font-size: smaller

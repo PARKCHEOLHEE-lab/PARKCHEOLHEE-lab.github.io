@@ -12,7 +12,9 @@
       {{ include.post.date | date: date_format }} 
       <i>
         {% if include.post.at == "Spacewalk" %}
-          <a  style="color: #66a1ff;" href="https://spacewalk.tech/" target="_blank" rel="noopener">＠ {{ include.post.at }}</a>
+          <a class="meta-link" href="https://spacewalk.tech/" target="_blank" rel="noopener">＠ {{ include.post.at }}</a>
+        {% elsif include.post.at == "Visual Media Lab" %}
+          <a class="meta-link" href="https://vml.kaist.ac.kr/main" target="_blank" rel="noopener">＠ {{ include.post.at }}</a>
         {% else %}
           ＠ {{ include.post.at }}
         {% endif %}

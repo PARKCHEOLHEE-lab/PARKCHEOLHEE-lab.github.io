@@ -2,14 +2,13 @@
 layout: default
 ---
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/stackoverflow-light.min.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"></script>
-<script src="/js/utils.js"></script>
+<link rel="stylesheet" href="{{ site.highlightjs.css }}">
+<script src="{{ site.highlightjs.js }}"></script>
 <script>
-  // Initialize Highlight.js
   hljs.highlightAll();
 </script>
 
+{% unless page.mathjax %}
 <script type="text/x-mathjax-config">
   MathJax.Hub.Config({
     tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
@@ -21,19 +20,20 @@ layout: default
 <script type="text/javascript" async
   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
+{% endunless %}
 
 <article>
-  
+
   {% include meta.html post=page %}
-  
+
   {{ content }}
-  
+
   {% if page.comment != false and page.content != empty %}
     <div class="col-lg-8 col-md-10 mx-auto">
       <hr />
-      
+
       <script src="https://utteranc.es/client.js"
-        repo="PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io"
+        repo="{{ site.utterances.repo }}"
         issue-term="url"
         label="comment"
         theme="github-light"

@@ -1,30 +1,6 @@
-<style>
-
-  .useBottomLine {
-    border-bottom: 1px dotted rgba(128, 128, 128, 0.14);
-    padding-bottom: 2em;
-  }
-
-  .onClickDiv {
-    cursor: pointer;
-  }
-
-  .onClickDiv:hover {
-      opacity: 0.5;
-      transition:opacity 0.5s ease;
-    }
-
-  .useGray {
-    color: gray;
-  }
-
-</style>
-
-<script src="/js/utils.js"></script>
-
 <article>
   <header><h2>{{ include.title | default: page.title }}</h2></header>
-  <p style="margin-top: -1.5em; color: gray; float: left">{{page.summary}}</p>
+  <p class="list-summary">{{page.summary}}</p>
 
   {% assign featured_count = 0 %}
   {% assign progress_count = 0 %}
@@ -39,27 +15,27 @@
 
   <span id="filter-buttons">
     {% if featured_count != 0 %}
-      <p class="onClickDiv" onclick='filter_posts("featured")' style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="wavyUnderline">&nbsp;featured&nbsp;</u></b></p><br>
+      <p class="clickable list-filter-button" onclick='filter_posts("featured")'><b><u class="wavy-underline">&nbsp;featured&nbsp;</u></b></p><br>
     {% endif %}
     {% if progress_count != 0 %}
-      <p class="onClickDiv" onclick='filter_posts("inprogress")' style="margin-top: -1.5em; float: right; font-size: smaller;"><b><u class="WIPUnderline">&nbsp;in progress&nbsp;</u></b></p>
+      <p class="clickable list-filter-button" onclick='filter_posts("inprogress")'><b><u class="wip-underline">&nbsp;in progress&nbsp;</u></b></p>
     {% endif %}
   </span>
   <span id="back-button" style="display: none;">
-    <p class="onClickDiv" onclick='filter_posts("all")' style="margin-top: -1.5em; float: right; font-size: smaller;"><b>&nbsp;back to all&nbsp;</b></p>
+    <p class="clickable list-filter-button" onclick='filter_posts("all")'><b>&nbsp;back to all&nbsp;</b></p>
     <br>
   </span>
-  <p style="margin-top: -1em">　</p>
+  <p class="list-spacer">　</p>
 
     {% for post in site.categories.testbed %}
       {% assign sorted_hashtag = post.hashtag | split: " " %}
 
-    <div class="testbed-post" style="margin-top: -0.2em" data-featured="{{ post.featured }}" data-inprogress="{{ post.inprogress }}">
-      <div class="onClickDiv" onclick="handle_click(event, '{{ post.url | relative_url }}');">
+    <div class="testbed-post testbed-post-item" data-featured="{{ post.featured }}" data-inprogress="{{ post.inprogress }}">
+      <div class="clickable" onclick="handle_click(event, '{{ post.url | relative_url }}');">
         {% if post.featured %}
-          <h3><u class="wavyUnderline">{{ post.title }}</u></h3>
+          <h3><u class="wavy-underline">{{ post.title }}</u></h3>
         {% elsif post.inprogress %}
-            <h3><u class="WIPUnderline">{{ post.title }}</u></h3>
+            <h3><u class="wip-underline">{{ post.title }}</u></h3>
         {% else %}
           <h3>{{ post.title }}</h3>
         {% endif %}
@@ -67,10 +43,10 @@
         {% assign excerpt_part = post.excerpt | strip_html | split: "." %}
         {% assign excerpt_part_size = excerpt_part | size %}
 
-        <p style="margin-top: -0.5em; margin-bottom: 0.5em;"><time class="useGray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}<i><span>{% if post.at %} ＠ {{ post.at }}{% endif %}</span></i></time></p>
-        <p style=" text-align: justify; font-size:smaller;">
-          <div style="display: flex; font-size: calc(0.45rem + 0.2vw); text-align: justify;">
-            <p style="margin-bottom: -0.4em;">
+        <p class="testbed-date"><time class="use-gray" datetime="{{ post.date | date_to_xmlschema }}" style="font-size: smaller;">{{ post.date | date: "%B %d, %Y" }}<i><span>{% if post.at %} ＠ {{ post.at }}{% endif %}</span></i></time></p>
+        <p style="text-align: justify; font-size: smaller;">
+          <div class="testbed-excerpt-wrapper">
+            <p class="testbed-excerpt-text">
               {% for i in (0..excerpt_part_size) %}
                 {{ excerpt_part[i] }}.
                 {% if i == post.splitter %}
@@ -79,13 +55,13 @@
               {% endfor %}
             </p>
             {% if post.thumbnail %}
-              <img src="{{ post.thumbnail }}" style="margin-left: 7em; margin-top: 1.2em; display: block; width: 25%; object-fit: cover;" onerror=handle_image_error(this)>
+              <img src="{{ post.thumbnail }}" class="testbed-thumbnail" onerror=handle_image_error(this)>
             {% endif %}
           </div>
           {% if post.done %}
-            <p style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
+            <p class="testbed-hashtag">{{ sorted_hashtag | sort | join: " " }}</p>
           {% else %}
-            <p class="useBottomLine" style="margin-top: 3em; margin-bottom: 0.5em; font-size: calc(0.35rem + 0.2vw); text-align: right; color: gray;">{{ sorted_hashtag | sort | join: " " }}</p>
+            <p class="testbed-hashtag use-bottom-line--padded">{{ sorted_hashtag | sort | join: " " }}</p>
           {% endif %}
         </p>
       </div>

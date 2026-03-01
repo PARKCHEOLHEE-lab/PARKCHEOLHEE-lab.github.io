@@ -1,7 +1,7 @@
 title: "latentspace."
 title_tab: "latentspace"
 author: "pch"
-description: "<b style=\"color: #9c9c9c; font-weight: 200; font-size: smaller\">parkcheolhee-lab</b>"
+description: "<b class=\"site-description\">parkcheolhee-lab</b>"
 permalink: /:title/
 lang: "en"
 excerpt_separator: <!--break-->
@@ -12,8 +12,6 @@ google_site_verification: "GKJEYyW0dEIgdiKJcLRyWyeKoYYIW3YwSmsZGfbeEHU"
 # Layout
 
 show_excerpts: false        # show article excerpts on the home page
-show_frame: false           # adds a gray frame to the site
-show_sidebar: false        # show a sidebar instead of the usual header
 minimal: false             # use a dark header
 
 # Menu
@@ -38,6 +36,13 @@ external:
 comments:
 #  disqus_shortname: ""    # see https://disqus.com/
 #  isso_domain: ""         # see https://posativ.org/isso/
+
+utterances:
+  repo: "PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io"
+
+highlightjs:
+  css: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/stackoverflow-light.min.css"
+  js: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"
 
 plugins:
  - jekyll-feed
