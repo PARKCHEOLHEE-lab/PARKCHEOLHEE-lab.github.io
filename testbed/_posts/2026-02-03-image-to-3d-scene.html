@@ -192,16 +192,16 @@ In this profiling the setup was kept conservative on purpose: the model was relo
 
     $$
         \,\\
-        \mathbf{O'} = \mathbf{B}_{\mathrm{OBB}}^{-1} (\mathbf{O} - \mathbf{c}) + \mathbf{c} - \mathbf{z}_{\mathrm{snap}}
+        \mathbf{O'}_i = \mathbf{B}_{\mathrm{OBB},i}^{-1} \left( \mathbf{O}_i - \mathbf{c}_i \right) + \mathbf{c}_i - \mathbf{z}_{\mathrm{snap},i}
+        \qquad \text{for } i = 1, 2, \ldots, n
         \,\\
     $$
 
-    where \(\mathbf{O}\) is the matrix of vertices of the object in world coordinates,
-    \(\mathbf{O}'\) is the matrix of vertices after correction,
-    \(\mathbf{B}_{\mathrm{OBB}}\) is the \(3\times 3\) orthonormal OBB basis matrix,
-    \(\mathbf{c}\) is the center of the OBB, and
-    \(\mathbf{z}_{\mathrm{snap}} = (0, 0, z_{\min})\) is the snap vector with \(z_{\min}\) the minimum \(z\)-coordinate of \(\mathbf{B}_{\mathrm{OBB}}^{-1}(\mathbf{O} - \mathbf{c}) + \mathbf{c}\) over all vertices (so the object is snapped to the floor \(z=0\)).
-
+    where for each object \(i\), \(\mathbf{O}_i\) is the matrix of vertices of object \(i\) in world coordinates,
+    \(\mathbf{O}_i'\) is the matrix of vertices after correction,
+    \(\mathbf{B}_{\mathrm{OBB},i}\) is the \(3 \times 3\) orthonormal OBB basis matrix for object \(i\),
+    \(\mathbf{c}_i\) is the center of the OBB for object \(i\), and
+    \(\mathbf{z}_{\mathrm{snap},i} = (0, 0, z_{\min,i})\) is the snap vector for object \(i\), where \(z_{\min,i}\) is the minimum \(z\)-coordinate of \(\mathbf{B}_{\mathrm{OBB},i}^{-1} (\mathbf{O}_i - \mathbf{c}_i) + \mathbf{c}_i\) over all vertices of object \(i\), ensuring the object is snapped to the floor \(z = 0\).
     <br><br>
     
     This process is inspired by the <a href="https://parkcheolhee-lab.github.io/local-coordinate-system/">local coordinate system</a> transformation,
