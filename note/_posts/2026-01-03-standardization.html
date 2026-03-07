@@ -1,0 +1,54 @@
+---
+title:  "standardization"
+layout: post
+---
+
+
+<br>
+
+<div style="text-align: justify;">
+    Distribution standardization is the statistical process of transforming data to have a mean of $0$ and a standard deviation of $1$, 
+    often called Z-score normalization.
+    
+    $$
+        Z = \frac{X - \mu}{\sigma}
+    $$
+
+    It converts different normal distributions into a single, standard normal distribution $Z \sim \mathcal{N}(0, 1)$
+    , enabling direct comparison of datasets, simplifying probability calculations, and optimizing machine learning algorithms.
+    Based on the properties of the expected value and variance, 
+    $E(aX + b) = aE(x) + b $ and $Var(aX + b) = a^2Var(x)$, we can derive the following:
+
+    $$
+        \begin{aligned}
+            E(Z) &= E(\frac{1}{\sigma}X - \frac{1}{\sigma}\mu)
+            \,\\
+            \,\\
+            &= \frac{1}{\sigma}E(X) - \frac{1}{\sigma}E(\mu)
+            \,\\
+            \,\\
+            &= \frac{1}{\sigma}\mu - \frac{1}{\sigma}\mu
+            \,\\
+            \,\\
+            &= 0
+            \,\\
+            \,\\
+
+            Var(Z) &= Var(\frac{1}{\sigma}X - \frac{1}{\sigma}\mu)
+            \,\\
+            \,\\
+            &= \frac{1}{\sigma^{\small{2}}}Var(X)
+            \,\\
+            \,\\
+            &= \frac{1}{\sigma^{\small{2}}}\sigma^{2}
+            \,\\
+            \,\\
+            &= 1
+        \end{aligned}
+    $$
+    
+
+</div>
+
+
+<br><br>
