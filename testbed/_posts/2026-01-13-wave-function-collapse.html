@@ -58,19 +58,19 @@ thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
 
     Inspired by this kind of modular design, I defined the 3D tileset for WFC.
     Each tile is a block with six faces ($\pm x$, $\pm y$, $\pm z$), and each face 
-    has an interface label (e.g. $\mathrm{FREE}, \mathrm{OPEN}, \mathrm{CLOSED}, \mathrm{SUPPORT}, \mathrm{EMPTY}$). 
+    has an interface label. 
     Two neighboring tiles are compatible only if their touching faces have the same 
     compatible labels (6-way compatibility). The algorithm uses these rules, not geometry, to propagate constraints.
     
     <br><br>
 
 
-    The left panel on the figure above shows the 3D tileset, and the right panel shows the compatibility visualization.
+    The left panel on the figure below shows the 3D tileset, and the right panel shows the compatibility visualization.
     The right panel explains that the six dots per cube represent one label per face, 
     color-coded, and that allowed adjacencies come from compatible labels on touching faces.
 
     For example, the tile $6$ and $7$ are compatible for the $+z$ and $-z$ faces each other. 
-    Because the $+z$ face of $6$ is $\mathrm{OPEN}$ and the $-z$ face of $7$ is $\mathrm{OPEN}$, they are compatible.
+    Because the $+z$ face of $6$ is OPEN and the $-z$ face of $7$ is OPEN, they are compatible.
 
 
     <figure>
@@ -79,6 +79,106 @@ thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
             3D tileset and compatibility visualization
         </figcaption>
     </figure>
+
+    <br><br>
+    <!-- 
+    The tileset is encoded as a Python dictionary <code>INTERFACE</code> used by the implementation. 
+    Each tile ID ($0$ - $19$) maps to a dict of six face directions ($\pm x, \pm y, \pm z$) 
+    to one of the five labels (FREE, OPEN, CLOSED, SUPPORT, EMPTY). 
+    The implementation precomputes compatibility matrices from this table so that, for each direction, 
+    two tiles are compatible if in the horizontal directions ($\pm x, \pm y$) either face is FREE, 
+    or otherwise the two touching face labels match. Tile 0 is the empty tile (all horizontal FREE, vertical EMPTY); 
+    tiles 1-19 are the 3D building blocks. The snippet below is taken from <a href="https://github.com/PARKCHEOLHEE-lab/wave-function-collapse/blob/main/wfc/src/wfc.py">wfc.py</a> (constants and a subset of INTERFACE entries). 
+    -->
+    <!-- The tileset is encoded as a Python dictionary <code>INTERFACE</code>.
+    Each tile ID ($0$ - $19$) maps to a dict of six face directions ($\pm x$, $\pm y$, $\pm z$)
+    to one of the five labels (FREE, OPEN, CLOSED, SUPPORT, EMPTY).
+    Tile $0$ is the empty tile, and tiles $1$ - $19$ are the 3D building blocks.
+    The snippet below is taken from <a href="https://github.com/PARKCHEOLHEE-lab/wave-function-collapse/blob/main/wfc/src/wfc.py">wfc.py</a> (constants and a subset of <code>INTERFACE</code> entries).
+
+    For labels other than FREE, adjacent (touching) faces must have the same label.
+    FREE acts as a wildcard: the adjacent face may have any label. -->
+
+    In code, the tileset is stored as a Python dictionary <code>INTERFACE</code>: 
+    each key is a tile ID from $0$ to $19$, and each value is a mapping from the six face directions ($\pm x$, $\pm y$, $\pm z$) to one of five 
+    labels—<code>FREE</code>, <code>OPEN</code>, <code>CLOSED</code>, <code>SUPPORT</code>, and <code>EMPTY</code>. 
+    Tile $0$ is the empty cell. Tiles $1$–$19$ are the solid building blocks. 
+    Compatibility between neighboring tiles is determined by these labels: for any pair of touching faces, the labels must match, 
+    except that <code>FREE</code> acts as a wildcard and is compatible with any label on the adjacent face. 
+    The snippet below shows the relevant constants and a subset of <code>INTERFACE</code> from <a href="https://github.com/PARKCHEOLHEE-lab/wave-function-collapse/blob/main/wfc/src/wfc.py">wfc.py</a>.
+
+    
+    
+    <!-- 
+        FREE 레이블을 제외한 나머지 레이블들은 서로 인접한 면의 레이블이 같아야 합니다.
+        FREE 레이블은 히든 레이블로, 인접한 면의 레이블이 같지 않아도 어느 것이든 올 수 있는 조건을 갖습니다.
+    -->
+
+    <div style="display: flex; justify-content: center; gap: 15px;">
+        <div style="width: 50%;">
+<pre><code class="python">
+    class WaveFunctionCollapseInterface:
+        XP = "+x"
+        XN = "-x"
+        YP = "+y"
+        YN = "-y"
+        ZP = "+z"
+        ZN = "-z"
+        
+        FREE = "free"
+        OPEN = "open"
+        CLOSED = "closed"
+        SUPPORT = "support"
+        EMPTY = "empty"
+
+        TILE_SIZE = 1
+
+        (...)
+
+        INTERFACE = {
+            0: {
+                XP: FREE,
+                XN: FREE,
+                YP: FREE,
+                YN: FREE,
+                ZP: EMPTY,
+                ZN: EMPTY,
+            },
+</code></pre>
+        </div>
+        <div style="width: 50%;">
+<pre><code class="python">
+        (...)
+
+        17: {
+            XP: OPEN,
+            XN: OPEN,
+            YP: OPEN,
+            YN: CLOSED,
+            ZP: EMPTY,
+            ZN: SUPPORT,
+        },
+        18: {
+            XP: CLOSED,
+            XN: OPEN,
+            YP: OPEN,
+            YN: OPEN,
+            ZP: EMPTY,
+            ZN: SUPPORT,
+        },
+        19: {
+            XP: OPEN,
+            XN: OPEN,
+            YP: CLOSED,
+            YN: OPEN,
+            ZP: EMPTY,
+            ZN: SUPPORT,
+        },
+    }
+</code></pre>
+        </div>
+
+    
 </div><br><br>
 
 <h3>Implementation</h3>
