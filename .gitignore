@@ -8,3 +8,5 @@ _site
 
 ___*.html
 settings*.json
+
+.claude
