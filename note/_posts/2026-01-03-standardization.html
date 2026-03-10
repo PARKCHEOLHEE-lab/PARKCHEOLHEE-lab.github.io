@@ -17,14 +17,14 @@ layout: post
     It converts different normal distributions into a single, standard normal distribution $Z \sim \mathcal{N}(0, 1)$
     , enabling direct comparison of datasets, simplifying probability calculations, and optimizing machine learning algorithms.
     Based on the properties of the expected value and variance, 
-    $E(aX + b) = aE(x) + b $ and $Var(aX + b) = a^2Var(x)$, we can derive the following:
+    $E(aX + b) = aE(X) + b $ and $Var(aX + b) = a^2Var(x)$, we can derive the following:
 
     $$
         \begin{aligned}
             E(Z) &= E(\frac{1}{\sigma}X - \frac{1}{\sigma}\mu)
             \,\\
             \,\\
-            &= \frac{1}{\sigma}E(X) - \frac{1}{\sigma}E(\mu)
+            &= \frac{1}{\sigma}E(X) - \frac{1}{\sigma}\mu
             \,\\
             \,\\
             &= \frac{1}{\sigma}\mu - \frac{1}{\sigma}\mu
