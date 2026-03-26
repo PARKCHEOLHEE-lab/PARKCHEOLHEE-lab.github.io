@@ -1,7 +1,7 @@
 var SITE_CONFIG = {
   repo_owner: "PARKCHEOLHEE-lab",
   repo_name: "PARKCHEOLHEE-lab.github.io",
-  branches: ["dev", "main"],
+  branches: ["main", "dev"],
   media_base_url: "https://media.githubusercontent.com/media/"
 };
 
