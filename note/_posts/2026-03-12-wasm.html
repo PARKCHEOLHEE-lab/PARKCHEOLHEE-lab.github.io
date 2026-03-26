@@ -96,7 +96,7 @@ layout: post
     </li>
         <ul>
             <li>
-                <a href="https://github.com/wjakob/instant-meshes">Instant Meshes</a> — C++ library for field-aligned quad remeshing, compiled to WASM (~485 KB)
+                <a href="https://github.com/wjakob/instant-meshes">Instant Meshes</a> — C++ tool for field-aligned quad remeshing, compiled to WASM (~485 KB)
             </li>
             <li>
                 Why WASM over rewriting in TS: research-grade algorithm, complex numerics, hard to validate a from-scratch port
@@ -129,7 +129,7 @@ layout: post
                 <b>No filesystem</b> — file I/O must be stubbed or use Emscripten's virtual FS
             </li>
             <li>
-                <b>Debugging</b> — Chrome DevTools supports WASM source maps, but limited compared to JS
+                <b>Debugging</b> — Chrome DevTools supports WASM debugging via DWARF debug info, but limited compared to JS
             </li>
         </ul>
 </ul>
