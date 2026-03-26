@@ -2,3 +2,136 @@
 title:  "WASM"
 layout: post
 ---
+
+
+<br>
+
+<ul>
+    <li>
+        What is WebAssembly (WASM)
+    </li>
+        <ul>
+            <li>
+                A <b>binary instruction format</b> that runs near-native-speed code in web browsers
+            </li>
+            <li>
+                <mark>Not a programming language — a compilation target for C, C++, Rust, Go, etc.</mark>
+            </li>
+            <li>
+                Runs in a <b>sandboxed VM</b> alongside JavaScript — W3C standard, all modern browsers
+            </li>
+            <li>
+                Also runs outside browsers — Cloudflare Workers, Node.js, Deno
+            </li>
+        </ul>
+    <br>
+    <li>
+        Why WASM
+    </li>
+        <ul>
+            <li>
+                <b>Performance</b>: near-native speed for compute-heavy tasks
+            </li>
+            <li>
+                <b>Code reuse</b>: bring existing C/C++ libraries to the web without rewriting in JS
+            </li>
+            <li>
+                <b>Portability</b>: compile once, run anywhere that supports WASM
+            </li>
+        </ul>
+    <br>
+    <li>
+        How it works
+    </li>
+        <ul>
+            <li>
+                C/C++ source → compiled to <code>.wasm</code> binary via <a href="https://emscripten.org/">Emscripten</a>
+            </li>
+            <li>
+                Emscripten also generates a <b>JS glue file</b> (<code>.js</code>) that handles loading and binding
+            </li>
+            <li>
+                Browser fetches and instantiates the <code>.wasm</code>, exported functions become callable from JS
+            </li>
+            <li>
+                JS and WASM share a <b>linear memory</b> (ArrayBuffer) — data is copied into/out of this memory
+            </li>
+        </ul>
+    <br>
+    <li>
+        Emscripten & Embind
+    </li>
+        <ul>
+            <li>
+                <a href="https://emscripten.org/">Emscripten</a>: the most widely used C/C++ → WASM compiler toolchain
+            </li>
+            <li>
+                Compile with <code>emcc</code> (C/C++) or <code>em++</code> (forces C++ mode), produces <code>.js</code> (glue) + <code>.wasm</code> (binary)
+            </li>
+            <li>
+                <b>Embind</b>: Emscripten's binding system that maps C++ functions, structs, and types to JavaScript
+            </li>
+            <li>
+                After compilation, JS can call C++ functions as if they were native JS functions
+            </li>
+        </ul>
+    <br>
+    <li>
+        Memory management
+    </li>
+        <ul>
+            <li>
+                Embind objects live on the <b>WASM heap</b>, not managed by JS garbage collector
+            </li>
+            <li>
+                <mark>Must call <code>.delete()</code> on Embind class instances — forgetting causes memory leaks</mark>
+            </li>
+            <li>
+                WASM heap grows dynamically but <b>never shrinks</b>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Practical example: Instant Meshes as WASM
+    </li>
+        <ul>
+            <li>
+                <a href="https://github.com/wjakob/instant-meshes">Instant Meshes</a> — C++ tool for field-aligned quad-dominant remeshing, compiled to WASM (~485 KB)
+            </li>
+            <li>
+                Why WASM over rewriting in TS: research-grade algorithm, complex numerics, hard to validate a from-scratch port
+            </li>
+            <li>
+                Key decisions:
+                <ul>
+                    <li><b>Single-threaded</b>: TBB replaced with a shim — avoids <code>SharedArrayBuffer</code> / <code>pthreads</code></li>
+                    <li><b>No file I/O</b>: stubbed out since WASM has no filesystem</li>
+                    <li><b>Pinned versions</b>: Emscripten, source commit, Eigen all pinned for reproducible builds</li>
+                </ul>
+            </li>
+            <br>
+            <img src="/img/wasm/wasm.gif" width="100%" style="clip-path: inset(2px 0)" onerror=handle_image_error(this)>
+            <figcaption>Instant Meshes quad remeshing via WASM</figcaption>
+            <br>
+        </ul>
+    <br>
+    <li>
+        Limitations
+    </li>
+        <ul>
+            <li>
+                <b>No DOM access</b> — must call back to JS for browser APIs
+            </li>
+            <li>
+                <b>No threads by default</b> — requires <code>SharedArrayBuffer</code> + COOP/COEP headers
+            </li>
+            <li>
+                <b>No filesystem</b> — file I/O must be stubbed or use Emscripten's virtual FS
+            </li>
+            <li>
+                <b>Debugging</b> — Chrome DevTools supports WASM debugging via DWARF debug info, but limited compared to JS
+            </li>
+        </ul>
+</ul>
+
+<br><br>
