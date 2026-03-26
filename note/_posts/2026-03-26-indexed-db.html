@@ -1,0 +1,236 @@
+---
+title:  "IndexedDB"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        What is IndexedDB
+    </li>
+        <ul>
+            <li>
+                A <b>client-side NoSQL database</b> built into the browser
+            </li>
+            <li>
+                Unlike <code>localStorage</code>, it can store large amounts of <b>structured data</b> (objects, files, Blobs, etc.)
+            </li>
+            <li>
+                <mark>Stores data in key-value format and supports fast lookups via indexes</mark>
+            </li>
+            <li>
+                A Web API standard — available in all modern browsers without any installation
+            </li>
+        </ul>
+    <br>
+    <li>
+        Differences from localStorage / sessionStorage
+    </li>
+        <ul>
+            <li>
+                <code>localStorage</code>: stores strings only, ~5-10MB max, synchronous API
+            </li>
+            <li>
+                <code>sessionStorage</code>: similar to localStorage but scoped per tab — data is deleted when the tab/window closes
+            </li>
+            <li>
+                <code>IndexedDB</code>: can store objects, <b>hundreds of MB or more</b>, <b>asynchronous</b> API
+            </li>
+            <li>
+                IndexedDB operates on a transaction-based model, ensuring data integrity
+            </li>
+        </ul>
+    <br>
+    <li>
+        Where the data is stored
+    </li>
+        <ul>
+            <li>
+                Data is stored on the <b>user's local disk</b>, managed internally by the browser engine
+            </li>
+            <li>
+                Under the hood, most browsers use <b>LevelDB</b> (Chrome) or <b>SQLite</b> (Firefox, Safari) as the backing storage engine —
+                but this is an implementation detail, not exposed to the API
+            </li>
+            <li>
+                Storage paths by browser:
+                <ul>
+                    <li>Chrome (Linux): <code>~/.config/google-chrome/Default/IndexedDB/</code></li>
+                    <li>Chrome (macOS): <code>~/Library/Application Support/Google/Chrome/Default/IndexedDB/</code></li>
+                    <li>Chrome (Windows): <code>%LOCALAPPDATA%\Google\Chrome\User Data\Default\IndexedDB\</code></li>
+                    <li>Firefox: <code>~/.mozilla/firefox/&lt;profile&gt;/storage/default/</code></li>
+                    <li>Safari: <code>~/Library/Containers/com.apple.Safari/Data/Library/WebKit/WebsiteData/Default/</code></li>
+                </ul>
+            </li>
+            <li>
+                Inside these directories, data is organized by origin — e.g. <code>https_example.com_0.indexeddb.leveldb/</code>
+            </li>
+            <li>
+                Isolated per <b>origin (protocol + domain + port)</b> — cannot access data from other origins (Same-Origin Policy)
+            </li>
+            <li>
+                The files on disk are <b>not human-readable</b> — they are binary database files managed by LevelDB/SQLite, not plain JSON or text
+            </li>
+            <li>
+                Storage quota:
+                <ul>
+                    <li>Chrome: up to <b>60% of total disk space</b> per origin (within an overall browser limit of 80% of disk)</li>
+                    <li>Firefox: up to <b>10% of total disk space</b> per origin (or 10 GiB group limit, whichever is smaller)</li>
+                    <li>Safari (17.0+): up to <b>60% of total disk space</b> per origin (overall 80% of disk, same as Chrome)</li>
+                </ul>
+            </li>
+            <li>
+                Check available storage programmatically:
+<pre><code>
+    const estimate = await navigator.storage.estimate();
+    console.log(`Used: ${estimate.usage} bytes`);
+    console.log(`Quota: ${estimate.quota} bytes`);
+</code></pre>
+            </li>
+            <li>
+                Data persistence:
+                <ul>
+                    <li>By default, the browser may evict IndexedDB data under <b>storage pressure</b> (low disk space) — this is called <b>"best-effort"</b> persistence</li>
+                    <li>Request <b>persistent storage</b> to prevent eviction: <code>await navigator.storage.persist()</code></li>
+                    <li>Deleted when the user clears browser data, or at session end in incognito/private mode</li>
+                </ul>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Core concepts
+    </li>
+        <ul>
+            <li>
+                <b>Database</b>: the top-level container, identified by name and version
+            </li>
+            <li>
+                <b>Object Store</b>: equivalent to a table in RDBMS — the actual storage space for data
+            </li>
+            <li>
+                <b>Key</b>: a value that uniquely identifies each record, configured via <code>keyPath</code> or <code>autoIncrement</code>
+            </li>
+            <li>
+                <b>Index</b>: a secondary key for fast lookups on a specific property
+            </li>
+            <li>
+                <b>Transaction</b>: all read/write operations run inside a transaction — three modes: <code>readonly</code>, <code>readwrite</code>, <code>versionchange</code>
+            </li>
+            <li>
+                <b>Cursor</b>: a mechanism for iterating over records in an Object Store
+            </li>
+        </ul>
+    <br>
+    <li>
+        How it works (basic flow)
+    </li>
+        <ol>
+            <li>
+                Open a database — <code>indexedDB.open(name, version)</code>
+<pre><code>
+    const request = indexedDB.open("MyDatabase", 1);
+</code></pre>
+            </li>
+            <li>
+                Set up the schema — create Object Stores and Indexes in the <code>onupgradeneeded</code> event
+<pre><code>
+    request.onupgradeneeded = (event) => {
+        const db = event.target.result;
+        const store = db.createObjectStore("users", { keyPath: "id" });
+        store.createIndex("name", "name", { unique: false });
+    };
+</code></pre>
+            </li>
+            <li>
+                Write data — open a transaction and add data to the Object Store
+<pre><code>
+    request.onsuccess = (event) => {
+        const db = event.target.result;
+        const tx = db.transaction("users", "readwrite");
+        const store = tx.objectStore("users");
+        store.add({ id: 1, name: "Park", age: 30 });
+    };
+</code></pre>
+            </li>
+            <li>
+                Read data — query by key or index
+<pre><code>
+    const tx = db.transaction("users", "readonly");
+    const store = tx.objectStore("users");
+    const getRequest = store.get(1);
+    getRequest.onsuccess = () => {
+        console.log(getRequest.result); // { id: 1, name: "Park", age: 30 }
+    };
+</code></pre>
+            </li>
+        </ol>
+    <br>
+    <li>
+        Async patterns
+    </li>
+        <ul>
+            <li>
+                The IndexedDB API is <b>event-driven</b> — every request requires <code>onsuccess</code> and <code>onerror</code> callbacks
+            </li>
+            <li>
+                Wrapping with Promises enables the <code>async/await</code> pattern
+            </li>
+            <li>
+                <a href="https://github.com/jakearchibald/idb">idb</a> library: a lightweight wrapper that provides a Promise-based API for IndexedDB
+<pre><code>
+    import { openDB } from "idb";
+
+    const db = await openDB("MyDatabase", 1, {
+        upgrade(db) {
+            db.createObjectStore("users", { keyPath: "id" });
+        },
+    });
+
+    await db.add("users", { id: 1, name: "Park", age: 30 });
+    const user = await db.get("users", 1);
+</code></pre>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Use cases
+    </li>
+        <ul>
+            <li>
+                <b>Offline web apps</b>: caching data offline alongside Service Workers
+            </li>
+            <li>
+                <b>Large client-side data</b>: storing images, files, large JSON payloads in the browser
+            </li>
+            <li>
+                <b>Client-side search</b>: fast local search using indexes
+            </li>
+            <li>
+                <b>Persistent state</b>: preserving app state across refreshes and reconnections
+            </li>
+        </ul>
+    <br>
+    <li>
+        Things to watch out for
+    </li>
+        <ul>
+            <li>
+                <b>No synchronous API</b> — all operations are async, requiring callbacks or Promises
+            </li>
+            <li>
+                <b>Schema migration</b> — <code>onupgradeneeded</code> fires on initial database creation or when the version number is incremented.
+                Be careful with version management when modifying existing Object Stores
+            </li>
+            <li>
+                <b>Storage Quota</b> — storage limits vary by browser.
+                Use <code>navigator.storage.estimate()</code> to check available capacity
+            </li>
+            <li>
+                <b>Debugging</b> — inspect and edit data in Chrome DevTools > Application > IndexedDB
+            </li>
+        </ul>
+</ul>
+
+<br><br>
