@@ -66,7 +66,7 @@ layout: post
                 <a href="https://emscripten.org/">Emscripten</a>: the most widely used C/C++ → WASM compiler toolchain
             </li>
             <li>
-                Compile with <code>em++</code> (C++) or <code>emcc</code> (C), produces <code>.js</code> (glue) + <code>.wasm</code> (binary)
+                Compile with <code>emcc</code> (C/C++) or <code>em++</code> (forces C++ mode), produces <code>.js</code> (glue) + <code>.wasm</code> (binary)
             </li>
             <li>
                 <b>Embind</b>: Emscripten's binding system that maps C++ functions, structs, and types to JavaScript
@@ -84,7 +84,7 @@ layout: post
                 Embind objects live on the <b>WASM heap</b>, not managed by JS garbage collector
             </li>
             <li>
-                <mark>Must call <code>.delete()</code> on every WASM object — forgetting causes memory leaks</mark>
+                <mark>Must call <code>.delete()</code> on Embind class instances — forgetting causes memory leaks</mark>
             </li>
             <li>
                 WASM heap grows dynamically but <b>never shrinks</b>
@@ -96,7 +96,7 @@ layout: post
     </li>
         <ul>
             <li>
-                <a href="https://github.com/wjakob/instant-meshes">Instant Meshes</a> — C++ tool for field-aligned quad remeshing, compiled to WASM (~485 KB)
+                <a href="https://github.com/wjakob/instant-meshes">Instant Meshes</a> — C++ tool for field-aligned quad-dominant remeshing, compiled to WASM (~485 KB)
             </li>
             <li>
                 Why WASM over rewriting in TS: research-grade algorithm, complex numerics, hard to validate a from-scratch port
