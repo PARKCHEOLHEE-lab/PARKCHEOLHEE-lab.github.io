@@ -66,12 +66,10 @@ layout: post
             </li>
         </ul>
     <br>
-    <li>
         <div style="display: flex; justify-content: center; align-items: center; margin: 10px 0;">
             <canvas id="regressionCanvas" width="700" height="420"></canvas>
         </div>
         <figcaption>Scatter plot with regression line and conditional \(Y\) distributions at \(X = 2, 5, 8\)</figcaption>
-    </li>
     <br>
     <li>
         What the regression line really is
@@ -296,10 +294,15 @@ document.addEventListener("DOMContentLoaded", function() {
         ctx.fillText("X=" + xp, cx, pad.top + plotH + 35);
     }
 
-    // legend
+    // legend (bottom-right with semi-transparent white background)
     ctx.font = "12px PT Sans";
     ctx.textAlign = "left";
-    var lx = pad.left + plotW - 155, ly = pad.top + 10;
+    var legendW = 185, legendH = 58, legendPad = 8;
+    var lx = pad.left + plotW - legendW - 5;
+    var ly = pad.top + plotH - legendH - 5;
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillRect(lx - legendPad, ly - legendPad, legendW + legendPad * 2, legendH + legendPad * 2);
 
     ctx.fillStyle = "rgba(70, 130, 180, 0.6)";
     ctx.beginPath(); ctx.arc(lx + 5, ly + 5, 3.5, 0, Math.PI * 2); ctx.fill();
