@@ -1,5 +1,5 @@
 ---
-title: "Window / Crossing Selection"
+title: "Window/Crossing Selection"
 layout: post
 related:
   - selectionbox
@@ -36,6 +36,9 @@ related:
                 the user is dragging right-to-left, so the mode is crossing.
             </li>
         </ul>
+    <figure>
+        <img src="/img/window-crossing-selection/window-crossing-selection-0.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
     <br>
     <li>
         Drawing the Rubber-Band Rect
@@ -144,6 +147,9 @@ related:
                 Without stage 2, a long line crossing the box from edge to edge would be missed.
             </li>
         </ul>
+    <figure>
+        <img src="/img/window-crossing-selection/window-crossing-selection-1.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
     <br>
     <li>
         2D Segment Intersection
@@ -154,12 +160,18 @@ related:
                 Given segments \(P_1P_2\) and \(P_3P_4\), express each as a parametric form
                 and solve for the parameters \(t, u\):
 
-                \[
-                t = \frac{(x_3 - x_1)(y_4 - y_3) - (y_3 - y_1)(x_4 - x_3)}{(x_2 - x_1)(y_4 - y_3) - (y_2 - y_1)(x_4 - x_3)}
-                \]
-                \[
-                u = \frac{(x_3 - x_1)(y_2 - y_1) - (y_3 - y_1)(x_2 - x_1)}{(x_2 - x_1)(y_4 - y_3) - (y_2 - y_1)(x_4 - x_3)}
-                \]
+                <div class="latex-container">
+                    \[
+                    t = \frac{(x_3 - x_1)(y_4 - y_3) - (y_3 - y_1)(x_4 - x_3)}{(x_2 - x_1)(y_4 - y_3) - (y_2 - y_1)(x_4 - x_3)}
+                    \]
+                </div>
+                <div class="latex-container">
+                    \[
+                    u = \frac{(x_3 - x_1)(y_2 - y_1) - (y_3 - y_1)(x_2 - x_1)}{(x_2 - x_1)(y_4 - y_3) - (y_2 - y_1)(x_4 - x_3)}
+                    \]
+                </div>
+
+                <br>
 
                 The segments intersect if and only if \(0 \le t \le 1\) and \(0 \le u \le 1\).
                 The denominator is the 2D cross product of the two direction vectors —
@@ -180,15 +192,107 @@ related:
         </ul>
     <br>
     <li>
-        Projecting the Geometry
+        World-to-Screen Projection
     </li>
         <ul>
             <li>
-                The hit test runs in screen space, so each object's vertices have to be projected first.
-                For ordinary three.js meshes and lines, this is a loop over the
-                <code>position</code> buffer attribute,
+                The hit test runs in pixel coordinates, so the real question is:
+                given a 3D vertex on a CAD object,
+                what 2D pixel does it land on?
+                <code>worldToScreen</code> collapses the standard graphics pipeline —
+                view transform, projection, perspective divide, viewport remap —
+                into a single helper:
+
+<pre><code class="typescript">
+    worldToScreen(point: XYZ): XY {
+        const cx = this.width / 2;
+        const cy = this.height / 2;
+        const vec = new Vector3(point.x, point.y, point.z).project(this.camera);
+        return new XY({ x: Math.round(cx * vec.x + cx), y: Math.round(-cy * vec.y + cy) });
+    }
+</code></pre>
+            </li>
+            <br>
+            <li>
+                Three.js's <code>Vector3.project(camera)</code> applies the camera's
+                view matrix \(M_{\text{view}}\) and projection matrix \(M_{\text{proj}}\),
+                then performs the perspective divide.
+                The result is in <b>normalized device coordinates</b> (NDC) —
+                a unit cube where each axis lies in \([-1,\, 1]\):
+
+                <div class="latex-container">
+                    \[
+                        \mathbf{p}_{\text{clip}} = M_{\text{proj}}\, M_{\text{view}}\, \mathbf{p}_{\text{world}}, \quad
+                        \mathbf{p}_{\text{NDC}} = \frac{\mathbf{p}_{\text{clip}}}{w_{\text{clip}}}
+                    \]
+                </div>
+
+                <br>
+
+                Mapping NDC to pixels is a straight affine remap.
+                Note the y-axis flip — NDC y points up, but screen y points down:
+
+                <div class="latex-container">
+                    \[
+                        x_s = \tfrac{w}{2}\,(x_{\text{NDC}} + 1), \qquad
+                        y_s = \tfrac{h}{2}\,(1 - y_{\text{NDC}})
+                    \]
+                </div>
+            </li>
+            <br>
+            <li>
+                Vertices on a three.js <code>Object3D</code> start in <b>local</b> space —
+                each object has its own coordinate frame.
+                <code>localToWorld</code> applies the object's <code>matrixWorld</code>,
+                bringing local vertices into the shared world frame
+                that <code>worldToScreen</code> expects:
+
+<pre><code class="typescript">
+    private projectGeometry(obj: Object3D) {
+        // ...
+        const v = new Vector3();
+        const pts: { x: number; y: number }[] = [];
+        for (let i = 0; i < posAttr.count; i++) {
+            v.fromBufferAttribute(posAttr, i);                // local-space vertex
+            obj.localToWorld(v);                              // local → world
+            pts.push(this.worldToScreen({ x: v.x, y: v.y, z: v.z }));
+        }
+        // ...
+    }
+</code></pre>
+
+                <br>
+
+                The full chain for a single vertex is therefore:
+
+                <div class="latex-container">
+                    \[
+                        \mathbf{p}_{\text{local}}
+                        \;\xrightarrow{M_{\text{world}}}\; \mathbf{p}_{\text{world}}
+                        \;\xrightarrow{M_{\text{view}}}\; \mathbf{p}_{\text{view}}
+                        \;\xrightarrow{M_{\text{proj}}}\; \mathbf{p}_{\text{clip}}
+                        \;\xrightarrow{\div\, w}\; \mathbf{p}_{\text{NDC}}
+                        \;\xrightarrow{\text{viewport}}\; \mathbf{p}_{\text{screen}}
+                    \]
+                </div>
+            </li>
+            <br>
+            <li>
+                One subtlety: this projection is a <b>silhouette</b> test, not a visibility test.
+                A vertex behind another object still projects to wherever the camera <i>would</i> see it
+                if nothing occluded it,
+                so window / crossing selection picks parts by their on-screen outline —
+                not by which pixels the user can actually see.
+                That matches AutoCAD and Rhino: a part hidden behind a wall is still selectable
+                as long as its outline lands inside the rectangle.
+            </li>
+            <br>
+            <li>
+                For ordinary three.js meshes and lines the projection
+                loops over the <code>position</code> buffer attribute,
                 with the edge list reconstructed from the geometry type
-                (<code>LineSegments</code> pairs vertices, <code>Line</code> chains them, <code>Mesh</code> uses the index buffer to build triangle edges).
+                (<code>LineSegments</code> pairs vertices, <code>Line</code> chains them,
+                <code>Mesh</code> uses the index buffer to build triangle edges).
             </li>
             <br>
             <li>
@@ -200,7 +304,9 @@ related:
                 Without this branch, fat-line edges silently never appear in any rectangle selection.
             </li>
         </ul>
-    <br>
+    <figure>
+        <img src="/img/window-crossing-selection/window-crossing-selection-2.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
     <li>
         Shape-Level vs Visual-Level
     </li>
@@ -226,6 +332,7 @@ related:
     }
 </code></pre>
             </li>
+            <br>
             <li>
                 <code>SelectionBox</code> builds a frustum from the camera and the two NDC corners
                 of the drag rectangle, then walks the scene graph and keeps any object whose
@@ -236,23 +343,6 @@ related:
             </li>
         </ul>
     <br>
-    <li>
-        Ref
-    </li>
-        <ul>
-            <li>
-                <a href="https://github.com/aaro-lab/aaro-webcad-interface/blob/main/packages/core/src/eventHandlers/selectionEventHandler.ts">selectionEventHandler.ts</a> - rubber-band rect, drag direction, mode toggle
-            </li>
-            <li>
-                <a href="https://github.com/aaro-lab/aaro-webcad-interface/blob/main/packages/three/src/threeView.ts">threeView.ts</a> - <code>detectVisualRect</code>, screen-space projection, segment intersection
-            </li>
-            <li>
-                <a href="https://threejs.org/docs/#examples/en/interactive/SelectionBox">three.js SelectionBox</a> - 3D frustum-based box selection
-            </li>
-            <li>
-                <a href="https://help.autodesk.com/view/ACD/2024/ENU/?guid=GUID-1B419263-277F-4534-A14D-7FFC362286BF">AutoCAD - Select Objects with a Window</a>
-            </li>
-        </ul>
 </ul>
 
 <br><br>
