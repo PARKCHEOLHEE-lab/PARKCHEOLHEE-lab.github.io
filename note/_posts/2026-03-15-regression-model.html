@@ -1,5 +1,5 @@
 ---
-title:  "Regression"
+title:  "Regression Model"
 layout: post
 ---
 
@@ -67,7 +67,7 @@ layout: post
         </ul>
     <br>
         <div style="display: flex; justify-content: center; align-items: center; margin: 10px 0;">
-            <canvas id="regressionCanvas" width="700" height="420"></canvas>
+            <canvas id="regressionCanvas" width="800" height="420"></canvas>
         </div>
         <figcaption>Scatter plot with regression line and conditional \(Y\) distributions at \(X = 2, 5, 8\)</figcaption>
     <br>
@@ -222,11 +222,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     ctx.textAlign = "center";
     ctx.font = "15px PT Sans";
-    ctx.fillText("X", W / 2, H - 5);
     ctx.save();
     ctx.translate(15, H / 2);
     ctx.rotate(-Math.PI / 2);
-    ctx.fillText("Y", 0, 0);
     ctx.restore();
 
     // scatter points
