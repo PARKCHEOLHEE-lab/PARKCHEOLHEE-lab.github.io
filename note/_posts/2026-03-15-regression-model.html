@@ -1,0 +1,321 @@
+---
+title:  "Regression Model"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        Regression is not fitting a line to data
+    </li>
+        <ul>
+            <li>
+                Most people think of regression as: data exists first → find a line that fits the data
+            </li>
+            <li>
+                <mark>But statistically, it's the opposite: a line (mean structure) exists first → data is generated randomly around it</mark>
+            </li>
+            <li>
+                This is the most important perspective shift in understanding regression
+            </li>
+        </ul>
+    <br>
+    <li>
+        Data Generating Process (DGP)
+    </li>
+        <ul>
+            <li>
+                The statistical model starts with:
+                \[
+                    Y_i = \beta_0 + \beta_1 X_i + \epsilon_i, \quad \epsilon_i \sim N(0, \sigma^2)
+                \]
+            </li>
+            <li>
+                This means: there exists a <b>true line</b> in the world, but we can never observe it directly
+            </li>
+            <li>
+                Instead, we observe data that is <b>the line + random noise</b>
+            </li>
+            <li>
+                The generation process:
+                <ol>
+                    <li>\(X_i\) is chosen</li>
+                    <li>Conditional mean is computed: \(\mu_i = \beta_0 + \beta_1 X_i\)</li>
+                    <li>\(Y_i\) is sampled from \(N(\mu_i, \sigma^2)\)</li>
+                </ol>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Conditional distribution of \(Y\)
+    </li>
+        <ul>
+            <li>
+                At each \(X\), \(Y\) follows a normal distribution:
+                \[
+                    Y \mid X = x \sim N(\beta_0 + \beta_1 x, \, \sigma^2)
+                \]
+            </li>
+            <li>
+                <mark>A scatter plot is not just a collection of points — it's the top-down view of vertical normal distributions at each \(X\)</mark>
+            </li>
+            <li>
+                The vertical spread at each \(X\) is \(\text{Var}(Y \mid X) = \sigma^2\)
+            </li>
+        </ul>
+    <br>
+        <div style="display: flex; justify-content: center; align-items: center; margin: 10px 0;">
+            <canvas id="regressionCanvas" width="800" height="420"></canvas>
+        </div>
+        <figcaption>Scatter plot with regression line and conditional \(Y\) distributions at \(X = 2, 5, 8\)</figcaption>
+    <br>
+    <li>
+        What the regression line really is
+    </li>
+        <ul>
+            <li>
+                The regression line connects the <b>means of the vertical distributions</b>:
+                \[
+                    \text{Regression line} = E(Y \mid X) = \beta_0 + \beta_1 X
+                \]
+            </li>
+            <li>
+                So regression is not "fitting a line to data" — it's <b>estimating the conditional expectation</b> \(E(Y \mid X)\)
+            </li>
+            <li>
+                Equivalently, the regression line minimizes the expected squared error:
+                \[
+                    \beta_0 + \beta_1 X = \arg\min_f \, E\left[(Y - f(X))^2\right]
+                \]
+            </li>
+        </ul>
+    <br>
+    <li>
+        Summary
+    </li>
+        <ul>
+            <li>
+                The full structure of regression:
+                \[
+                    \epsilon \sim N(0, \sigma^2)
+                \]
+                \[
+                    Y = \beta_0 + \beta_1 X + \epsilon
+                \]
+                \[
+                    Y \mid X \sim N(\beta_0 + \beta_1 X, \, \sigma^2)
+                \]
+                \[
+                    E(Y \mid X) = \beta_0 + \beta_1 X
+                \]
+                \[
+                    \text{Regression line} = E(Y \mid X)
+                \]
+            </li>
+            <li>
+                Once this perspective is understood, confidence intervals, t-tests, ANOVA, and \(R^2\) all follow naturally
+            </li>
+            <li>
+                This generalizes to GLM, Bayesian regression, and Gaussian process regression — all share the same structure
+            </li>
+        </ul>
+</ul>
+
+<br><br>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const canvas = document.getElementById("regressionCanvas");
+    const ctx = canvas.getContext("2d");
+    const W = canvas.width;
+    const H = canvas.height;
+
+    const pad = { top: 30, right: 30, bottom: 50, left: 50 };
+    const plotW = W - pad.left - pad.right;
+    const plotH = H - pad.top - pad.bottom;
+
+    // seeded random (mulberry32)
+    function mulberry32(a) {
+        return function() {
+            a |= 0; a = a + 0x6D2B79F5 | 0;
+            var t = Math.imul(a ^ a >>> 15, 1 | a);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        }
+    }
+    var rand = mulberry32(42);
+
+    // box-muller
+    function randn() {
+        var u = 0, v = 0;
+        while (u === 0) u = rand();
+        while (v === 0) v = rand();
+        return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+    }
+
+    // data params
+    var beta0 = 2, beta1 = 0.7, sigma = 1.5;
+    var n = 80;
+    var xMin = 0, xMax = 10;
+
+    // generate data
+    var dataX = [], dataY = [];
+    for (var i = 0; i < n; i++) {
+        var x = rand() * (xMax - xMin) + xMin;
+        var y = beta0 + beta1 * x + randn() * sigma;
+        dataX.push(x);
+        dataY.push(y);
+    }
+
+    // fit regression (least squares)
+    var sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+    for (var i = 0; i < n; i++) {
+        sumX += dataX[i]; sumY += dataY[i];
+        sumXY += dataX[i] * dataY[i]; sumXX += dataX[i] * dataX[i];
+    }
+    var b1 = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    var b0 = (sumY - b1 * sumX) / n;
+
+    // y range
+    var yMin = -1, yMax = 12;
+
+    // coordinate transforms
+    function toCanvasX(x) { return pad.left + (x - xMin) / (xMax - xMin) * plotW; }
+    function toCanvasY(y) { return pad.top + (1 - (y - yMin) / (yMax - yMin)) * plotH; }
+
+    var bodyStyle = getComputedStyle(document.body);
+    var textColor = bodyStyle.color || "#000";
+
+    // axes
+    ctx.strokeStyle = textColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top);
+    ctx.lineTo(pad.left, pad.top + plotH);
+    ctx.lineTo(pad.left + plotW, pad.top + plotH);
+    ctx.stroke();
+
+    // axis labels
+    ctx.fillStyle = textColor;
+    ctx.font = "14px PT Sans";
+    ctx.textAlign = "center";
+    for (var x = 0; x <= 10; x += 2) {
+        var cx = toCanvasX(x);
+        ctx.fillText(x, cx, pad.top + plotH + 20);
+        ctx.beginPath();
+        ctx.moveTo(cx, pad.top + plotH);
+        ctx.lineTo(cx, pad.top + plotH + 5);
+        ctx.stroke();
+    }
+    ctx.textAlign = "right";
+    for (var y = 0; y <= 10; y += 2) {
+        var cy = toCanvasY(y);
+        ctx.fillText(y, pad.left - 10, cy + 4);
+        ctx.beginPath();
+        ctx.moveTo(pad.left - 5, cy);
+        ctx.lineTo(pad.left, cy);
+        ctx.stroke();
+    }
+
+    ctx.textAlign = "center";
+    ctx.font = "15px PT Sans";
+    ctx.save();
+    ctx.translate(15, H / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.restore();
+
+    // scatter points
+    ctx.fillStyle = "rgba(70, 130, 180, 0.6)";
+    for (var i = 0; i < n; i++) {
+        ctx.beginPath();
+        ctx.arc(toCanvasX(dataX[i]), toCanvasY(dataY[i]), 3.5, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // regression line
+    ctx.strokeStyle = "rgba(220, 60, 60, 0.85)";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(toCanvasX(xMin), toCanvasY(b0 + b1 * xMin));
+    ctx.lineTo(toCanvasX(xMax), toCanvasY(b0 + b1 * xMax));
+    ctx.stroke();
+
+    // conditional distributions at X = 2, 5, 8
+    var distColors = [
+        "rgba(255, 140, 0, 0.55)",
+        "rgba(60, 180, 75, 0.55)",
+        "rgba(160, 80, 220, 0.55)"
+    ];
+    var xPoints = [2, 5, 8];
+
+    function gaussPdf(y, mu, s) {
+        return Math.exp(-0.5 * Math.pow((y - mu) / s, 2)) / (s * Math.sqrt(2 * Math.PI));
+    }
+
+    for (var k = 0; k < xPoints.length; k++) {
+        var xp = xPoints[k];
+        var mu = b0 + b1 * xp;
+        var cx = toCanvasX(xp);
+        var scale = 120;
+
+        ctx.fillStyle = distColors[k];
+        ctx.strokeStyle = distColors[k].replace("0.55", "0.9");
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, toCanvasY(yMin));
+        for (var y = yMin; y <= yMax; y += 0.05) {
+            var p = gaussPdf(y, mu, sigma);
+            ctx.lineTo(cx + p * scale, toCanvasY(y));
+        }
+        ctx.lineTo(cx, toCanvasY(yMax));
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // mean line
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = distColors[k].replace("0.55", "0.9");
+        ctx.beginPath();
+        ctx.moveTo(cx, toCanvasY(mu));
+        ctx.lineTo(cx + gaussPdf(mu, mu, sigma) * scale, toCanvasY(mu));
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // label
+        ctx.fillStyle = textColor;
+        ctx.font = "12px PT Sans";
+        ctx.textAlign = "center";
+        ctx.fillText("X=" + xp, cx, pad.top + plotH + 35);
+    }
+
+    // legend (bottom-right with semi-transparent white background)
+    ctx.font = "12px PT Sans";
+    ctx.textAlign = "left";
+    var legendW = 185, legendH = 58, legendPad = 8;
+    var lx = pad.left + plotW - legendW - 5;
+    var ly = pad.top + plotH - legendH - 5;
+
+    ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
+    ctx.fillRect(lx - legendPad, ly - legendPad, legendW + legendPad * 2, legendH + legendPad * 2);
+
+    ctx.fillStyle = "rgba(70, 130, 180, 0.6)";
+    ctx.beginPath(); ctx.arc(lx + 5, ly + 5, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = textColor;
+    ctx.fillText("Data points", lx + 15, ly + 9);
+
+    ctx.strokeStyle = "rgba(220, 60, 60, 0.85)";
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(lx, ly + 22); ctx.lineTo(lx + 12, ly + 22); ctx.stroke();
+    ctx.fillStyle = textColor;
+    ctx.fillText("E(Y | X) = regression line", lx + 15, ly + 26);
+
+    ctx.fillStyle = "rgba(255, 140, 0, 0.35)";
+    ctx.fillRect(lx, ly + 33, 12, 12);
+    ctx.fillStyle = textColor;
+    ctx.fillText("P(Y | X = x) distributions", lx + 15, ly + 43);
+});
+</script>
