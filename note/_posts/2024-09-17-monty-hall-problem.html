@@ -1,0 +1,116 @@
+---
+title:  "Monty Hall Problem"
+layout: post
+---
+
+
+<br>
+
+<ul>
+    <li>
+        Monty Hall Problem
+    </li>
+        <ul>
+            <li>
+                Behind 3 doors, there is one car and two goats
+            </li>
+            <li>
+                When the contestant picks a door, the host (Monty Hall) opens one of the remaining doors to reveal a goat
+            </li>
+            <li>
+                The contestant then decides whether to stick with their original choice or switch to the other remaining door
+            </li>
+            <br>
+            <li>
+                Event definitions
+            </li>
+                <ul>
+                    <li>
+                        \(A_1\): The car is behind door 1 (the door the contestant chose)
+                    </li>
+                    <li>
+                        \(A_2\): The car is behind door 2
+                    </li>
+                    <li>
+                        \(A_3\): The car is behind door 3
+                    </li>
+                    <li>
+                        \(B\): The host opens door 2 to reveal a goat
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Prior
+            </li>
+                <ul>
+                    <li>
+                        \(P(A_1) = P(A_2) = P(A_3) = \frac{1}{3}\)
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Likelihood
+            </li>
+                <ul>
+                    <li>
+                        \(P(B|A_1) = \frac{1}{2}\): If the car is behind door 1, the host randomly chooses between door 2 or 3 (\(\frac{1}{2}\) each)
+                    </li>
+                    <li>
+                        \(P(B|A_2) = 0\): If the car is behind door 2, the host cannot open door 2
+                    </li>
+                    <li>
+                        \(P(B|A_3) = 1\): If the car is behind door 3, the host must open door 2
+                    </li>
+                </ul>
+            <br>
+            <li>
+                What are \(P(A_1|B)\) and \(P(A_3|B)\)?
+            </li>
+            <br>
+            <li>
+                Total probability \(P(B)\)
+                \[
+                    \begin{aligned}
+                    B &= (B \cap A_1) \cup (B \cap A_2) \cup (B \cap A_3) \\
+                    \\
+                    P(B) &= P(B \cap A_1) + P(B \cap A_2) + P(B \cap A_3) \\
+                        \,\\
+                        &= P(B|A_1)P(A_1) + P(B|A_2)P(A_2) + P(B|A_3)P(A_3) \\
+                        \,\\
+                        &= \frac{1}{2} \times \frac{1}{3} + 0 \times \frac{1}{3} + 1 \times \frac{1}{3} \\
+                        \,\\
+                         &= \frac{1}{6} + 0 + \frac{1}{3} = \frac{1}{2}
+                    \end{aligned}
+                \]
+            <br>
+            <li>
+                Posterior
+            </li>
+                \[
+                    \begin{aligned}
+                    P(A_1|B) &= \frac{P(B|A_1)P(A_1)}{P(B)} = \frac{\frac{1}{2} \times \frac{1}{3}}{\frac{1}{2}} = \frac{\frac{1}{6}}{\frac{1}{2}} = \frac{1}{3}
+                    \\\\
+                    P(A_3|B) &= \frac{P(B|A_3)P(A_3)}{P(B)} = \frac{1 \times \frac{1}{3}}{\frac{1}{2}} = \frac{\frac{1}{3}}{\frac{1}{2}} = \frac{2}{3}
+                    \end{aligned}
+                \]
+            <br>
+            <li>
+                Conclusion: Switching is advantageous
+            </li>
+                <ul>
+                    <li>
+                        Probability of winning the car by staying with door 1: \(P(A_1|B) = \frac{1}{3}\)
+                    </li>
+                    <li>
+                        Probability of winning the car by switching to door 3: \(P(A_3|B) = \frac{2}{3}\)
+                    </li>
+                    <li>
+                        The host opening a door with a goat serves as new evidence (\(B\)) that updates the prior probability.
+                        Switching doubles the probability of winning
+                    </li>
+                </ul>
+        </ul>
+</ul>
+
+
+<br><br>
