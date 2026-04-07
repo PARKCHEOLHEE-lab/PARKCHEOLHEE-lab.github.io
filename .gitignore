@@ -9,4 +9,6 @@ _site
 ___*.html
 settings*.json
 
-.claude
+.claude/*
+!.claude/skills/
+__pycache__/

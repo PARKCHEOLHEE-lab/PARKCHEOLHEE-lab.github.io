@@ -1,0 +1,87 @@
+// --- Latent space post map ---
+
+$map-border-color: rgba(128, 128, 128, 0.15)
+$map-border-hover-color: rgba(128, 128, 128, 0.4)
+$map-control-color: #969696
+$map-text-color: $text-dark
+
+\:root
+  --label-brain: #f19cb0
+  --label-books: #00b341
+  --label-eyes: #1a1a1a
+  --label-wordballoon: #ff9500
+  --label-robot: #8b00ff
+  --label-storm: #ffe000
+  --label-testbed: #0011e3
+  --label-pin: #ff0000
+  --label-note: #888888
+  --edge-color: #{$map-border-color}
+  --edge-color-dim: rgba(128, 128, 128, 0.03)
+
+#post-map
+  position: relative
+  margin-top: 1em
+  margin-bottom: 1em
+  width: 100%
+
+#post-map svg
+  display: block
+
+.map-tooltip
+  position: absolute
+  background: #fff
+  border: 1px solid $map-border-color
+  padding: 6px 12px
+  font-size: calc(0.55rem + 0.15vw)
+  color: $map-text-color
+  text-align: left
+  pointer-events: none
+  opacity: 0
+  transition: opacity 0.12s
+  z-index: 10
+  line-height: 1.5
+  max-width: unquote("min(18rem, calc(100vw - 2rem))")
+  white-space: normal
+  overflow-wrap: break-word
+  hyphens: auto
+  -webkit-hyphens: auto
+
+.map-tooltip span
+  font-size: calc(0.45rem + 0.12vw)
+
+.zoom-controls
+  display: none
+
+.zoom-btn
+  width: 22px
+  height: 22px
+  border: 1px solid rgba(128, 128, 128, 0.2)
+  background: #fff
+  color: $map-control-color
+  font-size: 11px
+  line-height: 1
+  cursor: pointer
+  display: flex
+  align-items: center
+  justify-content: center
+  padding: 0
+  border-radius: 2px
+  &:hover
+    color: $map-text-color
+    border-color: $map-border-hover-color
+
+.zoom-btn-fit
+  font-size: 10px
+
+@media (max-width: 40em)
+  #post-map
+    margin-top: -1em
+
+  .zoom-controls
+    top: 8px
+    left: 8px
+
+  .zoom-btn
+    width: 29px
+    height: 29px
+    font-size: 13px
