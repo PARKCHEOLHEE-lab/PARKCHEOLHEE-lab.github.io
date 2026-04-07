@@ -63,10 +63,8 @@ For each post (or a small batch of posts), launch a sub-agent (Agent tool) that:
 
 1. **Reads `/tmp/post_list.txt`** to get the canonical candidate pool
 2. **Reads the post's full content** to understand what it's about
-3. **Proposes 0–5 related posts with justification** for each connection, using these two criteria:
-   - **Conceptual dependency**: Is there a prerequisite or follow-up relationship? (e.g., `likelihood` → `maximum-likelihood-estimation` → `bayes-theorem`)
-   - **Natural next read**: Would a reader who just finished this post naturally want to read the candidate next? The topics must be closely enough related that the connection feels obvious, not forced.
-4. **Challenges each proposed connection**: For every candidate, the agent must argue *against* the connection too. If the counter-argument is stronger, drop the candidate.
+3. **Proposes 0–5 related posts with justification** for each connection, using the relatedness criteria below
+4. **Briefly sanity-checks each proposal**: For every candidate, ask "would a reader actually benefit from seeing this link?" Only drop the candidate if you cannot articulate a concrete benefit to the reader.
 5. **Returns a final list** of slug(s) with one-line justifications
 
 **Important**: The sub-agent prompt MUST instruct the agent to read `/tmp/post_list.txt` for the candidate pool. A PreToolUse hook enforces this.
@@ -80,13 +78,15 @@ Compare the sub-agent's recommendation with the post's existing `related:` field
 ### Relatedness criteria (for the sub-agent)
 
 Connections must satisfy **at least one** of:
-- **Conceptual chain**: Post A teaches a concept that Post B builds upon (or vice versa)
+- **Conceptual chain**: Post A teaches a concept that Post B builds upon (or vice versa) (e.g., `likelihood` → `maximum-likelihood-estimation` → `bayes-theorem`)
 - **Same topic, different angle**: Both posts explore the same subject but from different perspectives (e.g., a theory note and its testbed implementation)
+- **Shared domain, complementary content**: Both posts belong to the same study area and a reader learning that area would benefit from reading both (e.g., `dot-product` and `intuitive-understanding-of-linear-algebra` are both linear algebra fundamentals; `dropout` and `normalization-layers` are both regularization/training techniques)
+- **Thematic resonance**: Posts that explore overlapping philosophical, literary, or reflective themes (e.g., existentialist novels like `nausea`, `no-exit`, `the-myth-of-sisyphus` share genuine thematic connections beyond just being "books")
 
 Connections must **NOT** be based on:
-- Superficial keyword overlap (e.g., both mention "Python" but cover unrelated topics)
-- Same author mood/style (e.g., two philosophical essays with no topical overlap)
-- Shared format (e.g., both are cheat sheets for completely different tools)
+- Superficial keyword overlap with no conceptual link (e.g., both mention "Python" but cover unrelated topics)
+- Shared format alone (e.g., both are cheat sheets for completely different tools)
+- Mere proximity in time (e.g., posted in the same week but unrelated topics)
 
 ### Sub-agent prompt template
 
