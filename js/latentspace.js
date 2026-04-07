@@ -15,6 +15,8 @@ function init_latentspace() {
     const MAX_ZOOM = 5;
     const VIEWPORT_PAD = 100;
     const IDLE_DELAY = 4000;
+    const DRIFT_RADIUS = 12;
+    const DRIFT_SPEED = 0.001;
 
     const container = document.getElementById("post-map");
     const is_touch_device = "ontouchstart" in window || navigator.maxTouchPoints > 0;
@@ -105,7 +107,7 @@ function init_latentspace() {
         });
 
     update_viewport();
-    svg.call(zoom);
+    svg.call(zoom).on("dblclick.zoom", null);
     svg.node().addEventListener("wheel", function(event) {
         if (active_hover_node || is_zoom_limit_wheel(event)) {
             event.preventDefault();
@@ -183,6 +185,10 @@ function init_latentspace() {
         nodes.forEach(function(d) {
             d.tx = d.x;
             d.ty = d.y;
+            d.drift_phase_x = Math.random() * Math.PI * 2;
+            d.drift_phase_y = Math.random() * Math.PI * 2;
+            d.drift_freq_x = 0.7 + Math.random() * 0.6;
+            d.drift_freq_y = 0.7 + Math.random() * 0.6;
         });
 
         const links = [];
@@ -290,6 +296,7 @@ function init_latentspace() {
         }
 
         fit_btn.on("click", function() { fit_all(500); });
+        svg.on("dblclick", function() { fit_all(500); });
 
         // --- Simulation ---
 
@@ -403,6 +410,11 @@ function init_latentspace() {
         // --- Tick ---
 
         function on_tick() {
+            nodes.forEach(function(d) {
+                d.x = Math.max(BASE_RADIUS, Math.min(width - BASE_RADIUS, d.x));
+                d.y = Math.max(BASE_RADIUS, Math.min(height - BASE_RADIUS, d.y));
+            });
+
             link_elements
                 .attr("x1", function(l) { return l.source.x; })
                 .attr("y1", function(l) { return l.source.y; })
@@ -515,6 +527,33 @@ function init_latentspace() {
         }
 
         idle_timer = setTimeout(function() { start_idle_anim(); }, IDLE_DELAY);
+
+        // --- Drift animation ---
+
+        let drift_start = performance.now();
+        let drift_raf = null;
+
+        function drift_tick() {
+            var t = (performance.now() - drift_start) * DRIFT_SPEED;
+            nodes.forEach(function(d) {
+                if (d.fx != null) return;
+                var base_x = d.nx * width;
+                var base_y = d.ny * height;
+                d.tx = Math.max(BASE_RADIUS, Math.min(width - BASE_RADIUS, base_x + Math.sin(t * d.drift_freq_x + d.drift_phase_x) * DRIFT_RADIUS));
+                d.ty = Math.max(BASE_RADIUS, Math.min(height - BASE_RADIUS, base_y + Math.sin(t * d.drift_freq_y + d.drift_phase_y) * DRIFT_RADIUS));
+            });
+
+            simulation.force("x").x(function(d) { return d.tx; });
+            simulation.force("y").y(function(d) { return d.ty; });
+
+            if (simulation.alpha() < 0.01) {
+                simulation.alpha(0.02).restart();
+            }
+
+            drift_raf = requestAnimationFrame(drift_tick);
+        }
+
+        drift_raf = requestAnimationFrame(drift_tick);
 
         // --- Resize ---
 
