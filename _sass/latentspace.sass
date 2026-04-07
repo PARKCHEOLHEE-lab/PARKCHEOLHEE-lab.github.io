@@ -20,8 +20,9 @@ $map-text-color: $text-dark
 
 #post-map
   position: relative
-  margin-top: -0.5em
+  margin-top: 1em
   margin-bottom: 1em
+  width: 100%
 
 #post-map svg
   display: block
@@ -33,6 +34,7 @@ $map-text-color: $text-dark
   padding: 6px 12px
   font-size: calc(0.55rem + 0.15vw)
   color: $map-text-color
+  text-align: left
   pointer-events: none
   opacity: 0
   transition: opacity 0.12s
@@ -48,12 +50,7 @@ $map-text-color: $text-dark
   font-size: calc(0.45rem + 0.12vw)
 
 .zoom-controls
-  position: absolute
-  top: 10px
-  left: 10px
-  display: flex
-  flex-direction: column
-  gap: 2px
+  display: none
 
 .zoom-btn
   width: 22px

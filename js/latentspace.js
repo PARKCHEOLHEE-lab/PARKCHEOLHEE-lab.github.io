@@ -10,11 +10,25 @@ function init_latentspace() {
     const EDGE_COLOR = root_style.getPropertyValue("--edge-color").trim();
     const EDGE_COLOR_DIM = root_style.getPropertyValue("--edge-color-dim").trim();
 
+    const LABEL_EMOJIS = {
+        "Brain": "/emoji/brain.png",
+        "Books": "/emoji/books.png",
+        "Eyes": "/emoji/eyes.png",
+        "Wordballoon": "/emoji/wordballoon.png",
+        "Robot": "/emoji/robot.png",
+        "Storm": "/emoji/storm.png",
+        "Testbed": "/emoji/dna.png",
+        "Pin": "/emoji/pin.png",
+        "Note": "/emoji/default.png"
+    };
+
     const BASE_RADIUS = 3;
     const MIN_ZOOM = 0.8;
     const MAX_ZOOM = 5;
     const VIEWPORT_PAD = 100;
     const IDLE_DELAY = 4000;
+    const IDLE_WALK_HIGHLIGHT_DURATION = 2500;
+    const IDLE_WALK_TRANSITION_DELAY = 2500;
     const DRIFT_RADIUS = 12;
     const DRIFT_SPEED = 0.001;
 
@@ -32,10 +46,18 @@ function init_latentspace() {
 
     function get_map_dimensions() {
         const container_width = Math.max(container.clientWidth || 0, 280);
-        const map_top = container.getBoundingClientRect().top;
+        var map_top = 0;
+        var el = container;
+        while (el) { map_top += el.offsetTop; el = el.offsetParent; }
         const footer = document.querySelector("body > footer");
         const footer_height = footer ? footer.offsetHeight : 0;
-        const available_height = window.innerHeight - map_top - footer_height;
+        var below_height = 0;
+        var sibling = container.nextSibling;
+        while (sibling) {
+            if (sibling.offsetHeight) below_height += sibling.offsetHeight;
+            sibling = sibling.nextSibling;
+        }
+        const available_height = window.innerHeight - map_top - below_height - footer_height;
         return { width: container_width, height: Math.max(available_height, 260) };
     }
 
@@ -133,11 +155,13 @@ function init_latentspace() {
         const el = tooltip.node();
         el.style.width = "";
         tooltip
-            .html("<strong>" + d.title + "</strong><br><span style='color:" + dot_color(d) + "'>" + label + "</span>")
+            .html("<strong>" + d.title + "</strong><br><span style='display:inline-flex;align-items:center;white-space:nowrap'><img src='" + (LABEL_EMOJIS[label] || "/emoji/default.png") + "' style='width:1em;height:1em;margin-right:0.3em'><span>" + label + "</span></span>")
             .style("opacity", 1);
 
+        const label_row = el.querySelector("span");
+        const min_width = label_row ? label_row.offsetWidth : 0;
         const full_h = el.offsetHeight;
-        let lo = 0, hi = el.offsetWidth;
+        let lo = min_width, hi = el.offsetWidth;
         while (hi - lo > 1) {
             const mid = (lo + hi) / 2;
             el.style.width = mid + "px";
@@ -243,6 +267,7 @@ function init_latentspace() {
                 .attr("stroke-width", function() { return 0.5 / current_zoom.k; });
 
             tooltip.style("opacity", 0);
+            active_hover_node = null;
         }
 
         // --- Zoom fit ---
@@ -457,7 +482,7 @@ function init_latentspace() {
         }
 
         function start_idle_anim() {
-            if (user_interacting) return;
+            if (user_interacting || active_hover_node) return;
             idle_anim_running = true;
             idle_walk();
         }
@@ -465,6 +490,7 @@ function init_latentspace() {
         function idle_highlight_node(d) {
             if (!idle_anim_running || user_interacting) return;
 
+            active_hover_node = d;
             const connected = get_connected_slugs(d);
 
             dot_elements.transition("idle").duration(400)
@@ -522,8 +548,8 @@ function init_latentspace() {
                     } else {
                         idle_walk();
                     }
-                }, 500);
-            }, 2500);
+                }, IDLE_WALK_TRANSITION_DELAY);
+            }, IDLE_WALK_HIGHLIGHT_DURATION);
         }
 
         idle_timer = setTimeout(function() { start_idle_anim(); }, IDLE_DELAY);

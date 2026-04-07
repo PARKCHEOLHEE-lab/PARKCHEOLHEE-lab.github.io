@@ -6,8 +6,16 @@ last_modified_at: ---------
 mathjax: true
 ---
 
-<div id="post-map"></div>
+<br>
+
+<div class="article">
+    I hope this page itself can function as a latent space, where each note or project acts as a latent vector&mdash;and through their combinations, both similar and unexpected notions may emerge, revealing something interesting. In a latent space, nearby points share underlying structure; points far apart may still be interpolated, producing meaningful transitions that were never explicitly written. The same should hold here.
+    <div id="post-map"></div>
+    Each post is fed through an embedding model to produce a high-dimensional vector, then projected onto two dimensions via UMAP. Posts that share similar content land near each other; edges between nodes mark explicitly related posts. But the space between nodes matters just as much&mdash;it is where unwritten posts might live, where two distant topics could meet and produce a thought that neither contains alone. Hover or tap to wander.
+</div>
+
+<br><br>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="/js/latentspace.js"></script>
-<script>init_latentspace();</script>
+<script>document.fonts.ready.then(function() { init_latentspace(); });</script>
