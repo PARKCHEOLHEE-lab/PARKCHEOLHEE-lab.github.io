@@ -1,0 +1,2581 @@
+[
+  {
+    "title": "CVs",
+    "slug": "cvs",
+    "url": "/cvs/",
+    "category": "note",
+    "x": 0.5462,
+    "y": 0.4884,
+    "label": "Pin",
+    "connected": [
+      "reading-list",
+      "voxels-to-graph",
+      "wave-function-collapse",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "latent-shapes"
+    ]
+  },
+  {
+    "title": "Reading List",
+    "slug": "reading-list",
+    "url": "/reading-list/",
+    "category": "note",
+    "x": 0.4363,
+    "y": 0.382,
+    "label": "Pin",
+    "connected": [
+      "voxels-to-graph",
+      "mass-gans",
+      "synthesized-skyscrapers",
+      "office-layout-generation-agents",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "SDW 2020",
+    "slug": "sdw2020",
+    "url": "/sdw2020/",
+    "category": "note",
+    "x": 0.17,
+    "y": 0.8324,
+    "label": "Note",
+    "connected": [
+      "wsic",
+      "three-loaders",
+      "drafting-with-ai",
+      "crisis-discourse-of-samsung",
+      "secure-room-in-seoul"
+    ]
+  },
+  {
+    "title": "git Commands Cheat Sheet",
+    "slug": "useful-git-commands",
+    "url": "/useful-git-commands/",
+    "category": "note",
+    "x": 0.4461,
+    "y": 0.9674,
+    "label": "Note",
+    "connected": [
+      "docker-cli-cheat-sheet",
+      "ssh-keygen-shortcut",
+      "block-commit",
+      "claude-code-cheat-sheet",
+      "testing-with-github-actions"
+    ]
+  },
+  {
+    "title": "rhino3dm",
+    "slug": "rhino3dm",
+    "url": "/rhino3dm/",
+    "category": "note",
+    "x": 0.3682,
+    "y": 0.7228,
+    "label": "Note",
+    "connected": [
+      "drafting-with-ai",
+      "three-geometries",
+      "space-syntax",
+      "dynamic-mesh-fence",
+      "p2m"
+    ]
+  },
+  {
+    "title": ".wslconfig",
+    "slug": "wslconfig",
+    "url": "/wslconfig/",
+    "category": "note",
+    "x": 0.0442,
+    "y": 0.6913,
+    "label": "Note",
+    "connected": [
+      "wasm",
+      "docker-cli-cheat-sheet",
+      "just-my-code",
+      "wsic",
+      "wave-function-collapse"
+    ]
+  },
+  {
+    "title": "*.ghpy, *.ghuser compile",
+    "slug": "ghpy-ghuser-compile",
+    "url": "/ghpy-ghuser-compile/",
+    "category": "note",
+    "x": 0.4644,
+    "y": 0.7778,
+    "label": "Note",
+    "connected": [
+      "ghpythonutils",
+      "ghdoc",
+      "mass-generator",
+      "rhino3dm",
+      "voxels-to-graph"
+    ]
+  },
+  {
+    "title": "Inverse Design",
+    "slug": "inverse-design",
+    "url": "/inverse-design/",
+    "category": "note",
+    "x": 0.4737,
+    "y": 0.3779,
+    "label": "Storm",
+    "connected": [
+      "voxels-to-graph",
+      "mass-gans",
+      "reading-list",
+      "synthesized-skyscrapers",
+      "building-gan"
+    ]
+  },
+  {
+    "title": "Dot Product",
+    "slug": "dot-product",
+    "url": "/dot-product/",
+    "category": "note",
+    "x": 0.0254,
+    "y": 0.309,
+    "label": "Note",
+    "connected": [
+      "cosine-similarity",
+      "intuitive-understanding-of-linear-algebra",
+      "plane-equation",
+      "math-notation-cheat-sheet",
+      "mathematics-for-machine-learning"
+    ]
+  },
+  {
+    "title": "Non-linearity",
+    "slug": "non-linearity",
+    "url": "/non-linearity/",
+    "category": "note",
+    "x": 0.2212,
+    "y": 0.2536,
+    "label": "Note",
+    "connected": [
+      "linear-interpolation",
+      "maximum-likelihood-estimation",
+      "intuitive-understanding-of-linear-algebra",
+      "poly-inr",
+      "chain-rule"
+    ]
+  },
+  {
+    "title": "Chain Rule",
+    "slug": "chain-rule",
+    "url": "/chain-rule/",
+    "category": "note",
+    "x": 0.3499,
+    "y": 0.1091,
+    "label": "Note",
+    "connected": [
+      "optimizers",
+      "maximum-likelihood-estimation",
+      "gradient-accumulation",
+      "numerical-differentitation-for-autograd"
+    ]
+  },
+  {
+    "title": "Cosine Similarity",
+    "slug": "cosine-similarity",
+    "url": "/cosine-similarity/",
+    "category": "note",
+    "x": 0.0121,
+    "y": 0.309,
+    "label": "Note",
+    "connected": [
+      "linear-interpolation",
+      "plane-equation",
+      "math-notation-cheat-sheet",
+      "intuitive-understanding-of-linear-algebra"
+    ]
+  },
+  {
+    "title": "Dropout",
+    "slug": "dropout",
+    "url": "/dropout/",
+    "category": "note",
+    "x": 0.4204,
+    "y": 0.1254,
+    "label": "Note",
+    "connected": [
+      "fancy-indexing-cheat-sheet",
+      "gumbel-softmax",
+      "voxels-to-graph",
+      "register_buffer",
+      "setting-different-learning-rates-within-an-optimizer"
+    ]
+  },
+  {
+    "title": "Generative Adversarial Networks",
+    "slug": "gan",
+    "url": "/gan/",
+    "category": "note",
+    "x": 0.3036,
+    "y": 0.2348,
+    "label": "Brain",
+    "connected": [
+      "conditional-gan",
+      "mass-gans",
+      "geometric-deep-learning",
+      "reading-list",
+      "voxels-to-graph"
+    ]
+  },
+  {
+    "title": "Optimizers",
+    "slug": "optimizers",
+    "url": "/optimizers/",
+    "category": "note",
+    "x": 0.3606,
+    "y": 0.0819,
+    "label": "Note",
+    "connected": [
+      "gradient-accumulation",
+      "representation-learning",
+      "numerical-differentitation-for-autograd",
+      "gradient-penalty"
+    ]
+  },
+  {
+    "title": "super()",
+    "slug": "super",
+    "url": "/super/",
+    "category": "note",
+    "x": 0.6531,
+    "y": 0.7906,
+    "label": "Note",
+    "connected": [
+      "metaclass",
+      "inspect-getsource",
+      "decorator",
+      "shapely-geometry-inheritance",
+      "scriptcontext-sticky"
+    ]
+  },
+  {
+    "title": "단순함의 법칙",
+    "slug": "the-laws-of-simplicity",
+    "url": "/the-laws-of-simplicity/",
+    "category": "note",
+    "x": 0.83,
+    "y": 0.1527,
+    "label": "Books",
+    "connected": [
+      "truth",
+      "spurting",
+      "qq",
+      "capability-overhang",
+      "human-action"
+    ]
+  },
+  {
+    "title": "decorator",
+    "slug": "decorator",
+    "url": "/decorator/",
+    "category": "note",
+    "x": 0.6814,
+    "y": 0.75,
+    "label": "Note",
+    "connected": [
+      "q-sample",
+      "mcp-related",
+      "metaclass",
+      "numerical-differentitation-for-autograd"
+    ]
+  },
+  {
+    "title": "Linear Interpolation",
+    "slug": "linear-interpolation",
+    "url": "/linear-interpolation/",
+    "category": "note",
+    "x": 0.2179,
+    "y": 0.2853,
+    "label": "Note",
+    "connected": [
+      "poly-inr",
+      "extrapolation",
+      "latent-shapes",
+      "latent-points"
+    ]
+  },
+  {
+    "title": "mass test",
+    "slug": "mass-test",
+    "url": "/mass-test/",
+    "category": "note",
+    "x": 0.5136,
+    "y": 0.5996,
+    "label": "Note",
+    "connected": [
+      "apartment",
+      "three-loaders",
+      "inverse-design",
+      "tower-crane-arrangement",
+      "plot-shape-estimator"
+    ]
+  },
+  {
+    "title": "Conditional Generative Adversarial Nets",
+    "slug": "conditional-gan",
+    "url": "/conditional-gan/",
+    "category": "note",
+    "x": 0.3126,
+    "y": 0.2442,
+    "label": "Brain",
+    "connected": [
+      "geometric-deep-learning",
+      "reading-list",
+      "mass-gans",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "Intersection over Union (IoU)",
+    "slug": "intersection-over-union-iou",
+    "url": "/intersection-over-union-iou/",
+    "category": "note",
+    "x": 0.0337,
+    "y": 0.1891,
+    "label": "Note",
+    "connected": [
+      "wasserstein-distance",
+      "kl-divergence",
+      "cosine-similarity",
+      "geometric-deep-learning",
+      "deep-sdf"
+    ]
+  },
+  {
+    "title": "Label Smoothing",
+    "slug": "label-smoothing",
+    "url": "/label-smoothing/",
+    "category": "note",
+    "x": 0.2315,
+    "y": 0.0945,
+    "label": "Note",
+    "connected": [
+      "gradient-penalty",
+      "gumbel-softmax",
+      "machine-learning-students-overfit-to-overfitting",
+      "maximum-likelihood-estimation",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "ChatGPT Custom Instructions",
+    "slug": "chat-gpt-custom-instructions",
+    "url": "/chat-gpt-custom-instructions/",
+    "category": "note",
+    "x": 0.737,
+    "y": 0.2483,
+    "label": "Note",
+    "connected": [
+      "capability-overhang",
+      "office-layout-generation-agents",
+      "truth",
+      "hallucination-is-a-feature",
+      "claude-code-cheat-sheet"
+    ]
+  },
+  {
+    "title": "DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation",
+    "slug": "deep-sdf",
+    "url": "/deep-sdf/",
+    "category": "note",
+    "x": 0.351,
+    "y": 0.3323,
+    "label": "Brain",
+    "connected": [
+      "latent-shapes",
+      "exploring-generative-3d-shapes-using-autoencoder-networks",
+      "synthesized-skyscrapers",
+      "representation-learning",
+      "auto-encoding-variational-bayes"
+    ]
+  },
+  {
+    "title": "Skip Connection",
+    "slug": "skip-connection",
+    "url": "/skip-connection/",
+    "category": "note",
+    "x": 0.4897,
+    "y": 0.1918,
+    "label": "Note",
+    "connected": [
+      "attention-is-all-you-need",
+      "u-net",
+      "inductive-bias",
+      "chain-rule",
+      "autoencoder"
+    ]
+  },
+  {
+    "title": "docker CLI Cheat Sheet",
+    "slug": "docker-cli-cheat-sheet",
+    "url": "/docker-cli-cheat-sheet/",
+    "category": "note",
+    "x": 0.4192,
+    "y": 0.9496,
+    "label": "Note",
+    "connected": [
+      "claude-code-cheat-sheet",
+      "testing-with-github-actions",
+      "secrets-in-github-actions",
+      "ssh-keygen-shortcut"
+    ]
+  },
+  {
+    "title": "Mathematics for Machine Learning",
+    "slug": "mathematics-for-machine-learning",
+    "url": "/mathematics-for-machine-learning/",
+    "category": "note",
+    "x": 0.1224,
+    "y": 0.3463,
+    "label": "Books",
+    "connected": [
+      "intuitive-understanding-of-linear-algebra",
+      "math-notation-cheat-sheet",
+      "local-coordinate-system",
+      "pca"
+    ]
+  },
+  {
+    "title": "Weisfeiler and Leman Go Neural: Higher-order Graph Neural Networks",
+    "slug": "gnn",
+    "url": "/gnn/",
+    "category": "note",
+    "x": 0.2959,
+    "y": 0.309,
+    "label": "Brain",
+    "connected": [
+      "polygon-segmentation",
+      "poly-inr",
+      "voxels-to-graph",
+      "representation-learning",
+      "building-gan"
+    ]
+  },
+  {
+    "title": "Machine Learning Students Overfit to Overfitting",
+    "slug": "machine-learning-students-overfit-to-overfitting",
+    "url": "/machine-learning-students-overfit-to-overfitting/",
+    "category": "note",
+    "x": 0.3585,
+    "y": 0.1799,
+    "label": "Brain",
+    "connected": [
+      "representation-learning",
+      "extrapolation",
+      "gan",
+      "maximum-likelihood-estimation",
+      "inductive-bias"
+    ]
+  },
+  {
+    "title": "Metrics",
+    "slug": "metrics",
+    "url": "/metrics/",
+    "category": "note",
+    "x": 0.1319,
+    "y": 0.1002,
+    "label": "Note",
+    "connected": [
+      "math-notation-cheat-sheet",
+      "inverse-design",
+      "inductive-bias",
+      "machine-learning-students-overfit-to-overfitting",
+      "polygon-segmentation"
+    ]
+  },
+  {
+    "title": "Intuitions about Transformer",
+    "slug": "intuition-about-transformer",
+    "url": "/intuition-about-transformer/",
+    "category": "note",
+    "x": 0.5396,
+    "y": 0.2699,
+    "label": "Note",
+    "connected": [
+      "attention-is-all-you-need",
+      "attention-attention",
+      "reading-list",
+      "inductive-bias",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "Attention? Attention!",
+    "slug": "attention-attention",
+    "url": "/attention-attention/",
+    "category": "note",
+    "x": 0.5045,
+    "y": 0.2674,
+    "label": "Eyes",
+    "connected": [
+      "attention-is-all-you-need",
+      "inductive-bias",
+      "reading-list",
+      "conditional-gan"
+    ]
+  },
+  {
+    "title": "Attention Is All You Need",
+    "slug": "attention-is-all-you-need",
+    "url": "/attention-is-all-you-need/",
+    "category": "note",
+    "x": 0.4978,
+    "y": 0.2603,
+    "label": "Brain",
+    "connected": [
+      "inductive-bias",
+      "poly-inr",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "Testing with Github Actions",
+    "slug": "testing-with-github-actions",
+    "url": "/testing-with-github-actions/",
+    "category": "note",
+    "x": 0.4801,
+    "y": 0.8748,
+    "label": "Note",
+    "connected": [
+      "secrets-in-github-actions",
+      "ghpythonutils",
+      "debugvisualizer-for-geometry",
+      "landbook-diffusion-pipeline",
+      "nohup"
+    ]
+  },
+  {
+    "title": "Linear Algebra for Programmers (프로그래머를 위한 선형대수)",
+    "slug": "intuitive-understanding-of-linear-algebra",
+    "url": "/intuitive-understanding-of-linear-algebra/",
+    "category": "note",
+    "x": 0.1142,
+    "y": 0.3412,
+    "label": "Books",
+    "connected": [
+      "math-notation-cheat-sheet",
+      "pca"
+    ]
+  },
+  {
+    "title": "How to pivot to a Machine Learning engineer?",
+    "slug": "how-to-pivot-to-a-machine-learning-engineer",
+    "url": "/how-to-pivot-to-a-machine-learning-engineer/",
+    "category": "note",
+    "x": 0.5859,
+    "y": 0.2186,
+    "label": "Eyes",
+    "connected": [
+      "inductive-bias",
+      "office-layout-generation-agents",
+      "maximum-likelihood-estimation",
+      "representation-learning",
+      "math-notation-cheat-sheet"
+    ]
+  },
+  {
+    "title": "Autoencoder",
+    "slug": "autoencoder",
+    "url": "/autoencoder/",
+    "category": "note",
+    "x": 0.3556,
+    "y": 0.2827,
+    "label": "Note",
+    "connected": [
+      "auto-encoding-variational-bayes",
+      "exploring-generative-3d-shapes-using-autoencoder-networks",
+      "representation-learning",
+      "attention-is-all-you-need",
+      "gan"
+    ]
+  },
+  {
+    "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
+    "slug": "u-net",
+    "url": "/u-net/",
+    "category": "note",
+    "x": 0.4418,
+    "y": 0.2733,
+    "label": "Brain",
+    "connected": [
+      "poly-inr",
+      "representation-learning",
+      "attention-is-all-you-need",
+      "conditional-gan",
+      "exploring-generative-3d-shapes-using-autoencoder-networks"
+    ]
+  },
+  {
+    "title": "Shapely geometry inheritance",
+    "slug": "shapely-geometry-inheritance",
+    "url": "/shapely-geometry-inheritance/",
+    "category": "note",
+    "x": 0.2229,
+    "y": 0.4833,
+    "label": "Note",
+    "connected": [
+      "polygon-segmentation",
+      "space-syntax",
+      "three-geometries",
+      "dynamic-mesh-fence",
+      "quadtree"
+    ]
+  },
+  {
+    "title": "Nausea (구토)",
+    "slug": "nausea",
+    "url": "/nausea/",
+    "category": "note",
+    "x": 0.9797,
+    "y": 0.1178,
+    "label": "Books",
+    "connected": [
+      "no-exit",
+      "unbearable-lightness-of-being",
+      "razors-edge",
+      "distraction",
+      "the-myth-of-sisyphus"
+    ]
+  },
+  {
+    "title": "You Are NOT Dumb, You Just Lack the Prerequisites",
+    "slug": "you-are-not-dumb-you-just-lack-the-prerequisites",
+    "url": "/you-are-not-dumb-you-just-lack-the-prerequisites/",
+    "category": "note",
+    "x": 0.7898,
+    "y": 0.3542,
+    "label": "Eyes",
+    "connected": [
+      "capability-overhang",
+      "good-refactoring-vs-bad-refactoring",
+      "programmers-are-like",
+      "how-to-pivot-to-a-machine-learning-engineer",
+      "truth"
+    ]
+  },
+  {
+    "title": "LDLM",
+    "slug": "ldlm",
+    "url": "/ldlm/",
+    "category": "note",
+    "x": 0.5172,
+    "y": 0.3962,
+    "label": "Storm",
+    "connected": [
+      "reading-list",
+      "_2025-01-09-neural-discrete-representation-learning",
+      "layout-vlm",
+      "building-gan",
+      "office-layout-generation-agents"
+    ]
+  },
+  {
+    "title": "?",
+    "slug": "q",
+    "url": "/q/",
+    "category": "note",
+    "x": 0.815,
+    "y": 0.0853,
+    "label": "Wordballoon",
+    "connected": [
+      "capability-overhang",
+      "snow-country",
+      "finding-w",
+      "unbearable-lightness-of-being",
+      "qq"
+    ]
+  },
+  {
+    "title": "Setting different learning rates within an optimizer",
+    "slug": "setting-different-learning-rates-within-an-optimizer",
+    "url": "/setting-different-learning-rates-within-an-optimizer/",
+    "category": "note",
+    "x": 0.4127,
+    "y": 0.0708,
+    "label": "Note",
+    "connected": [
+      "optimizers",
+      "register_buffer",
+      "gradient-accumulation",
+      "chain-rule"
+    ]
+  },
+  {
+    "title": "Good Refactoring vs. Bad Refactoring",
+    "slug": "good-refactoring-vs-bad-refactoring",
+    "url": "/good-refactoring-vs-bad-refactoring/",
+    "category": "note",
+    "x": 0.7901,
+    "y": 0.374,
+    "label": "Eyes",
+    "connected": [
+      "machine-learning-students-overfit-to-overfitting",
+      "writes-and-write-not",
+      "truth",
+      "chat-gpt-custom-instructions"
+    ]
+  },
+  {
+    "title": "Representation Learning: A Review and New Perspectives",
+    "slug": "representation-learning",
+    "url": "/representation-learning/",
+    "category": "note",
+    "x": 0.3948,
+    "y": 0.2438,
+    "label": "Brain",
+    "connected": [
+      "auto-encoding-variational-bayes",
+      "poly-inr",
+      "inductive-bias",
+      "extrapolation"
+    ]
+  },
+  {
+    "title": "Live Preview (ms-vscode.live-server)",
+    "slug": "live-preview",
+    "url": "/live-preview/",
+    "category": "note",
+    "x": 0.2216,
+    "y": 0.7178,
+    "label": "Note",
+    "connected": [
+      "debugvisualizer-for-geometry",
+      "just-my-code",
+      "github-pr-suggestion",
+      "landbook-rendering-with-diffusion",
+      "wasm"
+    ]
+  },
+  {
+    "title": "Thoughtless Thought",
+    "slug": "thoughtless-thought",
+    "url": "/thoughtless-thought/",
+    "category": "note",
+    "x": 0.9088,
+    "y": 0.0487,
+    "label": "Wordballoon",
+    "connected": [
+      "distraction",
+      "asdf",
+      "nausea",
+      "siddhartha",
+      "the-laws-of-simplicity"
+    ]
+  },
+  {
+    "title": "Math Notation Cheat Sheet",
+    "slug": "math-notation-cheat-sheet",
+    "url": "/math-notation-cheat-sheet/",
+    "category": "note",
+    "x": 0.1189,
+    "y": 0.3064,
+    "label": "Note",
+    "connected": [
+      "maximum-likelihood-estimation",
+      "non-linearity"
+    ]
+  },
+  {
+    "title": "ルックバック (룩백)",
+    "slug": "look-back",
+    "url": "/look-back/",
+    "category": "note",
+    "x": 0.5306,
+    "y": 0.0022,
+    "label": "Books",
+    "connected": [
+      "optimizers",
+      "qq",
+      "cvs",
+      "gradient-accumulation",
+      "human-action"
+    ]
+  },
+  {
+    "title": "Block Commit",
+    "slug": "block-commit",
+    "url": "/block-commit/",
+    "category": "note",
+    "x": 0.4459,
+    "y": 1.0,
+    "label": "Note",
+    "connected": [
+      "github-pr-suggestion",
+      "just-my-code",
+      "skip-connection",
+      "wave-function-collapse"
+    ]
+  },
+  {
+    "title": "哲希",
+    "slug": "pch",
+    "url": "/pch/",
+    "category": "note",
+    "x": 0.6055,
+    "y": 0.9411,
+    "label": "Wordballoon",
+    "connected": [
+      "drafting-with-ai",
+      "landbook-rendering-with-diffusion",
+      "ssh-keygen-shortcut",
+      "4o-image-generation",
+      "debugvisualizer-for-geometry"
+    ]
+  },
+  {
+    "title": "Siddhartha (싯다르타)",
+    "slug": "siddhartha",
+    "url": "/siddhartha/",
+    "category": "note",
+    "x": 0.9309,
+    "y": 0.1073,
+    "label": "Books",
+    "connected": [
+      "distraction",
+      "no-longer-human",
+      "words",
+      "snow-country",
+      "the-myth-of-sisyphus"
+    ]
+  },
+  {
+    "title": "Bayes'&nbsp Theorem",
+    "slug": "bayes-theorem",
+    "url": "/bayes-theorem/",
+    "category": "note",
+    "x": 0.2997,
+    "y": 0.167,
+    "label": "Note",
+    "connected": [
+      "likelihood",
+      "auto-encoding-variational-bayes",
+      "inductive-bias-2",
+      "representation-learning",
+      "capability-overhang"
+    ]
+  },
+  {
+    "title": "likelihood",
+    "slug": "likelihood",
+    "url": "/likelihood/",
+    "category": "note",
+    "x": 0.2512,
+    "y": 0.1806,
+    "label": "Note",
+    "connected": [
+      "maximum-likelihood-estimation",
+      "kl-divergence",
+      "regression-model",
+      "non-linearity"
+    ]
+  },
+  {
+    "title": "Maximum Likelihood Estimation",
+    "slug": "maximum-likelihood-estimation",
+    "url": "/maximum-likelihood-estimation/",
+    "category": "note",
+    "x": 0.2552,
+    "y": 0.1902,
+    "label": "Note",
+    "connected": [
+      "gan",
+      "auto-encoding-variational-bayes",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "딴 생각",
+    "slug": "distraction",
+    "url": "/distraction/",
+    "category": "note",
+    "x": 0.9216,
+    "y": 0.0647,
+    "label": "Wordballoon",
+    "connected": [
+      "razors-edge",
+      "snow-country",
+      "asdf"
+    ]
+  },
+  {
+    "title": "Polynomial Implicit Neural Representations For Large Diverse Datasets",
+    "slug": "poly-inr",
+    "url": "/poly-inr/",
+    "category": "note",
+    "x": 0.4092,
+    "y": 0.2563,
+    "label": "Brain",
+    "connected": [
+      "inductive-bias",
+      "auto-encoding-variational-bayes"
+    ]
+  },
+  {
+    "title": "Programmers are like",
+    "slug": "programmers-are-like",
+    "url": "/programmers-are-like/",
+    "category": "note",
+    "x": 0.725,
+    "y": 0.356,
+    "label": "Eyes",
+    "connected": [
+      "we-are-being-programmed",
+      "hallucination-is-a-feature",
+      "_2025-06-01-ai-super-week",
+      "writes-and-write-not"
+    ]
+  },
+  {
+    "title": "JustMyCode configuration",
+    "slug": "just-my-code",
+    "url": "/just-my-code/",
+    "category": "note",
+    "x": 0.399,
+    "y": 0.8529,
+    "label": "Note",
+    "connected": [
+      "debugvisualizer-for-geometry",
+      "testing-with-github-actions",
+      "claude-code-cheat-sheet",
+      "mcp-related"
+    ]
+  },
+  {
+    "title": "No Exit (닫힌 방)",
+    "slug": "no-exit",
+    "url": "/no-exit/",
+    "category": "note",
+    "x": 1.0,
+    "y": 0.1357,
+    "label": "Books",
+    "connected": [
+      "words",
+      "the-myth-of-sisyphus",
+      "razors-edge",
+      "no-longer-human"
+    ]
+  },
+  {
+    "title": "거짓말",
+    "slug": "thinking-of-lying",
+    "url": "/thinking-of-lying/",
+    "category": "note",
+    "x": 0.7786,
+    "y": 0.1822,
+    "label": "Wordballoon",
+    "connected": [
+      "truth",
+      "capability-overhang",
+      "about-behaviorism",
+      "chat-gpt-custom-instructions",
+      "inductive-bias-2"
+    ]
+  },
+  {
+    "title": "Inductive Bias",
+    "slug": "inductive-bias",
+    "url": "/inductive-bias/",
+    "category": "note",
+    "x": 0.437,
+    "y": 0.2124,
+    "label": "Note",
+    "connected": [
+      "inductive-bias-2",
+      "extrapolation"
+    ]
+  },
+  {
+    "title": "Inductive Bias",
+    "slug": "inductive-bias-2",
+    "url": "/inductive-bias-2/",
+    "category": "note",
+    "x": 0.4341,
+    "y": 0.2007,
+    "label": "Robot",
+    "connected": [
+      "representation-learning",
+      "extrapolation",
+      "capability-overhang",
+      "truth"
+    ]
+  },
+  {
+    "title": "HuggingFace Inference Endpoints",
+    "slug": "inference-endpoints",
+    "url": "/inference-endpoints/",
+    "category": "note",
+    "x": 0.4939,
+    "y": 0.3233,
+    "label": "Note",
+    "connected": [
+      "u-net",
+      "attention-is-all-you-need",
+      "latent-shapes",
+      "synthesized-skyscrapers",
+      "mass-gans"
+    ]
+  },
+  {
+    "title": "Grandient Accumulation",
+    "slug": "gradient-accumulation",
+    "url": "/gradient-accumulation/",
+    "category": "note",
+    "x": 0.3445,
+    "y": 0.0737,
+    "label": "Note",
+    "connected": [
+      "gradient-penalty",
+      "numerical-differentitation-for-autograd",
+      "mass-gans"
+    ]
+  },
+  {
+    "title": "Words (말)",
+    "slug": "words",
+    "url": "/words/",
+    "category": "note",
+    "x": 0.9744,
+    "y": 0.172,
+    "label": "Books",
+    "connected": [
+      "the-myth-of-sisyphus",
+      "no-longer-human",
+      "about-behaviorism",
+      "unbearable-lightness-of-being"
+    ]
+  },
+  {
+    "title": "Material Masking",
+    "slug": "material-masking",
+    "url": "/material-masking/",
+    "category": "note",
+    "x": 0.0966,
+    "y": 0.6303,
+    "label": "Note",
+    "connected": [
+      "latent-shapes",
+      "three-geometries",
+      "wasm",
+      "landbook-diffusion-pipeline",
+      "landbook-rendering-with-diffusion"
+    ]
+  },
+  {
+    "title": "20년 반도체맨이 말하는 삼성전자 위기론",
+    "slug": "crisis-discourse-of-samsung",
+    "url": "/crisis-discourse-of-samsung/",
+    "category": "note",
+    "x": 0.85,
+    "y": 0.231,
+    "label": "Eyes",
+    "connected": [
+      "_2025-06-01-ai-super-week",
+      "human-action",
+      "capability-overhang",
+      "truth",
+      "inductive-bias-2"
+    ]
+  },
+  {
+    "title": "Fancy Indexing Cheat Sheet",
+    "slug": "fancy-indexing-cheat-sheet",
+    "url": "/fancy-indexing-cheat-sheet/",
+    "category": "note",
+    "x": 0.2139,
+    "y": 0.3756,
+    "label": "Note",
+    "connected": [
+      "attention-is-all-you-need",
+      "openai-agents-sdk",
+      "intuitive-understanding-of-linear-algebra",
+      "attention-attention",
+      "latent-shapes"
+    ]
+  },
+  {
+    "title": "register_buffer",
+    "slug": "register_buffer",
+    "url": "/register_buffer/",
+    "category": "note",
+    "x": 0.4558,
+    "y": 0.0887,
+    "label": "Note",
+    "connected": [
+      "attention-is-all-you-need",
+      "data-parallel",
+      "fancy-indexing-cheat-sheet"
+    ]
+  },
+  {
+    "title": "Free-form Floor Plan Design using Differentiable Voronoi Diagram",
+    "slug": "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+    "url": "/free-form-floor-plan-design-using-differentiable-voronoi-diagram/",
+    "category": "note",
+    "x": 0.3859,
+    "y": 0.5419,
+    "label": "Brain",
+    "connected": [
+      "floor-plan-generation-with-voronoi-diagram",
+      "office-layout-generation-agents",
+      "building-gan",
+      "voxels-to-graph",
+      "layout-vlm"
+    ]
+  },
+  {
+    "title": "nohup",
+    "slug": "nohup",
+    "url": "/nohup/",
+    "category": "note",
+    "x": 0.5141,
+    "y": 0.8519,
+    "label": "Note",
+    "connected": [
+      "scriptcontext-sticky",
+      "nvitop",
+      "ghpythonutils",
+      "parallel-execution-within-gh"
+    ]
+  },
+  {
+    "title": "About Behaviorism (스키너의 행동심리학)",
+    "slug": "about-behaviorism",
+    "url": "/about-behaviorism/",
+    "category": "note",
+    "x": 0.9266,
+    "y": 0.2142,
+    "label": "Books",
+    "connected": [
+      "the-myth-of-sisyphus",
+      "human-action",
+      "truth",
+      "capability-overhang"
+    ]
+  },
+  {
+    "title": "Writes and Write-Nots",
+    "slug": "writes-and-write-not",
+    "url": "/writes-and-write-not/",
+    "category": "note",
+    "x": 0.7497,
+    "y": 0.3102,
+    "label": "Eyes",
+    "connected": [
+      "capability-overhang",
+      "hallucination-is-a-feature",
+      "_2025-06-01-ai-super-week"
+    ]
+  },
+  {
+    "title": "numerical differentiation for autograd",
+    "slug": "numerical-differentitation-for-autograd",
+    "url": "/numerical-differentitation-for-autograd/",
+    "category": "note",
+    "x": 0.3113,
+    "y": 0.0893,
+    "label": "Note",
+    "connected": [
+      "auto-encoding-variational-bayes",
+      "floor-plan-generation-with-voronoi-diagram"
+    ]
+  },
+  {
+    "title": "雪国 (설국)",
+    "slug": "snow-country",
+    "url": "/snow-country/",
+    "category": "note",
+    "x": 0.9616,
+    "y": 0.0782,
+    "label": "Books",
+    "connected": [
+      "razors-edge",
+      "unbearable-lightness-of-being",
+      "the-myth-of-sisyphus"
+    ]
+  },
+  {
+    "title": "Python Slack SDK",
+    "slug": "python-slack-sdk",
+    "url": "/python-slack-sdk/",
+    "category": "note",
+    "x": 0.3045,
+    "y": 0.7066,
+    "label": "Note",
+    "connected": [
+      "landbook-diffusion-pipeline",
+      "landbook-rendering-with-diffusion",
+      "drafting-with-ai",
+      "testing-with-github-actions",
+      "office-layout-generation-agents"
+    ]
+  },
+  {
+    "title": "Chamfer Distance",
+    "slug": "chamfer-distance",
+    "url": "/chamfer-distance/",
+    "category": "note",
+    "x": 0.0163,
+    "y": 0.2604,
+    "label": "Note",
+    "connected": [
+      "dot-product",
+      "standardization",
+      "wasserstein-distance",
+      "latent-points",
+      "image-to-3d-scene"
+    ]
+  },
+  {
+    "title": "Wedbush Top 10 Christmas Wish List for the Tech Sector in 2025",
+    "slug": "wedbush-top-10-christmas-list-for-the-tech-sector-in-2025",
+    "url": "/wedbush-top-10-christmas-list-for-the-tech-sector-in-2025/",
+    "category": "note",
+    "x": 0.0955,
+    "y": 0.8132,
+    "label": "Eyes",
+    "connected": [
+      "sdw2020",
+      "wsic",
+      "cvs",
+      "we-are-being-programmed",
+      "github-pr-suggestion"
+    ]
+  },
+  {
+    "title": "Auto-Encoding Variational Bayes",
+    "slug": "auto-encoding-variational-bayes",
+    "url": "/auto-encoding-variational-bayes/",
+    "category": "note",
+    "x": 0.3514,
+    "y": 0.2579,
+    "label": "Brain",
+    "connected": [
+      "exploring-generative-3d-shapes-using-autoencoder-networks",
+      "gan"
+    ]
+  },
+  {
+    "title": "KL-Divergence",
+    "slug": "kl-divergence",
+    "url": "/kl-divergence/",
+    "category": "note",
+    "x": 0.0906,
+    "y": 0.1847,
+    "label": "Note",
+    "connected": [
+      "wasserstein-distance",
+      "maximum-likelihood-estimation",
+      "math-notation-cheat-sheet"
+    ]
+  },
+  {
+    "title": "Hallucination is a feature not a bug",
+    "slug": "hallucination-is-a-feature",
+    "url": "/hallucination-is-a-feature/",
+    "category": "note",
+    "x": 0.6302,
+    "y": 0.2983,
+    "label": "Eyes",
+    "connected": [
+      "intuition-about-transformer",
+      "inverse-design",
+      "reading-list",
+      "inductive-bias",
+      "mass-gans"
+    ]
+  },
+  {
+    "title": "The Myth of Sisyphus (시지프 신화)",
+    "slug": "the-myth-of-sisyphus",
+    "url": "/the-myth-of-sisyphus/",
+    "category": "note",
+    "x": 0.9502,
+    "y": 0.1741,
+    "label": "Books",
+    "connected": [
+      "no-longer-human",
+      "unbearable-lightness-of-being"
+    ]
+  },
+  {
+    "title": "DataParallel",
+    "slug": "data-parallel",
+    "url": "/data-parallel/",
+    "category": "note",
+    "x": 0.4289,
+    "y": 0.4738,
+    "label": "Note",
+    "connected": [
+      "floor-plan-generation-with-voronoi-diagram",
+      "voxels-to-graph",
+      "building-gan",
+      "mass-gans",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram"
+    ]
+  },
+  {
+    "title": "ghdoc.Path",
+    "slug": "ghdoc",
+    "url": "/ghdoc/",
+    "category": "note",
+    "x": 0.4801,
+    "y": 0.7575,
+    "label": "Note",
+    "connected": [
+      "ghpythonutils",
+      "space-syntax",
+      "rhino3dm",
+      "dynamic-mesh-fence"
+    ]
+  },
+  {
+    "title": "Human Action (인간 행동)",
+    "slug": "human-action",
+    "url": "/human-action/",
+    "category": "note",
+    "x": 0.8734,
+    "y": 0.2075,
+    "label": "Books",
+    "connected": [
+      "truth",
+      "the-myth-of-sisyphus",
+      "capability-overhang"
+    ]
+  },
+  {
+    "title": "Building-GAN: Graph-Conditioned Architectural Volumetric Design Generation",
+    "slug": "building-gan",
+    "url": "/building-gan/",
+    "category": "note",
+    "x": 0.4052,
+    "y": 0.4464,
+    "label": "Brain",
+    "connected": [
+      "voxels-to-graph",
+      "mass-gans",
+      "voxelate",
+      "geometric-deep-learning"
+    ]
+  },
+  {
+    "title": "pytest.raises",
+    "slug": "pytest-raises",
+    "url": "/pytest-raises/",
+    "category": "note",
+    "x": 0.6255,
+    "y": 0.6801,
+    "label": "Note",
+    "connected": [
+      "openai-agents-sdk",
+      "testing-with-github-actions",
+      "inspect-getsource",
+      "subdivision-curve",
+      "ghpythonutils"
+    ]
+  },
+  {
+    "title": "scriptcontext.sticky",
+    "slug": "scriptcontext-sticky",
+    "url": "/scriptcontext-sticky/",
+    "category": "note",
+    "x": 0.5147,
+    "y": 0.8103,
+    "label": "Note",
+    "connected": [
+      "ghpythonutils",
+      "indexed-db",
+      "space-syntax",
+      "ghpy-ghuser-compile"
+    ]
+  },
+  {
+    "title": "Message Passing",
+    "slug": "message-passing",
+    "url": "/message-passing/",
+    "category": "note",
+    "x": 0.2668,
+    "y": 0.3203,
+    "label": "Note",
+    "connected": [
+      "gnn",
+      "gradient-accumulation",
+      "polygon-segmentation",
+      "chain-rule",
+      "skip-connection"
+    ]
+  },
+  {
+    "title": "w를 찾아서",
+    "slug": "finding-w",
+    "url": "/finding-w/",
+    "category": "note",
+    "x": 0.8049,
+    "y": 0.033,
+    "label": "Eyes",
+    "connected": [
+      "hallucination-is-a-feature",
+      "asdf",
+      "crisis-discourse-of-samsung",
+      "inverse-design"
+    ]
+  },
+  {
+    "title": "Gumbel-Softmax",
+    "slug": "gumbel-softmax",
+    "url": "/gumbel-softmax/",
+    "category": "note",
+    "x": 0.2379,
+    "y": 0.1311,
+    "label": "Note",
+    "connected": [
+      "gan",
+      "auto-encoding-variational-bayes",
+      "maximum-likelihood-estimation",
+      "non-linearity"
+    ]
+  },
+  {
+    "title": "??",
+    "slug": "qq",
+    "url": "/qq/",
+    "category": "note",
+    "x": 0.7499,
+    "y": 0.1443,
+    "label": "Wordballoon",
+    "connected": [
+      "truth",
+      "layout-vlm",
+      "capability-overhang",
+      "human-action"
+    ]
+  },
+  {
+    "title": "Wasserstein Distance (Earth Mover's Distance)",
+    "slug": "wasserstein-distance",
+    "url": "/wasserstein-distance/",
+    "category": "note",
+    "x": 0.082,
+    "y": 0.1878,
+    "label": "Note",
+    "connected": [
+      "gan",
+      "mass-gans",
+      "deep-sdf",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "Gradient Penalty",
+    "slug": "gradient-penalty",
+    "url": "/gradient-penalty/",
+    "category": "note",
+    "x": 0.3256,
+    "y": 0.0508,
+    "label": "Note",
+    "connected": [
+      "chain-rule",
+      "gan",
+      "poly-inr"
+    ]
+  },
+  {
+    "title": "Discrete Voronoi",
+    "slug": "discrete-voronoi",
+    "url": "/discrete-voronoi/",
+    "category": "note",
+    "x": 0.2538,
+    "y": 0.5574,
+    "label": "Note",
+    "connected": [
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "floor-plan-generation-with-voronoi-diagram",
+      "voxels-to-graph",
+      "voxelate",
+      "gumbel-softmax"
+    ]
+  },
+  {
+    "title": "we are being programmed",
+    "slug": "we-are-being-programmed",
+    "url": "/we-are-being-programmed/",
+    "category": "note",
+    "x": 0.7147,
+    "y": 0.3554,
+    "label": "Eyes",
+    "connected": [
+      "reading-list",
+      "truth",
+      "capability-overhang",
+      "office-layout-generation-agents"
+    ]
+  },
+  {
+    "title": "Two Points Perspective in threejs",
+    "slug": "two-points-perspective",
+    "url": "/two-points-perspective/",
+    "category": "note",
+    "x": 0.1243,
+    "y": 0.5616,
+    "label": "Note",
+    "connected": [
+      "three-geometries",
+      "plane-equation",
+      "local-coordinate-system",
+      "selectionbox",
+      "space-syntax"
+    ]
+  },
+  {
+    "title": "면도날",
+    "slug": "razors-edge",
+    "url": "/razors-edge/",
+    "category": "note",
+    "x": 0.9682,
+    "y": 0.0795,
+    "label": "Books",
+    "connected": [
+      "siddhartha"
+    ]
+  },
+  {
+    "title": "Half-Plane Clipping",
+    "slug": "half-plane-clipping",
+    "url": "/half-plane-clipping/",
+    "category": "note",
+    "x": 0.1069,
+    "y": 0.4853,
+    "label": "Note",
+    "connected": [
+      "p2m",
+      "plane-equation",
+      "local-coordinate-system",
+      "subdivision-curve",
+      "quadtree"
+    ]
+  },
+  {
+    "title": "Exploring Generative 3D Shapes Using Autoencoder Networks",
+    "slug": "exploring-generative-3d-shapes-using-autoencoder-networks",
+    "url": "/exploring-generative-3d-shapes-using-autoencoder-networks/",
+    "category": "note",
+    "x": 0.3422,
+    "y": 0.3565,
+    "label": "Brain",
+    "connected": [
+      "latent-shapes",
+      "representation-learning",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "4o Image Generation",
+    "slug": "4o-image-generation",
+    "url": "/4o-image-generation/",
+    "category": "note",
+    "x": 0.5682,
+    "y": 0.3501,
+    "label": "Eyes",
+    "connected": [
+      "reading-list",
+      "inverse-design",
+      "poly-inr",
+      "intuition-about-transformer",
+      "mass-gans"
+    ]
+  },
+  {
+    "title": "MCP-related",
+    "slug": "mcp-related",
+    "url": "/mcp-related/",
+    "category": "note",
+    "x": 0.5772,
+    "y": 0.7362,
+    "label": "Note",
+    "connected": [
+      "metaclass",
+      "office-layout-generation-agents",
+      "ghpythonutils",
+      "openai-agents-sdk",
+      "message-passing"
+    ]
+  },
+  {
+    "title": "extrapolation",
+    "slug": "extrapolation",
+    "url": "/extrapolation/",
+    "category": "note",
+    "x": 0.3884,
+    "y": 0.2063,
+    "label": "Robot",
+    "connected": [
+      "poly-inr",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "Latent Points",
+    "slug": "latent-points",
+    "url": "/latent-points/",
+    "category": "note",
+    "x": 0.2738,
+    "y": 0.4128,
+    "label": "Storm",
+    "connected": [
+      "latent-shapes",
+      "exploring-generative-3d-shapes-using-autoencoder-networks",
+      "deep-sdf",
+      "polygon-segmentation"
+    ]
+  },
+  {
+    "title": "OpenAI Agents SDK",
+    "slug": "openai-agents-sdk",
+    "url": "/openai-agents-sdk/",
+    "category": "note",
+    "x": 0.5767,
+    "y": 0.6668,
+    "label": "Note",
+    "connected": [
+      "office-layout-generation-agents",
+      "polygon-segmentation",
+      "geometric-deep-learning",
+      "metaclass"
+    ]
+  },
+  {
+    "title": "참을 수 없는 존재의 가벼움",
+    "slug": "unbearable-lightness-of-being",
+    "url": "/unbearable-lightness-of-being/",
+    "category": "note",
+    "x": 0.9344,
+    "y": 0.1441,
+    "label": "Books",
+    "connected": [
+      "spurting"
+    ]
+  },
+  {
+    "title": "secrets in Github Actions",
+    "slug": "secrets-in-github-actions",
+    "url": "/secrets-in-github-actions/",
+    "category": "note",
+    "x": 0.4793,
+    "y": 0.8899,
+    "label": "Note",
+    "connected": [
+      "useful-git-commands",
+      "ssh-keygen-shortcut",
+      "scriptcontext-sticky"
+    ]
+  },
+  {
+    "title": "Github PR Suggestion",
+    "slug": "github-pr-suggestion",
+    "url": "/github-pr-suggestion/",
+    "category": "note",
+    "x": 0.2535,
+    "y": 0.773,
+    "label": "Note",
+    "connected": [
+      "landbook-rendering-with-diffusion",
+      "chat-gpt-custom-instructions",
+      "drafting-with-ai",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "metaclass",
+    "slug": "metaclass",
+    "url": "/metaclass/",
+    "category": "note",
+    "x": 0.5916,
+    "y": 0.732,
+    "label": "Note",
+    "connected": [
+      "office-layout-generation-agents",
+      "chat-gpt-custom-instructions"
+    ]
+  },
+  {
+    "title": "truth",
+    "slug": "truth",
+    "url": "/truth/",
+    "category": "note",
+    "x": 0.7842,
+    "y": 0.2052,
+    "label": "Robot",
+    "connected": [
+      "capability-overhang",
+      "representation-learning"
+    ]
+  },
+  {
+    "title": "PyO3",
+    "slug": "pyo3",
+    "url": "/pyo3/",
+    "category": "note",
+    "x": 0.3783,
+    "y": 0.774,
+    "label": "Note",
+    "connected": [
+      "ghpythonutils",
+      "three-geometries",
+      "rhino3dm",
+      "mass-generator",
+      "debugvisualizer-for-geometry"
+    ]
+  },
+  {
+    "title": "AI의 진짜 똑똑함을 우리는 아직 모른다",
+    "slug": "capability-overhang",
+    "url": "/capability-overhang/",
+    "category": "note",
+    "x": 0.7675,
+    "y": 0.2311,
+    "label": "Eyes",
+    "connected": [
+      "representation-learning",
+      "_2025-06-01-ai-super-week"
+    ]
+  },
+  {
+    "title": "inspect.getsource",
+    "slug": "inspect-getsource",
+    "url": "/inspect-getsource/",
+    "category": "note",
+    "x": 0.6234,
+    "y": 0.7754,
+    "label": "Note",
+    "connected": [
+      "openai-agents-sdk",
+      "metaclass",
+      "ghpythonutils",
+      "debugvisualizer-for-geometry"
+    ]
+  },
+  {
+    "title": "SelectionBox",
+    "slug": "selectionbox",
+    "url": "/selectionbox/",
+    "category": "note",
+    "x": 0.1567,
+    "y": 0.611,
+    "label": "Note",
+    "connected": [
+      "three-geometries",
+      "latent-shapes",
+      "material-masking",
+      "three-loaders",
+      "live-preview"
+    ]
+  },
+  {
+    "title": "asdf",
+    "slug": "asdf",
+    "url": "/asdf/",
+    "category": "note",
+    "x": 0.8664,
+    "y": 0.0418,
+    "label": "Wordballoon",
+    "connected": [
+      "ego",
+      "razors-edge"
+    ]
+  },
+  {
+    "title": "인간 실격",
+    "slug": "no-longer-human",
+    "url": "/no-longer-human/",
+    "category": "note",
+    "x": 0.975,
+    "y": 0.1787,
+    "label": "Books",
+    "connected": [
+      "about-behaviorism"
+    ]
+  },
+  {
+    "title": "LayoutVLM: Differentiable Optimization of 3D Layout via Vision-Language Models",
+    "slug": "layout-vlm",
+    "url": "/layout-vlm/",
+    "category": "note",
+    "x": 0.4892,
+    "y": 0.4463,
+    "label": "Brain",
+    "connected": [
+      "office-layout-generation-agents",
+      "reading-list",
+      "floor-plan-generation-with-voronoi-diagram",
+      "building-gan"
+    ]
+  },
+  {
+    "title": "nvitop",
+    "slug": "nvitop",
+    "url": "/nvitop/",
+    "category": "note",
+    "x": 0.125,
+    "y": 0.9736,
+    "label": "Note",
+    "connected": [
+      "debugvisualizer-for-geometry",
+      "inference-endpoints",
+      "register_buffer",
+      "image-to-3d-scene"
+    ]
+  },
+  {
+    "title": "Principal Component Analysis",
+    "slug": "pca",
+    "url": "/pca/",
+    "category": "note",
+    "x": 0.078,
+    "y": 0.3403,
+    "label": "Note",
+    "connected": [
+      "dot-product",
+      "auto-encoding-variational-bayes",
+      "math-notation-cheat-sheet"
+    ]
+  },
+  {
+    "title": "wsic",
+    "slug": "wsic",
+    "url": "/wsic/",
+    "category": "note",
+    "x": 0.1896,
+    "y": 0.8483,
+    "label": "Wordballoon",
+    "connected": [
+      "three-loaders",
+      "wave-function-collapse",
+      "wasm"
+    ]
+  },
+  {
+    "title": "Plane Equation",
+    "slug": "plane-equation",
+    "url": "/plane-equation/",
+    "category": "note",
+    "x": 0.0926,
+    "y": 0.4415,
+    "label": "Note",
+    "connected": [
+      "local-coordinate-system",
+      "intuitive-understanding-of-linear-algebra",
+      "mathematics-for-machine-learning"
+    ]
+  },
+  {
+    "title": "standardization",
+    "slug": "standardization",
+    "url": "/standardization/",
+    "category": "note",
+    "x": 0.0959,
+    "y": 0.2444,
+    "label": "Note",
+    "connected": [
+      "regression-model",
+      "math-notation-cheat-sheet",
+      "pca",
+      "kl-divergence"
+    ]
+  },
+  {
+    "title": "q-sample",
+    "slug": "q-sample",
+    "url": "/q-sample/",
+    "category": "note",
+    "x": 0.2361,
+    "y": 0.6042,
+    "label": "Note",
+    "connected": [
+      "discrete-voronoi",
+      "live-preview",
+      "cvs",
+      "selectionbox"
+    ]
+  },
+  {
+    "title": "ssh-keygen shortcut",
+    "slug": "ssh-keygen-shortcut",
+    "url": "/ssh-keygen-shortcut/",
+    "category": "note",
+    "x": 0.4789,
+    "y": 0.9575,
+    "label": "Note",
+    "connected": [
+      "testing-with-github-actions",
+      "claude-code-cheat-sheet"
+    ]
+  },
+  {
+    "title": "ego",
+    "slug": "ego",
+    "url": "/ego/",
+    "category": "note",
+    "x": 0.817,
+    "y": 0.2656,
+    "label": "Eyes",
+    "connected": [
+      "_2025-06-01-ai-super-week",
+      "capability-overhang",
+      "crisis-discourse-of-samsung",
+      "truth",
+      "hallucination-is-a-feature"
+    ]
+  },
+  {
+    "title": "Intuitions about Diffusion Models",
+    "slug": "intuitions-about-diffusion-models",
+    "url": "/intuitions-about-diffusion-models/",
+    "category": "note",
+    "x": 0.18,
+    "y": 0.1819,
+    "label": "Note",
+    "connected": [
+      "regression-model",
+      "gan",
+      "extrapolation",
+      "reading-list",
+      "auto-encoding-variational-bayes"
+    ]
+  },
+  {
+    "title": "전력 질주",
+    "slug": "spurting",
+    "url": "/spurting/",
+    "category": "note",
+    "x": 0.8811,
+    "y": 0.1533,
+    "label": "Wordballoon",
+    "connected": [
+      "the-myth-of-sisyphus",
+      "human-action",
+      "siddhartha"
+    ]
+  },
+  {
+    "title": "Claude Code Cheat Sheet",
+    "slug": "claude-code-cheat-sheet",
+    "url": "/claude-code-cheat-sheet/",
+    "category": "note",
+    "x": 0.4135,
+    "y": 0.936,
+    "label": "Note",
+    "connected": [
+      "debugvisualizer-for-geometry",
+      "scriptcontext-sticky"
+    ]
+  },
+  {
+    "title": "WASM",
+    "slug": "wasm",
+    "url": "/wasm/",
+    "category": "note",
+    "x": 0.0735,
+    "y": 0.6765,
+    "label": "Note",
+    "connected": [
+      "latent-shapes",
+      "wave-function-collapse",
+      "indexed-db"
+    ]
+  },
+  {
+    "title": "Regression Model",
+    "slug": "regression-model",
+    "url": "/regression-model/",
+    "category": "note",
+    "x": 0.1956,
+    "y": 0.2095,
+    "label": "Note",
+    "connected": [
+      "maximum-likelihood-estimation",
+      "extrapolation",
+      "gan",
+      "non-linearity"
+    ]
+  },
+  {
+    "title": "IndexedDB",
+    "slug": "indexed-db",
+    "url": "/indexed-db/",
+    "category": "note",
+    "x": 0.1153,
+    "y": 0.6891,
+    "label": "Note",
+    "connected": [
+      "synthesized-skyscrapers",
+      "latent-shapes",
+      "three-geometries",
+      "drafting-with-ai"
+    ]
+  },
+  {
+    "title": "Neural Discrete Representation Learning",
+    "slug": "_2025-01-09-neural-discrete-representation-learning",
+    "url": "/_2025-01-09-neural-discrete-representation-learning/",
+    "category": "note",
+    "x": 0.4003,
+    "y": 0.2916,
+    "label": "Brain",
+    "connected": [
+      "representation-learning",
+      "auto-encoding-variational-bayes",
+      "poly-inr",
+      "deep-sdf",
+      "autoencoder"
+    ]
+  },
+  {
+    "title": "AI Super Week",
+    "slug": "_2025-06-01-ai-super-week",
+    "url": "/_2025-06-01-ai-super-week/",
+    "category": "note",
+    "x": 0.8155,
+    "y": 0.2733,
+    "label": "Eyes",
+    "connected": [
+      "representation-learning",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "Secure room in seoul",
+    "slug": "secure-room-in-seoul",
+    "url": "/secure-room-in-seoul/",
+    "category": "testbed",
+    "x": 0.1379,
+    "y": 0.7634,
+    "label": "Testbed",
+    "connected": [
+      "k-rooms-clusters",
+      "mass-generator",
+      "plot-shape-estimator",
+      "p2m",
+      "tower-crane-arrangement"
+    ]
+  },
+  {
+    "title": "Travelling salesman problem",
+    "slug": "travelling-salesman-problem",
+    "url": "/travelling-salesman-problem/",
+    "category": "testbed",
+    "x": 0.6427,
+    "y": 0.4892,
+    "label": "Testbed",
+    "connected": [
+      "the-selfish-gene",
+      "openai-agents-sdk",
+      "theater-sightlines",
+      "floor-plan-generation-with-voronoi-diagram",
+      "office-layout-generation-agents"
+    ]
+  },
+  {
+    "title": "Mass generator",
+    "slug": "mass-generator",
+    "url": "/mass-generator/",
+    "category": "testbed",
+    "x": 0.3159,
+    "y": 0.514,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "mass-gans",
+      "building-gan",
+      "synthesized-skyscrapers",
+      "plot-shape-estimator"
+    ]
+  },
+  {
+    "title": "Theater sightlines",
+    "slug": "theater-sightlines",
+    "url": "/theater-sightlines/",
+    "category": "testbed",
+    "x": 0.5111,
+    "y": 0.5446,
+    "label": "Testbed",
+    "connected": [
+      "tower-crane-arrangement",
+      "space-syntax",
+      "floor-plan-generation-with-voronoi-diagram",
+      "layout-vlm"
+    ]
+  },
+  {
+    "title": "Tower crane arrangement",
+    "slug": "tower-crane-arrangement",
+    "url": "/tower-crane-arrangement/",
+    "category": "testbed",
+    "x": 0.4905,
+    "y": 0.5552,
+    "label": "Testbed",
+    "connected": [
+      "floor-plan-generation-with-voronoi-diagram",
+      "k-rooms-clusters",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "apartment"
+    ]
+  },
+  {
+    "title": "Space syntax",
+    "slug": "space-syntax",
+    "url": "/space-syntax/",
+    "category": "testbed",
+    "x": 0.4427,
+    "y": 0.6291,
+    "label": "Testbed",
+    "connected": [
+      "three-loaders",
+      "k-rooms-clusters",
+      "dynamic-mesh-fence",
+      "voxelate",
+      "apartment"
+    ]
+  },
+  {
+    "title": "Subdivision curve",
+    "slug": "subdivision-curve",
+    "url": "/subdivision-curve/",
+    "category": "testbed",
+    "x": 0.6436,
+    "y": 0.5953,
+    "label": "Testbed",
+    "connected": [
+      "quadtree",
+      "numerical-differentitation-for-autograd",
+      "space-syntax",
+      "k-rooms-clusters"
+    ]
+  },
+  {
+    "title": "Dynamic mesh fence",
+    "slug": "dynamic-mesh-fence",
+    "url": "/dynamic-mesh-fence/",
+    "category": "testbed",
+    "x": 0.4207,
+    "y": 0.6234,
+    "label": "Testbed",
+    "connected": [
+      "three-loaders",
+      "latent-shapes",
+      "drafting-with-ai",
+      "mass-generator"
+    ]
+  },
+  {
+    "title": "Merry christmas",
+    "slug": "merry-christmass",
+    "url": "/merry-christmass/",
+    "category": "testbed",
+    "x": 0.6018,
+    "y": 0.5776,
+    "label": "Testbed",
+    "connected": [
+      "quadtree",
+      "latent-shapes",
+      "dynamic-mesh-fence",
+      "wave-function-collapse",
+      "three-geometries"
+    ]
+  },
+  {
+    "title": "Plot shape estimator",
+    "slug": "plot-shape-estimator",
+    "url": "/plot-shape-estimator/",
+    "category": "testbed",
+    "x": 0.2908,
+    "y": 0.4669,
+    "label": "Testbed",
+    "connected": [
+      "exploring-generative-3d-shapes-using-autoencoder-networks",
+      "latent-shapes",
+      "polygon-segmentation",
+      "apartment"
+    ]
+  },
+  {
+    "title": "Voxelate",
+    "slug": "voxelate",
+    "url": "/voxelate/",
+    "category": "testbed",
+    "x": 0.3919,
+    "y": 0.5052,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "image-to-3d-scene",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "mass-gans"
+    ]
+  },
+  {
+    "title": "Windows placement helper",
+    "slug": "windows-placement-helper",
+    "url": "/windows-placement-helper/",
+    "category": "testbed",
+    "x": 0.3294,
+    "y": 0.6067,
+    "label": "Testbed",
+    "connected": [
+      "three-loaders",
+      "p2m",
+      "drafting-with-ai",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "floor-plan-generation-with-voronoi-diagram"
+    ]
+  },
+  {
+    "title": "three.js geoms",
+    "slug": "three-geometries",
+    "url": "/three-geometries/",
+    "category": "testbed",
+    "x": 0.1493,
+    "y": 0.5969,
+    "label": "Testbed",
+    "connected": [
+      "latent-shapes",
+      "debugvisualizer-for-geometry",
+      "space-syntax"
+    ]
+  },
+  {
+    "title": "ghpythonutils",
+    "slug": "ghpythonutils",
+    "url": "/ghpythonutils/",
+    "category": "testbed",
+    "x": 0.4678,
+    "y": 0.776,
+    "label": "Testbed",
+    "connected": [
+      "parallel-execution-within-gh"
+    ]
+  },
+  {
+    "title": "Loading the geometries I have",
+    "slug": "three-loaders",
+    "url": "/three-loaders/",
+    "category": "testbed",
+    "x": 0.3922,
+    "y": 0.6425,
+    "label": "Testbed",
+    "connected": [
+      "voxelate",
+      "apartment",
+      "drafting-with-ai"
+    ]
+  },
+  {
+    "title": "K-Rooms clusters",
+    "slug": "k-rooms-clusters",
+    "url": "/k-rooms-clusters/",
+    "category": "testbed",
+    "x": 0.4256,
+    "y": 0.5684,
+    "label": "Testbed",
+    "connected": [
+      "floor-plan-generation-with-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "voxelate",
+      "office-layout-generation-agents"
+    ]
+  },
+  {
+    "title": "Quadtree",
+    "slug": "quadtree",
+    "url": "/quadtree/",
+    "category": "testbed",
+    "x": 0.6277,
+    "y": 0.5922,
+    "label": "Testbed",
+    "connected": [
+      "space-syntax",
+      "k-rooms-clusters",
+      "voxelate"
+    ]
+  },
+  {
+    "title": "Klemens Torggler's door",
+    "slug": "klemens-torggler-door",
+    "url": "/klemens-torggler-door/",
+    "category": "testbed",
+    "x": 0.3679,
+    "y": 0.5966,
+    "label": "Testbed",
+    "connected": [
+      "drafting-with-ai",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "wave-function-collapse",
+      "three-loaders",
+      "dynamic-mesh-fence"
+    ]
+  },
+  {
+    "title": "Plan to Model",
+    "slug": "p2m",
+    "url": "/p2m/",
+    "category": "testbed",
+    "x": 0.3323,
+    "y": 0.5594,
+    "label": "Testbed",
+    "connected": [
+      "floor-plan-generation-with-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "image-to-3d-scene",
+      "drafting-with-ai"
+    ]
+  },
+  {
+    "title": "Analysis of Apt state-spaces",
+    "slug": "apartment",
+    "url": "/apartment/",
+    "category": "testbed",
+    "x": 0.4652,
+    "y": 0.5958,
+    "label": "Testbed",
+    "connected": [
+      "floor-plan-generation-with-voronoi-diagram",
+      "local-coordinate-system"
+    ]
+  },
+  {
+    "title": "Drafting with AI",
+    "slug": "drafting-with-ai",
+    "url": "/drafting-with-ai/",
+    "category": "testbed",
+    "x": 0.3306,
+    "y": 0.6599,
+    "label": "Testbed",
+    "connected": [
+      "landbook-diffusion-pipeline",
+      "landbook-rendering-with-diffusion",
+      "synthesized-skyscrapers",
+      "latent-shapes",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "Parallel execution within GhPython",
+    "slug": "parallel-execution-within-gh",
+    "url": "/parallel-execution-within-gh/",
+    "category": "testbed",
+    "x": 0.4909,
+    "y": 0.6615,
+    "label": "Testbed",
+    "connected": [
+      "space-syntax",
+      "geometric-deep-learning",
+      "polygon-segmentation",
+      "k-rooms-clusters"
+    ]
+  },
+  {
+    "title": "The selfish gene",
+    "slug": "the-selfish-gene",
+    "url": "/the-selfish-gene/",
+    "category": "testbed",
+    "x": 0.6503,
+    "y": 0.4842,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "reading-list",
+      "mass-gans",
+      "gan"
+    ]
+  },
+  {
+    "title": "Mass GANs",
+    "slug": "mass-gans",
+    "url": "/mass-gans/",
+    "category": "testbed",
+    "x": 0.3948,
+    "y": 0.4112,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "geometric-deep-learning",
+      "latent-shapes"
+    ]
+  },
+  {
+    "title": "Local coordinate system",
+    "slug": "local-coordinate-system",
+    "url": "/local-coordinate-system/",
+    "category": "testbed",
+    "x": 0.1544,
+    "y": 0.4521,
+    "label": "Testbed",
+    "connected": [
+      "p2m",
+      "intuitive-understanding-of-linear-algebra"
+    ]
+  },
+  {
+    "title": "Shape-conditional GANs",
+    "slug": "geometric-deep-learning",
+    "url": "/geometric-deep-learning/",
+    "category": "testbed",
+    "x": 0.3761,
+    "y": 0.3963,
+    "label": "Testbed",
+    "connected": [
+      "polygon-segmentation",
+      "voxels-to-graph",
+      "reading-list"
+    ]
+  },
+  {
+    "title": "Seeing is solving",
+    "slug": "debugvisualizer-for-geometry",
+    "url": "/debugvisualizer-for-geometry/",
+    "category": "testbed",
+    "x": 0.2223,
+    "y": 0.7007,
+    "label": "Testbed",
+    "connected": [
+      "space-syntax",
+      "latent-shapes",
+      "plot-shape-estimator"
+    ]
+  },
+  {
+    "title": "Infinite synthesis",
+    "slug": "synthesized-skyscrapers",
+    "url": "/synthesized-skyscrapers/",
+    "category": "testbed",
+    "x": 0.3631,
+    "y": 0.4384,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "latent-shapes",
+      "mass-gans"
+    ]
+  },
+  {
+    "title": "Landbook Rendering with Diffuser",
+    "slug": "landbook-rendering-with-diffusion",
+    "url": "/landbook-rendering-with-diffusion/",
+    "category": "testbed",
+    "x": 0.3014,
+    "y": 0.6692,
+    "label": "Testbed",
+    "connected": [
+      "landbook-diffusion-pipeline",
+      "voxels-to-graph",
+      "office-layout-generation-agents",
+      "three-loaders"
+    ]
+  },
+  {
+    "title": "Polygon segmentations",
+    "slug": "polygon-segmentation",
+    "url": "/polygon-segmentation/",
+    "category": "testbed",
+    "x": 0.3457,
+    "y": 0.3953,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "mass-gans",
+      "building-gan"
+    ]
+  },
+  {
+    "title": "Floor Plan Generation with Voronoi Diagram",
+    "slug": "floor-plan-generation-with-voronoi-diagram",
+    "url": "/floor-plan-generation-with-voronoi-diagram/",
+    "category": "testbed",
+    "x": 0.3913,
+    "y": 0.5412,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "office-layout-generation-agents",
+      "building-gan"
+    ]
+  },
+  {
+    "title": "Landbook Diffusion Pipeline",
+    "slug": "landbook-diffusion-pipeline",
+    "url": "/landbook-diffusion-pipeline/",
+    "category": "testbed",
+    "x": 0.3081,
+    "y": 0.6722,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph",
+      "synthesized-skyscrapers"
+    ]
+  },
+  {
+    "title": "Voxels to Graph",
+    "slug": "voxels-to-graph",
+    "url": "/voxels-to-graph/",
+    "category": "testbed",
+    "x": 0.4012,
+    "y": 0.4354,
+    "label": "Testbed",
+    "connected": []
+  },
+  {
+    "title": "Office Layout Generation Agents",
+    "slug": "office-layout-generation-agents",
+    "url": "/office-layout-generation-agents/",
+    "category": "testbed",
+    "x": 0.4752,
+    "y": 0.4695,
+    "label": "Testbed",
+    "connected": [
+      "voxels-to-graph"
+    ]
+  },
+  {
+    "title": "Latent Shapes",
+    "slug": "latent-shapes",
+    "url": "/latent-shapes/",
+    "category": "testbed",
+    "x": 0.3181,
+    "y": 0.4243,
+    "label": "Testbed",
+    "connected": []
+  },
+  {
+    "title": "Wave Function Collapse",
+    "slug": "wave-function-collapse",
+    "url": "/wave-function-collapse/",
+    "category": "testbed",
+    "x": 0.4295,
+    "y": 0.5274,
+    "label": "Testbed",
+    "connected": [
+      "voxelate",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "floor-plan-generation-with-voronoi-diagram",
+      "three-loaders"
+    ]
+  },
+  {
+    "title": "Image to 3D Scene Pipeline",
+    "slug": "image-to-3d-scene",
+    "url": "/image-to-3d-scene/",
+    "category": "testbed",
+    "x": 0.3518,
+    "y": 0.4843,
+    "label": "Testbed",
+    "connected": [
+      "latent-shapes",
+      "landbook-diffusion-pipeline",
+      "mass-gans",
+      "synthesized-skyscrapers",
+      "voxels-to-graph"
+    ]
+  }
+]
