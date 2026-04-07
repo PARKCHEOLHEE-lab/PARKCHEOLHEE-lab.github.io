@@ -25,6 +25,16 @@ def extract_title(filepath):
     return ""
 
 
+def has_body(filepath):
+    """Check if post has non-empty body after frontmatter."""
+    with open(filepath, encoding="utf-8") as f:
+        content = f.read()
+    match = re.match(r"^---\s*\n.*?\n---\s*\n(.*)", content, re.DOTALL)
+    if not match:
+        return False
+    return bool(match.group(1).strip())
+
+
 def list_posts():
     """Yield (filepath, slug, title) for each eligible post."""
     for subdir in ("note/_posts", "testbed/_posts"):
@@ -36,6 +46,10 @@ def list_posts():
 
             # Skip underscore-prefixed files
             if basename.startswith("_"):
+                continue
+
+            # Skip empty posts
+            if not has_body(filepath):
                 continue
 
             # Extract slug: remove date prefix and .html extension

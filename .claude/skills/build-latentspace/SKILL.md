@@ -7,16 +7,18 @@ allowed-tools: "Bash Read"
 
 # Build Latent Space
 
-Rebuild `assets/data/latentspace.json` — the single data source for the D3.js latent space visualization on the landing page.
+Rebuild `data/latentspace.json` — the single data source for the D3.js latent space visualization on the landing page.
 
 ## What it does
 
-1. Collects all eligible posts from `note/_posts` and `testbed/_posts` (excludes `_` prefixed files)
+1. Collects all eligible posts from `note/_posts` and `testbed/_posts` (excludes `_` prefixed files and empty posts)
 2. Embeds each post using OpenAI `text-embedding-3-small`
 3. Reduces embeddings to 2D with UMAP
 4. Assigns a label based on `emoji` frontmatter
 5. Extracts `connected` links from `related` frontmatter
-6. Writes the result to `assets/data/latentspace.json`
+6. Writes the result to `data/latentspace.json`
+
+Incremental mode: existing posts keep their xy from `data/latentspace.json`. Only new posts are embedded and projected via cached UMAP model (`data/umap_model.pkl`).
 
 ## Prerequisites
 
@@ -32,7 +34,7 @@ python3 "${CLAUDE_SKILL_DIR}/scripts/build_post_map.py"
 Verify the output looks correct:
 
 ```bash
-python3 -c "import json; data=json.load(open('assets/data/latentspace.json')); print(f'{len(data)} posts'); print({d['label'] for d in data}); print(f'{sum(len(d[\"connected\"]) for d in data)} connections')"
+python3 -c "import json; data=json.load(open('data/latentspace.json')); print(f'{len(data)} posts'); print({d['label'] for d in data}); print(f'{sum(len(d[\"connected\"]) for d in data)} connections')"
 ```
 
 ## Output schema

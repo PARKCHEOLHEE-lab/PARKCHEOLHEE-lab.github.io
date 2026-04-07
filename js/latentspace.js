@@ -168,7 +168,7 @@ function init_latentspace() {
 
     // --- Data loading ---
 
-    d3.json("/assets/data/latentspace.json").then(function(data) {
+    d3.json("/data/latentspace.json").then(function(data) {
         const nodes = data.filter(function(d) { return d.slug.charAt(0) !== "_"; });
 
         const slug_index = {};
