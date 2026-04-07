@@ -327,7 +327,7 @@ function init_latentspace() {
 
         const simulation = d3.forceSimulation(nodes)
             .force("link", d3.forceLink(links).distance(5).strength(0.2))
-            .force("charge", d3.forceManyBody().strength(-12))
+            .force("charge", d3.forceManyBody().strength(-2))
             .force("collide", d3.forceCollide(BASE_RADIUS * 1.5))
             .force("x", d3.forceX(function(d) { return d.tx; }).strength(0.3))
             .force("y", d3.forceY(function(d) { return d.ty; }).strength(0.3))
