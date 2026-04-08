@@ -43,6 +43,7 @@ function init_latentspace() {
     let active_hover_node = null;
     let touch_selected_node = null;
     let hover_leave_timer = null;
+    let touch_tap_handled = false;
 
     function get_map_dimensions() {
         const container_width = Math.max(container.clientWidth || 0, 280);
@@ -396,6 +397,12 @@ function init_latentspace() {
                 }
 
                 if (is_touch_device) {
+                    // Already handled in drag_ended for touch devices
+                    if (touch_tap_handled) {
+                        touch_tap_handled = false;
+                        return;
+                    }
+
                     if (touch_selected_node === d) {
                         touch_selected_node = null;
                         handle_click(event, d.url);
@@ -654,11 +661,34 @@ function init_latentspace() {
             d.fy = null;
             d3.select(this).style("cursor", "grab");
 
+            var was_tap = !drag_moved;
+
             requestAnimationFrame(function() {
                 is_dragging_node = false;
                 drag_moved = false;
                 if (!is_panning) dot_elements.style("pointer-events", "auto");
             });
+
+            // On real touch devices, D3 drag intercepts touch events and
+            // suppresses the synthetic click. Handle taps directly here.
+            if (was_tap && is_touch_device) {
+                touch_tap_handled = true;
+
+                if (touch_selected_node === d) {
+                    touch_selected_node = null;
+                    handle_click(event.sourceEvent, d.url);
+                    return;
+                }
+
+                touch_selected_node = d;
+                active_hover_node = d;
+                reset_idle();
+                dot_elements.interrupt();
+                dot_elements.interrupt("idle");
+                link_elements.interrupt("idle");
+                apply_highlight(d);
+                show_tooltip(d);
+            }
         }
     });
 }
