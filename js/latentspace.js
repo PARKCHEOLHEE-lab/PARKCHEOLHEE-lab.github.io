@@ -46,19 +46,8 @@ function init_latentspace() {
 
     function get_map_dimensions() {
         const container_width = Math.max(container.clientWidth || 0, 280);
-        var map_top = 0;
-        var el = container;
-        while (el) { map_top += el.offsetTop; el = el.offsetParent; }
-        const footer = document.querySelector("body > footer");
-        const footer_height = footer ? footer.offsetHeight : 0;
-        var below_height = 0;
-        var sibling = container.nextSibling;
-        while (sibling) {
-            if (sibling.offsetHeight) below_height += sibling.offsetHeight;
-            sibling = sibling.nextSibling;
-        }
-        const available_height = window.innerHeight - map_top - below_height - footer_height;
-        return { width: container_width, height: Math.max(available_height, 260) };
+        const container_height = Math.max(container.clientHeight || 0, 260);
+        return { width: container_width, height: container_height };
     }
 
     const initial_size = get_map_dimensions();
@@ -75,7 +64,17 @@ function init_latentspace() {
 
     const tooltip = d3.select("#post-map")
         .append("div")
-        .attr("class", "map-tooltip");
+        .attr("class", "map-tooltip" + (is_touch_device ? " touchable" : ""));
+
+    if (is_touch_device) {
+        tooltip.on("click", function() {
+            if (touch_selected_node) {
+                var url = touch_selected_node.url;
+                touch_selected_node = null;
+                location.href = url;
+            }
+        });
+    }
 
     function dot_color(d) {
         return LABEL_COLORS[d.label] || LABEL_COLORS["Note"];
