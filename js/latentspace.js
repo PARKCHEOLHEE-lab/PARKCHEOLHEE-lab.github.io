@@ -45,7 +45,7 @@ function init_latentspace() {
     let active_hover_node = null;
     let touch_selected_node = null;
     let hover_leave_timer = null;
-    let touch_tap_handled = false;
+    const TOUCH_HIT_RADIUS = 20;
 
     function get_map_dimensions() {
         const container_width = Math.max(container.clientWidth || 0, 280);
@@ -70,7 +70,8 @@ function init_latentspace() {
         .attr("class", "map-tooltip" + (is_touch_device ? " touchable" : ""));
 
     if (is_touch_device) {
-        tooltip.on("click", function() {
+        tooltip.on("click", function(event) {
+            event.stopPropagation();
             if (touch_selected_node) {
                 var url = touch_selected_node.url;
                 touch_selected_node = null;
@@ -120,7 +121,8 @@ function init_latentspace() {
         .on("zoom", function(event) {
             current_zoom = event.transform;
             g.attr("transform", current_zoom);
-            g.selectAll(".dot").attr("r", function() { return BASE_RADIUS / current_zoom.k; });
+            g.selectAll(".dot").attr("r", function() { return BASE_RADIUS / current_zoom.k; })
+                .attr("stroke-width", is_touch_device ? TOUCH_HIT_RADIUS * 2 / current_zoom.k : 0);
             g.selectAll(".edge").attr("stroke-width", function() { return 0.5 / current_zoom.k; });
         })
         .on("end", function() {
@@ -350,6 +352,8 @@ function init_latentspace() {
             .attr("r", BASE_RADIUS)
             .attr("fill", dot_color)
             .attr("opacity", 0.8)
+            .attr("stroke", "transparent")
+            .attr("stroke-width", is_touch_device ? TOUCH_HIT_RADIUS * 2 : 0)
             .style("cursor", "grab")
             .call(d3.drag()
                 .on("start", drag_started)
@@ -393,37 +397,7 @@ function init_latentspace() {
                 }, 80);
             })
             .on("click", function(event, d) {
-                if (drag_moved) {
-                    event.preventDefault();
-                    return;
-                }
-
-                if (is_touch_device) {
-                    // Already handled in drag_ended for touch devices
-                    if (touch_tap_handled) {
-                        touch_tap_handled = false;
-                        return;
-                    }
-
-                    if (touch_selected_node === d) {
-                        touch_selected_node = null;
-                        handle_click(event, d.url);
-                        return;
-                    }
-
-                    event.preventDefault();
-                    touch_selected_node = d;
-                    active_hover_node = d;
-                    reset_idle();
-                    dot_elements.interrupt();
-                    dot_elements.interrupt("idle");
-                    link_elements.interrupt("idle");
-
-                    apply_highlight(d);
-                    show_tooltip(d);
-                    return;
-                }
-
+                if (drag_moved || is_touch_device) return;
                 handle_click(event, d.url);
             });
 
@@ -432,6 +406,7 @@ function init_latentspace() {
         if (is_touch_device) {
             svg.on("click.touch-dismiss", function(event) {
                 if (event.target.classList && event.target.classList.contains("dot")) return;
+                if (tooltip.node().contains(event.target)) return;
                 if (touch_selected_node) {
                     touch_selected_node = null;
                     active_hover_node = null;
@@ -680,11 +655,7 @@ function init_latentspace() {
                 if (!is_panning) dot_elements.style("pointer-events", "auto");
             });
 
-            // On real touch devices, D3 drag intercepts touch events and
-            // suppresses the synthetic click. Handle taps directly here.
             if (was_tap && is_touch_device) {
-                touch_tap_handled = true;
-
                 if (touch_selected_node === d) {
                     touch_selected_node = null;
                     handle_click(event.sourceEvent, d.url);
