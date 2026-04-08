@@ -40,6 +40,8 @@ function init_latentspace() {
     let is_panning = false;
     let is_dragging_node = false;
     let drag_moved = false;
+    let drag_start_pos = null;
+    const TAP_THRESHOLD = 10;
     let active_hover_node = null;
     let touch_selected_node = null;
     let hover_leave_timer = null;
@@ -641,6 +643,7 @@ function init_latentspace() {
             clear_hover_state();
             is_dragging_node = true;
             drag_moved = false;
+            drag_start_pos = { x: event.x, y: event.y };
             dot_elements.style("pointer-events", "none");
 
             if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -650,7 +653,15 @@ function init_latentspace() {
         }
 
         function on_drag(event, d) {
-            drag_moved = true;
+            if (drag_start_pos) {
+                var dx = event.x - drag_start_pos.x;
+                var dy = event.y - drag_start_pos.y;
+                if (dx * dx + dy * dy > TAP_THRESHOLD * TAP_THRESHOLD) {
+                    drag_moved = true;
+                }
+            } else {
+                drag_moved = true;
+            }
             d.fx = event.x;
             d.fy = event.y;
         }
