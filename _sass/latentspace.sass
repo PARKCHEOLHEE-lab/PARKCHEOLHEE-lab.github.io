@@ -23,9 +23,11 @@ $map-text-color: $text-dark
   margin-top: 1em
   margin-bottom: 1em
   width: 100%
+  aspect-ratio: 16 / 9
 
 #post-map svg
   display: block
+  margin-top: 1.5em
 
 .map-tooltip
   position: absolute
@@ -52,6 +54,10 @@ $map-text-color: $text-dark
 .zoom-controls
   display: none
 
+.map-tooltip.touchable
+  pointer-events: auto
+  cursor: pointer
+
 .zoom-btn
   width: 22px
   height: 22px
@@ -76,6 +82,11 @@ $map-text-color: $text-dark
 @media (max-width: 40em)
   #post-map
     margin-top: -1em
+    aspect-ratio: 3 / 4
+
+@media (min-width: 40em) and (max-width: 64em)
+  #post-map
+    aspect-ratio: 4 / 3
 
   .zoom-controls
     top: 8px
