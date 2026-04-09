@@ -1,0 +1,50 @@
+name: Build Latent Space
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'note/_posts/**'
+      - 'testbed/_posts/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openai umap-learn numpy beautifulsoup4 lxml
+
+      - name: Build latentspace.json
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python3 .claude/skills/build-latentspace/scripts/build_post_map.py
+
+      - name: Verify output
+        run: |
+          python3 -c "
+          import json
+          data = json.load(open('data/latentspace.json'))
+          print(f'{len(data)} posts')
+          print({d['label'] for d in data})
+          print(f'{sum(len(d[\"connected\"]) for d in data)} connections')
+          "
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/latentspace.json data/umap_model.pkl
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update latentspace.json [automated]"
+            git push
+          fi
