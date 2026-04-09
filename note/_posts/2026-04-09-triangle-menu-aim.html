@@ -99,6 +99,16 @@ related:
                 This works because traversing the triangle edges in order (A → B → C)
                 creates a consistent winding direction.
                 A point inside the triangle will always be on the same side of every edge.
+
+                <br><br>
+
+                <figure>
+                    <img src="/img/triangle-menu-aim/point-in-triangle.svg" width="100%" onerror="handle_image_error(this)">
+                    <figcaption>
+                        Left: P inside the triangle — all cross products share the same sign.
+                        Right: P outside — d₁ has opposite sign from d₂ and d₃.
+                    </figcaption>
+                </figure>
             </li>
             <li>
                 In the implementation, the <code>tri_sign</code> function computes this 2D cross product:
