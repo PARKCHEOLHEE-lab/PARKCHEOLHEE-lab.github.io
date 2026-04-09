@@ -1,116 +1,120 @@
 ---
 title: "Triangle Menu-Aim"
 layout: post
-emoji: /emoji/brain.png
 related:
   - dot-product
   - half-plane-clipping
 ---
 
-<div id="toc"></div>
 <br>
-
-<h3>1. The Problem</h3>
 
 <ul>
     <li>
-        In interfaces with densely packed interactive elements,
-        moving the cursor diagonally from a node to its tooltip (or submenu) often causes
-        the cursor to pass over other nodes along the way.
-        Each crossed node fires a <code>mouseenter</code> event, replacing the intended tooltip with an unrelated one.
-        The result is a frustrating flicker effect.
+        <b>1. The Problem</b>
+        <ul>
+            <br>
+            <li>
+                In interfaces with densely packed interactive elements,
+                moving the cursor diagonally from a node to its tooltip (or submenu) often causes
+                the cursor to pass over other nodes along the way.
+                Each crossed node fires a <code>mouseenter</code> event, replacing the intended tooltip with an unrelated one.
+                The result is a frustrating flicker effect.
+            </li>
+            <br>
+            <li>
+                This is exactly the situation that arises in
+                <a href="/">latentspace.js</a>,
+                the D3.js post map on this blog.
+                Hundreds of nodes float in a small viewport.
+                When a user hovers a node and wants to click its tooltip, the cursor inevitably crosses neighboring nodes,
+                breaking the hover state before reaching the target.
+            </li>
+        </ul>
     </li>
+
     <br>
+
     <li>
-        This is exactly the situation that arises in
-        <a href="/">latentspace.js</a>,
-        the D3.js post map on this blog.
-        Hundreds of nodes float in a small viewport.
-        When a user hovers a node and wants to click its tooltip, the cursor inevitably crosses neighboring nodes,
-        breaking the hover state before reaching the target.
+        <b>2. Amazon's Mega Menu and the Triangle Trick</b>
+        <ul>
+            <br>
+            <li>
+                Amazon solved a nearly identical problem in their <mark>mega dropdown menu</mark> around 2013.
+                When a user hovers a top-level category, a large submenu panel appears to the side.
+                Moving the cursor toward the panel requires a diagonal motion,
+                which crosses other menu items and triggers their submenus instead.
+            </li>
+            <br>
+            <li>
+                The solution: construct an invisible triangle from the <b>current cursor position</b>
+                to the <b>two far corners of the open submenu</b>.
+                As long as the cursor remains inside this triangle,
+                the system assumes the user is heading toward the submenu and suppresses any new hover events.
+
+                <br><br>
+
+                <figure>
+                    <img src="/img/triangle-menu-aim/triangle-menu-aim-1.svg" width="100%" onerror="handle_image_error(this)">
+                    <figcaption>
+                        The cursor (apex) and the two corners of the tooltip form a triangle.
+                        While the cursor stays inside this triangle, hover changes on intermediate nodes are suppressed.
+                    </figcaption>
+                </figure>
+            </li>
+            <br>
+            <li>
+                This pattern is sometimes called the <mark>menu-aim pattern</mark>,
+                and it can be seen as an extension of <a href="https://en.wikipedia.org/wiki/Fitts%27s_law">Fitts's Law</a>:
+                the effective target area is enlarged by considering the user's <b>movement direction</b>,
+                not just the target's static bounding box.
+            </li>
+        </ul>
     </li>
-</ul>
 
-<br>
-
-<h3>2. Amazon's Mega Menu and the Triangle Trick</h3>
-
-<ul>
-    <li>
-        Amazon solved a nearly identical problem in their <mark>mega dropdown menu</mark> around 2013.
-        When a user hovers a top-level category, a large submenu panel appears to the side.
-        Moving the cursor toward the panel requires a diagonal motion,
-        which crosses other menu items and triggers their submenus instead.
-    </li>
     <br>
+
     <li>
-        The solution: construct an invisible triangle from the <b>current cursor position</b>
-        to the <b>two far corners of the open submenu</b>.
-        As long as the cursor remains inside this triangle,
-        the system assumes the user is heading toward the submenu and suppresses any new hover events.
+        <b>3. Point-in-Triangle Test</b>
+        <ul>
+            <br>
+            <li>
+                The core math behind the triangle trick is the <b>point-in-triangle test</b> using the sign of cross products.
+                Given a triangle with vertices \(A\), \(B\), \(C\) and a query point \(P\),
+                compute the following three cross product signs:
 
-        <br><br>
+                \[
+                d_1 = (P - A) \times (B - A)
+                \]
+                \[
+                d_2 = (P - B) \times (C - B)
+                \]
+                \[
+                d_3 = (P - C) \times (A - C)
+                \]
 
-        <figure>
-            <img src="/img/triangle-menu-aim/triangle-menu-aim-1.svg" width="100%" onerror="handle_image_error(this)">
-            <figcaption>
-                The cursor (apex) and the two corners of the tooltip form a triangle.
-                While the cursor stays inside this triangle, hover changes on intermediate nodes are suppressed.
-            </figcaption>
-        </figure>
-    </li>
-    <br>
-    <li>
-        This pattern is sometimes called the <mark>menu-aim pattern</mark>,
-        and it can be seen as an extension of <a href="https://en.wikipedia.org/wiki/Fitts%27s_law">Fitts's Law</a>:
-        the effective target area is enlarged by considering the user's <b>movement direction</b>,
-        not just the target's static bounding box.
-    </li>
-</ul>
+                where the 2D cross product of vectors \(\mathbf{u} = (u_x, u_y)\) and \(\mathbf{v} = (v_x, v_y)\) is:
 
-<br>
+                \[
+                \mathbf{u} \times \mathbf{v} = u_x v_y - u_y v_x
+                \]
+            </li>
+            <br>
+            <li>
+                If all three values \(d_1, d_2, d_3\) share the <b>same sign</b> (all positive or all negative),
+                the point \(P\) lies inside the triangle.
+                If any sign differs, the point is outside.
 
-<h3>3. Point-in-Triangle Test</h3>
+                <br><br>
 
-<ul>
-    <li>
-        The core math behind the triangle trick is the <b>point-in-triangle test</b> using the sign of cross products.
-        Given a triangle with vertices \(A\), \(B\), \(C\) and a query point \(P\),
-        compute the following three cross product signs:
+                This works because traversing the triangle edges in order (A → B → C)
+                creates a consistent winding direction.
+                A point inside the triangle will always be on the same side of every edge.
+            </li>
+            <br>
+            <li>
+                In the implementation, the <code>tri_sign</code> function computes this 2D cross product:
 
-        \[
-        d_1 = (P - A) \times (B - A)
-        \]
-        \[
-        d_2 = (P - B) \times (C - B)
-        \]
-        \[
-        d_3 = (P - C) \times (A - C)
-        \]
-
-        where the 2D cross product of vectors \(\mathbf{u} = (u_x, u_y)\) and \(\mathbf{v} = (v_x, v_y)\) is:
-
-        \[
-        \mathbf{u} \times \mathbf{v} = u_x v_y - u_y v_x
-        \]
-    </li>
-    <br>
-    <li>
-        If all three values \(d_1, d_2, d_3\) share the <b>same sign</b> (all positive or all negative),
-        the point \(P\) lies inside the triangle.
-        If any sign differs, the point is outside.
-
-        <br><br>
-
-        This works because traversing the triangle edges in order (A → B → C)
-        creates a consistent winding direction.
-        A point inside the triangle will always be on the same side of every edge.
-    </li>
-    <br>
-    <li>
-        In the implementation, the <code>tri_sign</code> function computes this 2D cross product:
-
-        <pre><code class="javascript">function tri_sign(x1, y1, x2, y2, x3, y3) {
+                <pre><code class="javascript">function tri_sign(x1, y1, x2, y2, x3, y3) {
     return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
 }
 
@@ -121,41 +125,43 @@ function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
     return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
 }</code></pre>
 
-        The final boolean expression is equivalent to checking
-        <code>!(has_negative && has_positive)</code>,
-        which is true only when all signs agree.
+                The final boolean expression is equivalent to checking
+                <code>!(has_negative && has_positive)</code>,
+                which is true only when all signs agree.
+            </li>
+        </ul>
     </li>
-</ul>
 
-<br>
+    <br>
 
-<h3>4. Building the Intent Triangle</h3>
-
-<ul>
     <li>
-        In latentspace.js, when the mouse leaves a node,
-        the system constructs a triangle before deciding whether to dismiss the tooltip.
-        The three vertices are:
-
-        <ol>
+        <b>4. Building the Intent Triangle</b>
+        <ul>
             <br>
             <li>
-                <b>Apex (A)</b>: the screen position of the currently hovered node
-            </li>
-            <li>
-                <b>Corner B</b>: one far edge of the tooltip bounding box (with padding)
-            </li>
-            <li>
-                <b>Corner C</b>: the opposite far edge of the tooltip bounding box (with padding)
-            </li>
-        </ol>
-    </li>
-    <br>
-    <li>
-        The tooltip can appear either left or right of the node depending on available space,
-        so the triangle flips accordingly:
+                In latentspace.js, when the mouse leaves a node,
+                the system constructs a triangle before deciding whether to dismiss the tooltip.
+                The three vertices are:
 
-        <pre><code class="javascript">function build_intent_triangle() {
+                <ol>
+                    <br>
+                    <li>
+                        <b>Apex (A)</b>: the screen position of the currently hovered node
+                    </li>
+                    <li>
+                        <b>Corner B</b>: one far edge of the tooltip bounding box (with padding)
+                    </li>
+                    <li>
+                        <b>Corner C</b>: the opposite far edge of the tooltip bounding box (with padding)
+                    </li>
+                </ol>
+            </li>
+            <br>
+            <li>
+                The tooltip can appear either left or right of the node depending on available space,
+                so the triangle flips accordingly:
+
+                <pre><code class="javascript">function build_intent_triangle() {
     // ... get node screen position (dot_x, dot_y)
     // ... get tooltip rect (tt_left, tt_top, tt_w, tt_h)
     var pad = 6;
@@ -168,72 +174,78 @@ function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
     };
 }</code></pre>
 
-        Here, vertices B and C share the same x-coordinate (the far edge of the tooltip),
-        but differ in y (top and bottom edges), forming a triangle that fans out
-        from the node toward the entire height of the tooltip.
-    </li>
-</ul>
-
-<br>
-
-<h3>5. Integration into the Hover Flow</h3>
-
-<ul>
-    <li>
-        The triangle is checked at two points in the event flow:
-
-        <ol>
-            <br>
-            <li>
-                <b><code>mouseleave</code> on a node</b>:
-                The system builds the intent triangle and starts a short timer (80ms).
-                If the cursor reaches the tooltip before the timer fires,
-                the tooltip's own <code>mouseenter</code> cancels the dismiss.
+                Here, vertices B and C share the same x-coordinate (the far edge of the tooltip),
+                but differ in y (top and bottom edges), forming a triangle that fans out
+                from the node toward the entire height of the tooltip.
             </li>
+        </ul>
+    </li>
+
+    <br>
+
+    <li>
+        <b>5. Integration into the Hover Flow</b>
+        <ul>
             <br>
             <li>
-                <b><code>mouseenter</code> on a different node</b>:
-                Before activating the new node, the system checks
-                <code>is_moving_toward_tooltip(mx, my)</code>.
-                If the cursor is inside the intent triangle,
-                the new node's hover is <b>suppressed</b>, and the current tooltip remains.
+                The triangle is checked at two points in the event flow:
 
-                <pre><code class="javascript">// inside mouseenter handler
+                <ol>
+                    <br>
+                    <li>
+                        <b><code>mouseleave</code> on a node</b>:
+                        The system builds the intent triangle and starts a short timer (80ms).
+                        If the cursor reaches the tooltip before the timer fires,
+                        the tooltip's own <code>mouseenter</code> cancels the dismiss.
+                    </li>
+                    <br>
+                    <li>
+                        <b><code>mouseenter</code> on a different node</b>:
+                        Before activating the new node, the system checks
+                        <code>is_moving_toward_tooltip(mx, my)</code>.
+                        If the cursor is inside the intent triangle,
+                        the new node's hover is <b>suppressed</b>, and the current tooltip remains.
+
+                        <pre><code class="javascript">// inside mouseenter handler
 if (intent_triangle && active_hover_node && active_hover_node !== d) {
     var rect = container.getBoundingClientRect();
     var mx = event.clientX - rect.left;
     var my = event.clientY - rect.top;
     if (is_moving_toward_tooltip(mx, my)) return;  // suppress
 }</code></pre>
+                    </li>
+                </ol>
             </li>
-        </ol>
+            <br>
+            <li>
+                The intent triangle is cleared whenever a new node is explicitly activated,
+                the cursor enters the tooltip,
+                or a drag/pan interaction begins.
+                This ensures the triangle only persists during the narrow window
+                of diagonal cursor travel.
+            </li>
+        </ul>
     </li>
+
     <br>
-    <li>
-        The intent triangle is cleared whenever a new node is explicitly activated,
-        the cursor enters the tooltip,
-        or a drag/pan interaction begins.
-        This ensures the triangle only persists during the narrow window
-        of diagonal cursor travel.
-    </li>
-</ul>
 
-<br>
-
-<h3>6. Ref</h3>
-
-<ul>
     <li>
-        <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/pull/30">PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io#30</a> - PR that introduced the triangle intent detection
-    </li>
-    <li>
-        <a href="https://bjk5.com/post/44698559168/breaking-down-amazons-mega-dropdown">Breaking Down Amazon's Mega Dropdown</a> - Ben Kamens' original analysis (2013)
-    </li>
-    <li>
-        <a href="https://github.com/kamens/jQuery-menu-aim">jQuery-menu-aim</a> - jQuery plugin by Ben Kamens implementing the pattern
-    </li>
-    <li>
-        <a href="https://en.wikipedia.org/wiki/Fitts%27s_law">Fitts's Law</a>
+        <b>6. Ref</b>
+        <ul>
+            <br>
+            <li>
+                <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/pull/30">PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io#30</a> - PR that introduced the triangle intent detection
+            </li>
+            <li>
+                <a href="https://bjk5.com/post/44698559168/breaking-down-amazons-mega-dropdown">Breaking Down Amazon's Mega Dropdown</a> - Ben Kamens' original analysis (2013)
+            </li>
+            <li>
+                <a href="https://github.com/kamens/jQuery-menu-aim">jQuery-menu-aim</a> - jQuery plugin by Ben Kamens implementing the pattern
+            </li>
+            <li>
+                <a href="https://en.wikipedia.org/wiki/Fitts%27s_law">Fitts's Law</a>
+            </li>
+        </ul>
     </li>
 </ul>
 
