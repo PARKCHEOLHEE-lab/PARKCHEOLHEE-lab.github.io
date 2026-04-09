@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install openai umap-learn numpy beautifulsoup4 lxml
+        run: pip install openai beautifulsoup4 lxml "numpy<2" "scikit-learn==1.4.2" "numba==0.59.1" "umap-learn==0.5.6"
 
       - name: Build latentspace.json
         env:
