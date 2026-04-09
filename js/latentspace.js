@@ -45,7 +45,9 @@ function init_latentspace() {
     let active_hover_node = null;
     let touch_selected_node = null;
     let hover_leave_timer = null;
-    const TOUCH_HIT_RADIUS = 20;
+    let hover_enter_timer = null;
+    let intent_triangle = null;
+    const TOUCH_HIT_RADIUS = 10;
 
     function get_map_dimensions() {
         const container_width = Math.max(container.clientWidth || 0, 280);
@@ -69,15 +71,93 @@ function init_latentspace() {
         .append("div")
         .attr("class", "map-tooltip" + (is_touch_device ? " touchable" : ""));
 
+    tooltip.on("click", function(event) {
+        event.stopPropagation();
+        if (is_touch_device && touch_selected_node) {
+            var url = touch_selected_node.url;
+            touch_selected_node = null;
+            location.href = url;
+        } else if (!is_touch_device && active_hover_node) {
+            handle_click(event, active_hover_node.url);
+        }
+    });
+
     if (is_touch_device) {
-        tooltip.on("click", function(event) {
+        var tooltip_touch_start = null;
+        tooltip.node().addEventListener("touchstart", function(event) {
             event.stopPropagation();
-            if (touch_selected_node) {
-                var url = touch_selected_node.url;
-                touch_selected_node = null;
-                location.href = url;
+            tooltip_touch_start = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+        }, { passive: true });
+        tooltip.node().addEventListener("touchend", function(event) {
+            event.stopPropagation();
+            if (tooltip_touch_start && touch_selected_node) {
+                var t = event.changedTouches[0];
+                var dx = t.clientX - tooltip_touch_start.x;
+                var dy = t.clientY - tooltip_touch_start.y;
+                if (dx * dx + dy * dy < TAP_THRESHOLD * TAP_THRESHOLD) {
+                    location.href = touch_selected_node.url;
+                }
             }
+            tooltip_touch_start = null;
         });
+    }
+
+    if (!is_touch_device) {
+        tooltip.on("mouseenter", function() {
+            intent_triangle = null;
+            if (hover_leave_timer) {
+                clearTimeout(hover_leave_timer);
+                hover_leave_timer = null;
+            }
+        }).on("mouseleave", function() {
+            hover_leave_timer = setTimeout(function() {
+                hover_leave_timer = null;
+                active_hover_node = null;
+                clear_hover_state(250);
+            }, 80);
+        });
+    }
+
+    // --- Triangle intent detection (menu-aim pattern) ---
+
+    function tri_sign(x1, y1, x2, y2, x3, y3) {
+        return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+    }
+
+    function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
+        var d1 = tri_sign(px, py, ax, ay, bx, by);
+        var d2 = tri_sign(px, py, bx, by, cx, cy);
+        var d3 = tri_sign(px, py, cx, cy, ax, ay);
+        return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
+    }
+
+    function build_intent_triangle() {
+        if (!active_hover_node || is_touch_device) return null;
+        var el = tooltip.node();
+        if (!el || +tooltip.style("opacity") === 0) return null;
+        var rect = container.getBoundingClientRect();
+        var pt = new DOMPoint(active_hover_node.x, active_hover_node.y)
+            .matrixTransform(g.node().getScreenCTM());
+        var dot_x = pt.x - rect.left;
+        var dot_y = pt.y - rect.top;
+        var tt_left = parseFloat(tooltip.style("left"));
+        var tt_top = parseFloat(tooltip.style("top"));
+        var tt_w = el.offsetWidth;
+        var tt_h = el.offsetHeight;
+        var pad = 6;
+        return {
+            ax: dot_x, ay: dot_y,
+            bx: tt_left < dot_x ? tt_left - pad : tt_left + tt_w + pad,
+            by: tt_top - pad,
+            cx: tt_left < dot_x ? tt_left - pad : tt_left + tt_w + pad,
+            cy: tt_top + tt_h + pad
+        };
+    }
+
+    function is_moving_toward_tooltip(mx, my) {
+        if (!intent_triangle) return false;
+        var t = intent_triangle;
+        return point_in_triangle(mx, my, t.ax, t.ay, t.bx, t.by, t.cx, t.cy);
     }
 
     function dot_color(d) {
@@ -194,6 +274,8 @@ function init_latentspace() {
     function show_tooltip(d) {
         render_tooltip(d);
         position_tooltip(d);
+        tooltip.style("pointer-events", "auto");
+        if (!is_touch_device) tooltip.style("cursor", "pointer");
     }
 
     // --- Data loading ---
@@ -270,7 +352,8 @@ function init_latentspace() {
                 .attr("stroke", EDGE_COLOR)
                 .attr("stroke-width", function() { return 0.5 / current_zoom.k; });
 
-            tooltip.style("opacity", 0);
+            tooltip.style("opacity", 0).style("pointer-events", "none");
+            intent_triangle = null;
             active_hover_node = null;
         }
 
@@ -364,32 +447,71 @@ function init_latentspace() {
 
         // --- Mouse interaction ---
 
+        function activate_hover(d, el) {
+            intent_triangle = null;
+
+            if (hover_leave_timer) {
+                clearTimeout(hover_leave_timer);
+                hover_leave_timer = null;
+            }
+
+            active_hover_node = d;
+            reset_idle();
+            dot_elements.interrupt();
+            dot_elements.interrupt("idle");
+            link_elements.interrupt();
+            link_elements.interrupt("idle");
+
+            d3.select(el).raise().attr("r", 5 / current_zoom.k).attr("opacity", 1);
+            apply_highlight(d);
+            show_tooltip(d);
+        }
+
         dot_elements
             .on("mouseenter", function(event, d) {
                 if (is_dragging_node || is_panning) return;
 
-                if (hover_leave_timer) {
-                    clearTimeout(hover_leave_timer);
-                    hover_leave_timer = null;
+                if (intent_triangle && active_hover_node && active_hover_node !== d) {
+                    var rect = container.getBoundingClientRect();
+                    var mx = event.clientX - rect.left;
+                    var my = event.clientY - rect.top;
+                    if (is_moving_toward_tooltip(mx, my)) return;
                 }
 
-                active_hover_node = d;
-                reset_idle();
-                dot_elements.interrupt();
-                dot_elements.interrupt("idle");
-                link_elements.interrupt();
-                link_elements.interrupt("idle");
+                if (!active_hover_node) {
+                    activate_hover(d, this);
+                    return;
+                }
 
-                d3.select(this).raise().attr("r", 5 / current_zoom.k).attr("opacity", 1);
-                apply_highlight(d);
-                show_tooltip(d);
+                if (active_hover_node === d) {
+                    if (hover_leave_timer) {
+                        clearTimeout(hover_leave_timer);
+                        hover_leave_timer = null;
+                    }
+                    return;
+                }
+
+                var self = this;
+                if (hover_enter_timer) clearTimeout(hover_enter_timer);
+                hover_enter_timer = setTimeout(function() {
+                    hover_enter_timer = null;
+                    activate_hover(d, self);
+                }, 150);
             })
             .on("mousemove", function(event, d) {
                 if (is_dragging_node || is_panning) return;
-                position_tooltip(d);
+                if (active_hover_node === d) position_tooltip(d);
             })
-            .on("mouseleave", function() {
+            .on("mouseleave", function(event, d) {
                 if (is_dragging_node) return;
+
+                if (hover_enter_timer && active_hover_node !== d) {
+                    clearTimeout(hover_enter_timer);
+                    hover_enter_timer = null;
+                    return;
+                }
+
+                intent_triangle = build_intent_triangle();
                 hover_leave_timer = setTimeout(function() {
                     hover_leave_timer = null;
                     active_hover_node = null;
@@ -474,6 +596,7 @@ function init_latentspace() {
             if (!idle_anim_running || user_interacting) return;
 
             active_hover_node = d;
+            if (is_touch_device) touch_selected_node = d;
             const connected = get_connected_slugs(d);
 
             dot_elements.transition("idle").duration(400)
