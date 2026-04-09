@@ -12,6 +12,9 @@
   "shutdownAction": "none",
   "customizations": {
     "vscode": {
+      "settings": {
+        "remote.localPortHost": "allInterfaces"
+      },
       "extensions": [
         "shopify.ruby-lsp"
       ]
