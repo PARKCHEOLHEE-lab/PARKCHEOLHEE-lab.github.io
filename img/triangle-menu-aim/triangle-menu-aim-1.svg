@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 300" font-family="monospace" font-size="12">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#999"/>
+    </marker>
+  </defs>
+
+  <!-- Intent triangle (shaded area) -->
+  <polygon points="120,150 370,60 370,240" fill="#e8d4f0" fill-opacity="0.4" stroke="#b088c0" stroke-width="1" stroke-dasharray="5,3"/>
+
+  <!-- Intermediate nodes (dimmed) -->
+  <circle cx="200" cy="120" r="5" fill="#ccc" opacity="0.5"/>
+  <circle cx="230" cy="165" r="5" fill="#ccc" opacity="0.5"/>
+  <circle cx="260" cy="135" r="5" fill="#ccc" opacity="0.5"/>
+  <circle cx="180" cy="175" r="5" fill="#ccc" opacity="0.5"/>
+  <circle cx="290" cy="155" r="5" fill="#ccc" opacity="0.5"/>
+  <circle cx="245" cy="195" r="5" fill="#ccc" opacity="0.5"/>
+
+  <!-- Hovered node (apex) -->
+  <circle cx="120" cy="150" r="7" fill="#7c5cbf" stroke="#5a3d8a" stroke-width="1.5"/>
+  <text x="80" y="145" fill="#5a3d8a" font-size="11" font-weight="bold">node</text>
+
+  <!-- Tooltip box -->
+  <rect x="370" y="60" width="130" height="180" rx="4" fill="#fff" stroke="#333" stroke-width="1.5"/>
+  <text x="395" y="140" fill="#333" font-size="13" font-weight="bold">Post Title</text>
+  <text x="395" y="160" fill="#888" font-size="11">Brain</text>
+
+  <!-- Corner labels -->
+  <text x="375" y="52" fill="#b088c0" font-size="10">B (top corner)</text>
+  <text x="375" y="258" fill="#b088c0" font-size="10">C (bottom corner)</text>
+  <text x="68" y="170" fill="#b088c0" font-size="10">A (cursor)</text>
+
+  <!-- Cursor arrow indicating diagonal movement -->
+  <line x1="130" y1="148" x2="340" y2="125" stroke="#999" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>
+  <text x="210" y="115" fill="#999" font-size="10" font-style="italic">cursor path</text>
+
+  <!-- Labels for suppressed nodes -->
+  <text x="200" y="220" fill="#aaa" font-size="10" text-anchor="middle" font-style="italic">hover suppressed</text>
+</svg>
