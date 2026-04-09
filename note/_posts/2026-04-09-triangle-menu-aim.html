@@ -103,16 +103,18 @@ related:
             <li>
                 In the implementation, the <code>tri_sign</code> function computes this 2D cross product:
 
-<pre><code class="javascript">function tri_sign(x1, y1, x2, y2, x3, y3) {
-    return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
-}
+<pre><code class="javascript">
+    function tri_sign(x1, y1, x2, y2, x3, y3) {
+        return (x1 - x3) * (y2 - y3) - (x2 - x3) * (y1 - y3);
+    }
 
-function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
-    var d1 = tri_sign(px, py, ax, ay, bx, by);
-    var d2 = tri_sign(px, py, bx, by, cx, cy);
-    var d3 = tri_sign(px, py, cx, cy, ax, ay);
-    return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
-}</code></pre>
+    function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
+        var d1 = tri_sign(px, py, ax, ay, bx, by);
+        var d2 = tri_sign(px, py, bx, by, cx, cy);
+        var d3 = tri_sign(px, py, cx, cy, ax, ay);
+        return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
+    }
+</code></pre>
 
                 The final boolean expression is equivalent to checking
                 <code>!(has_negative && has_positive)</code>,
@@ -146,18 +148,20 @@ function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
                 The tooltip can appear either left or right of the node depending on available space,
                 so the triangle flips accordingly:
 
-<pre><code class="javascript">function build_intent_triangle() {
-    // ... get node screen position (dot_x, dot_y)
-    // ... get tooltip rect (tt_left, tt_top, tt_w, tt_h)
-    var pad = 6;
-    return {
-        ax: dot_x, ay: dot_y,
-        bx: tt_left < dot_x ? tt_left - pad : tt_left + tt_w + pad,
-        by: tt_top - pad,
-        cx: tt_left < dot_x ? tt_left - pad : tt_left + tt_w + pad,
-        cy: tt_top + tt_h + pad
-    };
-}</code></pre>
+<pre><code class="javascript">
+    function build_intent_triangle() {
+        // ... get node screen position (dot_x, dot_y)
+        // ... get tooltip rect (tt_left, tt_top, tt_w, tt_h)
+        var pad = 6;
+        return {
+            ax: dot_x, ay: dot_y,
+            bx: tt_left < dot_x ? tt_left - pad : tt_left + tt_w + pad,
+            by: tt_top - pad,
+            cx: tt_left < dot_x ? tt_left - pad : tt_left + tt_w + pad,
+            cy: tt_top + tt_h + pad
+        };
+    }
+</code></pre>
 
                 Here, vertices B and C share the same x-coordinate (the far edge of the tooltip),
                 but differ in y (top and bottom edges), forming a triangle that fans out
@@ -188,13 +192,15 @@ function point_in_triangle(px, py, ax, ay, bx, by, cx, cy) {
                         If the cursor is inside the intent triangle,
                         the new node's hover is <b>suppressed</b>, and the current tooltip remains.
 
-<pre><code class="javascript">// inside mouseenter handler
-if (intent_triangle && active_hover_node && active_hover_node !== d) {
-    var rect = container.getBoundingClientRect();
-    var mx = event.clientX - rect.left;
-    var my = event.clientY - rect.top;
-    if (is_moving_toward_tooltip(mx, my)) return;  // suppress
-}</code></pre>
+<pre><code class="javascript">
+    // inside mouseenter handler
+    if (intent_triangle && active_hover_node && active_hover_node !== d) {
+        var rect = container.getBoundingClientRect();
+        var mx = event.clientX - rect.left;
+        var my = event.clientY - rect.top;
+        if (is_moving_toward_tooltip(mx, my)) return;  // suppress
+    }
+</code></pre>
                     </li>
                 </ol>
             </li>
