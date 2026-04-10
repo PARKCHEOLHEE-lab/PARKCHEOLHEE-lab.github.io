@@ -53,6 +53,8 @@ jobs:
             BRANCH="auto/update-latentspace-$(date +%Y%m%d-%H%M%S)"
             git checkout -b "$BRANCH"
             git commit -m "Update latentspace.json [automated]"
+            git fetch origin main
+            git rebase origin/main
             git push -u origin "$BRANCH"
             PR_URL=$(gh pr create \
               --title "Update latentspace.json [automated]" \
