@@ -20,12 +20,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install openai beautifulsoup4 lxml numpy scikit-learn umap-learn
+        run: pip install openai beautifulsoup4 lxml numpy scikit-learn pytest
+
+      - name: Run tests
+        run: python3 -m pytest .claude/skills/build-latentspace/scripts/test_build_post_map.py -v
 
       - name: Build latentspace.json
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          NUMBA_DISABLE_JIT: "1"
         run: python3 .claude/skills/build-latentspace/scripts/build_post_map.py
 
       - name: Verify output
@@ -42,7 +44,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add data/latentspace.json data/umap_model.pkl
+          git add data/latentspace.json data/embeddings.json
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
