@@ -46,16 +46,15 @@ related:
                 As long as the cursor remains inside this triangle,
                 the system assumes the user is heading toward the submenu and suppresses any new hover events.
 
-                <br><br>
-
                 <figure>
-                    <img src="/img/triangle-menu-aim/triangle-menu-aim-1.svg" width="100%" onerror="handle_image_error(this)">
+                    <img src="/img/triangle-menu-aim/triangle-menu-aim.png" width="70%" onerror="handle_image_error(this)">
                     <figcaption>
                         The cursor (apex) and the two corners of the tooltip form a triangle.
                         While the cursor stays inside this triangle, hover changes on intermediate nodes are suppressed.
                     </figcaption>
                 </figure>
             </li>
+            <br>
             <li>
                 This pattern is sometimes called the <mark>menu-aim pattern</mark>,
                 and it can be seen as an extension of <a href="https://en.wikipedia.org/wiki/Fitts%27s_law">Fitts's Law</a>:
@@ -83,12 +82,15 @@ related:
                 d_3 = (P - C) \times (A - C)
                 \]
 
+                <br>
+
                 where the 2D cross product of vectors \(\mathbf{u} = (u_x, u_y)\) and \(\mathbf{v} = (v_x, v_y)\) is:
 
                 \[
                 \mathbf{u} \times \mathbf{v} = u_x v_y - u_y v_x
                 \]
             </li>
+            <br>
             <li>
                 If all three values \(d_1, d_2, d_3\) share the <b>same sign</b> (all positive or all negative),
                 the point \(P\) lies inside the triangle.
@@ -110,6 +112,7 @@ related:
                     </figcaption>
                 </figure>
             </li>
+            <br>
             <li>
                 In the implementation, the <code>tri_sign</code> function computes this 2D cross product:
 
