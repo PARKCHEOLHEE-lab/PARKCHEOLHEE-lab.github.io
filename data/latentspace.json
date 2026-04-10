@@ -161,7 +161,7 @@
       "dot-product"
     ],
     "x": 0.6735,
-    "y": 0.5417
+    "y": 0.5416
   },
   {
     "title": "Dropout",
@@ -173,7 +173,7 @@
       "machine-learning-students-overfit-to-overfitting"
     ],
     "x": 0.6689,
-    "y": 0.3173
+    "y": 0.3174
   },
   {
     "title": "Generative Adversarial Networks",
@@ -268,7 +268,7 @@
       "extrapolation"
     ],
     "x": 0.8315,
-    "y": 0.3153
+    "y": 0.3154
   },
   {
     "title": "mass test",
@@ -587,7 +587,7 @@
       "how-to-pivot-to-a-machine-learning-engineer",
       "good-refactoring-vs-bad-refactoring"
     ],
-    "x": 0.4094,
+    "x": 0.4095,
     "y": 0.5324
   },
   {
@@ -625,7 +625,7 @@
       "gradient-accumulation"
     ],
     "x": 0.6688,
-    "y": 0.3779
+    "y": 0.378
   },
   {
     "title": "Good Refactoring vs. Bad Refactoring",
@@ -758,7 +758,7 @@
       "auto-encoding-variational-bayes"
     ],
     "x": 0.4287,
-    "y": 0.3257
+    "y": 0.3256
   },
   {
     "title": "likelihood",
@@ -821,7 +821,7 @@
     "label": "Eyes",
     "connected": [],
     "x": 0.3727,
-    "y": 0.6411
+    "y": 0.6412
   },
   {
     "title": "JustMyCode configuration",
@@ -922,7 +922,7 @@
       "siddhartha"
     ],
     "x": 0.0,
-    "y": 0.5142
+    "y": 0.5143
   },
   {
     "title": "Material Masking",
@@ -991,7 +991,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.4497,
-    "y": 0.8656
+    "y": 0.8655
   },
   {
     "title": "About Behaviorism (스키너의 행동심리학)",
@@ -1149,7 +1149,7 @@
       "nvitop"
     ],
     "x": 0.8966,
-    "y": 0.5741
+    "y": 0.5742
   },
   {
     "title": "ghdoc.Path",
@@ -1163,7 +1163,7 @@
       "scriptcontext-sticky"
     ],
     "x": 0.596,
-    "y": 0.9969
+    "y": 0.997
   },
   {
     "title": "Human Action (인간 행동)",
@@ -1313,7 +1313,7 @@
       "floor-plan-generation-with-voronoi-diagram"
     ],
     "x": 0.8203,
-    "y": 0.6089
+    "y": 0.609
   },
   {
     "title": "we are being programmed",
@@ -1687,7 +1687,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.494,
-    "y": 0.857
+    "y": 0.8571
   },
   {
     "title": "standardization",
@@ -1860,7 +1860,7 @@
       "plot-shape-estimator"
     ],
     "x": 0.5775,
-    "y": 0.8622
+    "y": 0.8621
   },
   {
     "title": "Travelling salesman problem",
@@ -1973,7 +1973,7 @@
       "subdivision-curve"
     ],
     "x": 0.7328,
-    "y": 0.8022
+    "y": 0.8023
   },
   {
     "title": "Plot shape estimator",
@@ -2086,7 +2086,7 @@
       "subdivision-curve"
     ],
     "x": 0.8055,
-    "y": 0.8865
+    "y": 0.8866
   },
   {
     "title": "Klemens Torggler's door",
@@ -2298,7 +2298,7 @@
       "synthesized-skyscrapers"
     ],
     "x": 0.8328,
-    "y": 0.7655
+    "y": 0.7654
   },
   {
     "title": "Voxels to Graph",
