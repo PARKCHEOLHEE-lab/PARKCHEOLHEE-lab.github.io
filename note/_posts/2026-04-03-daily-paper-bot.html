@@ -1,0 +1,127 @@
+---
+title: "Daily Paper Bot"
+layout: post
+related:
+  - testing-with-github-actions
+  - devcontainer
+---
+
+<br>
+
+<ul>
+    <li>
+        Motivation
+    </li>
+        <ul>
+            <li>
+                A bot that automatically fetches the most-upvoted paper each day from
+                <a href="https://huggingface.co/papers">HuggingFace Daily Papers</a>,
+                summarizes it in Korean, and posts it to Slack.
+                The entire pipeline —
+                <mark>paper fetch → Gemini summary → Slack post → history save</mark> —
+                runs daily via a GitHub Actions cron job.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Architecture
+    </li>
+        <ul>
+            <li>
+                Four modules, each with a single responsibility:
+
+                <ol>
+                    <br>
+                    <li>
+                        <b>PaperFetcher</b> — queries the HuggingFace API.
+                        On weekdays it fetches the day's #1 paper; on weekends it picks the week's top unposted paper.
+                    </li>
+                    <li>
+                        <b>Summarizer</b> — downloads the full PDF from arXiv and passes it to <mark>Gemini 2.5 Flash</mark>
+                        (chosen because Gemini offers a small free API tier — just enough for one paper a day).
+                        Produces a structured Korean summary in five sections: one-liner, problem, method, results, significance.
+                    </li>
+                    <li>
+                        <b>SlackPoster</b> — formats the summary as Slack Block Kit blocks and sends it via Incoming Webhook.
+                        On failure, posts a formatted traceback to the same channel for immediate visibility.
+                    </li>
+                    <li>
+                        <b>History</b> — stores posted paper IDs in yearly JSON files (<code>posted/2026.json</code>)
+                        and auto-generates the repo's <code>README.md</code> papers table.
+                    </li>
+                </ol>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Cron Workflow
+    </li>
+        <ul>
+            <li>
+                <mark>Cron</mark> is a Unix job scheduler that runs commands at fixed times defined by a five-field expression
+                (<code>minute hour day month weekday</code>).
+            </li>
+            <li>
+                GitHub Actions' <code>schedule</code> trigger exposes the same syntax to run workflows on a recurring basis.
+                This bot is set to fire daily at UTC 21:30 (KST 06:30).
+                <code>workflow_dispatch</code> is also enabled for manual runs.
+
+<pre><code class="yaml">
+    on:
+      schedule:
+        - cron: '30 21 * * *'  # 06:30 KST daily
+      workflow_dispatch:
+</code></pre>
+            </li>
+            <br>
+            <li>
+                After the Python script finishes,
+                the workflow auto-commits and pushes changes to <code>posted/</code> and <code>README.md</code>.
+                <code>git diff --staged --quiet</code> skips the commit when there are no changes.
+
+<pre><code class="yaml">
+    - name: Save posted history
+      run: |
+        git config user.name "github-actions"
+        git config user.email "actions@github.com"
+        git add posted/ README.md
+        git diff --staged --quiet || git commit -m "chore: update posted history"
+        git push
+</code></pre>
+            </li>
+            <br>
+            <li>
+                Only two secrets are required: <code>GEMINI_API_KEY</code> and <code>SLACK_WEBHOOK_URL</code>.
+                The workflow uses <code>permissions: contents: write</code> to push directly from the action.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Weekday vs. Weekend
+    </li>
+        <ul>
+            <li>
+                On weekdays, the fetcher hits <code>/api/daily_papers?date=YYYY-MM-DD</code>
+                and takes the top result, falling back up to 3 previous days if the date is empty.
+            </li>
+            <li>
+                On weekends, it collects all Monday-through-Friday papers,
+                sorts globally by upvote count, and picks the highest unposted one.
+                Papers that were overshadowed by the daily #1 get surfaced in the weekend slot.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Ref
+    </li>
+        <ul>
+<li>
+                <a href="https://huggingface.co/papers">HuggingFace Daily Papers</a>
+            </li>
+            <li>
+                <a href="https://ai.google.dev/gemini-api/docs">Gemini API docs</a>
+            </li>
+        </ul>
+</ul>
+
+<br><br>
