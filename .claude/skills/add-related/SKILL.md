@@ -19,13 +19,24 @@ hooks:
         - type: prompt
           prompt: |
             Check if the edit just made correctly modifies the `related:` frontmatter in a blog post.
-            The related field must be a YAML list with 0-5 slug items. Each slug must exist as an actual post.
-            If the edit looks wrong, say BLOCK and explain why. Otherwise say ALLOW.
+            The related field must be a YAML list with MIN_RELATED to MAX_RELATED slug items (see scripts/config.py for values).
+            Only check the YAML structure and count. Do NOT try to verify whether slugs exist — the verification script handles that.
+            If the structure or count looks wrong, say BLOCK and explain why. Otherwise say ALLOW.
 ---
 
 # Add Related Posts
 
 You are updating the `related` frontmatter field for every eligible blog post. This must run to completion without stopping.
+
+## Step 0: Read limits from config
+
+The single source of truth for min/max related counts is `scripts/config.py`. Print it to confirm:
+
+```bash
+python3 -c "import sys; sys.path.insert(0,'${CLAUDE_SKILL_DIR}/scripts'); from config import *; print(f'MIN_RELATED={MIN_RELATED}, MAX_RELATED={MAX_RELATED}')"
+```
+
+All references to "minimum" or "maximum" related counts below mean these values. **Do not hardcode numbers — always refer to config.py.**
 
 ## Step 1: Generate the canonical post list
 
@@ -63,7 +74,7 @@ For each post (or a small batch of posts), launch a sub-agent (Agent tool) that:
 
 1. **Reads `/tmp/post_list.txt`** to get the canonical candidate pool
 2. **Reads the post's full content** to understand what it's about
-3. **Proposes 0–5 related posts with justification** for each connection, using the relatedness criteria below
+3. **Proposes MIN_RELATED–MAX_RELATED related posts with justification** for each connection, using the relatedness criteria below
 4. **Briefly sanity-checks each proposal**: For every candidate, ask "would a reader actually benefit from seeing this link?" Only drop the candidate if you cannot articulate a concrete benefit to the reader.
 5. **Returns a final list** of slug(s) with one-line justifications
 
@@ -108,7 +119,7 @@ related:
 ```
 
 - Use **slugs only** (not filenames, not titles)
-- Minimum 0, maximum 5 related posts
+- Minimum MIN_RELATED, maximum MAX_RELATED related posts (see `scripts/config.py`)
 - A post must NOT reference itself
 - Prefer bidirectional relatedness: if A relates to B, B should likely relate to A
 
@@ -136,6 +147,6 @@ If verification fails, fix every reported issue before finishing.
 
 - **Do not stop mid-loop.** Process all posts in one session.
 - **Do not hallucinate slugs.** Only use slugs from `/tmp/post_list.txt`.
-- **Respect the 0–5 limit.** No post should have more than 5 related entries.
+- **Respect the MIN_RELATED–MAX_RELATED limit.** See `scripts/config.py`.
 - **Preserve other frontmatter fields.** Only modify the `related:` block. Do not touch title, layout, emoji, hashtag, thumbnail, featured, comment, splitter, or any other field.
 - **Every connection must be justified.** No related link should exist without a clear reason.
