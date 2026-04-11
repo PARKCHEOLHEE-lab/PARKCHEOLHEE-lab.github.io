@@ -91,7 +91,7 @@
       "parallel-execution-within-gh"
     ],
     "x": 0.6573,
-    "y": 0.9536
+    "y": 0.9537
   },
   {
     "title": "Inverse Design",
@@ -276,7 +276,7 @@
       "good-refactoring-vs-bad-refactoring"
     ],
     "x": 0.1925,
-    "y": 0.4222
+    "y": 0.4223
   },
   {
     "title": "decorator",
@@ -493,7 +493,7 @@
       "machine-learning-students-overfit-to-overfitting"
     ],
     "x": 0.4826,
-    "y": 0.39
+    "y": 0.3901
   },
   {
     "title": "Intuitions about Transformer",
@@ -810,7 +810,7 @@
       "useful-git-commands"
     ],
     "x": 0.4077,
-    "y": 0.8208
+    "y": 0.8209
   },
   {
     "title": "哲希",
@@ -1001,7 +1001,7 @@
       "poly-inr"
     ],
     "x": 0.5412,
-    "y": 0.166
+    "y": 0.1659
   },
   {
     "title": "HuggingFace Inference Endpoints",
@@ -1635,7 +1635,7 @@
       "office-layout-generation-agents",
       "rhinomcptest"
     ],
-    "x": 0.7845,
+    "x": 0.7846,
     "y": 0.8059
   },
   {
@@ -1695,7 +1695,7 @@
       "shapely-geometry-inheritance"
     ],
     "x": 0.5799,
-    "y": 0.6765
+    "y": 0.6766
   },
   {
     "title": "truth",
@@ -1878,7 +1878,7 @@
       "rhino3dm",
       "claude-code-cheat-sheet"
     ],
-    "x": 0.4585,
+    "x": 0.4586,
     "y": 0.9861
   },
   {
@@ -1985,7 +1985,7 @@
       "q-sample",
       "standardization"
     ],
-    "x": 0.6465,
+    "x": 0.6466,
     "y": 0.2536
   },
   {
@@ -2095,7 +2095,7 @@
       "mass-generator",
       "plot-shape-estimator"
     ],
-    "x": 0.5731,
+    "x": 0.5732,
     "y": 0.8637
   },
   {
@@ -2343,7 +2343,7 @@
       "local-coordinate-system"
     ],
     "x": 0.6264,
-    "y": 0.8106
+    "y": 0.8107
   },
   {
     "title": "Plan to Model",
@@ -2524,7 +2524,7 @@
       "gnn"
     ],
     "x": 0.9592,
-    "y": 0.4479
+    "y": 0.448
   },
   {
     "title": "Floor Plan Generation with Voronoi Diagram",
@@ -2623,7 +2623,7 @@
       "quadtree"
     ],
     "x": 0.7422,
-    "y": 0.7741
+    "y": 0.7742
   },
   {
     "title": "Image to 3D Scene Pipeline",
