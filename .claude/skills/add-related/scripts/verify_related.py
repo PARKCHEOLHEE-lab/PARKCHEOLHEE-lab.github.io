@@ -1,4 +1,4 @@
-"""Verify all eligible posts have related frontmatter (0-5 items).
+"""Verify all eligible posts have valid related frontmatter.
 
 Exit 0 if all valid, exit 1 with details if any missing/invalid.
 """
@@ -6,6 +6,7 @@ Exit 0 if all valid, exit 1 with details if any missing/invalid.
 import re
 import sys
 
+from config import MAX_RELATED
 from list_posts import list_posts
 
 
@@ -32,7 +33,7 @@ def check_related(filepath):
     related_items = re.findall(r"^  - .+", frontmatter, re.MULTILINE)
     count = len(related_items)
 
-    if count > 5:
+    if count > MAX_RELATED:
         return "invalid", count
 
     return "valid", count
@@ -53,7 +54,9 @@ def main():
             issues.append(f"  MISSING: {slug} ({filepath})")
         elif status == "invalid":
             invalid += 1
-            issues.append(f"  INVALID ({count} items, max 5): {slug} ({filepath})")
+            issues.append(
+                f"  INVALID ({count} items, max {MAX_RELATED}): {slug} ({filepath})"
+            )
 
     print("=== Related Frontmatter Verification ===")
     print(f"Total posts: {total}")
