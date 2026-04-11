@@ -23,7 +23,7 @@ function init_latentspace() {
     };
 
     const BASE_RADIUS = 3;
-    const MIN_ZOOM = 0.8;
+    const MIN_ZOOM = 0.9;
     const MAX_ZOOM = 5;
     const VIEWPORT_PAD = 100;
     const IDLE_DELAY = 4000;
@@ -443,7 +443,11 @@ function init_latentspace() {
                 .on("drag", on_drag)
                 .on("end", drag_ended));
 
-        set_initial_min_zoom();
+        simulation.stop();
+        for (var i = 0; i < 300; i++) simulation.tick();
+        on_tick();
+        simulation.restart();
+        fit_all(0);
 
         // --- Mouse interaction ---
 
@@ -730,7 +734,7 @@ function init_latentspace() {
             simulation.force("y").y(function(d) { return d.ty; });
             simulation.alphaTarget(0).alpha(0.35).restart();
             on_tick();
-            set_initial_min_zoom();
+            fit_all(0);
         }
 
         // --- Drag ---
