@@ -276,7 +276,7 @@
       "good-refactoring-vs-bad-refactoring"
     ],
     "x": 0.1925,
-    "y": 0.4223
+    "y": 0.4222
   },
   {
     "title": "decorator",
@@ -767,7 +767,7 @@
       "siddhartha",
       "words"
     ],
-    "x": 0.1548,
+    "x": 0.1549,
     "y": 0.3987
   },
   {
@@ -810,7 +810,7 @@
       "useful-git-commands"
     ],
     "x": 0.4077,
-    "y": 0.8209
+    "y": 0.8208
   },
   {
     "title": "哲希",
@@ -1169,7 +1169,7 @@
       "gradient-penalty"
     ],
     "x": 0.7218,
-    "y": 0.3598
+    "y": 0.3599
   },
   {
     "title": "雪国 (설국)",
@@ -1195,7 +1195,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.5957,
-    "y": 0.8766
+    "y": 0.8767
   },
   {
     "title": "Chamfer Distance",
@@ -1526,7 +1526,7 @@
       "snow-country"
     ],
     "x": 0.1255,
-    "y": 0.5633
+    "y": 0.5634
   },
   {
     "title": "Half-Plane Clipping",
@@ -1620,7 +1620,7 @@
       "autoencoder"
     ],
     "x": 0.8858,
-    "y": 0.554
+    "y": 0.5541
   },
   {
     "title": "OpenAI Agents SDK",
@@ -1999,7 +1999,7 @@
       "siddhartha",
       "razors-edge"
     ],
-    "x": 0.1359,
+    "x": 0.136,
     "y": 0.4257
   },
   {
@@ -2155,7 +2155,7 @@
       "mass-generator"
     ],
     "x": 0.8025,
-    "y": 0.8033
+    "y": 0.8034
   },
   {
     "title": "Space syntax",
@@ -2299,7 +2299,7 @@
       "p2m"
     ],
     "x": 0.7229,
-    "y": 0.9944
+    "y": 0.9945
   },
   {
     "title": "K-Rooms clusters",
@@ -2389,7 +2389,7 @@
       "latent-shapes"
     ],
     "x": 0.7659,
-    "y": 0.8743
+    "y": 0.8744
   },
   {
     "title": "Parallel execution within GhPython",
@@ -2524,7 +2524,7 @@
       "gnn"
     ],
     "x": 0.9592,
-    "y": 0.448
+    "y": 0.4479
   },
   {
     "title": "Floor Plan Generation with Voronoi Diagram",
@@ -2591,7 +2591,7 @@
       "openai-agents-sdk"
     ],
     "x": 0.9081,
-    "y": 0.6151
+    "y": 0.6152
   },
   {
     "title": "Latent Shapes",
