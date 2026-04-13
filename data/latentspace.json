@@ -276,7 +276,7 @@
       "good-refactoring-vs-bad-refactoring"
     ],
     "x": 0.1925,
-    "y": 0.4222
+    "y": 0.4223
   },
   {
     "title": "decorator",
@@ -493,7 +493,7 @@
       "machine-learning-students-overfit-to-overfitting"
     ],
     "x": 0.4826,
-    "y": 0.3901
+    "y": 0.39
   },
   {
     "title": "Intuitions about Transformer",
@@ -767,7 +767,7 @@
       "siddhartha",
       "words"
     ],
-    "x": 0.1549,
+    "x": 0.1548,
     "y": 0.3987
   },
   {
@@ -810,7 +810,7 @@
       "useful-git-commands"
     ],
     "x": 0.4077,
-    "y": 0.8208
+    "y": 0.8209
   },
   {
     "title": "哲希",
@@ -1169,7 +1169,7 @@
       "gradient-penalty"
     ],
     "x": 0.7218,
-    "y": 0.3599
+    "y": 0.3598
   },
   {
     "title": "雪国 (설국)",
@@ -1195,7 +1195,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.5957,
-    "y": 0.8767
+    "y": 0.8766
   },
   {
     "title": "Chamfer Distance",
@@ -1317,7 +1317,7 @@
       "scriptcontext-sticky",
       "rhino3dm"
     ],
-    "x": 0.5916,
+    "x": 0.5917,
     "y": 0.9947
   },
   {
@@ -1418,7 +1418,7 @@
       "discrete-voronoi"
     ],
     "x": 0.7594,
-    "y": 0.2533
+    "y": 0.2532
   },
   {
     "title": "??",
@@ -1526,7 +1526,7 @@
       "snow-country"
     ],
     "x": 0.1255,
-    "y": 0.5634
+    "y": 0.5633
   },
   {
     "title": "Half-Plane Clipping",
@@ -1620,7 +1620,7 @@
       "autoencoder"
     ],
     "x": 0.8858,
-    "y": 0.5541
+    "y": 0.554
   },
   {
     "title": "OpenAI Agents SDK",
@@ -1985,7 +1985,7 @@
       "q-sample",
       "standardization"
     ],
-    "x": 0.6466,
+    "x": 0.6465,
     "y": 0.2536
   },
   {
@@ -2026,7 +2026,7 @@
       "pyo3"
     ],
     "x": 0.5768,
-    "y": 0.7452
+    "y": 0.7453
   },
   {
     "title": "Regression Model",
@@ -2155,7 +2155,7 @@
       "mass-generator"
     ],
     "x": 0.8025,
-    "y": 0.8034
+    "y": 0.8033
   },
   {
     "title": "Space syntax",
@@ -2343,7 +2343,7 @@
       "local-coordinate-system"
     ],
     "x": 0.6264,
-    "y": 0.8107
+    "y": 0.8106
   },
   {
     "title": "Plan to Model",
@@ -2389,7 +2389,7 @@
       "latent-shapes"
     ],
     "x": 0.7659,
-    "y": 0.8744
+    "y": 0.8743
   },
   {
     "title": "Parallel execution within GhPython",
@@ -2524,7 +2524,7 @@
       "gnn"
     ],
     "x": 0.9592,
-    "y": 0.4479
+    "y": 0.448
   },
   {
     "title": "Floor Plan Generation with Voronoi Diagram",
@@ -2591,7 +2591,7 @@
       "openai-agents-sdk"
     ],
     "x": 0.9081,
-    "y": 0.6152
+    "y": 0.6151
   },
   {
     "title": "Latent Shapes",
