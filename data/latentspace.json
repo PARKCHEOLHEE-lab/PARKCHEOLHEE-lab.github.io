@@ -27,7 +27,7 @@
       "exploring-generative-3d-shapes-using-autoencoder-networks"
     ],
     "x": 0.8439,
-    "y": 0.3403
+    "y": 0.3404
   },
   {
     "title": "SDW 2020",
@@ -493,7 +493,7 @@
       "machine-learning-students-overfit-to-overfitting"
     ],
     "x": 0.4826,
-    "y": 0.39
+    "y": 0.3901
   },
   {
     "title": "Intuitions about Transformer",
@@ -839,7 +839,7 @@
       "thoughtless-thought"
     ],
     "x": 0.1,
-    "y": 0.4806
+    "y": 0.4807
   },
   {
     "title": "Bayes'&nbsp Theorem",
@@ -916,7 +916,7 @@
       "non-linearity"
     ],
     "x": 0.8059,
-    "y": 0.1718
+    "y": 0.1719
   },
   {
     "title": "Programmers are like",
@@ -1001,7 +1001,7 @@
       "poly-inr"
     ],
     "x": 0.5412,
-    "y": 0.1659
+    "y": 0.166
   },
   {
     "title": "HuggingFace Inference Endpoints",
@@ -1114,7 +1114,7 @@
       "layout-vlm"
     ],
     "x": 0.9443,
-    "y": 0.6795
+    "y": 0.6796
   },
   {
     "title": "nohup",
@@ -1169,7 +1169,7 @@
       "gradient-penalty"
     ],
     "x": 0.7218,
-    "y": 0.3598
+    "y": 0.3599
   },
   {
     "title": "雪国 (설국)",
@@ -1185,7 +1185,7 @@
       "razors-edge"
     ],
     "x": 0.1672,
-    "y": 0.5285
+    "y": 0.5286
   },
   {
     "title": "Python Slack SDK",
@@ -1195,7 +1195,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.5957,
-    "y": 0.8766
+    "y": 0.8767
   },
   {
     "title": "Chamfer Distance",
@@ -1223,7 +1223,7 @@
       "crisis-discourse-of-samsung"
     ],
     "x": 0.4748,
-    "y": 0.7981
+    "y": 0.7982
   },
   {
     "title": "Auto-Encoding Variational Bayes",
@@ -1303,7 +1303,7 @@
       "nvitop"
     ],
     "x": 0.8964,
-    "y": 0.579
+    "y": 0.5791
   },
   {
     "title": "ghdoc.Path",
@@ -1351,7 +1351,7 @@
       "free-form-floor-plan-design-using-differentiable-voronoi-diagram"
     ],
     "x": 0.9769,
-    "y": 0.5387
+    "y": 0.5388
   },
   {
     "title": "pytest.raises",
@@ -1418,7 +1418,7 @@
       "discrete-voronoi"
     ],
     "x": 0.7594,
-    "y": 0.2532
+    "y": 0.2533
   },
   {
     "title": "??",
@@ -1526,7 +1526,7 @@
       "snow-country"
     ],
     "x": 0.1255,
-    "y": 0.5633
+    "y": 0.5634
   },
   {
     "title": "Half-Plane Clipping",
@@ -1542,7 +1542,7 @@
       "intersection-over-union-iou"
     ],
     "x": 0.7755,
-    "y": 0.7759
+    "y": 0.776
   },
   {
     "title": "Exploring Generative 3D Shapes Using Autoencoder Networks",
@@ -1620,7 +1620,7 @@
       "autoencoder"
     ],
     "x": 0.8858,
-    "y": 0.554
+    "y": 0.5541
   },
   {
     "title": "OpenAI Agents SDK",
@@ -2000,7 +2000,7 @@
       "razors-edge"
     ],
     "x": 0.136,
-    "y": 0.4257
+    "y": 0.4258
   },
   {
     "title": "Claude Code Cheat Sheet",
@@ -2041,7 +2041,7 @@
       "maximum-likelihood-estimation"
     ],
     "x": 0.7424,
-    "y": 0.3309
+    "y": 0.331
   },
   {
     "title": "IndexedDB",
@@ -2054,7 +2054,7 @@
       "scriptcontext-sticky"
     ],
     "x": 0.5322,
-    "y": 0.759
+    "y": 0.7591
   },
   {
     "title": "Daily Paper Bot",
@@ -2110,7 +2110,7 @@
       "the-selfish-gene"
     ],
     "x": 0.7457,
-    "y": 0.6168
+    "y": 0.6169
   },
   {
     "title": "Mass generator",
@@ -2139,7 +2139,7 @@
       "space-syntax"
     ],
     "x": 0.7409,
-    "y": 0.7804
+    "y": 0.7805
   },
   {
     "title": "Tower crane arrangement",
@@ -2155,7 +2155,7 @@
       "mass-generator"
     ],
     "x": 0.8025,
-    "y": 0.8033
+    "y": 0.8034
   },
   {
     "title": "Space syntax",
@@ -2170,7 +2170,7 @@
       "floor-plan-generation-with-voronoi-diagram"
     ],
     "x": 0.8275,
-    "y": 0.9829
+    "y": 0.983
   },
   {
     "title": "Subdivision curve",
@@ -2209,7 +2209,7 @@
       "subdivision-curve"
     ],
     "x": 0.7313,
-    "y": 0.8002
+    "y": 0.8003
   },
   {
     "title": "Plot shape estimator",
@@ -2330,7 +2330,7 @@
       "wave-function-collapse"
     ],
     "x": 0.8042,
-    "y": 0.8822
+    "y": 0.8823
   },
   {
     "title": "Klemens Torggler's door",
@@ -2343,7 +2343,7 @@
       "local-coordinate-system"
     ],
     "x": 0.6264,
-    "y": 0.8106
+    "y": 0.8107
   },
   {
     "title": "Plan to Model",
@@ -2591,7 +2591,7 @@
       "openai-agents-sdk"
     ],
     "x": 0.9081,
-    "y": 0.6151
+    "y": 0.6152
   },
   {
     "title": "Latent Shapes",
