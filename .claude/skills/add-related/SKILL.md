@@ -86,9 +86,27 @@ The sub-agent prompt MUST instruct it to:
 
 1. **Read `/tmp/post_list.txt`** to get the canonical candidate pool
 2. **Read the post's full content** to understand what it's about
-3. **Propose MIN_RELATED–MAX_RELATED related posts with justification** for each connection, using the relatedness criteria below
-4. **Briefly sanity-check each proposal**: For every candidate, ask "would a reader actually benefit from seeing this link?" Only drop the candidate if you cannot articulate a concrete benefit to the reader.
-5. **Return a final list** in the format `POST: slug\nRELATED: slug1, slug2, slug3\n---`
+3. **Propose MIN_RELATED–MAX_RELATED related posts**, using the relatedness criteria below
+4. **Write a one-line justification for EVERY proposed link** that cites which criterion it satisfies and what concrete connection exists. If you cannot write a concrete, specific justification (beyond "both are dev tools" or "both are notes"), **drop the link**. A link without a real justification is a hallucinated link — leave it out.
+5. **Return the result** in the format below. The `RELATED:` line contains ONLY slugs (no justification inline). Justifications go in the `REASONS:` block below it for auditing, but only slugs from `RELATED:` will be written to the post's frontmatter.
+
+```
+POST: slug
+RELATED: slug1, slug2, slug3
+REASONS:
+  - slug1: <one-line concrete justification citing a criterion>
+  - slug2: <one-line concrete justification citing a criterion>
+  - slug3: <one-line concrete justification citing a criterion>
+---
+```
+
+**Anti-example — do NOT do this:**
+```
+POST: wslconfig
+RELATED: asdf
+REASONS:
+  - asdf: both are dev-environment tool configs  ← REJECT: this is shared-format-only, no conceptual link. Drop it.
+```
 
 Run multiple `claude` CLI calls in parallel (background Bash) to maximize throughput.
 
