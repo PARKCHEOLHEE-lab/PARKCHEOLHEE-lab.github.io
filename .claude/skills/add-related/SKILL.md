@@ -2,16 +2,17 @@
 name: add-related
 description: Add or update related frontmatter for all blog posts in note/_posts and testbed/_posts. Run when user wants to refresh related post links across the entire site.
 user-invocable: true
-allowed-tools: "Read Edit Bash Glob Grep Agent"
+allowed-tools: "Read Edit Bash Glob Grep"
 hooks:
   PreToolUse:
-    - matcher: "Agent"
+    - matcher: "Bash"
       hooks:
         - type: prompt
           prompt: |
-            Check that the Agent prompt references the canonical post list file at /tmp/post_list.txt.
+            If the Bash command invokes `claude` CLI (spawning a sub-agent), check that the prompt passed via -p references the canonical post list file at /tmp/post_list.txt.
             This file is produced by list_posts.py and is the ONLY valid source of post slugs.
-            If the prompt does NOT reference /tmp/post_list.txt (either by reading it or including its content), say BLOCK: "Sub-agent must use the canonical post list from /tmp/post_list.txt".
+            If the command is NOT a `claude` CLI invocation, say ALLOW.
+            If it IS a `claude` CLI invocation and the prompt does NOT reference /tmp/post_list.txt, say BLOCK: "Sub-agent must use the canonical post list from /tmp/post_list.txt".
             Otherwise say ALLOW.
   PostToolUse:
     - matcher: "Edit"
@@ -68,17 +69,28 @@ Read every post's frontmatter and first ~50 lines of content to understand its t
 
 For **every single post** from `/tmp/post_list.txt` (no exceptions, no skipping), regardless of whether it already has a `related:` field:
 
-### 3a. Spawn a sub-agent to evaluate related posts
+### 3a. Spawn a sub-agent via CLI to evaluate related posts
 
-For each post (or a small batch of posts), launch a sub-agent (Agent tool) that:
+For each post (or a small batch of posts), spawn a sub-agent using the `claude` CLI via Bash. This ensures `--effort max` is enforced for every sub-agent.
 
-1. **Reads `/tmp/post_list.txt`** to get the canonical candidate pool
-2. **Reads the post's full content** to understand what it's about
-3. **Proposes MIN_RELATED–MAX_RELATED related posts with justification** for each connection, using the relatedness criteria below
-4. **Briefly sanity-checks each proposal**: For every candidate, ask "would a reader actually benefit from seeing this link?" Only drop the candidate if you cannot articulate a concrete benefit to the reader.
-5. **Returns a final list** of slug(s) with one-line justifications
+```bash
+claude --effort max --model opus \
+  --add-dir /tmp --add-dir /workspaces/PARKCHEOLHEE-lab.github.io \
+  --allowedTools "Read" \
+  -p "PROMPT_HERE" > result.txt 2>err.txt
+```
 
-**Important**: The sub-agent prompt MUST instruct the agent to read `/tmp/post_list.txt` for the candidate pool. A PreToolUse hook enforces this.
+The `--add-dir` and `--allowedTools` flags are required so the sub-agent can read `/tmp/post_list.txt` and the post files without triggering permission prompts (since root can't use `--dangerously-skip-permissions`).
+
+The sub-agent prompt MUST instruct it to:
+
+1. **Read `/tmp/post_list.txt`** to get the canonical candidate pool
+2. **Read the post's full content** to understand what it's about
+3. **Propose MIN_RELATED–MAX_RELATED related posts with justification** for each connection, using the relatedness criteria below
+4. **Briefly sanity-check each proposal**: For every candidate, ask "would a reader actually benefit from seeing this link?" Only drop the candidate if you cannot articulate a concrete benefit to the reader.
+5. **Return a final list** in the format `POST: slug\nRELATED: slug1, slug2, slug3\n---`
+
+Run multiple `claude` CLI calls in parallel (background Bash) to maximize throughput.
 
 ### 3b. Apply the result
 
@@ -101,7 +113,7 @@ Connections must **NOT** be based on:
 
 ### Sub-agent prompt template
 
-When spawning the sub-agent, include:
+When spawning the sub-agent via `claude` CLI, include in the prompt:
 - Instruction to **read `/tmp/post_list.txt`** for the canonical post list (slug + title)
 - The target post's filepath, slug, title
 - The relatedness criteria above
