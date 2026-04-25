@@ -1,0 +1,351 @@
+---
+title: "Window/Crossing Selection"
+layout: post
+related:
+  - selectionbox
+  - two-points-perspective
+  - local-coordinate-system
+  - triangle-menu-aim
+  - half-plane-clipping
+  - three-geometries
+---
+
+<br>
+
+<ul>
+    <li>
+        Two Drag Modes
+    </li>
+        <ul>
+            <li>
+                CAD tools traditionally distinguish two rectangle-drag selection modes:
+                <b>window</b> selection picks only the geometry that is <b>fully enclosed</b> by the rectangle,
+                while <b>crossing</b> selection picks anything the rectangle <b>fully encloses or merely intersects</b>.
+                AutoCAD, Rhino, and most parametric modelers use the drag direction itself as the toggle:
+                left-to-right means window, right-to-left means crossing.
+            </li>
+            <li>
+                The mode is inferred from a single comparison
+                between the pointer's <code>down</code> position and its current position:
+
+<pre><code class="typescript">
+    protected get isCrossingSelect(): boolean {
+        if (!this.rect) return false;
+        return this.rect.currentX < this.rect.clientX;
+    }
+</code></pre>
+
+                If the cursor's current x is to the <b>left</b> of where the drag started,
+                the user is dragging right-to-left, so the mode is crossing.
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/window-crossing-selection/window-crossing-selection-0.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
+    <br>
+    <li>
+        Drawing the Rubber-Band Rect
+    </li>
+        <ul>
+            <li>
+                The rectangle is a plain absolutely-positioned <code>div</code> appended to the main window
+                on <code>pointerdown</code> and removed on <code>pointerup</code>.
+                The visual style flips on every <code>pointermove</code> based on the drag direction —
+                window mode draws a <b>solid blue</b> border with a translucent blue fill,
+                while crossing mode switches to a <b>dashed green</b> border with a lighter fill,
+                giving the user the same visual cue they would see in AutoCAD:
+
+<pre><code class="typescript">
+    protected updateRect(rect: SelectionRect, event: PointerEvent) {
+        if (this.pointerEventMap.size !== 1) return;
+        rect.currentX = event.clientX;
+        rect.element.style.display = "block";
+        const [x1, y1] = [Math.min(rect.clientX, event.clientX), Math.min(rect.clientY, event.clientY)];
+        const [x2, y2] = [Math.max(rect.clientX, event.clientX), Math.max(rect.clientY, event.clientY)];
+        const crossing = event.clientX < rect.clientX;
+        Object.assign(rect.element.style, {
+            left: `${x1}px`,
+            top: `${y1}px`,
+            width: `${x2 - x1}px`,
+            height: `${y2 - y1}px`,
+            borderStyle: crossing ? "dashed" : "solid",
+            backgroundColor: crossing ? "rgba(74, 255, 158, 0.15)" : "rgba(74, 158, 255, 0.3)",
+            borderColor: crossing ? "var(--success-color, #4ade80)" : "var(--primary-color)",
+        });
+    }
+</code></pre>
+            </li>
+            <li>
+                The handler also requires a <b>3-pixel deadzone</b> before treating the gesture as a rectangle drag.
+                Below that threshold the pointer is still treated as a single click,
+                so a sloppy mouse-down doesn't accidentally open a tiny selection box.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Two Hit Tests, One Rectangle
+    </li>
+        <ul>
+            <li>
+                Once the user releases the mouse,
+                each candidate object is projected onto screen space —
+                every vertex of the geometry is run through <code>worldToScreen</code>,
+                producing a 2D point cloud and an edge list.
+                The mode then selects between two completely different tests.
+            </li>
+            <br>
+            <li>
+                <b>Window</b> — every projected vertex must lie inside the rectangle:
+
+<pre><code class="typescript">
+    private allPointsInsideRect(pts, minX, minY, maxX, maxY): boolean {
+        for (const p of pts) {
+            if (p.x < minX || p.x > maxX || p.y < minY || p.y > maxY) return false;
+        }
+        return pts.length > 0;
+    }
+</code></pre>
+
+                A single vertex outside the box disqualifies the whole object.
+                This is fast (early-exit on first miss) and matches the user's mental model:
+                if any visible bit of the part pokes out of the rectangle, it isn't selected.
+            </li>
+            <br>
+            <li>
+                <b>Crossing</b> — selected if <i>any</i> part of the geometry overlaps the rectangle.
+                The check has two stages:
+                first, any vertex inside the rectangle is an immediate hit;
+                second, every geometry edge is tested against each of the four rectangle edges
+                using a 2D segment-intersection routine:
+
+<pre><code class="typescript">
+    private anyCrossingHit(pts, edges, minX, minY, maxX, maxY): boolean {
+        // 1) any vertex inside rect
+        for (const p of pts) {
+            if (p.x >= minX && p.x <= maxX && p.y >= minY && p.y <= maxY) return true;
+        }
+        // 2) any geometry edge crosses rect boundary
+        const rectEdges = [
+            [minX, minY, maxX, minY],
+            [maxX, minY, maxX, maxY],
+            [maxX, maxY, minX, maxY],
+            [minX, maxY, minX, minY],
+        ];
+        for (const [ai, bi] of edges) {
+            const pa = pts[ai], pb = pts[bi];
+            for (const [ex1, ey1, ex2, ey2] of rectEdges) {
+                if (segmentsIntersect(pa.x, pa.y, pb.x, pb.y, ex1, ey1, ex2, ey2)) return true;
+            }
+        }
+        return false;
+    }
+</code></pre>
+            </li>
+            <br>
+            <li>
+                The two stages cover the two ways an edge can intersect a rectangle:
+                an endpoint inside (caught by stage 1)
+                or an edge that passes <b>through</b> the rectangle without either endpoint being inside
+                (caught by stage 2).
+                Without stage 2, a long line crossing the box from edge to edge would be missed.
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/window-crossing-selection/window-crossing-selection-1.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
+    <br>
+    <li>
+        2D Segment Intersection
+    </li>
+        <ul>
+            <li>
+                The crossing test reduces to the standard parametric line-segment intersection.
+                Given segments \(P_1P_2\) and \(P_3P_4\), express each as a parametric form
+                and solve for the parameters \(t, u\):
+
+                <div class="latex-container">
+                    \[
+                    t = \frac{(x_3 - x_1)(y_4 - y_3) - (y_3 - y_1)(x_4 - x_3)}{(x_2 - x_1)(y_4 - y_3) - (y_2 - y_1)(x_4 - x_3)}
+                    \]
+                </div>
+                <div class="latex-container">
+                    \[
+                    u = \frac{(x_3 - x_1)(y_2 - y_1) - (y_3 - y_1)(x_2 - x_1)}{(x_2 - x_1)(y_4 - y_3) - (y_2 - y_1)(x_4 - x_3)}
+                    \]
+                </div>
+
+                <br>
+
+                The segments intersect if and only if \(0 \le t \le 1\) and \(0 \le u \le 1\).
+                The denominator is the 2D cross product of the two direction vectors —
+                if it's near zero, the segments are parallel and skipped:
+
+<pre><code class="typescript">
+    function segmentsIntersect(x1, y1, x2, y2, x3, y3, x4, y4): boolean {
+        const dx1 = x2 - x1, dy1 = y2 - y1;
+        const dx2 = x4 - x3, dy2 = y4 - y3;
+        const denom = dx1 * dy2 - dy1 * dx2;
+        if (Math.abs(denom) < 1e-10) return false;
+        const t = ((x3 - x1) * dy2 - (y3 - y1) * dx2) / denom;
+        const u = ((x3 - x1) * dy1 - (y3 - y1) * dx1) / denom;
+        return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+    }
+</code></pre>
+            </li>
+        </ul>
+    <br>
+    <li>
+        World-to-Screen Projection
+    </li>
+        <ul>
+            <li>
+                The hit test runs in pixel coordinates, so the real question is:
+                given a 3D vertex on a CAD object,
+                what 2D pixel does it land on?
+                <code>worldToScreen</code> collapses the standard graphics pipeline —
+                view transform, projection, perspective divide, viewport remap —
+                into a single helper:
+
+<pre><code class="typescript">
+    worldToScreen(point: XYZ): XY {
+        const cx = this.width / 2;
+        const cy = this.height / 2;
+        const vec = new Vector3(point.x, point.y, point.z).project(this.camera);
+        return new XY({ x: Math.round(cx * vec.x + cx), y: Math.round(-cy * vec.y + cy) });
+    }
+</code></pre>
+            </li>
+            <br>
+            <li>
+                Three.js's <code>Vector3.project(camera)</code> applies the camera's
+                view matrix \(M_{\text{view}}\) and projection matrix \(M_{\text{proj}}\),
+                then performs the perspective divide.
+                The result is in <b>normalized device coordinates</b> (NDC) —
+                a unit cube where each axis lies in \([-1,\, 1]\):
+
+                <div class="latex-container">
+                    \[
+                        \mathbf{p}_{\text{clip}} = M_{\text{proj}}\, M_{\text{view}}\, \mathbf{p}_{\text{world}}, \quad
+                        \mathbf{p}_{\text{NDC}} = \frac{\mathbf{p}_{\text{clip}}}{w_{\text{clip}}}
+                    \]
+                </div>
+
+                <br>
+
+                Mapping NDC to pixels is a straight affine remap.
+                Note the y-axis flip — NDC y points up, but screen y points down:
+
+                <div class="latex-container">
+                    \[
+                        x_s = \tfrac{w}{2}\,(x_{\text{NDC}} + 1), \qquad
+                        y_s = \tfrac{h}{2}\,(1 - y_{\text{NDC}})
+                    \]
+                </div>
+            </li>
+            <br>
+            <li>
+                Vertices on a three.js <code>Object3D</code> start in <b>local</b> space —
+                each object has its own coordinate frame.
+                <code>localToWorld</code> applies the object's <code>matrixWorld</code>,
+                bringing local vertices into the shared world frame
+                that <code>worldToScreen</code> expects:
+
+<pre><code class="typescript">
+    private projectGeometry(obj: Object3D) {
+        // ...
+        const v = new Vector3();
+        const pts: { x: number; y: number }[] = [];
+        for (let i = 0; i < posAttr.count; i++) {
+            v.fromBufferAttribute(posAttr, i);                // local-space vertex
+            obj.localToWorld(v);                              // local → world
+            pts.push(this.worldToScreen({ x: v.x, y: v.y, z: v.z }));
+        }
+        // ...
+    }
+</code></pre>
+
+                <br>
+
+                The full chain for a single vertex is therefore:
+
+                <div class="latex-container">
+                    \[
+                        \mathbf{p}_{\text{local}}
+                        \;\xrightarrow{M_{\text{world}}}\; \mathbf{p}_{\text{world}}
+                        \;\xrightarrow{M_{\text{view}}}\; \mathbf{p}_{\text{view}}
+                        \;\xrightarrow{M_{\text{proj}}}\; \mathbf{p}_{\text{clip}}
+                        \;\xrightarrow{\div\, w}\; \mathbf{p}_{\text{NDC}}
+                        \;\xrightarrow{\text{viewport}}\; \mathbf{p}_{\text{screen}}
+                    \]
+                </div>
+            </li>
+            <br>
+            <li>
+                One subtlety: this projection is a <b>silhouette</b> test, not a visibility test.
+                A vertex behind another object still projects to wherever the camera <i>would</i> see it
+                if nothing occluded it,
+                so window / crossing selection picks parts by their on-screen outline —
+                not by which pixels the user can actually see.
+                That matches AutoCAD and Rhino: a part hidden behind a wall is still selectable
+                as long as its outline lands inside the rectangle.
+            </li>
+            <br>
+            <li>
+                For ordinary three.js meshes and lines the projection
+                loops over the <code>position</code> buffer attribute,
+                with the edge list reconstructed from the geometry type
+                (<code>LineSegments</code> pairs vertices, <code>Line</code> chains them,
+                <code>Mesh</code> uses the index buffer to build triangle edges).
+            </li>
+            <br>
+            <li>
+                Fat lines (<code>LineSegments2</code>) are special-cased:
+                their geometry doesn't store a <code>position</code> attribute at all.
+                Instead each segment's start and end are stored separately
+                in <code>instanceStart</code> and <code>instanceEnd</code> instanced attributes,
+                so the projection has to read both attributes side-by-side and emit them as alternating points.
+                Without this branch, fat-line edges silently never appear in any rectangle selection.
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/window-crossing-selection/window-crossing-selection-2.png" width="100%" onerror=handle_image_error(this)>
+    </figure>
+    <li>
+        Shape-Level vs Visual-Level
+    </li>
+        <ul>
+            <li>
+                The visual-level path above (<code>detectVisualRect</code>) is what runs for
+                whole-object picks like "select these parts."
+                For sub-shape picks — selecting individual edges or faces of a B-Rep —
+                the code delegates to three.js's built-in
+                <a href="https://threejs.org/docs/#examples/en/interactive/SelectionBox">SelectionBox</a>,
+                which performs a true 3D frustum test against the scene:
+
+<pre><code class="typescript">
+    detectShapesRect(shapeType, mx1, my1, mx2, my2, ...) {
+        // Shape-level rect selection uses SelectionBox for both modes
+        // (crossing/window distinction is handled at visual level)
+        const selectionBox = this.initSelectionBox(mx1, my1, mx2, my2);
+        const detecteds: VisualShapeData[] = [];
+        for (const obj of selectionBox.select()) {
+            this.addDetectedShape(detecteds, ..., shapeType, obj, ...);
+        }
+        return detecteds;
+    }
+</code></pre>
+            </li>
+            <br>
+            <li>
+                <code>SelectionBox</code> builds a frustum from the camera and the two NDC corners
+                of the drag rectangle, then walks the scene graph and keeps any object whose
+                bounding volume falls inside.
+                It doesn't itself distinguish window from crossing —
+                that distinction is handled one layer up,
+                where the screen-space projection has finer control over each vertex.
+            </li>
+        </ul>
+    <br>
+</ul>
+
+<br><br>
