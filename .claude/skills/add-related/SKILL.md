@@ -3,16 +3,6 @@ name: add-related
 description: Add or update related frontmatter for blog posts in note/_posts and testbed/_posts. Supports a full-site pass (--all=true, default) or a single-post focus pass (--post-name=<slug>). Run when user wants to refresh related post links.
 user-invocable: true
 allowed-tools: "Read Edit Bash Glob Grep"
-hooks:
-  PostToolUse:
-    - matcher: "Edit"
-      hooks:
-        - type: prompt
-          prompt: |
-            Check if the edit just made correctly modifies the `related:` frontmatter in a blog post.
-            The related field must be a YAML list with MIN_RELATED to MAX_RELATED slug items (see scripts/config.py for values).
-            Only check the YAML structure and count. Do NOT try to verify whether slugs exist — the verification script handles that.
-            If the structure or count looks wrong, say BLOCK and explain why. Otherwise say ALLOW.
 ---
 
 # Add Related Posts
