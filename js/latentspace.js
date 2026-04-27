@@ -1,3 +1,21 @@
+function pick_weighted_index(weights, rand) {
+    if (!weights || weights.length === 0) return 0;
+    let total = 0;
+    for (let i = 0; i < weights.length; i++) total += weights[i];
+    if (total <= 0) return 0;
+    let r = (rand !== undefined ? rand : Math.random()) * total;
+    for (let i = 0; i < weights.length - 1; i++) {
+        r -= weights[i];
+        if (r < 0) return i;
+    }
+    return weights.length - 1;
+}
+
+function pick_least_visited(items) {
+    const weights = items.map(function(n) { return 1 / (1 + (n.visits || 0)); });
+    return items[pick_weighted_index(weights)];
+}
+
 function init_latentspace() {
     const root_style = getComputedStyle(document.documentElement);
 
@@ -527,19 +545,17 @@ function init_latentspace() {
                 handle_click(event, d.url);
             });
 
-        // --- Touch dismiss ---
+        // --- Empty-canvas click dismiss ---
 
-        if (is_touch_device) {
-            svg.on("click.touch-dismiss", function(event) {
-                if (event.target.classList && event.target.classList.contains("dot")) return;
-                if (tooltip.node().contains(event.target)) return;
-                if (touch_selected_node) {
-                    touch_selected_node = null;
-                    active_hover_node = null;
-                    clear_hover_state(250);
-                }
-            });
-        }
+        svg.on("click.dismiss", function(event) {
+            if (event.target.classList && event.target.classList.contains("dot")) return;
+            if (tooltip.node().contains(event.target)) return;
+            if (active_hover_node || touch_selected_node) {
+                touch_selected_node = null;
+                active_hover_node = null;
+                clear_hover_state(250);
+            }
+        });
 
         // --- Tick ---
 
@@ -578,9 +594,7 @@ function init_latentspace() {
             }, IDLE_DELAY);
         }
 
-        svg.on("mouseenter", reset_idle)
-           .on("mousemove", reset_idle)
-           .on("mousedown", reset_idle);
+        svg.on("mousedown", reset_idle);
 
         function stop_idle_anim(options) {
             options = options || {};
@@ -601,6 +615,7 @@ function init_latentspace() {
 
             active_hover_node = d;
             if (is_touch_device) touch_selected_node = d;
+            d.visits = (d.visits || 0) + 1;
             const connected = get_connected_slugs(d);
 
             dot_elements.transition("idle").duration(400)
@@ -631,8 +646,7 @@ function init_latentspace() {
             });
             if (nodes_with_edges.length === 0) return;
 
-            const start = nodes_with_edges[Math.floor(Math.random() * nodes_with_edges.length)];
-            walk_step(start);
+            walk_step(pick_least_visited(nodes_with_edges));
         }
 
         function walk_step(current) {
@@ -654,7 +668,7 @@ function init_latentspace() {
                     });
 
                     if (neighbors.length > 0) {
-                        walk_step(neighbors[Math.floor(Math.random() * neighbors.length)]);
+                        walk_step(pick_least_visited(neighbors));
                     } else {
                         idle_walk();
                     }
