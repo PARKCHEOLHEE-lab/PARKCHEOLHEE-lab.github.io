@@ -12,3 +12,9 @@ settings*.json
 .claude/*
 !.claude/skills/
 __pycache__/
+
+node_modules/
+test-results/
+playwright-report/
+.playwright/
+blob-report/
