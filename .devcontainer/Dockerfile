@@ -6,8 +6,23 @@ RUN apt-get update && apt-get install -y \
     git-lfs \
     curl \
     gh \
+    jq \
+    python3 \
+    python3-pip \
+    python3-venv \
     && rm -rf /var/lib/apt/lists/* \
     && git lfs install
+
+RUN python3 -m venv /opt/latentspace-venv \
+    && /opt/latentspace-venv/bin/python -m pip install --no-cache-dir \
+    openai \
+    beautifulsoup4 \
+    lxml \
+    numpy \
+    scikit-learn \
+    pytest
+
+ENV LATENTSPACE_PYTHON=/opt/latentspace-venv/bin/python
 
 # Install Node.js and Claude Code
 RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \

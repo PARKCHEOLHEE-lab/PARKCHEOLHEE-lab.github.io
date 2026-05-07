@@ -1,6 +1,6 @@
 ---
 name: build-latentspace
-description: Rebuild the D3.js post map by embedding all blog posts with OpenAI and reducing to 2D with UMAP. Run when posts are added, removed, or labels need refreshing.
+description: Rebuild the D3.js post map by embedding all blog posts with OpenAI and reducing to 2D with deterministic PCA. Run when posts are added, removed, or labels need refreshing.
 user-invocable: true
 allowed-tools: "Bash Read"
 ---
@@ -13,22 +13,23 @@ Rebuild `data/latentspace.json` — the single data source for the D3.js latent 
 
 1. Collects all eligible posts from `note/_posts` and `testbed/_posts` (excludes `_` prefixed files and empty posts)
 2. Embeds each post using OpenAI `text-embedding-3-small`
-3. Reduces embeddings to 2D with UMAP
+3. Reduces embeddings to 2D with deterministic PCA
 4. Assigns a label based on `emoji` frontmatter
 5. Extracts `connected` links from `related` frontmatter
 6. Writes the result to `data/latentspace.json`
 
-Incremental mode: existing posts keep their xy from `data/latentspace.json`. Only new posts are embedded and projected via cached UMAP model (`data/umap_model.pkl`).
+Incremental mode: cached embeddings in `data/embeddings.json` avoid repeat OpenAI calls. Coordinates are recomputed from the full embedding matrix with deterministic PCA.
 
 ## Prerequisites
 
 - `OPENAI_API_KEY` environment variable must be set
-- Python dependencies: `openai`, `umap-learn`, `numpy`, `beautifulsoup4`, `lxml`
+- Python dependencies: `openai`, `beautifulsoup4`, `lxml`, `numpy`, `scikit-learn`
 
 ## Run
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/build_post_map.py"
+SKILL_DIR="${CLAUDE_SKILL_DIR:-$(git rev-parse --show-toplevel)/.agents/shared/skills/build-latentspace}"
+python3 "${SKILL_DIR}/scripts/build_post_map.py"
 ```
 
 Verify the output looks correct:

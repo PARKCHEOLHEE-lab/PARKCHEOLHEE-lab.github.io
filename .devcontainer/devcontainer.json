@@ -7,7 +7,9 @@
   "postStartCommand": "src=$(find /root/.claude/projects -maxdepth 1 -name '*PARKCHEOLHEE-lab-github-io' ! -name '-workspaces-*' | head -1) && [ -n \"$src\" ] && ln -sfn \"$src\" /root/.claude/projects/-workspaces-PARKCHEOLHEE-lab-github-io || true",
   "mounts": [
     "source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/.claude,target=/root/.claude,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.agents,target=/root/.agents,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,consistency=cached"
   ],
   "shutdownAction": "none",
   "customizations": {

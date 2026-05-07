@@ -7,8 +7,32 @@ Output format: filepath|slug|title (one per line)
 import glob
 import os
 import re
+import subprocess
+from pathlib import Path
 
-REPO_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+
+def find_repo_root():
+    """Return the git repo root even when this script is reached via symlink."""
+    try:
+        root = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"],
+            cwd=os.path.dirname(__file__),
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
+        if root:
+            return root
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        pass
+
+    for parent in Path(__file__).resolve().parents:
+        if (parent / "_config.yml").exists() and (parent / ".git").exists():
+            return str(parent)
+
+    return os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
+
+
+REPO_ROOT = find_repo_root()
 
 
 def extract_title(filepath):

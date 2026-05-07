@@ -2,6 +2,9 @@
 .bundle
 .jekyll-cache
 .sass-cache
+.pytest_cache/
+.ruby-lsp/
+.agents/shared/INSTRUCTIONS.history/.snapshot.log
 Gemfile.lock
 _site
 *.gem
@@ -10,7 +13,11 @@ ___*.html
 settings*.json
 
 .claude/*
-!.claude/skills/
+!.claude/CLAUDE.md
+!.claude/CLAUDE.history
+!.claude/hooks
+!.claude/settings.json
+!.claude/skills
 __pycache__/
 
 node_modules/

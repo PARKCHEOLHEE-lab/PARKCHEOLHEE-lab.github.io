@@ -36,7 +36,8 @@ mode: focus            (--post-name=<slug>)
 The single source of truth for min/max related counts is `scripts/config.py`. Print it to confirm:
 
 ```bash
-python3 -c "import sys; sys.path.insert(0,'${CLAUDE_SKILL_DIR}/scripts'); from config import *; print(f'MIN_RELATED={MIN_RELATED}, MAX_RELATED={MAX_RELATED}')"
+SKILL_DIR="${CLAUDE_SKILL_DIR:-$(git rev-parse --show-toplevel)/.agents/shared/skills/add-related}"
+python3 -c "import sys; sys.path.insert(0,'${SKILL_DIR}/scripts'); from config import *; print(f'MIN_RELATED={MIN_RELATED}, MAX_RELATED={MAX_RELATED}')"
 ```
 
 All references to "minimum" or "maximum" related counts below mean these values. **Do not hardcode numbers — always refer to config.py.**
@@ -46,7 +47,8 @@ All references to "minimum" or "maximum" related counts below mean these values.
 Run the list script and save its output to a fixed file. This file is the **single source of truth** for all slugs.
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/list_posts.py" > /tmp/post_list.txt
+SKILL_DIR="${CLAUDE_SKILL_DIR:-$(git rev-parse --show-toplevel)/.agents/shared/skills/add-related}"
+python3 "${SKILL_DIR}/scripts/list_posts.py" > /tmp/post_list.txt
 ```
 
 Print the count to confirm:
@@ -202,7 +204,8 @@ This step is **not optional**. The justification block is the audit trail and th
 After re-review, run the verification script:
 
 ```bash
-python3 "${CLAUDE_SKILL_DIR}/scripts/verify_related.py"
+SKILL_DIR="${CLAUDE_SKILL_DIR:-$(git rev-parse --show-toplevel)/.agents/shared/skills/add-related}"
+python3 "${SKILL_DIR}/scripts/verify_related.py"
 ```
 
 If verification fails, fix every reported issue before finishing.
