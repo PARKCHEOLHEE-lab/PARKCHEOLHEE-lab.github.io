@@ -10,7 +10,11 @@ ___*.html
 settings*.json
 
 .claude/*
-!.claude/skills/
+!.claude/CLAUDE.md
+!.claude/CLAUDE.history
+!.claude/hooks
+!.claude/settings.json
+!.claude/skills
 __pycache__/
 
 node_modules/

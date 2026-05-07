@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash -c 'root=\"${CODEX_PROJECT_DIR:-}\"; if [ -z \"$root\" ]; then root=\"$(git rev-parse --show-toplevel 2>/dev/null)\" || exit 0; fi; bash \"$root/.codex/hooks/pre-commit-check.sh\"'",
+            "timeout": 900,
+            "statusMessage": "pre-commit: jekyll build + related/skill checks"
+          }
+        ]
+      }
+    ]
+  }
+}
