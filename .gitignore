@@ -2,6 +2,8 @@
 .bundle
 .jekyll-cache
 .sass-cache
+.pytest_cache/
+.ruby-lsp/
 Gemfile.lock
 _site
 *.gem
