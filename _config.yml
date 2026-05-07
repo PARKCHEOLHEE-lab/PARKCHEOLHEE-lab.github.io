@@ -45,10 +45,6 @@ highlightjs:
   js: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/highlight.min.js"
 
 exclude:
-  - .agents
-  - .claude
-  - .codex
-  - AGENTS.md
   - data/umap_model.pkl
 
 plugins:
