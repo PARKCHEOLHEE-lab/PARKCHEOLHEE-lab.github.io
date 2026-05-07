@@ -5,7 +5,7 @@
 - Shared repo-local skills live under `.agents/shared/skills`; `.claude/skills` and `.codex/skills` are discovery symlinks to that shared directory.
 - Shared hook implementations live under `.agents/shared/hooks`; `.claude/hooks` and `.codex/hooks` are compatibility symlinks to that shared directory.
 - Tool-specific hook registration config stays under `.claude/settings.json` and `.codex/hooks.json` because their schemas differ.
-- Instruction history snapshots live under `.agents/shared/instructions-history`; `.claude/CLAUDE.history` and `.codex/AGENTS.history` are compatibility symlinks into that shared directory.
+- Instruction history snapshots live under `.agents/shared/INSTRUCTIONS.history`; `.claude/CLAUDE.history` and `.codex/AGENTS.history` are compatibility symlinks into that shared directory.
 
 # PARKCHEOLHEE Lab Blog Guidelines
 
@@ -55,12 +55,12 @@ pip install openai beautifulsoup4 lxml numpy scikit-learn pytest
 
 ## Skill Workflow
 
-Use `$add-related` when adding or refreshing related-post links. The canonical scripts are:
+Use `/add-related` in Claude or `$add-related` in Codex when adding or refreshing related-post links. The canonical scripts are:
 
 - `.agents/shared/skills/add-related/scripts/list_posts.py`
 - `.agents/shared/skills/add-related/scripts/verify_related.py`
 
-Use `$build-latentspace` when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
+Use `/build-latentspace` in Claude or `$build-latentspace` in Codex when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
 
 - `data/latentspace.json`
 - `data/embeddings.json`
