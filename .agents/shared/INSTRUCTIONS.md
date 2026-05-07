@@ -55,12 +55,12 @@ pip install openai beautifulsoup4 lxml numpy scikit-learn pytest
 
 ## Skill Workflow
 
-Use `/add-related` in Claude or `$add-related` in Codex when adding or refreshing related-post links. The canonical scripts are:
+Use the `add-related` skill when adding or refreshing related-post links. The canonical scripts are:
 
 - `.agents/shared/skills/add-related/scripts/list_posts.py`
 - `.agents/shared/skills/add-related/scripts/verify_related.py`
 
-Use `/build-latentspace` in Claude or `$build-latentspace` in Codex when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
+Use the `build-latentspace` skill when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
 
 - `data/latentspace.json`
 - `data/embeddings.json`
