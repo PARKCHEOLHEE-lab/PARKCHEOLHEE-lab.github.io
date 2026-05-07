@@ -35,7 +35,7 @@ link_path() {
 mkdir -p \
   .agents/shared/hooks \
   .agents/shared/skills \
-  .agents/shared/instructions-history
+  .agents/shared/INSTRUCTIONS.history
 
 link_path ".agents/shared/INSTRUCTIONS.md" "AGENTS.md"
 link_path "../.agents/shared/INSTRUCTIONS.md" ".codex/AGENTS.md"
@@ -47,7 +47,7 @@ link_path "../.agents/shared/skills" ".claude/skills"
 link_path "../.agents/shared/hooks" ".codex/hooks"
 link_path "../.agents/shared/hooks" ".claude/hooks"
 
-link_path "../.agents/shared/instructions-history" ".codex/AGENTS.history"
-link_path "../.agents/shared/instructions-history" ".claude/CLAUDE.history"
+link_path "../.agents/shared/INSTRUCTIONS.history" ".codex/AGENTS.history"
+link_path "../.agents/shared/INSTRUCTIONS.history" ".claude/CLAUDE.history"
 
 printf 'done\n'
