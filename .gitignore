@@ -4,6 +4,7 @@
 .sass-cache
 .pytest_cache/
 .ruby-lsp/
+.agents/shared/INSTRUCTIONS.history/.snapshot.log
 Gemfile.lock
 _site
 *.gem
