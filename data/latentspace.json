@@ -29,7 +29,7 @@
       "attention-is-all-you-need"
     ],
     "x": 0.8315,
-    "y": 0.3235
+    "y": 0.3236
   },
   {
     "title": "SDW 2020",
@@ -549,7 +549,7 @@
       "cosine-similarity"
     ],
     "x": 0.7055,
-    "y": 0.1814
+    "y": 0.1815
   },
   {
     "title": "Testing with Github Actions",
@@ -684,7 +684,7 @@
       "building-gan"
     ],
     "x": 0.7182,
-    "y": 0.4011
+    "y": 0.401
   },
   {
     "title": "?",
@@ -1006,7 +1006,7 @@
       "representation-learning"
     ],
     "x": 0.651,
-    "y": 0.0381
+    "y": 0.0382
   },
   {
     "title": "Inductive Bias",
@@ -1069,7 +1069,7 @@
       "snow-country"
     ],
     "x": 0.0,
-    "y": 0.5573
+    "y": 0.5574
   },
   {
     "title": "Material Masking",
@@ -1619,7 +1619,7 @@
       "hallucination-is-a-feature"
     ],
     "x": 0.5686,
-    "y": 0.4718
+    "y": 0.4719
   },
   {
     "title": "MCP-related",
@@ -1680,7 +1680,7 @@
       "rhinomcptest"
     ],
     "x": 0.8082,
-    "y": 0.7975
+    "y": 0.7976
   },
   {
     "title": "참을 수 없는 존재의 가벼움",
@@ -1784,7 +1784,7 @@
       "hallucination-is-a-feature"
     ],
     "x": 0.2944,
-    "y": 0.3679
+    "y": 0.368
   },
   {
     "title": "inspect.getsource",
@@ -1967,7 +1967,7 @@
       "auto-encoding-variational-bayes"
     ],
     "x": 0.5784,
-    "y": 0.7605
+    "y": 0.7606
   },
   {
     "title": "ssh-keygen shortcut",
@@ -2322,7 +2322,7 @@
       "apartment",
       "secure-room-in-seoul"
     ],
-    "x": 0.8395,
+    "x": 0.8394,
     "y": 0.6141
   },
   {
