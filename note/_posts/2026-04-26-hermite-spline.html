@@ -1,0 +1,337 @@
+---
+title:  "Hermite Spline"
+layout: post
+related:
+  - subdivision-curve
+  - linear-interpolation
+  - plane-equation
+---
+
+<br>
+
+<ul>
+    <li>
+        Why Splines
+    </li>
+        <ul>
+            <li>
+                A single high-degree polynomial that passes through many points
+                tends to wiggle uncontrollably between them
+                (<a href="https://en.wikipedia.org/wiki/Runge%27s_phenomenon">Runge's phenomenon</a>).
+                The fix is to break the curve into <b>short pieces</b>
+                and stitch them together so the joints look smooth.
+                Each piece is a low-degree polynomial — usually cubic.
+                The collection is called a <mark>spline</mark>.
+            </li>
+            <li>
+                The <b>Hermite spline</b> is the simplest member of this family.
+                Each segment is defined by just four pieces of information:
+                the two endpoints, and the tangent vectors at those endpoints.
+                "Where you start, where you end, and how fast you leave / arrive"
+                is enough to pin down a unique cubic.
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Definition
+    </li>
+        <ul>
+            <li>
+                A Hermite segment uses four control elements:
+                two endpoints \(P(0), P(1)\) and two tangent vectors \(P'(0), P'(1)\).
+                The segment itself is a cubic polynomial in a parameter \(u \in [0, 1]\):
+                \[
+                    P(u) = a u^3 + b u^2 + c u + d
+                \]
+                <br>
+                The four unknown coefficient vectors \(a, b, c, d\)
+                are uniquely determined by the four control elements.
+            </li>
+            <br>
+
+            <li>
+                Visually, the endpoints fix <b>where</b> the curve passes,
+                and the tangent vectors fix <b>which way</b> and <b>how strongly</b>
+                it leaves and arrives.
+
+                <figure>
+                    <img src="/img/hermite-spline/fig-1.png" width="100%" style="max-width: 700px;" onerror="handle_image_error(this)">
+                    <figcaption>
+                        Two Hermite segments sharing the same endpoint locations
+                        but driven by different tangent vectors.
+                        The endpoints fix where the curve goes;
+                        the tangents fix the entry/exit direction and speed.
+                    </figcaption>
+                </figure>
+            </li>
+            <br>
+
+            <li>
+                Holding the endpoints fixed and only varying the <b>tangent vectors</b>
+                already gives a rich family of shapes.
+                A longer tangent means the curve "lingers" longer in that direction
+                before turning toward the other endpoint.
+
+                <figure>
+                    <img src="/img/hermite-spline/fig-2.png" width="100%" style="max-width: 700px;" onerror="handle_image_error(this)">
+                    <figcaption>
+                        Same endpoints, four different tangent configurations.
+                        Top-left: short tangents in the natural direction.
+                        Top-right: long tangents both horizontal — the curve "lingers" before turning.
+                        Bottom-left: tangent at \(p_1\) reversed — the curve overshoots and returns.
+                        Bottom-right: tangents perpendicular and opposite — the curve arches above and descends into \(p_1\).
+                    </figcaption>
+                </figure>
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Continuity at Joints
+    </li>
+        <ul>
+            <li>
+                When two segments meet, the joint can be smooth or kinked.
+                "How smooth" is captured by two related but different notions:
+                <b>geometric continuity</b> \(G^n\) and <b>parametric continuity</b> \(C^n\).
+            </li>
+            <br>
+
+            <li>
+                <mark>Geometric continuity \(G^n\)</mark>
+                cares about the <b>shape</b> at the joint and ignores the parameterization.
+                <ul>
+                    <li>
+                        \(G^0\): the two segments share the joint point — they touch.
+                    </li>
+                    <li>
+                        \(G^1\): in addition to \(G^0\), their tangent <b>directions</b> agree at the joint.
+                        The magnitudes are allowed to differ.
+                    </li>
+                    <li>
+                        \(G^n\): the same condition extended to \(n\)-th derivatives —
+                        directions match, magnitudes need not.
+                    </li>
+                </ul>
+            </li>
+            <br>
+
+            <li>
+                <mark>Parametric continuity \(C^n\)</mark>
+                is the stricter version: at the joint
+                the \(n\)-th derivatives must be <b>equal as vectors</b>
+                (same direction <em>and</em> same magnitude).
+                It cares about how fast the parameter \(u\) is sweeping along the curve.
+                <br><br>
+                Concretely: \(C^n\) implies \(G^n\), but not the other way around.
+                Two segments can share a smooth-looking tangent direction (\(G^1\))
+                while their parameter speeds differ (not \(C^1\)).
+            </li>
+            <br>
+
+            <li>
+                The diagram below makes the staircase concrete.
+                Top row: geometric continuity — increasing visual smoothness.
+                Bottom row: at the joint, only the direction must match for \(G^1\),
+                whereas \(C^1\) demands the full tangent vector.
+
+                <figure>
+                    <img src="/img/hermite-spline/fig-3.png" width="100%" style="max-width: 700px;" onerror="handle_image_error(this)">
+                    <figcaption>
+                        Top: geometric continuity from \(G^0\) (touching only)
+                        through \(G^1\) (tangent direction matches) to \(G^2\) (curvature also matches).
+                        Bottom: \(G^1\) only requires matching tangent <em>directions</em>;
+                        \(C^1\) requires the full tangent vectors to be equal.
+                    </figcaption>
+                </figure>
+            </li>
+            <br>
+
+            <li>
+                Why Hermite splines make this easy: each segment <b>directly exposes</b>
+                its endpoint tangents \(P'(0), P'(1)\) as control elements.
+                To enforce \(C^1\) at a joint between segment \(i\) and \(i+1\),
+                set \(P'_i(1) = P'_{i+1}(0)\). To enforce only \(G^1\),
+                require \(P'_{i+1}(0) = \alpha\, P'_i(1)\) for some scalar \(\alpha &gt; 0\).
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Generation: from Control Elements to \(P(u)\)
+    </li>
+        <ul>
+            <li>
+                A cubic curve has four unknown coefficient vectors:
+                \[
+                    P(u) = a u^3 + b u^2 + c u + d, \qquad
+                    P'(u) = 3 a u^2 + 2 b u + c
+                \]
+                <br>
+                Plugging in \(u = 0\) and \(u = 1\) gives four equations:
+                \[
+                    \begin{aligned}
+                        P(0) &= d \\
+                        P(1) &= a + b + c + d \\
+                        P'(0) &= c \\
+                        P'(1) &= 3a + 2b + c
+                    \end{aligned}
+                \]
+                <br>
+                Solving for \(a, b, c, d\) and substituting back yields the Hermite form:
+                \[
+                    \,\\
+                    P(u) =
+                    (2u^3 - 3u^2 + 1)\,P(0)
+                    + (-2u^3 + 3u^2)\,P(1)
+                    + (u^3 - 2u^2 + u)\,P'(0)
+                    + (u^3 - u^2)\,P'(1)
+                    \,\\
+                \]
+                The four polynomials in front of the control elements are the
+                <mark>Hermite blending functions</mark>.
+                Each one says "how much does this control element influence \(P(u)\) at parameter \(u\)?"
+            </li>
+            <br>
+
+            <li>
+                Notice two structural properties that come straight from the
+                interpolation conditions \(h_{ij}(0)\) and \(h_{ij}(1)\):
+                <ul>
+                    <li>
+                        At \(u = 0\): \(h_{00} = 1\), all others = 0. So \(P(0) = P(0)\).
+                    </li>
+                    <li>
+                        At \(u = 1\): \(h_{01} = 1\), all others = 0. So \(P(1) = P(1)\).
+                    </li>
+                    <li>
+                        The tangent blends \(h_{10}, h_{11}\) vanish at both endpoints,
+                        so changing tangent magnitudes only bends the curve in the middle —
+                        it never moves the endpoints.
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Worked Example
+    </li>
+        <ul>
+            <li>
+                Take the four control elements from the lecture:
+                \[
+                    P(0) = \begin{bmatrix} 1 \\ 1 \end{bmatrix},\;
+                    P(1) = \begin{bmatrix} 5 \\ 3 \end{bmatrix},\;
+                    P'(0) = \begin{bmatrix} 3 \\ 0 \end{bmatrix},\;
+                    P'(1) = \begin{bmatrix} 6 \\ -3 \end{bmatrix}
+                \]
+                Substituting into the Hermite form:
+                \[
+                    \begin{aligned}
+                    P(u) &=
+                    \begin{bmatrix} 1 \\ 1 \end{bmatrix}(2u^3 - 3u^2 + 1)
+                    + \begin{bmatrix} 5 \\ 3 \end{bmatrix}(-2u^3 + 3u^2) \\
+                    &\quad + \begin{bmatrix} 3 \\ 0 \end{bmatrix}(u^3 - 2u^2 + u)
+                    + \begin{bmatrix} 6 \\ -3 \end{bmatrix}(u^3 - u^2) \\
+                    &= \begin{bmatrix} u^3 + 3u + 1 \\ -7u^3 + 9u^2 + 1 \end{bmatrix}
+                    \end{aligned}
+                \]
+            </li>
+            <br>
+
+            <li>
+                Sanity-check the boundary values:
+                \(P(0) = (1, 1)\), \(P(1) = (1+3+1,\; -7+9+1) = (5, 3)\). Both endpoints land.
+                Differentiating: \(P'(u) = (3u^2 + 3,\; -21u^2 + 18u)\),
+                so \(P'(0) = (3, 0)\) and \(P'(1) = (6, -3)\). Both tangents land.
+            </li>
+            <br>
+
+            <li>
+                Sampling \(P(u)\) at \(u = 0, 0.1, 0.2, \dots, 1\)
+                produces the curve drawn below.
+                The dashed arrows are the prescribed tangents
+                at the two endpoints.
+
+                <figure>
+                    <img src="/img/hermite-spline/fig-5.png" width="100%" style="max-width: 700px;" onerror="handle_image_error(this)">
+                    <figcaption>
+                        The Hermite curve generated from
+                        \(P(0) = (1,1)\), \(P(1) = (5,3)\), \(P'(0) = (3,0)\), \(P'(1) = (6,-3)\).
+                        It leaves \(P(0)\) horizontally (the start tangent has zero \(y\) component),
+                        rises past \(P(1)\), and arrives at \(P(1)\) heading down-right.
+                    </figcaption>
+                </figure>
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Matrix Form
+    </li>
+        <ul>
+            <li>
+                Writing the cubic as \(P(u) = [a\;b\;c\;d]\,U\) with \(U = [u^3, u^2, u, 1]^T\)
+                and stacking the four boundary conditions in matrix form,
+                we get:
+                \[
+                    [P(0)\;\; P(1)\;\; P'(0)\;\; P'(1)]
+                    =
+                    [a\;b\;c\;d]
+                    \begin{bmatrix}
+                        0 & 1 & 0 & 3 \\
+                        0 & 1 & 0 & 2 \\
+                        0 & 1 & 1 & 1 \\
+                        1 & 1 & 0 & 0
+                    \end{bmatrix}
+                \]
+                Inverting that matrix gives the
+                <mark>Hermite basis matrix</mark> \(M_H\):
+                \[
+                    M_H =
+                    \begin{bmatrix}
+                        \phantom{-}2 & -3 & \phantom{-}0 & \phantom{-}1 \\
+                        -2 & \phantom{-}3 & \phantom{-}0 & \phantom{-}0 \\
+                        \phantom{-}1 & -2 & \phantom{-}1 & \phantom{-}0 \\
+                        \phantom{-}1 & -1 & \phantom{-}0 & \phantom{-}0
+                    \end{bmatrix}
+                \]
+                and the curve becomes a clean sandwich:
+                \[
+                    \,\\
+                    P(u) =
+                    \underbrace{[\,P(0)\;\; P(1)\;\; P'(0)\;\; P'(1)\,]}_{\text{control}}
+                    \cdot
+                    \underbrace{M_H}_{\text{basis}}
+                    \cdot
+                    \underbrace{\begin{bmatrix} u^3 \\ u^2 \\ u \\ 1 \end{bmatrix}}_{\text{parameter}}
+                    \,\\
+                \]
+            </li>
+            <br>
+
+            <li>
+                Each row of \(M_H \cdot U\) is exactly one of the four blending functions:
+                \[
+                    M_H
+                    \begin{bmatrix} u^3 \\ u^2 \\ u \\ 1 \end{bmatrix}
+                    =
+                    \begin{bmatrix}
+                        2u^3 - 3u^2 + 1 \\
+                        -2u^3 + 3u^2 \\
+                        u^3 - 2u^2 + u \\
+                        u^3 - u^2
+                    \end{bmatrix}
+                \]
+                <br>
+                The same factorization (control · basis · parameter) shows up
+                for Bézier and B-spline curves with a different basis matrix in the middle.
+                Once you internalize this shape, switching between curve families
+                becomes "swap the basis matrix and keep the rest."
+            </li>
+        </ul>
+</ul>
+
+<br><br>
