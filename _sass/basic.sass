@@ -234,9 +234,7 @@ hr
   border: 0
   height: 1px
   background-color: $divider
-  margin: 20px 0
-  margin-top: 2em
-  margin-bottom: 2em
+  margin: 2em 0
 
 .message-content h3
   margin-top: 20px
@@ -276,19 +274,27 @@ hr
 
 // Universal display-math overflow guard. KaTeX's `.katex-display` and
 // MathJax v2 CHTML's `.mjx-chtml.MJXc-display` are the block-level
-// display containers; making them the scroll boundary lets wider math
-// scroll inside the equation block instead of pushing the whole page
-// wide on mobile. Targeting these parents (not the inner
+// display containers; making them the horizontal scroll boundary lets
+// wider math scroll inside the equation block instead of pushing the
+// whole page wide on mobile. Targeting these parents (not the inner
 // `.mjx-full-width`, which MathJax overrides with `max-width: none`)
 // is what actually constrains overflow. Replaces the per-post
 // .latex-container wrap convention going forward; existing wrappers
 // remain harmless.
+//
+// `overflow-y` is intentionally not set: the spec promotes it to `auto`
+// (paired with `overflow-x: auto`), so the small vertical protrusions
+// MathJax leaves on matrix brackets and large operators (≈4–5 px past
+// the container's measured height) would either be clipped (if `hidden`)
+// or trigger a useless v-scrollbar. The `padding-block` below gives
+// those protrusions breathing room so the natural box stays larger than
+// the rendered scrollHeight and `auto` never shows a vertical scrollbar.
 .katex-display,
 .mjx-chtml.MJXc-display,
 .MathJax_Display
   max-width: 100%
   overflow-x: auto
-  overflow-y: hidden
+  padding-block: 0.4em
 
 // --- Global styles (moved from default.html inline <style>) ---
 

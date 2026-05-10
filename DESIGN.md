@@ -86,10 +86,18 @@ still use tokens:
    `.archive`, `.icon`, `.katex`, `.rouge-table`) are general utilities
    and DO follow token discipline.
 
-2. **`_sass/latentspace.sass`** — D3 categorical color palette for the
-   latent-space post map. Each color encodes a post category and is read
-   by `js/latentspace.js`. Renaming or unifying these would silently
-   change the visualization.
+2. **`_sass/latentspace.sass`** (whole file) — the latent-space post
+   map's stylesheet. Two kinds of raw values live here and both are
+   intentionally exempt:
+   - The D3 categorical `--label-*` palette (`#f19cb0`, `#00b341`, ...).
+     Each color encodes a post category and is read by
+     `js/latentspace.js`; renaming would silently change the
+     visualization.
+   - Map-UI raw values (map border / hover border, control color, the
+     `#969696` control text, tooltip background, zoom button border).
+     These are data-viz infrastructure tuned to look right against the
+     scatter; folding them into general tokens would risk visual drift
+     in the map without benefiting the rest of the site.
 
 If you find yourself wanting to add a third excluded zone, that is a sign
 the new feature should be a token instead.
@@ -116,7 +124,10 @@ the new feature should be a token instead.
   with its own fonts and is the only exception.
 - **No hardcoded `px` for body or section spacing.** Use `em` so spacing
   scales with the fluid base font size. The chat-bubble component is the
-  one tolerated exception (it uses `10px` / `15px` to lock bubble shape).
+  one tolerated exception — `.chat-message` and every `.message-content`
+  descendant rule may use `px` (e.g. `padding: 10px 15px`,
+  `margin-top: 20px`) to lock bubble shape and keep the bubble UI
+  visually consistent across post font sizes.
 
 ## What this project does NOT use
 
