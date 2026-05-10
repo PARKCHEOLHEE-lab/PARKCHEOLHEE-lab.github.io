@@ -24,10 +24,12 @@ related:
                 The collection is called a <mark>spline</mark>.
             </li>
             <li>
-                The <b>Hermite spline</b> is the simplest member of this family.
+                The <b>cubic Hermite spline</b> is the simplest member of this family
+                that lets you specify both endpoint positions and endpoint tangents directly.
                 Each segment is defined by just four pieces of information:
                 the two endpoints, and the tangent vectors at those endpoints.
-                "Where you start, where you end, and how fast you leave / arrive"
+                "Where you start, where you end, and how fast you leave / arrive
+                (in the parameter \(u\), not in arc length)"
                 is enough to pin down a unique cubic.
             </li>
         </ul>
@@ -100,7 +102,9 @@ related:
 
             <li>
                 <mark>Geometric continuity \(G^n\)</mark>
-                cares about the <b>shape</b> at the joint and ignores the parameterization.
+                depends only on the <b>shape</b> at the joint and is invariant
+                under any orientation-preserving regular reparameterization
+                (one whose derivative stays positive).
                 <ul>
                     <li>
                         \(G^0\): the two segments share the joint point — they touch.
@@ -127,11 +131,17 @@ related:
                 is the stricter version: at the joint
                 the \(n\)-th derivatives must be <b>equal as vectors</b>
                 (same direction <em>and</em> same magnitude).
-                It cares about how fast the parameter \(u\) is sweeping along the curve.
+                Concretely, \(C^1\) requires the tangent vectors \(P'(u)\) on both sides to be equal —
+                which simultaneously pins down direction and parametric speed \(|P'(u)|\).
+                Higher \(C^n\) extends this to equality of all derivatives up to order \(n\).
                 <br><br>
-                Concretely: \(C^n\) implies \(G^n\), but not the other way around.
+                At <em>regular</em> points (where \(P'(u) \neq 0\)),
+                \(C^n\) implies \(G^n\), but not the other way around.
                 Two segments can share a smooth-looking tangent direction (\(G^1\))
                 while their parameter speeds differ (not \(C^1\)).
+                The implication can fail at <em>stationary</em> points where \(P'(u) = 0\):
+                the canonical example is \(\alpha(t) = (t^2, t^3)\),
+                which is \(C^\infty\) in \(t\) but has a geometric cusp at the origin.
             </li>
             <br>
 
@@ -196,7 +206,11 @@ related:
                 \]
                 The four polynomials in front of the control elements are the
                 <mark>Hermite blending functions</mark>.
-                Each one says "how much does this control element influence \(P(u)\) at parameter \(u\)?"
+                The position pair is a partition of unity — \(h_{00}(u) + h_{01}(u) = 1\) —
+                so when both tangents are zero the curve stays in the affine hull of \(P(0), P(1)\)
+                (a straight line segment between them).
+                The tangent pair \(h_{10}, h_{11}\) are vector weights, not affine weights;
+                they can be negative and they don't sum to anything special.
             </li>
             <br>
 
@@ -332,8 +346,11 @@ related:
                 \]
                 <br>
                 The same factorization (control · basis · parameter) shows up
-                for Bézier and B-spline curves with a different basis matrix in the middle.
-                Once you internalize this shape, switching between curve families
+                per-segment for Bézier curves and for uniform B-spline segments —
+                same shape, different basis matrix.
+                (General non-uniform B-splines are evaluated by the Cox–de Boor recursion
+                rather than one global matrix, but each cubic segment can still be put in this form.)
+                Once you internalize the shape, switching between these families
                 becomes "swap the basis matrix and keep the rest."
             </li>
         </ul>
