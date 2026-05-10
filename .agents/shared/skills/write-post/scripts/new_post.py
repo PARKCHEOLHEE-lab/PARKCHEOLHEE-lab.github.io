@@ -48,8 +48,19 @@ def normalize_emoji(value: str) -> str:
     return f"/emoji/{value}"
 
 
+def yaml_double_quote(value: str) -> str:
+    """Wrap *value* in YAML double quotes, escaping backslashes and quotes.
+
+    YAML double-quoted scalars treat ``\\`` and ``"`` specially, so a raw title
+    like ``Bayes "Rule"`` would otherwise produce ``title: "Bayes "Rule""``,
+    which is rejected by every strict YAML loader (Jekyll's included).
+    """
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"{escaped}"'
+
+
 def frontmatter_note(title: str, emoji: str | None) -> str:
-    lines = ["---", f'title: "{title}"', "layout: post"]
+    lines = ["---", f"title: {yaml_double_quote(title)}", "layout: post"]
     if emoji:
         lines.append(f"emoji: {emoji}")
     lines.append("related: []")
@@ -60,13 +71,13 @@ def frontmatter_note(title: str, emoji: str | None) -> str:
 def frontmatter_testbed(title: str, slug: str, emoji: str | None) -> str:
     lines = [
         "---",
-        f'title: "{title}"',
+        f"title: {yaml_double_quote(title)}",
         "layout: post",
         'hashtag: ""',
         "comment: true",
         "splitter: 2",
         "featured: false",
-        "inprogress: true",
+        "inprogress: false",
         'at: ""',
         f"thumbnail: /img/{slug}/{slug}-thumbnail.png",
     ]

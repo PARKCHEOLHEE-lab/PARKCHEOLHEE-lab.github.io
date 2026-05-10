@@ -76,18 +76,22 @@ Abort if `$FILE` already exists — ask the user how to proceed.
 
 ### Step 5 — Pick a body style
 
-Pick from three templates (full HTML wrappers in `references/body-styles.md`):
+Pick from four templates (full HTML wrappers in `references/body-styles.md`). The `--style` value passed to `scripts/new_post.py` must be one of these exact tokens.
 
 | Style | When to pick | Wrapper |
 |---|---|---|
-| **outline** | Technical notes that explain structure or mechanism | nested `<ul><li>...</li><ul><li>...</li>...</ul></ul>` |
-| **prose** | Short essay, observation, prose-style technical intuition | `<div style="text-align: justify;">...<br><br>...</div>` |
-| **keyword** | Korean thought-jump posts (one short line per keyword/phrase) | `<div style="text-align: justify;">line<br>line<br>...</div>` |
+| `outline` | `note` posts that explain structure or mechanism | nested `<ul><li>...</li><ul><li>...</li>...</ul></ul>` |
+| `prose` | `note` short essay, observation, prose-style technical intuition | `<div style="text-align: justify;">...<br><br>...</div>` |
+| `keyword` | `note` Korean thought-jump posts (one short line per keyword/phrase) | `<div style="text-align: justify;">line<br>line<br>...</div>` |
+| `testbed-longform` | All `testbed` posts — long-form experiment / project writeups | `<div id="toc"></div>` + repeated `<h3>Title</h3><div class="article">…</div><br><br>` blocks |
 
-Inference cues:
-- `--language=kr` + topic is reflective/philosophical → likely **keyword** or **prose**
-- `--language=en` + topic involves code, math, or system mechanics → likely **outline**
-- `--category=testbed` → use **outline** with top-level `<h3>` section headings wrapped in `<div class="article">` blocks instead of nested `<ul>` (see `testbed/_posts/2026-02-03-image-to-3d-scene.html`)
+Category → style hard rules:
+- `--category=testbed` → **must** use `testbed-longform`. The other three styles are `note` wrappers and produce the wrong HTML structure for testbed posts. See `testbed/_posts/2026-02-03-image-to-3d-scene.html` for the canonical shape.
+- `--category=note` → pick one of `outline`, `prose`, `keyword`. `testbed-longform` is forbidden inside `note/_posts`.
+
+Inference cues for `note`:
+- `--language=kr` + topic is reflective/philosophical → likely `keyword` or `prose`
+- `--language=en` + topic involves code, math, or system mechanics → likely `outline`
 
 Confirm the chosen style with `AskUserQuestion` before writing.
 
@@ -167,11 +171,16 @@ If the math says a diagram should compare against a canonical reference (e.g., p
 
 ### Step 9 — Verify the build
 
+`bundle exec jekyll build | tail -30` would mask Jekyll failures because the pipeline exit status is `tail`'s, not Jekyll's. Capture the log to a file and check Jekyll's own exit status:
+
 ```bash
-bundle exec jekyll build 2>&1 | tail -30
+bundle exec jekyll build >/tmp/jekyll-build.log 2>&1
+status=$?
+tail -30 /tmp/jekyll-build.log
+[ "$status" = "0" ] || { echo "BUILD FAILED (exit $status)"; exit "$status"; }
 ```
 
-If Jekyll fails, fix the source. If it succeeds and the user has the dev server running, suggest visiting `http://127.0.0.1:4000/<slug>/`.
+If Jekyll fails, read the captured log, fix the source, and re-run. If it succeeds and the user has the dev server running, suggest visiting `http://127.0.0.1:4000/<slug>/`.
 
 ### Step 10 — Hand off to `/add-related`
 
