@@ -10,5 +10,28 @@ $text-dark: rgb(70, 70, 70) !default
 $dark: #000000 !default
 $light: #ffffff !default
 
+// Surface tokens for chat-style content (note posts use chat bubbles)
+$bg-subtle: #f7f7f8 !default
+$text-chat: #343541 !default
+$divider: #e5e5e6 !default
+$link-chat: #4b83ec !default
+
 @function reduce ($percent)
   @return rgba(mix($dark, $light), $percent / 100)
+
+@mixin hover-fade($opacity: 0.5, $duration: 0.5s)
+  opacity: $opacity
+  transition: opacity $duration ease
+
+@mixin hide-scrollbar($axis: width)
+  scrollbar-width: none
+  -ms-overflow-style: none
+  &::-webkit-scrollbar
+    @if $axis == width or $axis == both
+      width: 0
+    @if $axis == height or $axis == both
+      height: 0
+    background: transparent
+  &::-webkit-scrollbar-track,
+  &::-webkit-scrollbar-thumb
+    background: transparent

@@ -68,7 +68,7 @@ blockquote
   border-left: 3px solid reduce(90)
   padding: 1px 3em
   opacity: 1.0
-  background-color: #ffffff
+  background-color: $light
 
 blockquote, figure
   margin: 1em 0
@@ -77,8 +77,7 @@ ul.section-nav
   // list-style: none
   padding-left: 2em
   margin-top: -1.2em
-  color: gray
-  link-color: gray
+  color: reduce(100)
   font-size: calc(0.6rem + 0.2vw)
 
 canvas
@@ -112,6 +111,9 @@ img
   margin-left: auto
   margin-right: auto
 
+img.book-cover
+  box-shadow: 0 4px 8px rgba($dark, 0.2)
+
 table
   max-width: 100%
   overflow-y: scroll
@@ -143,19 +145,16 @@ pre
   margin: 0 .1em
   padding: .2em .4em
 
-.title-main 
+.title-main
   background: $featured-color
-  color: #ffffff
-  padding-left: 0.5em
-  padding-right: 0.5em
-  padding-bottom: 0.2em
-  padding-top: 0.2em
+  color: $light
+  padding: 0.2em 0.5em
   font-size: calc(0.9rem + 0.2vw)
   
 figcaption
   text-align: center
   margin-top: 1em
-  color: gray
+  color: reduce(100)
   font-size: calc(0.6rem + 0.2vw)
 
 div.article
@@ -192,12 +191,11 @@ div.article
     overflow: hidden
     max-width: 100%
 
-.youtube-container iframe, 
-.youtube-container object, 
-.youtube-container embed 
+.youtube-container iframe,
+.youtube-container object,
+.youtube-container embed
     position: absolute
-    top: 0
-    left: 0
+    inset: 0
     width: 100%
     height: 100%
 
@@ -215,9 +213,9 @@ div.article
 .chat-message.user 
   align-items: flex-end
 
-.chat-message.user .message-content 
-  background-color: #f7f7f8
-  color: #343541
+.chat-message.user .message-content
+  background-color: $bg-subtle
+  color: $text-chat
   margin-left: auto
   margin-right: 1em
   max-width: 70%
@@ -225,29 +223,27 @@ div.article
   padding-top: 0
   padding-bottom: 0
 
-.chat-message.assistant .message-content 
-  background-color: #ffffff
-  color: #343541
+.chat-message.assistant .message-content
+  background-color: $light
+  color: $text-chat
 
 .message-content table
   width: 100%
 
-hr 
+hr
   border: 0
   height: 1px
-  background-color: #e5e5e6
-  margin: 20px 0
-  margin-top: 2em
-  margin-bottom: 2em
+  background-color: $divider
+  margin: 2em 0
 
-.message-content h3 
+.message-content h3
   margin-top: 20px
   margin-bottom: 10px
   font-size: 1.1em
-  color: #343541
+  color: $text-chat
 
-.message-content a 
-  color: #4b83ec
+.message-content a
+  color: $link-chat
   text-decoration: none
 
 .message-content ul 
@@ -257,15 +253,15 @@ hr
 .message-content li 
   margin-bottom: 5px
 
-.message-content pre 
-  background-color: #f7f7f8
+.message-content pre
+  background-color: $bg-subtle
   padding: 10px
   border-radius: 5px
   overflow-x: auto
   margin: 10px 0
 
-.message-content code 
-  background-color: #f7f7f8
+.message-content code
+  background-color: $bg-subtle
   padding: 2px 4px
   border-radius: 3px
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace
@@ -276,37 +272,57 @@ hr
 .latex-container
   overflow: auto
 
+// Universal display-math overflow guard. KaTeX's `.katex-display` and
+// MathJax v2 CHTML's `.mjx-chtml.MJXc-display` are the block-level
+// display containers; making them the horizontal scroll boundary lets
+// wider math scroll inside the equation block instead of pushing the
+// whole page wide on mobile. Targeting these parents (not the inner
+// `.mjx-full-width`, which MathJax overrides with `max-width: none`)
+// is what actually constrains overflow. Replaces the per-post
+// .latex-container wrap convention going forward; existing wrappers
+// remain harmless.
+//
+// `overflow-y` is intentionally not set: the spec promotes it to `auto`
+// (paired with `overflow-x: auto`), so the small vertical protrusions
+// MathJax leaves on matrix brackets and large operators (≈4–5 px past
+// the container's measured height) would either be clipped (if `hidden`)
+// or trigger a useless v-scrollbar. The `padding-block` below gives
+// those protrusions breathing room so the natural box stays larger than
+// the rendered scrollHeight and `auto` never shows a vertical scrollbar.
+.katex-display,
+.mjx-chtml.MJXc-display,
+.MathJax_Display
+  max-width: 100%
+  overflow-x: auto
+  padding-block: 0.4em
+
 // --- Global styles (moved from default.html inline <style>) ---
 
 html
   overflow: scroll
   overflow-x: hidden
   scroll-behavior: smooth
-  &::-webkit-scrollbar
-    width: 0
-    background: transparent
+  @include hide-scrollbar(width)
 
 a:hover
-  opacity: 0.5
-  transition: opacity 0.5s ease
+  @include hover-fade
 
 // --- Shared list component classes (from note.html/testbed.html inline <style>) ---
 
 .use-bottom-line
-  border-bottom: 1px dotted rgba(128, 128, 128, 0.14)
+  border-bottom: 1px dotted reduce(14)
 
 .use-bottom-line--padded
-  border-bottom: 1px dotted rgba(128, 128, 128, 0.14)
+  border-bottom: 1px dotted reduce(14)
   padding-bottom: 2em
 
 .clickable
   cursor: pointer
   &:hover
-    opacity: 0.5
-    transition: opacity 0.5s ease
+    @include hover-fade
 
 .use-gray
-  color: gray
+  color: reduce(100)
 
 .emoji-image
   width: 1.25em
@@ -338,17 +354,11 @@ a:hover
   overflow-x: auto
   overflow-y: hidden
   white-space: nowrap
-  -ms-overflow-style: none
-  scrollbar-width: none
-  &::-webkit-scrollbar
-    height: 0px
-  &::-webkit-scrollbar-track,
-  &::-webkit-scrollbar-thumb
-    background: transparent
+  @include hide-scrollbar(height)
 
 .list-summary
   margin-top: -1.5em
-  color: gray
+  color: reduce(100)
   float: left
 
 .list-filter-button
@@ -411,7 +421,7 @@ a:hover
   margin-bottom: 0.5em
   font-size: calc(0.35rem + 0.2vw)
   text-align: right
-  color: gray
+  color: reduce(100)
 
 // --- Embed classes ---
 
