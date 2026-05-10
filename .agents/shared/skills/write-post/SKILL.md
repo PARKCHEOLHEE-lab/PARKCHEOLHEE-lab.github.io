@@ -1,7 +1,7 @@
 ---
 name: write-post
 description: Scaffold and draft a new blog post under note/_posts or testbed/_posts following this repo's frontmatter, body-style, image, and follow-up conventions. Use when the user asks to write a post, draft a post, or expand a topic into a post.
-argument-hint: "[topic] [--language=en|kr] [--emoji=<file>] [--sources=<urls,paths>] [--category=note|testbed] [--slug=<slug>]"
+argument-hint: "[topic] [--language=en|kr] [--emoji=<file>] [--sources=<urls,paths>] [--category=note|testbed] [--slug=<slug>] [--at=<venue>]"
 user-invocable: true
 allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 ---
@@ -17,10 +17,11 @@ Parse the slash-command `ARGUMENTS:` line for the following flags. All optional.
 | Flag | Values | Default | Meaning |
 |---|---|---|---|
 | `--language` | `en` / `kr` | `en` | Body language. `en` = English, `kr` = Korean. |
-| `--emoji` | filename under `emoji/` (e.g. `brain.png`) or full path (e.g. `/emoji/brain.png`) | _(none)_ | Sets the `emoji:` frontmatter field. If omitted, the field is **not** generated. |
+| `--emoji` | One of `brain.png`, `books.png`, `pin.png`, `eyes.png`, `wordballoon-with-dots.png`, `robot.png`, `storm.png` (or the same with `/emoji/` prefix) | _(none)_ | Sets the `emoji:` frontmatter field. **Only the seven emojis listed have label mappings in `build-latentspace`** — others silently fall back to "Note". If none fits, omit the flag. Full table: `references/frontmatter.md`. |
 | `--sources` | comma-separated list of URLs and/or local file paths | _(none)_ | Reference material. URLs are fetched via `WebFetch`; local paths are read with `Read`. |
 | `--category` | `note` / `testbed` | _(ask)_ | Skip if not provided — always confirm with `AskUserQuestion`. |
 | `--slug` | kebab-case slug | _(derive + confirm)_ | Filename slug without date prefix or extension. |
+| `--at` | venue / lab / event string (testbed only) | _(none)_ | **Do not pass an empty string.** Liquid treats `""` as truthy and renders a dangling `＠` marker in the testbed index. Omit the flag if there is no venue. Known special-cased values with link templates: `Visual Media Lab`, `Spacewalk`. |
 
 A free-text topic (anything in `ARGUMENTS:` outside the flags) is treated as the topic seed.
 
@@ -106,8 +107,11 @@ python3 "$SKILL_DIR/scripts/new_post.py" \
   --title "${TITLE}" \
   --style "${STYLE}" \
   ${EMOJI:+--emoji "$EMOJI"} \
-  ${LANGUAGE:+--language "$LANGUAGE"}
+  ${LANGUAGE:+--language "$LANGUAGE"} \
+  ${AT:+--at "$AT"}
 ```
+
+`--at` only applies to `--category=testbed` and **only** when there is a real venue. If the user did not pass `--at`, do not synthesise an empty value — the script omits the field entirely, which is the only safe behaviour given Liquid's truthiness rules.
 
 The script writes `<category>/_posts/<date>-<slug>.html` and prints the path. It also creates `img/<slug>/` ahead of any diagram work.
 

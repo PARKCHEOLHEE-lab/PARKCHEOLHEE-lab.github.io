@@ -20,24 +20,19 @@ related: []
 |---|---|---|
 | `emoji` | Only for essay / observation / reflective posts | `emoji: /emoji/eyes.png` |
 
-The `emoji` field maps to a label on the latent-space visualization. Available files (under `emoji/`):
+The `emoji` field maps to a label on the latent-space visualization. **Only the seven files in the table below have label mappings** — the latent-space mapper (`.agents/shared/skills/build-latentspace/scripts/build_post_map.py`'s `EMOJI_TO_LABEL`) recognises exactly these. Setting any other filename (even ones present under `emoji/` like `bulb.png`, `pencil.png`, `dna.png`, `clip.png`, `fire.png`, `wordballoon.png`) silently falls back to the "Note" label, which is almost never what you want.
 
-| File | Used for |
-|---|---|
-| `brain.png` | ML / theory deep-dive |
-| `books.png` | Book quotes, reading reflections |
-| `pin.png` | Reading list, bookmarked references |
-| `eyes.png` | Observation / commentary on industry / ego |
-| `wordballoon-with-dots.png` | Quiet thought, philosophical posts |
-| `robot.png` | AI behavior, agents, automation |
-| `storm.png` | Strong-opinion essays |
-| `bulb.png` | Insight / quick aha posts |
-| `pencil.png` | Writing / drafting / process posts |
-| `dna.png` | Identity / formation / origin posts |
-| `clip.png` | Cheat sheets / clipped-fact posts |
-| `fire.png` | Urgency / breakthrough |
+| File | Label | Used for |
+|---|---|---|
+| `brain.png` | Brain | ML / theory deep-dive |
+| `books.png` | Books | Book quotes, reading reflections |
+| `pin.png` | Pin | Reading list, bookmarked references |
+| `eyes.png` | Eyes | Observation / commentary on industry / ego |
+| `wordballoon-with-dots.png` | Wordballoon | Quiet thought, philosophical posts |
+| `robot.png` | Robot | AI behavior, agents, automation |
+| `storm.png` | Storm | Strong-opinion essays |
 
-**Do not invent new emoji names.** If none fits and the topic is reflective, omit the field — it falls back to the "Note" label.
+**Do not invent new emoji names.** If none fits, omit the field — it falls back to the "Note" label deliberately. To add a new emoji, register it in `EMOJI_TO_LABEL` first (and update this table).
 
 ### Examples
 
@@ -72,7 +67,7 @@ related: []
 
 ## `testbed/_posts/` — long-form experiment / project writeup
 
-### Full template
+### Full template (no venue)
 
 ```yaml
 ---
@@ -83,10 +78,17 @@ comment: true
 splitter: 2
 featured: false
 inprogress: false
-at: ""
 thumbnail: /img/<slug>/<slug>-thumbnail.png
 related: []
 ---
+```
+
+### With a venue
+
+If the project was done at a specific lab or event, add an `at:` line. **Do not use an empty string** — Liquid treats `""` as truthy, so `_includes/testbed.html` and `_includes/meta.html` would render a dangling `＠` marker. Either include a real venue or omit the field entirely.
+
+```yaml
+at: "Visual Media Lab"
 ```
 
 | Field | Notes |
@@ -95,8 +97,8 @@ related: []
 | `comment` | Almost always `true`. |
 | `splitter` | Almost always `2`. Controls layout column split. |
 | `featured` | `true` puts the post in the featured slot on the landing page. Default `false`. |
-| `inprogress` | `true` while still drafting. Set `false` when the post is shippable. |
-| `at` | Lab / event / venue name (e.g. `Visual Media Lab`, `KOCCA`). Empty string if none. |
+| `inprogress` | `true` while still drafting. Set `false` when the post is shippable. The scaffolder writes `false` so the post is shippable as soon as the body is ready; flip to `true` if you want it tagged as a draft. |
+| `at` | Lab / event / venue name (e.g. `Visual Media Lab`, `Spacewalk`). **Omit the line entirely if there is no venue.** Two `at:` values have dedicated link templates in `_includes/meta.html` (`Spacewalk`, `Visual Media Lab`); other values render as plain text. |
 | `thumbnail` | Path to a card-sized thumbnail. Generate after the body is written. |
 
 ### Example

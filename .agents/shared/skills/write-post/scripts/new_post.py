@@ -68,7 +68,9 @@ def frontmatter_note(title: str, emoji: str | None) -> str:
     return "\n".join(lines) + "\n"
 
 
-def frontmatter_testbed(title: str, slug: str, emoji: str | None) -> str:
+def frontmatter_testbed(
+    title: str, slug: str, emoji: str | None, at: str | None = None
+) -> str:
     lines = [
         "---",
         f"title: {yaml_double_quote(title)}",
@@ -78,9 +80,10 @@ def frontmatter_testbed(title: str, slug: str, emoji: str | None) -> str:
         "splitter: 2",
         "featured: false",
         "inprogress: false",
-        'at: ""',
         f"thumbnail: /img/{slug}/{slug}-thumbnail.png",
     ]
+    if at:
+        lines.append(f"at: {yaml_double_quote(at)}")
     if emoji:
         lines.append(f"emoji: {emoji}")
     lines.append("related: []")
@@ -158,6 +161,7 @@ def build_post(
     language: str,
     date: _dt.date,
     root: Path,
+    at: str | None = None,
 ) -> Path:
     if category not in VALID_CATEGORIES:
         raise ValueError(f"category must be one of {VALID_CATEGORIES}, got {category!r}")
@@ -167,6 +171,12 @@ def build_post(
         raise ValueError(f"language must be one of {VALID_LANGUAGES}, got {language!r}")
     if not slug or slug != kebab(slug):
         raise ValueError(f"slug must be kebab-case, got {slug!r}")
+    if category == "note" and (style == "testbed-longform"):
+        raise ValueError("style 'testbed-longform' is only valid for category 'testbed'")
+    if category == "testbed" and style != "testbed-longform":
+        raise ValueError(
+            f"category 'testbed' requires style 'testbed-longform', got {style!r}"
+        )
 
     posts_dir = root / category / "_posts"
     posts_dir.mkdir(parents=True, exist_ok=True)
@@ -179,7 +189,7 @@ def build_post(
     if category == "note":
         fm = frontmatter_note(title, emoji)
     else:
-        fm = frontmatter_testbed(title, slug, emoji)
+        fm = frontmatter_testbed(title, slug, emoji, at=at)
 
     body = BODY_BUILDERS[style]()
 
@@ -199,6 +209,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--style", required=True, choices=VALID_STYLES)
     parser.add_argument("--language", default="en", choices=VALID_LANGUAGES)
     parser.add_argument("--emoji", default="")
+    parser.add_argument(
+        "--at",
+        default="",
+        help="Testbed venue/lab/event (e.g. 'Visual Media Lab'). Omit for none — empty string would render a dangling marker because Liquid treats empty strings as truthy.",
+    )
     parser.add_argument("--date", default="", help="ISO date YYYY-MM-DD; defaults to today")
     args = parser.parse_args(argv)
 
@@ -222,6 +237,7 @@ def main(argv: list[str] | None = None) -> int:
             language=args.language,
             date=date,
             root=root,
+            at=args.at or None,
         )
     except (ValueError, FileExistsError) as exc:
         print(str(exc), file=sys.stderr)
