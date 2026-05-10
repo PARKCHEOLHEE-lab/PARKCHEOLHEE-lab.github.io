@@ -67,7 +67,7 @@ related: []
 
 ## `testbed/_posts/` — long-form experiment / project writeup
 
-### Full template (no venue)
+### Scaffold-time template (no venue, no thumbnail yet)
 
 ```yaml
 ---
@@ -78,10 +78,11 @@ comment: true
 splitter: 2
 featured: false
 inprogress: false
-thumbnail: /img/<slug>/<slug>-thumbnail.png
 related: []
 ---
 ```
+
+The scaffolder writes this minimal shape on purpose — neither `at:` nor `thumbnail:` is included. Both fields are rendered through Liquid `{% if … %}` blocks that treat any string (including `""`) as truthy, so emitting them with placeholder values causes broken markup on the testbed index.
 
 ### With a venue
 
@@ -89,6 +90,14 @@ If the project was done at a specific lab or event, add an `at:` line. **Do not 
 
 ```yaml
 at: "Visual Media Lab"
+```
+
+### With a thumbnail
+
+Add `thumbnail:` only after the PNG exists on disk. `_includes/testbed.html:57` renders `<img src="{{ post.thumbnail }}">` whenever the field is truthy, so a non-existent path becomes a broken image card on the testbed index. Convention: `/img/<slug>/<slug>-thumbnail.png`.
+
+```yaml
+thumbnail: /img/<slug>/<slug>-thumbnail.png
 ```
 
 | Field | Notes |
@@ -99,7 +108,7 @@ at: "Visual Media Lab"
 | `featured` | `true` puts the post in the featured slot on the landing page. Default `false`. |
 | `inprogress` | `true` while still drafting. Set `false` when the post is shippable. The scaffolder writes `false` so the post is shippable as soon as the body is ready; flip to `true` if you want it tagged as a draft. |
 | `at` | Lab / event / venue name (e.g. `Visual Media Lab`, `Spacewalk`). **Omit the line entirely if there is no venue.** Two `at:` values have dedicated link templates in `_includes/meta.html` (`Spacewalk`, `Visual Media Lab`); other values render as plain text. |
-| `thumbnail` | Path to a card-sized thumbnail. Generate after the body is written. |
+| `thumbnail` | Path to a card-sized thumbnail PNG that already exists on disk. **Omit the line entirely until the file is generated**, otherwise `_includes/testbed.html:57` renders a broken `<img>`. Generate the thumbnail after the body is written and add this line then (or rerun the scaffolder with `--thumbnail`). |
 
 ### Example
 

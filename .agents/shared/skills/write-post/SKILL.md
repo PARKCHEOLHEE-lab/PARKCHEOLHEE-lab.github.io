@@ -1,7 +1,7 @@
 ---
 name: write-post
 description: Scaffold and draft a new blog post under note/_posts or testbed/_posts following this repo's frontmatter, body-style, image, and follow-up conventions. Use when the user asks to write a post, draft a post, or expand a topic into a post.
-argument-hint: "[topic] [--language=en|kr] [--emoji=<file>] [--sources=<urls,paths>] [--category=note|testbed] [--slug=<slug>] [--at=<venue>]"
+argument-hint: "[topic] [--language=en|kr] [--emoji=<file>] [--sources=<urls,paths>] [--category=note|testbed] [--slug=<slug>] [--at=<venue>] [--thumbnail=<path>]"
 user-invocable: true
 allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
 ---
@@ -22,6 +22,7 @@ Parse the slash-command `ARGUMENTS:` line for the following flags. All optional.
 | `--category` | `note` / `testbed` | _(ask)_ | Skip if not provided — always confirm with `AskUserQuestion`. |
 | `--slug` | kebab-case slug | _(derive + confirm)_ | Filename slug without date prefix or extension. |
 | `--at` | venue / lab / event string (testbed only) | _(none)_ | **Do not pass an empty string.** Liquid treats `""` as truthy and renders a dangling `＠` marker in the testbed index. Omit the flag if there is no venue. Known special-cased values with link templates: `Visual Media Lab`, `Spacewalk`. |
+| `--thumbnail` | thumbnail path, e.g. `/img/<slug>/<slug>-thumbnail.png` (testbed only) | _(none)_ | **Pass only after the file actually exists.** `_includes/testbed.html` renders `<img src="…">` whenever the field is set, so a non-existent path becomes a broken image card on the testbed index. Omit the flag at scaffold time, generate the PNG in Step 8, and either rerun the scaffolder or add the line manually. |
 
 A free-text topic (anything in `ARGUMENTS:` outside the flags) is treated as the topic seed.
 
@@ -108,10 +109,13 @@ python3 "$SKILL_DIR/scripts/new_post.py" \
   --style "${STYLE}" \
   ${EMOJI:+--emoji "$EMOJI"} \
   ${LANGUAGE:+--language "$LANGUAGE"} \
-  ${AT:+--at "$AT"}
+  ${AT:+--at "$AT"} \
+  ${THUMBNAIL:+--thumbnail "$THUMBNAIL"}
 ```
 
-`--at` only applies to `--category=testbed` and **only** when there is a real venue. If the user did not pass `--at`, do not synthesise an empty value — the script omits the field entirely, which is the only safe behaviour given Liquid's truthiness rules.
+`--at` and `--thumbnail` only apply to `--category=testbed` and **only** when the value is real. If the user did not provide one, do not synthesise an empty string — the script omits the field entirely, which is the only safe behaviour given Liquid's truthiness rules. For `--thumbnail`, do not pass a path that does not yet exist on disk: the testbed index template renders an `<img>` tag whenever the field is set, so a non-existent path becomes a broken image card.
+
+Thumbnail follow-up: after the body is written and you produce the post's hero diagram in Step 8, also generate a card-sized thumbnail (square or 16:9) and save it to `img/<slug>/<slug>-thumbnail.png`. Then either re-run the scaffolder with `--thumbnail`, or insert the line `thumbnail: /img/<slug>/<slug>-thumbnail.png` into the frontmatter manually.
 
 The script writes `<category>/_posts/<date>-<slug>.html` and prints the path. It also creates `img/<slug>/` ahead of any diagram work.
 
@@ -120,7 +124,7 @@ Frontmatter rules:
 - `layout: post` — always.
 - `emoji:` — only if `--emoji` was provided.
 - `related: []` — empty list. **Do not populate.** Reserved for `/add-related`.
-- `testbed` adds: `hashtag`, `comment: true`, `splitter: 2`, `featured: false`, `inprogress: false`, `thumbnail: /img/<slug>/<slug>-thumbnail.png`. The `at:` line is **only** added when a real venue is provided via `--at`; an empty `at: ""` would render a dangling `＠` marker because Liquid treats `""` as truthy.
+- `testbed` adds: `hashtag`, `comment: true`, `splitter: 2`, `featured: false`, `inprogress: false`. The `at:` and `thumbnail:` lines are **only** added when real values are provided via `--at` and `--thumbnail`. Liquid treats both fields with truthy empty-string semantics in `_includes/testbed.html` and `_includes/meta.html`, so an empty `at: ""` would render a dangling `＠` marker and an empty (or non-existent) `thumbnail:` would render a broken `<img>` on the testbed index. The conventional thumbnail path is `/img/<slug>/<slug>-thumbnail.png`; pass it via `--thumbnail` only after the PNG actually exists.
 
 Full templates: `references/frontmatter.md`.
 

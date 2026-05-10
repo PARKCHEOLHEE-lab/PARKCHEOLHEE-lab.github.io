@@ -69,7 +69,11 @@ def frontmatter_note(title: str, emoji: str | None) -> str:
 
 
 def frontmatter_testbed(
-    title: str, slug: str, emoji: str | None, at: str | None = None
+    title: str,
+    slug: str,
+    emoji: str | None,
+    at: str | None = None,
+    thumbnail: str | None = None,
 ) -> str:
     lines = [
         "---",
@@ -80,8 +84,9 @@ def frontmatter_testbed(
         "splitter: 2",
         "featured: false",
         "inprogress: false",
-        f"thumbnail: /img/{slug}/{slug}-thumbnail.png",
     ]
+    if thumbnail:
+        lines.append(f"thumbnail: {thumbnail}")
     if at:
         lines.append(f"at: {yaml_double_quote(at)}")
     if emoji:
@@ -162,6 +167,7 @@ def build_post(
     date: _dt.date,
     root: Path,
     at: str | None = None,
+    thumbnail: str | None = None,
 ) -> Path:
     if category not in VALID_CATEGORIES:
         raise ValueError(f"category must be one of {VALID_CATEGORIES}, got {category!r}")
@@ -189,7 +195,7 @@ def build_post(
     if category == "note":
         fm = frontmatter_note(title, emoji)
     else:
-        fm = frontmatter_testbed(title, slug, emoji, at=at)
+        fm = frontmatter_testbed(title, slug, emoji, at=at, thumbnail=thumbnail)
 
     body = BODY_BUILDERS[style]()
 
@@ -213,6 +219,11 @@ def main(argv: list[str] | None = None) -> int:
         "--at",
         default="",
         help="Testbed venue/lab/event (e.g. 'Visual Media Lab'). Omit for none — empty string would render a dangling marker because Liquid treats empty strings as truthy.",
+    )
+    parser.add_argument(
+        "--thumbnail",
+        default="",
+        help="Thumbnail path (testbed only, e.g. /img/<slug>/<slug>-thumbnail.png). Pass only after the file exists; otherwise omit so _includes/testbed.html does not render a broken <img>. The conventional path is /img/<slug>/<slug>-thumbnail.png.",
     )
     parser.add_argument("--date", default="", help="ISO date YYYY-MM-DD; defaults to today")
     args = parser.parse_args(argv)
@@ -238,6 +249,7 @@ def main(argv: list[str] | None = None) -> int:
             date=date,
             root=root,
             at=args.at or None,
+            thumbnail=args.thumbnail or None,
         )
     except (ValueError, FileExistsError) as exc:
         print(str(exc), file=sys.stderr)
