@@ -120,7 +120,7 @@ Frontmatter rules:
 - `layout: post` — always.
 - `emoji:` — only if `--emoji` was provided.
 - `related: []` — empty list. **Do not populate.** Reserved for `/add-related`.
-- `testbed` adds: `hashtag`, `comment: true`, `splitter: 2`, `featured: false`, `inprogress: false`, `at: ""`, `thumbnail: /img/<slug>/<slug>-thumbnail.png`.
+- `testbed` adds: `hashtag`, `comment: true`, `splitter: 2`, `featured: false`, `inprogress: false`, `thumbnail: /img/<slug>/<slug>-thumbnail.png`. The `at:` line is **only** added when a real venue is provided via `--at`; an empty `at: ""` would render a dangling `＠` marker because Liquid treats `""` as truthy.
 
 Full templates: `references/frontmatter.md`.
 
