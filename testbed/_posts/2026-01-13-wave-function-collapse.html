@@ -4,7 +4,7 @@ layout: post
 hashtag: "#generative-design #procedural generation"
 comment: true
 splitter: 2
-inprogress: true
+inprogress: false
 thumbnail: /img/wave-function-collapse/wave-function-collapse-thumbnail.gif
 related:
   - floor-plan-generation-with-voronoi-diagram
@@ -183,69 +183,263 @@ related:
     }
 </code></pre>
         </div>
+    </div>
 
-    
 </div><br><br>
 
 <h3>Implementation</h3>
 <div class="article">
-<!-- 
-    In this implementation, the algorithm uses 20 predefined tiles (numbered 0-19), 
-    where each tile has interface labels ($\text{FREE, OPEN, CLOSED, SUPPORT, EMPTY}$) 
-    defined for its six faces ($\pm x, \, \pm y, \, \pm z $).
 
-    The algorithm initializes a 3D grid ($\text{width} \times \text{depth} \times \text{height}$) where each cell can be any of the 20 tiles. 
-    Starting from a seed position, it iteratively collapses cells by selecting the cell with the minimum number of possible tiles, then randomly samples a tile from the possibilities using weighted probabilities. 
-    After each collapse, constraints are propagated to neighboring cells using a BFS approach based on precomputed compatibility matrices. 
-    If a contradiction occurs (a cell has no valid tiles), the algorithm resets and restarts from the initial seed position. 
-    The process continues until all cells are collapsed to a single tile or the maximum iteration count is reached. -->
+    The grid state is held in a single 4D boolean tensor
+    <code>states</code> of shape $(H, D, W, T)$, where $T = 20$ is the number of tiles.
+    A value of <code>True</code> at <code>states[z, y, x, t]</code> means tile $t$ is still a candidate for cell $(x, y, z)$.
+    Collapse and propagation are then just bitmask updates on this tensor.
 
-<!-- 
+    <figure>
+        <img src="/img/wave-function-collapse/wave-function-collapse-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Each grid cell carries a 20-bit candidate mask; propagation only ever flips True bits to False</figcaption>
+    </figure>
+
+    <br><br>
+
+    Compatibility is precomputed once. For every direction $d$, a $T \times T$ boolean matrix
+    <code>compatibility[d]</code> stores which tile pairs are allowed across that face.
+    The matrix is built by iterating over every ordered pair of tiles, looking up the labels on the touching faces
+    (the face $d$ of the first tile against the opposite face of the second), and applying the rule:
+    in the horizontal directions a <code>FREE</code> label is a wildcard, and otherwise the two labels must match exactly.
+
+<pre><code class="python">
+    def _compute_compatibility(self) -> Dict[str, torch.Tensor]:
+        compatibility = {}
+        for direction in self.directions:
+            compatibility_matrix = torch.zeros(
+                (len(self.tiles), len(self.tiles)), dtype=torch.bool
+            )
+            direction_opposite = self.opposite[direction]
+
+            for tile_a in self.tiles:
+                tile_a_index = self.tile_to_index[tile_a]
+                tile_a_label = self.INTERFACE[tile_a][direction]
+
+                for tile_b in self.tiles:
+                    tile_b_index = self.tile_to_index[tile_b]
+                    tile_b_label = self.INTERFACE[tile_b][direction_opposite]
+
+                    compatibility_matrix[tile_a_index, tile_b_index] = (
+                        self._is_compatible(tile_a_label, tile_b_label, direction)
+                    )
+
+            compatibility[direction] = compatibility_matrix
+
+        return compatibility
+</code></pre>
+
+    <br>
+
+    Because of how the rule is defined, the matrices satisfy
+    <code>compatibility["+x"] == compatibility["-x"].t()</code> and the same for $\pm y$ and $\pm z$ — propagation in one direction
+    is the transpose of propagation in the opposite direction.
+
+    <figure>
+        <img src="/img/wave-function-collapse/wave-function-collapse-6.png" width="90%" onerror=handle_image_error(this)>
+        <figcaption>The six $20 \times 20$ compatibility matrices. The horizontal directions $\pm x, \pm y$ are denser ($\approx 0.61$ allowed pairs) because <code>FREE</code> acts as a wildcard; the vertical $\pm z$ matrices are sparser ($\approx 0.36$) because $\pm z$ requires an exact label match. The horizontal pairs are transposes of each other.</figcaption>
+    </figure>
+
+    <br><br>
+
+    A cell collapses by drawing one tile from its current candidate set. The candidates are converted to a float vector,
+    multiplied element-wise by <code>cell_weights</code>, and fed to <code>torch.multinomial</code>.
+    The only weight that differs from $1$ is the entry for tile $0$ (the empty tile),
+    which is scaled by the user-controlled <code>empty_weight</code>.
+    A value below $1$ favours dense structures; a value above $1$ produces sparser, more open shapes.
+
+<pre><code class="python">
+    def _collapse(self, x: int, y: int, z: int) -> bool:
+        states_int = self.states[z, y, x, :].float()
+        states_int *= self.cell_weights
+
+        tile_index_to_collapse = torch.multinomial(
+            states_int / states_int.sum(), 1
+        ).item()
+
+        self.states[z, y, x, :] = False
+        self.states[z, y, x, tile_index_to_collapse] = True
+
+        propagation_status = self._propagate(x=x, y=y, z=z)
+
+        return propagation_status
+</code></pre>
+
+    <br>
+
+    After a cell is fixed, constraints have to flow outward. Propagation is a BFS over the grid: a queue is seeded with the just-collapsed cell,
+    and for each cell pulled off the queue the algorithm asks, for each of the six neighbours, "given my current candidate set, which of your candidates are still reachable?".
+    The reachable set is the OR of the relevant rows of the compatibility matrix, intersected with the neighbour's existing candidate mask.
+    If that intersection actually shrinks the neighbour, the neighbour is pushed back onto the queue.
+    If it shrinks to nothing, propagation reports failure and the run will reset.
+
+<pre><code class="python">
+    def _propagate(self, x: int, y: int, z: int) -> bool:
+        queue = deque()
+        queue.append((x, y, z))
+
+        while queue:
+            x, y, z = queue.popleft()
+            possible_tiles = self.states[z, y, x, :]
+
+            if not possible_tiles.any():
+                return False
+
+            for direction in self.directions:
+                dx, dy, dz = self.step[direction]
+                ax, ay, az = x + dx, y + dy, z + dz
+
+                if (
+                    ax < 0 or ax >= self.width
+                    or ay < 0 or ay >= self.depth
+                    or az < 0 or az >= self.height
+                ):
+                    continue
+
+                possible_neighbors = self._get_possible_neighbors(
+                    possible_tiles, direction
+                )
+
+                before = self.states[az, ay, ax, :]
+                after = before & possible_neighbors
+
+                if not after.any():
+                    return False
+
+                if torch.all(before == after):
+                    continue
+
+                self.states[az, ay, ax, :] = after
+                queue.append((ax, ay, az))
+
+        return True
+</code></pre>
+
+    <br>
+
+    Choosing which cell to collapse next is a separate concern. <code>_get_min_k_cell</code>
+    scans the grid and returns the cell with the smallest candidate count greater than one — the lowest-entropy cell.
+    If any cell has been reduced to zero candidates the function returns <code>False</code>, signalling a contradiction;
+    if every cell is already collapsed it returns <code>None</code> and the run terminates.
+
+    <br><br>
+
+    A toy 2D version of the same loop makes the dynamics visible. The tileset has four tiles ($A, B, C, D$),
+    each defined by the colour ($R$ or $B$) of its four edges, and a tile is compatible with its neighbour
+    only when their touching edges share a colour. Initially every cell carries all four candidates;
+    one collapse forces its neighbours to shrink, and a few more collapses are enough for propagation to fix the rest of the grid.
+
+    <figure>
+        <img src="/img/wave-function-collapse/wave-function-collapse-7.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Toy WFC on a $4 \times 4$ grid with four tiles. Tiles with multiple candidates show a small swatch grid; collapsed cells are flat colour. The first collapse already constrains both immediate neighbours, and the remainder is filled by repeated min-entropy collapses.</figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Algorithm Details</h3>
+<div class="article">
+
+    The full run loop ties the four primitives — collapse, propagate, min-entropy selection, and reset — together.
+    Starting from a user-supplied seed cell $(x_0, y_0, z_0)$, the algorithm repeats:
+    collapse the current cell; if propagation fails or the next pick reports a contradiction, wipe the grid and start over from the seed;
+    otherwise advance to the lowest-entropy cell. The loop ends when every cell holds exactly one tile, or after <code>max_iters</code> attempts.
+
+    <figure>
+        <img src="/img/wave-function-collapse/wave-function-collapse-8.png" width="90%" onerror=handle_image_error(this)>
+        <figcaption>Run loop control flow. The red path is the failure escape: any propagation failure or zero-candidate cell jumps back to the seed.</figcaption>
+    </figure>
+
+    <br><br>
+
     <div class="latex-container">
     \[
         \begin{array}{l}
         \hline
         \textbf{Algorithm: } \text{Wave Function Collapse 3D} \\
         \hline
-        \textbf{Input: } \text{width, depth, height, seed, empty_weight, max_iters, tiles} \\
-        \textbf{Output: } \text{collapsed grid} \\
+        \textbf{Input: } W, D, H, \text{ seed cell } (x_0, y_0, z_0), w_{\text{empty}}, \text{max\_iters} \\
+        \textbf{Output: } \text{collapsed grid of tiles} \\
         \hline
-        \text{Grid } W \times D \times H; \text{ tiles } \{0,\ldots,19\} \text{ with labels } \{\texttt{FREE, OPEN, CLOSED, SUPPORT, EMPTY}\} \text{ on } \pm x, \pm y, \pm z. \\
-        \quad \text{Precompute } \mathbf{C}_d \in \{0,1\}^{20\times 20} \text{ per direction } d. \ \texttt{FREE} \text{ in } \pm x,\pm y \Rightarrow \text{any}; \text{ else same label.} \\
-        \quad \texttt{states}[z,y,x,t] \leftarrow 1 \ \forall (x,y,z,t); \; \texttt{cell} \leftarrow (\texttt{start_x}, \texttt{start_y}, \texttt{start_z}) \\
-        \quad \textbf{repeat} \\
-        \qquad \textbf{if} \ \text{all cells collapsed} \ \textbf{then break} \\
-        \qquad \textbf{if} \ \neg\texttt{Collapse}(\texttt{cell}) \ \textbf{or} \ \texttt{GetMinKCell}() = \bot \ \textbf{then} \ \text{Reset}; \; \texttt{cell} \leftarrow \text{seed}; \; \textbf{continue} \\
-        \qquad \texttt{cell} \leftarrow \texttt{GetMinKCell}(); \; \textbf{if} \ \texttt{cell} = \text{None} \ \textbf{then break} \\
-        \quad \textbf{until} \ \text{max\_iters} \\
+        \text{Precompute } \mathbf{C}_d \in \{0, 1\}^{T \times T} \text{ for each direction } d \in \{\pm x, \pm y, \pm z\} \\
+        \texttt{states}[z, y, x, t] \leftarrow 1 \quad \forall (x, y, z, t) \\
+        \texttt{cell} \leftarrow (x_0, y_0, z_0) \\
+        \textbf{for } i = 1 \ldots \text{max\_iters} \textbf{ do} \\
+        \quad \textbf{if all cells collapsed: break} \\
+        \quad \textbf{if not Collapse}(\texttt{cell}) \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
+        \quad \texttt{cell} \leftarrow \text{GetMinKCell}() \\
+        \quad \textbf{if } \texttt{cell} = \text{False} \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
+        \quad \textbf{if } \texttt{cell} = \text{None} \textbf{ then break} \\
         \hline
-        \quad \texttt{Collapse}(x,y,z): \ \text{Sample } t \sim \text{Multinomial}(\texttt{states}[z,y,x]\cdot\texttt{weights}); \; \texttt{states}[z,y,x] \leftarrow \mathbf{e}_t \\
-        \qquad \textbf{return} \ \texttt{Propagate}(x,y,z) \\
-        \quad \texttt{Propagate}(x,y,z): \ Q \leftarrow \{(x,y,z)\}; \; \textbf{while} \ Q \neq \emptyset: \\
-        \qquad (x,y,z) \leftarrow Q.\text{pop}(); \; \textbf{for} \ d \in \{\pm x,\pm y,\pm z\}: \ (x',y',z') \leftarrow \text{neighbor}; \\
-        \qquad \quad \texttt{valid} \leftarrow \bigvee_{\{t : \texttt{states}[z,y,x,t]=1\}} \mathbf{C}_d[t,:]; \; \texttt{states}[z',y',x'] \leftarrow \texttt{states} \wedge \texttt{valid}; \; \textbf{if changed} \ Q.\text{push}((x',y',z')) \\
-        \qquad \textbf{return} \ \texttt{False} \ \text{if} \ \exists \text{ cell with no valid tiles else True} \\
-        \quad \texttt{GetMinKCell}(): \ \textbf{return} \ \arg\min_{|\texttt{states}|>1} |\texttt{states}[z,y,x]|; \ \texttt{False} \ \text{if} \ \exists \ |\texttt{states}|=0 \\
+        \texttt{Collapse}(x, y, z): \\
+        \quad t \sim \text{Multinomial}\big(\texttt{states}[z, y, x] \cdot \texttt{cell\_weights}\big) \\
+        \quad \texttt{states}[z, y, x] \leftarrow \mathbf{e}_t \\
+        \quad \textbf{return Propagate}(x, y, z) \\
+        \hline
+        \texttt{Propagate}(x, y, z): \\
+        \quad Q \leftarrow \{(x, y, z)\} \\
+        \quad \textbf{while } Q \neq \emptyset \textbf{ do} \\
+        \qquad (x, y, z) \leftarrow Q.\text{pop}() \\
+        \qquad \textbf{for } d \in \{\pm x, \pm y, \pm z\} \textbf{ do} \\
+        \qquad \quad (x', y', z') \leftarrow \text{neighbour in direction } d \\
+        \qquad \quad \texttt{valid} \leftarrow \bigvee_{t \,:\, \texttt{states}[z, y, x, t] = 1} \mathbf{C}_d[t, :] \\
+        \qquad \quad \texttt{after} \leftarrow \texttt{states}[z', y', x'] \wedge \texttt{valid} \\
+        \qquad \quad \textbf{if not after.any(): return False} \\
+        \qquad \quad \textbf{if } \texttt{after} \neq \texttt{states}[z', y', x'] \textbf{ then } \texttt{states}[z', y', x'] \leftarrow \texttt{after}; \, Q.\text{push}((x', y', z')) \\
+        \quad \textbf{return True} \\
         \hline
         \end{array}
     \]
-    </div> -->
-    
-</div><br><br>
+    </div>
 
-<h3>Algorithm Details</h3>
-<div class="article">
+    <br><br>
+
+    Two design choices drive the behaviour of this loop. First, the next cell to collapse is always the one with the fewest remaining candidates,
+    not a random cell. Picking the lowest-entropy cell concentrates work where the constraints are tightest, which keeps the
+    set of reachable contradictions small. Second, the failure recovery is the simplest possible: any contradiction throws away
+    the entire grid and restarts from the same seed cell. There is no backtracking or local repair.
+    With a small grid and a well-designed tileset this is fast enough; on larger grids the cost of repeated full restarts is the dominant runtime concern.
+
+    <br><br>
+
+    The seed is also where directional bias enters. The cat-tower target wants growth from the floor upward, so the seed is fixed at $z_0 = 0$
+    and propagation naturally fans out and up through the support-bearing tiles. The empty tile (id $0$) acts as a release valve:
+    raising <code>empty_weight</code> lets the algorithm pick "no tile" more often, producing thinner, more sculptural shapes,
+    while lowering it forces denser packings.
+
 </div><br><br>
 
 <h3>Gallery</h3>
 <div class="article">
+
+    The frames below are intermediate <code>.obj</code> snapshots dumped during a single run, replayed in order.
+    Each new frame corresponds to one collapse-and-propagate step, so the animation traces the BFS as it
+    sweeps outward from the seed cell at the floor. Different runs use different grid sizes, seeds, and
+    <code>empty_weight</code> values, which is why the resulting cat-towers have such different silhouettes.
+
+    <figure>
+        <img src="/img/wave-function-collapse/wave-function-collapse-3.gif" width="48%" onerror=handle_image_error(this)>
+        <img src="/img/wave-function-collapse/wave-function-collapse-4.gif" width="48%" onerror=handle_image_error(this)>
+        <figcaption>Two WFC runs: collapse order on the left, finished structure on the right of each pair</figcaption>
+    </figure>
+
 </div><br><br>
 
 <h3>References</h3>
 <div class="article">
     <ul>
         <li>
+            <a href="https://github.com/PARKCHEOLHEE-lab/wave-function-collapse">https://github.com/PARKCHEOLHEE-lab/wave-function-collapse</a>
+        </li>
+        <li>
             <a href="https://en.wikipedia.org/wiki/Wave_function_collapse">https://en.wikipedia.org/wiki/Wave_function_collapse</a>
+        </li>
+        <li>
+            <a href="https://www.archdaily.com/771836/catable-for-architects">https://www.archdaily.com/771836/catable-for-architects</a>
         </li>
     </ul>
 </div><br><br>
