@@ -10,6 +10,7 @@ Available skills:
 
 - `add-related`
 - `build-latentspace`
+- `write-post`
 
 If a skill is invoked but not shown in the active tool's skill list, open the
 matching `SKILL.md` in this directory and follow it manually. Keep shared skills
