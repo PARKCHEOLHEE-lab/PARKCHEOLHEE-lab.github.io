@@ -329,6 +329,14 @@ Sources:
     .skel-spinner { animation: none; border-top-color: rgba(0, 0, 0, 0.45); }
     .skel-shimmer::after { animation: none; opacity: 0; }
 }
+@media (max-width: 600px) {
+    .skel-controls {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5em;
+    }
+}
 </style>
 
 <script>
