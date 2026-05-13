@@ -1,0 +1,397 @@
+---
+title: "Skeleton UX · UI"
+layout: post
+related:
+  - window-crossing-selection
+  - triangle-menu-aim
+---
+
+<br>
+
+<ul>
+    <li>
+        What a skeleton screen is
+    </li>
+        <ul>
+            <li>
+                A <b>skeleton screen</b> is a wireframe-shaped placeholder rendered in light gray before real content arrives. The placeholders mirror the final layout — image blocks, text bars, card frames — so the page appears to <b>take shape</b> rather than simply wait
+            </li>
+            <li>
+                The term was coined by Luke Wroblewski in 2013 while working on the Polar app. He noticed that spinners drew the user's attention to the act of waiting, and replaced them with screens that focus attention on the content being assembled
+            </li>
+            <li>
+                Quoting Wroblewski directly: <i>"With a skeleton screen, the focus is on content being loaded, not the fact that it's loading, and that's real progress."</i>
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Watch it side by side
+    </li>
+        <ul>
+            <li>
+                The two panes below load for the same 5 seconds and then reveal the same card. The only difference is what the user looks at during the wait
+            </li>
+            <li>
+                The spinner pane keeps attention on the indicator; the skeleton pane keeps attention on the shape of the answer
+            </li>
+        </ul>
+
+        <div class="skel-demo" id="skel-demo">
+            <div class="skel-row">
+                <div class="skel-pane">
+                    <div class="skel-pane-label">Spinner</div>
+                    <div class="skel-stage" id="skel-stage-spinner">
+                        <div class="skel-spinner" aria-hidden="true"></div>
+                    </div>
+                </div>
+                <div class="skel-pane">
+                    <div class="skel-pane-label">Skeleton screen</div>
+                    <div class="skel-stage" id="skel-stage-skeleton">
+                        <div class="skel-ph skel-ph-img skel-shimmer"></div>
+                        <div class="skel-ph skel-ph-line-1 skel-shimmer"></div>
+                        <div class="skel-ph skel-ph-line-2 skel-shimmer"></div>
+                        <div class="skel-ph skel-ph-line-3 skel-shimmer"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="skel-controls">
+                <button id="skel-replay" type="button">Replay (5s)</button>
+                <span class="skel-hint">Both panes finish at the same instant. Which felt faster?</span>
+            </div>
+        </div>
+    <br>
+
+    <li>
+        Why it changes perceived wait, not actual wait
+    </li>
+        <ul>
+            <li>
+                Skeleton screens do not shorten the load. Server time, network time, and render time are unchanged. What changes is the user's mental model of progress
+            </li>
+            <li>
+                With a spinner, the user is watching a clock — there is no signal that anything in particular is being assembled, so attention loops back to the wait itself
+            </li>
+            <li>
+                With a skeleton, the user is already parsing the future layout. By the time real content snaps into place, the eye has chosen where to land and the page feels <b>partially read</b> rather than <b>blocked</b>
+            </li>
+            <li>
+                The principle generalizes beyond loading. Any waiting experience improves when the user can do useful preparatory work while the system finishes
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        What the research actually says
+    </li>
+        <ul>
+            <li>
+                Nearly every blog post on this topic claims skeleton screens make pages feel <i>20–30% faster</i>. That number is folklore — the underlying study does not say it
+            </li>
+            <li>
+                The most-cited paper, <a href="https://dl.acm.org/doi/10.1145/3232078.3232086">Mejtoft, Långström & Söderström (2018)</a>, compared a fictional news site loaded with skeleton screens against the same site loaded with spinners
+            </li>
+            <li>
+                Skeleton screens scored <b>higher on average</b> for perceived speed and ease of navigation. Spinners, oddly, led to <b>faster task completion</b> on first visit. The differences in both directions were <b>not statistically significant</b>
+            </li>
+            <li>
+                The honest takeaway is narrower than the folklore: skeleton screens shift attention in a way users tend to prefer, but the effect on measurable speed is small and the published evidence is weak
+            </li>
+            <li>
+                The strongest case for skeletons is qualitative — fewer abandonment moments, less perceived jank, smoother handoff into rendered content
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        When skeletons are the right choice
+    </li>
+        <ul>
+            <li>
+                <b>Full-page loads</b> where the layout is predictable: feeds, dashboards, search results, profile pages, product listings
+            </li>
+            <li>
+                <b>Wait windows of about 2 to 10 seconds.</b> Under one second, render the real content directly. Over ten seconds, the user needs an explicit progress bar with a sense of duration, not a vibe
+            </li>
+            <li>
+                <b>Container-shaped content</b> — cards, tiles, structured lists, grids. The skeleton works because the placeholder is a meaningful preview of the cell
+            </li>
+            <li>
+                When the goal is to <b>reduce abandonment</b> on cold-start pages: the user sees structure within the first paint and is less likely to assume the page is broken
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        When skeletons are the wrong choice
+    </li>
+        <ul>
+            <li>
+                <b>Known-duration work.</b> If you can estimate the remaining time (file upload, video export, batch job), use a progress bar — it gives the user the one piece of information a skeleton cannot
+            </li>
+            <li>
+                <b>Sub-second loads.</b> A skeleton that appears for 200 ms is just a flash of gray — worse than no indicator. If you must guard against fast paths, hide the skeleton until at least <code>~300ms</code> have elapsed
+            </li>
+            <li>
+                <b>Single-component loads.</b> A skeleton over a single button or input is visual noise; a small inline spinner is clearer
+            </li>
+            <li>
+                <b>Layouts that do not yet exist.</b> A skeleton screen lies if the placeholders do not match what eventually loads. Mismatched dimensions cause the user's eye to relock — the perceived-speed gain inverts into a perceived-jank loss
+            </li>
+            <li>
+                <b>Frame-only skeletons</b> that render the header and footer but leave the middle blank. Users read these as "the page broke" once the wait passes a couple of seconds
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Designing one that actually helps
+    </li>
+        <ul>
+            <li>
+                <b>Match the final layout to the pixel.</b> Block widths, line heights, gap sizes, border radii — all the same as the rendered content. A skeleton's only job is to be a truthful preview
+            </li>
+            <li>
+                <b>Animate, but quietly.</b> A slow shimmer or pulse — period around 1.2 to 1.6 seconds — keeps the eye assured that the page is alive. Fast or high-contrast animation re-creates the spinner problem
+            </li>
+            <li>
+                <b>Avoid skeletons on micro-elements.</b> One placeholder per group of related elements is enough. Skeletons on individual labels, icons, or buttons add noise without adding signal
+            </li>
+            <li>
+                <b>Respect reduced motion.</b> Behind <code>@media (prefers-reduced-motion: reduce)</code>, freeze the shimmer to a static gray. The pattern still works without animation
+            </li>
+            <li>
+                <b>Announce loading to assistive tech.</b> Add <code>aria-busy="true"</code> to the loading region and remove it on completion. The visual analogue of "loading" should also reach screen-reader users
+            </li>
+            <li>
+                <b>Hide the skeleton on fast paths.</b> Delay its first paint by a short threshold so that genuinely quick loads never flash a placeholder. The same goes for the transition into real content — if you can, fade rather than snap
+            </li>
+            <li>
+                <b>Never use it to hide a failure.</b> A skeleton that lingers past the timeout becomes a lie. On error, swap to an explicit error state, not a permanent gray
+            </li>
+        </ul>
+    <br>
+
+    <li>
+        Closing thought
+    </li>
+        <ul>
+            <li>
+                Skeletons are not a speed trick. They are an attention trick — they redirect the user from <i>"how long is this taking"</i> to <i>"what is this going to be"</i>
+            </li>
+            <li>
+                That single shift is worth more than the dubious 20–30% figure suggests. The win is not that the page loads faster, but that the user stops counting
+            </li>
+        </ul>
+</ul>
+
+<br><br>
+Sources:
+<ul>
+    <li><a href="https://www.lukew.com/ff/entry.asp?1797=">Mobile Design Details: Avoid The Spinner — Luke Wroblewski</a></li>
+    <li><a href="https://www.nngroup.com/articles/skeleton-screens/">Skeleton Screens 101 — Nielsen Norman Group</a></li>
+    <li><a href="https://dl.acm.org/doi/10.1145/3232078.3232086">Mejtoft, Långström & Söderström (2018), The effect of skeleton screens — ECCE'18</a></li>
+    <li><a href="https://blog.logrocket.com/ux-design/skeleton-loading-screen-design/">Skeleton loading screen design — LogRocket</a></li>
+</ul>
+
+<style>
+.skel-demo {
+    margin: 1.2em 0 0.6em;
+    padding: 1em;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background: #fafafa;
+}
+.skel-row {
+    display: flex;
+    gap: 1em;
+    flex-wrap: wrap;
+}
+.skel-pane {
+    flex: 1 1 220px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.skel-pane-label {
+    font-size: 0.85em;
+    color: rgba(0, 0, 0, 0.55);
+    margin-bottom: 0.5em;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.skel-stage {
+    position: relative;
+    width: 100%;
+    max-width: 280px;
+    height: 240px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    padding: 12px;
+    box-sizing: border-box;
+}
+.skel-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 32px;
+    height: 32px;
+    margin: -16px 0 0 -16px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: rgba(0, 0, 0, 0.45);
+    border-radius: 50%;
+    animation: skel-spin 0.9s linear infinite;
+}
+@keyframes skel-spin {
+    to { transform: rotate(360deg); }
+}
+.skel-ph {
+    background: #ececec;
+    border-radius: 4px;
+}
+.skel-ph-img {
+    height: 140px;
+    margin-bottom: 12px;
+}
+.skel-ph-line-1 { height: 12px; width: 85%; margin-bottom: 8px; }
+.skel-ph-line-2 { height: 12px; width: 70%; margin-bottom: 8px; }
+.skel-ph-line-3 { height: 12px; width: 40%; }
+.skel-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+.skel-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.65) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: translateX(-100%);
+    animation: skel-shimmer-move 1.4s ease-in-out infinite;
+}
+@keyframes skel-shimmer-move {
+    100% { transform: translateX(100%); }
+}
+.skel-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.skel-card-img {
+    height: 140px;
+    margin-bottom: 12px;
+    border-radius: 4px;
+    background:
+        linear-gradient(135deg, #c9e4ff 0%, #f0c9ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: rgba(0, 0, 0, 0.45);
+}
+.skel-card-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: rgba(0, 0, 0, 0.85);
+    font-size: 0.95em;
+}
+.skel-card-meta {
+    font-size: 0.8em;
+    color: rgba(0, 0, 0, 0.55);
+    line-height: 1.35;
+}
+.skel-controls {
+    margin-top: 1em;
+    display: flex;
+    align-items: center;
+    gap: 0.8em;
+    flex-wrap: wrap;
+}
+#skel-replay {
+    font: inherit;
+    padding: 0.35em 0.9em;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#skel-replay:hover { background: #f2f2f2; }
+#skel-replay:disabled { opacity: 0.5; cursor: default; }
+.skel-hint {
+    font-size: 0.85em;
+    color: rgba(0, 0, 0, 0.5);
+}
+@media (prefers-reduced-motion: reduce) {
+    .skel-spinner { animation: none; border-top-color: rgba(0, 0, 0, 0.45); }
+    .skel-shimmer::after { animation: none; opacity: 0; }
+}
+@media (max-width: 600px) {
+    .skel-controls {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 0.5em;
+    }
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    var spinnerStage = document.getElementById("skel-stage-spinner");
+    var skeletonStage = document.getElementById("skel-stage-skeleton");
+    var replayBtn = document.getElementById("skel-replay");
+    if (!spinnerStage || !skeletonStage || !replayBtn) return;
+
+    var DURATION_MS = 5000;
+
+    var loadedCard =
+        '<div class="skel-card">' +
+            '<div class="skel-card-img">⬛</div>' +
+            '<div class="skel-card-title">Skeleton screens</div>' +
+            '<div class="skel-card-meta">A wireframe-shaped placeholder that loads<br>attention before it loads content.</div>' +
+        '</div>';
+
+    var spinnerLoading =
+        '<div class="skel-spinner" aria-hidden="true"></div>';
+
+    var skeletonLoading =
+        '<div class="skel-ph skel-ph-img skel-shimmer"></div>' +
+        '<div class="skel-ph skel-ph-line-1 skel-shimmer"></div>' +
+        '<div class="skel-ph skel-ph-line-2 skel-shimmer"></div>' +
+        '<div class="skel-ph skel-ph-line-3 skel-shimmer"></div>';
+
+    function reset() {
+        spinnerStage.innerHTML = spinnerLoading;
+        skeletonStage.innerHTML = skeletonLoading;
+        spinnerStage.setAttribute("aria-busy", "true");
+        skeletonStage.setAttribute("aria-busy", "true");
+    }
+
+    function reveal() {
+        spinnerStage.innerHTML = loadedCard;
+        skeletonStage.innerHTML = loadedCard;
+        spinnerStage.removeAttribute("aria-busy");
+        skeletonStage.removeAttribute("aria-busy");
+    }
+
+    function run() {
+        replayBtn.disabled = true;
+        reset();
+        setTimeout(function () {
+            reveal();
+            replayBtn.disabled = false;
+        }, DURATION_MS);
+    }
+
+    replayBtn.addEventListener("click", run);
+    run();
+});
+</script>
+
+<br><br>
