@@ -85,6 +85,14 @@ Skip a diagram when:
 - The math is one-liner and the equation reads itself.
 - The figure would be decorative.
 
+## Reference images
+
+External reference images are allowed when they clarify the post. Prefer original papers, official docs, project pages, or license-friendly sources over reposts. For new posts, copy the image into `img/<slug>/` and use the normal `<slug>-N.{png,jpg}` naming convention rather than hotlinking.
+
+Always cite the source:
+- If the image itself is embedded, cite it in the `<figcaption>` when practical.
+- If the image is only used as a visual reference for a generated diagram, cite it in the final `References:` section.
+
 ## Verification step (recommended)
 
 After producing a diagram, briefly compare it against canonical references:

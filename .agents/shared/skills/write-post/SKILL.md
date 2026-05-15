@@ -34,7 +34,8 @@ A free-text topic (anything in `ARGUMENTS:` outside the flags) is treated as the
 4. **No matplotlib spines on diagrams.** Always call `for s in ax.spines.values(): s.set_visible(False)` before saving — the user has explicitly rejected bordered figures.
 5. **Block math (`\[ ... \]`) must be wrapped in `<div class="latex-container">...</div>`.** Inline math (`\( ... \)`) does not need a wrapper. Reference: `note/_posts/2024-04-18-mathematics-for-machine-learning.html`.
 6. **Image paths follow `img/<slug>/<slug>-N.{png,jpg}`.** Single-image posts may use `img/<slug>/<slug>.png`. Always create the `img/<slug>/` directory before writing files.
-7. **Do not edit the generated `_site/` directory.** Source files only — Jekyll regenerates `_site/` on build.
+7. **Reference images are allowed when they clarify the post.** Prefer original, official, or license-friendly sources. Store the image under `img/<slug>/` using the normal naming rule, and cite the source in the figure caption or final `References:` section.
+8. **Do not edit the generated `_site/` directory.** Source files only — Jekyll regenerates `_site/` on build.
 
 ## Workflow
 
@@ -138,11 +139,11 @@ Tone:
 - **English (`en`)**: plain, direct, no first-person, sentence-case headings, prefer the active voice.
 - **Korean (`kr`)**: keep one register per post (do not mix `~다` and `~합니다`). Short sentences. `<br>`-separated thought-jumps for the keyword style.
 
-Sources are paraphrased into the body. End the post with a `Sources:` section if external references were used:
+Reference materials are paraphrased into the body. End the post with a `References:` section if external references were used:
 
 ```html
 <br><br>
-Sources:
+References:
 <ul>
     <li><a href="https://...">Title</a></li>
 </ul>
@@ -163,6 +164,8 @@ If the post benefits from a figure, generate it. Prefer:
 - **2D, geometry / math / data** → `matplotlib` (turn off all spines, no titles unless load-bearing, color-code consistently)
 - **3D, geometry / projection / cameras** → `three.js` rendered through headless Chromium (canonical pattern: see `references/images.md`)
 - **Networks / DAGs** → `matplotlib` + `networkx` or `graphviz`
+
+Externally sourced reference images may also be used when they make the post clearer. Copy them into `img/<slug>/`, name them with the same `<slug>-N.{png,jpg}` convention, and include attribution either in `<figcaption>` or in the final `References:` list.
 
 Save to `img/<slug>/<slug>-N.png` (N=0,1,2,…). Embed with:
 
