@@ -203,11 +203,11 @@ Multiple block-math expressions in one section each get their own `<div class="l
 
 ## Closing
 
-Every post ends with `<br><br>` (two trailing breaks) before the closing of the file. If a `Sources:` or attribution section exists, it goes **before** the trailing `<br><br>`:
+Every post ends with `<br><br>` (two trailing breaks) before the closing of the file. If a `References:` or attribution section exists, it goes **before** the trailing `<br><br>`:
 
 ```html
 <br><br>
-Sources:
+References:
 <ul>
     <li><a href="https://...">Title</a></li>
 </ul>
