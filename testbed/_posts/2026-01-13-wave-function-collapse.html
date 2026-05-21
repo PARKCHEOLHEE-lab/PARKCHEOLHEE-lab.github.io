@@ -362,13 +362,13 @@ related:
         \hline
         \textbf{Algorithm: } \text{Wave Function Collapse 3D} \\
         \hline
-        \textbf{Input: } W, D, H, \text{ seed cell } (x_0, y_0, z_0), w_{\text{empty}}, \text{max\_iters} \\
+        \textbf{Input: } W, D, H, \text{ seed cell } (x_0, y_0, z_0), w_{\text{empty}}, \text{max_iters} \\
         \textbf{Output: } \text{collapsed grid of tiles} \\
         \hline
         \text{Precompute } \mathbf{C}_d \in \{0, 1\}^{T \times T} \text{ for each direction } d \in \{\pm x, \pm y, \pm z\} \\
         \texttt{states}[z, y, x, t] \leftarrow 1 \quad \forall (x, y, z, t) \\
         \texttt{cell} \leftarrow (x_0, y_0, z_0) \\
-        \textbf{for } i = 1 \ldots \text{max\_iters} \textbf{ do} \\
+        \textbf{for } i = 1 \ldots \text{max_iters} \textbf{ do} \\
         \quad \textbf{if all cells collapsed: break} \\
         \quad \textbf{if not Collapse}(\texttt{cell}) \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
         \quad \texttt{cell} \leftarrow \text{GetMinKCell}() \\
@@ -376,7 +376,7 @@ related:
         \quad \textbf{if } \texttt{cell} = \text{None} \textbf{ then break} \\
         \hline
         \texttt{Collapse}(x, y, z): \\
-        \quad t \sim \text{Multinomial}\big(\texttt{states}[z, y, x] \cdot \texttt{cell\_weights}\big) \\
+        \quad t \sim \text{Multinomial}\big(\texttt{states}[z, y, x] \cdot \texttt{cell_weights}\big) \\
         \quad \texttt{states}[z, y, x] \leftarrow \mathbf{e}_t \\
         \quad \textbf{return Propagate}(x, y, z) \\
         \hline
