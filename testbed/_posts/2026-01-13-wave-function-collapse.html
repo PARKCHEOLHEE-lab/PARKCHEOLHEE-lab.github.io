@@ -33,7 +33,7 @@ related:
     collapsing its state space to one concrete value, and then propagating the resulting constraints to neighboring cells.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-0.png" width="80%" onerror=handle_image_error(this)>
+        <img src="/img/wave-function-collapse/wave-function-collapse-0.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Intuition of how the WFC algorithm works</figcaption>
     </figure>
 
@@ -55,10 +55,6 @@ related:
     The algorithm then operates on a finite set of such modules. Each module is defined by how it can attach to its neighbors, so that collapse and propagation are purely rule-based.
     A useful reference is modular systems, where a small set of physical pieces combine in many ways under clear connection rules. 
     <a href="https://www.archdaily.com/771836/catable-for-architects">LYCS's Modular CATable</a> is one example. A limited set of table segments with defined interfaces can be rearranged into different table layouts. That idea translates directly into a 3D tileset for WFC.
-    <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-1.png" width="70%">
-        <figcaption>LYCS's Modular CATable</figcaption>
-    </figure>
 
     <br><br>
 
@@ -241,7 +237,7 @@ related:
     is the transpose of propagation in the opposite direction.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-6.png" width="90%" onerror=handle_image_error(this)>
+        <img src="/img/wave-function-collapse/wave-function-collapse-6.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>The six $20 \times 20$ compatibility matrices. The horizontal directions $\pm x, \pm y$ are denser ($\approx 0.61$ allowed pairs) because <code>FREE</code> acts as a wildcard; the vertical $\pm z$ matrices are sparser ($\approx 0.36$) because $\pm z$ requires an exact label match. The horizontal pairs are transposes of each other.</figcaption>
     </figure>
 
@@ -327,17 +323,6 @@ related:
     If any cell has been reduced to zero candidates the function returns <code>False</code>, signalling a contradiction;
     if every cell is already collapsed it returns <code>None</code> and the run terminates.
 
-    <br><br>
-
-    A toy 2D version of the same loop makes the dynamics visible. The tileset has four tiles ($A, B, C, D$),
-    each defined by the colour ($R$ or $B$) of its four edges, and a tile is compatible with its neighbour
-    only when their touching edges share a colour. Initially every cell carries all four candidates;
-    one collapse forces its neighbours to shrink, and a few more collapses are enough for propagation to fix the rest of the grid.
-
-    <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-7.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Toy WFC on a $4 \times 4$ grid with four tiles. Tiles with multiple candidates show a small swatch grid; collapsed cells are flat colour. The first collapse already constrains both immediate neighbours, and the remainder is filled by repeated min-entropy collapses.</figcaption>
-    </figure>
 
 </div><br><br>
 
@@ -356,44 +341,64 @@ related:
 
     <br><br>
 
-    <div class="latex-container">
-    \[
-        \begin{array}{l}
-        \hline
-        \textbf{Algorithm: } \text{Wave Function Collapse 3D} \\
-        \hline
-        \textbf{Input: } W, D, H, \text{ seed cell } (x_0, y_0, z_0), w_{\text{empty}}, \text{max_iters} \\
-        \textbf{Output: } \text{collapsed grid of tiles} \\
-        \hline
-        \text{Precompute } \mathbf{C}_d \in \{0, 1\}^{T \times T} \text{ for each direction } d \in \{\pm x, \pm y, \pm z\} \\
-        \texttt{states}[z, y, x, t] \leftarrow 1 \quad \forall (x, y, z, t) \\
-        \texttt{cell} \leftarrow (x_0, y_0, z_0) \\
-        \textbf{for } i = 1 \ldots \text{max_iters} \textbf{ do} \\
-        \quad \textbf{if all cells collapsed: break} \\
-        \quad \textbf{if not Collapse}(\texttt{cell}) \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
-        \quad \texttt{cell} \leftarrow \text{GetMinKCell}() \\
-        \quad \textbf{if } \texttt{cell} = \text{False} \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
-        \quad \textbf{if } \texttt{cell} = \text{None} \textbf{ then break} \\
-        \hline
-        \texttt{Collapse}(x, y, z): \\
-        \quad t \sim \text{Multinomial}\big(\texttt{states}[z, y, x] \cdot \texttt{cell_weights}\big) \\
-        \quad \texttt{states}[z, y, x] \leftarrow \mathbf{e}_t \\
-        \quad \textbf{return Propagate}(x, y, z) \\
-        \hline
-        \texttt{Propagate}(x, y, z): \\
-        \quad Q \leftarrow \{(x, y, z)\} \\
-        \quad \textbf{while } Q \neq \emptyset \textbf{ do} \\
-        \qquad (x, y, z) \leftarrow Q.\text{pop}() \\
-        \qquad \textbf{for } d \in \{\pm x, \pm y, \pm z\} \textbf{ do} \\
-        \qquad \quad (x', y', z') \leftarrow \text{neighbour in direction } d \\
-        \qquad \quad \texttt{valid} \leftarrow \bigvee_{t \,:\, \texttt{states}[z, y, x, t] = 1} \mathbf{C}_d[t, :] \\
-        \qquad \quad \texttt{after} \leftarrow \texttt{states}[z', y', x'] \wedge \texttt{valid} \\
-        \qquad \quad \textbf{if not after.any(): return False} \\
-        \qquad \quad \textbf{if } \texttt{after} \neq \texttt{states}[z', y', x'] \textbf{ then } \texttt{states}[z', y', x'] \leftarrow \texttt{after}; \, Q.\text{push}((x', y', z')) \\
-        \quad \textbf{return True} \\
-        \hline
-        \end{array}
-    \]
+    <div class="algorithm-box">
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \textbf{Algorithm: } \text{Wave Function Collapse 3D}
+            \end{array}
+        \]
+        </div>
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \textbf{Input: } W, D, H, \text{ seed cell } (x_0, y_0, z_0), w_{\text{empty}}, \text{max_iters} \\
+            \textbf{Output: } \text{collapsed grid of tiles}
+            \end{array}
+        \]
+        </div>
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \text{Precompute } \mathbf{C}_d \in \{0, 1\}^{T \times T} \text{ for each direction } d \in \{\pm x, \pm y, \pm z\} \\
+            \texttt{states}[z, y, x, t] \leftarrow 1 \quad \forall (x, y, z, t) \\
+            \texttt{cell} \leftarrow (x_0, y_0, z_0) \\
+            \textbf{for } i = 1 \ldots \text{max_iters} \textbf{ do} \\
+            \quad \textbf{if all cells collapsed: break} \\
+            \quad \textbf{if not Collapse}(\texttt{cell}) \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
+            \quad \texttt{cell} \leftarrow \text{GetMinKCell}() \\
+            \quad \textbf{if } \texttt{cell} = \text{False} \textbf{ then } \text{Reset}; \texttt{cell} \leftarrow (x_0, y_0, z_0); \textbf{ continue} \\
+            \quad \textbf{if } \texttt{cell} = \text{None} \textbf{ then break}
+            \end{array}
+        \]
+        </div>
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \texttt{Collapse}(x, y, z): \\
+            \quad t \sim \text{Multinomial}\big(\texttt{states}[z, y, x] \cdot \texttt{cell_weights}\big) \\
+            \quad \texttt{states}[z, y, x] \leftarrow \mathbf{e}_t \\
+            \quad \textbf{return Propagate}(x, y, z)
+            \end{array}
+        \]
+        </div>
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \texttt{Propagate}(x, y, z): \\
+            \quad Q \leftarrow \{(x, y, z)\} \\
+            \quad \textbf{while } Q \neq \emptyset \textbf{ do} \\
+            \qquad (x, y, z) \leftarrow Q.\text{pop}() \\
+            \qquad \textbf{for } d \in \{\pm x, \pm y, \pm z\} \textbf{ do} \\
+            \qquad \quad (x', y', z') \leftarrow \text{neighbour in direction } d \\
+            \qquad \quad \texttt{valid} \leftarrow \bigvee_{t \,:\, \texttt{states}[z, y, x, t] = 1} \mathbf{C}_d[t, :] \\
+            \qquad \quad \texttt{after} \leftarrow \texttt{states}[z', y', x'] \wedge \texttt{valid} \\
+            \qquad \quad \textbf{if not after.any(): return False} \\
+            \qquad \quad \textbf{if } \texttt{after} \neq \texttt{states}[z', y', x'] \textbf{ then } \texttt{states}[z', y', x'] \leftarrow \texttt{after}; \, Q.\text{push}((x', y', z')) \\
+            \quad \textbf{return True}
+            \end{array}
+        \]
+        </div>
     </div>
 
     <br><br>
@@ -413,7 +418,7 @@ related:
 
 </div><br><br>
 
-<h3>Gallery</h3>
+<h3>Procedural Generation</h3>
 <div class="article">
 
     The frames below are intermediate <code>.obj</code> snapshots dumped during a single run, replayed in order.
@@ -422,8 +427,10 @@ related:
     <code>empty_weight</code> values, which is why the resulting cat-towers have such different silhouettes.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-3.gif" width="48%" onerror=handle_image_error(this)>
-        <img src="/img/wave-function-collapse/wave-function-collapse-4.gif" width="48%" onerror=handle_image_error(this)>
+        <div style="display: flex; justify-content: center; gap: 15px;">
+            <img src="/img/wave-function-collapse/wave-function-collapse-3.gif" width="48%" onerror=handle_image_error(this)>
+            <img src="/img/wave-function-collapse/wave-function-collapse-4.gif" width="48%" onerror=handle_image_error(this)>
+        </div>
         <figcaption>Two WFC runs: collapse order on the left, finished structure on the right of each pair</figcaption>
     </figure>
 

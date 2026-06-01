@@ -272,6 +272,28 @@ hr
 .latex-container
   overflow: auto
 
+// Pseudocode/algorithm box: full-width horizontal rules at every section
+// boundary. MathJax v2 CHTML draws \hline only as wide as the array content,
+// so the rules are produced here as CSS borders on full-width section
+// wrappers instead, and the array inside each section is left-aligned with
+// its default display margin removed so sections stack tightly.
+.algorithm-box
+  border-top: 1px solid $dark
+  border-bottom: 1px solid $dark
+  margin: 1.2em 0
+  overflow-x: auto
+
+  .algorithm-section
+    padding: 0.3em 0.6em
+
+  .algorithm-section + .algorithm-section
+    border-top: 1px solid $dark
+
+  .mjx-chtml.MJXc-display
+    margin: 0 !important
+    text-align: left !important
+    padding: 0
+
 // Universal display-math overflow guard. KaTeX's `.katex-display` and
 // MathJax v2 CHTML's `.mjx-chtml.MJXc-display` are the block-level
 // display containers; making them the horizontal scroll boundary lets
