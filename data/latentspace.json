@@ -283,7 +283,7 @@
       "good-refactoring-vs-bad-refactoring"
     ],
     "x": 0.1899,
-    "y": 0.4431
+    "y": 0.443
   },
   {
     "title": "decorator",
@@ -563,7 +563,7 @@
       "block-commit"
     ],
     "x": 0.5428,
-    "y": 0.9904
+    "y": 0.9903
   },
   {
     "title": "Linear Algebra for Programmers (프로그래머를 위한 선형대수)",
@@ -578,7 +578,7 @@
       "pca",
       "dot-product"
     ],
-    "x": 0.8572,
+    "x": 0.8571,
     "y": 0.3587
   },
   {
@@ -828,7 +828,7 @@
       "useful-git-commands"
     ],
     "x": 0.4091,
-    "y": 0.8253
+    "y": 0.8252
   },
   {
     "title": "哲希",
@@ -1022,7 +1022,7 @@
       "poly-inr"
     ],
     "x": 0.5366,
-    "y": 0.1737
+    "y": 0.1736
   },
   {
     "title": "HuggingFace Inference Endpoints",
@@ -1138,7 +1138,8 @@
       "building-gan",
       "half-plane-clipping",
       "layout-vlm",
-      "numerical-differentitation-for-autograd"
+      "numerical-differentitation-for-autograd",
+      "wave-function-collapse"
     ],
     "x": 0.9543,
     "y": 0.673
@@ -1298,7 +1299,7 @@
       "chamfer-distance"
     ],
     "x": 0.6102,
-    "y": 0.3356
+    "y": 0.3357
   },
   {
     "title": "Hallucination is a feature not a bug",
@@ -1362,7 +1363,7 @@
       "rhino3dm"
     ],
     "x": 0.6044,
-    "y": 0.9856
+    "y": 0.9857
   },
   {
     "title": "Human Action (인간 행동)",
@@ -1376,7 +1377,7 @@
       "truth"
     ],
     "x": 0.1789,
-    "y": 0.3791
+    "y": 0.379
   },
   {
     "title": "Building-GAN: Graph-Conditioned Architectural Volumetric Design Generation",
@@ -1440,7 +1441,7 @@
       "voxels-to-graph"
     ],
     "x": 0.7786,
-    "y": 0.4186
+    "y": 0.4185
   },
   {
     "title": "w를 찾아서",
@@ -1522,10 +1523,11 @@
       "gumbel-softmax",
       "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
       "floor-plan-generation-with-voronoi-diagram",
-      "half-plane-clipping"
+      "half-plane-clipping",
+      "wave-function-collapse"
     ],
     "x": 0.8281,
-    "y": 0.6045
+    "y": 0.6046
   },
   {
     "title": "we are being programmed",
@@ -1621,7 +1623,7 @@
       "hallucination-is-a-feature"
     ],
     "x": 0.5692,
-    "y": 0.4688
+    "y": 0.4689
   },
   {
     "title": "MCP-related",
@@ -1636,7 +1638,7 @@
       "office-layout-generation-agents"
     ],
     "x": 0.6132,
-    "y": 0.6936
+    "y": 0.6937
   },
   {
     "title": "extrapolation",
@@ -1980,7 +1982,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.3598,
-    "y": 0.8317
+    "y": 0.8316
   },
   {
     "title": "StyleID: A Perception-Aware Dataset and Metric for Stylization-Agnostic Facial Identity Recognition",
@@ -2067,7 +2069,7 @@
       "chat-gpt-custom-instructions",
       "rhinomcptest"
     ],
-    "x": 0.4084,
+    "x": 0.4083,
     "y": 0.8727
   },
   {
@@ -2465,7 +2467,7 @@
       "discrete-voronoi",
       "subdivision-curve"
     ],
-    "x": 0.8272,
+    "x": 0.8273,
     "y": 0.8829
   },
   {
@@ -2494,7 +2496,7 @@
       "image-to-3d-scene",
       "floor-plan-generation-with-voronoi-diagram"
     ],
-    "x": 0.9459,
+    "x": 0.9458,
     "y": 0.8182
   },
   {
@@ -2628,7 +2630,7 @@
       "shapely-geometry-inheritance"
     ],
     "x": 0.6733,
-    "y": 0.8883
+    "y": 0.8882
   },
   {
     "title": "Infinite synthesis",
@@ -2734,7 +2736,8 @@
       "geometric-deep-learning",
       "gnn",
       "message-passing",
-      "gumbel-softmax"
+      "gumbel-softmax",
+      "wave-function-collapse"
     ],
     "x": 1.0,
     "y": 0.5002
@@ -2752,7 +2755,8 @@
       "layout-vlm",
       "openai-agents-sdk",
       "the-selfish-gene",
-      "k-rooms-clusters"
+      "k-rooms-clusters",
+      "wave-function-collapse"
     ],
     "x": 0.9116,
     "y": 0.6016
@@ -2783,11 +2787,15 @@
     "category": "testbed",
     "label": "Testbed",
     "connected": [
-      "floor-plan-generation-with-voronoi-diagram",
       "voxelate",
-      "k-rooms-clusters",
+      "voxels-to-graph",
+      "building-gan",
+      "floor-plan-generation-with-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "office-layout-generation-agents",
+      "discrete-voronoi",
       "quadtree",
-      "discrete-voronoi"
+      "k-rooms-clusters"
     ],
     "x": 0.7505,
     "y": 0.7732
