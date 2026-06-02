@@ -2236,8 +2236,8 @@
   },
   {
     "title": "Travelling salesman problem",
-    "slug": "travelling-salesman-problem",
-    "url": "/travelling-salesman-problem/",
+    "slug": "traveling-salesman-problem",
+    "url": "/traveling-salesman-problem/",
     "category": "testbed",
     "label": "Testbed",
     "connected": [
@@ -2270,7 +2270,7 @@
     "category": "testbed",
     "label": "Testbed",
     "connected": [
-      "travelling-salesman-problem",
+      "traveling-salesman-problem",
       "tower-crane-arrangement",
       "space-syntax"
     ],
@@ -2287,7 +2287,7 @@
       "theater-sightlines",
       "k-rooms-clusters",
       "space-syntax",
-      "travelling-salesman-problem",
+      "traveling-salesman-problem",
       "mass-generator"
     ],
     "x": 0.8153,
@@ -2554,7 +2554,7 @@
     "category": "testbed",
     "label": "Testbed",
     "connected": [
-      "travelling-salesman-problem",
+      "traveling-salesman-problem",
       "office-layout-generation-agents"
     ],
     "x": 0.5667,
