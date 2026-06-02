@@ -249,7 +249,7 @@ related:
     multiplied element-wise by <code>cell_weights</code>, and passed to <code>torch.multinomial</code>.
     The only weight that differs from $1$ is the entry for tile $0$ (the empty tile),
     which is scaled by the user-controlled <code>empty_weight</code>.
-    A value below $1$ favors dense structures, while a value above $1$ produces sparser, more open shapes.
+    A value below $1$ favours dense structures, while a value above $1$ produces sparser, more open shapes.
 
 <pre><code class="python">
     def _collapse(self, x: int, y: int, z: int) -> bool:
