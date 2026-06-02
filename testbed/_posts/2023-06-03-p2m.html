@@ -19,12 +19,12 @@ related:
     <!-- <a href="https://en.wikipedia.org/wiki/Edge_detection">Edge detection</a> includes a variety of mathematical methods that aim at identifying edges, 
     curves in a digital image at which the image brightness changes sharply or, more formally, has discontinuities. -->
 
-    Edge means a boundary line or an outline. An edge in an image refers to a portion existing at a point where the brightness of an image changes from a low value to a high value or vice versa.
-    Ultimately, an edge indicates the boundary of an object in an image and contains various information such as shape and direction detection.
-    
+    An edge is a boundary line or an outline. In an image, an edge refers to a region located where the brightness changes from a low value to a high value, or vice versa.
+    Ultimately, an edge indicates the boundary of an object in an image and contains various information, such as cues for shape and direction detection.
+
     <br><br>
-    <a href="https://en.wikipedia.org/wiki/Edge_detection">Edge detection</a> is the process of finding a pixel corresponding to an edge.
-    And it includes a variety of mathematical methods that aim at identifying edges, curves in a digital image at which the image brightness changes sharply or, more formally, has discontinuities.
+    <a href="https://en.wikipedia.org/wiki/Edge_detection">Edge detection</a> is the process of finding the pixels that correspond to an edge.
+    It includes a variety of mathematical methods that aim to identify edges, that is, curves in a digital image at which the image brightness changes sharply or, more formally, has discontinuities.
     
     <br><br>
     <figure>
@@ -38,20 +38,20 @@ related:
 
     <!--break-->
 
-    We can convert from an image of a <code>floor plan to vector data</code> and also model to 3d, using <code>Edge Detection</code> with OpenCV described above. Let's implement it!
+    An image of a <code>floor plan</code> can be converted into <code>vector data</code> and then modeled in 3D, using the <code>Edge Detection</code> with OpenCV described above. The following sections describe the implementation.
 
 </div><br><br>
 <h3>Image preprocessing</h3>
 <div class="article">
-    Image binarization is the operation that makes the pixel of an image 0 or 255(Here 0 means black and 255 means white).
-    <br>The reason for <code>binarization</code> is: 
+    Image binarization is the operation that sets each pixel of an image to either 0 or 255 (here, 0 means black and 255 means white).
+    <br><code>Binarization</code> serves the following purposes:
         <ul style="padding-left: 2em;">
-            <li class="decimal">to distinguish the background from the object</li>
-            <li class="decimal">to distinguish the region of interest(ROI) from the region of non-interest</li>
+            <li class="decimal">It separates the background from the object.</li>
+            <li class="decimal">It separates the region of interest (ROI) from the region of non-interest.</li>
         </ul>
 
-    In the binarization of a grayscale image, a pixel value above the <code>threshold</code> is 0 (black), and 255 (white) below the threshold. 
-    One of the most popular computer vision libraries, OpenCV, provides these functions.
+    In the binarization of a grayscale image, a pixel value above the <code>threshold</code> is set to 0 (black), and a value below the threshold is set to 255 (white).
+    OpenCV, one of the most popular computer vision libraries, provides these functions.
 
     <figure style="display: flex;">
         <img src="/img/plan-to-model/p2m-1.jpg" width="30%" onerror=handle_image_error(this)>
@@ -62,9 +62,9 @@ related:
         Preprocessing sequence<br>From the left, Original floor plan image · Applied threshold · Eroded and dilated image
     </figcaption><br><br>
 
-    The pre-processing is finished by first cleaning the image using a threshold and removing the remaining elements except for the wall using image <code>erosion</code> and <code>dilation</code>.
-    The <a href="https://en.wikipedia.org/wiki/Erosion_(morphology)">erosion</a> operation usually uses a structuring element for probing and reducing the shapes contained in the input image (<a href="https://en.wikipedia.org/wiki/Dilation_(morphology)">dilation</a> operation expands the shapes).
-    The code related a pre-processing is <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/d70bcb99bc2823a829605a37c973f12dd3bc5c80/APIs/p2m/p2m.py#L30-L50">here</a>.
+    The pre-processing is completed by first cleaning the image with a threshold and then removing the remaining elements except for the walls, using image <code>erosion</code> and <code>dilation</code>.
+    The <a href="https://en.wikipedia.org/wiki/Erosion_(morphology)">erosion</a> operation usually uses a structuring element to probe and reduce the shapes contained in the input image, whereas the <a href="https://en.wikipedia.org/wiki/Dilation_(morphology)">dilation</a> operation expands the shapes.
+    The code related to the pre-processing can be found <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/d70bcb99bc2823a829605a37c973f12dd3bc5c80/APIs/p2m/p2m.py#L30-L50">here</a>.
     <br><br>
     <figure>
         <img src="/img/plan-to-model/p2m-4.gif" width="60%" onerror=handle_image_error(this)><br>
@@ -79,7 +79,7 @@ related:
 <h3>Data vectorization</h3>
 <div class="article">
     After all the preprocessing described above has been completed, the <code>coordinates of the outer wall</code> can be extracted through edge detection with OpenCV.
-    The code is the following: In this code, I used <code>Shapely</code>, geometries handling library for simplifying geometries.
+    The code is shown below. In this code, <code>Shapely</code>, a geometry-handling library, is used to simplify the geometries.
     
 <pre class="highlight"><code class="python">
     def <span class="defName">get_wall_coordinates</span>(self) -> List[List[Tuple[int]]]:
@@ -114,9 +114,9 @@ related:
 <br>
 <h3>Loading data within Grasshopper</h3>
 <div class="article">
-    Grasshopper does not support external libraries. If you want to use other packages, you can execute running API server(Flask, Django, Fastapi etc).
-    Thus I defined the Flask app following. 
-    This is an API that returns the wall's coordinates of a given image. Now we can use external library we defined using <code>ghpython</code>.
+    Grasshopper does not support external libraries. To use other packages, an API server (Flask, Django, FastAPI, etc.) can be run instead.
+    The following Flask app was therefore defined.
+    This is an API that returns the wall coordinates of a given image. The external library defined here can then be used through <code>ghpython</code>.
 
 <pre class="highlight"><code class="python">
     <span class="defName">@app.route</span>("/p2m/＜path:image_path_param＞")
@@ -125,7 +125,7 @@ related:
         
         return <span class="defName">jsonify</span>({"wall_coordinates": <span class="method">P2M</span>(image_path_param).wall_coordinates})
 </code></pre><br>
-    Finally, all we need to do is model the information about the outer wall line in 3D. You can check about this project in my <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/tree/main/APIs">repository</a>.
+    Finally, the only remaining step is to model the information about the outer wall line in 3D. Further details of this project can be found in the <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/tree/main/APIs">repository</a>.
     <figure>
         <img src="/img/p2m-6.gif" width="80%" onerror=handle_image_error(this)>
         <img src="/img/plan-to-model/p2m-7.gif" width="80%" onerror=handle_image_error(this)>

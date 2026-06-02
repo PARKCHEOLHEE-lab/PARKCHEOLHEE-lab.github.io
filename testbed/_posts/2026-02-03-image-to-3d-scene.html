@@ -24,23 +24,23 @@ related:
 
     
     
-    This project aims to develop an interior scene generation system, funded by KOCCA, that converts single interior images into structured 3D scenes.
-    By combining state-of-the-art models for 2D object detection, automatic mask and semantic segmentation, 
-    and single-view image-to-3D reconstruction, the pipeline automatically identifies 
-    and segments all interior elements from a single input photo, 
-    reconstructs each detected object as an aligned, textured 3D mesh, and assembles them coherently into a recreated scene.
-    Applications range from virtual walkthroughs and editing to AR/VR staging and interior design automation.
+    This project aims to develop an interior scene generation system, funded by KOCCA, that converts single
+    interior images into structured 3D scenes. By combining models for 2D object detection, automatic mask
+    and semantic segmentation, and single-view image-to-3D reconstruction, the pipeline detects and segments
+    interior elements from a single input photo, reconstructs each object as an aligned and textured 3D mesh,
+    and then merges them into a single reconstructed scene.
+    Applications include virtual walkthroughs, scene editing, AR/VR staging, and interior design automation.
 </div><br><br>
 
 <h3>SAM 3D</h3>
 <div class="article">
 
-    <a href="https://arxiv.org/pdf/2511.16624">SAM 3D</a> Objects represents a new approach 
-    to tackling robust, visually grounded 3D reconstruction and object pose estimation 
-    from a single natural image, reconstructing detailed 3D shapes, textures, and layouts of objects from everyday images. 
+    <a href="https://arxiv.org/pdf/2511.16624">SAM 3D</a> Objects represents a new approach
+    to 3D reconstruction and object pose estimation
+    from a single natural image, reconstructing detailed 3D shapes, textures, and layouts of objects from everyday images.
      <!--break-->
-    In these images, small objects, indirect views, and occlusion are frequent, but recognition and context can assist the reconstruction where pixels alone are insufficient. 
-    Using SAM 3D Objects, people can start from an image, select any objects, and quickly generate posed 3D models. This makes it easy to precisely manipulate individual objects in a reconstructed 3D scene, or freely control the camera to view from different perspectives.
+    In these images, small objects, indirect views, and occlusion are common, but recognition and context can help the reconstruction when pixel information alone is not enough.
+    Using SAM 3D Objects, users can start from an image, select objects, and quickly generate positioned 3D models. This allows users to manipulate individual objects in a reconstructed 3D scene or control the camera to view the scene from different perspectives.
 
     <figure style="display: flex;">
         <img src="/img/image-to-3d-scene/image-to-3d-scene-0.png" width="45%" onerror=handle_image_error(this)>
@@ -69,13 +69,13 @@ related:
 <h3>Profiling</h3>
 <div class="article">
 
-    To measure the wall-clock time of SAM 3D inference on test images, I used the following setup:
+    To measure the wall-clock time of SAM 3D inference on test images, the following setup was used:
 
     <br><br>
 
-    Inference was run on about 230 individual objects. For each object, the schedule was wait = 0, warmup = 1, active = 3, so four runs per object in total.
-    Only the three active-step wall-clock times were recorded and averaged to get the per-object mean.
-    Time was taken as the difference of <code>time.perf_counter()</code> after calling <code>torch.cuda.synchronize()</code> at each step so the GPU is fully in sync.
+    Inference was performed on about 230 objects. For each object, the schedule was wait = 0, warmup = 1, active = 3, so there were four runs per object.
+    Only the three active-step wall-clock times were recorded and averaged to obtain the mean time per object.
+    The time was measured as the difference in <code>time.perf_counter()</code> after calling <code>torch.cuda.synchronize()</code> at each step so that the GPU was fully synchronized.
 <pre><code class="python">
 
     (...)
@@ -112,18 +112,18 @@ related:
 
 <br><br>
 
-On an NVIDIA A5000 GPU (24 GB VRAM), the mean wall-clock time per single-object inference is <code>37.004264873904155 seconds</code>. 
-If model-loading overhead is excluded, runtime is expected to drop by about 20%.
-In this profiling the setup was kept conservative on purpose: the model was reloaded on every run.
+On an NVIDIA A5000 GPU (24 GB VRAM), the mean wall-clock time per single-object inference is <code>37.004264873904155 seconds</code>.
+If model-loading overhead is excluded, the runtime is expected to decrease by about 20%.
+In this profiling, the setup was kept conservative, and the model was reloaded for each run.
 
 </div><br><br>
 
 <h3>Automatic Mask Generation with SAM</h3>
 <div class="article">
         
-    The goal of this project is to automatically reconstruct a complete, structured 3D scene from a single interior photo by generating meshes for all visible objects.
-    Because SAM 3D does not provide built-in automatic masking of individual objects, it is necessary to develop a custom pipeline. 
-    In this approach, <a href="https://arxiv.org/pdf/2304.02643">Segment Anything</a> (SAM) is used to detect and segment all interior objects within the input image, enabling separate 3D model generation for each detected object mask.
+    This pipeline uses <a href="https://arxiv.org/pdf/2304.02643">Segment Anything</a> (SAM) to generate object masks from a single interior image before the 3D reconstruction stage.
+    This step is necessary because SAM 3D does not provide automatic mask generation and requires object masks as input.
+    The generated masks are used as input for SAM 3D reconstruction, allowing the pipeline to process multiple objects in the scene automatically.
 
     <figure>
         <img src="/img/image-to-3d-scene/image-to-3d-scene-2.png" width="100%" onerror=handle_image_error(this)>
@@ -145,13 +145,12 @@ In this profiling the setup was kept conservative on purpose: the model was relo
         이 문제를 해결하기 위해서 각 객체의 정렬 방향을 조정하는 파이프라인을 추가해야 한다.
     -->
 
-    Figure 3 below shows the 3D scene obtained by running the automatic masking pipeline 
-    and then processing the resulting masks with SAM 3D, using the image from Figure 2 as input.
+    Figure 3 below shows the 3D scene generated by the automatic masking pipeline and SAM 3D, using the image from Figure 2 as input.
 
-    However, a main issue is that 
-        the orientation of each object in the generated 3D scene does not always match the actual orientation of the objects in the input image,
-        and the objects are not properly placed on the floor plane.
-    To address this problem, an additional pipeline is needed to correct the alignment of each object's orientation to properly match the image.
+    However, a main issue is that
+        the orientation of each object in the generated 3D scene does not always match the orientation of the objects in the input image,
+        and the objects are sometimes not properly placed on the floor plane.
+    To solve this problem, an additional post-processing pipeline is required to correct the orientation and alignment of each object so that they better match the image.
 
 
     <figure>
@@ -192,9 +191,9 @@ In this profiling the setup was kept conservative on purpose: the model was relo
         </li>
     </ul>
 
-    Based on the above, the correction works as follows. 
-    For each object, the OBB is computed, and the inverse of its local basis matrix is applied to undo the object's rotation. 
-    The object is then moved back to its original position, and its z-coordinate is set to zero so that it is snapped to the floor plane.
+    Based on these assumptions, the correction works as follows.
+    For each object, the OBB is computed, and the inverse of its local basis matrix is applied to remove the object's rotation.
+    The object is then moved back to its original position, and its z-coordinate is set to zero so that it is aligned with the floor plane.
     The correction process can be expressed as the following equation:
 
     $$
@@ -249,10 +248,10 @@ In this profiling the setup was kept conservative on purpose: the model was relo
 
     <ol>
         <li>
-            The current alignment correction flattens all objects onto the floor (z = 0), so the relative height between objects is lost. A better way to preserve or estimate z-values is needed for stacked or floating objects.
+            The current alignment correction places all objects on the floor (z = 0), so the relative height between objects is lost. A better method to preserve or estimate z-values is needed for stacked or floating objects.
         </li>
         <li>
-            The choice of OBB basis (which axis is "up") is not always consistent across objects, so some meshes may have the wrong upright direction unless a stable rule for picking the basis is added.
+            The choice of OBB basis (which axis is "up") is not always consistent across objects, so some meshes may have the wrong upright direction unless a consistent rule for selecting the basis is added.
         </li>
         <li>
             Segment Anything should be able to recognize an object that is split into several parts due to occlusion as a single object.

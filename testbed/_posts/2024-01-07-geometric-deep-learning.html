@@ -22,10 +22,10 @@ related:
 <h3>What is Conditional Generative Adversarial Networks ❓</h3>
 <div class="article">
 
-    <code>Conditional Generative Adversarial Networks</code> (cGANs) is an extension of the original Generative Adversarial Networks.
-    cGANs take the concept of conventional GANs further by feeding additional information into both the generator and discriminator, allowing the generation of data that is more specific and controlled.
+    <code>Conditional Generative Adversarial Networks</code> (cGANs) are an extension of the original Generative Adversarial Networks.
+    cGANs extend conventional GANs by feeding additional information into both the generator and the discriminator, which enables the generation of data that is more specific and controlled.
 
-    This information acts as a directive or constraint for the generator on what type of data to produce. 
+    This information acts as a directive or constraint that specifies the type of data the generator is expected to produce.
 
     <br><br>
     
@@ -43,16 +43,16 @@ related:
         </figcaption>
     </figure><br>
     
-    Since I am interested in handling geometry and generative design, I wanted to combine my interests with cGAN to solve a simple problem and understand these concepts.
+    Because my research interest lies in handling geometry and generative design, I sought to combine these interests with cGANs in order to solve a simple problem and to better understand the underlying concepts.
 
 </div><br>
 
 <h3>Problem definition</h3>
 <div class="article">
 
-    To experiment with the above, 
-    let me define a simple geometric problem. 
-    It is to find the <code>largest inscribed rectangle</code> on a given 2d polygon like the following.
+    To experiment with the approach described above,
+    a simple geometric problem is defined.
+    The task is to find the <code>largest inscribed rectangle</code> within a given 2D polygon, as shown below.
     <br><br>
 
     <figure style="display: flex;">
@@ -66,10 +66,10 @@ related:
 
     <br><br>
 
-    After setting a geometric problem, I defined the algorithm for finding <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/largest_inscribed_rectangle.py#L12-L133">LIR</a>.
+    After defining the geometric problem, I implemented the algorithm for finding the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/largest_inscribed_rectangle.py#L12-L133">LIR</a>.
     In this algorithm, a given polygon is represented as a <code>binary grid</code> of 1s and 0s.
-    1 is represented as a solid part and 0 is represented as a void part. 
-    The following representation of a binary grid-shaped polygon has 100 x 100 grid size. If the size is higher, it can be represented more precisely.
+    A value of 1 denotes a solid part, and a value of 0 denotes a void part.
+    The following representation of a binary grid-shaped polygon uses a 100 x 100 grid size. A larger grid size yields a more precise representation.
 
     <br><br>
 
@@ -87,12 +87,12 @@ related:
 <h3>Data preparation</h3>
 <div class="article">
 
-    We have set up a problem and a way to represent geometric data to experiment with the problem in the above section. 
-    In this part, we create a dataset to train a generator that estimates the <code>LIR</code> given an input polygon.
+    The previous section established the problem and a method for representing geometric data.
+    This section describes the construction of a dataset used to train a generator that estimates the <code>LIR</code> for a given input polygon.
 
     <br><br>
 
-    First of all, I'm going to define the function for creating a polygon with random coordinates called <code>_get_random_coordinates</code> as follows:
+    First, the function for creating a polygon with random coordinates, named <code>_get_random_coordinates</code>, is defined as follows:
     
 <pre><code class="python">
     def _get_random_coordinates(
@@ -122,8 +122,8 @@ related:
         return coordinates
 </pre></code><br><br>
 
-    This algorithm sorts polygon vertices by angle from the center to each vertex so that they do not intersect.
-    The whole process of creating a random polygon is as follows and you can see the code in this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L45-L69">link</a>.
+    This algorithm sorts the polygon vertices by the angle from the center to each vertex, so that the resulting polygon does not self-intersect.
+    The complete process of creating a random polygon is illustrated below, and the corresponding code is available at this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L45-L69">link</a>.
     <br><br>
 
     <figure>
@@ -135,9 +135,9 @@ related:
 
     <br><br>
 
-    After creating each random polygon, it needs to <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L71-L98">resize</a> as much as the grid size(I set 256x256).
-    We then need to <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/utils.py#L59-L74">convert</a> these <code>vector-shaped polygons to binary grid-shaped polygons</code> consisting of 1s and 0s. It's easy with OpenCV.
-    Through this process, <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/tree/main/lirGAN/data/binpy">5000 datasets</a> were created as shown in the figure below. If you need more data sets, you can get them easily.
+    After creating each random polygon, it must be <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L71-L98">resized</a> to match the grid size, which was set to 256x256.
+    It is then necessary to <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/utils.py#L59-L74">convert</a> these <code>vector-shaped polygons to binary grid-shaped polygons</code> consisting of 1s and 0s, which is straightforward with OpenCV.
+    Through this process, <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/tree/main/lirGAN/data/binpy">5000 datasets</a> were created, as shown in the figure below. Additional datasets can be generated easily if required.
 
     <br><br>
 
@@ -163,18 +163,18 @@ related:
 <h3>Building models and loss functions</h3>
 <div class="article">
 
-    In this section, we will build a model based on DCGANs architecture for 256x256 data and implement a geometric loss function.
+    This section describes the construction of a model based on the DCGAN architecture for 256x256 data and the implementation of a geometric loss function.
 
     <br><br>
 
-    In the LIR problem contexts we defined, <code>extra information y</code> corresponds to an input polygon.
-    The following <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L235-L244">forward</a> propagation method takes two inputs: noise and input polygon.
-    The <code>input_polygon</code> is first flattened and then this reshaped tensor is converted to feature space by passing through fully connected layers.
+    In the LIR problem context defined above, the <code>extra information y</code> corresponds to an input polygon.
+    The following <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L235-L244">forward</a> propagation method takes two inputs: a noise vector and an input polygon.
+    The <code>input_polygon</code> is first flattened, and the reshaped tensor is then mapped to feature space by passing through fully connected layers.
 
     <br><br>
 
-    The output(128) of the linear transformation is concatenated with the noise(128) tensor. 
-    This concatenation(256) allows the model to use both the random noise and the information from the <code>input_polygon</code> to generate the output.
+    The output (128) of the linear transformation is concatenated with the noise (128) tensor.
+    This concatenation (256) allows the model to use both the random noise and the information from the <code>input_polygon</code> to generate the output.
     
 <pre><code class="python">
     class LirGenerator(nn.Module, ModelConfig):
@@ -193,9 +193,9 @@ related:
             return nn.Sigmoid()(x)
 </pre></code><br><br>
 
-    Similarly, the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L247C10-L272">discriminator</a> takes the input polygon as additional input. 
-    In the forward propagation method of the discriminator, the <code>rectangle</code> and <code>input_polygon</code> have the same shape as the tensor. 
-    So we just need to connect them and then pass them to the main layer.
+    Similarly, the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L247C10-L272">discriminator</a> takes the input polygon as an additional input.
+    In the forward propagation method of the discriminator, the <code>rectangle</code> and <code>input_polygon</code> tensors share the same shape.
+    They are therefore concatenated and passed to the main layer.
 
     <pre><code class="python">
         class LirDiscriminator(nn.Module, ModelConfig):
@@ -226,19 +226,19 @@ related:
                 return self.main(x).view(-1, 1).squeeze(1)
     </pre></code><br><br>
     
-    Next, let us define the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L55C7-L168">additional loss functions</a> that compute the geometric features of generated data. I think these losses will help train the generator stably.
+    Next, the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L55C7-L168">additional loss functions</a> that compute the geometric features of the generated data are defined. These losses are intended to help train the generator more stably.
     
     The losses consist of:
     
     <ul style="padding-left: 2em;">
-        <li class="decimal"><u>BCE loss</u> is a standard loss function used for binary classification tasks(conventional GANs do not use any loss other than the adversarial loss, but without these losses when training the generator, the model did not create rectangles) </li>
-        <li class="decimal"><u><a href="https://deep-learning-study.tistory.com/634">DIoU</a> loss</u>, or Distance Intersection over Union Loss, is a metric used to evaluate the similarity between two boxes</li>
-        <li class="decimal"><u>Feasibility loss</u> measures how well the generated rectangle fits within the input polygon(and target rectangle) without overextending beyond its boundaries or underfitting within them</li>
-        <li class="decimal"><u>Connectivity loss</u> checks whether the generated rectangle is a single piece using the labeling function</li>
+        <li class="decimal"><u>BCE loss</u> is a standard loss function used for binary classification tasks. Conventional GANs use only the adversarial loss, but without these additional losses the generator did not produce rectangles during training.</li>
+        <li class="decimal"><u><a href="https://deep-learning-study.tistory.com/634">DIoU</a> loss</u>, or Distance Intersection over Union loss, is a metric used to evaluate the similarity between two boxes.</li>
+        <li class="decimal"><u>Feasibility loss</u> measures how well the generated rectangle fits within the input polygon and the target rectangle, without extending beyond their boundaries or underfitting within them.</li>
+        <li class="decimal"><u>Connectivity loss</u> verifies whether the generated rectangle forms a single connected piece, using the labeling function.</li>
     </ul>
     
     <br><br>
-    We have now finished defining the base models and loss functions. Let's train the model using only one data point to check whether it has a structure that can be learned.
+    The base models and loss functions are now defined. As an initial check, the model is trained on a single data point to verify that the problem has a structure that can be learned.
 
     <figure>
         <img src="/img/shape-conditional-gan/with-geometric-loss-polygons-2000.gif" style="width: 90%;" onerror=handle_image_error(this)>
@@ -252,8 +252,8 @@ related:
 
 <h3>Training and evaluating</h3>
 <div class="article">
-    Now, let's proceed with <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/lirGAN.ipynb">training</a> using the 5,000 datasets we have prepared. 
-    The configuration for training the models is as follows:
+    Training then proceeds with <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/lirGAN.ipynb">training</a> on the 5,000 datasets prepared earlier.
+    The configuration used for training the models is as follows:
     
 <pre><code class="python">
     """Train models with Geometric loss and Tanh using all data"""
@@ -292,10 +292,10 @@ related:
     lir_gan_trainer.train()
 </pre></code><br><br>
 
-I set the epochs and batch sizes to 1000 and 32, respectively. 
-Additionally, to qualitatively measure the quality of the generated data, I have configured the function to visualize the generated data at each epoch, as demonstrated in the following figure, when the given <code>log_interval</code> is reached.
+The number of epochs and the batch size were set to 1000 and 32, respectively.
+In addition, to qualitatively assess the quality of the generated data, the function was configured to visualize the generated data whenever the given <code>log_interval</code> is reached, as demonstrated in the following figure.
 
-The following figures show the training process corresponding to the above configuration:
+The following figures show the training process corresponding to the configuration above:
 
 
 <figure>
@@ -308,7 +308,7 @@ The following figures show the training process corresponding to the above confi
 </figure><br>
 
 <!-- 약 200 epochs 정도부터는 더이상 손실값이 감소하지 않는 것을 볼 수 있습니다. 이쯤에서 학습을 멈추고 (700epochs) 모델을 로드해서 정성적 평가를 해봅시다. 이번에는 ground truth를 함께 출력하겠습니다.-->
-At approximately 200 epochs, the loss no longer decreases. Let's stop training at this point (700 epochs) and load the model for qualitative evaluation. This time, we will print the ground truth together.
+At approximately 200 epochs, the loss no longer decreases. Training is stopped at this point (700 epochs) and the model is loaded for qualitative evaluation. In this case, the ground truth is printed alongside the generated output.
 
 <br><br>
 
@@ -406,32 +406,32 @@ At approximately 200 epochs, the loss no longer decreases. Let's stop training a
 <h3>Conclusions & future works</h3>
 <div class="article">
 
-    As you can see above, it produces perfect results for the data it was trained on. 
-    That's why there was no further decline in losses. Performance on test data is not very good. The thing interesting is that when a relatively simple polygon is received as input, it produces results that are similar to the ground truth.
+    As shown above, the model produces accurate results for the data on which it was trained, which explains why the loss no longer decreased.
+    Performance on the test data, however, is limited. A notable observation is that when a relatively simple polygon is provided as input, the model produces results similar to the ground truth.
 
     <br><br>
 
-    Also when defining the loss function, I intuitively thought that incorporating a geometric loss function would aid in <code>generalizing</code> the model. 
-    I experimented with two versions: one using BCELoss with geometric loss and another using BCELoss without geometric loss. 
-    However, the additional loss functions seem to have no effect. 
-    
+    When defining the loss function, I expected that incorporating a geometric loss function would help <code>generalize</code> the model.
+    Two versions were therefore compared: one using BCELoss with the geometric loss, and another using BCELoss without it.
+    The additional loss functions, however, appear to have no measurable effect.
+
     <br><br>
 
-    I think we could try the following:
+    The following directions could be explored further:
     
     <br><br>
     <ul style="padding-left: 2em;">
-        <li>Increasing data volume:</li>
+        <li>Increasing the volume of training data.</li>
         <ul style="list-style-type: none;">
-            Since we have <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/data/data_creator.py#L101-L158">DataCreator</a> class and it is created by LIR algorithm, so we can increase the volume of the dataset as much as you want.
-            Therefore, I think it is worth increasing the amount of training data, making the model structure more complex, overfitting, and checking whether the model generalizes.
+            Because the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/data/data_creator.py#L101-L158">DataCreator</a> class generates data through the LIR algorithm, the dataset can be expanded to any desired size.
+            It is therefore worth increasing the amount of training data, making the model structure more complex, overfitting, and then examining whether the model generalizes.
         </ul>
         <br>
-        <li>Experimenting with a dataset that has fewer vertices and simpler geometry:</li>
+        <li>Experimenting with a dataset that has fewer vertices and simpler geometry.</li>
         <ul style="list-style-type: none;">
-            In this project, I generated training data by creating random geometries with a number of vertices between <code>3 and 25</code> and creating the Largest Inscribed Rectangle for them.
-            That's why polygon datasets are so complex, as seen in the <code>Data preparation</code> part.
-            Therefore, I think it is necessary to simplify and generalize the data for training and then train the model.
+            In this project, the training data was generated by creating random geometries with a number of vertices between <code>3 and 25</code> and computing the Largest Inscribed Rectangle for each.
+            This is why the polygon datasets are highly complex, as seen in the <code>Data preparation</code> section.
+            It would therefore be worthwhile to simplify and generalize the training data before training the model.
         </ul>
     </ul>
 

@@ -14,11 +14,11 @@ related:
 <div id="toc"></div>
 <h3>Recommend a room with a high security score</h3>
 <div class="article">
-    This project maps rooms with high security scores by overlapping the number of crimes and locations data from 2014 to 2019.
+    This project maps rooms with high security scores by overlapping the number of crimes with location data from 2014 to 2019.
 
     <br><br>
-    I used the open api on the "Getting a good room with Peter Pan" property sales site to scrap room information data in Seoul. 
-    The scrapped data is stored in the form of csv, inserted into the Elastic Search using the Logstash and Beats of the <code>Elastic Stack</code>, and visualized by the Kibana
+    The open API of the "Getting a good room with Peter Pan" property sales site is used to scrape room information data in Seoul.
+    The scraped data is stored as csv, inserted into Elasticsearch using Logstash and Beats from the <code>Elastic Stack</code>, and visualized with Kibana.
 
     <!--break-->
 </div>
@@ -26,9 +26,9 @@ related:
 <br><br>
 <h3>Collecting data</h3>
 <div class="article">
-    If you look at the below HTML source of the "Getting a good room with Peter Pan" real estate sales site,
+    In the HTML source of the "Getting a good room with Peter Pan" real estate sales site shown below,
     there is a tag indicating the presence or absence of <code>security facilities</code>.
-    I wanted to collect this and score the security score.
+    The goal is to collect this information and compute a security score from it.
 <pre><code class="python">
     ＜div class="col-md-3 col-xs-4 column left-padding-20"＞
         보안시설
@@ -38,8 +38,8 @@ related:
     ＜/div＞
 </code></pre><br>
 
-Basic information such as contract type, price, and area within the property sales site was collected. 
-After that, tags containing security facility data were parsed and security scores were aggregated for each property. The whole code related to scrapping is <a href="https://github.com/PARKCHEOLHEE-lab/SecrueRoomInSeoul/blob/PCH/peterpan.py">here</a>.
+Basic information such as contract type, price, and area was collected from the property sales site.
+The tags containing security facility data were then parsed, and a security score was aggregated for each property. The full code related to scraping is available <a href="https://github.com/PARKCHEOLHEE-lab/SecrueRoomInSeoul/blob/PCH/peterpan.py">here</a>.
 
 <pre class="highlight"><code class="python">
     r_contract = soup.select("div#contract_type")[0].string                                                               <span class="gi"># 계약형태</span>
@@ -82,29 +82,29 @@ After that, tags containing security facility data were parsed and security scor
 </code></pre><br>
 
 <!-- 스크래핑된 데이터 형태는 다음과 같습니다. 계산된 보안점수와, 보안 점수 계산에 사용된 보안시설, 그리고 방의 위치 정보인 위도와 경도를 포함합니다. -->
-The structure of scraped data is the following. It contains aggregated <code>security scores</code>, used <code>security facilities</code> for calculating the security score, and location data with <code>latitude</code>, and <code>longitude</code>.
+The structure of the scraped data is as follows. It contains the aggregated <code>security scores</code>, the <code>security facilities</code> used to calculate each score, and location data given as <code>latitude</code> and <code>longitude</code>.
 <figure>
     <img src="/img/secure-room-0.png" width="80%">
-    <figcaption>Saved data as the shape of csv</figcaption>
+    <figcaption>Scraped data saved in CSV format</figcaption>
 </figure>
 
 </div>
 <br>
 <h3>Visualization</h3>
 <div class="article">
-    Based on the data, I made a map of the number of crimes in Seoul using Kibana.
-    And when you hover your mouse over the map, I planned to see the number of crimes.
-    The rooms aggregated with security scores on the map below were overlapped so that users could filter rooms without security facilities.
+    Based on the data, a map of the number of crimes in Seoul was created using Kibana.
+    Hovering the mouse over the map reveals the number of crimes for each area.
+    The rooms aggregated with security scores were overlapped on the map below so that users could filter out rooms without security facilities.
 
     <br><br>
-    And the site containing detailed information about the property was switched from string type to URL type so that users could move to the web page through the URL if they chose a room they liked.
+    In addition, the site link containing detailed information about each property was converted from a string type to a URL type, so that users could navigate to the web page through the URL when they selected a room of interest.
 
     <br><br>
     <figure>
         <img src="/img/secure-room-1.png" width="100%">
         <figcaption>
             Secure room in Seoul <br>
-            From the top, Danger score room · Filtered rooms by high score
+            From the top, crime score by area · rooms filtered by high security score
         </figcaption>
     </figure>
 </div>

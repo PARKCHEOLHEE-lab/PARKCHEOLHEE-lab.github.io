@@ -18,12 +18,12 @@ related:
 <h3>Boring, boring, boring 😑</h3>
 <div class="article">
 
-    If you are an architect, you may have downloaded open cad sources and used them to draw plans.
-    And you may also have experienced the repetitive task of <code>moving</code> design elements such as windows and doors to the desired location and <code>drilling</code> holes in the wall at that location.
+    Architects often download open CAD sources and use them to draw plans.
+    In doing so, they repeatedly perform the task of <code>moving</code> design elements such as windows and doors to the desired location and <code>drilling</code> holes in the wall at that location.
     <!--break-->
 
     <br><br>
-    It is an unproductive task highly. Many architects(or designers who work similarly to architects) are exposed to these repetitive tasks, It makes them exhausted and also stay up all night.
+    This is a highly unproductive task. Many architects, and designers who work in a similar way, are exposed to such repetitive work, which leaves them exhausted and often forces them to stay up all night.
 
     <figure style="display: flex;">
         <!-- <img src="/img/window-0.png" width="60%"> -->
@@ -38,7 +38,7 @@ related:
 
 <h3>From CAD blocks to objects</h3>
 <div class="article">
-    We have lots of CAD block sources. These are distinguished by each layer its usage. For example, if there is a window block, the block has the following elements:
+    A large number of CAD block sources are available. Each block is distinguished by layers according to its usage. For example, a window block contains the following elements:
     
     <ul style="padding-left: 2em;">
         <li>frames</li>
@@ -48,7 +48,7 @@ related:
         <li>center lines</li>
     </ul><br>
 
-    Through the above common elements that windows have, all windows with different appearances can be integrated into one <code>object</code>. And the following image is part of that task.
+    Through these common elements shared by windows, all windows with different appearances can be integrated into a single <code>object</code>. The following image shows part of that task.
 
 <!-- <pre class="highlight">
     class <span class="method">WindowGenerator</span>:
@@ -102,7 +102,7 @@ related:
             self.window_width = self.sorted_centerlines[0].length
 </pre><br> -->
 
-    The window, converted to the object is the following.
+    The window converted to an object is shown below.
     <figure>
         <img src="/img/window-3.png">
         <figcaption>Window object <br>
@@ -114,11 +114,11 @@ related:
 
 <h3>Placement helper</h3>
 <div class="article">
-    We created a window object with all information of the window using <code>ezdxf</code> and <code>shapely</code>.
-    Now, if you define a function that places a window at the desired location and drills walls, it's done.
+    A window object containing all information about the window was created using <code>ezdxf</code> and <code>shapely</code>.
+    With this object, the remaining work is to define a function that places a window at the desired location and drills the walls.
 
-    It's simple. First, calculate the angle of the wall and rotate the geometries to match the angle of the wall.
-    Lastly, make a vector to move, and translate the window. It's all!
+    The procedure is simple. First, the angle of the wall is calculated and the geometries are rotated to match that angle.
+    Finally, a translation vector is constructed and the window is translated into place.
 
     <figure style="display: flex;">
         <img src="/img/window-7.png" width="45%">

@@ -12,15 +12,15 @@ related:
 ---
 
 <div id="toc"></div>
-<h3>Automating buildings generation with GeoJSON</h3>
+<h3>Automating building generation with GeoJSON</h3>
 <div class="article">
-    1. after reading the shapefile from QGIS, cut out the necessary parts and convert it to the <code>GeoJSON</code> file format.
+    1. After reading the shapefile in QGIS, the necessary parts are extracted and converted to the <code>GeoJSON</code> file format.
     <figure>
         <img src="/img/mass-0.png" style="width: 60%;">
         <figcaption>Getting GeoJSON</figcaption>
     </figure><br><br>
     
-    2. Read the GeoJSON file and parse the geometry. The GeoJSON file contains <code>information about the coordinates of the geometry</code> like the one below.
+    2. The GeoJSON file is read and the geometry is parsed. The GeoJSON file contains <code>information about the coordinates of the geometry</code>, as shown below.
     <!--break-->
     
 <pre class="highlight"><code class="JSON">
@@ -116,18 +116,18 @@ related:
 </code></pre><br><br>
     
     
-    3. Then, it <code>parses the information</code> about the height of the building and creates the geometry through the following process:
+    3. Next, the program <code>parses the information</code> about the height of the building and creates the geometry through the following process:
     <figure>
         <img src="/img/mass-1.png" style="width: 50%">
         <figcaption>Process of mass generation</figcaption>
     </figure><br><br>
 
-    4. Now you can get this image below. And also you can visualize by height, regist date structure, usability, etc. 
-    The whole code is <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/mass_generator/mass_generator.py">here</a>.
+    4. The result is the image shown below. The buildings can also be visualized by height, registration date, structure, usability, and other attributes.
+    The full code is available <a href="https://github.com/PARKCHEOLHEE-lab/ToyProjects/blob/master/mass_generator/mass_generator.py">here</a>.
     <figure>
       <img src="/img/mass-2.png" style="width: 100%">
       <figcaption>
-        Visualized result <br> From the top, Building height · Building regist day · Building structure · Building usability
+        Visualized result <br> From the top, building height · building registration date · building structure · building usability
       </figcaption>
     </figure>
 

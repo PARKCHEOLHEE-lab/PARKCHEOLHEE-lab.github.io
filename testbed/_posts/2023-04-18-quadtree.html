@@ -13,18 +13,18 @@ related:
 ---
 
 <div id="toc"></div>
-<h3>What is a Quadtree ?</h3>
+<h3>What is a Quadtree?</h3>
 <div style="text-align: justify;">
     A <code>Quadtree</code> is a data structure in which each internal node has exactly <code>four children.</code>
-    Quadtrees are most used to partition a 2D space by recursively subdividing it into quadrants.
-    The subdivided regions may be square or rectangular, or may have arbitrary shapes.
+    Quadtrees are most commonly used to partition a 2D space by recursively subdividing it into quadrants.
+    The subdivided regions may be square, rectangular, or of arbitrary shape.
 
     <br><br>    
     All forms of quadtrees share some common <a href="https://en.wikipedia.org/wiki/Quadtree">features</a>: <br>
     <ul style="padding-left: 2em;">
-        <li>They decompose space into adaptable cells</li>
-        <li>Each cell (or bucket) <code>has a maximum capacity.</code> When maximum capacity is reached, the bucket <code>splits (or subdivides)</code></li>
-        <li>The tree directory follows the spatial decomposition of the quadtree</li>
+        <li>They decompose space into adaptable cells.</li>
+        <li>Each cell (or bucket) <code>has a maximum capacity.</code> When the maximum capacity is reached, the bucket <code>splits (or subdivides)</code>.</li>
+        <li>The tree directory follows the spatial decomposition of the quadtree.</li>
     </ul>    
     
     <!--break-->
@@ -50,8 +50,8 @@ related:
 
     <br><br>
 
-    There is an interesting diagram regarding Edge quadtree. Here, the <code>k</code> is may be infinite.
-    That's why, as mentioned above you should designate the maximum level of decomposition.
+    The diagram below illustrates an edge quadtree. Here, <code>k</code> may be infinite.
+    For this reason, as mentioned above, the maximum level of decomposition must be designated.
 
     
     <br><br><br>
@@ -69,10 +69,10 @@ related:
 
 <h3>Implementation</h3>
 <div style="text-align: justify;">
-    Now, let's implement it using GhPython based on the explanations above.
+    The quadtree is now implemented in GhPython based on the explanations above.
 
-    First, define the <code>quadtree</code> class and takes <code>bounding_box</code> and <code>min_size</code> as input values.
-    The <code>min_size</code> is used as the maximum level of decomposition as mentioned above.
+    First, the <code>quadtree</code> class is defined, taking <code>bounding_box</code> and <code>min_size</code> as input values.
+    The <code>min_size</code> serves as the maximum level of decomposition, as mentioned above.
 
 <pre class="highlight"><code class="python">
     class <span class="method">Quadtree</span>:
@@ -88,18 +88,18 @@ related:
     
             self.<span class="defName">_post_init</span>()
 </code></pre>
-    Quadtree has a root node, middle node, and leaf node because its data structure is based on a node.
-    If cannnot subdivide no more, children will be <code>None</code>, else other Quadtree objects.
+    A quadtree has a root node, middle nodes, and leaf nodes, because its data structure is based on nodes.
+    When no further subdivision is possible, the children are <code>None</code>; otherwise, they are other Quadtree objects.
 
     <br><br>
 
-    In the <code>crvs</code> instance variable of the quadtree, the line segments included in each quadtree rectangle are stored.
-    The <code>COUNTER</code> class variable that the quadtree has, is used as a flag to subdivide when each region of the quadtree contains a curve.
+    The <code>crvs</code> instance variable of the quadtree stores the line segments contained in each quadtree rectangle.
+    The <code>COUNTER</code> class variable of the quadtree is used as a flag for subdivision when a region of the quadtree contains a curve.
 
     <br><br>
 
-    In the second, you need a function that checks whether <code>intersects(or contains)</code> between given curves and quadtree region.
-    It can be defined as below, and a return value of this function is worked as a requirement condition to subdivide.
+    Second, a function is required that checks whether a given curve <code>intersects(or contains)</code> a quadtree region.
+    It can be defined as below, and its return value serves as the requirement condition for subdivision.
 <pre class="highlight"><code class="python">
         def <span class="defName">_is_intersects</span>(self, crv, bb):
             intersects = rg.<span class="method">Intersect.Intersection.CurveCurve</span>(
@@ -112,8 +112,8 @@ related:
     
     <br><br>
 
-    Finally, if you define a function to create a <code>quadtrant</code> and a function to <code>insert</code> it into each quadtree,
-    all preparations are complete. Those functions can be defined as below, you can see the full code at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/quadtree/quadtree.py">this link.</a>
+    Finally, once a function to create a <code>quadtrant</code> and a function to <code>insert</code> it into each quadtree are defined,
+    all preparations are complete. These functions can be defined as below, and the full code is available at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/quadtree/quadtree.py">this link.</a>
 
 <pre class="highlight"><code class="python">
     def <span class="defName">_subdivide</span>(self):
@@ -170,14 +170,14 @@ related:
 <br><br>
 <h3>Example</h3>
 <div>
-    If you have done all implementations now, you can get the geometries regarding <code>Edge quadtree</code> as below.
+    Once all of the implementations above are complete, the geometries for the <code>Edge quadtree</code> can be obtained as below.
     
     <figure>
         <img src="/img/quadtree-2.png" style="width: 90%;" onerror=handle_image_error(this)>
         <figcaption style="text-align: center; margin-top: 1em">
             Edge quadtree example
             <br>From the left, given edge · edge quadtree
-            <br>You can set the direction of the bounding box using the plane of Rhino object
+            <br>The direction of the bounding box can be set using the plane of the Rhino object
         </figcaption>
     </figure>
 </div>

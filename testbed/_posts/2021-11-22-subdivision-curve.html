@@ -13,7 +13,7 @@ related:
 
 <div id="toc"></div>
 <h3>Subdivision curves</h3>
-    Subdvision methods progressively refine a discrete curve and <code>converge to a smooth</code> curve. This allows to perform an interpolation or approximation of a given coarse dataset.
+    Subdivision methods progressively refine a discrete curve so that it <code>converges to a smooth</code> curve. This makes it possible to interpolate or approximate a given coarse dataset.
     
     <figure>
         <img src="/img/sub-curve-0.png" style="width: 60%">
@@ -22,10 +22,10 @@ related:
         </figcaption>
     </figure><br>
     
-    Subdivision curve is created based on the base vertices(or curve). Given the base vertices, find the vectors of the <code>n%</code> and <code>100-n%</code> vertices between the i-th point and the i+1-th point.
+    A subdivision curve is created from a set of base vertices (or a base curve). Given the base vertices, the points at <code>n%</code> and <code>100-n%</code> along the vector between the i-th point and the (i+1)-th point are computed.
     <!--break-->
     
-    The <a href="https://github.com/PARKCHEOLHEE-lab/GeometryCamp/blob/master/geometryFundamental/SubdivisionCurve/subdivisionCurve.py">code</a> is like the one below.
+    The <a href="https://github.com/PARKCHEOLHEE-lab/GeometryCamp/blob/master/geometryFundamental/SubdivisionCurve/subdivisionCurve.py">code</a> is as follows.
 
 <pre class="highlight"><code class="python">
     class <span class="method">SubdivisionCurve</span>:
@@ -64,7 +64,7 @@ related:
                 self.subdivided_points = each_subdivided_points
 </code></pre><br>
 
-Increasing the <code>iterative count</code> can create smoother curves. The image below is an explanation of it.
+Increasing the <code>iterative count</code> produces a smoother curve, as illustrated in the image below.
 
 <figure>
     <img src="/img/sub-curve-1.png" style="width: 100%">

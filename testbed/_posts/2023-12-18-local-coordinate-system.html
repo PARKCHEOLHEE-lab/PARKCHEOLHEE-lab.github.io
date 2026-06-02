@@ -22,8 +22,8 @@ related:
 <h3>Types of coordinate systems: Global vs. Local</h3>
 <div class="article">
 
-    In the field of engineering, computer graphics, and physics, understanding the relationship between different coordinate systems is crucial for accurate modeling, simulation, and analysis. 
-    The figure attached describes the concept of a <code>global coordinate system</code> (GCS) and a <code>local coordinate system</code> (LCS), 
+    In engineering, computer graphics, and physics, understanding the relationship between different coordinate systems is essential for accurate modeling, simulation, and analysis.
+    The attached figure describes the concept of a <code>global coordinate system</code> (GCS) and a <code>local coordinate system</code> (LCS),
     both of which are commonly used to define the position and orientation of objects in 3D space.
 
     
@@ -51,11 +51,11 @@ related:
 <h3>Simple implementation of Plane2d</h3>
 <div class="article">
 
-    The <code>Plane2d</code> class has properties that are the origin, x-axis, and y-axis as the 2D coordinate system. In this <a href="https://github.com/PARKCHEOLHEE-lab/local-coordinate-system/blob/df058f3562e363452dbc754f30c1b8b79b0f61cd/plane2d.py#L85">class that I implemented</a>, the core functions are as follows:
+    The <code>Plane2d</code> class defines the origin, x-axis, and y-axis as the properties of a 2D coordinate system. In this <a href="https://github.com/PARKCHEOLHEE-lab/local-coordinate-system/blob/df058f3562e363452dbc754f30c1b8b79b0f61cd/plane2d.py#L85">class that I implemented</a>, the core functions are as follows:
 
     <ul style="padding-left: 2em;">
-        <li>_get_local_coords_matrix(): This method constructs a matrix that represents the local coordinate system of the plane in terms of <a href="https://eunho5751.tistory.com/38">homogeneous coordinates</a></li>
-        <li>get_converted_geometry_by_plane(): Converts a geometry from the plane's coordinate system to another</li>
+        <li>_get_local_coords_matrix(): This method constructs a matrix that represents the local coordinate system of the plane in terms of <a href="https://eunho5751.tistory.com/38">homogeneous coordinates</a>.</li>
+        <li>get_converted_geometry_by_plane(): This method converts a geometry from the plane's coordinate system to another.</li>
     </ul>
     
 <pre><code class="python">
@@ -108,22 +108,22 @@ related:
             )
 </pre></code><br>
 
-    The figure below describes the transformation process easily. 
+    The figure below illustrates the transformation process.
 
     <br><br>
 
-    Firstly, it needs to take the inverse of a transformation matrix to convert a polygon from the original plane to another
-    This process corresponds from the blue polygon to the black polygon, and the code line <code>matrix_to_map_global_coords = np.linalg.inv(self._get_local_coords_matrix())</code> above. 
-    By this process, the polygon in the local coordinate system is mapped to the global coordinate system that considers (0, 0) to the origin.
+    First, the inverse of a transformation matrix must be taken to convert a polygon from the original plane to another.
+    This step corresponds to the transition from the blue polygon to the black polygon, and to the code line <code>matrix_to_map_global_coords = np.linalg.inv(self._get_local_coords_matrix())</code> above.
+    Through this step, the polygon in the local coordinate system is mapped to the global coordinate system, which treats (0, 0) as the origin.
 
     <br><br>
 
-    After processing the above, we need to remap from the global coordinate system to the local coordinate system to convert it. This is from the black polygon to the green polygon.
-    The <code>matrix_to_map_local_coords = plane_to_convert._get_local_coords_matrix() @ matrix_to_map_global_coords</code> line is corresponded to it.
+    After this step, the polygon must be remapped from the global coordinate system to the target local coordinate system. This corresponds to the transition from the black polygon to the green polygon.
+    The line <code>matrix_to_map_local_coords = plane_to_convert._get_local_coords_matrix() @ matrix_to_map_global_coords</code> corresponds to this step.
 
     <br><br>
 
-    In the entire <a href="https://github.com/PARKCHEOLHEE-lab/local-coordinate-system/blob/main/plane2d_viz.ipynb">process of transformation</a>, the polygon keeps the same indices of vertices, the shape of the geometry, and orientation (in this case counter-clockwise).
+    Throughout the entire <a href="https://github.com/PARKCHEOLHEE-lab/local-coordinate-system/blob/main/plane2d_viz.ipynb">transformation process</a>, the polygon preserves the same vertex indices, geometry shape, and orientation (counter-clockwise in this case).
     
     <figure style="display: flex;">
         <img src="/img/local-coordinate-system/local-coordinate-system-1.png" style="width: 45%;" onerror=handle_image_error(this)>
@@ -138,15 +138,15 @@ related:
 <h3>Applying coordinate system transformation in Architectural design</h3>
 <div class="article">
 
-    As you saw above, the transformation from GCS to LCS involves <code>rotation, translation, and reflection matrices</code> that convert a geometry's coordinates to its position and orientation within the plane.
+    As shown above, the transformation from GCS to LCS involves <code>rotation, translation, and reflection matrices</code> that convert a geometry's coordinates to its position and orientation within the plane.
 
     <br><br>
     In architectural design, a transformation matrix can help align building shapes along intended angles and directions within an axial framework.
-    Let's say we're developing an algorithm to automate apartment layout and we have some building templates. 
-    In this situation, we can situate buildings simply along a given axis that is defined for placing apartments. 
-    
+    For example, consider an algorithm developed to automate apartment layout, given a set of building templates.
+    In this situation, the buildings can be placed simply along a given axis defined for arranging the apartments.
+
     <br><br>
-    You just apply the logic that is described above after defining two planes, and geometries for apartments. That's all!
+    The logic described above is applied after defining two planes and the geometries for the apartments.
 
     <figure>
         <img src="/img/local-coordinate-system/local-coordinate-system-4.png" style="width: 100%;" onerror=handle_image_error(this)>

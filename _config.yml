@@ -50,3 +50,4 @@ exclude:
 
 plugins:
  - jekyll-feed
+ - jekyll-redirect-from

@@ -19,9 +19,9 @@ related:
 <div id="toc"></div>
 <h3>Objectives</h3>
 <div class="article">
-    This analysis aims to write a prototype for deriving the apartment layout starting point for <code>the street housing maintenance project (가로주택정비사업)</code> solution called <a href="https://lbdeveloper.landbook.me/">LBDeveloper</a> (at Spacewalk).
-    The plots to analyze and layout analysis visualized are the following images.
-    Also it aims to set the <code>parameters</code> and the <code>range</code> of parameters to optimize apartment complex layout.  
+    This analysis aims to develop a prototype for deriving the apartment layout starting point for <code>the street housing maintenance project (가로주택정비사업)</code> solution called <a href="https://lbdeveloper.landbook.me/">LBDeveloper</a> (at Spacewalk).
+    The plots under analysis and the corresponding layout analysis are visualized in the images below.
+    A further objective is to define the <code>parameters</code> and the <code>range</code> of each parameter used to optimize the apartment complex layout.
 
     <br><br>
 
@@ -48,8 +48,8 @@ related:
 
 <h3>Axes rules</h3>
 <div class="article">
-    Since the orientation of street houses takes into account the south-facing of all units, the orientation and placement axis can be separated.
-    Therefore, the <code>array axes</code> is largely divided into the following:
+    Because the orientation of street houses must account for the south-facing of all units, the orientation and the placement axis can be treated separately.
+    The <code>array axes</code> are therefore divided broadly into the following:
     
     <ul style="padding-left: 2em;">
         <li>Longest segment axis of the plot geometry</li>
@@ -57,15 +57,15 @@ related:
         <li>South-facing axis</li>
     </ul><br>
 
-    The rules of <code>array axes</code> by layout analysis:
+    The rules governing the <code>array axes</code>, derived from the layout analysis, are as follows:
     
     <ul style="padding-left: 1.8em;">
-        <li class="decimal">One array axis has a minimum of 1 and a maximum of 3 origins</li>
-        <li class="decimal">The array axes have a minimum of 1 and a maximum of 2 axes when not Boundary axis</li>
-        <li class="decimal">If the selected array axes parameter is the Boundary axis, offset <code>N</code> line segments into the site</li>
-        <li class="decimal">Place a corner-type building at the intersection of lines that offset the site boundary axis</li>
+        <li class="decimal">One array axis has a minimum of 1 and a maximum of 3 origins.</li>
+        <li class="decimal">The array axes have a minimum of 1 and a maximum of 2 axes when the Boundary axis is not selected.</li>
+        <li class="decimal">If the selected array-axis parameter is the Boundary axis, <code>N</code> line segments are offset into the site.</li>
+        <li class="decimal">A corner-type building is placed at the intersection of the lines offset from the site boundary axis.</li>
         <!--break-->
-        <li class="decimal">The range of parameters for offseting is <code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST</code> And it follows the following analysis.</li>
+        <li class="decimal">The range of the offset parameters is <code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST</code>, which follows the analysis below.</li>
         <figure>
             <img src="/img/analysis-of-apt-state-spaces/apartment-12.png" width="70%;" onerror=handle_image_error(this)>
             <figcaption>Analysis of SITE_BOUNDARY_OFFSET_DISTANCE_LIST</figcaption>
@@ -99,8 +99,8 @@ related:
         elif param_axis == Enums.BOUNDARIES_ARRAY_AXIS:
             axis = sorted_simplified_site_geom[:Consts.SITE_BOUNDARY_NUMBER_TO_USE]
 </code></pre><br>
-    <li class="decimal">If Boundary axis is selected, the units' directions will follow the site boundary axis</li>
-    <li class="decimal">If the aspect_ratio of the obb created for the site's long axis is more than <code>ASPECT_RATIO_BASELINE</code>, other axes are not searched but fixed to the long axis</li>
+    <li class="decimal">If the Boundary axis is selected, the units' directions follow the site boundary axis.</li>
+    <li class="decimal">If the aspect ratio of the OBB created for the site's long axis exceeds <code>ASPECT_RATIO_BASELINE</code>, no other axes are searched and the long axis is fixed.</li>
 <pre><code class="python">
     class Consts:
         ASPECT_RATIO_BASELINE = 1.91
@@ -172,7 +172,7 @@ related:
         </tbody>
       </table><br><br>
 
-      Parameters descriptioins:
+      Parameter descriptions:
       <ul style="padding-left: 2em;">
           <li>param_axis: Parameter for selecting the axis</li>
           <li>param_axis_count: The count of axes</li>
@@ -259,18 +259,18 @@ Parameters definition:
         </figure>
         
         <ul style="padding-left: 2em;">
-            <li>Create an OBB by the longest segment of site segments</li>
-            <li>Move the axis in the vertical direction of the long axis OBB using the <code>param_axis_position</code> parameter</li>
-            <li>Derive the intersection line segment between the moved axis and site_geom</li>
-            <li>Divide the corresponding <code>array_axis</code> into equal parts by the number of created <code>param_building_positions_count</code> parameters</li>
+            <li>An OBB is created from the longest segment of the site segments.</li>
+            <li>The axis is moved in the direction perpendicular to the long-axis OBB using the <code>param_axis_position</code> parameter.</li>
+            <li>The intersection line segment between the moved axis and site_geom is derived.</li>
+            <li>The corresponding <code>array_axis</code> is divided into equal parts according to the number of generated <code>param_building_positions_count</code> parameters.</li>
                 <ul>
-                    <li>This is to prevent dots from appearing in overlapping locations</li>
+                    <li>This prevents points from appearing at overlapping locations.</li>
                 </ul>
-            <li>After dividing into equal parts, both ends of each line are reduced by <code>POSITION_REDUCE_LENGTH</code></li>
+            <li>After the division into equal parts, both ends of each line are reduced by <code>POSITION_REDUCE_LENGTH</code>.</li>
                 <ul>
-                    <li>If a line segment disappears, use it as is without reducing it</li>
+                    <li>If a line segment would disappear, it is used as is without reduction.</li>
                 </ul>
-            <li>After creating the <code>param_building_positions</code> parameter, set the starting point of each reduced line segment to 0 and the final point to 1 and interpolate. Use that point as the starting point for Apt placement</li>
+            <li>After the <code>param_building_positions</code> parameter is created, the starting point of each reduced line segment is set to 0 and the end point to 1, and the values are interpolated; the resulting point is used as the starting point for apartment placement.</li>
         </ul>
     </ul><br>
 
@@ -282,25 +282,25 @@ Parameters definition:
                 <figcaption>Creation result of BOUNDARIES_ARRAY_AXIS using dummy blocks</figcaption>
             </figure><br>
 
-            <li>Simplify a site geometry</li>
+            <li>The site geometry is simplified.</li>
                 <ul>
                     <li><code>TOLERANCE_TO_SIMPLIFY = 10</code></li>
                     <li><code>TOLERANCE_ANGLE_TO_SIMPLIFY = 10</code></li>
                 </ul>
-            <li>Explode the simplified site segments and sort them by the length of each segment</li>
-            <li>Slice sorted segments up to <code>SITE_BOUNDARY_NUMBER_TO_USE</code></li>
-            <li>Slice to the <code>SITE_BOUNDARY_NUMBER_TO_USE</code>th longest line segment in length</li>
-            <li>Offset the site shape using the <code>param_offset_distance</code> parameter.</li>
+            <li>The simplified site segments are exploded and sorted by the length of each segment.</li>
+            <li>The sorted segments are sliced up to <code>SITE_BOUNDARY_NUMBER_TO_USE</code>.</li>
+            <li>The segments are sliced to the <code>SITE_BOUNDARY_NUMBER_TO_USE</code>th longest segment in length.</li>
+            <li>The site shape is offset using the <code>param_offset_distance</code> parameter.</li>
                 <ul>
                     <li><code>SITE_BOUNDARY_NUMBER_TO_USE = 4</code></li>
                     <li><code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST = [15, 20, 25]</code></li>
                 </ul>
-            <li>Draw the intersection points between offsetted site segments</li>
-            <li>Create circles with a radius of <code>max(SITE_BOUNDARY_OFFSET_DISTANCE_LIST) from the intersections</code></li>
+            <li>The intersection points between the offset site segments are drawn.</li>
+            <li>Circles with a radius of <code>max(SITE_BOUNDARY_OFFSET_DISTANCE_LIST)</code> are created at the intersections.</li>
                 <ul>
-                    <li>Place corner type Apt at intersection points</li>
+                    <li>A corner-type apartment is placed at each intersection point.</li>
                 </ul>
-            <li>Subtract the circles from the boundary axis and remove segments that have a length is less than <code>ARRAY_AXIS_LENGTH_BASELINE_LOWEST</code></li>
+            <li>The circles are subtracted from the boundary axis, and segments shorter than <code>ARRAY_AXIS_LENGTH_BASELINE_LOWEST</code> are removed.</li>
                 <ul>
                     <li><code>ARRAY_AXIS_LENGTH_BASELINE_LOWEST = 20</code></li>
                 </ul>
@@ -310,9 +310,9 @@ Parameters definition:
     3. Creation sequence of <code>Enums.FULL_SOUTH_ARRAY_AXIS</code>
     <ul>
         <ul style="padding-left: 2em;">
-            <li>This parameter is only used when <code>AABB_OMBR_RATIO_BASELINE</code> is greater than 0.84</li>
+            <li>This parameter is used only when <code>AABB_OMBR_RATIO_BASELINE</code> is greater than 0.84.</li>
                 <ul>
-                    <li>If this condition is not satisfied, the axis is recalculated</li>
+                    <li>If this condition is not satisfied, the axis is recalculated.</li>
                 </ul>
 
             <figure>
@@ -320,23 +320,23 @@ Parameters definition:
                 <figcaption>Analysis of BOUNDARIES_ARRAY_AXIS</figcaption>
             </figure><br>
 
-            <li>Create AABB (Axis Aligned Bounding Box)</li>
-            <li>Derive the most northern segment among the AABB segments</li>
-            <li>The subsequent process is the same as <code>Enums.LONGEST_ARRAY_AXIS</code> to derive the placement starting points</li>
+            <li>An AABB (Axis-Aligned Bounding Box) is created.</li>
+            <li>The northernmost segment among the AABB segments is derived.</li>
+            <li>The subsequent process is the same as that of <code>Enums.LONGEST_ARRAY_AXIS</code> for deriving the placement starting points.</li>
         </ul>
     </ul><br>
 
     4. Creation sequence of <code>Enums.N_DEGREE_SOUTH_FACING_ARRAY_AXIS</code>
     <ul>
         <ul style="padding-left: 2em;">
-            <li>This parameter is intended to respond to irregular plots that do not follow any axis of the site line, such as:</li>
+            <li>This parameter is intended to handle irregular plots that do not follow any axis of the site line, such as the following:</li>
             <figure>
                 <img src="/img/analysis-of-apt-state-spaces/apartment-16.png" width="35%" onerror=handle_image_error(this)>
                 <figcaption>Analysis of N_DEGREE_SOUTH_FACING_ARRAY_AXIS</figcaption>
             </figure><br>
 
-            <li>The same placement method as <code>Enums.FULL_SOUTH_ARRAY_AXIS</code> in step 3 is used and with the only difference being the angle of the array axis</li>
-            <li>Create axes by fixing a specific axis without being affected by the site geometry and place blocks at the same south-facing angle</li>
+            <li>The same placement method as <code>Enums.FULL_SOUTH_ARRAY_AXIS</code> in step 3 is used, with the only difference being the angle of the array axis.</li>
+            <li>Axes are created by fixing a specific axis independently of the site geometry, and blocks are placed at the same south-facing angle.</li>
         
         </ul>
     </ul><br>
@@ -344,25 +344,25 @@ Parameters definition:
     5. Creation sequence of <code>Enums.N_DEGREE_SOUTH_FACING_ARRAY_AXIS</code>
     <ul>
         <ul style="padding-left: 2em;">
-            <li>This parameter is only considered when the plot area is greater than equal <code>N m²</code></li>
+            <li>This parameter is considered only when the plot area is greater than or equal to <code>N m²</code>.</li>
             <figure>
                 <img src="/img/analysis-of-apt-state-spaces/apartment-17.png" width="35%" onerror=handle_image_error(this)>
                 <figcaption>Analysis of BOUNDARIES_MULTIPLE_OFFSET_ARRAY_AXIS</figcaption>
             </figure><br>
 
-            <li>Explode the site segments and sort them by the length of each segment</li>
-            
-            <li>After sorting, select up to the <code>M</code>th longest segment (can be switched to use <code>M</code> or searching)</li>
+            <li>The site segments are exploded and sorted by the length of each segment.</li>
+
+            <li>After sorting, select up to the <code>M</code>th longest segment (this can be switched to use <code>M</code> or a search).</li>
             <li><code>param_offset_distance_indices</code></li>
                 <ul>
-                    <li>This parameter selects the index for offseting distance among <code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST = [15, 20, 25]</code></li>
+                    <li>This parameter selects the offset-distance index among <code>SITE_BOUNDARY_OFFSET_DISTANCE_LIST = [15, 20, 25]</code>.</li>
                 </ul>
             <li><code>param_axis_offset_counts</code></li>
                 <ul>
-                    <li>This parameter selects offset count of each segment (0 ~ 4)</code></li>
+                    <li>This parameter selects the offset count of each segment (0 ~ 4).</code></li>
                 </ul>
 
-            <li>When this parameter is selected, the plate-type module is expanded and placed on the offset axis</li>
+            <li>When this parameter is selected, the plate-type module is expanded and placed on the offset axis.</li>
             
         </ul>
     </ul><br>

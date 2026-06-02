@@ -26,9 +26,9 @@ related:
 <div class="article">
     This project <mark>explores the key contributions of <a href="https://arxiv.org/pdf/2104.13316">Building-GAN</a> by AutodeskAILab: 
     1) a novel 3D representation called <strong>voxel graph</strong> that can encode <strong>irregular voxel grids</strong></mark> with non-uniform space partitioning, overcoming limitations of traditional regular voxel grids, and 
-    2) a graph-conditioned generative adversarial network (GAN) leveraging graph neural networks (GNNs). 
+    2) a graph-conditioned generative adversarial network (GAN) leveraging graph neural networks (GNNs).
     The implementation uses their <a href="https://github.com/AutodeskAILab/Building-GAN?tab=readme-ov-file">dataset</a> to study these approaches.
-    First, let's examine the structure of the raw data in the next section.
+    The structure of the raw data is examined first in the following section.
 
     <figure>
         <div style="width:100%; overflow:hidden; display:flex; justify-content:center;">
@@ -136,12 +136,12 @@ related:
 </figcaption><br>
         </li>
         <li>
-            <strong>voxel_*.json</strong>: 
-            contains the voxel voxel nodes. Each voxel node has the following attributes: 
-            location (it serves as a unique index in the voxel graph), 
-            program type, 
-            dimension (depth, height, width of an irregular voxel), 
-            coordinate (center of the voxel),
+            <strong>voxel_*.json</strong>:
+            contains the voxel nodes. Each voxel node has the following attributes:
+            location (which serves as a unique index in the voxel graph),
+            program type,
+            dimension (the depth, height, and width of an irregular voxel),
+            coordinate (the center of the voxel),
             and neighbors that indicate connectivity between nodes.
 
 <pre><code class="json">
@@ -190,15 +190,15 @@ related:
 
     <br><br>
 
-    To convert voxel data into a graph structure, we need to assign an index for each voxel.
-    The index of each voxel is \(\text{(x, y, z)} \)-shaped structure, and it is unique, so that the index can be converted to \(\text{(0, 1, 2,} \cdot \cdot \cdot \text{, n)} \)-shaped structure.
-    As each voxel is a node, the last index of the node is the number of voxels-1.
+    To convert voxel data into a graph structure, an index must be assigned to each voxel.
+    The index of each voxel has an \(\text{(x, y, z)} \)-shaped structure and is unique, so that it can be converted into an \(\text{(0, 1, 2,} \cdot \cdot \cdot \text{, n)} \)-shaped structure.
+    Because each voxel is treated as a node, the last index of the node is the number of voxels minus one.
 
     <br><br>
     
-    Since the voxel is a cuboid-shaped geometry, connectivity between voxel nodes can be determined by the 3D 6-way connectivity.
-    In the figure below, let's see the uppermost voxel with index \(319\) of the right diagram.
-    
+    Since a voxel is a cuboid-shaped geometry, connectivity between voxel nodes can be determined by 3D 6-way connectivity.
+    Consider the uppermost voxel with index \(319\) in the right diagram of the figure below.
+
     Among the six faces of this voxel, only three (right, front, and bottom) are connected to adjacent voxels.
     The other faces do not touch any neighboring voxels. According to the 3D 6-way connectivity system, the node with index \(319\) has neighbor nodes with indices \(255\), \(311\), and \(318\).
     Therefore, using the adjacency list representation, it can be expressed as \(\text{319: [255, 311, 318]}\).
@@ -222,8 +222,8 @@ related:
 
     <br><br>
 
-    Each node in the graph data has the same shape features as other nodes.
-    As I mentioned above, each voxel is converted into a node, so the node's features are the voxel's geometric attributes.
+    Each node in the graph data has feature vectors of the same shape as every other node.
+    As noted above, each voxel is converted into a node, so the node's features are the voxel's geometric attributes.
 
     In the raw data, each voxel node has the following features: coordinate \((3)\), dimension \((3)\), and location \((3)\) 
     (<code>voxel_graph_features</code> is a flattened vector \((9)\) containing all three).
@@ -232,8 +232,8 @@ related:
 
     <br><br>
 
-    Here, I will skip the details of processing the local graph. 
-    You can find the code for processing the local graph at this <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py#L16-L41">link</a>.
+    The details of processing the local graph are omitted here.
+    The code for processing the local graph is available at this <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py#L16-L41">link</a>.
 
     <br><br>
 
@@ -276,8 +276,8 @@ related:
 
     Each graph is instantiated by <code>Data</code> of PyTorch Geometric.
     The raw data, excluding <code>x</code> and <code>edge_index</code>, can also be passed as kwargs to be used during training or evaluation.
-    The thing to note is that, in training with graphs, mini-batching is performed at the node level. 
-    Therefore, you must ensure that each data field matches the number of nodes; otherwise, problems may occur during batching.
+    It should be noted that, in training with graphs, mini-batching is performed at the node level.
+    Each data field must therefore match the number of nodes; otherwise, problems may occur during batching.
 
     <br><br>
 
@@ -324,8 +324,8 @@ related:
 
     <br><br>
 
-    If you are curious about how to convert voxels into a graph at the code level, 
-    you can check the detailed logic through the following <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py">link</a>.
+    The detailed logic for converting voxels into a graph at the code level
+    can be found through the following <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py">link</a>.
 
 </div><br><br>
 
@@ -334,7 +334,7 @@ related:
 
     The GNN model can be broadly divided into link prediction and node classification tasks.
     In the paper, the model generates a building consisting of voxels with labels given a local graph and a voxel graph, so the task corresponds to <strong>node prediction</strong>.
-    The diagram below provides a brief illustration of the training process. The process follows a <strong>WGAN-GP architecture</strong>, in which both the generator and discriminator are based on Graph Neural Networks.
+    The diagram below briefly illustrates the training process. The process follows a <strong>WGAN-GP architecture</strong>, in which both the generator and the discriminator are based on Graph Neural Networks.
 
     <br><br>
 
@@ -438,7 +438,7 @@ related:
 
     <br><br>
 
-    In this project, auxiliary losses are used in addition to WGAN-GP: calculating the FAR of the building generated by the model and the ratio of voxel types.
+    In this project, auxiliary losses are used in addition to WGAN-GP, namely the FAR of the building generated by the model and the ratio of voxel types.
     For this purpose, the <code>logits</code> need to be converted to hard labels, but using simple argmax would break the gradient, so <strong>Gumbel Softmax</strong> is used.
 
     The temperature parameter \(\tau\) controls how discrete the output is: 
@@ -558,8 +558,8 @@ related:
 
     For this implementation, a subset of 10,000 graphs from the total 120,000 dataset is used.
 
-    The monitoring results from training on 10,000 graph data for 1,000 epochs are as follows.
-    Each metric commonly used for evaluating classification models was measured. All graphs show convergence.
+    The monitoring results from training on 10,000 graphs for 1,000 epochs are as follows.
+    Each metric commonly used for evaluating classification models was measured, and all graphs show convergence.
 
     
     <figure>
@@ -572,11 +572,11 @@ related:
 
     <br><br>
         
-    However, since the total number of nodes within the 10,000 data samples is approximately 4,000,000 nodes, due to the large number of nodes,
-    even if misclassified labels are mixed in, the metrics cannot reflect the performance differences.
-    
-    Also, since VoxelGNNGenerator performs node-wise label prediction,
-    there is a problem in that <strong>it is difficult to evaluate the generation quality at the graph level.</strong>
+    However, since the total number of nodes within the 10,000 samples is approximately 4,000,000,
+    the large number of nodes means that, even when misclassified labels are present, the metrics cannot reflect the performance differences.
+
+    In addition, since VoxelGNNGenerator performs node-wise label prediction,
+    <strong>it is difficult to evaluate the generation quality at the graph level.</strong>
 
 
     <figure>
@@ -605,10 +605,10 @@ related:
 </code></pre> -->
 
     To address this problem, the validation method <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/fd906a029e1c085b3b27c9641c912a938c50aa67/building_gan/src/trainer.py#L412-L435">computes the graph-wise f1 scores</a> on both training and validation datasets.
-    <strong>By calculating f1 scores for node labels separately for each graph, we can evaluate the quality of each building</strong>, 
+    <strong>By calculating f1 scores for node labels separately for each graph, the quality of each building can be evaluated</strong>,
     even though generating these metrics takes more time.
     Therefore, the model selection criterion \(\mathcal{C}\) uses a weighted sum of the worst-performing graphs from both sets.
-    The model is saved when the weighted sum of f1 score improves, calculated as, where \(w_{\text{t}} = 0.05\) and \(w_{\text{v}} = 1.0\).
+    The model is saved when this weighted sum of f1 scores improves, computed as follows, where \(w_{\text{t}} = 0.05\) and \(w_{\text{v}} = 1.0\).
 
     \[
         \,\\
@@ -685,7 +685,7 @@ related:
 <h3>Building Generation</h3>
 <div class="article">
 
-    Finally, by passing the test dataset through the trained VoxelGNNGenerator model, we can obtain results like the following.
+    Finally, passing the test dataset through the trained VoxelGNNGenerator model produces results such as the following.
     
     <figure>
         <img src="/img/voxels-to-graph/voxels-to-graph-5.png" width="100%" onerror=handle_image_error(this)>
@@ -702,22 +702,22 @@ related:
 <h3>Future Works</h3>
 <div class="article">
 
-    This project revealed several important findings to me. 
-    The most significant discovery was that layer normalization performs significantly better than batch normalization when working with graphs that have varying numbers of nodes. 
-    This insight will be helpful for building better graph neural networks in the future. 
+    This project yielded several important findings.
+    The most significant was that layer normalization performs considerably better than batch normalization when working with graphs that have varying numbers of nodes.
+    This insight will be helpful for building better graph neural networks in the future.
 
     <br><br>
-    In the future, I will try the following things:
+    The following directions are planned for future work:
 
     <ul>
         <li>
-            <strong>Implement Building Generation Interface</strong>: Develop an interface in web or CAD plugin format that allows for easy drawing of two input graphs and quickly generating scheme designs for buildings
+            <strong>Implement Building Generation Interface</strong>: Develop an interface, in the form of a web application or a CAD plugin, that allows the two input graphs to be drawn easily and scheme designs for buildings to be generated quickly.
         </li>
         <li>
-            <strong>Apply Sun Light Regulation</strong>: Apply building regulations, particularly the fundamental daylight regulations, to generate design proposals that comply with these requirements
+            <strong>Apply Sun Light Regulation</strong>: Apply building regulations, particularly the fundamental daylight regulations, so that the generated design proposals comply with these requirements.
         </li>
         <li>
-            <strong>Evaluate with metrics for generative model</strong>: Implement more reliable methods for measuring generative model quality, such as FID score, Inception score, and other established metrics
+            <strong>Evaluate with metrics for generative model</strong>: Implement more reliable methods for measuring generative-model quality, such as the FID score, the Inception score, and other established metrics.
         </li>
         <!-- <li>
             Implement Building Generation Interface: web or cad plugin 형태로 두 입력 그래프를 만들고 빠르게 건물에 대한 scheme design을 할 수 있는 인터페이스 구현

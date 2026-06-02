@@ -26,7 +26,7 @@ related:
     <br><br>
     <a href="https://en.wikipedia.org/wiki/Three.js">(...)</a> 
     <br><br>
-    What's unusual is that unlike common geometry handling tools (Rhino, Sketchup, Revit, etc.), Three.js <code>reverses the y-axis and z-axis.</code>
+    One notable difference is that, unlike common geometry-handling tools (Rhino, Sketchup, Revit, etc.), Three.js <code>reverses the y-axis and z-axis.</code>
 </div>
 <br><br>
 <h3>THREE.BoxGeometry array</h3>
@@ -40,16 +40,16 @@ related:
     </script>
     <script type="module" src="../../threesrc/box.js"></script>
 </div>
-<figcaption style="text-align: center">Reversed axes and boxes array<br>You can handle the camera using your mouse !</figcaption>
+<figcaption style="text-align: center">Reversed axes and boxes array<br>The camera can be controlled with the mouse.</figcaption>
 
 <br><br>
 
 
 <div style="text-align: justify;">
     <a href="https://threejs.org/docs/?q=box#api/en/geometries/BoxGeometry">BoxGeometry</a> is a geometry class for a rectangular cuboid with a given 'width', 'height', and 'depth'. 
-    On creation, the cuboid is centred on the origin, with each edge parallel to one of the axes.
-    So, we can create boxes array like the above with these properties that the cuboid is centered.
-    Please refer the <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/blob/caa3cba3ca809b3d13b2d7995589d141569bb99f/threesrc/box.js#L60-L87"">GitHub</a> to see the detailed code.
+    On creation, the cuboid is centered on the origin, with each edge parallel to one of the axes.
+    Using these properties, where the cuboid is centered, the box array shown above can be created.
+    The detailed code is available on <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/blob/caa3cba3ca809b3d13b2d7995589d141569bb99f/threesrc/box.js#L60-L87"">GitHub</a>.
 </div>
 <div style="text-align: justify;">
 <pre class="highlight"><code class="JavaScript">
@@ -86,13 +86,13 @@ related:
 <h3>THREE.SphereGeometry</h3>
 <div style="text-align: justify;">
     <a href="https://threejs.org/docs/index.html?q=sphere#api/en/geometries/SphereGeometry">SphereGeometry</a> is a 
-    geometry class for a sphere geometries with a given 'radius', 'widthSegments', and 'heightSegments'. 
+    geometry class for a sphere with a given 'radius', 'widthSegments', and 'heightSegments'.
     <br><br>
-    The all of geometries in the Three.js are expressed as a <code>Mesh.</code> 
-    Thus, incomplete spheres can be created depending on the number of <code>Mesh.</code>
-    There is an initial <code>SphereGeometry</code> that has 10 by 10 meshes (Segments of control box). 
-    If you change these values to highly using the control box located upper right, 
-    we can get the delicately expressed SphereGeometry.
+    All geometries in Three.js are expressed as a <code>Mesh.</code>
+    Thus, incomplete spheres can be created depending on the number of <code>Mesh</code> segments.
+    The initial <code>SphereGeometry</code> has 10 by 10 meshes (the Segments value in the control box).
+    Increasing these values using the control box located in the upper right
+    produces a more finely expressed SphereGeometry.
 </div>
 <br>
 <div id="gui"></div>
@@ -106,6 +106,6 @@ related:
     </script>
     <script type="module" src="../../threesrc/sphere.js"></script>
 </div>
-<figcaption style="text-align: center">Sphere geometry<br>You can handle the camera and properties of sphere using your mouse !</figcaption>
+<figcaption style="text-align: center">Sphere geometry<br>The camera and the sphere properties can be controlled with the mouse.</figcaption>
 
 <br><br>

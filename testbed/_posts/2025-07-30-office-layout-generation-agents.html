@@ -24,8 +24,8 @@ related:
 <h3>PlanNext</h3>
 <div class="article">
 
-    <a href="https://plannext.ai/en">PlanNext</a> is a cloud-based API service that uses Large Language Models to design optimized office layouts from natural language input. 
-    By <strong>interpreting your text-based requirements, it automatically generates layouts</strong> divided into essential work zones: Focus, Collaboration, Social, Functional, Service, and Private.
+    <a href="https://plannext.ai/en">PlanNext</a> is a cloud-based API service that uses Large Language Models to generate optimized office layouts from natural language input.
+    By <strong>interpreting text-based requirements, it automatically generates layouts</strong> divided into essential work zones: Focus, Collaboration, Social, Functional, Service, and Private.
 
     <figure>
         <img src="/img/office-layout-generation-agents/office-layout-generation-agents-1.png" width="100%" onerror=handle_image_error(this)>
@@ -39,12 +39,12 @@ related:
     각 세대마다 평가 함수로 품질을 측정하고 최적해를 갱신하며, 수렴 조건을 만족할 때까지 이 과정을 반복합니다. -->
 
     This flow chart shows the complete pipeline of an LLM-based office layout generation system.
-    When a user requests layout requirements in natural language, <code>OrchestrationAgent</code> analyzes this and selects the necessary specialized agents. 
+    When a user provides layout requirements in natural language, the <code>OrchestrationAgent</code> analyzes the request and selects the required specialized agents.
     <!--break-->
-    Agents for directions, workstations, area ratios, density, weights, adjacency, etc., each interpret the requirements from their perspective.
-    <strong>All agent analysis results are converted into structured data and sent to the optimization engine. </strong>
-    The optimization engine initializes the environment using the interpretations and iteratively improves solutions through optimization algorithms.
-    Each generation measures quality with evaluation functions, updates the optimal solution, and repeats this process until convergence conditions are met.
+    Agents for directions, workstations, area ratios, density, weights, adjacency, and other layout constraints each interpret the requirements from their perspective.
+    <strong>All agent results are converted into structured data and sent to the optimization engine. </strong>
+    The optimization engine initializes the environment based on these interpretations and iteratively improves layout solutions through optimization algorithms.
+    Each iteration evaluates the layout using evaluation functions, updates the best solution, and repeats this process until convergence conditions are met.
 
 
     <br><br>
@@ -58,16 +58,16 @@ related:
 <h3>Base Agent Design</h3>
 <div class="article">
 
-    The <code>BaseAgent</code> abstract class defines the interface and shared behaviors. 
-    It includes abstract methods for key functionalities that must be implemented by all derived agents.
+    The <code>BaseAgent</code> abstract class defines the interface and shared behavior for all agents.
+    It includes abstract methods for key functions that must be implemented by all derived agents.
     <br><br>
 
     Each agent must define the following attributes:
 
-    1) <code>system_prompt</code>: contains the agent's specialized domain knowledge and explicit instructions for the LLM. 
-    2) <code>output_format</code>: strictly specifies the structure and data types of the LLM's output. 
+    1) <code>system_prompt</code>: contains the agent's specialized domain knowledge and explicit instructions for the LLM.
+    2) <code>output_format</code>: specifies the structure and data types of the LLM's output.
     3) <code>output_default</code>: provides default values for the agent's output if the LLM call fails or returns an unexpected result.
-    4) <code>call_payload</code>: predefines the parameter template for OpenAI API calls. This includes model selection, temperature, max tokens, and other relevant settings, ensuring consistent and reproducible agent behavior.
+    4) <code>call_payload</code>: defines the parameter template for OpenAI API calls. This includes model selection, temperature, max tokens, and other related settings, ensuring consistent and reproducible agent behavior.
     <br><br>
 
 <pre><code class="python">
@@ -94,9 +94,9 @@ related:
     BaseAgent abstract class
 </figcaption><br><br>
 
-    Below is a simplified example of a <code>WeightsAgent</code> that inherits from <code>BaseAgent</code>. 
-    This agent is responsible for assigning weights to an objective function that has multiple components, 
-    so that the assigned weights are used to compute a weighted sum. 
+    Below is a simplified example of a <code>WeightsAgent</code> that inherits from <code>BaseAgent</code>.
+    This agent is responsible for assigning weights to an objective function composed of multiple components,
+    so that the assigned weights can be used to compute a weighted sum.
     The code below shows how to define the required attributes and output structure using <a href="https://docs.pydantic.dev/latest/">Pydantic BaseModel</a>.
 
 <br><br>
@@ -170,24 +170,24 @@ related:
     
     <br><br>
 
-    According to the abstract methods of the base agent, <code>sync_call</code> and <code>async_call</code> can be defined as follows.
+    Following the abstract methods of the base agent, <code>sync_call</code> and <code>async_call</code> can be defined as follows.
     Both functions perform the same task and return the same result. The only difference is whether async/await syntax is used.
 
     <br><br>
-        
+
     If there are only a few agents, calling the API for each agent sequentially may not cause significant delays.
-    However, in environments with many agents that must interpret user prompts and return results, 
+    However, in environments with many agents that must interpret user prompts and return results, the
     processing time increases linearly with the number of agents.
-    <strong>So, it is necessary to wrap multiple API calls with async/await so that they can be requested concurrently</strong>.
-    I will discuss this further in the Agents Orchestration section.
+    <strong>Therefore, multiple API calls should be wrapped with async/await so that they can be requested concurrently</strong>.
+    This will be discussed further in the Agents Orchestration section.
 </div><br><br>
 
 <h3>Geometric Context Engineering</h3>
 <div class="article">
 
-    The office layout agents must interpret the user's prompts together with the given geometric conditions.
-    Examples of these conditions include the boundaries of the space or the location of columns.
-    In this context, geometric context engineering refers to the process of structuring spatial information in a way that LLMs can comprehend and utilize for decision-making.
+    Office layout agents must interpret user prompts together with the given geometric conditions.
+    Examples of these conditions include the space boundary, the location of columns, and other geometric constraints.
+    In this context, geometric context engineering refers to structuring spatial information in a way that LLMs can understand and use for decision-making.
     
     <figure>
         <img src="/img/office-layout-generation-agents/office-layout-generation-agents-3.png" width="85%" onerror=handle_image_error(this)>
@@ -208,13 +208,13 @@ related:
         이러한 방식으로, 추상적인 공간적 지시를 구체적인 기하학적 연산으로 연결하는 것이 중요하다.
     -->
     
-        In direction-based polygon segment selection, it is important to consider how the agent can understand and process directional information 
-        such as 'right', 'left', 'east', and 'west'. 
+        In direction-based polygon segment selection, it is important to consider how the agent can understand and process directional information
+        such as 'right', 'left', 'east', and 'west'.
         <br><br>
-        For example, when a user requests, <i>"Place all meeting rooms on the right side"</i> 
-        the agent can convert the natural language direction 'right' into a direction vector (e.g., [1, 0]) or select a predefined vector, 
-        then compare this with the direction of each segment to select those with the highest similarity. 
-        In this way, it is crucial to connect abstract spatial instructions to geometric operations.
+        For example, when a user requests, <i>"Place all meeting rooms on the right side"</i>,
+        the agent can convert the natural language direction 'right' into a direction vector (e.g., [1, 0]) or select a predefined vector, and then
+        compare this with the direction of each segment to select those with the highest similarity.
+        In this way, abstract spatial instructions are connected to concrete geometric operations.
 
     <br><br>
 
@@ -284,8 +284,8 @@ related:
     <br><br>
 
     The <code>SegmentSelectionAgent</code> demonstrates this approach by dividing each polygon segment into multiple points and computing direction vectors from the polygon centroid to these points.
-    By normalizing these vectors to unit length, the agent can use simple dot product to calculate cosine similarities. 
-    <strong>This allows the agent to infer the vector most similar to a target vector(selected from the user's prompt) and select the segment</strong>  in that direction.
+    By normalizing these vectors to unit length, the agent can use a dot product to calculate cosine similarity.
+    <strong>This allows the agent to find the vector most similar to a target vector selected from the user's prompt and select the segment</strong> in that direction.
     The implementation using function calling can be found in this <a href="https://github.com/PARKCHEOLHEE-lab/segment-selector">repository</a>.
 
 </div><br><br>
@@ -293,14 +293,14 @@ related:
 <h3>Numerical Reasoning</h3>
 <div class="article">
 
-    For the prompt 
+    For the prompt
     <i>"Generate an office layout with a kitchen, a pantry, two storages and lounges, three meeting rooms"</i>,
-    we expect the agent to output 1 kitchen, 1 pantry, 2 storages, 2 lounges, and 3 meeting rooms, 
+    the agent is expected to output 1 kitchen, 1 pantry, 2 storages, 2 lounges, and 3 meeting rooms,
     which can be represented as the structured output on the left below.
 
-    However, with the prompt above and a cheap model, you may receive unexpected results.
+    However, with the prompt above and a low-cost model, unexpected results may occur.
     Since LLMs are not deterministic systems, <strong>the output can vary each time, even with the same prompt</strong>.
-    The result on the right below is an example I encountered during development.
+    The result on the right below is an example encountered during development.
 
     <div style="display: flex; justify-content: center; gap: 15px;">
         <div style="width: 50%;">
@@ -331,16 +331,16 @@ related:
     <br><br>
 
     
-        In such situations, <strong>asking the model to provide reasoning for its output can help you obtain more accurate results.</strong>
-        This approach can be easily applied even to models that do not have a built-in reasoning parameter.
-        You simply need to add a reasoning field to the output format.
+        In such situations, <strong>asking the model to provide reasoning for its output can help obtain more accurate results.</strong>
+        This approach can be applied even to models that do not have a built-in reasoning parameter.
+        It only requires adding a reasoning field to the output format.
 
         <br><br>
 
-        For example, by adding a <code>reasoning</code> field as shown below, 
-        you can receive not only the count for each space, but also the rationale behind it. 
-        This increases the reliability of the results and is also very helpful for future debugging or improving your system prompts. 
-        The <code>reasoning</code> field can be a simple explanation such as 'explicitly mentioned in the prompt' 
+        For example, by adding a <code>reasoning</code> field as shown below,
+        the model returns not only the count for each space, but also the rationale behind it.
+        This increases the reliability of the results and is also helpful for future debugging or for improving the system prompts.
+        The <code>reasoning</code> field can be a simple explanation such as 'explicitly mentioned in the prompt'
         or, in cases that require more complex inference, the model can describe its reasoning process in natural language.
 
         <br><br>
@@ -451,10 +451,10 @@ related:
 <h3>Orchestrating Multiple Agents</h3>
 <div class="article">
 
-    When working with multiple specialized agents that need to interpret user prompts simultaneously, 
-    <strong>orchestration becomes crucial for time performance and cost efficiency</strong>. 
-    As mentioned in the Base Agent Design section, processing time increases linearly with the number of agents when called sequentially.
-    For a system with a large number of agents, this could result in significant delays.
+    When working with multiple agents that need to interpret user prompts at the same time,
+    <strong>orchestration becomes important for performance</strong>.
+    As mentioned in the Base Agent Design section, processing time increases linearly with the number of agents when they are called sequentially.
+    For a system with many agents, this can result in significant delays.
 
     <br><br>
     <figure>
@@ -468,19 +468,19 @@ related:
 
     <br><br>
 
-    Since each agent interprets the same user prompt from their specialized perspective (directions, weights, program counts, etc.), 
-    these operations are independent and can be executed concurrently with <code>asyncio.gather</code>.    
+    Since each agent interprets the same user prompt from its specialized role (directions, weights, program counts, and other parameters),
+    these operations are independent and can be executed concurrently using <code>asyncio.gather</code>.
 
     <br><br>
 
-    The orchestration pattern shown above demonstrates how to efficiently coordinate multiple specialized agents.
-    This approach scales well as new agents are added to the system, 
-    since the concurrent execution time remains <strong>bounded by the slowest individual agent</strong> rather than growing linearly.
+    The orchestration pattern shown above demonstrates how to coordinate multiple specialized agents efficiently.
+    This approach scales well as new agents are added to the system, because
+    the total execution time is limited by the slowest agent rather than increasing linearly.
 
     <br><br>
 
-    Below is a simplified example of <code>OrchestrationAgent</code>, which is <strong>responsible for determining which specialized agents should be handed off</strong> based on the user's prompt. 
-    The orchestration agent analyzes the natural language input and decides which agents are relevant for the specific request, 
+    Below is a simplified example of the <code>OrchestrationAgent</code>, which is <strong>responsible for determining which specialized agents should be handed off</strong> based on the user's prompt.
+    The orchestration agent analyzes the natural language input and decides which agents are relevant for the specific request,
     helping to optimize both execution time and API costs by avoiding unnecessary agent calls.
 
     <br><br>
@@ -528,10 +528,10 @@ related:
 </figcaption>
     <br><br>
 
-    The <code>concurrent_call</code> function below demonstrates a practical implementation of agent orchestration. 
-    It starts by initializing an <code>Aggregation</code> object with default values from each agent, 
-    ensuring that the system has fallback data even if some agents fail to execute properly. 
-    Only the selected agents are then added to the tasks.
+    The <code>concurrent_call</code> function below demonstrates a practical implementation of agent orchestration.
+    It starts by initializing an <code>Aggregation</code> object with default values from each agent,
+    so the system has fallback data even if some agents fail to execute properly.
+    Only the selected agents are then added to the task list.
 
     <br><br>
 
@@ -581,9 +581,9 @@ related:
 
     <br><br>
         
-    By using <code>asyncio.gather</code>, the total execution time becomes approximately equal to the slowest agent's response time, 
-    rather than the sum of all agents' response times. For example, if 6 agents each take 2-3 seconds to respond, 
-    sequential execution would require 12-18 seconds, while concurrent execution completes in just 2-3 seconds.
+    By using <code>asyncio.gather</code>, the total execution time becomes approximately equal to the slowest agent's response time
+    instead of the sum of all agents' response times. For example, if 6 agents each take 2-3 seconds to respond,
+    sequential execution would require 12-18 seconds, while concurrent execution completes in about 2-3 seconds.
 
     
     <div style="display: flex; justify-content: center; gap: 15px;">
@@ -641,21 +641,19 @@ related:
 <div class="article">
 
     
-    This chapter covers the process of converting user requests into optimization problems based on 
-    the agent's interpretation results to satisfy those requirements.
-    Agents struggle with predicting continuous values, and their performance significantly drops when tasked 
-    with directly inferring these values in spatial contexts as vectors (e.g., coordinates). 
+    This chapter describes the process of converting user requests into optimization problems based on the agent interpretation results.
+    Agents are not good at predicting continuous values, and their performance decreases when they directly infer spatial values such as coordinates.
 
     <br><br>
-    Subsequently, we need an approach that combines discrete value reasoning with optimization. then, construct an optimization environment to find spatial arrangements that satisfy these relationships. 
-    This project uses Evolution Strategy-based random search optimization algorithms, such as genetic algorithms. 
-    This ES-based algorithm is easy to use for geometry-based problems because <strong>it does not need the environment to be differentiable</strong>.
+    Therefore, an approach that combines discrete reasoning with optimization is needed. An optimization environment is constructed to find layout arrangements that satisfy these relationships.
+    This project uses Evolution Strategy-based random search optimization algorithms, such as genetic algorithms.
+    This ES-based algorithm is suitable for geometry-based optimization problems because <strong>it does not require the environment to be differentiable</strong>.
 
     <br><br>
 
-    For example, if a user requests <i>"I want the meeting room and lounge to be close to each other"</i>, 
-    the agent interprets this as a structured pairwise relationship: "meeting room - lounge adjacency." 
-    The model then selects an appropriate objective function to include in the final optimization objective.
+    For example, if a user requests <i>"I want the meeting room and lounge to be close to each other"</i>,
+    the agent interprets this as a structured pairwise relationship: "meeting room - lounge adjacency."
+    The system then selects an appropriate objective function and includes it in the final optimization objective.
     The user request can be expressed as maximizing the proximity between the meeting room and lounge polygons,
     where \(d(\cdot, \cdot)\) represents the L2 distance between two points. Here, the closest points of the two polygons are used.
 
@@ -666,10 +664,10 @@ related:
     \]
 
     
-    Similarly, if a user requests <i>"Create an office with \(n\) desks and \(m\) meeting rooms"</i>, 
-    the agent interprets this as specific count requirements for different space types. 
-    This becomes a constraint satisfaction problem where the optimization must maximize the count accuracy.
-    The optimization for counting objective can be expressed as:
+    Similarly, if a user requests <i>"Create an office with \(n\) desks and \(m\) meeting rooms"</i>,
+    the agent interprets this as count requirements for different space types.
+    This becomes a constraint satisfaction problem where the optimization must maximize count accuracy.
+    The optimization for the counting objective can be expressed as:
 
     \[
         \,\\
@@ -678,7 +676,8 @@ related:
     \]
     
     The system combines multiple objective functions using weighted sums, where the weights are determined by the <code>WeightsAgent</code> based on the user's priorities.
-    Here, \(w_j\) is the weight assigned by the agent, \(f_j\) is individual objective function, and \(\mathbf{x}\) represents the layout parameters being optimized.
+    Each objective function represents a different design requirement, such as adjacency, area ratio, density, or program count, and the weights control the importance of each objective in the optimization process.
+    Here, \(w_j\) is the weight assigned by the agent, \(f_j\) is the individual objective function, and \(\mathbf{x}\) represents the layout parameters being optimized.
 
     \[
         \,\\
@@ -779,19 +778,19 @@ related:
     그럼에도 개발자가 objective function을 지정하는 것 자체는 레이아웃의 baseline quality를 조절할 수 있다는 점에서 의미가 있음. 
     -->
 
-    While the agent-based office layout generation system demonstrates promising capabilities, several fundamental limitations constrain its potential for broader application.
+    While the agent-based office layout generation system shows promising capabilities, several fundamental limitations still restrict its broader application.
 
     <br><br>
 
-    The system's layout flexibility remains inherently limited unless agents can autonomously define and code their own objective functions for optimization targets. 
-    Currently, many different types of objective functions are predefined by developers.
-    <strong>This means the system can only optimize for spatial relationships and constraints that have been explicitly programmed</strong>. 
+    The system's layout flexibility is limited unless agents can automatically define and implement their own objective functions for optimization targets.
+    Currently, many types of objective functions are predefined by developers.
+    <strong>This means the system can only optimize spatial relationships and constraints that have already been programmed</strong>.
 
     <br><br>
 
-    However, <strong>specifying objective functions itself provides meaningful value in controlling the baseline quality of generated layouts</strong>. 
-    By defining the evaluation metrics, developers can ensure that fundamental spatial design principles are maintained. 
-    This includes accessibility requirements, functional adjacencies, and geometric constraints (aspect ratio, size, etc.) that are essential for practical office environments.
+    However, <strong>defining objective functions still provides important value in maintaining the baseline quality of generated layouts</strong>.
+    By defining evaluation metrics, developers can ensure that basic spatial design principles are maintained.
+    This includes accessibility requirements, functional adjacencies, and geometric constraints such as aspect ratio and size, which are essential for practical office environments.
 
 </div><br><br>
 
