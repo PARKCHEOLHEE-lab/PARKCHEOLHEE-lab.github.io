@@ -114,7 +114,7 @@
       "reading-list"
     ],
     "x": 0.7112,
-    "y": 0.3417
+    "y": 0.3418
   },
   {
     "title": "...",
@@ -283,7 +283,7 @@
       "good-refactoring-vs-bad-refactoring"
     ],
     "x": 0.1899,
-    "y": 0.443
+    "y": 0.4431
   },
   {
     "title": "decorator",
@@ -563,7 +563,7 @@
       "block-commit"
     ],
     "x": 0.5428,
-    "y": 0.9903
+    "y": 0.9904
   },
   {
     "title": "Linear Algebra for Programmers (프로그래머를 위한 선형대수)",
@@ -578,7 +578,7 @@
       "pca",
       "dot-product"
     ],
-    "x": 0.8571,
+    "x": 0.8572,
     "y": 0.3587
   },
   {
@@ -828,7 +828,7 @@
       "useful-git-commands"
     ],
     "x": 0.4091,
-    "y": 0.8252
+    "y": 0.8253
   },
   {
     "title": "哲希",
@@ -1007,7 +1007,7 @@
       "representation-learning"
     ],
     "x": 0.6661,
-    "y": 0.0388
+    "y": 0.0389
   },
   {
     "title": "Inductive Bias",
@@ -1022,7 +1022,7 @@
       "poly-inr"
     ],
     "x": 0.5366,
-    "y": 0.1736
+    "y": 0.1737
   },
   {
     "title": "HuggingFace Inference Endpoints",
@@ -1155,7 +1155,7 @@
       "python-slack-sdk"
     ],
     "x": 0.4503,
-    "y": 0.8653
+    "y": 0.8654
   },
   {
     "title": "About Behaviorism (스키너의 행동심리학)",
@@ -1377,7 +1377,7 @@
       "truth"
     ],
     "x": 0.1789,
-    "y": 0.379
+    "y": 0.3791
   },
   {
     "title": "Building-GAN: Graph-Conditioned Architectural Volumetric Design Generation",
@@ -1441,7 +1441,7 @@
       "voxels-to-graph"
     ],
     "x": 0.7786,
-    "y": 0.4185
+    "y": 0.4186
   },
   {
     "title": "w를 찾아서",
@@ -1591,7 +1591,7 @@
       "window-crossing-selection"
     ],
     "x": 0.7944,
-    "y": 0.7779
+    "y": 0.778
   },
   {
     "title": "Exploring Generative 3D Shapes Using Autoencoder Networks",
@@ -1876,7 +1876,7 @@
       "nohup"
     ],
     "x": 0.535,
-    "y": 0.735
+    "y": 0.7351
   },
   {
     "title": "Principal Component Analysis",
@@ -1982,7 +1982,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.3598,
-    "y": 0.8316
+    "y": 0.8317
   },
   {
     "title": "StyleID: A Perception-Aware Dataset and Metric for Stylization-Agnostic Facial Identity Recognition",
@@ -2235,7 +2235,7 @@
     "y": 0.8612
   },
   {
-    "title": "Travelling salesman problem",
+    "title": "Traveling salesman problem",
     "slug": "traveling-salesman-problem",
     "url": "/traveling-salesman-problem/",
     "category": "testbed",
@@ -2333,7 +2333,7 @@
       "klemens-torggler-door"
     ],
     "x": 0.7781,
-    "y": 0.899
+    "y": 0.8991
   },
   {
     "title": "Merry christmas",
@@ -2453,7 +2453,7 @@
       "wave-function-collapse"
     ],
     "x": 0.8669,
-    "y": 0.8112
+    "y": 0.8113
   },
   {
     "title": "Quadtree",
@@ -2467,7 +2467,7 @@
       "discrete-voronoi",
       "subdivision-curve"
     ],
-    "x": 0.8273,
+    "x": 0.8272,
     "y": 0.8829
   },
   {
@@ -2481,7 +2481,7 @@
       "local-coordinate-system"
     ],
     "x": 0.6363,
-    "y": 0.8126
+    "y": 0.8127
   },
   {
     "title": "Plan to Model",
@@ -2496,7 +2496,7 @@
       "image-to-3d-scene",
       "floor-plan-generation-with-voronoi-diagram"
     ],
-    "x": 0.9458,
+    "x": 0.9459,
     "y": 0.8182
   },
   {
@@ -2617,7 +2617,7 @@
       "gan"
     ],
     "x": 0.9809,
-    "y": 0.4396
+    "y": 0.4397
   },
   {
     "title": "Seeing is solving",
@@ -2630,7 +2630,7 @@
       "shapely-geometry-inheritance"
     ],
     "x": 0.6733,
-    "y": 0.8882
+    "y": 0.8883
   },
   {
     "title": "Infinite synthesis",
