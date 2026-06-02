@@ -249,7 +249,7 @@ related:
     multiplied element-wise by <code>cell_weights</code>, and passed to <code>torch.multinomial</code>.
     The only weight that differs from $1$ is the entry for tile $0$ (the empty tile),
     which is scaled by the user-controlled <code>empty_weight</code>.
-    A value below $1$ favours dense structures, while a value above $1$ produces sparser, more open shapes.
+    A value below $1$ favors dense structures, while a value above $1$ produces sparser, more open shapes.
 
 <pre><code class="python">
     def _collapse(self, x: int, y: int, z: int) -> bool:
@@ -271,9 +271,9 @@ related:
     <br>
 
     After a cell is fixed, the constraints must flow outward. Propagation is a BFS over the grid: a queue is seeded with the just-collapsed cell,
-    and for each cell pulled off the queue, the algorithm determines, for each of the six neighbours, which of the neighbour's candidates remain reachable given the current candidate set.
-    The reachable set is the OR of the relevant rows of the compatibility matrix, intersected with the neighbour's existing candidate mask.
-    If that intersection shrinks the neighbour, the neighbour is pushed back onto the queue.
+    and for each cell pulled off the queue, the algorithm determines, for each of the six neighbors, which of the neighbor's candidates remain reachable given the current candidate set.
+    The reachable set is the OR of the relevant rows of the compatibility matrix, intersected with the neighbor's existing candidate mask.
+    If that intersection shrinks the neighbor, the neighbor is pushed back onto the queue.
     If it shrinks to nothing, propagation reports failure and the run is reset.
 
 <pre><code class="python">
@@ -392,7 +392,7 @@ related:
             \quad \textbf{while } Q \neq \emptyset \textbf{ do} \\
             \qquad (x, y, z) \leftarrow Q.\text{pop}() \\
             \qquad \textbf{for } d \in \{\pm x, \pm y, \pm z\} \textbf{ do} \\
-            \qquad \quad (x', y', z') \leftarrow \text{neighbour in direction } d \\
+            \qquad \quad (x', y', z') \leftarrow \text{neighbor in direction } d \\
             \qquad \quad \texttt{valid} \leftarrow \bigvee_{t \,:\, \texttt{states}[z, y, x, t] = 1} \mathbf{C}_d[t, :] \\
             \qquad \quad \texttt{after} \leftarrow \texttt{states}[z', y', x'] \wedge \texttt{valid} \\
             \qquad \quad \textbf{if not after.any(): return False} \\
@@ -405,7 +405,7 @@ related:
 
     <br><br>
 
-    Two design choices govern the behaviour of this loop. First, the next cell to collapse is always the one with the fewest remaining candidates,
+    Two design choices govern the behavior of this loop. First, the next cell to collapse is always the one with the fewest remaining candidates,
     rather than a random cell. Selecting the lowest-entropy cell concentrates work where the constraints are tightest, which keeps the
     set of reachable contradictions small. Second, the failure recovery is deliberately minimal: any contradiction discards
     the entire grid and restarts from the same seed cell, with no backtracking or local repair.
