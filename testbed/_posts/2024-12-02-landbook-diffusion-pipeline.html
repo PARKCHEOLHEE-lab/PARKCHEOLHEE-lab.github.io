@@ -22,8 +22,8 @@ related:
 <h3>Landbook 🏠</h3>
 <div class="article">
 
-  <a href="https://www.landbook.net/">Landbook</a> is a service that supports all the steps of new construction development for small and medium-sized land investors.
-  Landbook's AI architect service provides building owners with various architectural design proposals 
+  <a href="https://www.landbook.net/">Landbook</a> is a service that supports the entire process of new construction development for small and medium-sized land investors.
+  Landbook's AI architect service provides building owners with various architectural design proposals
   by considering different plot sizes, zoning areas, and building regulations for each region.
 
 
@@ -36,14 +36,14 @@ related:
 
   <br>
 
-  This project is to develop a pipeline that <strong>renders the final result of the Landbook AI architect service by using a generative image model</strong> such as diffusers.
-  By taking 3D modeling data as input and generating realistic images that closely resemble actual buildings,
+  This project develops a pipeline that <strong>renders the final results of the Landbook AI architect service using a generative image model</strong> such as Diffusers.
+  By taking 3D modeling data as input and generating realistic images that resemble actual buildings,
   <mark>
-    it allows building owners to visualize and review what their design proposals would look like when actually constructed.
+    it allows building owners to visualize and review how their design proposals would look after construction.
   </mark>
 
-  Unlike conventional 3D rendering, this aims to provide high-quality visualization that considers both the texture of actual buildings
-  and their harmony with the surrounding environment by utilizing AI-based generative models.
+  Unlike conventional architectural 3D rendering tools such as V-Ray and Enscape, this pipeline aims to provide high-quality visualization that considers both building textures
+  and the surrounding context by using AI-based generative models.
   <!--break-->
 
 
@@ -52,8 +52,8 @@ related:
 <h3>Pipeline Overview</h3>
 <div class="article">
   
-  The comprehensive pipeline below ensures that the final output not only accurately represents the architectural design 
-  but also provides a realistic visualization that helps building owners better understand how the building will look in reality.
+  The pipeline below ensures that the final output not only represents the architectural design accurately
+  but also provides a realistic visualization that helps building owners understand how the building will look after construction.
 
   The pipeline consists of the following steps:
   <ol>
@@ -106,21 +106,21 @@ related:
 <h3>Camera Position Estimation</h3>
 <div class="article">
 
-  The camera position estimation is a crucial step in capturing the building from the most effective viewpoint. The algorithm determines the camera position appropriately 
-  by considering the building's dimensions, plot layout, and road positions.
+  Camera position estimation is an important step for capturing the building from an effective viewpoint. The algorithm determines the camera position based on
+  the building dimensions, plot layout, and road positions.
 
   <ol>
     <li>
       <b>Road-Based Positioning</b>
       <ul>
         <li>
-          Identifies the widest road adjacent to the building plot
+          The widest road adjacent to the building plot is identified.
         </li>
         <li>
-          Uses the road's centroid as a reference point for camera placement
+          The centroid of that road is used as a reference point for camera placement.
         </li>
         <li>
-          Ensures the building is viewed from a natural street-level perspective
+          This ensures that the building is viewed from a natural street-level perspective.
         </li>
       </ul>
     </li>
@@ -128,13 +128,13 @@ related:
       <b>Vector Calculation</b>
       <ul>
         <li>
-          Creates a horizontal vector aligned with the widest road (X vector)
+          A horizontal vector aligned with the widest road is created (X vector).
         </li>
         <li>
-          Creates a vertical vector by rotating the horizontal vector 90 degrees (Y vector)
+          A vertical vector is created by rotating the horizontal vector by 90 degrees (Y vector).
         </li>
         <li>
-          These vectors form the basis for determining the camera's viewing direction
+          Together, these vectors form the basis for determining the camera's viewing direction.
         </li>
       </ul>
     </li>
@@ -142,13 +142,13 @@ related:
       <b>Height Determination and Distance Calculation</b>
       <ul>
         <li>
-          Calculates optimal camera height using two criteria
+          The optimal camera height is calculated using two criteria.
         </li>
         <li>
-          Selects the maximum value between these criteria to ensure proper building coverage
+          The maximum value between these criteria is selected to ensure proper building coverage.
         </li>
         <li>
-          Uses trigonometry to compute the ideal distance between camera and building as follows.
+          Trigonometry is used to compute the ideal distance between the camera and the building, as follows.
           
           \[
           \tan(\theta) = \frac{h}{d}, \quad d = \frac{h}{\tan(\theta)}
@@ -247,9 +247,9 @@ related:
 <h3>Scale Figures</h3>
 <div class="article">
 
-  Scale figures serve as essential contextual elements for the diffusion model to understand and generate more realistic architectural visualizations. 
-  By incorporating human figures, trees, and vehicles into the scene, 
-  we provide the model with crucial reference points that help it comprehend the <b>spatial relationships and scale of the architecture</b> it needs to generate.
+  Scale figures serve as important contextual elements that help the diffusion model generate more realistic architectural images.
+  By adding human figures, trees, and vehicles to the scene,
+  the model is given reference points that help it understand the <b>spatial relationships and scale of the architecture</b> it needs to generate.
 
   <figure>
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-3.png" width="100%" onerror=handle_image_error(this)>
@@ -260,23 +260,23 @@ related:
 
   <br>
 
-  The presence of these contextual elements also guides the model in generating appropriate lighting, shadows, and atmospheric effects. 
-  When the model sees a human figure or a tree in the scene, it can <b>better interpret the scale</b> of lighting effects and environmental interactions that should be present in the final rendering. 
-  This helps create more convincing and naturally integrated architectural visualizations.
+  The presence of these contextual elements also guides the model in generating appropriate lighting, shadows, and atmospheric effects.
+  When the model sees a human figure or a tree in the scene, it can <b>better estimate the lighting</b> and environmental interactions that should appear in the final rendering.
+  This helps create more convincing and naturally integrated architectural images.
 
   <br><br>
 
-  In our pipeline, these scale elements are placed before the diffusion process begins. 
-  The model uses these references to better understand the intended size and proportions of the building, 
-  which significantly improves the quality and accuracy of the generated images. 
-  Human figures are particularly important as they provide the diffusion model with a <b>scale reference</b> that helps maintain consistent and realistic proportions throughout the generation process.
+  In this pipeline, these scale elements are placed before the diffusion process begins so the model can use them as size references.
+  The model uses these references to better understand the intended size and proportion of the building,
+  which improves the quality and accuracy of the generated images.
+  Human figures are particularly important because they provide a clear <b>scale reference</b> that helps maintain consistent and realistic proportions during the generation process.
 
   <figure style="display: flex;">
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-4.png" width="50%" onerror=handle_image_error(this)>
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
   </figure>
   <figcaption>
-    Landbook AI Architect result w/ and w/o scale figures
+    Landbook AI Architect result with and without scale figures
   </figcaption>
 
 </div><br><br>
@@ -284,13 +284,12 @@ related:
 <h3>Material Masking</h3>
 <div class="article">
   <a href="https://threejs.org/docs/#api/en/materials/ShaderMaterial">ShaderMaterial</a> provided by three.js is used to mask the materials of the building and the environment.
-  ShaderMaterial is a material rendered with custom shaders. A shader is a small program written in GLSL that runs on the GPU. 
+  ShaderMaterial is a material rendered with custom shaders, which are small programs written in GLSL that run on the GPU.
 
   <br><br>
-  
-  Since ShaderMaterial allows users to write custom shaders, 
-  we can create specialized masking materials by defining specific colors for different architectural elements. 
-  These masking materials help segment the 3D model into distinct parts that can be processed separately by the diffusion model. 
+
+  Using ShaderMaterial, specialized masking materials are created by assigning specific colors to different architectural elements.
+  These masking materials segment the 3D model into distinct parts so that each part can be processed separately by the diffusion model.
 
   <figure style="display: flex;">
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
@@ -343,9 +342,9 @@ related:
 <h3>EndpointHandler 🤗</h3>
 <div class="article">
 
-  The diffusion process in our pipeline utilizes multiple specialized models from the <a href="https://huggingface.co/models">HuggingFace</a> Diffusers library to generate photorealistic architectural visualizations. 
+  The diffusion process in this pipeline uses multiple models from the <a href="https://huggingface.co/models">HuggingFace</a> Diffusers library to generate photorealistic architectural images.
   The process consists of three main stages: initial generation, targeted inpainting, and final refinement.
-  The pipeline begins with <code>StableDiffusionXLControlNetPipeline</code> using a <code>ControlNet</code> model trained on <b>canny</b> edge detection. 
+  The pipeline begins with <code>StableDiffusionXLControlNetPipeline</code> using a <code>ControlNet</code> model trained on <b>canny</b> edge detection.
 
   <figure style="display: flex;">
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
@@ -357,8 +356,8 @@ related:
 
   <br>
 
-  This stage takes the edge information from our 3D model and generates a base image. 
-  The <code>ControlNet</code> helps ensure that the generated base image follows the precise geometric outlines of the building design with the help of the prompt:
+  This stage uses edge information from the 3D model to create a base image.
+  The <code>ControlNet</code> ensures that the generated base image follows the geometric outlines of the building design with the help of the prompt:
 
 <pre><code class="python">
     self.prompt_positive_base = ", ".join(
@@ -376,10 +375,10 @@ related:
 
 <br><br>
 
-After the initial generation, the pipeline performs a series of targeted inpainting operations using <code>StableDiffusionXLInpaintPipeline</code>. 
-The inpainting process follows a specific order to handle different architectural elements.
-Each inpainting step uses crafted prompts and masks to ensure appropriate material textures and architectural details are generated for each element.
-After each inpainting step, it is merged with the base image to <b>create a new base image</b>.
+After the initial generation, the pipeline performs a series of targeted inpainting operations using <code>StableDiffusionXLInpaintPipeline</code>.
+The inpainting process follows a specific order to process different architectural elements.
+Each inpainting step uses prompts and masks to generate appropriate material textures and architectural details for each element.
+After each inpainting step, the result is merged with the base image to <b>create a new base image</b>.
 
 <ol>
   <li>
@@ -417,15 +416,15 @@ Masked images
 
 <br><br>
 
-The last stage uses <code>StableDiffusionXLImg2ImgPipeline</code> to refine the overall image, enhancing the coherence and realism of the rendering image. 
-This refinement process focuses on improving overall image quality through better resolution and detail enhancement. 
+The last stage uses <code>StableDiffusionXLImg2ImgPipeline</code> to refine the overall image and improve the realism of the rendered image.
+This refinement process focuses on improving image quality through resolution and detail enhancement.
 
 <br><br>
 
-It adjusts lighting and shadows to create more natural and realistic effects, 
-ensures consistent material appearances across different surfaces of the building, 
-and fine-tunes architectural details to maintain design accuracy. 
-These refinements work together to produce a final visualization that is both architecturally accurate and visually compelling.
+It adjusts lighting and shadows to create more natural effects,
+ensures consistent material appearance across building surfaces,
+and fine-tunes architectural details to maintain design accuracy.
+These refinement steps work to produce a final visualization that is both architecturally accurate and visually realistic.
 
 <br><br>
 
@@ -504,8 +503,8 @@ These refinements work together to produce a final visualization that is both ar
 
 <h3>Results</h3>
 <div class="article">
-  After applying the multi-stage diffusion pipeline described above, 
-  we can get the following results which demonstrate the effectiveness of our approach in generating high-quality architectural renderings with consistent materials, lighting, and architectural details.
+  After applying the multi-stage diffusion pipeline described above,
+  the following results are obtained, demonstrating the effectiveness of this approach in generating high-quality architectural renderings with consistent materials, lighting, and architectural details.
 
   <figure style="display: flex;">
     <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-7.png" width="32%" onerror=handle_image_error(this)>
@@ -538,9 +537,9 @@ These refinements work together to produce a final visualization that is both ar
 
 <div class="article">
     
-The pipeline integrates with Slack to provide immediate notifications about rendering jobs, 
-including success/failure status, performance metrics, and links to detailed reports. 
-<strong>This allows our team to quickly identify and address any issues with generated image quality that arise during production.</strong>
+The pipeline integrates with Slack to provide immediate notifications about rendering jobs,
+including success and failure status, performance metrics, and links to detailed reports.
+<strong>This allows the team to quickly identify and address any issues with generated image quality that arise during production.</strong>
 
 <pre><code class="python">
     def send_slack_notification(build_request_logs_unique_code: str, duration: float, ok: bool = True):
@@ -600,17 +599,17 @@ including success/failure status, performance metrics, and links to detailed rep
 <h3>Future Works</h3>
 <div class="article">
 
-  While our current pipeline successfully generates realistic architectural rendering images, there are several areas for potential improvement and future development:
+  While the current pipeline generates realistic architectural rendering images, there are several areas for improvement and future development:
 
   <ul>
     <li>
-      <b>Material Diversity Enhancement</b>: The system could be improved to handle more diverse surrounding building facade textures and materials, along with better material interaction and weathering effects to create more realistic environmental contexts.
+      <b>Material Diversity Enhancement</b>: The system can be improved to handle more diverse surrounding building facade textures and materials, along with better material interaction and weathering effects to create more realistic environmental contexts.
     </li>
     <li>
-      <b>Sky Condition Variations</b>: Future development could include support for different times of day, various weather effects and cloud patterns, and dynamic atmospheric conditions to provide more options for visualization scenarios.
+      <b>Sky Condition Variations</b>: Future development can include different times of day, various weather effects and cloud patterns, and atmospheric conditions to provide more visualization options.
     </li>
     <li>
-      <b>Road Detail Improvements</b>: The pipeline could be enhanced to generate more detailed road surfaces, including various pavement types, road markings, surface wear patterns, and better integration with surrounding elements.
+      <b>Road Detail Improvements</b>: The pipeline can be improved to generate more detailed road surfaces, including different pavement types, road markings, surface wear patterns, and better integration with surrounding elements.
     </li>
   </ul>
 

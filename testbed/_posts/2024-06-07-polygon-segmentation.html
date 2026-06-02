@@ -25,9 +25,9 @@ related:
 <h3>Objective ✂️</h3>
 <div class="article">
 
-    In the early stages of architectural design, there is a concept about the <code>axis</code> in which direction the building will be placed.
-    This plays an important role in determining the optimal layout considering the functionality, aesthetics, and environmental conditions of the building.
-    The goal of this project is to develop a segmenter that can determine how many axes a given 2D polygon should be segmented into and how to make those segmentations. 
+    In the early stages of architectural design, the <code>axis</code> defines the direction in which a building is to be placed.
+    This axis plays an important role in determining the optimal layout with respect to the functionality, aesthetics, and environmental conditions of the building.
+    The goal of this project is to develop a segmenter that determines how many axes a given 2D polygon should be segmented into and how those segmentations should be formed.
     <br><br>
     
     <figure style="display: flex;">
@@ -44,30 +44,30 @@ related:
         Segmented lands by a human architect
     </figcaption><br><br>
 
-    The figures above are imaginary dividing lines arbitrarily set by the architect. The apartments in the figures are placed based on segmented polygons.
-    Human architects <code>intuitively know</code> how many axes a given 2D polygon should be segmented into and how to create these segmentations, but explaining this intuition to a computer is difficult.
+    The figures above show imaginary dividing lines set arbitrarily by the architect. The apartments in the figures are placed based on the segmented polygons.
+    Human architects <code>intuitively know</code> how many axes a given 2D polygon should be segmented into and how to create these segmentations, but expressing this intuition to a computer is difficult.
 
     <br><br>
 
-    To achieve this, I will use a combination of deep learning and graph theory. 
-    In the graph, each point of the polygon will be a node and the connections between points will be edges.
-    Based on this concept, I will implement a GNN-based model, which will learn how to optimally segment given polygons.
+    To achieve this, a combination of deep learning and graph theory is used.
+    In the graph, each point of the polygon is treated as a node, and the connections between points are treated as edges.
+    Based on this concept, a GNN-based model is implemented to learn how to optimally segment given polygons.
 
     <!--break-->
 
 </div>
 <br><br>
 
-<h3>A simple understanding of graph and GNN</h3>
+<h3>A brief overview of graphs and GNNs</h3>
 <div class="article">
 
-    Before generating data, let's understand graphs and Graph Neural Networks.
-    Basically, the graph is defined \( G = (V, E) \). At this expression, \( V \) is the set of vertices (nodes) and \( E \) is the set of edges.
+    Before generating data, it is necessary to understand graphs and Graph Neural Networks.
+    A graph is defined as \( G = (V, E) \). In this expression, \( V \) is the set of vertices (nodes) and \( E \) is the set of edges.
 
     <br><br>
 
-    Graphs are mainly expressed as an <code>adjacency matrix</code>. When the number of points is \( n \), the size of the adjacency matrix \( A \) is \( n \times n \). 
-    When dealing with a graph in machine learning, it is expressed as a feature matrix depicting the characteristics of points. When the number of features is \( f \), the dimension of the feature matrix \( X \) is \( n \times f \).
+    Graphs are mainly expressed as an <code>adjacency matrix</code>. When the number of points is \( n \), the size of the adjacency matrix \( A \) is \( n \times n \).
+    When a graph is handled in machine learning, it is also expressed as a feature matrix that describes the characteristics of the points. When the number of features is \( f \), the dimension of the feature matrix \( X \) is \( n \times f \).
 
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-4.png" width="90%" onerror=handle_image_error(this)>
@@ -88,17 +88,17 @@ related:
 
     <br><br>
 
-    <code>Graph Neural Networks (GNN)</code> is a type of neural network designed to operate on graph structures. 
-    Unlike traditional neural networks, which work on fixed-size inputs like vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity. 
-    This makes GNNs particularly suitable for tasks where relationships are important, such as social networks, <code>geometries</code>, etc. 
-    It primarily use connections and the states of neighboring nodes to update (learn) the state of each node (<a href="https://process-mining.tistory.com/164">Message Passing</a>). 
-    Predictions are then made based on the final states. This final state is generally referred to as the <code>node embedding</code> (or I think also <code>encoding</code> is right because raw features of nodes are changed to other representations).
+    A <code>Graph Neural Network (GNN)</code> is a type of neural network designed to operate on graph structures.
+    Unlike traditional neural networks, which work on fixed-size inputs such as vectors or matrices, GNNs can handle graph-structured data with variable size and connectivity.
+    This makes GNNs particularly suitable for tasks in which relationships are important, such as social networks and <code>geometries</code>.
+    A GNN primarily uses the connections and the states of neighboring nodes to update (learn) the state of each node (<a href="https://process-mining.tistory.com/164">Message Passing</a>).
+    Predictions are then made based on the final states. This final state is generally referred to as the <code>node embedding</code>; the term <code>encoding</code> is also appropriate, since the raw features of the nodes are transformed into other representations.
 
     <br><br>
 
-    There are various methods for Message Passing, but since this task will be dealing with geometry, let's focus on models based on <code>Spatial Convolutionan Network</code>. 
+    There are various methods for Message Passing, but since this task deals with geometry, the focus is placed on models based on the <code>Spatial Convolutionan Network</code>.
     This method is known to be suitable for representing data with important geometric and spatial structures.
-    GNNs using Spatial Convolutional Network enable each node to integrate information from neighboring nodes, allowing for a more accurate understanding of local characteristics. 
+    A GNN using a Spatial Convolutional Network enables each node to integrate information from neighboring nodes, allowing for a more accurate understanding of local characteristics.
     Through this, the model can better comprehend the complex shapes and features of geometry.
 
     <figure>
@@ -109,14 +109,14 @@ related:
         </figcaption>
     </figure><br><br>
 
-    The idea of a Spatial Convolutional Network (SCN) is similar to that of a Convolutional Neural Network (CNN). An image can be transformed into a <code>grid-shaped graph</code>.
+    The idea of a Spatial Convolutional Network (SCN) is similar to that of a Convolutional Neural Network (CNN), since an image can be transformed into a <code>grid-shaped graph</code>.
 
     <br><br>
 
-    CNN processes images by using filters to combine the surrounding pixels of a central pixel. 
-    <code>SCN</code> extends this idea to graph structures by combining the features of neighboring connected nodes instead of neighboring pixels.
+    A CNN processes images by using filters to combine the surrounding pixels of a central pixel.
+    An <code>SCN</code> extends this idea to graph structures by combining the features of neighboring connected nodes instead of neighboring pixels.
 
-    Specifically, CNNs are useful for processing images in a regular grid structure, where the filter considers the surrounding area of each pixel to extract features. 
+    Specifically, CNNs are useful for processing images in a regular grid structure, where the filter considers the surrounding area of each pixel to extract features.
     In contrast, <code>SCNs</code> operate on general graph structures, combining the features of each node with those of its connected neighbors to generate <code>embeddings</code>.
 
 </div>
@@ -125,8 +125,8 @@ related:
 <h3>Data preparation</h3>
 <div class="article">
 
-    Since I have briefly looked into graphs and GNNs in the above, let's now prepare the data! There are already many raw polygons around us, and that is the land.
-    First, let's collect raw polygons from <a href="https://www.vworld.kr/dtna/dtna_fileDataList_s001.do">vworld</a>. Below is a part of all the raw polygons I collected from vworld.
+    Having briefly examined graphs and GNNs above, the next step is to prepare the data. Many raw polygons already exist around us in the form of land parcels.
+    First, raw polygons are collected from <a href="https://www.vworld.kr/dtna/dtna_fileDataList_s001.do">vworld</a>. Below is a portion of all the raw polygons collected from vworld.
 
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-6.png" width="95%" onerror=handle_image_error(this)>
@@ -135,7 +135,7 @@ related:
         </figcaption>
     </figure><br><br>
 
-    Now that we have collected the raw polygons, let's define the characteristics of the polygons to be included in the feature matrix. They are as follows:
+    Now that the raw polygons have been collected, the characteristics of the polygons to be included in the feature matrix are defined. They are as follows:
     <ul style="padding-left: 2em;">
         <li>X coordinate (normalized)</li>
         <li>Y coordinate (normalized)</li>
@@ -148,7 +148,7 @@ related:
         <li>Polygon area</li>
     </ul><br><br>
 
-    Then, I need to convert these data into graph form. Here is an example of hand labeling:
+    These data then need to be converted into graph form. The following is an example of hand labeling:
     
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-8.png" width="100%" onerror=handle_image_error(this)>
@@ -158,11 +158,11 @@ related:
         </figcaption>
     </figure><br><br>
 
-    However since it is impossible to label countless raw polygons by hand, I need to generate this data automatically. 
-    It would be nice if it could be fully automated with an algorithm, but if that were possible, there wouldn't be a need for deep learning 🤔.
-    
-    So, I created a naive algorithm that can reduce manual work even a little. 
-    This algorithm is inspired by the <code>triangulations</code> of the polygon. The process of this algorithm is as follows:
+    However, since it is impossible to label countless raw polygons by hand, this data must be generated automatically.
+    Full automation by a single algorithm would be ideal, but if that were possible, there would be no need for deep learning.
+
+    Therefore, a naive algorithm was created to reduce the manual work to some degree.
+    This algorithm is inspired by the <code>triangulations</code> of the polygon. The process of the algorithm is as follows:
     
     <ul style="padding-left: 2em;">
         <li class="decimal"><b>Triangulate a polygon</b>: Retrieve the triangulation edges.</li>
@@ -172,7 +172,7 @@ related:
         <li class="decimal"><b>Compute Scores and evaluation</b>: Compute scores to store the best segmentations.</li>
     </ul><br><br>
 
-    The scores (<code>even_area_score</code>, <code>ombr_ratio_score</code>, <code>slope_similarity_score</code>) used in the fifth step are computed as follows, and each score is aggregated as a weighted sum to obtain the segmentations with the lowest score.
+    The scores (<code>even_area_score</code>, <code>ombr_ratio_score</code>, <code>slope_similarity_score</code>) used in the fifth step are computed as follows, and each score is aggregated as a weighted sum to obtain the segmentations with the lowest total score.
 
     <br><br>
 
@@ -209,7 +209,7 @@ related:
 
 
     The whole code for this algorithm can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/b8e8e7516326c428f435a17af35705308e14decc/polygon_segmentation_with_gcn/src/data_creator.py#L670-L855">here</a>,
-    and the key part of the algorithm is as follows.
+    and the key part of the algorithm is shown below.
 
 <pre><code class="python">
     def segment_polygon(
@@ -340,8 +340,8 @@ related:
         return splits_selected, triangulations_edges, splitters_selceted
 </code></pre><br><br>
 
-    However, this algorithm is not perfect, and there are some problems. Because this algorithm uses the weights for computing scores, it may be sensitive to them. Look at the below figures.
-    The first is good case, and the second is bad case. 
+    However, this algorithm is not perfect and has some problems. Because it uses weights for computing the scores, it can be sensitive to them. The figures below illustrate this.
+    The first shows a successful case, and the second shows a failure case.
     
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-9.png" width="70%" onerror=handle_image_error(this)>
@@ -354,8 +354,8 @@ related:
         </figcaption>
     </figure><br><br>
 
-    Since these problems cannot be handled by my naive algorithm, I first used the algorithm to process the raw polygon data and then labeled it manually like the following.
-    So now I have approximately 40000 data with augmented originals. The all dataset can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/tree/main/polygon_segmentation_with_gcn/data/processed">here</a>.
+    Since these problems cannot be handled by the naive algorithm, the algorithm was first used to process the raw polygon data, after which the data was labeled manually as follows.
+    This produced approximately 40000 data points, including augmented originals. The full dataset can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/tree/main/polygon_segmentation_with_gcn/data/processed">here</a>.
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-13.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
@@ -369,26 +369,26 @@ related:
 <h3>Model for link prediction</h3>
 <div class="article">
 
-    Now, let's create a graph model using <a href="https://pytorch-geometric.readthedocs.io/en/latest/">Pytorch Geometric</a> and teach the graph data.
-    Pytorch Geometric is a library based on PyTorch to easily write and train graph neural networks.
+    The next step is to create a graph model using <a href="https://pytorch-geometric.readthedocs.io/en/latest/">Pytorch Geometric</a> and train it on the graph data.
+    Pytorch Geometric is a library based on PyTorch that simplifies writing and training graph neural networks.
 
     <br><br>
 
-    The role I need to assign to the model is to generate lines that will segment polygons. This can be translated into a task primarily used in GNNs, known as <code>link prediction</code>.
-    Link prediction models usually use an <code>encoder-decoder</code> structure. 
+    The role assigned to the model is to generate the lines that segment polygons. This can be framed as a task primarily used in GNNs, known as <code>link prediction</code>.
+    Link prediction models usually use an <code>encoder-decoder</code> structure.
     The encoder creates node embeddings, which are vector representations of the nodes that extract their features. 
     The decoder then uses these embeddings to predict the probability that a pair of nodes is connected.
 
     <br><br>
 
-    When inference, the model inputs all possible node pairs into the decoder. 
-    It then calculates the probability of each pair being connected. 
+    During inference, the model feeds all possible node pairs into the decoder.
+    It then calculates the probability that each pair is connected.
     Only pairs with probabilities above a certain threshold are kept, indicating likely connections.
 
     <br><br>
 
-    Generally, a simple operation like the <code>dot product</code> is used to predict links based on the similarity of node pairs. 
-    However, I thought this approach was not suitable for tasks using geometric data, so I additionally trained a decoder. 
+    Generally, a simple operation such as the <code>dot product</code> is used to predict links based on the similarity of node pairs.
+    However, this approach was considered unsuitable for tasks using geometric data, so a decoder was additionally trained.
     Below are the <code>encode</code> and <code>decode</code> methods of the model. The complete model code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/b8e8e7516326c428f435a17af35705308e14decc/polygon_segmentation_with_gcn/src/model.py#L124">here</a>.
 
 <pre><code class="python">
@@ -442,8 +442,8 @@ related:
             return decoded
 </code></pre><br>
 
-    The encoding process transforms the original feature matrix \( F \) into a new matrix \( E \) with potentially different dimensions. 
-    The following is an expression of the feature matrix before and after the encode function.
+    The encoding process transforms the original feature matrix \( F \) into a new matrix \( E \) with potentially different dimensions.
+    The following expresses the feature matrix before and after the encode function.
 
     <ul>
         <p>\( n \) as the number of nodes</p>
@@ -477,19 +477,19 @@ related:
     </div><br><br>
 
 
-    In the <code>decode</code> method, the encoded features of the nodes and <code>raw features</code> are used to predict the connections (links) between them. 
-    This skip connection merges raw features and encoded features to inject geometric information. 
-    Using skip connections helps preserve original features, and enhances overall model performance by combining low-level and high-level information.
+    In the <code>decode</code> method, the encoded features of the nodes and the <code>raw features</code> are used to predict the connections (links) between them.
+    This skip connection merges raw features and encoded features to inject geometric information.
+    Using skip connections helps preserve the original features and enhances overall model performance by combining low-level and high-level information.
 
     <br><br>
 
 
     In the <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/b8e8e7516326c428f435a17af35705308e14decc/polygon_segmentation_with_gcn/src/model.py#L273-L323">feedforward</a> process, the decoder is trained with connected labels and labels that should not be connected. This is a technique called <code>negative sampling</code>, which is used to improve model performance in link prediction tasks.
 
-    By providing examples of what should not be linked, negative sampling helps the model better distinguish between actual links and non-links, leading to improved accuracy in predicting future or missing links.
+    By providing examples of what should not be linked, negative sampling helps the model distinguish between actual links and non-links, leading to improved accuracy in predicting future or missing links.
 
     <br><br>
-    In most networks, actual links are significantly fewer than non-links, which can <code>bias</code> the model towards predicting no link. Negative sampling allows for controlled selection of negative examples, balancing the training data and enhancing the learning process.
+    In most networks, actual links are significantly fewer than non-links, which can <code>bias</code> the model toward predicting no link. Negative sampling allows for controlled selection of negative examples, balancing the training data and enhancing the learning process.
 
 <pre><code class="python">
         def forward(self, data: Batch) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -521,16 +521,16 @@ related:
             return decoded, k_predictions, k_targets
 </code></pre><br><br>
 
-    Up to this point, I defined the encoder and decoder.
-    Since the encoder and decoder use nodes in batches, it seems that they cannot recognize each graph separately.
+    Up to this point, the encoder and decoder have been defined.
+    Since the encoder and decoder process nodes in batches, they cannot recognize each graph separately.
 
-    Because I wanted to train the model on how many segmentations to divide the graph into when a graph is input, 
-    I defined a <code>predictor</code> to train <code>k</code> separately within the <code>segmenter</code> class.
+    Because the model also needs to learn how many segmentations a graph should be divided into when a graph is input,
+    a <code>predictor</code> was defined to train <code>k</code> separately within the <code>segmenter</code> class.
 
     <br><br>
 
-    The segmenter generates the segmentations using <code>topk</code> through the encoder and decoder processes described above. 
-    It then sorts the generated links in order of connection strength, and the predictor decides how many links to use.
+    The segmenter generates the segmentations using <code>topk</code> through the encoder and decoder processes described above.
+    It then sorts the generated links in order of connection strength, and the predictor determines how many links to use.
 
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-15.png" width="100%" onerror=handle_image_error(this)>
@@ -545,12 +545,12 @@ related:
 
 <h3>Training and evaluating</h3>
 <div class="article">
-    It's time to train the model. 
-    The model has been trained for 500 epochs, during which both the training loss and validation loss were recorded to monitor the training progress and convergence. As shown in the plots:
+    The model is now ready to be trained.
+    The model was trained for 500 epochs, during which both the training loss and the validation loss were recorded to monitor the training progress and convergence. As shown in the plots:
 
     <ul style="padding-left: 2em;">
         <li>According to the top plots, both the training loss and validation loss decrease quickly initially and then generalize.</li>
-        <li>All evaluation metrics (accuracy, F1 score, recall, and AUROC) show rapid improvement initially and then stabilize, having good generalization.</li>
+        <li>All evaluation metrics (accuracy, F1 score, recall, and AUROC) improve rapidly at first and then stabilize, indicating good generalization.</li>
     </ul>
     
     <figure>
@@ -560,11 +560,11 @@ related:
         </figcaption>
     </figure><br><br>
     
-    All the metrics look good, but there is a question about whether these metrics can be trusted 100%. 
-    This may be due to the impact of <code>negative sampling</code>. <br><br>
-    Based on the visualization of some of the test data, it is evident that the model accurately predicts polygons that do not require segmenting. 
-    This suggests that the model may be <code>overfitting on negative samples</code>. 
-    High performance on negative samples might not accurately reflect the model's ability to identify positive cases correctly.
+    All the metrics appear favorable, but it is questionable whether they can be fully trusted.
+    This concern may stem from the effect of <code>negative sampling</code>. <br><br>
+    Based on the visualization of some of the test data, the model clearly predicts polygons that do not require segmenting with high accuracy.
+    This suggests that the model may be <code>overfitting on negative samples</code>.
+    High performance on negative samples may not accurately reflect the model's ability to identify positive cases correctly.
 
     <figure>
         <img src="/img/polygon-segmentation/polygon-segmentation-19.png" width="100%" onerror=handle_image_error(this)>
@@ -577,9 +577,9 @@ related:
 
     <!-- 이에 따라서 나는 신뢰할 수 있는 성능지표를 만들었습니다.  -->
 
-    Taking inspiration from <code>IoU loss</code>, therefore I defined <code>GeometricLoss</code> to evaluate segmentation quality and create a reliable evaluation metric.
-    The <code>GeometricLoss</code> aims to quantify the discrepancy between predicted and ground-truth geometric structures within a <code>graph</code>. 
-    The process of the geometric loss calculation is as follows:
+    Taking inspiration from <code>IoU loss</code>, <code>GeometricLoss</code> was therefore defined to evaluate segmentation quality and provide a reliable evaluation metric.
+    The <code>GeometricLoss</code> aims to quantify the discrepancy between the predicted and ground-truth geometric structures within a <code>graph</code>.
+    The geometric loss is calculated as follows:
         
     <ul style="padding-left: 2em;">
         <li class="decimal"><b>Polygon Creation from Node Features</b>: Each graph's node features, representing coordinates, are converted into a polygon.</li>
@@ -587,7 +587,7 @@ related:
         <li class="decimal"><b>Connecting Ground-Truth Edges</b>: These edges represent the correct segmentation of the polygon.</li>
         <li class="decimal"><b>Creating Buffered Unions</b>: The predicted and ground-truth edges are combined and then buffered.</li>
         <li class="decimal"><b>Calculating Intersection</b>: This intersection represents the common area between the predicted and true geometric structures.</li>
-        <li class="decimal"><b>Computing Geometric Loss</b>: The intersection area is normalized by the ground-truth area and then negated</li>
+        <li class="decimal"><b>Computing Geometric Loss</b>: The intersection area is normalized by the ground-truth area and then negated.</li>
     </ul>
     
     <figure>
@@ -598,9 +598,9 @@ related:
         </figcaption>
     </figure><br><br>
 
-    The geometric loss serves solely as an <code>evaluation metric</code> for the model. Therefore, it has not been added to the BCE loss. 
-    This is because the model's training batches are based on nodes rather than graphs. Hence, calculating this loss for every graph per epoch would significantly slow down the process. 
-    Therefore, I have calculated this loss only for <code>4 samples</code> per batch to use it exclusively as a model evaluation metric. The results are as follows:
+    The geometric loss serves solely as an <code>evaluation metric</code> for the model and is therefore not added to the BCE loss.
+    This is because the model's training batches are based on nodes rather than graphs, so calculating this loss for every graph per epoch would significantly slow down the process.
+    For this reason, the loss is calculated only for <code>4 samples</code> per batch and used exclusively as a model evaluation metric. The results are as follows:
 
     
     <figure>
@@ -611,7 +611,7 @@ related:
         </figcaption>
     </figure><br><br>
 
-    The <code>GeometricLoss</code> class is defined as follows and the code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/main/polygon_segmentation_with_gcn/src/model.py#L39-L113">here</a>.
+    The <code>GeometricLoss</code> class is defined as follows, and the code can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/main/polygon_segmentation_with_gcn/src/model.py#L39-L113">here</a>.
 
     
 </div>
@@ -620,14 +620,14 @@ related:
 <h3>Limitations and future works</h3>
 <div class="article">
 
-    GNNs are node embedding-based models, so they seem to recognize the characteristics of <code>individual nodes</code> rather than the <code>overall shape of the graph</code>. 
-    While GNNs have a good ability to generalize shapes during training, it has been challenging to overfit them accurately to the intended labels.
+    GNNs are node embedding-based models, so they tend to recognize the characteristics of <code>individual nodes</code> rather than the <code>overall shape of the graph</code>.
+    While GNNs generalize shapes well during training, it has been challenging to overfit them accurately to the intended labels.
     
     <ul style="padding-left: 2em;">
         <li><b>Comparison with CNNs</b>: CNNs excel at capturing local patterns and combining them into more abstract representations, which can be advantageous for tasks involving polygons.</li>
-        <li><b>Imbalanced labels for predictor</b>: The predictor is trained to select one of 0, 1, or 2, but the number of data for 2 is very few.</li>
-        <li><b>Exploring reliable metrics</b>: Explore metrics that are more suitable for geometric tasks.</li>
-        <li><b>Overfitting</b>: Studying how positive labels can be completely overfitted.</li>
+        <li><b>Imbalanced labels for predictor</b>: The predictor is trained to select one of 0, 1, or 2, but the number of samples for 2 is very small.</li>
+        <li><b>Exploring reliable metrics</b>: Metrics that are more suitable for geometric tasks should be explored.</li>
+        <li><b>Overfitting</b>: How positive labels can be completely overfitted remains to be studied.</li>
     </ul>
 </div>
 <br><br>

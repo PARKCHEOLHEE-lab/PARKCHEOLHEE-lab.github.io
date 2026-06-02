@@ -16,12 +16,12 @@ related:
 <div id="toc"></div>
 <h3>A simple understanding of multiprocessing</h3>
 <div class="article">
-    Multiprocessing refers to the ability of a computer system to execute multiple processes or tasks concurrently. 
+    Multiprocessing refers to the ability of a computer system to execute multiple processes or tasks concurrently.
     It involves the use of multiple processors or processor cores to perform multiple tasks <code>simultaneously</code>, thereby improving overall system performance and efficiency.
-    
+
     <br><br>
-    In a multiprocessing system, each process is an independent unit of execution with its own program counter, stack, and data section. 
-    These <code>processes</code> can run concurrently, allowing for parallelism and efficient utilization of system resources.
+    In a multiprocessing system, each process is an independent unit of execution with its own program counter, stack, and data section.
+    These <code>processes</code> can run concurrently, enabling parallelism and the efficient utilization of system resources.
     
     <ul style="padding-left: 2em;">
         <li>Processes: A process is an instance of a running program. Each process has its own memory space, file descriptors, and system resources. Processes are created and managed by the operating system. <code>They can communicate with each other</code> using inter-process communication mechanisms.</li>
@@ -29,7 +29,7 @@ related:
     
     <br>
     
-    You can understand multiprocessing with a very simple example easily. That is the following:
+    Multiprocessing can be understood easily through a very simple example, as follows:
     <!--break-->
 
 <pre class="highlight"><code class="python">
@@ -73,31 +73,31 @@ related:
 </code></pre>
 
 <br>
-The <code>parallel_execution</code> and <code>sequential_execution</code> functions use <code>f(x)</code> in common,
-return a squared value about given x after wating 1 second (sleep). 
-Thus in the sequential function, you have to wait <code>at least max_range * 1</code> seconds before getting the result (On my computer, it took 10.073817014694214 seconds).
+The <code>parallel_execution</code> and <code>sequential_execution</code> functions both use <code>f(x)</code>,
+which returns the squared value of a given x after waiting 1 second (sleep).
+In the sequential function, therefore, the result is obtained only after waiting <code>at least max_range * 1</code> seconds (on my computer, this took 10.073817014694214 seconds).
 <br><br>
-On the other hand, the parallel function took 1.8122541904449463 seconds. 
-Because it executes simultaneously as much as <code>cpu_count</code>, you don't have to wait <code>max_range * 1</code> seconds.
+The parallel function, on the other hand, took 1.8122541904449463 seconds.
+Because it executes as many tasks simultaneously as <code>cpu_count</code>, waiting <code>max_range * 1</code> seconds is no longer necessary.
 </div>
 <br><br>
 
 <h3>Improving performance of the real algorithm</h3>
 <div class="article">
-    Now, let's improve the performance of a real algorithm by applying multiprocessing (This task corresponds to defining f(x) you saw above).
-    There is the algorithm that finds <code>MIR</code> (Maximal Inner Rectangle) for a given polygon like the following.
+    The performance of a real algorithm can now be improved by applying multiprocessing (this task corresponds to defining the f(x) shown above).
+    The algorithm below finds the <code>MIR</code> (Maximal Inner Rectangle) for a given polygon.
     <figure>
         <img src="/img/parallel-1.gif" width="100%" onerror=handle_image_error(this)>
         <figcaption>Algorithm for finding MIR</figcaption>
     </figure><br>
 
-    This algorithm approximates the maximal rectangle within a given polygon based on rotation interval degree and grid size.
-    Smaller values for <code>rotation interval degree</code> and <code>grid size</code> result in more accurate rectangles, but slower.
+    This algorithm approximates the maximal rectangle within a given polygon based on the rotation interval degree and the grid size.
+    Smaller values for the <code>rotation interval degree</code> and the <code>grid size</code> produce more accurate rectangles but run more slowly.
 
     <br><br>
 
-    This algorithm is based on rotating a polygon at input rotation intervals and creating a binary grid (AABB axes-aligned).
-    That is, the same logic is executed at all rotation intervals. At this point, we can write the code for finding MIR with <code>parallelism</code> in mind. That's the following.
+    The algorithm is based on rotating a polygon at the input rotation intervals and creating a binary grid (AABB, axis-aligned).
+    That is, the same logic is executed at every rotation interval. Accordingly, the code for finding the MIR can be written with <code>parallelism</code> in mind, as follows.
 
 <pre class="highlight"><code class="python">
     def <span class="defName">_generate_maximal_inner_rectangle</span>(
@@ -159,22 +159,22 @@ Because it executes simultaneously as much as <code>cpu_count</code>, you don't 
         return mir
 </code></pre><br>
 
-For one's information, GhPython has no multiprocessing module, so you can parallelize it by using <code>ghpythonlib.parallel</code> module.
-Perhaps GhPython is Iron Python implemented by .NET Framework, so you could use the multiprocessing module used in C#.
+It should be noted that GhPython has no multiprocessing module, so parallelization is achieved through the <code>ghpythonlib.parallel</code> module.
+Because GhPython is IronPython implemented on the .NET Framework, the multiprocessing module used in C# could presumably be used instead.
 
 </div>
 <br><br>
 
 <h3>Comparing execution time</h3>
 <div class="article">
-    On my computer, I got the following reuslts. When run in parallel, it takes 1.9735183715820313. And run in sequential, it takes 8.2854690551757813.
-    In the case of parallel processing, the result can be obtained <code>4x</code> times faster. If you have more inputs, you can expect a bigger performance boost.
+    On my computer, the following results were obtained. When run in parallel, it takes 1.9735183715820313 seconds, and when run sequentially, it takes 8.2854690551757813 seconds.
+    With parallel processing, the result can therefore be obtained roughly <code>4x</code> faster. A larger number of inputs can be expected to yield an even greater performance gain.
     <br><br>
     <figure>
         <img src="/img/parallel-execution-within-gh/parallel-2.png" width="60%" onerror=handle_image_error(this)>
         <figcaption>Compare execution time for Parallel vs. Sequential</figcaption>
     </figure><br>
-    The code for the above is in <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/mir/mir.py">this link</a>.
+    The code for the above is available at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/mir/mir.py">this link</a>.
 </div>
 <br><br>
 

@@ -27,21 +27,21 @@ related:
         </figcaption>
     </figure><br>
 
-    If you use this AI to create images, you can get plausible rendered images easily and shortly with a few lines of text.
-    Let's think about how this can be utilized in the field of architecture.
+    Using this model to create images makes it possible to obtain plausible rendered images quickly and easily from only a few lines of text.
+    This raises the question of how such a capability can be utilized in the field of architecture.
     <!--break-->
 
 
 </div><br><br>
 <h3>Application in the field of architecture</h3>
 <div class="article">
-    There are several rendering engines that are frequently used in the field of architectural design, but they require precise modeling for good rendering.
-    At the start of a design project, we can throw a very rough model or sketch to the AI, and type in the prompts to get a rough idea of what we're envisioning. 
+    Several rendering engines are frequently used in architectural design, but they require precise modeling to produce high-quality renderings.
+    At the start of a design project, a very rough model or sketch can instead be passed to the model, together with text prompts, to obtain an early impression of the intended design.
 
     <br><br>
-    First, let's see the simple example. 
-    The example below is an example of capturing the rhino viewport in Rhino's <code>GhPython</code> environment 
-    and then rendering the image in the desired direction using <code>ControlNet of the stable diffusion API</code>.
+    A simple example is presented first.
+    The example below captures the Rhino viewport within Rhino's <code>GhPython</code> environment
+    and then renders the image in the desired direction using <code>ControlNet of the stable diffusion API</code>.
     <br><br>
     <figure>
         <img src="/img/drafting-with-ai/d2r-5.gif" width="100%" onerror=handle_image_error(this)>
@@ -50,8 +50,8 @@ related:
         </figcaption>
     </figure><br>
 
-    First, We need to write code for capturing the rhino viewport.
-    I made it to be saved in the path where the current *.gh file is located.
+    First, code is required to capture the Rhino viewport.
+    The captured image is saved to the path where the current *.gh file is located.
 
 <pre><code class="python">
     def <span class="defName">capture_activated_viewport</span>(
@@ -73,15 +73,15 @@ related:
         return save_path
 </code></pre><br>
 
-Next, we should to run our local API server after cloning <code>stable-diffusion-webui</code> repository. 
-Please refer this <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a> 
-repository for settings required for running local API server. When all settings are done, now you can request the methods you want through API calls.
-I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API">AUTOMATIC1111/stable-diffusion-webui/wiki/API</a>
+Next, a local API server is run after cloning the <code>stable-diffusion-webui</code> repository.
+The <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui">AUTOMATIC1111/stable-diffusion-webui</a>
+repository describes the settings required to run the local API server. Once these settings are complete, the desired methods can be invoked through API calls.
+The API guide referenced here is available at <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/API">AUTOMATIC1111/stable-diffusion-webui/wiki/API</a>
 </div><br><br>
 <h3>Drafting</h3>
 <div class="article">
-    Python serves a built-in module called <code>urllib</code> to use HTTP. 
-    You can check the code to the API request used in the <code>GhPython</code> at this <a href="https://github.com/PARKCHEOLHEE-lab/stable-diffusion-webui/blob/5eead22e36b1293824a1005915ee1ea24ef9538b/d2r.py#L182-L219">link</a>.
+    Python provides a built-in module called <code>urllib</code> for handling HTTP.
+    The code for the API request used in the <code>GhPython</code> environment is available at this <a href="https://github.com/PARKCHEOLHEE-lab/stable-diffusion-webui/blob/5eead22e36b1293824a1005915ee1ea24ef9538b/d2r.py#L182-L219">link</a>.
     
 <pre><code class="python">
     ﻿import os
@@ -213,7 +213,7 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     </figure>
     <figcaption>
         Physical model <br>
-        From the left, Drfat view · Rendered view <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>Isometric view, River, Trees, 3D printed white model with illumination</u>
     </figcaption><br>
 
@@ -223,7 +223,7 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     </figure>
     <figcaption>
         Interior view <br>
-        From the left, Drfat view · Rendered view <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>Interior view with sunlight, Curtain wall with city view, Colorful sofas, Cushions on the sofas, Transparent glass table, Fabric stools, Some flower pots</u>
     </figcaption><br>
 
@@ -233,7 +233,7 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     </figure>
     <figcaption>
         <a href="https://www.archdaily.com/932099/chaptal-residence-nathalie-eldan-architecture/5e21774d3312fd970e000439-chaptal-residence-nathalie-eldan-architecture-floor-plan?next_project=no">Floor plan</a><br>
-        From the left, Drfat view · Rendered view <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>
             Top view,
             With sunlight and shadows,
@@ -248,8 +248,8 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
         <img src="/img/drafting-with-ai/d2r-8.png" width="46.5%" onerror=handle_image_error(this)>
     </figure>
     <figcaption>
-        Skyscrappers in the city <br>
-        From the left, Drfat view · Rendered view <br>
+        Skyscrapers in the city <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>
             Skyscrapers in the city,
             Night scene with many stars in the sky,
@@ -264,7 +264,7 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     </figure>
     <figcaption>
         <a href="https://www.pinterest.co.kr/pin/1094937728135829205/">Contour</a><br>
-        From the left, Drfat view · Rendered view <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>
             Bird's eye view,
             Colorful master plan,
@@ -279,7 +279,7 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     </figure>
     <figcaption>
         <a href="https://www.pinterest.co.kr/pin/353321533273442068/">Gabled houses</a><br>
-        From the left, Drfat view · Rendered view <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>
             Two points perspective,
             White clouds,
@@ -294,7 +294,7 @@ I referred API guide at <a href="https://github.com/AUTOMATIC1111/stable-diffusi
     </figure>
     <figcaption>
         Kitchen<br>
-        From the left, Drfat view · Rendered view <br>
+        From the left, Draft view · Rendered view <br>
         Prompt: <u>
             Front view,
             Kitchen with black color interior,

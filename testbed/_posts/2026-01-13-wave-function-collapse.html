@@ -43,40 +43,38 @@ related:
 
     <br><br>
 
-    Let's first look at the 3x3 block in the right-center of the leftmost image.
+    Consider first the 3x3 block in the right-center of the leftmost image.
     <!--break-->
-    Each cell in this area has two possible candidate numbers, and the red cells all share the same candidates ($4, 6$).
-    Because the red cells must be filled with either $4$ or $6$, 
-    the state of the blue cell is forced to collapse to $2$ otherwise, a contradiction would occur.
+    Each cell in this area has two candidate numbers, and the red cells all share the same candidates ($4, 6$).
+    Because the red cells must be filled with either $4$ or $6$,
+    the state of the blue cell is forced to collapse to $2$; otherwise, a contradiction would occur.
 
-    After the blue cell collapses to $2$, the cell directly above it, which has $2$ and $7$ as candidates, now collapses to $7$.
+    After the blue cell collapses to $2$, the cell directly above it, which has $2$ and $7$ as candidates, collapses to $7$.
 
 </div><br><br>
 
 <h3>Tileset Preparation</h3>
 <div class="article">
-    To apply WFC to real-world design, the abstract states must be turned into concrete, connectable blocks. 
-    The algorithm then operates on a finite set of such modules. Each module is defined by how it can attach to its neighbors, so that collapse and propagation are purely rule-based.
-    A useful reference is modular systems, where a small set of physical pieces combine in many ways under clear connection rules. 
-    <a href="https://www.archdaily.com/771836/catable-for-architects">LYCS's Modular CATable</a> is one example. A limited set of table segments with defined interfaces can be rearranged into different table layouts. That idea translates directly into a 3D tileset for WFC.
+    To apply WFC to real-world design, the abstract states must be turned into concrete, connectable blocks.
+    The algorithm then operates on a finite set of such modules. Each module is defined by how it can attach to its neighbors, so that collapse and propagation remain purely rule-based.
+    A natural reference is modular systems, in which a small set of physical pieces combine in many ways under clear connection rules.
+    <a href="https://www.archdaily.com/771836/catable-for-architects">LYCS's Modular CATable</a> is one such example: a limited set of table segments with defined interfaces can be rearranged into different table layouts. This idea translates directly into a 3D tileset for WFC.
 
     <br><br>
 
     Inspired by this kind of modular design, I defined the 3D tileset for WFC.
-    Each tile is a block with six faces ($\pm x$, $\pm y$, $\pm z$), and each face 
-    has an interface label. 
-    Two neighboring tiles are compatible only if their touching faces have the same 
-    compatible labels (6-way compatibility). The algorithm uses these rules, not geometry, to propagate constraints.
+    Each tile is a block with six faces ($\pm x$, $\pm y$, $\pm z$), and each face
+    carries an interface label.
+    Two neighboring tiles are compatible only if their touching faces carry compatible labels (6-way compatibility). The algorithm propagates constraints using these rules rather than the geometry itself.
     
     <br><br>
 
 
-    The left panel on the figure below shows the 3D tileset, and the right panel shows the compatibility visualization.
-    The right panel explains that the six dots per cube represent one label per face, 
-    color-coded, and that allowed adjacencies come from compatible labels on touching faces.
+    The left panel of the figure below shows the 3D tileset, and the right panel shows the compatibility visualization.
+    In the right panel, the six dots per cube represent one label per face, color-coded, and the allowed adjacencies follow from compatible labels on touching faces.
 
-    For example, the tile $6$ and $7$ are compatible for the $+z$ and $-z$ faces each other. 
-    Because the $+z$ face of $6$ is OPEN and the $-z$ face of $7$ is OPEN, they are compatible.
+    For example, tiles $6$ and $7$ are compatible across their $+z$ and $-z$ faces.
+    Because the $+z$ face of $6$ is OPEN and the $-z$ face of $7$ is OPEN, the two tiles are compatible.
 
 
     <figure>
@@ -193,7 +191,7 @@ related:
     The grid state is held in a single 4D boolean tensor
     <code>states</code> of shape $(H, D, W, T)$, where $T = 20$ is the number of tiles.
     A value of <code>True</code> at <code>states[z, y, x, t]</code> means tile $t$ is still a candidate for cell $(x, y, z)$.
-    Collapse and propagation are then just bitmask updates on this tensor.
+    Collapse and propagation then reduce to bitmask updates on this tensor.
 
     <figure>
         <img src="/img/wave-function-collapse/wave-function-collapse-5.png" width="100%" onerror=handle_image_error(this)>
@@ -248,10 +246,10 @@ related:
     <br><br>
 
     A cell collapses by drawing one tile from its current candidate set. The candidates are converted to a float vector,
-    multiplied element-wise by <code>cell_weights</code>, and fed to <code>torch.multinomial</code>.
+    multiplied element-wise by <code>cell_weights</code>, and passed to <code>torch.multinomial</code>.
     The only weight that differs from $1$ is the entry for tile $0$ (the empty tile),
     which is scaled by the user-controlled <code>empty_weight</code>.
-    A value below $1$ favours dense structures; a value above $1$ produces sparser, more open shapes.
+    A value below $1$ favors dense structures, while a value above $1$ produces sparser, more open shapes.
 
 <pre><code class="python">
     def _collapse(self, x: int, y: int, z: int) -> bool:
@@ -272,11 +270,11 @@ related:
 
     <br>
 
-    After a cell is fixed, constraints have to flow outward. Propagation is a BFS over the grid: a queue is seeded with the just-collapsed cell,
-    and for each cell pulled off the queue the algorithm asks, for each of the six neighbours, "given my current candidate set, which of your candidates are still reachable?".
+    After a cell is fixed, the constraints must flow outward. Propagation is a BFS over the grid: a queue is seeded with the just-collapsed cell,
+    and for each cell pulled off the queue, the algorithm determines, for each of the six neighbours, which of the neighbour's candidates remain reachable given the current candidate set.
     The reachable set is the OR of the relevant rows of the compatibility matrix, intersected with the neighbour's existing candidate mask.
-    If that intersection actually shrinks the neighbour, the neighbour is pushed back onto the queue.
-    If it shrinks to nothing, propagation reports failure and the run will reset.
+    If that intersection shrinks the neighbour, the neighbour is pushed back onto the queue.
+    If it shrinks to nothing, propagation reports failure and the run is reset.
 
 <pre><code class="python">
     def _propagate(self, x: int, y: int, z: int) -> bool:
@@ -333,10 +331,10 @@ related:
 <h3>Algorithm Details</h3>
 <div class="article">
 
-    The full run loop ties the four primitives — collapse, propagate, min-entropy selection, and reset — together.
-    Starting from a user-supplied seed cell $(x_0, y_0, z_0)$, the algorithm repeats:
-    collapse the current cell; if propagation fails or the next pick reports a contradiction, wipe the grid and start over from the seed;
-    otherwise advance to the lowest-entropy cell. The loop ends when every cell holds exactly one tile, or after <code>max_iters</code> attempts.
+    The full run loop combines the four primitives — collapse, propagate, min-entropy selection, and reset.
+    Starting from a user-supplied seed cell $(x_0, y_0, z_0)$, the algorithm repeats the following: collapse the current cell;
+    if propagation fails or the next selection reports a contradiction, clear the grid and restart from the seed;
+    otherwise advance to the lowest-entropy cell. The loop terminates when every cell holds exactly one tile, or after <code>max_iters</code> attempts.
 
     <figure>
         <img src="/img/wave-function-collapse/wave-function-collapse-8.png" width="90%" onerror=handle_image_error(this)>
@@ -407,17 +405,17 @@ related:
 
     <br><br>
 
-    Two design choices drive the behaviour of this loop. First, the next cell to collapse is always the one with the fewest remaining candidates,
-    not a random cell. Picking the lowest-entropy cell concentrates work where the constraints are tightest, which keeps the
-    set of reachable contradictions small. Second, the failure recovery is the simplest possible: any contradiction throws away
-    the entire grid and restarts from the same seed cell. There is no backtracking or local repair.
-    With a small grid and a well-designed tileset this is fast enough; on larger grids the cost of repeated full restarts is the dominant runtime concern.
+    Two design choices govern the behaviour of this loop. First, the next cell to collapse is always the one with the fewest remaining candidates,
+    rather than a random cell. Selecting the lowest-entropy cell concentrates work where the constraints are tightest, which keeps the
+    set of reachable contradictions small. Second, the failure recovery is deliberately minimal: any contradiction discards
+    the entire grid and restarts from the same seed cell, with no backtracking or local repair.
+    For a small grid and a well-designed tileset this is fast enough, whereas on larger grids the cost of repeated full restarts becomes the dominant runtime concern.
 
     <br><br>
 
-    The seed is also where directional bias enters. The cat-tower target wants growth from the floor upward, so the seed is fixed at $z_0 = 0$
-    and propagation naturally fans out and up through the support-bearing tiles. The empty tile (id $0$) acts as a release valve:
-    raising <code>empty_weight</code> lets the algorithm pick "no tile" more often, producing thinner, more sculptural shapes,
+    The seed is also where directional bias enters. The cat-tower target requires growth from the floor upward, so the seed is fixed at $z_0 = 0$,
+    and propagation naturally fans outward and upward through the support-bearing tiles. The empty tile (id $0$) acts as a release valve:
+    raising <code>empty_weight</code> lets the algorithm select "no tile" more often, producing thinner, more sculptural shapes,
     while lowering it forces denser packings.
 
 </div><br><br>
@@ -425,10 +423,10 @@ related:
 <h3>Procedural Generation</h3>
 <div class="article">
 
-    The frames below are intermediate <code>.obj</code> snapshots dumped during a single run, replayed in order.
+    The frames below are intermediate <code>.obj</code> snapshots saved during a single run and replayed in order.
     Each new frame corresponds to one collapse-and-propagate step, so the animation traces the BFS as it
     sweeps outward from the seed cell at the floor. Different runs use different grid sizes, seeds, and
-    <code>empty_weight</code> values, which is why the resulting cat-towers have such different silhouettes.
+    <code>empty_weight</code> values, which is why the resulting cat-towers exhibit such different silhouettes.
 
     <figure>
         <div style="display: flex; justify-content: center; gap: 15px;">

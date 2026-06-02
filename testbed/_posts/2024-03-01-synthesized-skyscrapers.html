@@ -25,9 +25,9 @@ related:
 <h3>Introduction 🏢</h3>
 <div class="article">
 
-    <code>Deep Generative AI</code>, a field of artificial intelligence that focuses on generating new data similar to training data, is having an impact not only in text generation and image generation but also 3d model generation in the design industry.
+    <code>Deep Generative AI</code>, a field of artificial intelligence concerned with generating new data resembling its training data, is exerting an influence not only on text and image generation but also on 3d model generation within the design industry.
 
-    In the realm of architectural design, especially in the <code>phase of initial design</code>, generative AI can serve as a useful tool for examining many design options.
+    In the domain of architectural design, and particularly in the <code>phase of initial design</code>, generative AI can serve as a useful instrument for examining a large number of design options.
 
     <br><br>
     <figure>
@@ -39,16 +39,16 @@ related:
     </figure><br><br>
 
 
-    Leveraging the Deep Signed Distance Functions model (<a href="https://arxiv.org/pdf/1901.05103.pdf">DeepSDF</a>) with latent vectors, this project aims to <code>build the algorithm that can synthesize infinite number of skyscrapers</code> simliar to trained data.
-    These vectors, mapped within a high-dimensional latent space, serve as the DNA for synthesizing potential skyscrapers. 
-    
-    <br><br>
-    
-    So, through the system that manipulates the latent vectors for expressing the shape of the buildings, architectural designers can rapidly generate and examine a diverse array of design options.
+    By leveraging the Deep Signed Distance Functions model (<a href="https://arxiv.org/pdf/1901.05103.pdf">DeepSDF</a>) together with latent vectors, this project aims to <code>build the algorithm that can synthesize infinite number of skyscrapers</code> similar to the trained data.
+    These vectors, mapped within a high-dimensional latent space, serve as the DNA for synthesizing potential skyscrapers.
 
     <br><br>
-    By manipulating(interpolation, and arithmetic operations) between two or more latent vectors, the model gives us infinite design options virtually. 
-    This method not only provides a brand-new design process but also will lead us to explore the novel architectural forms previously unattainable through conventional design methodologies.
+
+    Through a system that manipulates the latent vectors that express the shape of the buildings, architectural designers can rapidly generate and examine a diverse array of design options.
+
+    <br><br>
+    By manipulating two or more latent vectors through interpolation and arithmetic operations, the model provides virtually infinite design options.
+    This method not only introduces a new design process but also enables the exploration of novel architectural forms that were previously unattainable through conventional design methodologies.
 
 
     <!--break-->
@@ -75,21 +75,21 @@ related:
         </figcaption>
     </figure><br><br>
 
-    At the core of SDFs lies their simplicity and power in <code>describing complex geometries.</code> 
-    Unlike traditional mesh representations, which rely on vertices, edges, and faces to define forms, by using SDFs, we can construct 3d mesh models with a continuous surface, and it just needs 3D grid-shaped <code>XYZs and their corresponding SDF values.</code>
-
-    <br><br>
-    
-    Let's take a look at the following example for the CCTV headquarters by OMA recovered from SDF = 0.
-    Initially, to obtain SDF values, the entire space around the CCTV headquarters model is sampled on a <code>regular grid</code> (In this example, resolution indicates the number of grid points. i.e., resolution 8 means 8x8x8 grid). 
-    At each grid point, the SDF provides a value that indicates the point's distance from the closest surface of the model. 
-    Inside the model, these values are negative (or positive, depending on the convention), and outside, they are positive (or negative). 
+    At the core of SDFs lies their simplicity and power in <code>describing complex geometries.</code>
+    Unlike traditional mesh representations, which rely on vertices, edges, and faces to define forms, SDFs allow a 3d mesh model with a continuous surface to be constructed, requiring only a 3D grid of <code>XYZs and their corresponding SDF values.</code>
 
     <br><br>
 
-    As you can see in the below figure, more grid points result in more detailed and accurate 3d models. 
-    The numbers of the grid points used in examples are respectively <code>8x8x8(=512), 16x16x16(=4096), 32x32x32(=32768), 64x64x64(=262144), 128x128x128(=2097152).</code>
-    To recover meshes using grid points and SDF values, it needs to use the <a href="https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html">Marching Cubes</a> algorithm.
+    The following example concerns the CCTV headquarters by OMA, recovered from SDF = 0.
+    To obtain the SDF values, the entire space around the CCTV headquarters model is first sampled on a <code>regular grid</code> (in this example, resolution indicates the number of grid points; that is, resolution 8 denotes an 8x8x8 grid).
+    At each grid point, the SDF provides a value indicating the distance of that point from the closest surface of the model.
+    Inside the model these values are negative (or positive, depending on the convention), and outside they are positive (or negative).
+
+    <br><br>
+
+    As the figure below illustrates, a greater number of grid points results in more detailed and accurate 3d models.
+    The numbers of grid points used in the examples are, respectively, <code>8x8x8(=512), 16x16x16(=4096), 32x32x32(=32768), 64x64x64(=262144), 128x128x128(=2097152).</code>
+    Recovering meshes from grid points and SDF values requires the <a href="https://scikit-image.org/docs/stable/auto_examples/edges/plot_marching_cubes.html">Marching Cubes</a> algorithm.
 
     <br><br>
 
@@ -103,10 +103,10 @@ related:
         </figcaption>
     </figure><br><br>
 
-    Because we need each <code>sign</code> that decides whether the point is inside or outside the model, 
-    the meshes we recover from SDF values must be <code>watertight</code> meshes that are fully closed.
-    By using the below code, I examined the recovered meshes from the SDF values and each grid resolution. 
-    The <code>check_watertight</code> parameter is set to True, so the code checks if the mesh is watertight, if not fully closed, it will convert the mesh to the watertight mesh using <a href="https://github.com/fwilliams/point-cloud-utils">pcu</a>. 
+    Because each <code>sign</code> that determines whether a point lies inside or outside the model is required,
+    the meshes recovered from the SDF values must be <code>watertight</code> meshes that are fully closed.
+    Using the code below, I examined the meshes recovered from the SDF values at each grid resolution.
+    The <code>check_watertight</code> parameter is set to True, so the code checks whether the mesh is watertight; if it is not fully closed, the mesh is converted to a watertight mesh using <a href="https://github.com/fwilliams/point-cloud-utils">pcu</a>.
 
 <pre><code class="python">
     mesh = DataCreatorHelper.load_mesh(
@@ -139,9 +139,9 @@ related:
 <h3>Data preparation and processing</h3>
 <div class="article">
 
-    The first step for preparing data to train DeepSDF model is to gather the 3d models of the skyscrapers. I used the <a href="https://3dwarehouse.sketchup.com/">3dwarehouse</a> to download the free 3d models.
-    I downloaded the following models in the below figure. From the left, CCTV headquarters · Mahanakhon · Hearst Tower · Bank of China · Empire State Building · Transamerica Pyramid · The Shard · Gherkin London · Taipei 101 · Shanghai World Financial Center · One World Trade Center · Lotte Tower · Kingdom Centre · China Zun · Burj Al Arab.
-    The 15 raw data I gathered is in this <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/tree/main/deep_sdf/data/raw-skyscrapers">link</a>.
+    The first step in preparing the data to train the DeepSDF model is to gather 3d models of skyscrapers. I used <a href="https://3dwarehouse.sketchup.com/">3dwarehouse</a> to download the free 3d models.
+    The models shown in the figure below were downloaded. From the left, CCTV headquarters · Mahanakhon · Hearst Tower · Bank of China · Empire State Building · Transamerica Pyramid · The Shard · Gherkin London · Taipei 101 · Shanghai World Financial Center · One World Trade Center · Lotte Tower · Kingdom Centre · China Zun · Burj Al Arab.
+    The 15 raw data items gathered are available at this <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/tree/main/deep_sdf/data/raw-skyscrapers">link</a>.
     <br><br>
     <figure>
         <img src="/img/synthesized-skyscrapers/synthesized-skyscrapers-4.png" width="100%" onerror=handle_image_error(this)>
@@ -150,16 +150,16 @@ related:
         </figcaption>
     </figure><br><br>
 
-    The next step includes <code>(1) normalizing</code> all data to fit within a regular grid volume, <code>(2) converting</code> them into a consistent format. 
+    The next step comprises <code>(1) normalizing</code> all data to fit within a regular grid volume and <code>(2) converting</code> them into a consistent format.
 
     <br><br>
 
 
-    (1) normalizing: 
-    Generally, when geometry data is used for learning, it is normalized to a value between 0 and 1 for <code>each individual object</code>, and normalized by moving the centroid of the model to the origin(0, 0). 
-    i.e., the farthest point of the model is set to 1. If we use the normalization method used generally, it doesn't reflect the relative height of the skyscrapers.
+    (1) normalizing:
+    In general, when geometry data is used for learning, it is normalized to a value between 0 and 1 for <code>each individual object</code> and centered by moving the centroid of the model to the origin (0, 0);
+    that is, the farthest point of the model is set to 1. This common normalization method, however, does not reflect the relative height of the skyscrapers.
 
-    Therefore, in this project, the height of the <code>highest model</code> among all skyscrapers data is set to 1 and normalized.
+    Therefore, in this project the height of the <code>highest model</code> among all skyscraper data is set to 1 and used as the basis for normalization.
     <img src="/img/synthesized-skyscrapers/synthesized-skyscrapers-6.png" width="80%" onerror=handle_image_error(this)>
     <figcaption>
         Normalized skyscrapers <br>
@@ -169,8 +169,8 @@ related:
 
 
     (2) converting:
-    The DeepSDF model's feed-forward networks have the following architecture. It is composed of 8 fully connected layers, denoted as "FC" on the diagram.
-    As you can see in the below figure, the dimension of the input X excepting latent vectors consists of (x, y, z) 3.
+    The feed-forward network of the DeepSDF model has the following architecture. It is composed of 8 fully connected layers, denoted as "FC" in the diagram.
+    As shown in the figure below, the dimension of the input X, excluding the latent vectors, consists of the 3 values (x, y, z).
     <br><br>
     <img src="/img/synthesized-skyscrapers/synthesized-skyscrapers-5.png" width="80%" onerror=handle_image_error(this)>
     <figcaption>
@@ -178,9 +178,9 @@ related:
     </figcaption>
     </figure><br><br>
     
-    The data sample \( X \) is composed of \( (x, y, z) \) and the corresponding label \( s \) like this: \( X := \{(x, s) : SDF(x) = s\} \)
-    Additionally, class numbers are required to assign a latent vector to each sample. 
-    As mentioned in the introduction part, the latent vectors play the role of the DNA in representing the shape of the buildings.
+    The data sample \( X \) is composed of \( (x, y, z) \) and the corresponding label \( s \), as follows: \( X := \{(x, s) : SDF(x) = s\} \)
+    Additionally, class numbers are required in order to assign a latent vector to each sample.
+    As noted in the introduction, the latent vectors play the role of the DNA in representing the shape of the buildings.
 
 <pre><code class="python">
     class SDFdataset(Dataset, Configuration):
@@ -204,7 +204,7 @@ related:
 <h3>Implementing and training of DeepSDF model</h3>
 <div class="article">
 
-    As can be seen in the above part of <code>(2) converting</code>, the feed-forward network of the DeepSDF model is simple as follows.
+    As shown above in the <code>(2) converting</code> part, the feed-forward network of the DeepSDF model is simple, as follows.
 
 <pre><code class="python">
     class SDFdecoder(nn.Module, Configuration):
@@ -254,11 +254,11 @@ related:
 The <code>SDFdecoder</code> class has the following arguments as inputs:
     
 <ul style="padding-left: 2em;">
-    <li><code>cls_nums</code> is the number of skyscrapers</li>
-    <li><code>latent_size</code> is the dimension of the latent vector</li>
+    <li><code>cls_nums</code> is the number of skyscrapers.</li>
+    <li><code>latent_size</code> is the dimension of the latent vector.</li>
 </ul><br>
 
-In this project, the <code>cls_nums</code> and <code>latent_size</code> were used as 15 and 128, respectively.
+In this project, <code>cls_nums</code> and <code>latent_size</code> were set to 15 and 128, respectively.
 Therefore, the size of the instance variable initialized for the latent vector (self.latent_codes) is <code>torch.Size([15, 128])</code>.
 
 <br><br>
@@ -267,8 +267,8 @@ The <code>skip connection</code> technique used in forward propagation enables t
 
 <br><br>
 
-Now let's look at the learning process. It was trained for 150 epochs, and the total number of data (number of points) is 64x64x64x15 (=3932160). This is divided into an 8:2 ratio and used in the learning and evaluation process. It took an average of 1000 seconds per epoch.
-At the end of each epoch loop, I added code to reconstruct the skyscraper to <code>qualitatively evaluate</code> the model.
+The learning process is described next. The model was trained for 150 epochs, and the total number of data (number of points) is 64x64x64x15 (=3932160). This was divided in an 8:2 ratio and used for the learning and evaluation processes. Training took an average of 1000 seconds per epoch.
+At the end of each epoch loop, I added code to reconstruct a skyscraper in order to <code>qualitatively evaluate</code> the model.
 
 
 <figure>
@@ -280,9 +280,9 @@ At the end of each epoch loop, I added code to reconstruct the skyscraper to <co
     From the top, reconstructed skyscraper · losses
 </figcaption><br><br>
 
-After training the model for 150 epochs, 
-I reconstructed the 3D model by predicting the SDF value for each point in regular grid points for 15 skyscrapers with latent vectors.
-In the below figure, the buildings in the left row are reconstructed by the model, and the buildings in the right row are the original 3D models.
+After training the model for 150 epochs,
+I reconstructed the 3D models for the 15 skyscrapers with latent vectors by predicting the SDF value at each point of a regular grid.
+In the figure below, the buildings in the left row are reconstructed by the model, and the buildings in the right row are the original 3D models.
 
 <br><br><br>
 <figure>
@@ -292,9 +292,9 @@ In the below figure, the buildings in the left row are reconstructed by the mode
     Comparing reconstructed skyscrapers vs. originals
 </figcaption><br><br>
 
-I think the model is unable to reconstruct the original skyscrapers with precise details accurately, 
-but it seems to generate skyscrapers that are similar to the original skyscrapers appropriately.
-In this task for reconstructing models, I used 384x384x384(=56623104) for the grid points resolution.
+The model does not appear to reconstruct the precise details of the original skyscrapers accurately,
+but it does generate skyscrapers that are reasonably similar to the originals.
+For this reconstruction task, I used a grid resolution of 384x384x384(=56623104).
 
 
 </div>
@@ -302,9 +302,9 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
 
 <h3>Synthesizing skyscrapers infinitely</h3>
 <div class="article">
-    Lastly, let me synthesize skyscrapers by interpolating them or using arithmetic operations.
-    Through the <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/blob/main/deep_sdf/src/synthesize.py#L193-L289">following code</a>, you can generate infinite data of different shapes, starting by synthesizing latent vectors for the initial 15 buildings.
-    In this time, to synthesize them, I used 128x128x128(=2097152) grid points resolution.
+    Finally, skyscrapers are synthesized by interpolation or by arithmetic operations.
+    The <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/blob/main/deep_sdf/src/synthesize.py#L193-L289">following code</a> generates an unlimited amount of data of different shapes, beginning by synthesizing latent vectors from the initial 15 buildings.
+    For this synthesis, I used a grid resolution of 128x128x128(=2097152).
 
 <pre><code class="python">
     def infinite_synthesis(
@@ -399,8 +399,8 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
     <img src="/img/synthesized-skyscrapers-10-min.gif" width="100%">
 </figure><br>
 <figcaption style="text-align: center; margin-top: 1em">
-    From 15 skyscrapers to the 450 skyscrapers <br>
-    The first row that is illustrated as rectangles the initial 15 skyscrapers
+    From 15 skyscrapers to 450 skyscrapers <br>
+    The first row, illustrated as rectangles, shows the initial 15 skyscrapers
 </figcaption>
 
 </div>
@@ -409,17 +409,17 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
 <h3>Tracking synthesized data</h3>
 <div class="article">
 
-    Since the function used above for synthesizing skyscrapers records data, we can use the data to check the parents of the synthesized skyscrapers.
-    The process involves tracking back from any given synthesized design to its origins using graph-based analysis. 
-    This helps us to <code>understand how specific designs are derived</code> and the influence of original models on synthesized outcomes.
-    Therefore, to track the synthesized skyscrapers, I used the <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/blob/main/deep_sdf/src/synthesize.py#L292-L324">BFS</a>.
+    Since the function used above for synthesizing skyscrapers records data, this data can be used to check the parents of the synthesized skyscrapers.
+    The process traces any given synthesized design back to its origins through graph-based analysis.
+    This helps to <code>understand how specific designs are derived</code> and to assess the influence of the original models on the synthesized outcomes.
+    To track the synthesized skyscrapers, I therefore used <a href="https://github.com/PARKCHEOLHEE-lab/deep-sdf/blob/main/deep_sdf/src/synthesize.py#L292-L324">BFS</a>.
 
 
     <br><br>
 
 
-    The figures below demonstrate the application of these functions, showing the trace and visualization of synthesized skyscrapers starting from initial designs through various synthesis steps, culminating in complex structures. 
-    This illustrates the complex relationships and dependencies within the synthesized skyscrapers.
+    The figures below demonstrate the application of these functions, showing the trace and visualization of synthesized skyscrapers from the initial designs through various synthesis steps, culminating in complex structures.
+    This illustrates the complex relationships and dependencies among the synthesized skyscrapers.
 
     <br><br>
     
@@ -452,8 +452,8 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
 <h3>Limitations and future works</h3>
 <div class="article">
     
-    While the project demonstrates the potential of Deep Generative AI in synthesizing skyscraper designs, it's not without its limitations. 
-    So, the following points need to be improved:
+    While the project demonstrates the potential of Deep Generative AI for synthesizing skyscraper designs, it is not without its limitations.
+    The following points therefore require improvement:
 
     <ul>
     <li>
@@ -465,7 +465,7 @@ In this task for reconstructing models, I used 384x384x384(=56623104) for the gr
         <!-- Therefore, it is appropriate to use models in the initial design phase.  -->
     </li><br>
     <li>
-        <u>Computational Resources</u>: The process of training the model, especially at high resolutions for detailed synthesis, requires substantial computational power and time
+        <u>Computational Resources</u>: The process of training the model, especially at high resolutions for detailed synthesis, requires substantial computational power and time.
         <!-- Therefore, it is necessary to research ways for synthesizing the 3d model faster. -->
     </li><br>
     <li>

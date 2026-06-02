@@ -24,15 +24,15 @@ related:
 <div class="article">
 
   
-  In the best of my knowledge, latent vectors are initialized from a normal distribution and then updated during training to minimize the loss.
-  Although linear interpolation can be used in the manipulations between latent vectors, 
-  and similar vectors can be placed in spatially close locations, the latent vectors themselves do not have a specific shape.
+  Latent vectors are typically initialized from a normal distribution and then updated during training to minimize the loss function.
+  Although linear interpolation can be used between latent vectors,
+  and similar vectors can be placed in spatially close locations, the latent vectors themselves do not have a specific geometric shape or structure.
 
   <br><br>
 
-  This project takes inspiration from this <a href="https://parkcheolhee-lab.github.io/latent-points/">perspective</a> and explores two main conceptions:
-  <strong>1) Latent vectors with geometric shape ─</strong> exploring what happens if we give the latent vectors a geometric structure, and how that might help us better understand or control the results;
-  <strong>2) Interactive manipulation using the latent vector ─</strong> making it possible for people to easily change and play with the latent vectors, <mark>so they can see and understand the effects right away and create new shapes or designs interactively.</mark>
+  This project takes inspiration from this <a href="https://parkcheolhee-lab.github.io/latent-points/">perspective</a> and explores two main ideas:
+  <strong>1) Latent vectors with geometric shape ─</strong> exploring what happens if latent vectors are given a geometric structure, and how this can help us better understand, interpret, or control the results;
+  <strong>2) Interactive manipulation using the latent vector ─</strong> making it possible for users to modify latent vectors easily, <mark>so they can immediately see the effects and create new shapes or designs in an interactive way.</mark>
 
   <br><br>
 
@@ -46,24 +46,24 @@ related:
 
 <h3>Data Preprocessing</h3>
 <div class="article">
-    This project is based on the chair dataset (03001627) from ShapeNetCore. You can access the original data <a href="https://huggingface.co/datasets/ShapeNet/ShapeNetCore">here</a>.
+    This project uses the chair dataset (03001627) from ShapeNetCore. The original data is available <a href="https://huggingface.co/datasets/ShapeNet/ShapeNetCore">here</a>.
   <!--break-->
-    First, let's look at the meshes in ShapeNetCore. The dataset contains 6778 data points, all of which are already scaled to small values and are not zero-centered.
-    Additionally, a few data points are not aligned to the AABB axis. Therefore, all meshes must first pass the following steps. 
-    In this, the DeepSDF model architecture will be used as the mesh reconstruction network, so all meshes must also be watertight.
+    First, I examine the meshes in ShapeNetCore. The dataset contains 6778 data points, and all meshes are already scaled to small values, but are not zero-centered.
+    In addition, some meshes are not aligned with the AABB axis. Therefore, all meshes must go through the following steps before training.
+    In this project, the DeepSDF model architecture is used as the mesh reconstruction network, so all meshes must also be watertight.
 
     <ol>
         <li>
-            <strong>watertight</strong>: make each mesh watertight to ensure correct SDF values computation
+            <strong>watertight</strong>: each mesh is made watertight to ensure correct computation of SDF values.
         </li>
         <li>
-            <strong>centralize</strong>: translate each mesh to be zero-centered
+            <strong>centralize</strong>: each mesh is translated to be zero-centered.
         </li>
         <li>
-            <strong><a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py#L62-L104">orient</a></strong>: align each mesh to the AABB axis
+            <strong><a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py#L62-L104">orient</a></strong>: each mesh is aligned to the AABB axis.
         </li>
         <li>
-            <strong>sdf values compute</strong>: use these values to train a model for mesh reconstruction
+            <strong>sdf values compute</strong>: the resulting SDF values are used to train a model for mesh reconstruction.
         </li>
     </ol>
 
@@ -78,17 +78,17 @@ related:
     </figure>
     <br><br>
 
-    Now, as the final step, let's <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py#L106-L156">compute latent shapes</a>. The processes for computing them are:
-    1) creating a bounding box of the mesh; 
-    2) applying a scale matrix to the bounding box; 
-    3) subdividing the bounding box n times; 
-    4) adjusting bounding box vertices to the point intersected with a ray or the nearest point on the mesh 
-    (uses negative normal vectors if top and bottom faces of the bounding mesh else the nearest points on the mesh); 
+    Now, as the final step, the <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py#L106-L156">latent shapes are computed</a>. The process consists of the following steps:
+    1) creating a bounding box of the mesh;
+    2) applying a scale matrix to the bounding box;
+    3) subdividing the bounding box n times;
+    4) adjusting the bounding box vertices to the intersection point of a ray or the nearest point on the mesh
+    (using negative normal vectors for the top and bottom faces of the bounding mesh, otherwise using the nearest points on the mesh).
 
     <br><br>
 
     After all processing steps, the data is saved in *.npz format with the following data: xyz coordinates, sdf values, latent shape, faces (latent shape face indices), and class number (shape embedding number).
-    The code for processing the data can be found <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py">here</a>.
+    The code for processing the data is available <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py">here</a>.
 
     <br><br>
 
@@ -106,13 +106,13 @@ related:
 <h3>Model Architecture</h3>
 <div class="article">
 
-    The training target to optimize consists of <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/model.py#L36-L155">SDFDecoder</a> and the LatentShapes. 
-    The SDFDecoder follows the architecture used in DeepSDF, where the initial input data is skip-connected to the input of each block.
-    A number of blocks, and a number of layers of a block can be adjusted in config.py.
+    The training target to optimize consists of the <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/model.py#L36-L155">SDFDecoder</a> and the LatentShapes.
+    The SDFDecoder follows the architecture used in DeepSDF, where the initial input data is skip-connected to each block input.
+    The number of blocks and the number of layers in each block can be adjusted in config.py.
 
     <br><br>
 
-    The class for <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/model.py#L14-L33">LatentShapes</a> is defined as follows. Latent shapes' embedding attribute is initialized to pre-computed latent shapes above with noise (in this project, the values <code>noise_min = -0.1</code> and <code>noise_max = 0.1</code> are used).
+    The <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/model.py#L14-L33">LatentShapes</a> class is defined as follows. The embedding attribute of LatentShapes is initialized with pre-computed latent shapes with added noise (in this project, the noise values are set to <code>noise_min = -0.1</code> and <code>noise_max = 0.1</code>).
     In the forward pass, it returns the embeddings corresponding to the given classes.
 <pre><code class="python">
     class LatentShapes(nn.Module):
@@ -142,10 +142,10 @@ related:
 
     <br><br>
 
-    The diagram below visually indicates the entire training process of the models.
-    Each point at the upper left in the figure represents 3D \(\text{xyz (1, 3)}\) coordinate used as an input.
-    This coordinate is combined with the \(\text{latent shape (1, 98×3)}\), so the initial input for the forward pass is a \(\text{(1, 297)}\)-shaped vector.
-    SDFDecoder is trained on this combined data to predict an \(\text{sdf}\) value.
+    The diagram below shows the overall training process of the models.
+    Each point at the upper left in the figure represents a 3D \(\text{xyz (1, 3)}\) coordinate used as input.
+    This coordinate is combined with the \(\text{latent shape (1, 98×3)}\), so the initial input for the forward pass is a \(\text{(1, 297)}\) vector.
+    The SDFDecoder is trained on this combined input to predict an \(\text{sdf}\) value.
 
     <br><br>
 
@@ -158,15 +158,15 @@ related:
 
     <br><br>
 
-    The latent shape at the lower left indicates that the \(\text{latent shape}\) embedding is initialized with noise, as I described above.
-    Training latent shapes are gradually updated to the originals, and this approach enables flexible representation, allowing better reconstruction performance even when the latent shapes are not perfectly matched to the originals.
-    
+    The latent shape at the lower left indicates that the \(\text{latent shape}\) embedding is initialized with noise, as described above.
+    During training, the latent shapes are gradually updated toward the original shapes, and this approach allows flexible representation and better reconstruction performance even when the latent shapes are not perfectly matched to the originals.
+
     <br><br>
 
-    Lastly, the losses to optimize them are two. The one is \( \mathbf{Loss_{sdf}} \) 
-    that computes the difference between the predicted value and the ground truth value.
-    The \( \mathbf{Loss_{shape}} \) is another one that guides the embedding to be the original latent shape.
-    Through these losses, the LatentShapes and the SDFDecoder are optimized and improved simultaneously.
+    Lastly, there are two losses used for optimization. The first is \( \mathbf{Loss_{sdf}} \),
+    which computes the difference between the predicted value and the ground truth value.
+    The second is \( \mathbf{Loss_{shape}} \), which guides the embedding toward the original latent shape.
+    Through these losses, the LatentShapes and the SDFDecoder are optimized and improved at the same time.
   
 
 </div><br><br>
@@ -174,18 +174,18 @@ related:
 <h3>Training & Memory Strategy</h3>
 <div class="article">
 
-    In this project, NVIDIA GeForce RTX 4090 is used to train models for 120 epochs using only \(50\) chairs of data. 
-    Each data point has \(36^3\) xyz coordinates. Therefore the total number of xyz is \(36^3 \times 50 = 2332800\)
+    In this project, an NVIDIA GeForce RTX 4090 is used to train the models for 120 epochs using only \(50\) chairs of data.
+    Each data point has \(36^3\) xyz coordinates, so the total number of xyz coordinates is \(36^3 \times 50 = 2332800\).
 
-    Since the GPU doesn't have enough memory to load this much data into memory all at once (OOM), 
-    it should be loaded only when needed.
+    Since the GPU does not have enough memory to load all of this data at once (OOM),
+    the data should be loaded only when needed.
 
     <br><br>
 
-    The following <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py#L380-L405">code</a> is the implementation way.
-    First, the <code>cumulative_length</code> is pre-computed based on the total number of samples per data point at initialization time.
-    Then, given an index, the corresponding file is loaded, 
-    and the index is mapped to the correct sample within that file by using modulo with the total sampling number.
+    The following <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/data.py#L380-L405">code</a> shows the implementation.
+    First, the <code>cumulative_length</code> is pre-computed at initialization time based on the total number of samples per data point.
+    Then, given an index, the corresponding file is loaded,
+    and the index is mapped to the correct sample within that file using modulo with the total sampling number.
 
 <pre><code class="python">
     class SDFDataset(Dataset):
@@ -227,11 +227,11 @@ related:
 
     Below is the code used for <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/trainer.py#L146-L195">training at each epoch</a>.
 
-    The variable <code>cxyz</code> represents the combined input described in the Architecture section above. 
-    The SDFDecoder model takes this combined input and predicts sdf values in batches. 
+    The variable <code>cxyz</code> represents the combined input described in the Architecture section above.
+    The SDFDecoder model takes this combined input and predicts sdf values in batches.
     The model's weights are updated based on the <code>loss</code> that corresponds to \( \mathbf{Loss_{sdf}} \).
 
-    Since the LatentShapes are initialized with noise, the <code>loss_shape</code> that corresponds to \( \mathbf{Loss_{shape}} \) is used to update them 
+    Since the LatentShapes are initialized with noise, the <code>loss_shape</code> that corresponds to \( \mathbf{Loss_{shape}} \) is used to update them
     so that they gradually become closer to the original latent shapes.
 
 <pre><code class="python">
@@ -292,14 +292,14 @@ related:
 
     <br><br>
 
-    The flag for saving the decoder model's state uses the <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/trainer.py#L282-L285">weighted sum</a> of the training loss and validation loss. 
-    The weights are set to 0.1 and 1.0, respectively, so that the model is saved with a focus on validation generalization performance, 
+    The flag for saving the decoder model's state uses the <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes/blob/main/latent_shapes/src/trainer.py#L282-L285">weighted sum</a> of the training loss and the validation loss.
+    The weights are set to 0.1 and 1.0, respectively, so that the model is saved with a focus on validation generalization performance,
     while a small weight on the training loss ensures that the model can also reconstruct the training data well.
 
     <br><br>
 
-    The following are the loss graphs per epoch. All the losses <code>loss_mean</code>, <code>loss_mean_val</code>,  <code>loss_shape_mean</code>, and <code>loss_shape_mean_val</code> show stable convergence.
-    Next chapter, let's qualitatively evaluate the reconstruction performance.
+    The following are the loss graphs per epoch. All of the losses <code>loss_mean</code>, <code>loss_mean_val</code>,  <code>loss_shape_mean</code>, and <code>loss_shape_mean_val</code> show stable convergence.
+    In the next chapter, the reconstruction performance is evaluated qualitatively.
 
     <figure>
         <img src="/img/latent-shapes/latent-shapes-4.png" width="100%" onerror=handle_image_error(this)>
@@ -314,7 +314,7 @@ related:
 <div class="article">
 
     The following figure shows the results of reconstructing 50 trained chairs using latent shape embeddings and the decoder (the marching cubes algorithm was applied at a resolution of \(192^3\)).
-    You can see that even the details, such as the legs and armrests of the chairs, are properly reconstructed.
+    Details such as the legs and armrests of the chairs are properly reconstructed.
 
     <figure>
         <img src="/img/latent-shapes/latent-shapes-5.png" width="100%" onerror=handle_image_error(this)>
@@ -325,12 +325,12 @@ related:
 
     <br><br>
 
-    Let me now examine several results generated using the trained shape embeddings through ratio-based linear interpolation. 
-    The data on the left and right represent the inputs to be interpolated, while the center shows the result interpolated according to the specified ratios. 
-    The following ratios were used \( \text{[[0.50, 0.50], [0.30, 0.70], [0.60, 0.40], [0.45, 0.55]]} \).
+    Next, several results generated using the trained shape embeddings through ratio-based linear interpolation are examined.
+    The data on the left and right represent the input shapes to be interpolated, while the center shows the interpolated result according to the specified ratios.
+    The following ratios were used: \( \text{[[0.50, 0.50], [0.30, 0.70], [0.60, 0.40], [0.45, 0.55]]} \).
 
-    Although this approach is effective for data interpolation, it remains difficult to predict the specific changes that occur when only a portion of the latent vector is manipulated. 
-    Particularly, it isn't easy to predict which components of the vector correspond to specific geometric parts.
+    Although this method works well for interpolation between shapes, it is still difficult to predict the specific changes when only part of the latent vector is modified.
+    In particular, it is not easy to determine which components of the vector correspond to specific geometric parts.
     
     <figure>
         <img src="/img/latent-shapes/latent-shapes-6.png" width="100%" onerror=handle_image_error(this)>
@@ -341,8 +341,8 @@ related:
 
     <br><br>
     
-    So instead of relying on these static interpolation methods, 
-    let's finally look at the core implementation of the interface that allows interactive manipulation of the latent vector.
+    Instead of relying on these static interpolation methods,
+    the next section examines the core implementation of the interface that allows interactive manipulation of the latent vector.
 
 </div><br><br>
 
@@ -355,14 +355,14 @@ related:
     reconstruct api request는 다음과 같이 정의되며, 마칭큐브 알고리즘 특성상 resolution 크기에 따라 복원능력과 복원속도에 대한 트레이드오프가 있으므로 사용자가 조절가능하도록 합니다.
     -->
 
-    Here, I briefly describe the implementation of the demo GIF shown in the introduction section. 
-    First, <code>FastAPI</code> is used as the communication layer connecting the interface with the model. 
-    The API returns results in JSON format, where both the reconstruction outputs and latent shape data are represented as mesh data based on vertices and faces.
+    Here, I briefly describe the implementation of the demo GIF shown in the introduction section.
+    First, <code>FastAPI</code> is used as the communication layer connecting the interface with the model.
+    The API returns results in JSON format, where both the reconstruction outputs and the latent shape data are represented as mesh data based on vertices and faces.
 
     <br><br>
 
-    The reconstruct API request is defined as follows. 
-    Due to the Marching Cubes algorithm, there is a trade-off between reconstruction quality and reconstruction speed depending on the resolution size. 
+    The reconstruct API request is defined as follows.
+    Due to the Marching Cubes algorithm, there is a trade-off between reconstruction quality and reconstruction speed depending on the resolution.
     Therefore, this parameter is made adjustable by the user to balance fidelity and performance.
 
 <pre><code class="python">
@@ -420,19 +420,19 @@ related:
 
     <br><br>
 
-    Finally, the last part is a construction of the Three.js-based interface. 
-    The latent shapes are generated by naively shrink-wrapping a subdivided mesh box for the chair data, resulting in a mesh that can be directly rendered on a Three.js canvas. 
+    Finally, the last part is the construction of the Three.js-based interface.
+    The latent shapes are generated by shrink-wrapping a subdivided mesh box for the chair data, resulting in a mesh that can be directly rendered on a Three.js canvas.
     The main objective is to allow users to manipulate the vertices of this mesh, thereby creating an <strong>intuitive and interactive interpolation experience</strong>.
 
     <br><br>
 
-    Three.js's SelectionBox and TransformControls form the central modules of this implementation, enabling precise vertex selection and transformation within the interface.
+    Three.js SelectionBox and TransformControls are the main modules used in this implementation, enabling precise vertex selection and transformation within the interface.
 
     <br><br>
 
-    The key logic of the SelectionBox is in converting the browser's mouse coordinates to <a href="https://sonagi87174.tistory.com/26">Normalized Device Coordinates</a> (NDC). 
+    The key logic of the SelectionBox lies in converting the browser's mouse coordinates to <a href="https://sonagi87174.tistory.com/26">Normalized Device Coordinates</a> (NDC).
     While the browser uses a coordinate system ranging from 0 to 1, Three.js requires coordinates in the -1 to 1 range for Raycaster or SelectionBox operations.
-    In the browser, the y-coordinate gets bigger as you move down the screen, but in NDC, the y-coordinate gets bigger as you move up. So, you need to flip the sign of the y-coordinate when converting.
+    In the browser, the y-coordinate increases toward the bottom of the screen, whereas in NDC the y-coordinate increases toward the top. Therefore, the sign of the y-coordinate must be flipped during the conversion.
 
     <br><br>
 
@@ -499,11 +499,11 @@ related:
 
     <br><br>
 
-    Because TransformControls in Three.js can only be attached to one object at a time, 
-    this implementation attaches the controls to the first selected object. 
-    When the user moves this object, the same movement offset <code>(dx, dy, dz)</code> is applied to the other selected objects, preserving their relative positions.
+    Because TransformControls in Three.js can only be attached to one object at a time,
+    this implementation attaches the controls to the first selected object.
+    When the user moves this object, the same movement offset <code>(dx, dy, dz)</code> is applied to the other selected objects so that their relative positions are preserved.
 
-    This approach ensures that users can interactively manipulate multiple vertices at once, even though TransformControls is attached to a single object.
+    This approach allows users to interactively manipulate multiple vertices at once, even though TransformControls is attached to only one object.
 
     <br><br>
 
@@ -545,8 +545,8 @@ related:
 
     <br><br>
 
-    This project can be explored in detail in the <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">repository</a> linked. 
-    I will conclude this post by sharing a demo GIF illustrating the interactive latent shape manipulation.
+    This project can be explored in detail in the linked <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">repository</a>.
+    I conclude this post by sharing a demo GIF illustrating the interactive latent shape manipulation.
 
     <br><br>
 

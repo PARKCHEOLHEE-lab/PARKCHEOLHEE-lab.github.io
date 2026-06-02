@@ -17,9 +17,9 @@ related:
 <div id="toc"></div>
 <h3>What is a Voxel ? 🧊</h3>
 <div style='text-align: justify;'>
-    In computer graphics, a <a href="https://www.megavoxels.com/learn/what-is-a-voxel/">voxel</a>, also known as a 3D pixel, is a 3D cube located on a three-dimensional grid used to create 3D models. 
-    Similar to a pixel in a 2D image, a voxel can contain a specific location inside a <code>3D grid</code> and has a color value assigned to it. 
-    All individual voxels are the same size, however voxels can then be combined in the same grid at different positions with different colors to create what is known as a voxel model.
+    In computer graphics, a <a href="https://www.megavoxels.com/learn/what-is-a-voxel/">voxel</a>, also known as a 3D pixel, is a 3D cube located on a three-dimensional grid and used to construct 3D models.
+    Similar to a pixel in a 2D image, a voxel occupies a specific location inside a <code>3D grid</code> and has a color value assigned to it.
+    All individual voxels are the same size; however, voxels can be combined within the same grid at different positions and with different colors to create what is known as a voxel model.
     <figure>
         <a href="https://www.gamersnexus.net/gg/762-voxels-vs-vertexes-in-games">
             <img src="../img/voxelate-0.png" style="width: 50%;">
@@ -30,9 +30,9 @@ related:
     </figure>
     <br>
     
-    In addition, a voxel is also used as the smallest unit composing an architectural space. This is because <code>voxels have no deadspace</code> and can be used for all architectural purposes and reasonable.
-    Therefore It's being used in many architectural offices. The process of architecture below shows how to apply <code>voxelization to the building.</code>
-    This article covers automation of voxelization and how change to the voxelated shape when given specific shape. And let's put some information in the voxel.
+    In addition, a voxel is used as the smallest unit composing an architectural space, because <code>voxels have no deadspace</code> and can be applied to architectural purposes in a reasonable and consistent manner.
+    For this reason, voxels are used in many architectural offices. The architectural process below illustrates how <code>voxelization is applied to a building.</code>
+    This article covers the automation of voxelization, how a given shape is transformed into a voxelated shape, and how information can be embedded within each voxel.
     <!--break-->
     <br><br>
     <figure>
@@ -46,15 +46,15 @@ related:
 <br>
 <h3>3D grid & conditions map</h3>
 <div style='text-align: justify;'>
-    First we should create <code>grids</code> and to create a grid, need a bounding box of given shape. The angle of bounding box sets sun faced like the <code>picture 4</code> above.
-    Through the segments X and Y of the bounding box facing the sun, we can get a 3D voxel grid of the desired size that fully fills the bounding box. 
-    Then we check if the voxel is inside the given shape, <code>filter only the voxel that is inside the shape.</code> 
+    First, <code>grids</code> must be created, and creating a grid requires the bounding box of the given shape. The angle of the bounding box is set to face the sun, as shown in <code>picture 4</code> above.
+    Using the X and Y segments of the bounding box facing the sun, a 3D voxel grid of the desired size that fully fills the bounding box is obtained.
+    Each voxel is then tested against the given shape in order to <code>filter only the voxel that is inside the shape.</code>
     <br><br>
-    This grid of voxels can be represented as a <code>List,</code> one of Python's data structures. And the data structure List can express <code>multi-dimensional</code> data.
-    Let's take a look at a simple example below. 
+    This grid of voxels can be represented as a <code>List,</code> one of Python's data structures. The List data structure can express <code>multi-dimensional</code> data.
+    A simple example is examined below.
     <br><br>
-    The given simple conditions are as follows. <i>① voxel size: 2.0 ② given shape: sphere that radius: 20.0</i>. As mentioned earlier, in the last picture below you can see the voxel data structure represented as a List in Python.
-    Data of <code>0</code> means empty voxels and data of <code>1</code> means filled voxels.
+    The simple conditions are as follows: <i>① voxel size: 2.0 ② given shape: sphere that radius: 20.0</i>. As mentioned earlier, the last picture below shows the voxel data structure represented as a List in Python.
+    A value of <code>0</code> denotes empty voxels, and a value of <code>1</code> denotes filled voxels.
 
     <br><br>
     <figure>
@@ -70,8 +70,8 @@ related:
 <h3>Determining the voxel's condition</h3>
 <div style="text-align: justify;">
     
-    Now, we can determine each voxel condition through the data we have. 
-    <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L101-L111">Examples</a> include <code>interior voxels, exterior voxels, corner voxels, and roof voxels</code> etc.
+    The condition of each voxel can now be determined from the available data.
+    <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L101-L111">Examples</a> include <code>interior voxels, exterior voxels, corner voxels, and roof voxels</code>, among others.
     <br><br>
 
 <pre><code class="python">
@@ -145,9 +145,9 @@ related:
 </code></pre>
 <br><br>
 
-    To determine the ROOF voxel, simply <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L587-L592">check the condition</a> of the upper voxel. 
-    Likewise, to determine the CORNER voxel, simply check previous voxel, next voxel, front voxel, back voxel.
-    The diagram below shows how red voxels are estimated to be CORNER voxels. Please refer to the link above for detailed code related to determining the voxel condition.
+    To determine the ROOF voxel, it is sufficient to <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L587-L592">check the condition</a> of the upper voxel.
+    Likewise, to determine the CORNER voxel, the previous, next, front, and back voxels are checked.
+    The diagram below shows how the red voxels are identified as CORNER voxels. The link above provides the detailed code for determining the voxel condition.
 
     <figure>
         <img src="../img/voxelate-3.png" style="width: 80%;">
@@ -160,9 +160,9 @@ related:
 <br>
 <h3>Voxel unit matching by condition</h3>
 <div style="text-align: justify;">
-    Several predefined VoxelUnits can be matched through the condition of each voxel determined based on the conditions map.
-    You can design and apply a unit suitable for the desired voxel size, and if you wish, you can <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L138-L143">resize</a> the voxel size and apply it.
-    And for voxel matching, it also supports <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L131-L136">rotation</a> function by calculating the angle of the voxel.
+    Several predefined VoxelUnits can be matched according to the condition of each voxel, as determined from the conditions map.
+    A unit suitable for the desired voxel size can be designed and applied, and the voxel size can also be <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L138-L143">resized</a> as needed.
+    For voxel matching, a <a href="https://github.com/PARKCHEOLHEE-lab/fff/blob/main/voxelate/voxelate.py#L131-L136">rotation</a> function is also supported, computed from the angle of the voxel.
 
     <figure>
         <img src="../img/voxelate-4.png" style="width: 80%;">
@@ -206,33 +206,33 @@ related:
 </code></pre>
 
     <br><br>
-    Finally, I'll wrap up the article by showing some examples of each of the above VoxelUnits applied. See the <a href="https://github.com/PARKCHEOLHEE-lab/fff/tree/main/voxelate">link</a> for details.
+    Finally, the article concludes with several examples in which each of the VoxelUnits above is applied. Further details are available at the <a href="https://github.com/PARKCHEOLHEE-lab/fff/tree/main/voxelate">link</a>.
     <br><br>
     <figure>
         <img src="../img/voxelate-5.png" style="width: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
-            RED7 <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+            RED7 <br> From the left, Given shape · Matched VoxelUnits · Visualized each voxel's condition · Shades of voxelated shape 
         </figcaption>
     </figure>
     <br><br>
     <figure>
         <img src="../img/voxelate-6.png" style="width: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
-            79&PARK <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+            79&PARK <br> From the left, Given shape · Matched VoxelUnits · Visualized each voxel's condition · Shades of voxelated shape 
         </figcaption>
     </figure>
     <br><br>
     <figure>
         <img src="../img/voxelate-7.png" style="width: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
-            KING TORONTO <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+            KING TORONTO <br> From the left, Given shape · Matched VoxelUnits · Visualized each voxel's condition · Shades of voxelated shape 
         </figcaption>
     </figure>
     <br><br>
     <figure>
         <img src="../img/voxelate-8.png" style="width: auto;">
         <figcaption style="text-align: center; margin-top: 1em">
-            VANCOUVER HOUSE <br> From the left, Given shape · Matched VoxeUnits · Visualized each voxel's condition · Shades of voxelated shape 
+            VANCOUVER HOUSE <br> From the left, Given shape · Matched VoxelUnits · Visualized each voxel's condition · Shades of voxelated shape 
         </figcaption>
     </figure>
 </div>

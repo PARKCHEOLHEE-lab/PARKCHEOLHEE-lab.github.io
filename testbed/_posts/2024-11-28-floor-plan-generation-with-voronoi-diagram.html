@@ -23,13 +23,13 @@ related:
 <h3>Introduction 🔹</h3>
 <div class="article">
 
-    This project is to <a href="http://parkcheolhee-lab.github.io/free-form-floor-plan-design-using-differentiable-voronoi-diagram/">review</a> 
-    and implement the paper for <a href="https://www.dropbox.com/scl/fi/culi7j1v14r9ax98rfmd6/2024_pg24_floorplan.pdf?rlkey=s5xwncuybrtsj5vyphhn61u0h&e=3&dl=0">Free-form Floor Plan Design using Differentiable Voronoi Diagram</a>.
-    In Deep learning or any gradient-based optimization approach, it uses only tensors to compute gradients, but I think it is not intuitive in geometries.  
-    Therefore, I aim to integrate the tensor operations and the geometric operations using <code>Pytorch</code>, <code>Shapely</code>.
-    The biggest difference between the paper and this project is whether using autograd. 
-    In the paper, they used the <b>Differentiable Voronoi</b> Diagram for chaining gradient flow, 
-    but, I used <b>Numerical Differentiation</b> to approximate the gradients directly. 
+    This project <a href="http://parkcheolhee-lab.github.io/free-form-floor-plan-design-using-differentiable-voronoi-diagram/">reviews</a>
+    and implements the paper <a href="https://www.dropbox.com/scl/fi/culi7j1v14r9ax98rfmd6/2024_pg24_floorplan.pdf?rlkey=s5xwncuybrtsj5vyphhn61u0h&e=3&dl=0">Free-form Floor Plan Design using Differentiable Voronoi Diagram</a>.
+    In deep learning and gradient-based optimization methods, gradients are usually computed using tensor operations, but this approach is not intuitive for geometric operations.
+    Therefore, this project integrates tensor operations and geometric operations using <code>Pytorch</code> and <code>Shapely</code>.
+    The main difference between the paper and this project is the use of autograd.
+    In the paper, the <b>Differentiable Voronoi</b> Diagram is used to propagate gradients,
+    while this project uses <b>Numerical Differentiation</b> to approximate the gradients directly.
     <br>
 
     <!-- <figure style="display: flex;">
@@ -50,7 +50,7 @@ related:
 
   <br><br>
 
-  So, what is the numerical differentiation?
+  The following section describes numerical differentiation.
 
 </div><br><br>
 
@@ -58,12 +58,12 @@ related:
 <div class="article">
 
   <a href="http://parkcheolhee-lab.github.io/numerical-differentitation-for-autograd/">Numerical differentiation</a> 
-  is a method used to approximate a derivative using finite perturbation differences.
+  is a method used to approximate derivatives using finite perturbation differences.
   <!--break-->
-  Unlike automatic differentiation by differentiable voronoi diagram used in the original paper, 
-  this approach calculates derivatives by evaluating the function at multiple nearby points.
+  Unlike automatic differentiation used in the differentiable Voronoi Diagram in the original paper,
+  this approach computes derivatives by evaluating the function at nearby points.
 
-  There are three basic methods for numerical differentiation. In this, central difference method is used to compute gradient.
+  There are three main methods for numerical differentiation, and in this project the central difference method is used to compute the gradient.
 
 <br><br>
 
@@ -89,18 +89,18 @@ related:
 
 <br><br>
 
-The \(h \,(\text{or  } dx)\) in the expression is a perturbation value that determines the accuracy of the approximation. 
-As \(h\) approaches zero, the numerical approximation gets closer to the true derivative. 
-However, in practice, we cannot use an infinitely small value due to computational limitations and floating-point precision. 
-Choosing an appropriate step size is crucial. Too large values lead to poor approximations, while too small values can cause numerical instability due to rounding errors.
-A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-6}\). In this implementation, I used \(h = 10^{-6}\) as the perturbation value.
+The value \(h \,(\text{or  } dx)\) in the expression is a perturbation value that controls the accuracy of the approximation.
+As \(h\) approaches zero, the numerical approximation becomes closer to the true derivative.
+However, in practice, an infinitely small value cannot be used due to computational limitations and floating-point precision.
+The choice of step size is important: values that are too large lead to poor approximations, while values that are too small cause numerical instability due to rounding errors.
+A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-6}\), and in this implementation \(h = 10^{-6}\) is used.
 
 </div><br><br>
 
 <h3>Expression of Loss functions</h3>
 <div class="article">
-  In the paper, the key loss functions to optimize floor plans consists of four parts.
-  The below contents are excerpted from the paper:
+  In the paper, the key loss functions used to optimize floor plans consist of four main components.
+  The contents below are excerpted from the paper:
   <ol>
     <li>
       <b>Wall loss</b>: 
@@ -172,8 +172,8 @@ A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-
 
 <h3>Implementation of loss functions</h3>
 <div class="article">
-  As I mentioned in the Introduction, to implement the loss functions above for the forward propagation I used Shapely and Pytorch as below.
-  Total <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/main/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/loss.py#L23-L213">loss</a> is defined as a weighted sum of the above losses, and then using it, the Voronoi diagram generates a floor plan.
+  As mentioned in the Introduction, the loss functions above are implemented for forward propagation using Shapely and Pytorch, as shown below.
+  The total <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/main/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/loss.py#L23-L213">loss</a> is defined as a weighted sum of the individual losses, and this loss is used to update the Voronoi sites and generate the floor plan.
   \[
     \,\\
     \begin{align*}
@@ -359,16 +359,15 @@ A stable perturbation value typically ranges from \(h = 10^{-4}\) to \(h = 10^{-
 
 <br><br>
 
-Since I tried to intuitively convert the loss functions to Python codes with Shapely, there are some differences compared to the original.  
+Since the loss functions were implemented using Shapely in Python, there are some differences compared to the original implementation.
 
 </div><br><br>
 
 <h3>Backward with numerical differentiation</h3>
 <div class="article">
-Using numerical differentiation is not efficient in terms of computational performance.
-This is because it requires multiple function evaluations at nearby points to approximate derivatives.
-As you can see in the <code>backward</code> method, computational performance is influenced by the number of given sites.
-Therefore, I used Python's built-in multiprocessing module to improve the performance of <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/main/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/loss.py#L215-L314">backward</a> propagation. 
+Numerical differentiation is not efficient in terms of computational performance, because it requires multiple function evaluations at nearby points to approximate derivatives.
+As shown in the <code>backward</code> method below, computational performance depends on the number of sites.
+Therefore, Python's built-in multiprocessing module was used to improve the performance of <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/main/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/loss.py#L215-L314">backward</a> propagation.
 <pre><code class="python">
     @staticmethod
     def _backward_one(args):
@@ -500,11 +499,11 @@ Therefore, I used Python's built-in multiprocessing module to improve the perfor
 
   <br><br>
 
-  Secondly, I used the <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/fe727e51ca5c8c52dd1e65e879571a08437200e7/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/generator.py#L32-L38">KMeans</a> clustering algorithm to assign cell indices per each site.
-  Distance-based KMeans algorithm groups sites based on their spatial proximity, which helps ensure that rooms are formed from adjacent cells. 
-  By pre-clustering the sites, I created initial room assignments that are already spatially coherent, 
-  reducing the possibility of disconnected room regions during optimization.
-  Using this approach, the optimizer converges more stably. Let me give an example:
+  Secondly, I used the <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram/blob/fe727e51ca5c8c52dd1e65e879571a08437200e7/free_form_floor_plan_design_using_differentiable_voronoi_diagram/src/generator.py#L32-L38">KMeans</a> clustering algorithm to assign cell indices to each site.
+  The distance-based KMeans algorithm groups sites by spatial proximity, which helps ensure that rooms are formed from adjacent cells.
+  By clustering the sites in advance, initial room assignments become spatially coherent,
+  which reduces the possibility of disconnected room regions during optimization.
+  Using this approach, the optimizer converges more stably. An example is shown below.
 
   <figure style="display: flex;">
     <img src="/img/floor-plan-generation-with-voronoi-diagram/floor-plan-generation-with-voronoi-diagram-8.gif" width="40%" onerror=handle_image_error(this)>
@@ -518,19 +517,19 @@ Therefore, I used Python's built-in multiprocessing module to improve the perfor
 
   <br><br>
 
-  As you can see in the figure above, KMeans makes the loss flow more smoothly and converge faster. 
-  Without KMeans, the optimization process shows erratic behavior with disconnected rooms. 
-  In contrast, when using KMeans for initial room assignments, the optimization maintains spatial coherence throughout the process, leading to:
+  As shown in the figure above, KMeans makes the loss change more smoothly and converge faster.
+  Without KMeans, the optimization process shows unstable behavior and often produces disconnected rooms.
+  In contrast, when KMeans is used for initial room assignments, the optimization maintains spatial coherence throughout the process, leading to:
 
   <ul>
     <li>
-        Faster convergence to the target room areas
+        faster convergence to the target room areas,
     </li>
     <li>
-        More stable wall alignments
+        more stable wall alignments, and
     </li>
     <li>
-        Reduced possibility of rooms splitting into disconnected regions
+        a reduced possibility of rooms splitting into disconnected regions.
     </li>
   </ul>
 
@@ -543,9 +542,9 @@ Therefore, I used Python's built-in multiprocessing module to improve the perfor
 <h3>Experiments</h3>
 <div class="article">
 
-    Finally, I'll conclude this article by attaching the experimental results optimized by 800 iterations. 
-    The boundaries for experiments are used in the original paper and <a href="https://github.com/nobuyuki83/floor_plan">repository</a>. 
-    Please refer to this project <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram">repository</a> for the entire code.    
+    Finally, this article concludes with the experimental results obtained after 800 optimization iterations.
+    The boundaries used for the experiments are taken from the original paper and its <a href="https://github.com/nobuyuki83/floor_plan">repository</a>.
+    The entire code is available in this project <a href="https://github.com/PARKCHEOLHEE-lab/free-form-floor-plan-design-using-differentiable-voronoi-diagram">repository</a>.
 
     <figure style="display: flex;">
         <img src="/img/floor-plan-generation-with-voronoi-diagram/floor-plan-generation-with-voronoi-diagram-13.png" width="23%" onerror=handle_image_error(this)>
@@ -603,7 +602,7 @@ Therefore, I used Python's built-in multiprocessing module to improve the perfor
             <b>Graph-based contraint</b>: In the paper, to set and ensure the rooms' adjacencies it uses graph-based constraint.
         </li>
         <li>
-            <b>Improve computational performance</b>: Optimize the code to run faster (converting used language, or implementing differentiable voronoi diagram).
+            <b>Improve computational performance</b>: Optimize the code to run faster, for example by porting it to another language or by implementing a differentiable Voronoi diagram.
         </li>
         <li>
             <b>Handle deadspaces</b>: Set the loss function for deadspace \(\mathcal{L}_{\text{deadspace}}\) to exclude infeasible plans.
