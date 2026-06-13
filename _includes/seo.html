@@ -21,6 +21,10 @@
 {%- endif -%}
 {%- comment -%} Decode existing HTML entities (e.g. escaped code like &lt;branch&gt;) before escape/jsonify so they are not double-encoded; decode &amp; last. {%- endcomment -%}
 {%- assign seo_description = seo_description | strip_html | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&#x27;', "'" | replace: '&nbsp;', ' ' | replace: '&amp;', '&' | strip_newlines | normalize_whitespace | strip | truncate: 200 -%}
+{%- comment -%} If the chosen source was textless after stripping (e.g. an image-only or embed-only excerpt), fall back to the site description. {%- endcomment -%}
+{%- if seo_description == "" -%}
+  {%- assign seo_description = site.description | strip_html | normalize_whitespace | strip | truncate: 200 -%}
+{%- endif -%}
 
 {%- if page.thumbnail -%}
   {%- assign seo_image = page.thumbnail | absolute_url -%}
@@ -38,7 +42,9 @@
 {%- assign og_locale = page.lang | default: site.lang -%}
 {%- if og_locale == "en" -%}{%- assign og_locale = "en_US" -%}{%- endif -%}
 
-{%- if page.layout == "post" and page.date -%}
+{%- comment -%} Some posts use a 1111-11-11 filename date purely to pin/order them; don't expose that placeholder as article metadata. {%- endcomment -%}
+{%- assign date_year = page.date | date: "%Y" -%}
+{%- if page.layout == "post" and page.date and date_year != "1111" -%}
   {%- assign is_article = true -%}
 {%- else -%}
   {%- assign is_article = false -%}
@@ -109,11 +115,11 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": {{ site.title | strip_html | jsonify }},
-  "url": {{ site.url | append: site.baseurl | jsonify }},
+  "@type": "WebPage",
+  "name": {{ seo_title | jsonify }},
+  "url": {{ seo_url | jsonify }},
   "description": {{ seo_description | jsonify }},
-  "author": { "@type": "Person", "name": {{ seo_author | jsonify }} }
+  "isPartOf": { "@type": "WebSite", "name": {{ site.title | strip_html | jsonify }}, "url": {{ site.url | append: site.baseurl | jsonify }} }
 }
 </script>
 {%- endif %}
