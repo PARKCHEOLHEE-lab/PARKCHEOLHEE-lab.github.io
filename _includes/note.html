@@ -19,11 +19,11 @@
 
             <div class="note-emoji-column">
               {% if post.emoji %}
-                <img src="{{ post.emoji }}" class="emoji-image">
+                <img src="{{ post.emoji }}" alt="" class="emoji-image">
               {% elsif post.content == empty or post.content == blank %}
-                <img src="/emoji/default-empty.png" class="emoji-image">
+                <img src="/emoji/default-empty.png" alt="" class="emoji-image">
               {% else %}
-                <img src="/emoji/default.png" class="emoji-image">
+                <img src="/emoji/default.png" alt="" class="emoji-image">
               {% endif %}
             </div>
 

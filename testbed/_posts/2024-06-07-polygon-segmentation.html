@@ -31,13 +31,13 @@ related:
     <br><br>
     
     <figure style="display: flex;">
-        <img src="/img/polygon-segmentation/polygon-segmentation-0.png" width="45%" onerror=handle_image_error(this)>
-        <img src="/img/polygon-segmentation/polygon-segmentation-1.png" width="45%" onerror=handle_image_error(this)>
+        <img alt="Objective ✂️" src="/img/polygon-segmentation/polygon-segmentation-0.png" width="45%" onerror=handle_image_error(this)>
+        <img alt="Objective ✂️" src="/img/polygon-segmentation/polygon-segmentation-1.png" width="45%" onerror=handle_image_error(this)>
     </figure>
     
     <figure style="display: flex;">
-        <img src="/img/polygon-segmentation/polygon-segmentation-3.png" width="45%" onerror=handle_image_error(this)>
-        <img src="/img/polygon-segmentation/polygon-segmentation-2.png" width="45%" onerror=handle_image_error(this)>
+        <img alt="Objective ✂️" src="/img/polygon-segmentation/polygon-segmentation-3.png" width="45%" onerror=handle_image_error(this)>
+        <img alt="Objective ✂️" src="/img/polygon-segmentation/polygon-segmentation-2.png" width="45%" onerror=handle_image_error(this)>
     </figure>
 
     <figcaption>
@@ -70,7 +70,7 @@ related:
     When a graph is handled in machine learning, it is also expressed as a feature matrix that describes the characteristics of the points. When the number of features is \( f \), the dimension of the feature matrix \( X \) is \( n \times f \).
 
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-4.png" width="90%" onerror=handle_image_error(this)>
+        <img alt="Understanding of the graph expression In this figure, ( n = 4 ), ( f = 3 ) ( A = n n = 4 4 ) ( X = n f = 4 3 )." src="/img/polygon-segmentation/polygon-segmentation-4.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             <a href="https://medium.com/watcha/gnn-%EC%86%8C%EA%B0%9C-%EA%B8%B0%EC%B4%88%EB%B6%80%ED%84%B0-%EB%85%BC%EB%AC%B8%EA%B9%8C%EC%A7%80-96567b783479">Understanding of the graph expression</a> <br>
             In this figure, \( n = 4 \), \( f = 3 \) <br> 
@@ -102,7 +102,7 @@ related:
     Through this, the model can better comprehend the complex shapes and features of geometry.
 
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-5.png" width="90%" onerror=handle_image_error(this)>
+        <img alt="Convolution operations From the left, 2D Convolution · Graph Convolution" src="/img/polygon-segmentation/polygon-segmentation-5.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             Convolution operations<br>
             From the left, <a href="https://arxiv.org/abs/1901.00596">2D Convolution · Graph Convolution</a>
@@ -129,7 +129,7 @@ related:
     First, raw polygons are collected from <a href="https://www.vworld.kr/dtna/dtna_fileDataList_s001.do">vworld</a>. Below is a portion of all the raw polygons collected from vworld.
 
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-6.png" width="95%" onerror=handle_image_error(this)>
+        <img alt="Somewhere in Seoul.shp" src="/img/polygon-segmentation/polygon-segmentation-6.png" width="95%" onerror=handle_image_error(this)>
         <figcaption>
             Somewhere in Seoul.shp
         </figcaption>
@@ -151,7 +151,7 @@ related:
     These data then need to be converted into graph form. The following is an example of hand labeling:
     
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-8.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="Land polygon in Gangbukgu, Seoul From the left, raw polygon &amp; labeled link · adjacency matrix · feature matrix" src="/img/polygon-segmentation/polygon-segmentation-8.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Land polygon in Gangbukgu, Seoul <br>
             From the left, raw polygon & labeled link · adjacency matrix · feature matrix
@@ -344,10 +344,10 @@ related:
     The first shows a successful case, and the second shows a failure case.
     
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-9.png" width="70%" onerror=handle_image_error(this)>
-        <!-- <img src="/img/polygon-segmentation/polygon-segmentation-11.png" width="70%"> -->
-        <img src="/img/polygon-segmentation/polygon-segmentation-10.png" width="70%" onerror=handle_image_error(this)>
-        <!-- <img src="/img/polygon-segmentation/polygon-segmentation-12.png" width="70%"> -->
+        <img alt="Results of the algorithm From the left, triangulations · segmentations · oriented bounding boxes for segmentations (1 of 4)" src="/img/polygon-segmentation/polygon-segmentation-9.png" width="70%" onerror=handle_image_error(this)>
+        <!-- <img alt="Results of the algorithm From the left, triangulations · segmentations · oriented bounding boxes for segmentations (2 of 4)" src="/img/polygon-segmentation/polygon-segmentation-11.png" width="70%"> -->
+        <img alt="Results of the algorithm From the left, triangulations · segmentations · oriented bounding boxes for segmentations (3 of 4)" src="/img/polygon-segmentation/polygon-segmentation-10.png" width="70%" onerror=handle_image_error(this)>
+        <!-- <img alt="Results of the algorithm From the left, triangulations · segmentations · oriented bounding boxes for segmentations (4 of 4)" src="/img/polygon-segmentation/polygon-segmentation-12.png" width="70%"> -->
         <figcaption>
             Results of the algorithm<br>
             From the left, triangulations · segmentations · oriented bounding boxes for segmentations
@@ -357,7 +357,7 @@ related:
     Since these problems cannot be handled by the naive algorithm, the algorithm was first used to process the raw polygon data, after which the data was labeled manually as follows.
     This produced approximately 40000 data points, including augmented originals. The full dataset can be found <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/tree/main/polygon_segmentation_with_gcn/data/processed">here</a>.
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-13.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="Some data for training" src="/img/polygon-segmentation/polygon-segmentation-13.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Some data for training<br>
         </figcaption>
@@ -533,7 +533,7 @@ related:
     It then sorts the generated links in order of connection strength, and the predictor determines how many links to use.
 
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-15.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="Inference process From the top, topk segmentations · segmentation selected by predictor" src="/img/polygon-segmentation/polygon-segmentation-15.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             <a href="https://github.com/PARKCHEOLHEE-lab/polygon-segmentation-with-gcn/blob/5052a9e5ea1d740f7a98c3d07b249e233030435c/polygon_segmentation_with_gcn/src/model.py#L327-L462">Inference</a> process<br>
             From the top, topk segmentations · segmentation selected by predictor
@@ -554,7 +554,7 @@ related:
     </ul>
     
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-18.png" width="80%" onerror=handle_image_error(this)>
+        <img alt="Losses and metrics for 500 epochs" src="/img/polygon-segmentation/polygon-segmentation-18.png" width="80%" onerror=handle_image_error(this)>
         <figcaption>
             Losses and metrics for 500 epochs
         </figcaption>
@@ -567,7 +567,7 @@ related:
     High performance on negative samples may not accurately reflect the model's ability to identify positive cases correctly.
 
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-19.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="Evaluate some test data qualitatively" src="/img/polygon-segmentation/polygon-segmentation-19.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>
             Evaluate some test data qualitatively
         </figcaption>
@@ -591,7 +591,7 @@ related:
     </ul>
     
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-20.png" width="90%" onerror=handle_image_error(this)>
+        <img alt="An example for the geometric loss calculation From the left, loss: -0.000478528 · loss: -0.999999994" src="/img/polygon-segmentation/polygon-segmentation-20.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>
             An example for the geometric loss calculation <br>
             From the left, loss: -0.000478528 · loss: -0.999999994
@@ -604,7 +604,7 @@ related:
 
     
     <figure>
-        <img src="/img/polygon-segmentation/polygon-segmentation-21.png" width="85%" onerror=handle_image_error(this)>
+        <img alt="Geometric losses for 500 epochs From the left, train geometric loss · validation geometric loss" src="/img/polygon-segmentation/polygon-segmentation-21.png" width="85%" onerror=handle_image_error(this)>
         <figcaption>
             Geometric losses for 500 epochs <br>
             From the left, train geometric loss · validation geometric loss

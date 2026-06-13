@@ -37,7 +37,7 @@ related:
     collapsing its state space to one concrete value, and then propagating the resulting constraints to neighboring cells.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-0.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="Intuition of how the WFC algorithm works" src="/img/wave-function-collapse/wave-function-collapse-0.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Intuition of how the WFC algorithm works</figcaption>
     </figure>
 
@@ -78,7 +78,7 @@ related:
 
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-2.png" width="100%">
+        <img alt="3D tileset and compatibility visualization" src="/img/wave-function-collapse/wave-function-collapse-2.png" width="100%">
         <figcaption>
             3D tileset and compatibility visualization
         </figcaption>
@@ -194,7 +194,7 @@ related:
     Collapse and propagation then reduce to bitmask updates on this tensor.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-5.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="Each grid cell carries a 20-bit candidate mask; propagation only ever flips True bits to False" src="/img/wave-function-collapse/wave-function-collapse-5.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Each grid cell carries a 20-bit candidate mask; propagation only ever flips True bits to False</figcaption>
     </figure>
 
@@ -239,7 +239,7 @@ related:
     is the transpose of propagation in the opposite direction.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-6.png" width="100%" onerror=handle_image_error(this)>
+        <img alt="The six 20 20 compatibility matrices. The horizontal directions x, y are denser ( 0.61 allowed pairs) because FREE acts as a…" src="/img/wave-function-collapse/wave-function-collapse-6.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>The six $20 \times 20$ compatibility matrices. The horizontal directions $\pm x, \pm y$ are denser ($\approx 0.61$ allowed pairs) because <code>FREE</code> acts as a wildcard; the vertical $\pm z$ matrices are sparser ($\approx 0.36$) because $\pm z$ requires an exact label match. The horizontal pairs are transposes of each other.</figcaption>
     </figure>
 
@@ -337,7 +337,7 @@ related:
     otherwise advance to the lowest-entropy cell. The loop terminates when every cell holds exactly one tile, or after <code>max_iters</code> attempts.
 
     <figure>
-        <img src="/img/wave-function-collapse/wave-function-collapse-8.png" width="90%" onerror=handle_image_error(this)>
+        <img alt="Run loop control flow. The red path is the failure escape: any propagation failure or zero-candidate cell jumps back to the…" src="/img/wave-function-collapse/wave-function-collapse-8.png" width="90%" onerror=handle_image_error(this)>
         <figcaption>Run loop control flow. The red path is the failure escape: any propagation failure or zero-candidate cell jumps back to the seed.</figcaption>
     </figure>
 
@@ -430,8 +430,8 @@ related:
 
     <figure>
         <div style="display: flex; justify-content: center; gap: 15px;">
-            <img src="/img/wave-function-collapse/wave-function-collapse-3.gif" width="48%" onerror=handle_image_error(this)>
-            <img src="/img/wave-function-collapse/wave-function-collapse-4.gif" width="48%" onerror=handle_image_error(this)>
+            <img alt="Two WFC runs: collapse order on the left, finished structure on the right of each pair (1 of 2)" src="/img/wave-function-collapse/wave-function-collapse-3.gif" width="48%" onerror=handle_image_error(this)>
+            <img alt="Two WFC runs: collapse order on the left, finished structure on the right of each pair (2 of 2)" src="/img/wave-function-collapse/wave-function-collapse-4.gif" width="48%" onerror=handle_image_error(this)>
         </div>
         <figcaption>Two WFC runs: collapse order on the left, finished structure on the right of each pair</figcaption>
     </figure>
