@@ -19,7 +19,8 @@
 {%- else -%}
   {%- assign seo_description = site.description -%}
 {%- endif -%}
-{%- assign seo_description = seo_description | strip_html | strip_newlines | normalize_whitespace | strip | truncate: 200 -%}
+{%- comment -%} Decode existing HTML entities (e.g. escaped code like &lt;branch&gt;) before escape/jsonify so they are not double-encoded; decode &amp; last. {%- endcomment -%}
+{%- assign seo_description = seo_description | strip_html | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&#x27;', "'" | replace: '&nbsp;', ' ' | replace: '&amp;', '&' | strip_newlines | normalize_whitespace | strip | truncate: 200 -%}
 
 {%- if page.thumbnail -%}
   {%- assign seo_image = page.thumbnail | absolute_url -%}
@@ -93,7 +94,9 @@
   "mainEntityOfPage": { "@type": "WebPage", "@id": {{ seo_url | jsonify }} },
   "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
   "dateModified": {{ page.date | date_to_xmlschema | jsonify }},
-  "image": {{ seo_image | jsonify }},
+{%- if share_image %}
+  "image": {{ share_image | jsonify }},
+{%- endif %}
   "author": { "@type": "Person", "name": {{ seo_author | jsonify }} },
   "publisher": {
     "@type": "Organization",
