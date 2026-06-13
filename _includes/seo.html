@@ -29,6 +29,14 @@
   {%- assign seo_image = "/favicon.png" | absolute_url -%}
 {%- endif -%}
 
+{%- comment -%} Only a real preview (thumbnail) is large enough for social cards; emoji/favicon are too small. {%- endcomment -%}
+{%- if page.thumbnail -%}
+  {%- assign share_image = page.thumbnail | absolute_url -%}
+{%- endif -%}
+
+{%- assign og_locale = page.lang | default: site.lang -%}
+{%- if og_locale == "en" -%}{%- assign og_locale = "en_US" -%}{%- endif -%}
+
 {%- if page.layout == "post" and page.date -%}
   {%- assign is_article = true -%}
 {%- else -%}
@@ -51,19 +59,24 @@
 <meta property="og:description" content="{{ seo_description | escape }}">
 <meta property="og:url" content="{{ seo_url }}">
 <meta property="og:site_name" content="{{ site.title | escape }}">
-<meta property="og:image" content="{{ seo_image }}">
-{%- if page.lang or site.lang %}
-<meta property="og:locale" content="{{ page.lang | default: site.lang }}">
+{%- if share_image %}
+<meta property="og:image" content="{{ share_image }}">
+<meta property="og:image:alt" content="{{ seo_title | escape }}">
+{%- endif %}
+{%- if og_locale %}
+<meta property="og:locale" content="{{ og_locale }}">
 {%- endif %}
 {%- if is_article %}
 <meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
 <meta property="article:author" content="{{ seo_author | escape }}">
 {%- endif %}
 
-<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:card" content="{% if share_image %}summary_large_image{% else %}summary{% endif %}">
 <meta name="twitter:title" content="{{ seo_title | escape }}">
 <meta name="twitter:description" content="{{ seo_description | escape }}">
-<meta name="twitter:image" content="{{ seo_image }}">
+{%- if share_image %}
+<meta name="twitter:image" content="{{ share_image }}">
+{%- endif %}
 
 {%- if site.plugins contains "jekyll-feed" %}
 <link rel="alternate" type="application/atom+xml" title="{{ site.title | strip_html | escape }}" href="{{ "/feed.xml" | relative_url }}">
