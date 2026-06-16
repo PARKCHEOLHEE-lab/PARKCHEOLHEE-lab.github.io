@@ -860,7 +860,7 @@
     "y": 0.5041
   },
   {
-    "title": "Bayes'&nbsp Theorem",
+    "title": "Bayes' Theorem",
     "slug": "bayes-theorem",
     "url": "/bayes-theorem/",
     "category": "note",
@@ -1007,7 +1007,7 @@
       "representation-learning"
     ],
     "x": 0.6661,
-    "y": 0.0389
+    "y": 0.0388
   },
   {
     "title": "Inductive Bias",
@@ -1037,7 +1037,7 @@
       "python-slack-sdk"
     ],
     "x": 0.7183,
-    "y": 0.5057
+    "y": 0.5058
   },
   {
     "title": "Grandient Accumulation",
@@ -1558,7 +1558,7 @@
       "window-crossing-selection"
     ],
     "x": 0.6282,
-    "y": 0.7617
+    "y": 0.7618
   },
   {
     "title": "면도날",
@@ -2158,7 +2158,7 @@
       "window-crossing-selection",
       "skeleton-ux-ui"
     ],
-    "x": 0.6998,
+    "x": 0.6997,
     "y": 0.7243
   },
   {
@@ -2306,7 +2306,7 @@
       "floor-plan-generation-with-voronoi-diagram"
     ],
     "x": 0.8491,
-    "y": 0.9751
+    "y": 0.9752
   },
   {
     "title": "Subdivision curve",
