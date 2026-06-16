@@ -7,6 +7,10 @@ lang: "en"
 excerpt_separator: <!--break-->
 date_format: "%B %d, %Y"
 
+url: "https://parkcheolhee-lab.github.io"
+baseurl: ""
+encoding: "utf-8"
+
 google_site_verification: "GKJEYyW0dEIgdiKJcLRyWyeKoYYIW3YwSmsZGfbeEHU"
 
 # Layout

@@ -87,7 +87,7 @@ Because it executes as many tasks simultaneously as <code>cpu_count</code>, wait
     The performance of a real algorithm can now be improved by applying multiprocessing (this task corresponds to defining the f(x) shown above).
     The algorithm below finds the <code>MIR</code> (Maximal Inner Rectangle) for a given polygon.
     <figure>
-        <img src="/img/parallel-1.gif" width="100%" onerror=handle_image_error(this)>
+        <img alt="Algorithm for finding MIR" src="/img/parallel-1.gif" width="100%" onerror=handle_image_error(this)>
         <figcaption>Algorithm for finding MIR</figcaption>
     </figure><br>
 
@@ -171,7 +171,7 @@ Because GhPython is IronPython implemented on the .NET Framework, the multiproce
     With parallel processing, the result can therefore be obtained roughly <code>4x</code> faster. A larger number of inputs can be expected to yield an even greater performance gain.
     <br><br>
     <figure>
-        <img src="/img/parallel-execution-within-gh/parallel-2.png" width="60%" onerror=handle_image_error(this)>
+        <img alt="Compare execution time for Parallel vs. Sequential" src="/img/parallel-execution-within-gh/parallel-2.png" width="60%" onerror=handle_image_error(this)>
         <figcaption>Compare execution time for Parallel vs. Sequential</figcaption>
     </figure><br>
     The code for the above is available at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/mir/mir.py">this link</a>.

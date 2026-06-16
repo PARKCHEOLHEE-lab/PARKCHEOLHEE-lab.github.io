@@ -28,7 +28,7 @@ related:
 
 
   <figure>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-0.png" width="90%" onerror=handle_image_error(this)>
+    <img alt="Landbook&#x27;s AI architect service" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-0.png" width="90%" onerror=handle_image_error(this)>
     <figcaption>
       Landbook's AI architect service
     </figcaption>
@@ -95,7 +95,7 @@ related:
 
 
   <figure>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-1.png" width="100%" onerror=handle_image_error(this)>
+    <img alt="Pipeline Diagram" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-1.png" width="100%" onerror=handle_image_error(this)>
     <figcaption>
       Pipeline Diagram
     </figcaption>
@@ -160,7 +160,7 @@ related:
   </ol>
   
   <figure>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-2.png" width="100%" onerror=handle_image_error(this)>
+    <img alt="Camera Position Estimation Diagram" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-2.png" width="100%" onerror=handle_image_error(this)>
     <figcaption>
       Camera Position Estimation Diagram
     </figcaption>
@@ -252,7 +252,7 @@ related:
   the model is given reference points that help it understand the <b>spatial relationships and scale of the architecture</b> it needs to generate.
 
   <figure>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-3.png" width="100%" onerror=handle_image_error(this)>
+    <img alt="Scale Figures" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-3.png" width="100%" onerror=handle_image_error(this)>
     <figcaption>
       <a href="https://archi-monarch.com/scale-in-architectural/">Scale Figures</a>
     </figcaption>
@@ -272,8 +272,8 @@ related:
   Human figures are particularly important because they provide a clear <b>scale reference</b> that helps maintain consistent and realistic proportions during the generation process.
 
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-4.png" width="50%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
+    <img alt="Scale Figures" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-4.png" width="50%" onerror=handle_image_error(this)>
+    <img alt="Scale Figures" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
   </figure>
   <figcaption>
     Landbook AI Architect result with and without scale figures
@@ -292,8 +292,8 @@ related:
   These masking materials segment the 3D model into distinct parts so that each part can be processed separately by the diffusion model.
 
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-6.png" width="50%" onerror=handle_image_error(this)>
+    <img alt="Material Masking" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
+    <img alt="Material Masking" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-6.png" width="50%" onerror=handle_image_error(this)>
   </figure>
   <figcaption>
     Material Masking
@@ -347,8 +347,8 @@ related:
   The pipeline begins with <code>StableDiffusionXLControlNetPipeline</code> using a <code>ControlNet</code> model trained on <b>canny</b> edge detection.
 
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-22.png" width="50%" onerror=handle_image_error(this)>
+    <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-5.png" width="50%" onerror=handle_image_error(this)>
+    <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-22.png" width="50%" onerror=handle_image_error(this)>
   </figure>
   <figcaption>
     Canny edge detection, highlighting the main building, hatching some parts
@@ -398,17 +398,17 @@ After each inpainting step, the result is merged with the base image to <b>creat
 <br>
 
 <figure style="display: flex;">
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-6.png" width="23%" onerror=handle_image_error(this)>
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-23.png" width="23%" onerror=handle_image_error(this)>
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-24.png" width="23%" onerror=handle_image_error(this)>
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-25.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-6.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-23.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-24.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-25.png" width="23%" onerror=handle_image_error(this)>
 </figure>
 
 <figure style="display: flex;">
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-26.png" width="23%" onerror=handle_image_error(this)>
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-27.png" width="23%" onerror=handle_image_error(this)>
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-28.png" width="23%" onerror=handle_image_error(this)>
-  <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-29.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-26.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-27.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-28.png" width="23%" onerror=handle_image_error(this)>
+  <img alt="EndpointHandler 🤗" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-29.png" width="23%" onerror=handle_image_error(this)>
 </figure>
 <figcaption>
 Masked images
@@ -507,29 +507,29 @@ These refinement steps work to produce a final visualization that is both archit
   the following results are obtained, demonstrating the effectiveness of this approach in generating high-quality architectural renderings with consistent materials, lighting, and architectural details.
 
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-7.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-8.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-9.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-7.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-8.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-9.png" width="32%" onerror=handle_image_error(this)>
   </figure>
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-16.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-17.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-18.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-16.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-17.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-18.png" width="32%" onerror=handle_image_error(this)>
   </figure>
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-13.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-14.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-15.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-13.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-14.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-15.png" width="32%" onerror=handle_image_error(this)>
   </figure>
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-19.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-20.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-21.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-19.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-20.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-21.png" width="32%" onerror=handle_image_error(this)>
   </figure>
   <figure style="display: flex;">
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-10.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-11.png" width="32%" onerror=handle_image_error(this)>
-    <img src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-12.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-10.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-11.png" width="32%" onerror=handle_image_error(this)>
+    <img alt="Results" src="/img/landbook-diffusion-pipeline/landbook-diffusion-pipeline-12.png" width="32%" onerror=handle_image_error(this)>
   </figure>
 </div><br><br>
 
@@ -592,7 +592,7 @@ including success and failure status, performance metrics, and links to detailed
 </code></pre>
 
     <figure>
-        <img src="/img/python-slack-sdk-1.png" width="100%">
+        <img alt="Slack Integration for Monitoring &amp; QA" src="/img/python-slack-sdk-1.png" width="100%">
     </figure>
 </div><br><br>
 

@@ -55,7 +55,7 @@
               {% endfor %}
             </p>
             {% if post.thumbnail %}
-              <img src="{{ post.thumbnail }}" class="testbed-thumbnail" onerror=handle_image_error(this)>
+              <img src="{{ post.thumbnail }}" alt="{{ post.title | strip_html | escape }}" class="testbed-thumbnail" onerror=handle_image_error(this)>
             {% endif %}
           </div>
           {% if post.done %}

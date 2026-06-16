@@ -1,0 +1,125 @@
+{%- comment -%}
+  Hand-rolled SEO head: title, meta description, canonical, Open Graph,
+  Twitter Card, and JSON-LD structured data. Reads this repo's existing
+  fields (page.title, page.thumbnail, page.emoji, page.summary) directly.
+{%- endcomment -%}
+{%- assign brand = site.title_tab | default: site.title -%}
+{%- if page.title and page.title != " " and page.title != site.title -%}
+  {%- capture seo_title -%}{{ page.title | strip_html | strip }} · {{ brand }}{%- endcapture -%}
+{%- else -%}
+  {%- assign seo_title = site.title | strip_html -%}
+{%- endif -%}
+
+{%- if page.description and page.description != "" -%}
+  {%- assign seo_description = page.description -%}
+{%- elsif page.summary and page.summary != "" -%}
+  {%- assign seo_description = page.summary -%}
+{%- elsif page.excerpt and page.excerpt != "" -%}
+  {%- assign seo_description = page.excerpt -%}
+{%- else -%}
+  {%- assign seo_description = site.description -%}
+{%- endif -%}
+{%- comment -%} Decode existing HTML entities (e.g. escaped code like &lt;branch&gt;) before escape/jsonify so they are not double-encoded; decode &amp; last. {%- endcomment -%}
+{%- assign seo_description = seo_description | strip_html | replace: '&lt;', '<' | replace: '&gt;', '>' | replace: '&quot;', '"' | replace: '&#39;', "'" | replace: '&#x27;', "'" | replace: '&nbsp;', ' ' | replace: '&amp;', '&' | strip_newlines | normalize_whitespace | strip | truncate: 200 -%}
+{%- comment -%} If the chosen source was textless after stripping (e.g. an image-only or embed-only excerpt), fall back to the site description. {%- endcomment -%}
+{%- if seo_description == "" -%}
+  {%- assign seo_description = site.description | strip_html | normalize_whitespace | strip | truncate: 200 -%}
+{%- endif -%}
+
+{%- if page.thumbnail -%}
+  {%- assign seo_image = page.thumbnail | absolute_url -%}
+{%- elsif page.emoji -%}
+  {%- assign seo_image = page.emoji | absolute_url -%}
+{%- else -%}
+  {%- assign seo_image = "/favicon.png" | absolute_url -%}
+{%- endif -%}
+
+{%- comment -%} Only a real preview (thumbnail) is large enough for social cards; emoji/favicon are too small. {%- endcomment -%}
+{%- if page.thumbnail -%}
+  {%- assign share_image = page.thumbnail | absolute_url -%}
+{%- endif -%}
+
+{%- assign og_locale = page.lang | default: site.lang -%}
+{%- if og_locale == "en" -%}{%- assign og_locale = "en_US" -%}{%- endif -%}
+
+{%- comment -%} Some posts use a 1111-11-11 filename date purely to pin/order them; don't expose that placeholder as article metadata. {%- endcomment -%}
+{%- assign date_year = page.date | date: "%Y" -%}
+{%- if page.layout == "post" and page.date and date_year != "1111" -%}
+  {%- assign is_article = true -%}
+{%- else -%}
+  {%- assign is_article = false -%}
+{%- endif -%}
+
+{%- assign seo_url = page.url | absolute_url -%}
+{%- assign seo_author = page.author | default: site.author -%}
+
+<title>{{ seo_title | escape }}</title>
+<meta name="description" content="{{ seo_description | escape }}">
+<meta name="author" content="{{ seo_author | escape }}">
+<link rel="canonical" href="{{ seo_url }}">
+{%- if site.google_site_verification %}
+<meta name="google-site-verification" content="{{ site.google_site_verification }}">
+{%- endif %}
+
+<meta property="og:type" content="{% if is_article %}article{% else %}website{% endif %}">
+<meta property="og:title" content="{{ seo_title | escape }}">
+<meta property="og:description" content="{{ seo_description | escape }}">
+<meta property="og:url" content="{{ seo_url }}">
+<meta property="og:site_name" content="{{ site.title | escape }}">
+{%- if share_image %}
+<meta property="og:image" content="{{ share_image }}">
+<meta property="og:image:alt" content="{{ seo_title | escape }}">
+{%- endif %}
+{%- if og_locale %}
+<meta property="og:locale" content="{{ og_locale }}">
+{%- endif %}
+{%- if is_article %}
+<meta property="article:published_time" content="{{ page.date | date_to_xmlschema }}">
+<meta property="article:author" content="{{ seo_author | escape }}">
+{%- endif %}
+
+<meta name="twitter:card" content="{% if share_image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{{ seo_title | escape }}">
+<meta name="twitter:description" content="{{ seo_description | escape }}">
+{%- if share_image %}
+<meta name="twitter:image" content="{{ share_image }}">
+{%- endif %}
+
+{%- if site.plugins contains "jekyll-feed" %}
+<link rel="alternate" type="application/atom+xml" title="{{ site.title | strip_html | escape }}" href="{{ "/feed.xml" | relative_url }}">
+{%- endif %}
+
+{%- if is_article %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": {{ page.title | strip_html | strip | jsonify }},
+  "description": {{ seo_description | jsonify }},
+  "url": {{ seo_url | jsonify }},
+  "mainEntityOfPage": { "@type": "WebPage", "@id": {{ seo_url | jsonify }} },
+  "datePublished": {{ page.date | date_to_xmlschema | jsonify }},
+  "dateModified": {{ page.date | date_to_xmlschema | jsonify }},
+{%- if share_image %}
+  "image": {{ share_image | jsonify }},
+{%- endif %}
+  "author": { "@type": "Person", "name": {{ seo_author | jsonify }} },
+  "publisher": {
+    "@type": "Organization",
+    "name": {{ site.title | strip_html | jsonify }},
+    "logo": { "@type": "ImageObject", "url": {{ "/favicon.png" | absolute_url | jsonify }} }
+  }
+}
+</script>
+{%- else %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": {{ seo_title | jsonify }},
+  "url": {{ seo_url | jsonify }},
+  "description": {{ seo_description | jsonify }},
+  "isPartOf": { "@type": "WebSite", "name": {{ site.title | strip_html | jsonify }}, "url": {{ site.url | append: site.baseurl | jsonify }} }
+}
+</script>
+{%- endif %}
