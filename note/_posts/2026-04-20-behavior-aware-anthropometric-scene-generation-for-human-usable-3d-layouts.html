@@ -1,0 +1,77 @@
+---
+title:  "Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts"
+layout: post
+emoji: /emoji/brain.png
+---
+
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://dl.acm.org/doi/pdf/10.1145/3772318.3790341">Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts</a>
+        <ol>
+            <li>
+                Introduction
+                <ul>
+                    <li> 
+                        Physical environments fundamentally shape human movements and behavior.
+                        In the real world, <strong>layouts are rarely static; users naturally adjust their surroundings</strong> to fit their specific body dimensions and movements.
+                    </li>
+                    <li>
+                        Because the model ignores the anthropometric clearance
+                        required to actually push a chair back and stand up, the resulting layout creates an immediate conflict zone — a functional failure
+                        that a human user would have instinctively avoided by adjusting
+                        the furniture distance. 
+                    </li>
+                    <li>
+                        We leverage VLMs to infer object functions from visual cues and reason about
+                        potential human interactions based on scene type and layout criteria.
+                    </li>
+                    <li>
+                        <strong>We implemented the generated layouts at a 1:1 scale in physical office and lounge environments</strong> and compared three conditions: LayoutVLM (Baseline), 
+                        <strong>Passage-Only (PO)</strong>, which ensures minimal navigable passages using static body
+                        dimensions; and <strong>Human-Operational (HO)</strong>, which guarantees
+                        sufficient human-operational space based on movement-related anthropometric envelopes. 
+                    </li>
+                    <li>
+                        For PO and HO conditions, we instantiated
+                        participant-specific anthropometric profiles from each participant's
+                        Skinned Multi-Person Linear (SMPL) model, parameterizing
+                        the constraints (e.g., passage widths, reaching envelopes, and viewing requirements) to each participant's actual body dimensions. 
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Related Works
+                <ul>
+                    <li>
+                        Generating human-usable layouts requires anthropometric design principles, yet existing evaluations rarely assess whether generated layouts support actual human operation. 
+                    </li>
+                    <li>
+                        Our work builds
+                        upon LayoutVLM's constraint optimization framework but extends
+                        it by integrating anthropometric data directly into the constraint
+                        quantification process.
+                        <mark>
+
+                            Rather than relying on generic distances
+                            from LLM common sense, we compute person-specific operational
+                            requirements based on individual body measurements and intended interactions
+                        </mark>
+                        — advancing scene generation from semantically plausible to human-operational.
+                    </li>
+                    <li>
+                        Consequently, the gap
+                        between anthropometric specifications and real-world use remains
+                        largely unknown, and the cascading effects on human-scene and
+                        human-object interactions have not been systematically studied in
+                        the context of scene generation.
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </li>
+</ul>
+<br><br>
