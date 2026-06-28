@@ -7,6 +7,16 @@ emoji: /emoji/brain.png
 
 <br>
 
+<style>
+.viz-scene { position: relative; width: 100%; height: 360px; border: 1px solid #e5e5e6; border-radius: 8px; overflow: hidden; background: linear-gradient(#fbfbfc, #f1f2f4); touch-action: none; cursor: grab; }
+.viz-scene:active { cursor: grabbing; }
+.viz-scene canvas { display: block; }
+.viz-scene .lbl { font-size: 10.5px; line-height: 1.16; color: #111; background: rgba(255,255,255,.82); border: 1px solid #e5e5e6; border-radius: 4px; padding: 1px 5px; white-space: nowrap; pointer-events: none; transform: translate(-50%,-50%); }
+.viz-scene .lbl.f { color: #0011e3; border-color: rgba(0,17,227,.3); }
+.viz-scene .lbl.m { color: #d6336c; border-color: rgba(214,51,108,.3); }
+.viz-scene .lbl.g { color: #6b7075; }
+</style>
+
 <ul>
     <li>
         <a href="https://dl.acm.org/doi/pdf/10.1145/3772318.3790341">Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts</a>
@@ -22,8 +32,13 @@ emoji: /emoji/brain.png
                         Because the model ignores the anthropometric clearance
                         required to actually push a chair back and stand up, the resulting layout creates an immediate conflict zone — a functional failure
                         that a human user would have instinctively avoided by adjusting
-                        the furniture distance. 
+                        the furniture distance.
+                        <figure>
+                            <div class="viz-scene" id="s-conflict" data-cam="2.4,-2.7,1.8" data-target="0,0.55,0.6"></div>
+                            <figcaption class="nofig">Plausible &ne; usable. The body needs the blue volume to push the chair back and stand; a wall or the next desk sits inside it &mdash; the magenta overlap is space that exists on screen but not for the person.</figcaption>
+                        </figure>
                     </li>
+                    <br>
                     <li>
                         We leverage VLMs to infer object functions from visual cues and reason about
                         potential human interactions based on scene type and layout criteria.
@@ -63,11 +78,26 @@ emoji: /emoji/brain.png
                         — advancing scene generation from semantically plausible to human-operational.
                     </li>
                     <li>
-                        Consequently, the gap
-                        between anthropometric specifications and real-world use remains
-                        largely unknown, and the cascading effects on human-scene and
-                        human-object interactions have not been systematically studied in
-                        the context of scene generation.
+                        The anthropometric design approach extends beyond individual
+                        furniture pieces to encompass operational spaces and the volume
+                        required for humans to use objects effectively.
+                    </li>
+                    <li>
+                        The importance of this personalization becomes evident when considering human diversity; a 5th
+                        percentile female and a 95th percentile male require substantially
+                        different operational spaces; however, <strong>
+                            current anthropometric-driven design methods apply
+                            uniform constraints that may be insufficient for larger individuals
+                            or wastefully spacious for smaller ones.
+                        </strong> By integrating anthropometric data directly into the generation process, we ensure that
+                        layouts accommodate specific individuals who will inhabit these
+                        spaces.
+                    </li>
+                    <li>
+                        Although <mark>Fréchet Inception Distance and Kernel
+                        Inception Distance metrics effectively validate visual quality
+                        and learning performance, they fail to capture the behavioral and
+                        operational aspects</mark> that determine the actual usability.
                     </li>
                 </ul>
             </li>
@@ -75,3 +105,8 @@ emoji: /emoji/brain.png
     </li>
 </ul>
 <br><br>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.151.3/build/three.module.js" } }
+</script>
+<script type="module" src="{{ '/threesrc/behavior-aware-conflict.js' | relative_url }}"></script>
