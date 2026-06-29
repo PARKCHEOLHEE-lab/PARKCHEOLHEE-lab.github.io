@@ -15,6 +15,9 @@ emoji: /emoji/brain.png
 .viz-scene .lbl.f { color: #0011e3; border-color: rgba(0,17,227,.3); }
 .viz-scene .lbl.m { color: #d6336c; border-color: rgba(214,51,108,.3); }
 .viz-scene .lbl.g { color: #6b7075; }
+.viz-scene .lbl.gr { color: #2fa35a; border-color: rgba(47,163,90,.3); }
+.viz-scene .lbl.fb { color: #3a5cc0; border-color: rgba(58,92,192,.3); }
+.viz-scene .lbl.fa { color: #a8752a; border-color: rgba(168,117,42,.3); }
 </style>
 
 <ul>
@@ -34,8 +37,8 @@ emoji: /emoji/brain.png
                         that a human user would have instinctively avoided by adjusting
                         the furniture distance.
                         <figure>
-                            <div class="viz-scene" id="s-conflict" data-cam="2.4,-2.7,1.8" data-target="0,0.55,0.6"></div>
-                            <figcaption class="nofig">Plausible &ne; usable. The body needs the blue volume to push the chair back and stand; a wall or the next desk sits inside it &mdash; the magenta overlap is space that exists on screen but not for the person.</figcaption>
+                            <div class="viz-scene" id="s-conflict" data-cam="3,-3,3" data-target="0,0.55,0.62"></div>
+                            <figcaption class="nofig">From the left, the stand-up clearance (blue) blocked by furniture set too close, with the unusable overlap in magenta &middot; the same clearance kept free by spacing the furniture apart.</figcaption>
                         </figure>
                     </li>
                     <br>
@@ -43,15 +46,15 @@ emoji: /emoji/brain.png
                         We leverage VLMs to infer object functions from visual cues and reason about
                         potential human interactions based on scene type and layout criteria.
                     </li>
-                    <li>
+                    <!-- <li>
                         <strong>We implemented the generated layouts at a 1:1 scale in physical office and lounge environments</strong> and compared three conditions: LayoutVLM (Baseline), 
                         <strong>Passage-Only (PO)</strong>, which ensures minimal navigable passages using static body
                         dimensions; and <strong>Human-Operational (HO)</strong>, which guarantees
                         sufficient human-operational space based on movement-related anthropometric envelopes. 
-                    </li>
+                    </li> -->
                     <li>
                         For PO and HO conditions, we instantiated
-                        participant-specific anthropometric profiles from each participant's
+                        <strong>participant-specific anthropometric profiles</strong> from each participant's
                         Skinned Multi-Person Linear (SMPL) model, parameterizing
                         the constraints (e.g., passage widths, reaching envelopes, and viewing requirements) to each participant's actual body dimensions. 
                     </li>
@@ -62,7 +65,14 @@ emoji: /emoji/brain.png
                 Related Works
                 <ul>
                     <li>
-                        Generating human-usable layouts requires anthropometric design principles, yet existing evaluations rarely assess whether generated layouts support actual human operation. 
+                        Ergonomics literature distinguishes between
+                        structural anthropometry—static body dimensions—and functional
+                        anthropometry, which describes the dynamic range of motion and
+                        clearance required for tasks, emphasizing that true usability depends on accommodating the latter.
+                        <figure>
+                            <div class="viz-scene" id="s-dims" style="height:440px" data-cam="5.3,-3.3,2.8" data-target="1.7,0,0.95"></div>
+                            <figcaption class="nofig">Structural anthropometry (gray, the static body box) and functional anthropometry (green, the movement and reach envelope). The camera can be controlled with the mouse.</figcaption>
+                        </figure>
                     </li>
                     <li>
                         Our work builds
@@ -77,11 +87,11 @@ emoji: /emoji/brain.png
                         </mark>
                         — advancing scene generation from semantically plausible to human-operational.
                     </li>
-                    <li>
+                    <!-- <li>
                         The anthropometric design approach extends beyond individual
                         furniture pieces to encompass operational spaces and the volume
                         required for humans to use objects effectively.
-                    </li>
+                    </li> -->
                     <li>
                         The importance of this personalization becomes evident when considering human diversity; a 5th
                         percentile female and a 95th percentile male require substantially
@@ -101,6 +111,15 @@ emoji: /emoji/brain.png
                     </li>
                 </ul>
             </li>
+            <br>
+            <li>
+                Behavior-Aware Anthropometric Scene Generation
+            </li>
+                <ul>
+                    <li>
+
+                    </li>
+                </ul>
         </ol>
     </li>
 </ul>
