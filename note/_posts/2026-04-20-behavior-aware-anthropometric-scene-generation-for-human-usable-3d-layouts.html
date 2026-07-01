@@ -1,0 +1,194 @@
+---
+title:  "Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts"
+layout: post
+emoji: /emoji/brain.png
+related:
+  - layout-vlm
+  - office-layout-generation-agents
+  - free-form-floor-plan-design-using-differentiable-voronoi-diagram
+  - floor-plan-generation-with-voronoi-diagram
+  - building-gan
+  - image-to-3d-scene
+  - space-syntax
+  - theater-sightlines
+---
+
+
+<br>
+
+<style>
+.viz-scene { position: relative; width: 100%; height: 360px; border: 1px solid #e5e5e6; border-radius: 8px; overflow: hidden; background: linear-gradient(#fbfbfc, #f1f2f4); touch-action: none; cursor: grab; }
+.viz-scene:active { cursor: grabbing; }
+.viz-scene canvas { display: block; }
+.viz-scene .lbl { font-size: 10.5px; line-height: 1.16; color: #111; background: rgba(255,255,255,.82); border: 1px solid #e5e5e6; border-radius: 4px; padding: 1px 5px; white-space: nowrap; pointer-events: none; transform: translate(-50%,-50%); }
+.viz-scene .lbl.f { color: #0011e3; border-color: rgba(0,17,227,.3); }
+.viz-scene .lbl.m { color: #d6336c; border-color: rgba(214,51,108,.3); }
+.viz-scene .lbl.g { color: #6b7075; }
+.viz-scene .lbl.gr { color: #2fa35a; border-color: rgba(47,163,90,.3); }
+.viz-scene .lbl.fb { color: #3a5cc0; border-color: rgba(58,92,192,.3); }
+.viz-scene .lbl.fa { color: #a8752a; border-color: rgba(168,117,42,.3); }
+</style>
+
+<ul>
+    <li>
+        <a href="https://dl.acm.org/doi/pdf/10.1145/3772318.3790341">Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts</a>
+        <ol>
+            <li>
+                Introduction
+                <ul>
+                    <li> 
+                        Physical environments fundamentally shape human movements and behavior.
+                        In the real world, <strong>layouts are rarely static; users naturally adjust their surroundings</strong> to fit their specific body dimensions and movements.
+                    </li>
+                    <li>
+                        Because the model ignores the anthropometric clearance
+                        required to actually push a chair back and stand up, the resulting layout creates an immediate conflict zone — a functional failure
+                        that a human user would have instinctively avoided by adjusting
+                        the furniture distance.
+                        <figure>
+                            <div class="viz-scene" id="s-conflict" data-cam="3,-3,3" data-target="0,0.55,0.62"></div>
+                            <figcaption class="nofig">From the left, the stand-up clearance (blue) blocked by furniture set too close, with the unusable overlap in magenta &middot; the same clearance kept free by spacing the furniture apart.</figcaption>
+                        </figure>
+                    </li>
+                    <br>
+                    <li>
+                        We leverage VLMs to infer object functions from visual cues and reason about
+                        potential human interactions based on scene type and layout criteria.
+                    </li>
+                    <!-- <li>
+                        <strong>We implemented the generated layouts at a 1:1 scale in physical office and lounge environments</strong> and compared three conditions: LayoutVLM (Baseline), 
+                        <strong>Passage-Only (PO)</strong>, which ensures minimal navigable passages using static body
+                        dimensions; and <strong>Human-Operational (HO)</strong>, which guarantees
+                        sufficient human-operational space based on movement-related anthropometric envelopes. 
+                    </li> -->
+                    <li>
+                        For PO and HO conditions, we instantiated
+                        <strong>participant-specific anthropometric profiles</strong> from each participant's
+                        Skinned Multi-Person Linear (SMPL) model, parameterizing
+                        the constraints (e.g., passage widths, reaching envelopes, and viewing requirements) to each participant's actual body dimensions. 
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Related Works
+                <ul>
+                    <li>
+                        Ergonomics literature distinguishes between
+                        structural anthropometry—static body dimensions—and functional
+                        anthropometry, which describes the dynamic range of motion and
+                        clearance required for tasks, emphasizing that true usability depends on accommodating the latter.
+                        <figure>
+                            <div class="viz-scene" id="s-dims" style="height:440px" data-cam="5.3,-3.3,2.8" data-target="1.7,0,0.95"></div>
+                            <figcaption class="nofig">Structural anthropometry (gray, the static body box) and functional anthropometry (green, the movement and reach envelope). The camera can be controlled with the mouse.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        Our work builds
+                        upon LayoutVLM's constraint optimization framework but extends
+                        it by integrating anthropometric data directly into the constraint
+                        quantification process.
+                        <mark>
+
+                            Rather than relying on generic distances
+                            from LLM common sense, we compute person-specific operational
+                            requirements based on individual body measurements and intended interactions
+                        </mark>
+                        — advancing scene generation from semantically plausible to human-operational.
+                    </li>
+                    <!-- <li>
+                        The anthropometric design approach extends beyond individual
+                        furniture pieces to encompass operational spaces and the volume
+                        required for humans to use objects effectively.
+                    </li> -->
+                    <li>
+                        The importance of this personalization becomes evident when considering human diversity; a 5th
+                        percentile female and a 95th percentile male require substantially
+                        different operational spaces; however, <strong>
+                            current anthropometric-driven design methods apply
+                            uniform constraints that may be insufficient for larger individuals
+                            or wastefully spacious for smaller ones.
+                        </strong> By integrating anthropometric data directly into the generation process, we ensure that
+                        layouts accommodate specific individuals who will inhabit these
+                        spaces.
+                    </li>
+                    <li>
+                        Although <mark>Fréchet Inception Distance and Kernel
+                        Inception Distance metrics effectively validate visual quality
+                        and learning performance, they fail to capture the behavioral and
+                        operational aspects</mark> that determine the actual usability.
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Method
+                <ul>
+                    <li>
+                        our framework uses scene instructions and assets as inputs and proceeds through two main stages:
+                        (1) <strong>Semantic and Behavioral Representation for Spatial Relation Construction</strong>: Constructing behavior-aware relationalrepresentationsthat integrate objectsemantics, humanobject interaction patterns, and group-level spatial relations
+                        (2) <strong>Constraint-based Layout Generation</strong>: Inferring anthropometrically grounded constraint representations suitable for differentiable spatial optimization
+                    </li>
+                    <li>
+                        The <strong>[A-E] stages</strong> interpret raw 3D assets and layout criteria to produce behavior-aware relational representations that link object geometry, function, and human interaction.
+                    </li>
+                    <li>
+                        Each object was rendered from four orthogonal viewpoints (0&deg;, 90&deg;, 180&deg;, and 270&deg;) to capture comprehensive geometric details. <strong>The multi-view approach captures fine-grained features (e.g., casters, hinges, or door knobs) that are often absent from text descriptions.</strong>
+                        <figure>
+                            <div class="viz-scene" id="s-preproc" style="height:420px" data-cam="3.4,-3.4,2.6" data-target="0,0,0.6"></div>
+                            <figcaption class="nofig">[B] Data Preprocessing &middot; each asset is rendered from 0&deg; / 90&deg; / 180&deg; / 270&deg; with an orthographic camera; the four captures shown on the view planes (each perpendicular to its camera axis) are what the VLM reads.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        This stage infers each object's functional and behavioral properties: how it operates and how humans can interact with it &mdash; <strong>a cabinet may open outward or slide laterally, and a chair may swivel or remain fixed</strong>. The VLM produces a <strong>[C] Functional Description</strong>, capturing qualitative information about movable parts and usage requirements.
+                        <figure>
+                            <div class="viz-scene" id="s-funcdesc" style="height:400px" data-cam="1.57,-1.57,1.28" data-target="0,0,0.35"></div>
+                            <figcaption class="nofig">[C] Functional Description &middot; the inferred movable parts: an upper door that slides along X and a lower door that swings open on a hinge; keep the front clear for access.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        The VLM also produces a <strong>[D] Human-Object Interaction Pattern</strong>, identifying the top five human actions associated with the object based on atomic visual actions (e.g., sit, open, pull).
+                        <figure>
+                            <div class="viz-scene" id="s-interaction" style="height:420px" data-cam="5.0,-4.2,2.2" data-target="2.6,0.2,0.95"></div>
+                            <figcaption class="nofig">[D] Human-Object Interaction Pattern &middot; the top actions the object affords &mdash; open / close (door), pull / push (drawer), touch; two-bone inverse kinematics lands each hand on the movable part.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        Meaningful spatial reasoning emerges when objects are considered as part of behavioral configurations; for example, <strong>chairs around a desk forming a workspace or sofas arranged around a coffee table creating a lounge area</strong>. The <strong>[E] Semantic Grouping</strong> stage identifies both <strong>intra-group spatial relations</strong> (internal arrangement within a functional unit) and <strong>inter-group spatial relations</strong> (connectivity between distinct groups).
+                        <figure>
+                            <div class="viz-scene" id="s-grouping" style="height:460px" data-cam="3.2,-5.2,4.8" data-target="0.1,0.9,0.5"></div>
+                            <figcaption class="nofig">[E] Semantic Grouping &middot; objects that function together form a group (work / lounge / storage); solid links are intra-group relations, dashed magenta links are inter-group relations.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Validation
+                <ul>
+                    <li>
+
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                User Studies
+                <ul>
+                    <li>
+
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </li>
+</ul>
+<br><br>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.151.3/build/three.module.js" } }
+</script>
+<script type="module" src="{{ '/threesrc/behavior-aware-conflict.js' | relative_url }}"></script>
