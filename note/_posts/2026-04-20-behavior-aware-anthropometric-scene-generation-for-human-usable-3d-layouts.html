@@ -113,11 +113,44 @@ emoji: /emoji/brain.png
             </li>
             <br>
             <li>
-                Behavior-Aware Anthropometric Scene Generation
+                Method
             </li>
                 <ul>
                     <li>
-
+                        our framework uses scene instructions and assets as inputs and proceeds through two main stages:
+                        (1) <strong>Semantic and Behavioral Representation for Spatial Relation Construction</strong>: Constructing behavior-aware relationalrepresentationsthat integrate objectsemantics, humanobject interaction patterns, and group-level spatial relations
+                        (2) <strong>Constraint-based Layout Generation</strong>: Inferring anthropometrically grounded constraint representations suitable for differentiable spatial optimization
+                    </li>
+                    <li>
+                        The <strong>[A-E] stages</strong> interpret raw 3D assets and layout criteria to produce behavior-aware relational representations that link object geometry, function, and human interaction.
+                    </li>
+                    <li>
+                        Each object was rendered from four orthogonal viewpoints (0&deg;, 90&deg;, 180&deg;, and 270&deg;) to capture comprehensive geometric details. <strong>The multi-view approach captures fine-grained features (e.g., casters, hinges, or door knobs) that are often absent from text descriptions.</strong>
+                        <figure>
+                            <div class="viz-scene" id="s-preproc" style="height:420px" data-cam="3.4,-3.4,2.6" data-target="0,0,0.6"></div>
+                            <figcaption class="nofig">[B] Data Preprocessing &middot; each asset is rendered from 0&deg; / 90&deg; / 180&deg; / 270&deg; with an orthographic camera; the four captures shown on the view planes (each perpendicular to its camera axis) are what the VLM reads.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        This stage infers each object's functional and behavioral properties: how it operates and how humans can interact with it &mdash; <strong>a cabinet may open outward or slide laterally, and a chair may swivel or remain fixed</strong>. The VLM produces a <strong>[C] Functional Description</strong>, capturing qualitative information about movable parts and usage requirements.
+                        <figure>
+                            <div class="viz-scene" id="s-funcdesc" style="height:400px" data-cam="1.57,-1.57,1.28" data-target="0,0,0.35"></div>
+                            <figcaption class="nofig">[C] Functional Description &middot; the inferred movable parts: an upper door that slides along X and a lower door that swings open on a hinge; keep the front clear for access.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        The VLM also produces a <strong>[D] Human-Object Interaction Pattern</strong>, identifying the top five human actions associated with the object based on atomic visual actions (e.g., sit, open, pull).
+                        <figure>
+                            <div class="viz-scene" id="s-interaction" style="height:420px" data-cam="5.0,-4.2,2.2" data-target="2.6,0.2,0.95"></div>
+                            <figcaption class="nofig">[D] Human-Object Interaction Pattern &middot; the top actions the object affords &mdash; open / close (door), pull / push (drawer), touch; two-bone inverse kinematics lands each hand on the movable part.</figcaption>
+                        </figure>
+                    </li>
+                    <li>
+                        Meaningful spatial reasoning emerges when objects are considered as part of behavioral configurations; for example, <strong>chairs around a desk forming a workspace or sofas arranged around a coffee table creating a lounge area</strong>. The <strong>[E] Semantic Grouping</strong> stage identifies both <strong>intra-group spatial relations</strong> (internal arrangement within a functional unit) and <strong>inter-group spatial relations</strong> (connectivity between distinct groups).
+                        <figure>
+                            <div class="viz-scene" id="s-grouping" style="height:460px" data-cam="3.2,-5.2,4.8" data-target="0.1,0.9,0.5"></div>
+                            <figcaption class="nofig">[E] Semantic Grouping &middot; objects that function together form a group (work / lounge / storage); solid links are intra-group relations, dashed magenta links are inter-group relations.</figcaption>
+                        </figure>
                     </li>
                 </ul>
         </ol>

@@ -97,6 +97,19 @@ function makeChest(w, d, h) {
   }
   return g;
 }
+// storage cabinet — a body with two hinged front doors + centre handles (fits a "storage area" better than drawers)
+function makeStorageCabinet(w, d, h) {
+  const g = new THREE.Group(), m = MAT.metal();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(w, d, h), MAT.wood()); body.position.set(0, 0, h / 2); g.add(body);
+  const doorMat = new THREE.MeshStandardMaterial({ color: 0xd8c39a, roughness: .6 });
+  [-1, 1].forEach(sgn => {
+    const door = new THREE.Mesh(new THREE.BoxGeometry(w / 2 - 0.02, 0.016, h - 0.08), doorMat);
+    door.position.set(sgn * w / 4, -d / 2 - 0.009, h / 2); g.add(door);
+    const handle = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.03, 0.12), m);
+    handle.position.set(sgn * 0.03, -d / 2 - 0.025, h / 2); g.add(handle); // handles flank the centre seam
+  });
+  return g;
+}
 // a coat: a flat extruded silhouette (collar, shoulders, hanging sleeves, A-line body)
 function makeCoat() {
   const pts = [[-0.04, 0.5], [-0.18, 0.42], [-0.28, 0.34], [-0.25, -0.05], [-0.17, -0.05], [-0.15, 0.24], [-0.22, -0.38], [0.22, -0.38], [0.15, 0.24], [0.17, -0.05], [0.25, -0.05], [0.28, 0.34], [0.18, 0.42], [0.04, 0.5]];
@@ -201,6 +214,64 @@ function makeMannequin(pose, color) {
   return g;
 }
 
+// ---------- kinematic posing (FK torso + two-bone IK limbs, constant bone lengths) — for the interaction figure ----------
+function twoBoneIK(A, T, L1, L2, pole) {
+  const AT = T.clone().sub(A);
+  let d = AT.length();
+  d = Math.min(Math.max(d, Math.abs(L1 - L2) + 1e-3), L1 + L2 - 1e-3);
+  const dir = AT.clone().normalize();
+  const Tc = A.clone().add(dir.clone().multiplyScalar(d));
+  const cosA = (L1 * L1 + d * d - L2 * L2) / (2 * L1 * d);
+  const a = Math.acos(Math.min(1, Math.max(-1, cosA)));
+  let up = pole.clone().sub(dir.clone().multiplyScalar(pole.dot(dir)));
+  if (up.lengthSq() < 1e-6) { up = (Math.abs(dir.z) < 0.9 ? new THREE.Vector3(0, 0, 1) : new THREE.Vector3(0, 1, 0)); up.sub(dir.clone().multiplyScalar(up.dot(dir))); }
+  up.normalize();
+  const elbowDir = dir.clone().multiplyScalar(Math.cos(a)).add(up.multiplyScalar(Math.sin(a)));
+  return [A.clone().add(elbowDir.multiplyScalar(L1)), Tc];
+}
+const BONE = { spine: 0.40, neck: 0.10, head: 0.16, shW: 0.19, shUp: 0.04, upArm: 0.28, foreArm: 0.26, hipW: 0.10, thigh: 0.44, shin: 0.44 };
+// solve a figure from high-level targets (hand/foot positions, pelvis, lean) → joint dict for makeMannequin
+function solveFigure(pose) {
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const p = Object.assign({ pelvis: [0, 0, 0.92], lean: 0, footL: null, footR: null, handL: null, handR: null }, pose);
+  const pelvis = V(p.pelvis[0], p.pelvis[1], p.pelvis[2]);
+  const up = V(0, Math.sin(p.lean), Math.cos(p.lean)), side = V(1, 0, 0);
+  const J = {};
+  J.pelvis = pelvis;
+  J.chest = pelvis.clone().add(up.clone().multiplyScalar(BONE.spine));
+  J.neck = J.chest.clone().add(up.clone().multiplyScalar(BONE.neck));
+  J.head = J.neck.clone().add(up.clone().multiplyScalar(BONE.head));
+  J.shR = J.chest.clone().add(side.clone().multiplyScalar(BONE.shW)).add(up.clone().multiplyScalar(BONE.shUp));
+  J.shL = J.chest.clone().add(side.clone().multiplyScalar(-BONE.shW)).add(up.clone().multiplyScalar(BONE.shUp));
+  J.hipR = pelvis.clone().add(side.clone().multiplyScalar(BONE.hipW));
+  J.hipL = pelvis.clone().add(side.clone().multiplyScalar(-BONE.hipW));
+  const armReach = BONE.upArm + BONE.foreArm;
+  const footR = p.footR ? V(p.footR[0], p.footR[1], p.footR[2]) : V(J.hipR.x, 0, 0.06);
+  const footL = p.footL ? V(p.footL[0], p.footL[1], p.footL[2]) : V(J.hipL.x, 0, 0.06);
+  const handR = p.handR ? V(p.handR[0], p.handR[1], p.handR[2]) : V(J.shR.x + 0.05, 0.02, J.shR.z - armReach + 0.04);
+  const handL = p.handL ? V(p.handL[0], p.handL[1], p.handL[2]) : V(J.shL.x - 0.05, 0.02, J.shL.z - armReach + 0.04);
+  const kneePole = p.kneePole ? V(p.kneePole[0], p.kneePole[1], p.kneePole[2]) : V(0, 1, -0.2);
+  [J.knR, J.anR] = twoBoneIK(J.hipR, footR, BONE.thigh, BONE.shin, kneePole);
+  [J.knL, J.anL] = twoBoneIK(J.hipL, footL, BONE.thigh, BONE.shin, kneePole);
+  const epR = p.elbowPole ? V(p.elbowPole[0], p.elbowPole[1], p.elbowPole[2]) : V(0.3, -0.5, -1);
+  const epL = p.elbowPole ? V(-p.elbowPole[0], p.elbowPole[1], p.elbowPole[2]) : V(-0.3, -0.5, -1);
+  [J.elR, J.wrR] = twoBoneIK(J.shR, handR, BONE.upArm, BONE.foreArm, epR);
+  [J.elL, J.wrL] = twoBoneIK(J.shL, handL, BONE.upArm, BONE.foreArm, epL);
+  const out = {}; for (const k in J) out[k] = [J[k].x, J[k].y, J[k].z]; return out;
+}
+// axis-aligned bounding box of an object → translucent volume (for the grouping figure)
+function bboxOf(obj, color, opacity) {
+  const box = new THREE.Box3().setFromObject(obj);
+  const size = new THREE.Vector3(), center = new THREE.Vector3();
+  box.getSize(size); box.getCenter(center);
+  const geo = new THREE.BoxGeometry(Math.max(size.x, .01), Math.max(size.y, .01), Math.max(size.z, .01));
+  const g = new THREE.Group(); g.position.copy(center);
+  g.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: (opacity != null ? opacity : .06), depthWrite: false })));
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color, transparent: true, opacity: .55 })));
+  g.userData.center = center; g.userData.size = size;
+  return g;
+}
+
 // ---------- scene scaffold ----------
 function makeScene(container, build) {
   const W = container.clientWidth, H = container.clientHeight;
@@ -225,7 +296,7 @@ function makeScene(container, build) {
   ctr.enableDamping = true; ctr.dampingFactor = .08; ctr.autoRotate = false; ctr.enablePan = true; // static (no auto-spin); right-drag pans (OrbitControls default RIGHT=PAN)
   ctr.minZoom = 0.7; ctr.maxZoom = 2.5; // ortho zoom clamps (minDistance/maxDistance are no-ops for OrthographicCamera)
   ctr.target.set(tg[0], tg[1], tg[2]);
-  build(scene, THREE);
+  build(scene, THREE, renderer);   // renderer passed so a build can render-to-texture (multi-view capture)
   if (window.ResizeObserver) new ResizeObserver(() => { const w = container.clientWidth, h = container.clientHeight; if (!w || !h) return; cam.left = -halfH*w/h; cam.right = halfH*w/h; cam.top = halfH; cam.bottom = -halfH; cam.updateProjectionMatrix(); renderer.setSize(w, h); lr.setSize(w, h); }).observe(container);
   (function loop() { requestAnimationFrame(loop); if (scene.userData.tick) scene.userData.tick(performance.now()); ctr.update(); renderer.render(scene, cam); lr.render(scene, cam); })();
   return { scene, cam, controls: ctr };
@@ -299,7 +370,250 @@ function buildDims(scene) {
   scene.add(label('reach envelope', 'gr', sx, sy + 0.92, sz + 0.08));
 }
 
+// shared asset used by BOTH the preprocessing (B) and functional-description (C) figures, so the two
+// read continuously: an open-shelf cabinet with two movable parts — a sliding door (upper-right) and a
+// hinged door (lower-left). Returns refs (not via userData, which would break group.clone()'s JSON copy).
+function makeAsset() {
+  const g = new THREE.Group();
+  const w = 0.9, d = 0.4, h = 0.7, t = 0.02, colW = w / 2;
+  const shell = new THREE.MeshStandardMaterial({ color: 0xe9e9ec, roughness: .7 });
+  const fixed = new THREE.MeshStandardMaterial({ color: 0x803a3a, roughness: .65 });
+  const red = () => new THREE.MeshStandardMaterial({ color: 0x9c4646, roughness: .55 });
+  const knobMat = new THREE.MeshStandardMaterial({ color: 0x2a2f45, roughness: .4 });
+  const panel = (sx, sy, sz, px, py, pz) => { const m = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), shell); m.position.set(px, py, pz); g.add(m); };
+  panel(w, d, t, 0, 0, h - t / 2);            // top
+  panel(w, d, t, 0, 0, t / 2);                // bottom
+  panel(w, d, t, 0, 0, h / 2);                // middle shelf
+  panel(t, d, h, -w / 2 + t / 2, 0, h / 2);   // left side
+  panel(t, d, h, w / 2 - t / 2, 0, h / 2);    // right side
+  panel(t, d, h, 0, 0, h / 2);                // centre divider
+  panel(w, t, h, 0, d / 2 - t / 2, h / 2);    // back
+  const solid = new THREE.Mesh(new THREE.BoxGeometry(colW - 0.07, d - 0.07, h / 2 - 0.07), fixed); solid.position.set(colW / 2, 0, h / 4); g.add(solid); // lower-right: fixed
+  const slide = new THREE.Mesh(new THREE.BoxGeometry(colW - 0.04, t, h / 2 - 0.06), red()); slide.position.set(colW / 2, -d / 2 + 0.006, h * 0.75); g.add(slide); // upper-right: sliding door
+  const sk = new THREE.Mesh(new THREE.SphereGeometry(0.014, 10, 8), knobMat); sk.position.set(-(colW - 0.04) / 2 + 0.05, -0.014, 0); slide.add(sk); // child of the door → moves with it
+  const hinge = new THREE.Group(); hinge.position.set(-w / 2 + 0.012, -d / 2 + 0.006, h / 4); g.add(hinge); // lower-left: hinged door on the outer edge
+  const leaf = new THREE.Mesh(new THREE.BoxGeometry(colW - 0.04, t, h / 2 - 0.06), red()); leaf.position.set((colW - 0.04) / 2, 0, 0); hinge.add(leaf);
+  const hk = new THREE.Mesh(new THREE.SphereGeometry(0.014, 10, 8), knobMat); hk.position.set(colW - 0.07, -0.008, 0); hinge.add(hk);
+  const outline = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, d, h)), new THREE.LineBasicMaterial({ color: 0xb8b8bd })); outline.position.set(0, 0, h / 2); g.add(outline);
+  return { group: g, slide, hinge, slideClosedX: colW / 2, w, d, h, colW };
+}
+
+// ---------- Method §3.1 Stage B · multi-view preprocessing (renders each asset from 4 views to textures) ----------
+function buildStageB(scene, THREE, renderer) {
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const capScene = new THREE.Scene();
+  function captureView(camPos, look, halfW, halfH, rtW, rtH) {
+    const cam = new THREE.OrthographicCamera(-halfW, halfW, halfH, -halfH, 0.01, 30);
+    cam.up.set(0, 0, 1); cam.position.set(camPos[0], camPos[1], camPos[2]); cam.lookAt(look[0], look[1], look[2]);
+    const rt = new THREE.WebGLRenderTarget(rtW, rtH, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter });
+    renderer.setRenderTarget(rt); renderer.setClearColor(0xffffff, 1); renderer.clear(); renderer.render(capScene, cam); renderer.setRenderTarget(null);
+    return rt.texture;
+  }
+  function billboard(tex, pos, pw, ph, facePos) {
+    const g = new THREE.Group();
+    g.add(new THREE.Mesh(new THREE.PlaneGeometry(pw, ph), new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide })));
+    const hw = (pw + 0.05) / 2, hh = (ph + 0.05) / 2;
+    g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints([V(-hw, -hh, 0), V(hw, -hh, 0), V(hw, hh, 0), V(-hw, hh, 0)]), new THREE.LineBasicMaterial({ color: 0x4a4a8c })));
+    g.position.set(pos[0], pos[1], pos[2]); g.up.set(0, 0, 1); g.lookAt(facePos[0], facePos[1], facePos[2]);
+    return g;
+  }
+  function makeCamera(camPos, target, color) {
+    const g = new THREE.Group();
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: .5, metalness: .15 });
+    const dark = new THREE.MeshStandardMaterial({ color: 0x2a2f45, roughness: .4, metalness: .2 });
+    g.add(new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.1, 0.11), mat));
+    const vf = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.05, 0.03), mat); vf.position.set(0, -0.02, 0.07); g.add(vf);
+    const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.014, 12), dark); btn.position.set(0.05, -0.01, 0.065); g.add(btn);
+    const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.042, 0.048, 0.09, 18), dark); lens.position.set(0, 0.095, 0); g.add(lens);
+    const ring = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.052, 0.02, 18), mat); ring.position.set(0, 0.14, 0); g.add(ring);
+    const glass = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.006, 18), new THREE.MeshStandardMaterial({ color: 0x9fb4e8, roughness: .2, metalness: .4 })); glass.position.set(0, 0.151, 0); g.add(glass);
+    const dir = V(target[0], target[1], target[2]).sub(V(camPos[0], camPos[1], camPos[2])).normalize();
+    g.quaternion.setFromUnitVectors(V(0, 1, 0), dir); g.position.set(camPos[0], camPos[1], camPos[2]);
+    return g;
+  }
+  function orthoCamMarker(camPos, target, halfW, halfH, color) {
+    const g = new THREE.Group();
+    const P = V(camPos[0], camPos[1], camPos[2]), T = V(target[0], target[1], target[2]);
+    const dir = T.clone().sub(P); dir.normalize();
+    const right = new THREE.Vector3().crossVectors(dir, V(0, 0, 1)).normalize();
+    const up = new THREE.Vector3().crossVectors(right, dir).normalize();
+    const rectAt = ctr => [[1, 1], [-1, 1], [-1, -1], [1, -1]].map(s => ctr.clone().add(right.clone().multiplyScalar(s[0] * halfW)).add(up.clone().multiplyScalar(s[1] * halfH)));
+    const near = rectAt(P), far = rectAt(T);
+    const m = new THREE.LineBasicMaterial({ color: 0x9ab0e8, transparent: true, opacity: 0.6 });
+    for (let i = 0; i < 4; i++) g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([near[i], far[i]]), m));
+    g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(near), m));
+    g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(far), m));
+    g.add(makeCamera(camPos, target, color));
+    return g;
+  }
+  function dashLink(a, b) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a[0], a[1], a[2]), V(b[0], b[1], b[2])]), new THREE.LineDashedMaterial({ color: 0x6a6aa8, dashSize: 0.06, gapSize: 0.045 })); l.computeLineDistances(); return l; }
+  const views = [{ deg: '0°', dir: [0, -1], front: true }, { deg: '90°', dir: [1, 0], front: false }, { deg: '180°', dir: [0, 1], front: true }, { deg: '270°', dir: [-1, 0], front: false }];
+  floorGrid(scene, 10);
+  const a = makeAsset(); scene.add(a.group);
+  capScene.add(new THREE.AmbientLight(0xffffff, 0.92));
+  const cdl = new THREE.DirectionalLight(0xffffff, 0.32); cdl.position.set(2, -3, 5); capScene.add(cdl);
+  const cdl2 = new THREE.DirectionalLight(0xffffff, 0.16); cdl2.position.set(-2, 3, 4); capScene.add(cdl2);
+  capScene.add(a.group.clone());
+  const C = [0, 0, 0.35], Rcap = 4, Rc = 1.5, Ro = 2.95, billZ = 0.78, camZ = 0.35, ds = 1.2;
+  const oldColor = new THREE.Color(); renderer.getClearColor(oldColor); const oldAlpha = renderer.getClearAlpha();
+  views.forEach(v => {
+    const halfW = v.front ? 0.5 : 0.27, halfH = 0.42, big = Math.max(halfW, halfH);
+    const tex = captureView([v.dir[0] * Rcap, v.dir[1] * Rcap, C[2]], C, halfW, halfH, Math.round(512 * halfW / big), Math.round(512 * halfH / big));
+    const pw = 2 * halfW * ds, ph = 2 * halfH * ds;
+    const camP = [v.dir[0] * Rc, v.dir[1] * Rc, camZ], pos = [v.dir[0] * Ro, v.dir[1] * Ro, billZ];
+    const faceDist = v.front ? 0.2 : 0.45, boxHW = v.front ? 0.46 : 0.21, boxHH = 0.36;
+    scene.add(orthoCamMarker(camP, [v.dir[0] * faceDist, v.dir[1] * faceDist, camZ], boxHW, boxHH, 0x3a5cc0));
+    scene.add(billboard(tex, pos, pw, ph, [pos[0] + v.dir[0], pos[1] + v.dir[1], pos[2]]));
+    scene.add(label(v.deg, '', pos[0], pos[1], pos[2] + ph / 2 + 0.18));
+    scene.add(dashLink(camP, [v.dir[0] * (Ro - pw * 0.5), v.dir[1] * (Ro - pw * 0.5), billZ]));
+  });
+  renderer.setClearColor(oldColor, oldAlpha);
+}
+
+// ---------- Method §3.1 Stage C · functional description (sliding door + hinged door) ----------
+function buildStageC(scene) {
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  function axisArrow(x0, x1, y, z, color) {
+    const g = new THREE.Group(), m = new THREE.LineBasicMaterial({ color });
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(x0, y, z), V(x1, y, z)]), m));
+    const head = (x, dir) => { const h = new THREE.Group();
+      h.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(x, y, z), V(x + dir * 0.05, y, z + 0.03)]), m));
+      h.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(x, y, z), V(x + dir * 0.05, y, z - 0.03)]), m));
+      return h; };
+    g.add(head(x0, 1)); g.add(head(x1, -1)); return g;
+  }
+  floorGrid(scene, 10);
+  const a = makeAsset(); scene.add(a.group);   // the SAME asset the B figure captures
+  const w = a.w, d = a.d, h = a.h, colW = a.colW;
+  // slide arrow above the upper row (the sliding door travels along X)
+  scene.add(axisArrow(-0.12, w / 2 - 0.02, -d / 2 - 0.04, h + 0.08, 0x9c4646));
+  // swing arc of the hinged door (top-down quarter arc about its outer hinge)
+  const swingMax = 1.4, hx = -w / 2 + 0.012, hy = -d / 2 + 0.006, R = colW - 0.04, zc = h / 4;
+  const arcPts = []; for (let i = 0; i <= 22; i++) { const f = -swingMax * i / 22; arcPts.push(V(hx + R * Math.cos(f), hy + R * Math.sin(f), zc)); }
+  const swingArc = new THREE.Line(new THREE.BufferGeometry().setFromPoints(arcPts), new THREE.LineDashedMaterial({ color: 0x9c4646, dashSize: 0.03, gapSize: 0.02 })); swingArc.computeLineDistances(); scene.add(swingArc);
+  scene.add(label('sliding door', 'f', colW / 2, -d / 2 - 0.05, h + 0.16));
+  scene.add(label('slides along X', 'g', w / 2 + 0.24, -d / 2, h - 0.05));
+  scene.add(label('hinged door (swings open)', 'm', -0.3, -d / 2 - 0.5, h / 4 - 0.02));
+  scene.add(label('keep front clear for access', 'g', 0.12, -d / 2 - 0.56, 0.08));
+  scene.userData.tick = (ms) => {
+    const t = ms / 1000;
+    a.slide.position.x = a.slideClosedX - (colW - 0.08) * (Math.sin(t * 1.1) + 1) / 2;
+    a.hinge.rotation.z = -swingMax * (0.5 - 0.5 * Math.cos(t * 0.9));
+  };
+}
+
+// ---------- Method §3.1 Stage D · human-object interaction (kinematic: hand grips the movable part) ----------
+function buildStageD(scene) {
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const cw = 0.4, cd = 0.34, ch = 0.45, gap = 0.006, z0 = 0.45;
+  const cols = [-(cw + gap) / 2, (cw + gap) / 2];
+  const rows = [z0 + ch / 2, z0 + ch + gap + ch / 2];
+  const MOV = 0x7088c4, CUE = 0x3a5cc0, O = [0.4, 0.55, 0];
+  const grip = c => [c[0] + O[0], c[1] + O[1] - 0.02, c[2] + O[2]];
+  const doorGrip = s => [cols[0] + s - cw / 2 + 0.05, -cd / 2 - 0.022, rows[1]];
+  const drawerGrip = dout => [cols[0], -cd / 2 - dout - 0.022, z0 + ch - 0.10];
+  const touchPt = () => [cols[0], -cd / 2 - 0.01, rows[1]];
+  const panel = (w, h, color) => new THREE.Mesh(new THREE.BoxGeometry(w, 0.016, h), new THREE.MeshStandardMaterial({ color, roughness: .5 }));
+  const handleBar = () => new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.03, 0.14), new THREE.MeshStandardMaterial({ color: COL.metal, roughness: .4, metalness: .3 }));
+  function motionArrow(at, dir, color) {
+    const g = new THREE.Group();
+    const A = V(at[0], at[1], at[2]), d = V(dir[0], dir[1], dir[2]).normalize(), len = 0.14;
+    const B = A.clone().add(d.clone().multiplyScalar(len));
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: .5 });
+    const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, len, 8), mat);
+    shaft.position.copy(A.clone().add(B).multiplyScalar(0.5)); shaft.quaternion.setFromUnitVectors(V(0, 1, 0), d); g.add(shaft);
+    const head = new THREE.Mesh(new THREE.ConeGeometry(0.03, 0.07, 14), mat); head.position.copy(B); head.quaternion.setFromUnitVectors(V(0, 1, 0), d); g.add(head);
+    return g;
+  }
+  function makeCabinet(state) {
+    const g = new THREE.Group();
+    cols.forEach(x => rows.forEach(z => { const c = boxEdges(cw, cd, ch, 0x969ba2, 0.06); c.position.set(x, 0, z); g.add(c); }));
+    const s = state.door || 0, dout = state.drawer || 0, dz = z0 + ch - 0.10;
+    const door = panel(cw - 0.03, ch - 0.05, MOV); door.position.set(cols[0] + s, -cd / 2, rows[1]); g.add(door);
+    const dg = doorGrip(s); const dh = handleBar(); dh.position.set(dg[0], dg[1], dg[2]); g.add(dh);
+    const dbody = boxEdges(cw - 0.05, cd - 0.04, ch - 0.08, MOV, 0.05); dbody.position.set(cols[0], -dout, z0 + ch / 2); g.add(dbody);
+    const dfront = panel(cw - 0.04, ch - 0.10, MOV); dfront.position.set(cols[0], -cd / 2 - dout, z0 + ch / 2); g.add(dfront);
+    const rg = drawerGrip(dout); const drh = handleBar(); drh.rotation.y = Math.PI / 2; drh.position.set(rg[0], rg[1], rg[2]); g.add(drh);
+    if (state.touch) { const tp = touchPt(); const ring = new THREE.Mesh(new THREE.RingGeometry(0.05, 0.072, 28), new THREE.MeshBasicMaterial({ color: CUE, transparent: true, opacity: 0.75, side: THREE.DoubleSide, depthWrite: false })); ring.rotation.x = Math.PI / 2; ring.position.set(tp[0], -cd / 2 - 0.02, tp[2]); g.add(ring); }
+    if (state.cue === 'open')  g.add(motionArrow([cols[0] + s + 0.04, -cd / 2 - 0.05, rows[1] + 0.30], [1, 0, 0], CUE));
+    if (state.cue === 'close') g.add(motionArrow([cols[0] + s + 0.04, -cd / 2 - 0.05, rows[1] + 0.30], [-1, 0, 0], CUE));
+    if (state.cue === 'pull')  g.add(motionArrow([cols[0] + 0.22, -cd / 2 - dout, dz], [0, -1, 0], CUE));
+    if (state.cue === 'push')  g.add(motionArrow([cols[0] + 0.22, -cd / 2 - dout - 0.14, dz], [0, 1, 0], CUE));
+    return g;
+  }
+  floorGrid(scene, 14);
+  const dx = 1.4;
+  const items = [
+    ['open', { door: 0.24, cue: 'open' }, { handR: grip(doorGrip(0.24)) }],
+    ['close', { door: 0.05, cue: 'close' }, { handR: grip(doorGrip(0.05)), lean: 0.05 }],
+    ['pull', { drawer: 0.22, cue: 'pull' }, { pelvis: [0, -0.05, 0.84], lean: 0.12, handR: grip(drawerGrip(0.22)), footL: [-0.1, 0.06, 0.06], footR: [0.12, -0.06, 0.06] }],
+    ['push', { drawer: 0.04, cue: 'push' }, { pelvis: [0, 0.04, 0.84], lean: 0.22, handR: grip(drawerGrip(0.04)), elbowPole: [0.2, 0.1, -1] }],
+    ['touch', { touch: true }, { handR: grip(touchPt()) }],
+  ];
+  items.forEach((it, i) => {
+    const en = it[0], state = it[1], pose = it[2], x = i * dx;
+    const cab = makeCabinet(state); cab.position.set(x, 0.55, 0); scene.add(cab);
+    const man = makeMannequin(solveFigure(pose)); man.position.set(x - 0.4, 0, 0); scene.add(man);
+    scene.add(label(en, '', x - 0.1, 0.3, 1.82));
+  });
+}
+
+// ---------- Method §3.1 Stage E · semantic grouping (intra- and inter-group relations) ----------
+function buildStageE(scene) {
+  const V = (x, y, z) => new THREE.Vector3(x, y, z);
+  const sphere = (p, r, color) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 14), new THREE.MeshStandardMaterial({ color, roughness: .4 })); m.position.set(p[0], p[1], p[2]); return m; };
+  const solidEdge = (a, b, color, op) => new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a[0], a[1], a[2]), V(b[0], b[1], b[2])]), new THREE.LineBasicMaterial({ color, transparent: true, opacity: op }));
+  function dashEdge(a, b, color) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a[0], a[1], a[2]), V(b[0], b[1], b[2])]), new THREE.LineDashedMaterial({ color, dashSize: 0.09, gapSize: 0.06 })); l.computeLineDistances(); return l; }
+  const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
+  function makeSofa() {
+    const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color: 0x8a8f98, roughness: .75 });
+    const add = (w, d, h, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, d, h), mat); m.position.set(x, y, z); g.add(m); };
+    add(0.92, 0.52, 0.22, 0, 0, 0.14); add(0.86, 0.48, 0.12, 0, 0.02, 0.31); add(0.92, 0.14, 0.36, 0, -0.19, 0.42);
+    add(0.1, 0.52, 0.34, -0.41, 0, 0.36); add(0.1, 0.52, 0.34, 0.41, 0, 0.36);
+    return g;
+  }
+  floorGrid(scene, 14);
+  const groups = [
+    { name: 'individual work area', cls: 'fb', color: 0x3a5cc0, make() {
+        const desk = makeDesk(1.05, 0.58, 0.74); desk.position.set(-2.0, 0.2, 0);
+        const cA = makeChair(); cA.position.set(-2.35, -0.4, 0);
+        const cB = makeChair(); cB.position.set(-1.65, -0.4, 0);
+        return { objs: [desk, cA, cB], nodes: [[-2.0, 0.2, 0.8], [-2.35, -0.4, 1.0], [-1.65, -0.4, 1.0]], intra: [[1, 0], [2, 0]] };
+      } },
+    { name: 'lounge area', cls: 'fa', color: 0xa8752a, make() {
+        const t = makeDesk(0.7, 0.5, 0.36); t.position.set(0, 2.3, 0);
+        const s1 = makeSofa(); s1.position.set(0, 2.9, 0); s1.rotation.z = Math.PI;
+        const s2 = makeSofa(); s2.position.set(0, 1.7, 0);
+        return { objs: [t, s1, s2], nodes: [[0, 2.3, 0.5], [0, 2.9, 0.72], [0, 1.7, 0.72]], intra: [[1, 0], [2, 0]] };
+      } },
+    { name: 'storage area', cls: 'gr', color: 0x2fa35a, make() {
+        const cs = []; [1.55, 2.05, 2.55].forEach(x => { const c = makeStorageCabinet(0.5, 0.4, 0.95); c.position.set(x, -0.15, 0); cs.push(c); });
+        return { objs: cs, nodes: [[1.55, -0.15, 1.0], [2.05, -0.15, 1.0], [2.55, -0.15, 1.0]], intra: [[0, 1], [1, 2]] };
+      } },
+  ];
+  const gnodes = [];
+  groups.forEach(gr => {
+    const r = gr.make(), objs = r.objs, nodes = r.nodes, intra = r.intra;
+    const holder = new THREE.Group(); objs.forEach(o => holder.add(o)); scene.add(holder);
+    const hull = bboxOf(holder, gr.color, 0.07); scene.add(hull);
+    const c = hull.userData.center, s = hull.userData.size, gp = [c.x, c.y, c.z + s.z / 2 + 0.42];
+    scene.add(sphere(gp, 0.06, gr.color));
+    nodes.forEach(n => scene.add(sphere(n, 0.03, gr.color)));
+    intra.forEach(ij => scene.add(solidEdge(nodes[ij[0]], nodes[ij[1]], gr.color, 0.8)));
+    scene.add(label(gr.name, gr.cls, gp[0], gp[1], gp[2] + 0.14));
+    gnodes.push(gp);
+  });
+  [[0, 1], [0, 2], [1, 2]].forEach(ij => scene.add(dashEdge(gnodes[ij[0]], gnodes[ij[1]], 0xd6336c)));
+  scene.add(label('intra-group', 'g', -2.0, -0.15, 1.12));
+  const mm = mid(gnodes[0], gnodes[2]);
+  scene.add(label('inter-group', 'm', mm[0], mm[1], mm[2] + 0.04));
+}
+
 const elConflict = document.getElementById('s-conflict');
 if (elConflict) makeScene(elConflict, buildConflict);
 const elDims = document.getElementById('s-dims');
 if (elDims) makeScene(elDims, buildDims);
+const elB = document.getElementById('s-preproc'); if (elB) makeScene(elB, buildStageB);
+const elC = document.getElementById('s-funcdesc'); if (elC) makeScene(elC, buildStageC);
+const elD = document.getElementById('s-interaction'); if (elD) makeScene(elD, buildStageD);
+const elE = document.getElementById('s-grouping'); if (elE) makeScene(elE, buildStageE);
