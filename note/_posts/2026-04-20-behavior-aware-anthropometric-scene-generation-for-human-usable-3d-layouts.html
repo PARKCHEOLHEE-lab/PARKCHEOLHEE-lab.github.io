@@ -27,6 +27,8 @@ related:
 .viz-scene .lbl.gr { color: #2fa35a; border-color: rgba(47,163,90,.3); }
 .viz-scene .lbl.fb { color: #3a5cc0; border-color: rgba(58,92,192,.3); }
 .viz-scene .lbl.fa { color: #a8752a; border-color: rgba(168,117,42,.3); }
+/* mobile: shorter canvas so wide figures fill it (the camera fits width, so a tall canvas just letterboxes) */
+@media (max-width: 640px) { .viz-scene { height: 260px !important; } }
 </style>
 
 <ul>
@@ -156,7 +158,7 @@ related:
                     <li>
                         Meaningful spatial reasoning emerges when objects are considered as part of behavioral configurations; for example, <strong>chairs around a desk forming a workspace or sofas arranged around a coffee table creating a lounge area</strong>. The <strong>[E] Semantic Grouping</strong> stage identifies both <strong>intra-group spatial relations</strong> (internal arrangement within a functional unit) and <strong>inter-group spatial relations</strong> (connectivity between distinct groups).
                         <figure>
-                            <div class="viz-scene" id="s-grouping" style="height:460px" data-cam="3.2,-5.2,4.8" data-target="0.1,0.9,0.5"></div>
+                            <div class="viz-scene" id="s-grouping" style="height:460px" data-cam="2.66,-3.79,1.83" data-target="0.1,0.9,0.5"></div>
                             <figcaption class="nofig">[E] Semantic Grouping &middot; objects that function together form a group (work / lounge / storage); solid links are intra-group relations, dashed magenta links are inter-group relations.</figcaption>
                         </figure>
                     </li>

@@ -29,7 +29,7 @@ function boxEdges(w, d, h, color, opacity) {
   g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo), new THREE.LineBasicMaterial({ color })));
   return g;
 }
-function floorGrid(scene, size) { const g = new THREE.GridHelper(size, size * 4, 0xd7d7d9, 0xededee); g.rotation.x = Math.PI / 2; scene.add(g); return g; }
+function floorGrid(scene, size) { const g = new THREE.GridHelper(size, size * 4, 0xd7d7d9, 0xededee); g.rotation.x = Math.PI / 2; g.userData.isFloor = true; scene.add(g); return g; }
 function label(text, cls, x, y, z) {
   const el = document.createElement('div');
   el.className = 'lbl' + (cls ? ' ' + cls : '');
@@ -297,7 +297,33 @@ function makeScene(container, build) {
   ctr.minZoom = 0.7; ctr.maxZoom = 2.5; // ortho zoom clamps (minDistance/maxDistance are no-ops for OrthographicCamera)
   ctr.target.set(tg[0], tg[1], tg[2]);
   build(scene, THREE, renderer);   // renderer passed so a build can render-to-texture (multi-view capture)
-  if (window.ResizeObserver) new ResizeObserver(() => { const w = container.clientWidth, h = container.clientHeight; if (!w || !h) return; cam.left = -halfH*w/h; cam.right = halfH*w/h; cam.top = halfH; cam.bottom = -halfH; cam.updateProjectionMatrix(); renderer.setSize(w, h); lr.setSize(w, h); }).observe(container);
+  // responsive framing: keep the tuned vertical extent (halfH) on wide screens, but on narrow (mobile)
+  // viewports zoom out so the full content WIDTH still fits — otherwise wide figures get clipped left/right.
+  const target = new THREE.Vector3(tg[0], tg[1], tg[2]);
+  const fwd = new THREE.Vector3().subVectors(target, cam.position).normalize();
+  const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 0, 1)).normalize();
+  // content half-width along the camera's RIGHT axis. Project each mesh's world bounding sphere
+  // (center·right ± radius) instead of an axis-aligned Box3's 8 corners: for a diagonal camera over a
+  // plus-shaped layout (stage B's 4 view planes) the empty AABB corners project onto the 45° right-axis
+  // at ~√2× the true width, which over-zoomed wide figures — worst on mobile, where width binds the fit.
+  scene.updateMatrixWorld(true);
+  const tR = target.dot(right), sph = new THREE.Sphere();
+  let halfW = halfH;
+  scene.traverse(o => {
+    if (o.userData && o.userData.isFloor || !o.geometry) return;   // skip floor grid and label-only nodes
+    if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
+    sph.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);
+    halfW = Math.max(halfW, Math.abs(sph.center.dot(right) - tR) + sph.radius);
+  });
+  const FIT = 1.22;   // margin so edge labels (CSS2D, wider than their anchor point) aren't clipped
+  function frame() {
+    const w = container.clientWidth, h = container.clientHeight; if (!w || !h) return;
+    const aspect = w / h, hH = Math.max(halfH, halfW * FIT / aspect);
+    cam.left = -hH * aspect; cam.right = hH * aspect; cam.top = hH; cam.bottom = -hH; cam.updateProjectionMatrix();
+    renderer.setSize(w, h); lr.setSize(w, h);
+  }
+  frame();
+  if (window.ResizeObserver) new ResizeObserver(frame).observe(container);
   (function loop() { requestAnimationFrame(loop); if (scene.userData.tick) scene.userData.tick(performance.now()); ctr.update(); renderer.render(scene, cam); lr.render(scene, cam); })();
   return { scene, cam, controls: ctr };
 }
