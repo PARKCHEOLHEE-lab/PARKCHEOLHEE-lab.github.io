@@ -103,6 +103,39 @@ def strip_html(html_text):
     return text
 
 
+# text-embedding-3-small rejects inputs over 8192 tokens. CJK text tokenizes
+# at roughly 2 tokens per character, so a flat character cap cannot hold the
+# limit for Korean posts.
+EMBED_TOKEN_LIMIT = 8192
+EMBED_TOKEN_MARGIN = 500
+
+
+def estimate_tokens(text):
+    # lazy: conservative char-class heuristic (CJK 2.5 tok/char, other 1 tok
+    # per 3.5 chars); swap for tiktoken if exact budgeting ever matters
+    cjk = sum(
+        1
+        for c in text
+        if "가" <= c <= "힣"  # Hangul syllables
+        or "ᄀ" <= c <= "ᇿ"  # Hangul jamo
+        or "぀" <= c <= "ヿ"  # Kana
+        or "一" <= c <= "鿿"  # CJK ideographs
+    )
+    other = len(text) - cjk
+    return int(cjk * 2.5 + other / 3.5)
+
+
+def clip_to_token_limit(text, limit=EMBED_TOKEN_LIMIT - EMBED_TOKEN_MARGIN):
+    """Trim text until the token estimate fits the embedding input limit.
+
+    Texts already under the limit are returned unchanged so cached
+    embeddings keyed on embed_text stay valid.
+    """
+    while estimate_tokens(text) > limit:
+        text = text[: int(len(text) * 0.9)]
+    return text
+
+
 def load_posts():
     """Load all eligible posts from note/_posts and testbed/_posts."""
     patterns = [
@@ -137,7 +170,7 @@ def load_posts():
                 label = "Testbed" if category == "testbed" else "Note"
 
             clean_text = strip_html(body)
-            embed_text = f"{title}. {clean_text}"[:32000]
+            embed_text = clip_to_token_limit(f"{title}. {clean_text}"[:32000])
 
             posts.append({
                 "title": title,

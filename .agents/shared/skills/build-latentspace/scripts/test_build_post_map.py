@@ -236,3 +236,34 @@ class TestCacheSkip:
 
         mock_embed.assert_called_once()
         assert len(mock_embed.call_args[0][0]) == len(slugs)
+
+
+class TestClipToTokenLimit:
+    """Embedding inputs must stay under the 8192-token API limit (issue: long
+    Korean posts blew past it because the old cap counted characters)."""
+
+    def test_long_korean_text_is_clipped_under_limit(self):
+        text = "진실은 투명하게 전달되지 않는다 " * 2000
+        clipped = bpm.clip_to_token_limit(text)
+        assert len(clipped) < len(text)
+        assert bpm.estimate_tokens(clipped) <= bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
+
+    def test_clipped_text_is_prefix_of_original(self):
+        text = "우리는 스스로 거짓의 세계를 만든다 " * 2000
+        clipped = bpm.clip_to_token_limit(text)
+        assert text.startswith(clipped)
+
+    def test_short_mixed_text_unchanged(self):
+        text = "some truth. 진실은 순수한 상태로 남아있지 않는다."
+        assert bpm.clip_to_token_limit(text) == text
+
+    def test_long_english_text_under_limit_unchanged(self):
+        # ~20K ascii chars ≈ 5.7K estimated tokens: must stay byte-identical
+        # so cached embeddings for existing English posts remain valid.
+        text = "a" * 20000
+        assert bpm.clip_to_token_limit(text) == text
+
+    def test_estimate_counts_cjk_heavier_than_ascii(self):
+        korean = "가" * 100
+        ascii_ = "a" * 100
+        assert bpm.estimate_tokens(korean) > bpm.estimate_tokens(ascii_)
