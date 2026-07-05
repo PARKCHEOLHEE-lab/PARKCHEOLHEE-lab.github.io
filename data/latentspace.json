@@ -142,7 +142,7 @@
       "plane-equation"
     ],
     "x": 0.7384,
-    "y": 0.5531
+    "y": 0.5532
   },
   {
     "title": "Non-linearity",
@@ -174,7 +174,7 @@
       "gradient-penalty"
     ],
     "x": 0.6387,
-    "y": 0.1739
+    "y": 0.174
   },
   {
     "title": "Cosine Similarity",
@@ -188,7 +188,7 @@
       "attention-attention",
       "attention-is-all-you-need"
     ],
-    "x": 0.6779,
+    "x": 0.6778,
     "y": 0.5353
   },
   {
@@ -386,7 +386,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.476,
-    "y": 0.6452
+    "y": 0.6451
   },
   {
     "title": "DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation",
@@ -669,7 +669,7 @@
       "important-thing-is"
     ],
     "x": 0.4043,
-    "y": 0.5337
+    "y": 0.5338
   },
   {
     "title": "LDLM",
@@ -714,7 +714,7 @@
       "mathematics-for-machine-learning"
     ],
     "x": 0.6547,
-    "y": 0.3735
+    "y": 0.3736
   },
   {
     "title": "Good Refactoring vs. Bad Refactoring",
@@ -1052,7 +1052,7 @@
       "register_buffer"
     ],
     "x": 0.7997,
-    "y": 0.3087
+    "y": 0.3088
   },
   {
     "title": "Words (말)",
@@ -1283,7 +1283,7 @@
       "representation-learning"
     ],
     "x": 0.7423,
-    "y": 0.0598
+    "y": 0.0599
   },
   {
     "title": "KL-Divergence",
@@ -1592,7 +1592,7 @@
       "window-crossing-selection"
     ],
     "x": 0.7933,
-    "y": 0.7752
+    "y": 0.7751
   },
   {
     "title": "Exploring Generative 3D Shapes Using Autoencoder Networks",
@@ -1744,7 +1744,7 @@
       "openai-agents-sdk"
     ],
     "x": 0.5807,
-    "y": 0.6697
+    "y": 0.6696
   },
   {
     "title": "truth",
@@ -1905,7 +1905,7 @@
     "label": "Wordballoon",
     "connected": [],
     "x": 0.3755,
-    "y": 0.853
+    "y": 0.8529
   },
   {
     "title": "Plane Equation",
@@ -1984,7 +1984,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.3548,
-    "y": 0.8325
+    "y": 0.8324
   },
   {
     "title": "StyleID: A Perception-Aware Dataset and Metric for Stylization-Agnostic Facial Identity Recognition",
@@ -2267,7 +2267,7 @@
       "the-selfish-gene"
     ],
     "x": 0.7488,
-    "y": 0.6078
+    "y": 0.6077
   },
   {
     "title": "Mass generator",
@@ -2553,7 +2553,7 @@
       "intuitions-about-diffusion-models"
     ],
     "x": 0.783,
-    "y": 0.8667
+    "y": 0.8668
   },
   {
     "title": "Parallel execution within GhPython",
@@ -2706,7 +2706,7 @@
       "message-passing"
     ],
     "x": 0.9612,
-    "y": 0.4373
+    "y": 0.4372
   },
   {
     "title": "Floor Plan Generation with Voronoi Diagram",
@@ -2726,7 +2726,7 @@
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
     "x": 0.9596,
-    "y": 0.6378
+    "y": 0.6379
   },
   {
     "title": "Landbook Diffusion Pipeline",
