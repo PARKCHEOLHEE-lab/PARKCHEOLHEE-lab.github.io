@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 from openai import OpenAI
 from sklearn.decomposition import PCA
 import numpy as np
+import tiktoken
 
 EMOJI_TO_LABEL = {
     "brain": "Brain",
@@ -103,37 +104,35 @@ def strip_html(html_text):
     return text
 
 
-# text-embedding-3-small rejects inputs over 8192 tokens. CJK text tokenizes
-# at roughly 2 tokens per character, so a flat character cap cannot hold the
-# limit for Korean posts.
+# text-embedding-3-small rejects inputs over 8192 tokens. Character-count
+# heuristics undercount dense-tokenizing text (compatibility jamo like
+# "ㅋ", emoji, digit runs), so the budget is enforced with the model's own
+# tokenizer.
+EMBED_MODEL = "text-embedding-3-small"
 EMBED_TOKEN_LIMIT = 8192
 EMBED_TOKEN_MARGIN = 500
 
+_ENCODING = None
 
-def estimate_tokens(text):
-    # lazy: conservative char-class heuristic (CJK 2.5 tok/char, other 1 tok
-    # per 3.5 chars); swap for tiktoken if exact budgeting ever matters
-    cjk = sum(
-        1
-        for c in text
-        if "가" <= c <= "힣"  # Hangul syllables
-        or "ᄀ" <= c <= "ᇿ"  # Hangul jamo
-        or "぀" <= c <= "ヿ"  # Kana
-        or "一" <= c <= "鿿"  # CJK ideographs
-    )
-    other = len(text) - cjk
-    return int(cjk * 2.5 + other / 3.5)
+
+def _encoding():
+    global _ENCODING
+    if _ENCODING is None:
+        _ENCODING = tiktoken.encoding_for_model(EMBED_MODEL)
+    return _ENCODING
 
 
 def clip_to_token_limit(text, limit=EMBED_TOKEN_LIMIT - EMBED_TOKEN_MARGIN):
-    """Trim text until the token estimate fits the embedding input limit.
+    """Trim text to the embedding input token budget, counted exactly.
 
     Texts already under the limit are returned unchanged so cached
-    embeddings keyed on embed_text stay valid.
+    embeddings keyed on embed_text stay valid. A token slice can split a
+    multi-byte character, so any replacement char at the cut is stripped.
     """
-    while estimate_tokens(text) > limit:
-        text = text[: int(len(text) * 0.9)]
-    return text
+    tokens = _encoding().encode(text)
+    if len(tokens) <= limit:
+        return text
+    return _encoding().decode(tokens[:limit]).rstrip("�")
 
 
 def load_posts():
@@ -190,7 +189,7 @@ def get_embeddings(posts, client):
     texts = [p["embed_text"] for p in posts]
     print(f"Embedding {len(texts)} posts...")
     response = client.embeddings.create(
-        model="text-embedding-3-small",
+        model=EMBED_MODEL,
         input=texts,
     )
     embeddings = [item.embedding for item in response.data]

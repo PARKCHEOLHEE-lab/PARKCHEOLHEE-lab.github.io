@@ -41,7 +41,7 @@ python3 .agents/shared/skills/build-latentspace/scripts/build_post_map.py
 Python dependencies for latent-space work are installed in CI with:
 
 ```bash
-pip install openai beautifulsoup4 lxml numpy scikit-learn pytest
+pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
 ```
 
 ## Content Conventions

@@ -6,6 +6,7 @@ Guards against unnecessary OpenAI API calls (= real money).
 import json
 import os
 import tempfile
+from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
 import numpy as np
@@ -239,14 +240,24 @@ class TestCacheSkip:
 
 
 class TestClipToTokenLimit:
-    """Embedding inputs must stay under the 8192-token API limit (issue: long
-    Korean posts blew past it because the old cap counted characters)."""
+    """Embedding inputs must stay under the 8192-token API limit, counted
+    with the model's own tokenizer. Char-count heuristics undercount
+    dense-tokenizing text (compatibility jamo, emoji, digit runs) — found
+    by review reproduction on PR #87."""
+
+    def _count(self, text):
+        return len(bpm._encoding().encode(text))
 
     def test_long_korean_text_is_clipped_under_limit(self):
         text = "진실은 투명하게 전달되지 않는다 " * 2000
         clipped = bpm.clip_to_token_limit(text)
         assert len(clipped) < len(text)
-        assert bpm.estimate_tokens(clipped) <= bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
+        assert self._count(clipped) <= bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
+
+    def test_compatibility_jamo_text_is_clipped_under_limit(self):
+        text = "ㅋ" * 32000
+        clipped = bpm.clip_to_token_limit(text)
+        assert self._count(clipped) <= bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
 
     def test_clipped_text_is_prefix_of_original(self):
         text = "우리는 스스로 거짓의 세계를 만든다 " * 2000
@@ -257,13 +268,49 @@ class TestClipToTokenLimit:
         text = "some truth. 진실은 순수한 상태로 남아있지 않는다."
         assert bpm.clip_to_token_limit(text) == text
 
-    def test_long_english_text_under_limit_unchanged(self):
-        # ~20K ascii chars ≈ 5.7K estimated tokens: must stay byte-identical
-        # so cached embeddings for existing English posts remain valid.
-        text = "a" * 20000
+    def test_long_text_under_limit_unchanged(self):
+        # long-but-under-budget input must stay byte-identical so cached
+        # embeddings for existing posts remain valid
+        text = "word " * 4000
         assert bpm.clip_to_token_limit(text) == text
 
-    def test_estimate_counts_cjk_heavier_than_ascii(self):
-        korean = "가" * 100
-        ascii_ = "a" * 100
-        assert bpm.estimate_tokens(korean) > bpm.estimate_tokens(ascii_)
+
+class TestEmbeddingInputBoundary:
+    """End-to-end guard at the API boundary: whatever load_posts() produces,
+    main() must hand the embeddings client inputs under the token limit.
+    (Adapted from the PR #87 review reproduction artifact.)"""
+
+    def test_dense_post_reaches_client_under_limit(self, tmp_path):
+        post_dir = tmp_path / "note" / "_posts"
+        post_dir.mkdir(parents=True)
+        (post_dir / "2026-01-01-dense.html").write_text(
+            "---\ntitle: dense\n---\n<p>" + ("ㅋ" * 32000) + "</p>\n",
+            encoding="utf-8",
+        )
+        (post_dir / "2026-01-02-tiny.html").write_text(
+            "---\ntitle: tiny\n---\n<p>short body</p>\n",
+            encoding="utf-8",
+        )
+        (tmp_path / "data").mkdir()
+
+        seen = []
+
+        class FakeEmbeddings:
+            def create(self, model, input):
+                seen.extend(input)
+                return SimpleNamespace(
+                    data=[SimpleNamespace(embedding=[float(i), 1.0 - i]) for i, _ in enumerate(input)]
+                )
+
+        fake_client = SimpleNamespace(embeddings=FakeEmbeddings())
+
+        with patch.object(bpm, "REPO_ROOT", str(tmp_path)), \
+             patch.object(bpm, "DATA_DIR", str(tmp_path / "data")), \
+             patch.object(bpm, "EMBEDDINGS_PATH", str(tmp_path / "data" / "embeddings.json")), \
+             patch.object(bpm, "LATENTSPACE_PATH", str(tmp_path / "data" / "latentspace.json")), \
+             patch.object(bpm, "OpenAI", return_value=fake_client):
+            bpm.main()
+
+        assert seen, "embedding client was never called"
+        enc = bpm._encoding()
+        assert all(len(enc.encode(t)) <= bpm.EMBED_TOKEN_LIMIT for t in seen)
