@@ -238,6 +238,34 @@ class TestCacheSkip:
         mock_embed.assert_called_once()
         assert len(mock_embed.call_args[0][0]) == len(slugs)
 
+    def test_cached_multichunk_post_is_reembedded(self, tmp_data_dir):
+        """A cached post that is multi-chunk must still be re-embedded: its
+        pooled vector depends on the current chunking, so a slug-only cache
+        entry (e.g. one made under the old truncation) is stale. The cached
+        single-chunk companion must stay cached. Reproduced-bug, PR #87 round 1."""
+        cache = {
+            "mathy": np.random.randn(FAKE_DIM).tolist(),
+            "solo": np.random.randn(FAKE_DIM).tolist(),
+        }
+        with open(tmp_data_dir / "embeddings.json", "w") as f:
+            json.dump(cache, f)
+
+        multichunk = {
+            "title": "Post mathy", "slug": "mathy", "url": "/mathy/",
+            "category": "note", "label": "Note", "connected": [],
+            "embed_chunks": ["chunk one", "chunk two"],
+        }
+        singlechunk = _fake_posts(["solo"])[0]  # embed_chunks == ["text for solo"]
+
+        mock_client = MagicMock()
+        with patch.object(bpm, "load_posts", return_value=[multichunk, singlechunk]), \
+             patch.object(bpm, "get_embeddings", return_value=_fake_embedding(1)) as mock_embed, \
+             patch.object(bpm, "OpenAI", return_value=mock_client):
+            bpm.main()
+
+        mock_embed.assert_called_once()
+        assert [p["slug"] for p in mock_embed.call_args[0][0]] == ["mathy"]
+
 
 class TestChunkToTokenLimit:
     """Over-budget inputs are split into chunks that each stay under the

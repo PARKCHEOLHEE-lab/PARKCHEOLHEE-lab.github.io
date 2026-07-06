@@ -280,8 +280,19 @@ def main():
 
     # Load cached embeddings to avoid redundant API calls
     cached_embeddings = load_cached_embeddings()
-    new_slugs = [p["slug"] for p in posts if p["slug"] not in cached_embeddings]
-    cached_slugs = [p["slug"] for p in posts if p["slug"] in cached_embeddings]
+
+    # Reuse a cached vector only when it can be trusted from the slug alone.
+    # Single-chunk posts qualify: their embedding input is the verbatim post
+    # text, so the cached vector still matches. Multi-chunk posts do not — their
+    # vector is a pooled average that depends on the current chunking, so an
+    # entry cached under an older algorithm (e.g. truncation) is stale. There
+    # are only a handful of multi-chunk posts and each is a few cheap chunk
+    # embeds, so recompute them every run.
+    def _is_stale(post):
+        return post["slug"] not in cached_embeddings or len(post["embed_chunks"]) > 1
+
+    new_slugs = [p["slug"] for p in posts if _is_stale(p)]
+    cached_slugs = [p["slug"] for p in posts if not _is_stale(p)]
 
     print(f"Cached: {len(cached_slugs)}, New: {len(new_slugs)}")
 
