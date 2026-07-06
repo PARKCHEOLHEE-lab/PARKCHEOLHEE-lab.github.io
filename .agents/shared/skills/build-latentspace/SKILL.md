@@ -23,7 +23,7 @@ Incremental mode: cached embeddings in `data/embeddings.json` avoid repeat OpenA
 ## Prerequisites
 
 - `OPENAI_API_KEY` environment variable must be set
-- Python dependencies: `openai`, `beautifulsoup4`, `lxml`, `numpy`, `scikit-learn`
+- Python dependencies: `openai`, `beautifulsoup4`, `lxml`, `numpy`, `scikit-learn`, `tiktoken`
 
 ## Run
 
