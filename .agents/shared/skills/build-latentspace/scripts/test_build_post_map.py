@@ -402,3 +402,39 @@ class TestEmbeddingInputBoundary:
         assert seen, "embedding client was never called"
         enc = bpm._encoding()
         assert all(len(enc.encode(t)) <= bpm.EMBED_TOKEN_LIMIT for t in seen)
+
+
+class TestRequestTokenBudget:
+    """The API caps total tokens across all inputs in one request (300k),
+    separate from the per-input cap. get_embeddings must split chunks across
+    requests so no single call exceeds that cap. Reproduced-bug, PR #87 round 2."""
+
+    def test_chunks_split_across_requests_each_under_budget(self):
+        enc = bpm._encoding()
+        posts = [
+            {"slug": f"p{i}", "embed_chunks": [f"post number {i} " * 50]}
+            for i in range(4)
+        ]
+        per = [len(enc.encode(p["embed_chunks"][0])) for p in posts]
+        budget = per[0] + per[1] + 1  # fits ~2 posts per request, forcing a split
+
+        calls = []
+
+        class FakeEmbeddings:
+            def create(self, model, input):
+                calls.append(list(input))
+                return SimpleNamespace(
+                    data=[SimpleNamespace(embedding=[1.0, 2.0, 3.0, 4.0]) for _ in input]
+                )
+
+        client = SimpleNamespace(embeddings=FakeEmbeddings())
+        with patch.object(bpm, "EMBED_REQUEST_TOKEN_LIMIT", budget), \
+             patch.object(bpm, "EMBED_REQUEST_TOKEN_MARGIN", 0):
+            result = bpm.get_embeddings(posts, client)
+
+        assert len(calls) >= 2, "expected multiple requests under the token budget"
+        for inputs in calls:
+            assert sum(len(enc.encode(t)) for t in inputs) <= budget
+        # every chunk still embedded, one vector per post
+        assert sorted(t for c in calls for t in c) == sorted(p["embed_chunks"][0] for p in posts)
+        assert result.shape == (4, 4)

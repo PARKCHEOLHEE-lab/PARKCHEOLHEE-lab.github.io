@@ -114,6 +114,12 @@ EMBED_MODEL = "text-embedding-3-small"
 EMBED_TOKEN_LIMIT = 8192
 EMBED_TOKEN_MARGIN = 500
 
+# The API also caps the total tokens across all inputs in a single request at
+# 300k, independent of the 8192 per-input cap. Requests are batched to stay
+# under it; the margin leaves room for one max-size chunk of counting slack.
+EMBED_REQUEST_TOKEN_LIMIT = 300_000
+EMBED_REQUEST_TOKEN_MARGIN = 8_192
+
 _ENCODING = None
 
 
@@ -156,6 +162,23 @@ def _pool_chunk_embeddings(chunk_vectors, chunk_token_lens):
     if norm > 0:  # numerical guard; real chunk embeddings never sum to zero
         pooled = pooled / norm
     return pooled
+
+
+def _batch_indices_by_tokens(token_lens, budget):
+    """Group chunk indices into batches whose token sums each stay under budget.
+
+    Each chunk is already under the per-input cap (well below budget), so every
+    batch holds at least one chunk and no batch exceeds the budget.
+    """
+    batch, batch_tokens = [], 0
+    for i, tokens in enumerate(token_lens):
+        if batch and batch_tokens + tokens > budget:
+            yield batch
+            batch, batch_tokens = [], 0
+        batch.append(i)
+        batch_tokens += tokens
+    if batch:
+        yield batch
 
 
 def load_posts():
@@ -211,24 +234,31 @@ def get_embeddings(posts, client):
     """Batch embed posts via OpenAI API, one vector per post.
 
     Each post carries one or more chunks (multiple only when its text exceeds
-    the token budget). All chunks across all posts go out in a single batch
-    call; a post's chunk vectors are then pooled back into one vector, so the
-    output stays 1:1 with posts and the per-input token limit is respected.
+    the token budget). Chunks across all posts are sent in as few requests as
+    the aggregate per-request token cap allows; a post's chunk vectors are then
+    pooled back into one vector, so the output stays 1:1 with posts and both
+    the per-input and per-request token limits are respected.
     """
     all_chunks = []
+    chunk_token_lens = []
     spans = []  # (start index into all_chunks, [token length per chunk]) per post
     for post in posts:
         chunks = post["embed_chunks"]
         token_lens = [len(_encoding().encode(c)) for c in chunks]
         spans.append((len(all_chunks), token_lens))
         all_chunks.extend(chunks)
+        chunk_token_lens.extend(token_lens)
 
     print(f"Embedding {len(posts)} posts ({len(all_chunks)} chunks)...")
-    response = client.embeddings.create(
-        model=EMBED_MODEL,
-        input=all_chunks,
-    )
-    chunk_vectors = [item.embedding for item in response.data]
+    chunk_vectors = [None] * len(all_chunks)
+    budget = EMBED_REQUEST_TOKEN_LIMIT - EMBED_REQUEST_TOKEN_MARGIN
+    for batch in _batch_indices_by_tokens(chunk_token_lens, budget):
+        response = client.embeddings.create(
+            model=EMBED_MODEL,
+            input=[all_chunks[i] for i in batch],
+        )
+        for i, item in zip(batch, response.data):
+            chunk_vectors[i] = item.embedding
 
     embeddings = []
     for start, token_lens in spans:
