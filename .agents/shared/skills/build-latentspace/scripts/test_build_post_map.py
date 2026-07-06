@@ -36,7 +36,7 @@ def _fake_posts(slugs):
             "category": "note",
             "label": "Note",
             "connected": [],
-            "embed_text": f"text for {s}",
+            "embed_chunks": [f"text for {s}"],
         }
         for s in slugs
     ]
@@ -239,40 +239,100 @@ class TestCacheSkip:
         assert len(mock_embed.call_args[0][0]) == len(slugs)
 
 
-class TestClipToTokenLimit:
-    """Embedding inputs must stay under the 8192-token API limit, counted
-    with the model's own tokenizer. Char-count heuristics undercount
-    dense-tokenizing text (compatibility jamo, emoji, digit runs) — found
-    by review reproduction on PR #87."""
+class TestChunkToTokenLimit:
+    """Over-budget inputs are split into chunks that each stay under the
+    8192-token API limit, counted with the model's own tokenizer. Char-count
+    heuristics undercount dense-tokenizing text (compatibility jamo, emoji,
+    digit runs) — found by review reproduction on PR #87. Chunking replaces
+    truncation so the whole post is embedded, not just its head."""
 
     def _count(self, text):
         return len(bpm._encoding().encode(text))
 
-    def test_long_korean_text_is_clipped_under_limit(self):
+    def test_long_korean_text_splits_into_under_limit_chunks(self):
         text = "진실은 투명하게 전달되지 않는다 " * 2000
-        clipped = bpm.clip_to_token_limit(text)
-        assert len(clipped) < len(text)
-        assert self._count(clipped) <= bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
+        chunks = bpm.chunk_to_token_limit(text)
+        assert len(chunks) >= 2
+        for c in chunks:
+            assert self._count(c) <= bpm.EMBED_TOKEN_LIMIT
 
-    def test_compatibility_jamo_text_is_clipped_under_limit(self):
+    def test_compatibility_jamo_text_splits_into_under_limit_chunks(self):
         text = "ㅋ" * 32000
-        clipped = bpm.clip_to_token_limit(text)
-        assert self._count(clipped) <= bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
+        chunks = bpm.chunk_to_token_limit(text)
+        assert len(chunks) >= 2
+        for c in chunks:
+            assert self._count(c) <= bpm.EMBED_TOKEN_LIMIT
 
-    def test_clipped_text_is_prefix_of_original(self):
+    def test_chunks_keep_head_and_tail(self):
+        # the point of chunking over truncation: coverage beyond the first window
         text = "우리는 스스로 거짓의 세계를 만든다 " * 2000
-        clipped = bpm.clip_to_token_limit(text)
-        assert text.startswith(clipped)
+        chunks = bpm.chunk_to_token_limit(text)
+        assert len(chunks) >= 2
+        assert text.startswith(chunks[0])                 # first chunk is a head prefix
+        assert sum(len(c) for c in chunks) > len(chunks[0])  # tail is kept, not discarded
 
-    def test_short_mixed_text_unchanged(self):
+    def test_short_mixed_text_is_single_unchanged_chunk(self):
         text = "some truth. 진실은 순수한 상태로 남아있지 않는다."
-        assert bpm.clip_to_token_limit(text) == text
+        assert bpm.chunk_to_token_limit(text) == [text]
 
-    def test_long_text_under_limit_unchanged(self):
+    def test_long_text_under_limit_is_single_unchanged_chunk(self):
         # long-but-under-budget input must stay byte-identical so cached
         # embeddings for existing posts remain valid
         text = "word " * 4000
-        assert bpm.clip_to_token_limit(text) == text
+        assert bpm.chunk_to_token_limit(text) == [text]
+
+
+class TestChunkPooling:
+    """Disconfirming test for method 2: an over-budget post must embed to the
+    token-weighted mean of ALL its chunk vectors (L2-renormalized), not to just
+    its first chunk (which is what truncation produced)."""
+
+    def test_over_limit_post_pools_weighted_average_not_first_chunk(self):
+        budget = bpm.EMBED_TOKEN_LIMIT - bpm.EMBED_TOKEN_MARGIN
+        text = "word " * (budget + 2000)  # comfortably past one window
+        chunks = bpm.chunk_to_token_limit(text)
+        assert len(chunks) >= 2, "test needs a multi-chunk post"
+
+        enc = bpm._encoding()
+        token_lens = [len(enc.encode(c)) for c in chunks]
+        # a distinct, non-zero vector per chunk so the weighted mean is unambiguous
+        fake_vectors = [
+            [float(i + 1), float((i + 1) ** 2), 1.0, -float(i + 1)]
+            for i in range(len(chunks))
+        ]
+
+        class FakeEmbeddings:
+            def create(self, model, input):
+                assert len(input) == len(chunks)
+                return SimpleNamespace(
+                    data=[SimpleNamespace(embedding=v) for v in fake_vectors]
+                )
+
+        client = SimpleNamespace(embeddings=FakeEmbeddings())
+        result = bpm.get_embeddings([{"slug": "big", "embed_chunks": chunks}], client)
+
+        expected = np.average(np.array(fake_vectors), axis=0, weights=token_lens)
+        expected = expected / np.linalg.norm(expected)
+
+        assert result.shape == (1, 4)
+        np.testing.assert_allclose(result[0], expected, rtol=1e-6, atol=1e-9)
+        # truncation would have returned the first chunk's vector — it must NOT
+        assert not np.allclose(result[0], fake_vectors[0])
+
+    def test_under_limit_post_passes_embedding_through_unchanged(self):
+        # single-chunk posts get the API vector verbatim (no renorm drift), so
+        # existing cached posts keep identical coordinates
+        chunks = bpm.chunk_to_token_limit("a short post")
+        assert chunks == ["a short post"]
+        raw = [0.3, 0.4, 0.5, 0.6]  # deliberately non-unit
+
+        class FakeEmbeddings:
+            def create(self, model, input):
+                return SimpleNamespace(data=[SimpleNamespace(embedding=raw)])
+
+        client = SimpleNamespace(embeddings=FakeEmbeddings())
+        result = bpm.get_embeddings([{"slug": "small", "embed_chunks": chunks}], client)
+        np.testing.assert_array_equal(result[0], np.array(raw))
 
 
 class TestEmbeddingInputBoundary:

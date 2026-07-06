@@ -107,7 +107,9 @@ def strip_html(html_text):
 # text-embedding-3-small rejects inputs over 8192 tokens. Character-count
 # heuristics undercount dense-tokenizing text (compatibility jamo like
 # "ㅋ", emoji, digit runs), so the budget is enforced with the model's own
-# tokenizer.
+# tokenizer. Over-budget posts are split into chunks and pooled into one
+# vector (OpenAI cookbook "embedding long inputs" pattern) rather than
+# truncated, so the whole post is represented instead of just its head.
 EMBED_MODEL = "text-embedding-3-small"
 EMBED_TOKEN_LIMIT = 8192
 EMBED_TOKEN_MARGIN = 500
@@ -122,17 +124,38 @@ def _encoding():
     return _ENCODING
 
 
-def clip_to_token_limit(text, limit=EMBED_TOKEN_LIMIT - EMBED_TOKEN_MARGIN):
-    """Trim text to the embedding input token budget, counted exactly.
+def chunk_to_token_limit(text, limit=EMBED_TOKEN_LIMIT - EMBED_TOKEN_MARGIN):
+    """Split text into consecutive chunks that each fit the token budget.
 
-    Texts already under the limit are returned unchanged so cached
-    embeddings keyed on embed_text stay valid. A token slice can split a
-    multi-byte character, so any replacement char at the cut is stripped.
+    Text already within budget is returned as a single-element list holding
+    the original string unchanged, so cached embeddings for existing posts
+    stay valid. A token slice can split a multi-byte character, so any
+    replacement char at a chunk boundary is stripped.
     """
     tokens = _encoding().encode(text)
     if len(tokens) <= limit:
-        return text
-    return _encoding().decode(tokens[:limit]).rstrip("�")
+        return [text]
+    # lazy: fixed-size token windows; no sentence-boundary or overlap logic —
+    # a blended theme vector for the 2D map does not need boundary fidelity.
+    return [
+        _encoding().decode(tokens[i:i + limit]).strip("�")
+        for i in range(0, len(tokens), limit)
+    ]
+
+
+def _pool_chunk_embeddings(chunk_vectors, chunk_token_lens):
+    """Combine a post's chunk embeddings into one vector.
+
+    Token-length-weighted mean (longer chunks carry proportionally more
+    weight), then L2-renormalized back onto the unit sphere so the pooled
+    vector stays comparable with single-chunk embeddings, which the API
+    already returns at unit norm. (OpenAI cookbook pattern.)
+    """
+    pooled = np.average(np.array(chunk_vectors), axis=0, weights=chunk_token_lens)
+    norm = np.linalg.norm(pooled)
+    if norm > 0:  # numerical guard; real chunk embeddings never sum to zero
+        pooled = pooled / norm
+    return pooled
 
 
 def load_posts():
@@ -169,7 +192,7 @@ def load_posts():
                 label = "Testbed" if category == "testbed" else "Note"
 
             clean_text = strip_html(body)
-            embed_text = clip_to_token_limit(f"{title}. {clean_text}"[:32000])
+            embed_chunks = chunk_to_token_limit(f"{title}. {clean_text}")
 
             posts.append({
                 "title": title,
@@ -178,21 +201,42 @@ def load_posts():
                 "category": category,
                 "label": label,
                 "connected": fm.get("related", []),
-                "embed_text": embed_text,
+                "embed_chunks": embed_chunks,
             })
 
     return posts
 
 
 def get_embeddings(posts, client):
-    """Batch embed posts via OpenAI API."""
-    texts = [p["embed_text"] for p in posts]
-    print(f"Embedding {len(texts)} posts...")
+    """Batch embed posts via OpenAI API, one vector per post.
+
+    Each post carries one or more chunks (multiple only when its text exceeds
+    the token budget). All chunks across all posts go out in a single batch
+    call; a post's chunk vectors are then pooled back into one vector, so the
+    output stays 1:1 with posts and the per-input token limit is respected.
+    """
+    all_chunks = []
+    spans = []  # (start index into all_chunks, [token length per chunk]) per post
+    for post in posts:
+        chunks = post["embed_chunks"]
+        token_lens = [len(_encoding().encode(c)) for c in chunks]
+        spans.append((len(all_chunks), token_lens))
+        all_chunks.extend(chunks)
+
+    print(f"Embedding {len(posts)} posts ({len(all_chunks)} chunks)...")
     response = client.embeddings.create(
         model=EMBED_MODEL,
-        input=texts,
+        input=all_chunks,
     )
-    embeddings = [item.embedding for item in response.data]
+    chunk_vectors = [item.embedding for item in response.data]
+
+    embeddings = []
+    for start, token_lens in spans:
+        vectors = chunk_vectors[start:start + len(token_lens)]
+        if len(vectors) == 1:
+            embeddings.append(np.array(vectors[0]))
+        else:
+            embeddings.append(_pool_chunk_embeddings(vectors, token_lens))
     print(f"Got {len(embeddings)} embeddings, dim={len(embeddings[0])}")
     return np.array(embeddings)
 
