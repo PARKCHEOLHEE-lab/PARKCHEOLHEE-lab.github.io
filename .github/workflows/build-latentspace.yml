@@ -20,7 +20,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install openai beautifulsoup4 lxml numpy scikit-learn pytest
+        run: pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
 
       - name: Run tests
         run: python3 -m pytest .agents/shared/skills/build-latentspace/scripts/test_build_post_map.py -v

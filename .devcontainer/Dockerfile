@@ -20,7 +20,8 @@ RUN python3 -m venv /opt/latentspace-venv \
     lxml \
     numpy \
     scikit-learn \
-    pytest
+    pytest \
+    tiktoken
 
 ENV LATENTSPACE_PYTHON=/opt/latentspace-venv/bin/python
 
