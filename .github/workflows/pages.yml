@@ -3,6 +3,12 @@ name: Deploy Jekyll site to Pages
 on:
   push:
     branches: [main]
+  # Build Latent Space merges its own commit using GITHUB_TOKEN, and GitHub
+  # never fires `push` for those. Without this trigger the automated
+  # latentspace.json update would sit on main and never publish.
+  workflow_run:
+    workflows: ["Build Latent Space"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +23,10 @@ concurrency:
 
 jobs:
   build:
+    # `completed` fires on failure too; only publish a successful upstream run.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
