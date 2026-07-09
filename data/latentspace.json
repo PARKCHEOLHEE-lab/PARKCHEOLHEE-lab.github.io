@@ -29,7 +29,7 @@
       "attention-is-all-you-need"
     ],
     "x": 0.8338,
-    "y": 0.3214
+    "y": 0.3213
   },
   {
     "title": "SDW 2020",
@@ -79,7 +79,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.5469,
-    "y": 0.8251
+    "y": 0.8252
   },
   {
     "title": "*.ghpy, *.ghuser compile",
@@ -114,7 +114,7 @@
       "reading-list"
     ],
     "x": 0.7096,
-    "y": 0.3406
+    "y": 0.3405
   },
   {
     "title": "...",
@@ -241,7 +241,7 @@
       "mathematics-for-machine-learning"
     ],
     "x": 0.576,
-    "y": 0.2599
+    "y": 0.26
   },
   {
     "title": "Normalization Layers",
@@ -742,7 +742,7 @@
       "spurting"
     ],
     "x": 0.253,
-    "y": 0.6615
+    "y": 0.6616
   },
   {
     "title": "Representation Learning: A Review and New Perspectives",
@@ -1038,7 +1038,7 @@
       "python-slack-sdk"
     ],
     "x": 0.7261,
-    "y": 0.5052
+    "y": 0.5051
   },
   {
     "title": "Grandient Accumulation",
@@ -1112,7 +1112,7 @@
       "intuition-about-transformer"
     ],
     "x": 0.7796,
-    "y": 0.506
+    "y": 0.5059
   },
   {
     "title": "register_buffer",
@@ -1351,7 +1351,7 @@
       "setting-different-learning-rates-within-an-optimizer"
     ],
     "x": 0.9021,
-    "y": 0.5486
+    "y": 0.5487
   },
   {
     "title": "ghdoc.Path",
@@ -1484,7 +1484,7 @@
       "hallucination-is-a-feature"
     ],
     "x": 0.331,
-    "y": 0.3895
+    "y": 0.3896
   },
   {
     "title": "Wasserstein Distance (Earth Mover's Distance)",
@@ -1579,7 +1579,7 @@
       "snow-country"
     ],
     "x": 0.1392,
-    "y": 0.6169
+    "y": 0.617
   },
   {
     "title": "Half-Plane Clipping",
@@ -1747,7 +1747,7 @@
       "openai-agents-sdk"
     ],
     "x": 0.593,
-    "y": 0.6772
+    "y": 0.6773
   },
   {
     "title": "truth",
@@ -1794,7 +1794,7 @@
       "z"
     ],
     "x": 0.2924,
-    "y": 0.3721
+    "y": 0.372
   },
   {
     "title": "inspect.getsource",
@@ -2032,7 +2032,7 @@
       "space-syntax"
     ],
     "x": 0.66,
-    "y": 0.7861
+    "y": 0.786
   },
   {
     "title": "Intuitions about Diffusion Models",
@@ -2089,7 +2089,7 @@
       "pyo3"
     ],
     "x": 0.6043,
-    "y": 0.75
+    "y": 0.7501
   },
   {
     "title": "Regression Model",
@@ -2104,7 +2104,7 @@
       "maximum-likelihood-estimation"
     ],
     "x": 0.7386,
-    "y": 0.3306
+    "y": 0.3305
   },
   {
     "title": "IndexedDB",
@@ -2467,7 +2467,7 @@
       "k-rooms-clusters"
     ],
     "x": 0.7451,
-    "y": 0.9743
+    "y": 0.9742
   },
   {
     "title": "Loading the geometries I have",
@@ -2497,7 +2497,7 @@
       "wave-function-collapse"
     ],
     "x": 0.8806,
-    "y": 0.7932
+    "y": 0.7933
   },
   {
     "title": "Quadtree",
@@ -2511,7 +2511,7 @@
       "discrete-voronoi",
       "subdivision-curve"
     ],
-    "x": 0.8405,
+    "x": 0.8406,
     "y": 0.8656
   },
   {
@@ -2558,7 +2558,7 @@
       "p2m"
     ],
     "x": 0.8625,
-    "y": 0.8579
+    "y": 0.858
   },
   {
     "title": "Drafting with AI",
@@ -2573,7 +2573,7 @@
       "latent-shapes",
       "intuitions-about-diffusion-models"
     ],
-    "x": 0.8001,
+    "x": 0.8,
     "y": 0.8582
   },
   {
@@ -2623,7 +2623,7 @@
       "voxelate"
     ],
     "x": 0.9611,
-    "y": 0.3949
+    "y": 0.3948
   },
   {
     "title": "Local coordinate system",
@@ -2661,7 +2661,7 @@
       "gan"
     ],
     "x": 0.976,
-    "y": 0.4172
+    "y": 0.4171
   },
   {
     "title": "Seeing is solving",
@@ -2747,7 +2747,7 @@
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
     "x": 0.9628,
-    "y": 0.6184
+    "y": 0.6185
   },
   {
     "title": "Landbook Diffusion Pipeline",
