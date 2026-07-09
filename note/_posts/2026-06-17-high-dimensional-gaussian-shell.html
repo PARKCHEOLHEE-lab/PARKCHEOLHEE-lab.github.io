@@ -1,0 +1,255 @@
+---
+title: "The shell of high-dimensional Gaussians"
+layout: post
+related: []
+---
+
+<br>
+
+<div style="text-align: justify;">
+
+    A standard Gaussian \(z \sim \mathcal{N}(0, I_d)\) has its highest density exactly at the origin. The further a point sits from the center, the less likely it becomes. So the natural guess is that samples pile up near the center — a dense blob that fades out in every direction. In high dimensions this guess is wrong, and not by a little. Almost every sample lands far from the center, packed into a thin shell.
+
+    <br><br>
+
+    Draw many samples and make a histogram of their lengths \(\|z\|\). For \(d = 2\) the histogram still hugs small values. For \(d = 400\) it is a narrow spike sitting at \(\|z\| \approx 20\), with essentially nothing near zero. The single most probable location — the center — is where samples almost never go, and the peak always lands at \(\sqrt{d}\). This is the same fact a diffusion model's noise histogram shows: the latent \(x_T \sim \mathcal{N}(0, I_d)\) the network trains on never has a length near zero. It has length \(\approx \sqrt{d}\), and that is why one such histogram, measured at a single dimension, is really a measurement of this shell.
+
+    <br><br>
+
+    The resolution is that <b>most probable point</b> and <b>most probable distance</b> are different questions. The chance of landing in a thin shell at radius \(r\) is the density there times the amount of space the shell holds. The density falls off like \(e^{-r^2/2}\). But the shell's volume — the surface area of a sphere of radius \(r\) in \(d\) dimensions — grows like \(r^{\,d-1}\), and in high dimensions that growth is violent. Near the center the density is large but there is almost no room; far out there is enormous room but almost no density. The product peaks where the two trends balance, and that balance point is \(\sqrt{d}\).
+
+    <figure>
+        <img src="/img/high-dimensional-gaussian-shell/high-dimensional-gaussian-shell-0.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption class="nofig">
+            The chance of landing at distance \(r\) from the center. Near the center the density is high but there is almost no room; far out there is room but almost no density; the two balance at \(r \approx \sqrt{d}\).
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    This is exact, not hand-waving. Write \(\|z\|^2 = z_1^2 + \cdots + z_d^2\). Each term has mean one, so the typical squared length is the dimension itself,
+
+    <div class="latex-container">
+    \[
+        \mathbb{E}\big[\|z\|^2\big] = d,
+    \]
+    </div>
+
+    which makes the typical length \(\sqrt{d}\). The length itself follows a chi distribution, whose mean is \(\sqrt{2}\,\Gamma(\tfrac{d+1}{2})/\Gamma(\tfrac{d}{2}) \approx \sqrt{d - \tfrac{1}{2}}\) — a hair under \(\sqrt{d}\), and the gap vanishes as the dimension grows.
+
+    <br><br>
+
+    The surprising part is the spread. The variance of \(\|z\|\) does not grow with the dimension at all; it settles on a constant,
+
+    <div class="latex-container">
+    \[
+        \operatorname{Var}\big(\|z\|\big) \;\xrightarrow[d \to \infty]{}\; \tfrac{1}{2},
+    \]
+    </div>
+
+    so the standard deviation of the length stays around \(0.7\) no matter how large \(d\) is. The center of the shell marches outward as \(\sqrt{d}\), but its thickness stands still. Relative to its own radius, then, the shell keeps getting thinner — its width-to-radius ratio shrinks like \(1/\sqrt{2d}\). Higher dimension, sharper shell.
+
+    <div id="shell-demo" style="text-align: initial; margin: 22px 0;">
+        <style>
+            #shell-demo .ctrls { display: flex; align-items: center; gap: 12px; margin: 0 0 4px; }
+            #shell-demo .play { flex: 0 0 auto; width: 30px; height: 30px; padding: 0; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+            #shell-demo .play:hover { background: #f1f5f9; }
+            #shell-demo .play svg { width: 13px; height: 13px; fill: #334155; }
+            #shell-demo .scrub { flex: 1 1 auto; accent-color: #6b8fd6; }
+            #shell-demo .tval { flex: 0 0 auto; font: 13px ui-monospace, monospace; color: #64748b; min-width: 96px; text-align: right; }
+            #shell-demo canvas { width: 100%; height: 240px; display: block; }
+        </style>
+        <div class="ctrls">
+            <button type="button" class="play" id="shell-play" aria-label="play the sample build-up">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" id="shell-slider" min="0" max="4000" value="4000" step="1" aria-label="number of samples binned">
+            <span class="tval"><span id="shell-n">4000</span> samples</span>
+        </div>
+        <canvas id="shell-canvas" aria-label="Live histogram of the measured length of 4000 Gaussian samples in d=400: the lengths pile into a thin band at sqrt(d)=20 — the shell — and lengths near the center never occur."></canvas>
+        <figcaption class="nofig" style="text-align: center;">
+            Press ▶ to draw 4000 fresh Gaussian samples in \(d=400\) and measure each one's length \(\|z\|\). They pile into a thin band at \(\sqrt{d}=20\) — that band <i>is</i> the shell. Each run re-samples, so the bars wiggle but the band never moves; at higher \(d\) it only gets tighter.
+        </figcaption>
+    </div>
+
+    <br><br>
+
+    Made precise, this is the <b>Gaussian annulus theorem</b>: for a standard Gaussian in \(d\) dimensions and any \(\beta \le \sqrt{d}\), all but at most \(3e^{-c\beta^2}\) of the probability mass lies in the band \(\sqrt{d} - \beta \le \|z\| \le \sqrt{d} + \beta\), where \(c\) is a fixed positive constant. The fraction left outside the band falls off exponentially in \(\beta^2\). A few standard deviations away from the shell, in either direction, there is essentially nothing.
+
+    <br><br>
+
+    The shell is one face of a broader phenomenon, <b>concentration of measure</b>. The length is a function of the random vector that cannot change too fast: nudging the input moves the output by at most as much, which is to say it is \(1\)-Lipschitz. Gaussian concentration says any such function clusters tightly around its average,
+
+    <div class="latex-container">
+    \[
+        \Pr\big(|f(z) - \mathbb{E}f| \ge t\big) \le 2e^{-t^2/2},
+    \]
+    </div>
+
+    and the bound carries no \(d\). That dimension-free guarantee is exactly why the shell's thickness refuses to grow with the dimension. The same principle is behind a long list of high-dimensional facts that feel like coincidences until you see the common cause.
+
+    <br><br>
+
+    Two of those facts are worth naming. Take two independent samples \(a\) and \(b\). Their squared distance is \(\|a-b\|^2 \approx \|a\|^2 + \|b\|^2 = 2d\), so every pair sits at distance \(\approx \sqrt{2d}\) — and that distance concentrates as well, so almost all pairs are nearly equidistant. Nearest-neighbour reasoning quietly loses its meaning. For the same reason the cosine between two samples has mean zero and spread \(\approx 1/\sqrt{d}\): independent high-dimensional Gaussian vectors are almost always close to orthogonal.
+
+    <br><br>
+
+    None of this is a curiosity. It is the reason spherical interpolation exists. A diffusion or VAE latent lives on the shell of radius \(\sqrt{d}\). The straight-line midpoint of two latents has length \(\approx \sqrt{d/2} \approx 0.7\sqrt{d}\) — far enough inside the shell that, under the Gaussian, a point that short essentially never occurs. The decoder was never shown anything there, so it returns something degenerate. <b>SLERP</b> keeps every blended latent on the shell, which is why it morphs cleanly where the straight line washes out. The norm histogram that motivates SLERP is just this shell, measured at one dimension.
+
+    <br><br>
+
+    The picture to keep is not a fuzzy ball. A high-dimensional Gaussian is closer to a soap bubble: an all-but-empty interior wrapped in a thin, almost rigid shell of radius \(\sqrt{d}\). The single most likely place to be is the one place a sample is never found.
+
+</div>
+
+<br><br>
+References:
+<ul>
+    <li><a href="https://www.cs.cornell.edu/jeh/book.pdf">Blum, Hopcroft, Kannan — Foundations of Data Science</a> (the Gaussian annulus theorem, ch. 2)</li>
+    <li><a href="https://www.math.uci.edu/~rvershyn/papers/HDP-book/HDP-book.pdf">Vershynin — High-Dimensional Probability</a> (concentration of measure)</li>
+    <li><a href="https://arxiv.org/abs/1609.04468">White — Sampling Generative Networks</a> (spherical interpolation of latents)</li>
+    <li><a href="https://arxiv.org/abs/2010.02502">Song, Meng, Ermon — Denoising Diffusion Implicit Models</a> (the latent shell in practice)</li>
+</ul>
+
+<br><br>
+
+<script>
+(function () {
+    var root = document.getElementById("shell-demo");
+    if (!root) return;
+    var canvas = document.getElementById("shell-canvas");
+    var playBtn = document.getElementById("shell-play");
+    var slider = document.getElementById("shell-slider");
+    var nLabel = document.getElementById("shell-n");
+    var ctx = canvas.getContext("2d");
+
+    var D = 400, N = 4000, SQRTD = 20;        // sqrt(400) = 20
+    var XMIN = 14, XMAX = 26, NBINS = 48;     // tight range so the +/- spread is legible
+    var w = (XMAX - XMIN) / NBINS;
+    var BAR = "#6b8fd6", SHELL = "#16a34a";
+    var axis = getComputedStyle(document.body).color || "#334155";
+
+    // a fresh standard-normal each call (true randomness, so every run re-samples)
+    function randn() {
+        var u = 0, v = 0;
+        while (u === 0) u = Math.random();
+        while (v === 0) v = Math.random();
+        return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    }
+    // draw N points in D dimensions; return each point's length ||z||
+    function sampleNorms() {
+        var out = new Float64Array(N);
+        for (var i = 0; i < N; i++) {
+            var s = 0;
+            for (var j = 0; j < D; j++) { var x = randn(); s += x * x; }
+            out[i] = Math.sqrt(s);
+        }
+        return out;
+    }
+    function binCounts(arr, upto) {
+        var c = new Int32Array(NBINS);
+        for (var i = 0; i < upto; i++) {
+            var b = Math.floor((arr[i] - XMIN) / w);
+            if (b >= 0 && b < NBINS) c[b] += 1;
+        }
+        return c;
+    }
+    function maxCount(arr) {
+        var c = binCounts(arr, arr.length), m = 1;
+        for (var i = 0; i < NBINS; i++) if (c[i] > m) m = c[i];
+        return m;
+    }
+
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    var W = 720, H = 240;
+    function setup() {
+        W = canvas.clientWidth || 720; H = 240;
+        canvas.width = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function draw(arr, n, yMax) {
+        var L = 40, R = 14, T = 26, B = 34;
+        var px = function (val) { return L + (val - XMIN) / (XMAX - XMIN) * (W - L - R); };
+        var py = function (k) { return T + (1 - k / yMax) * (H - T - B); };
+        ctx.clearRect(0, 0, W, H);
+        // x-axis baseline only
+        ctx.strokeStyle = "#d4d4d8"; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(L, H - B); ctx.lineTo(W - R, H - B); ctx.stroke();
+        // bars (fixed y-scale, so they GROW as samples land)
+        var c = binCounts(arr, n);
+        ctx.fillStyle = BAR;
+        for (var i = 0; i < NBINS; i++) {
+            if (!c[i]) continue;
+            var x0 = px(XMIN + i * w), x1 = px(XMIN + (i + 1) * w);
+            ctx.fillRect(x0, py(c[i]), Math.max(1, x1 - x0 - 0.5), (H - B) - py(c[i]));
+        }
+        // sqrt(d) reference line + label
+        ctx.setLineDash([4, 3]); ctx.strokeStyle = SHELL; ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.moveTo(px(SQRTD), T); ctx.lineTo(px(SQRTD), H - B); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = SHELL; ctx.font = "11px ui-monospace, monospace"; ctx.textAlign = "center";
+        ctx.fillText("√d=20", px(SQRTD), T - 6);
+        // ticks + axis label
+        ctx.fillStyle = "#94a3b8"; ctx.font = "11px ui-monospace, monospace";
+        for (var t = XMIN; t <= XMAX; t += 2) ctx.fillText(String(t), px(t), H - B + 14);
+        ctx.fillStyle = axis; ctx.font = "12px PT Sans, sans-serif";
+        ctx.fillText("length ‖z‖", (L + W - R) / 2, H - 4);
+    }
+
+    var samples = null, yMax = 1, raf = null, animStart = 0, ANIM_MS = 1300;
+
+    function setIcon(showPlay) {
+        playBtn.querySelector("svg").innerHTML = showPlay
+            ? '<polygon points="7,5 7,19 17,12" />'
+            : '<rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" />';
+    }
+    function showN(n) {
+        n = Math.max(0, Math.min(N, Math.round(n)));
+        nLabel.textContent = n;
+        slider.value = n;
+        draw(samples, n, yMax);
+    }
+    function freshSamples() {
+        samples = sampleNorms();
+        yMax = maxCount(samples);
+    }
+    function stopAnim() {
+        if (raf) { cancelAnimationFrame(raf); raf = null; }
+        animStart = 0; setIcon(true);
+    }
+    function step(ts) {
+        if (!animStart) animStart = ts;
+        var frac = Math.min(1, (ts - animStart) / ANIM_MS);
+        showN(frac * N);
+        if (frac < 1) { raf = requestAnimationFrame(step); }
+        else { raf = null; animStart = 0; setIcon(true); }
+    }
+    function play() {
+        if (raf) { stopAnim(); return; }   // toggle off
+        freshSamples();                    // a brand-new draw every press
+        setIcon(false);
+        raf = requestAnimationFrame(step);
+    }
+
+    playBtn.addEventListener("click", play);
+    slider.addEventListener("input", function () {
+        stopAnim();
+        showN(parseInt(slider.value, 10));
+    });
+    window.addEventListener("resize", function () {
+        setup();
+        if (samples) draw(samples, parseInt(slider.value, 10), yMax);
+    });
+
+    function init() { setup(); freshSamples(); showN(N); }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () { requestAnimationFrame(init); });
+    } else {
+        requestAnimationFrame(init);
+    }
+})();
+</script>
+
+<br><br>
