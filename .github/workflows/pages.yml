@@ -1,0 +1,50 @@
+name: Deploy Jekyll site to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; never cancel an in-flight publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # GitHub Pages cannot serve Git LFS files, so the legacy branch build
+          # published 132-byte pointer files instead of the images. Resolving
+          # them here is the whole reason this workflow exists.
+          lfs: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.2.11'
+          bundler-cache: true
+
+      - uses: actions/configure-pages@v5
+
+      - run: bundle exec jekyll build
+        env:
+          JEKYLL_ENV: production
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
