@@ -479,14 +479,22 @@ function buildStageB(scene, THREE, renderer) {
     g.quaternion.setFromUnitVectors(V(0, 1, 0), dir); g.position.set(camPos[0], camPos[1], camPos[2]);
     return g;
   }
-  function orthoCamMarker(camPos, target, halfW, halfH, color) {
-    const g = new THREE.Group();
+  // A view's camera basis. `at(centre, halfW, halfH)` returns that rect's 4 world corners, always in the
+  // same winding, so two rects on the same view axis can be linked corner-to-corner without crossing.
+  // The billboard's own lookAt basis works out to this same (right, up), so plane corners share it.
+  function viewRect(camPos, target) {
     const P = V(camPos[0], camPos[1], camPos[2]), T = V(target[0], target[1], target[2]);
-    const dir = T.clone().sub(P); dir.normalize();
+    const dir = T.clone().sub(P).normalize();
     const right = new THREE.Vector3().crossVectors(dir, V(0, 0, 1)).normalize();
     const up = new THREE.Vector3().crossVectors(right, dir).normalize();
-    const rectAt = ctr => [[1, 1], [-1, 1], [-1, -1], [1, -1]].map(s => ctr.clone().add(right.clone().multiplyScalar(s[0] * halfW)).add(up.clone().multiplyScalar(s[1] * halfH)));
-    const near = rectAt(P), far = rectAt(T);
+    const at = (ctr, hw, hh) => [[1, 1], [-1, 1], [-1, -1], [1, -1]].map(s => ctr.clone()
+      .add(right.clone().multiplyScalar(s[0] * hw)).add(up.clone().multiplyScalar(s[1] * hh)));
+    return { P, T, at };
+  }
+  function orthoCamMarker(camPos, target, halfW, halfH, color) {
+    const g = new THREE.Group();
+    const { P, T, at } = viewRect(camPos, target);
+    const near = at(P, halfW, halfH), far = at(T, halfW, halfH);
     const m = new THREE.LineBasicMaterial({ color: 0x9ab0e8, transparent: true, opacity: 0.6 });
     for (let i = 0; i < 4; i++) g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([near[i], far[i]]), m));
     g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(near), m));
@@ -494,7 +502,7 @@ function buildStageB(scene, THREE, renderer) {
     g.add(makeCamera(camPos, target, color));
     return g;
   }
-  function dashLink(a, b) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a[0], a[1], a[2]), V(b[0], b[1], b[2])]), new THREE.LineDashedMaterial({ color: 0x6a6aa8, dashSize: 0.06, gapSize: 0.045 })); l.computeLineDistances(); return l; }
+  function dashLink(a, b) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), new THREE.LineDashedMaterial({ color: 0x6a6aa8, dashSize: 0.06, gapSize: 0.045 })); l.computeLineDistances(); return l; }
   const views = [{ deg: '0°', dir: [0, -1], front: true }, { deg: '90°', dir: [1, 0], front: false }, { deg: '180°', dir: [0, 1], front: true }, { deg: '270°', dir: [-1, 0], front: false }];
   floorGrid(scene, 10);
   const a = makeAsset(); scene.add(a.group);
@@ -510,10 +518,17 @@ function buildStageB(scene, THREE, renderer) {
     const pw = 2 * halfW * ds, ph = 2 * halfH * ds;
     const camP = [v.dir[0] * Rc, v.dir[1] * Rc, camZ], pos = [v.dir[0] * Ro, v.dir[1] * Ro, billZ];
     const faceDist = v.front ? 0.2 : 0.45, boxHW = v.front ? 0.46 : 0.21, boxHH = 0.36;
-    scene.add(orthoCamMarker(camP, [v.dir[0] * faceDist, v.dir[1] * faceDist, camZ], boxHW, boxHH, 0x3a5cc0));
+    const faceTarget = [v.dir[0] * faceDist, v.dir[1] * faceDist, camZ];
+    scene.add(orthoCamMarker(camP, faceTarget, boxHW, boxHH, 0x3a5cc0));
     scene.add(billboard(tex, pos, pw, ph, [pos[0] + v.dir[0], pos[1] + v.dir[1], pos[2]]));
     scene.add(label(v.deg, '', pos[0], pos[1], pos[2] + ph / 2 + 0.18));
-    scene.add(dashLink(camP, [v.dir[0] * (Ro - pw * 0.5), v.dir[1] * (Ro - pw * 0.5), billZ]));
+    // Link the capture box's outer face to the view plane corner-to-corner. That face is what the
+    // orthographic camera captures, and the plane is that capture — a single centre line read as if
+    // the camera sampled one point.
+    const { P, at } = viewRect(camP, faceTarget);
+    const boxFace = at(P, boxHW, boxHH);
+    const planeFace = at(V(pos[0], pos[1], pos[2]), (pw + 0.05) / 2, (ph + 0.05) / 2);   // the billboard's drawn border
+    for (let i = 0; i < 4; i++) scene.add(dashLink(boxFace[i], planeFace[i]));
   });
   renderer.setClearColor(oldColor, oldAlpha);
 }
