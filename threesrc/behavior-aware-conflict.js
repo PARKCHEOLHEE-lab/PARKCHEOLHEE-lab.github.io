@@ -491,18 +491,20 @@ function buildStageB(scene, THREE, renderer) {
       .add(right.clone().multiplyScalar(s[0] * hw)).add(up.clone().multiplyScalar(s[1] * hh)));
     return { P, T, at };
   }
+  // the capture rig draws as one object: the box and the links from it to its view plane share this ink
+  const RIG = { color: 0x9ab0e8, transparent: true, opacity: 0.6 };
   function orthoCamMarker(camPos, target, halfW, halfH, color) {
     const g = new THREE.Group();
     const { P, T, at } = viewRect(camPos, target);
     const near = at(P, halfW, halfH), far = at(T, halfW, halfH);
-    const m = new THREE.LineBasicMaterial({ color: 0x9ab0e8, transparent: true, opacity: 0.6 });
+    const m = new THREE.LineBasicMaterial(RIG);
     for (let i = 0; i < 4; i++) g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([near[i], far[i]]), m));
     g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(near), m));
     g.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(far), m));
     g.add(makeCamera(camPos, target, color));
     return g;
   }
-  function dashLink(a, b) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), new THREE.LineDashedMaterial({ color: 0x6a6aa8, dashSize: 0.06, gapSize: 0.045 })); l.computeLineDistances(); return l; }
+  function dashLink(a, b) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([a, b]), new THREE.LineDashedMaterial({ ...RIG, dashSize: 0.06, gapSize: 0.045 })); l.computeLineDistances(); return l; }
   const views = [{ deg: '0°', dir: [0, -1], front: true }, { deg: '90°', dir: [1, 0], front: false }, { deg: '180°', dir: [0, 1], front: true }, { deg: '270°', dir: [-1, 0], front: false }];
   floorGrid(scene, 10);
   const a = makeAsset(); scene.add(a.group);
