@@ -278,7 +278,7 @@ function makeScene(container, build) {
   const scene = new THREE.Scene();
   const cp = (container.dataset.cam || '2.5,-2.6,1.9').split(',').map(Number);
   const tg = (container.dataset.target || '0,0,0.6').split(',').map(Number);
-  // orthographic, framed to match the old 42° perspective: half-height = dist(cam,target)·tan(fov/2)
+  // seed half-height only; frame() replaces it with a content fit once the scene is built
   const halfH = Math.hypot(cp[0]-tg[0], cp[1]-tg[1], cp[2]-tg[2]) * Math.tan(21 * Math.PI/180);
   const cam = new THREE.OrthographicCamera(-halfH*W/H, halfH*W/H, halfH, -halfH, 0.05, 100); cam.up.set(0, 0, 1);
   cam.position.set(cp[0], cp[1], cp[2]);
@@ -297,28 +297,50 @@ function makeScene(container, build) {
   ctr.minZoom = 0.7; ctr.maxZoom = 2.5; // ortho zoom clamps (minDistance/maxDistance are no-ops for OrthographicCamera)
   ctr.target.set(tg[0], tg[1], tg[2]);
   build(scene, THREE, renderer);   // renderer passed so a build can render-to-texture (multi-view capture)
-  // responsive framing: keep the tuned vertical extent (halfH) on wide screens, but on narrow (mobile)
-  // viewports zoom out so the full content WIDTH still fits — otherwise wide figures get clipped left/right.
+  // Content-fit framing. The camera is orthographic, so cam.top (hH) IS the zoom — dist(cam,target)
+  // only sets the view direction. Fit hH to the silhouette the camera actually sees: project every
+  // vertex onto the camera's right/up axes. A bounding-sphere estimate cannot do this, because a
+  // sphere's radius is the half-DIAGONAL: stage B's flat view planes and the long storage run
+  // measured ~15% wider than they draw, and the resulting margin was visible as dead space.
   const target = new THREE.Vector3(tg[0], tg[1], tg[2]);
   const fwd = new THREE.Vector3().subVectors(target, cam.position).normalize();
   const right = new THREE.Vector3().crossVectors(fwd, new THREE.Vector3(0, 0, 1)).normalize();
-  // content half-width along the camera's RIGHT axis. Project each mesh's world bounding sphere
-  // (center·right ± radius) instead of an axis-aligned Box3's 8 corners: for a diagonal camera over a
-  // plus-shaped layout (stage B's 4 view planes) the empty AABB corners project onto the 45° right-axis
-  // at ~√2× the true width, which over-zoomed wide figures — worst on mobile, where width binds the fit.
+  const up = new THREE.Vector3().crossVectors(right, fwd).normalize();
   scene.updateMatrixWorld(true);
-  const tR = target.dot(right), sph = new THREE.Sphere();
-  let halfW = halfH;
+  const tR = target.dot(right), tU = target.dot(up), v = new THREE.Vector3();
+  let cW = 0, cH = 0;   // content half-extents, measured from the target (= the frame centre)
   scene.traverse(o => {
-    if (o.userData && o.userData.isFloor || !o.geometry) return;   // skip floor grid and label-only nodes
-    if (!o.geometry.boundingSphere) o.geometry.computeBoundingSphere();
-    sph.copy(o.geometry.boundingSphere).applyMatrix4(o.matrixWorld);
-    halfW = Math.max(halfW, Math.abs(sph.center.dot(right) - tR) + sph.radius);
+    if (o.userData.isFloor || !o.geometry) return;   // the floor grid is backdrop, not content
+    const pos = o.geometry.attributes.position; if (!pos) return;
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      cW = Math.max(cW, Math.abs(v.dot(right) - tR));
+      cH = Math.max(cH, Math.abs(v.dot(up) - tU));
+    }
   });
-  const FIT = 1.22;   // margin so edge labels (CSS2D, wider than their anchor point) aren't clipped
+  // Labels are fixed-size DOM boxes, so their footprint shrinks as the camera zooms out and cannot be
+  // expressed in world units. Render once to attach them, then solve hH per label so its box clears the
+  // container edge. This replaces the old blanket 1.22 fit factor, which padded every scene for the
+  // worst-case label whether or not that scene had one near an edge.
+  lr.render(scene, cam);
+  const labels = [];
+  scene.traverse(o => {
+    if (!o.isCSS2DObject) return;
+    const wp = o.getWorldPosition(new THREE.Vector3());
+    labels.push({ r: Math.abs(wp.dot(right) - tR), u: Math.abs(wp.dot(up) - tU),
+                  bx: o.element.offsetWidth / 2, by: o.element.offsetHeight / 2 });
+  });
+  const MARGIN = 1.04;   // breathing room so the silhouette never touches the card edge
+  const EDGE = 6;        // px kept clear at the container edge
   function frame() {
     const w = container.clientWidth, h = container.clientHeight; if (!w || !h) return;
-    const aspect = w / h, hH = Math.max(halfH, halfW * FIT / aspect);
+    const aspect = w / h;
+    let hH = Math.max(cH, cW / aspect) * MARGIN;
+    for (const l of labels) {
+      const availX = w / 2 - EDGE - l.bx, availY = h / 2 - EDGE - l.by;
+      if (availX > 0) hH = Math.max(hH, l.r * (w / 2) / (availX * aspect));   // px x = l.r/(hH·aspect)·(w/2)
+      if (availY > 0) hH = Math.max(hH, l.u * (h / 2) / availY);              // px y = l.u/hH·(h/2)
+    }
     cam.left = -hH * aspect; cam.right = hH * aspect; cam.top = hH; cam.bottom = -hH; cam.updateProjectionMatrix();
     renderer.setSize(w, h); lr.setSize(w, h);
   }
