@@ -492,7 +492,7 @@ function buildStageB(scene, THREE, renderer) {
     return { P, T, at };
   }
   // the capture rig draws as one object: the box and the links from it to its view plane share this ink
-  const RIG = { color: 0x9ab0e8, transparent: true, opacity: 0.6 };
+  const RIG = { color: 0x9ab0e8, transparent: true, opacity: 0.8 };
   function orthoCamMarker(camPos, target, halfW, halfH, color) {
     const g = new THREE.Group();
     const { P, T, at } = viewRect(camPos, target);
