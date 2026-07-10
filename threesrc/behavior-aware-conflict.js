@@ -536,7 +536,11 @@ function buildStageC(scene) {
   const swingArc = new THREE.Line(new THREE.BufferGeometry().setFromPoints(arcPts), new THREE.LineDashedMaterial({ color: 0x9c4646, dashSize: 0.03, gapSize: 0.02 })); swingArc.computeLineDistances(); scene.add(swingArc);
   scene.add(label('sliding door', 'f', colW / 2, -d / 2 - 0.05, h + 0.16));
   scene.add(label('slides along X', 'g', w / 2 + 0.24, -d / 2, h - 0.05));
-  scene.add(label('hinged door (swings open)', 'm', -0.3, -d / 2 - 0.5, h / 4 - 0.02));
+  // Break the line: this label anchors outside the asset's silhouette (at the swung-open door), and
+  // frame() fits the silhouette, so on a narrow card its one-line box ran past the left edge.
+  // Lift it too — two lines are taller, and only 0.075 in z separated it from the label below, which
+  // projects to ~6px once a mobile card shrinks the world scale while the boxes stay a fixed px size.
+  scene.add(label('hinged door<br>(swings open)', 'm', -0.3, -d / 2 - 0.5, h / 4 + 0.10));
   scene.add(label('keep front clear for access', 'g', 0.12, -d / 2 - 0.56, 0.08));
   scene.userData.tick = (ms) => {
     const t = ms / 1000;
