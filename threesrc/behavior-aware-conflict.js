@@ -330,8 +330,8 @@ function makeScene(container, build) {
     labels.push({ r: Math.abs(wp.dot(right) - tR), u: Math.abs(wp.dot(up) - tU),
                   bx: o.element.offsetWidth / 2, by: o.element.offsetHeight / 2 });
   });
-  const MARGIN = 1.04;   // breathing room so the silhouette never touches the card edge
-  const EDGE = 6;        // px kept clear at the container edge
+  const MARGIN = 1.18;   // silhouette fills 1/MARGIN of the card; a tight fit reads cramped, not legible
+  const EDGE = 12;       // px kept clear at the container edge
   function frame() {
     const w = container.clientWidth, h = container.clientHeight; if (!w || !h) return;
     const aspect = w / h;
