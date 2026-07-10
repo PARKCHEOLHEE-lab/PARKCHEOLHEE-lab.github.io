@@ -665,11 +665,17 @@ function buildStageE(scene) {
     scene.add(sphere(gp, 0.06, gr.color));
     nodes.forEach(n => scene.add(sphere(n, 0.03, gr.color)));
     intra.forEach(ij => scene.add(solidEdge(nodes[ij[0]], nodes[ij[1]], gr.color, 0.8)));
+    // Tag every unit's intra edges, not just the work area's: intra-group relations are what makes each
+    // group a functional unit, so labelling one implied the lounge and storage had none.
+    const im = intra.map(ij => mid(nodes[ij[0]], nodes[ij[1]]));
+    const ic = [0, 1, 2].map(k => im.reduce((s, p) => s + p[k], 0) / im.length);
+    // sit just above the intra edges, not up by the group node — each unit's node hovers a different
+    // height above its objects, so a taller lift collides with the short groups' nodes
+    scene.add(label('intra-group', 'g', ic[0], ic[1], ic[2] + 0.12));
     scene.add(label(gr.name, gr.cls, gp[0], gp[1], gp[2] + 0.14));
     gnodes.push(gp);
   });
   [[0, 1], [0, 2], [1, 2]].forEach(ij => scene.add(dashEdge(gnodes[ij[0]], gnodes[ij[1]], 0xd6336c)));
-  scene.add(label('intra-group', 'g', -2.0, -0.15, 1.12));
   const mm = mid(gnodes[0], gnodes[2]);
   scene.add(label('inter-group', 'm', mm[0], mm[1], mm[2] + 0.04));
 }
