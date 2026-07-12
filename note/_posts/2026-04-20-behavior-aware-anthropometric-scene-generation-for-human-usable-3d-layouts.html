@@ -39,7 +39,7 @@ related:
                 Introduction
                 <ul>
                     <li> 
-                        Physical environments fundamentally shape human movements and behavior.
+                        Physical environments fundamentally shape human movements and behavior [1].
                         In the real world, <strong>layouts are rarely static; users naturally adjust their surroundings</strong> to fit their specific body dimensions and movements.
                     </li>
                     <li>
@@ -66,7 +66,7 @@ related:
                     <li>
                         For PO and HO conditions, we instantiated
                         <strong>participant-specific anthropometric profiles</strong> from each participant's
-                        Skinned Multi-Person Linear (SMPL) model, parameterizing
+                        Skinned Multi-Person Linear (SMPL) [2] model, parameterizing
                         the constraints (e.g., passage widths, reaching envelopes, and viewing requirements) to each participant's actual body dimensions. 
                     </li>
                 </ul>
@@ -79,23 +79,23 @@ related:
                         Ergonomics literature distinguishes between
                         structural anthropometry—static body dimensions—and functional
                         anthropometry, which describes the dynamic range of motion and
-                        clearance required for tasks, emphasizing that true usability depends on accommodating the latter.
+                        clearance required for tasks, emphasizing that true usability depends on accommodating the latter [3].
                         <figure>
                             <div class="viz-scene" id="s-dims" style="height:440px" data-cam="5.3,-3.3,2.8" data-target="1.7,0,0.95"></div>
                             <figcaption class="nofig">Structural anthropometry (gray, the static body box) and functional anthropometry (green, the movement and reach envelope). The camera can be controlled with the mouse.</figcaption>
                         </figure>
                     </li>
                     <li>
-                        Our work builds
-                        upon LayoutVLM's constraint optimization framework but extends
-                        it by integrating anthropometric data directly into the constraint
-                        quantification process.
+                        Our work 
                         <mark>
-
+                            builds
+                            upon LayoutVLM [4]'s constraint optimization framework but extends
+                        it by integrating anthropometric data 
+                        </mark>
+                        directly into the constraint quantification process.
                             Rather than relying on generic distances
                             from LLM common sense, we compute person-specific operational
                             requirements based on individual body measurements and intended interactions
-                        </mark>
                         — advancing scene generation from semantically plausible to human-operational.
                     </li>
                     <!-- <li>
@@ -106,7 +106,7 @@ related:
                     <li>
                         The importance of this personalization becomes evident when considering human diversity; a 5th
                         percentile female and a 95th percentile male require substantially
-                        different operational spaces; however, <strong>
+                        different operational spaces [5]; however, <strong>
                             current anthropometric-driven design methods apply
                             uniform constraints that may be insufficient for larger individuals
                             or wastefully spacious for smaller ones.
@@ -116,7 +116,7 @@ related:
                     </li>
                     <li>
                         Although <mark>Fréchet Inception Distance and Kernel
-                        Inception Distance metrics effectively validate visual quality
+                        Inception Distance metrics [6, 7, 8] effectively validate visual quality
                         and learning performance, they fail to capture the behavioral and
                         operational aspects</mark> that determine the actual usability.
                     </li>
@@ -149,21 +149,78 @@ related:
                         </figure>
                     </li>
                     <li>
-                        The VLM also produces a <strong>[D] Human-Object Interaction Pattern</strong>, identifying the top five human actions associated with the object based on atomic visual actions (e.g., sit, open, pull).
+                        The VLM also produces a <strong>[D] Human-Object Interaction Pattern</strong>, identifying the top five human actions associated with the object based on atomic visual actions (e.g., sit, open, pull) [9].
                         <figure>
-                            <div class="viz-scene" id="s-interaction" style="height:420px" data-cam="5.0,-4.2,2.2" data-target="2.6,0.2,0.95"></div>
+                            <div class="viz-scene" id="s-interaction" style="height:420px" data-cam="5.969,-3.169,2.946" data-target="2.6,0.2,0.95"></div>
                             <figcaption class="nofig">[D] Human-Object Interaction Pattern &middot; the top actions the object affords &mdash; open / close (door), pull / push (drawer), touch; two-bone inverse kinematics lands each hand on the movable part.</figcaption>
                         </figure>
                     </li>
                     <li>
                         Meaningful spatial reasoning emerges when objects are considered as part of behavioral configurations; for example, <strong>chairs around a desk forming a workspace or sofas arranged around a coffee table creating a lounge area</strong>. The <strong>[E] Semantic Grouping</strong> stage identifies both <strong>intra-group spatial relations</strong> (internal arrangement within a functional unit) and <strong>inter-group spatial relations</strong> (connectivity between distinct groups).
                         <figure>
-                            <div class="viz-scene" id="s-grouping" style="height:460px" data-cam="2.66,-3.79,1.83" data-target="0.1,0.9,0.5"></div>
+                            <div class="viz-scene" id="s-grouping" style="height:460px" data-cam="3.312,-3.128,2.528" data-target="-0.279,0.463,0.401"></div>
                             <figcaption class="nofig">[E] Semantic Grouping &middot; objects that function together form a group (work / lounge / storage); solid links are intra-group relations, dashed magenta links are inter-group relations.</figcaption>
                         </figure>
                     </li>
                     <li>
-                        
+                        The <strong>[F-G] stages infer anthropometrically grounded constraint representations</strong> from natural-language spatial relations. 
+                        They convert these relations 
+                        into executable, differentiable constraints
+                        required for spatial optimization. 
+                        <mark>
+                            Our framework infers constraint specifications by explicitly referencing behavioral
+                            semantics and anthropometric rationale.
+                        </mark>
+                    </li>
+                    <!-- <li>
+                        Prior work defines constraints
+                        in geometric terms, focusing on the distances and angles between
+                        assets, independent of how people interact with them.
+                        By contrast,
+                        our formulation explicitly encodes how people need to reach, access,
+                        and operate furniture.
+                    </li> -->
+                    <li>
+                        The taxonomy organizes natural-language
+                        relations into learnable constraint types (positional, orientational,
+                        and height-based) such as chair against wall, table aligned with sofa,
+                        or lamp on top of desk.
+                        <div class="latex-container">
+                        \[
+                        \begin{array}{llll}
+                        \hline
+                        \textbf{Constraint Type} & \textbf{Constraint Name} & \textbf{Method} & \textbf{Description} \\
+                        \hline
+                        \text{Position-based} & L_{\text{distance}}(p_i, p_j, d_{\min}, d_{\max}) & \text{LayoutVLM} & \text{Distance between the two assets should fall within the range } [d_{\min}, d_{\max}]. \\
+                         & & \text{Ours} & \text{Distance between two objects to } [d_{\min}, d_{\max}]\text{, where bounds are inferred from reach and clearance requirements based on anthropometric data.} \\
+                         & L_{\text{against wall}}(p_i, w_j, b_i) & \text{LayoutVLM} & \text{Place an asset against wall } w_j. \\
+                         & & \text{Ours} & \text{Places the object against a specific wall while considering accessibility and clearance requirements for nearby interactions.} \\
+                        \hline
+                        \text{Orientation-based} & L_{\text{align with}}(p_i, p_j, \Theta) & \text{LayoutVLM} & \text{Align two assets at a specified angle } \Theta. \\
+                         & & \text{Ours} & \text{Aligns the rotations of two objects; the angle parameter } \Theta \text{ reflects task-oriented alignment (e.g., parallel or perpendicular configurations for joint use).} \\
+                         & L_{\text{point towards}}(p_i, p_j, \Theta) & \text{LayoutVLM} & \text{Orient one asset to face another with an offset angle } \Theta. \\
+                         & & \text{Ours} & \text{Adjusts orientation so that an object's front faces the target, with } \Theta \text{ encoding preferred viewing or interaction directions (e.g., facing a desk, or seating area).} \\
+                        \hline
+                        \text{Height-based} & L_{\text{on top of}}(p_i, p_j, h) & \text{LayoutVLM} & \text{Position one asset on top of another.} \\
+                         & & \text{Ours} & \text{Defines a vertical stacking relationship for placing smaller objects on surfaces while keeping sufficient interaction area.} \\
+                        \hline
+                        \end{array}
+                        \]
+                        </div>
+                        <figcaption class="nofig">
+                            Spatial Constraint Taxonomy for Behavior-Aware Anthropometric Scene Generation, comparing our behavior-aware, anthropometrically grounded constraints with the geometric relations [4].
+                            &middot; Notation: \(p_i, p_j\) object poses; \(w_j\) wall index; \(b_i\) object bounding box; \(d_{\min}, d_{\max}\) minimum/maximum center distance; \(\Theta\) relative angle; \(h\) height offset.
+                        </figcaption>
+                        <br>
+                        <figure>
+                            <div class="viz-scene" id="s-taxonomy" style="height:420px" data-cam="8.792,-4.842,3.549" data-target="4.222,-0.272,0.849"></div>
+                            <figcaption class="nofig">Spatial constraint taxonomy, animated &middot; each of Table 1's five losses pulls its movable object from a violating placement (high loss) into the satisfied one (loss &rarr; 0); the coloured arrow is the loss's negative gradient. Grouped by type &mdash; position (blue), orientation (amber), height (green).</figcaption>
+                        </figure>
+                    </li>
+                    <br>
+                    <li>
+                        Among these, distance constraint requires additional clarification, 
+                        because it directly governs human accessibility and functional clearance. 
                     </li>
                 </ul>
             </li>
@@ -183,6 +240,28 @@ related:
                     <li>
 
                     </li>
+                </ul>
+            </li>
+            <li>
+                Conclusion
+                <ul>
+                    <li>
+                        
+                    </li>
+                </ul>
+            </li>
+            <li>
+                References
+                <ul>
+                    <li>[1] Weizhou Luo, Zhongyuan Yu, Rufat Rzayev, Marc Satkowski, Stefan Gumhold, Matthew McGinity, and Raimund Dachselt. 2023. <a href="https://doi.org/10.1145/3544548.3580715" target="_blank" rel="noopener noreferrer">Pearl: Physical Environment Based Augmented Reality Lenses for In-Situ Human Movement Analysis</a>. In Proceedings of the 2023 CHI Conference on Human Factors in Computing Systems (CHI '23), 1&ndash;15.</li>
+                    <li>[2] Matthew Loper, Naureen Mahmood, Javier Romero, Gerard Pons-Moll, and Michael J. Black. 2015. <a href="https://doi.org/10.1145/2816795.2818013" target="_blank" rel="noopener noreferrer">SMPL: A Skinned Multi-Person Linear Model</a>. ACM Transactions on Graphics (Proc. SIGGRAPH Asia) 34, 6 (2015), 248:1&ndash;248:16.</li>
+                    <li>[3] Carlos Viviani, Pedro M. Arezes, Sara Bragan&ccedil;a, Johan Molenbroek, Iman Dianat, and Hector I. Castellucci. 2018. <a href="https://doi.org/10.1016/j.ergon.2018.01.012" target="_blank" rel="noopener noreferrer">Accuracy, Precision and Reliability in Anthropometric Surveys for Ergonomics Purposes in Adult Working Populations: A Literature Review</a>. International Journal of Industrial Ergonomics 65 (2018), 1&ndash;16.</li>
+                    <li>[4] Fan-Yun Sun, Weiyu Liu, Siyi Gu, Dylan Lim, Goutam Bhat, Federico Tombari, Manling Li, Nick Haber, and Jiajun Wu. 2025. <a href="https://arxiv.org/abs/2412.02193" target="_blank" rel="noopener noreferrer">LayoutVLM: Differentiable Optimization of 3D Layout via Vision-Language Models</a>. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 29469&ndash;29478.</li>
+                    <li>[5] Julius Panero and Martin Zelnik. 1979. <a href="https://openlibrary.org/works/OL6565998W" target="_blank" rel="noopener noreferrer">Human Dimension and Interior Space: A Source Book of Design Reference Standards</a>. Watson-Guptill, New York.</li>
+                    <li>[6] Chenguo Lin and Yadong Mu. 2024. <a href="https://arxiv.org/abs/2402.04717" target="_blank" rel="noopener noreferrer">InstructScene: Instruction-Driven 3D Indoor Scene Synthesis with Semantic Graph Prior</a>. arXiv:2402.04717.</li>
+                    <li>[7] Despoina Paschalidou, Amlan Kar, Maria Shugrina, Karsten Kreis, Andreas Geiger, and Sanja Fidler. 2021. <a href="https://arxiv.org/abs/2110.03675" target="_blank" rel="noopener noreferrer">ATISS: Autoregressive Transformers for Indoor Scene Synthesis</a>. In Advances in Neural Information Processing Systems (NeurIPS) 34 (2021), 12013&ndash;12026.</li>
+                    <li>[8] Jiapeng Tang, Yinyu Nie, Lev Markhasin, Angela Dai, Justus Thies, and Matthias Nie&szlig;ner. 2024. <a href="https://arxiv.org/abs/2303.14207" target="_blank" rel="noopener noreferrer">DiffuScene: Denoising Diffusion Models for Generative Indoor Scene Synthesis</a>. In Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR), 20507&ndash;20518.</li>
+                    <li>[9] Chunhui Gu, Chen Sun, David A. Ross, Carl Vondrick, Caroline Pantofaru, Yeqing Li, Sudheendra Vijayanarasimhan, George Toderici, Susanna Ricco, Rahul Sukthankar, Cordelia Schmid, and Jitendra Malik. 2018. <a href="https://arxiv.org/abs/1705.08421" target="_blank" rel="noopener noreferrer">AVA: A Video Dataset of Spatio-temporally Localized Atomic Visual Actions</a>. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 6047&ndash;6056.</li>
                 </ul>
             </li>
         </ol>
