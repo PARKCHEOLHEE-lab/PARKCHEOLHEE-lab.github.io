@@ -154,6 +154,24 @@ function makeChair(seatH) {
   }
   return g;
 }
+// two-seat sofa, faces +Y (backrest at -Y) — shared by the semantic-grouping and taxonomy figures.
+// optional uniform scale s (default 1) enlarges the whole sofa without touching call sites that omit it.
+function makeSofa(s) {
+  s = s || 1;
+  const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color: 0x8a8f98, roughness: .75 });
+  const add = (w, d, h, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w * s, d * s, h * s), mat); m.position.set(x * s, y * s, z * s); g.add(m); };
+  add(0.92, 0.52, 0.22, 0, 0, 0.14); add(0.86, 0.48, 0.12, 0, 0.02, 0.31); add(0.92, 0.14, 0.36, 0, -0.19, 0.42);
+  add(0.1, 0.52, 0.34, -0.41, 0, 0.36); add(0.1, 0.52, 0.34, 0.41, 0, 0.36);
+  return g;
+}
+// large flat-screen TV on a low media console; screen faces -Y (toward the viewer / sofa)
+function makeTV() {
+  const g = new THREE.Group();
+  const box = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.34, 0.3), MAT.wood()); box.position.set(0, 0, 0.15); g.add(box);
+  const bezel = new THREE.Mesh(new THREE.BoxGeometry(1.08, 0.05, 0.66), new THREE.MeshStandardMaterial({ color: 0x23272e, roughness: .35 })); bezel.position.set(0, -0.02, 0.7); g.add(bezel);
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(0.98, 0.01, 0.56), new THREE.MeshStandardMaterial({ color: 0x9fb4e8, roughness: .3 })); screen.position.set(0, -0.045, 0.7); g.add(screen);
+  return g;
+}
 
 // ---------- wooden mannequin (faces +Y) ----------
 function poseJoints(pose) {
@@ -612,13 +630,6 @@ function buildStageE(scene) {
   const solidEdge = (a, b, color, op) => new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a[0], a[1], a[2]), V(b[0], b[1], b[2])]), new THREE.LineBasicMaterial({ color, transparent: true, opacity: op }));
   function dashEdge(a, b, color) { const l = new THREE.Line(new THREE.BufferGeometry().setFromPoints([V(a[0], a[1], a[2]), V(b[0], b[1], b[2])]), new THREE.LineDashedMaterial({ color, dashSize: 0.09, gapSize: 0.06 })); l.computeLineDistances(); return l; }
   const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
-  function makeSofa() {
-    const g = new THREE.Group(), mat = new THREE.MeshStandardMaterial({ color: 0x8a8f98, roughness: .75 });
-    const add = (w, d, h, x, y, z) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, d, h), mat); m.position.set(x, y, z); g.add(m); };
-    add(0.92, 0.52, 0.22, 0, 0, 0.14); add(0.86, 0.48, 0.12, 0, 0.02, 0.31); add(0.92, 0.14, 0.36, 0, -0.19, 0.42);
-    add(0.1, 0.52, 0.34, -0.41, 0, 0.36); add(0.1, 0.52, 0.34, 0.41, 0, 0.36);
-    return g;
-  }
   floorGrid(scene, 14);
   const groups = [
     { name: 'individual work area', cls: 'fb', color: 0x3a5cc0, make() {
@@ -662,6 +673,114 @@ function buildStageE(scene) {
   scene.add(label('inter-group', 'm', mm[0], mm[1], mm[2] + 0.04));
 }
 
+// ---------- Method §3.2 · Spatial Constraint Taxonomy (the figure after Table 1) ----------
+// Animates each of Table 1's five losses. Reuses the furniture + dim / label helpers. Annotation
+// ink is coloured by TYPE — position=blue, orientation=amber, height=green — matching fb / fa / gr.
+const TAXCOL = { pos: 0x3a5cc0, ori: 0xa8752a, ht: 0x2fa35a };
+
+// cheap updatable arrow (three lines: shaft + two head strokes); set(from,to) rewrites the buffers
+function flowArrow(color) {
+  const m = new THREE.LineBasicMaterial({ color });
+  const shaft = new THREE.Line(new THREE.BufferGeometry(), m), h1 = new THREE.Line(new THREE.BufferGeometry(), m), h2 = new THREE.Line(new THREE.BufferGeometry(), m);
+  const g = new THREE.Group(); g.add(shaft); g.add(h1); g.add(h2);
+  g.userData.set = (from, to, head) => {
+    head = head == null ? 0.075 : head;
+    const A = new THREE.Vector3(from[0], from[1], from[2]), B = new THREE.Vector3(to[0], to[1], to[2]);
+    const d = new THREE.Vector3().subVectors(B, A), len = d.length();
+    if (len < 2e-3) { g.visible = false; return; } g.visible = true; d.normalize();
+    const ref = Math.abs(d.z) > 0.85 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 0, 1);
+    const perp = new THREE.Vector3().crossVectors(d, ref).normalize().multiplyScalar(head * 0.6), back = d.clone().multiplyScalar(-head);
+    shaft.geometry.setFromPoints([A, B]);
+    h1.geometry.setFromPoints([B, B.clone().add(back).add(perp)]);
+    h2.geometry.setFromPoints([B, B.clone().add(back).sub(perp)]);
+  };
+  return g;
+}
+// a translucent floor "facing cone" (like a flashlight beam) opening +Y in local — shows which way an object
+// looks; add as a child so it sweeps as the object rotates.
+function facingCone(color) {
+  const sh = new THREE.Shape(), r = 0.55, ha = 0.42, n = 14; sh.moveTo(0, 0);
+  for (let i = 0; i <= n; i++) { const a = Math.PI / 2 - ha + 2 * ha * i / n; sh.lineTo(r * Math.cos(a), r * Math.sin(a)); }
+  sh.closePath();
+  return new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.2, side: THREE.DoubleSide, depthWrite: false }));
+}
+// each constraint animates VIOLATION -> SATISFIED; a force arrow (the −gradient of the loss)
+// pulls the movable object into the relation, which reads as loss -> 0.
+// Grouped by the three types, colour-coded blue / amber / green. Green marks the satisfied target.
+function buildTaxLoss(scene) {
+  floorGrid(scene, 18);
+  const lerp = (a, b, s) => a + (b - a) * s, upd = [];
+  (() => {  // distance (blue): BOTH objects adjust until their CENTRE-TO-CENTRE distance enters [d_min,d_max]
+    const c = TAXCOL.pos, mx = 0.0, dMin = 0.7, dMax = 1.0, yAx = -0.62, zAx = 0.02, dFar = 1.7, dSat = 0.85;
+    const desk = makeDesk(1.05, 0.58, 0.73); desk.rotation.z = Math.PI / 2; scene.add(desk);  // full-height desk (0.73) so the chair fits under; long edge toward the chair
+    const chair = makeChair(0.46); chair.rotation.z = -Math.PI / 2; scene.add(chair);          // seat faces +X, toward the desk
+    // fixed green valid-distance zones: where each centre's projection onto the dim axis should land (symmetric)
+    const bandMat = new THREE.MeshBasicMaterial({ color: 0x2fa35a, transparent: true, opacity: 0.22, side: THREE.DoubleSide, depthWrite: false });
+    [-1, 1].forEach(sgn => { const b = new THREE.Mesh(new THREE.BoxGeometry((dMax - dMin) / 2, 0.14, 0.008), bandMat); b.position.set(mx + sgn * (dMin + dMax) / 4, yAx, zAx); scene.add(b); });
+    // live centre-to-centre dimension below the objects (shaft + end ticks + extension lines); turns green in range
+    const dmat = new THREE.LineBasicMaterial({ color: 0x8a9097 });
+    const shaft = new THREE.Line(new THREE.BufferGeometry(), dmat), tL = new THREE.Line(new THREE.BufferGeometry(), dmat), tR = new THREE.Line(new THREE.BufferGeometry(), dmat), eL = new THREE.Line(new THREE.BufferGeometry(), dmat), eR = new THREE.Line(new THREE.BufferGeometry(), dmat);
+    [shaft, tL, tR, eL, eR].forEach(o => scene.add(o));
+    scene.add(label('[d_min, d_max]', 'g', mx, yAx - 0.18, 0.05));
+    const aL = flowArrow(c), aR = flowArrow(c); scene.add(aL); scene.add(aR);
+    scene.add(label('distance', 'fb', mx, 0.02, 1.18));
+    const P = (x, y, z) => new THREE.Vector3(x, y, z);
+    upd.push(s => {
+      const d = lerp(dFar, dSat, s), xL = mx - d / 2, xR = mx + d / 2;
+      chair.position.set(xL, 0, 0); desk.position.set(xR, 0, 0);
+      shaft.geometry.setFromPoints([P(xL, yAx, zAx), P(xR, yAx, zAx)]);
+      tL.geometry.setFromPoints([P(xL, yAx - 0.05, zAx), P(xL, yAx + 0.05, zAx)]);
+      tR.geometry.setFromPoints([P(xR, yAx - 0.05, zAx), P(xR, yAx + 0.05, zAx)]);
+      eL.geometry.setFromPoints([P(xL, -0.02, 0.02), P(xL, yAx, zAx)]);
+      eR.geometry.setFromPoints([P(xR, -0.02, 0.02), P(xR, yAx, zAx)]);
+      dmat.color.setHex(d >= dMin && d <= dMax ? 0x2fa35a : 0x8a9097);
+      const f = (1 - s) * 0.4 + 0.02;
+      aL.userData.set([xL + 0.28, 0, 0.46], [xL + 0.28 + f, 0, 0.46]);
+      aR.userData.set([xR - 0.28, 0, 0.46], [xR - 0.28 - f, 0, 0.46]);
+    });
+  })();
+  (() => {  // against wall (blue): cabinet gap -> flush
+    const c = TAXCOL.pos, bx = 2.0;
+    const wall = boxEdges(1.35, 0.06, 1.3, 0x9aa0a6, 0.10); wall.position.set(bx, 0.55, 0.65); scene.add(wall);
+    const cab = makeStorageCabinet(0.8, 0.46, 1.15); scene.add(cab);
+    const arr = flowArrow(c); scene.add(arr);
+    scene.add(label('against wall', 'fb', bx, 0.0, 1.5));
+    upd.push(s => { const y = lerp(-0.35, 0.29, s); cab.position.set(bx, y, 0); arr.userData.set([bx, y + 0.26, 0.6], [bx, y + 0.26 + (1 - s) * 0.42 + 0.02, 0.6]); });
+  })();
+  (() => {  // align with (amber): sofa + coffee table BOTH rotate until the table's long edge is parallel to the sofa's front
+    const c = TAXCOL.ori, bx = 4.3;                                                     // (a usable lounge: table squared up in front of the seat) — symmetric, both move
+    const sofa = makeSofa(1.2); sofa.position.set(bx, -0.35, 0); scene.add(sofa);        // sofa faces +Y
+    const coneS = facingCone(c); coneS.position.set(0, 0.1, 0.02); sofa.add(coneS);
+    const table = makeDesk(0.95, 0.5, 0.4); table.position.set(bx, 0.55, 0); scene.add(table);   // coffee table IN FRONT of the sofa
+    const coneT = facingCone(c); coneT.position.set(0, 0.05, 0.02); table.add(coneT);
+    scene.add(label('parallel', 'g', bx + 0.62, 0.55, 0.35));
+    scene.add(label('align with', 'fa', bx, -0.5, 1.35));
+    upd.push(s => { sofa.rotation.z = lerp(0.5, 0, s); table.rotation.z = lerp(-0.75, 0, s); });   // BOTH rotate until parallel
+  })();
+  (() => {  // point towards (amber): the sofa turns to face the TV HEAD-ON (couch aimed straight at the screen) — one object rotates
+    const c = TAXCOL.ori, bx = 6.5;
+    const tv = makeTV(); tv.position.set(bx, 0.85, 0); scene.add(tv);                   // TV directly in front (+Y), screen faces -Y
+    const sofa = makeSofa(1.2); sofa.position.set(bx, -0.65, 0); scene.add(sofa);        // sofa on the SAME axis, straight in front of the TV
+    const cone = facingCone(c); cone.position.set(0, 0.1, 0.02); sofa.add(cone);
+    const ray = flowArrow(0x8bbf86); scene.add(ray); ray.userData.set([bx, -0.18, 0.42], [bx, 0.55, 0.42]);   // straight +Y toward the TV
+    scene.add(label('point towards', 'fa', bx, -0.2, 1.5));
+    upd.push(s => { sofa.rotation.z = lerp(-1.7, 0, s); });                             // satisfied: faces +Y, straight at the TV
+  })();
+  (() => {  // on top of (green): box drops onto the surface at height h
+    const c = TAXCOL.ht, bx = 8.5;
+    const chest = makeChest(0.72, 0.46, 0.82); chest.position.set(bx, 0, 0); scene.add(chest);
+    const box = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.26, 0.24), new THREE.MeshStandardMaterial({ color: 0xb86b5e, roughness: .7 })); scene.add(box);
+    scene.add(dimExt([bx, 0, 0], [bx, 0, 0.82], [0.5, 0, 0], [0.04, 0, 0], 'h', 'g', c, [0.16, 0, 0]));   // h on the +X side (opposite the neighbour)
+    const arr = flowArrow(c); scene.add(arr);
+    scene.add(label('on top of', 'gr', bx, 0, 1.62));
+    upd.push(s => { const z = lerp(1.4, 0.95, s), x = lerp(bx - 0.5, bx, s); box.position.set(x, 0, z); arr.userData.set([x, 0, z - 0.15], [x, 0, z - 0.15 - (1 - s) * 0.32 - 0.02]); });   // box drops from -X so it clears the h dimension
+  })();
+  scene.add(label('Position-based', 'fb', 0.85, 0.1, 1.95));
+  scene.add(label('Orientation-based', 'fa', 4.5, 0.1, 1.95));
+  scene.add(label('Height-based', 'gr', 8.5, 0.1, 2.15));
+  scene.userData.tick = (ms) => { const s = 0.5 - 0.5 * Math.cos(ms / 1000 * 0.9); upd.forEach(f => f(s)); };
+}
+
 const elConflict = document.getElementById('s-conflict');
 if (elConflict) makeScene(elConflict, buildConflict);
 const elDims = document.getElementById('s-dims');
@@ -670,3 +789,4 @@ const elB = document.getElementById('s-preproc'); if (elB) makeScene(elB, buildS
 const elC = document.getElementById('s-funcdesc'); if (elC) makeScene(elC, buildStageC);
 const elD = document.getElementById('s-interaction'); if (elD) makeScene(elD, buildStageD);
 const elE = document.getElementById('s-grouping'); if (elE) makeScene(elE, buildStageE);
+const elTaxonomy = document.getElementById('s-taxonomy'); if (elTaxonomy) makeScene(elTaxonomy, buildTaxLoss);
