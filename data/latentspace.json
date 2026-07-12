@@ -241,7 +241,7 @@
       "mathematics-for-machine-learning"
     ],
     "x": 0.576,
-    "y": 0.26
+    "y": 0.2599
   },
   {
     "title": "Normalization Layers",
@@ -329,7 +329,7 @@
       "mass-gans"
     ],
     "x": 0.739,
-    "y": 0.6585
+    "y": 0.6586
   },
   {
     "title": "Conditional Generative Adversarial Nets",
@@ -532,7 +532,7 @@
       "cosine-similarity"
     ],
     "x": 0.7211,
-    "y": 0.2595
+    "y": 0.2596
   },
   {
     "title": "Attention Is All You Need",
@@ -786,7 +786,7 @@
       "no-exit"
     ],
     "x": 0.1472,
-    "y": 0.453
+    "y": 0.4531
   },
   {
     "title": "Math Notation Cheat Sheet",
@@ -1099,7 +1099,7 @@
       "wedbush-top-10-christmas-list-for-the-tech-sector-in-2025"
     ],
     "x": 0.2149,
-    "y": 0.4829
+    "y": 0.4828
   },
   {
     "title": "Fancy Indexing Cheat Sheet",
@@ -1112,7 +1112,7 @@
       "intuition-about-transformer"
     ],
     "x": 0.7796,
-    "y": 0.5059
+    "y": 0.506
   },
   {
     "title": "register_buffer",
@@ -1188,7 +1188,7 @@
       "z"
     ],
     "x": 0.3426,
-    "y": 0.4706
+    "y": 0.4707
   },
   {
     "title": "numerical differentiation for autograd",
@@ -1236,7 +1236,7 @@
       "landbook-diffusion-pipeline"
     ],
     "x": 0.6269,
-    "y": 0.8748
+    "y": 0.8749
   },
   {
     "title": "Chamfer Distance",
@@ -1351,7 +1351,7 @@
       "setting-different-learning-rates-within-an-optimizer"
     ],
     "x": 0.9021,
-    "y": 0.5487
+    "y": 0.5486
   },
   {
     "title": "ghdoc.Path",
@@ -1454,7 +1454,7 @@
     "label": "Eyes",
     "connected": [],
     "x": 0.2759,
-    "y": 0.6116
+    "y": 0.6117
   },
   {
     "title": "Gumbel-Softmax",
@@ -2017,7 +2017,7 @@
       "z"
     ],
     "x": 0.2116,
-    "y": 0.44
+    "y": 0.4399
   },
   {
     "title": "Distorted Grid Graph",
@@ -2104,7 +2104,7 @@
       "maximum-likelihood-estimation"
     ],
     "x": 0.7386,
-    "y": 0.3305
+    "y": 0.3306
   },
   {
     "title": "IndexedDB",
@@ -2288,7 +2288,7 @@
       "the-selfish-gene"
     ],
     "x": 0.7533,
-    "y": 0.6018
+    "y": 0.6017
   },
   {
     "title": "Mass generator",
@@ -2377,7 +2377,7 @@
       "klemens-torggler-door"
     ],
     "x": 0.7952,
-    "y": 0.8859
+    "y": 0.886
   },
   {
     "title": "Merry christmas",
@@ -2574,7 +2574,7 @@
       "intuitions-about-diffusion-models"
     ],
     "x": 0.8,
-    "y": 0.8582
+    "y": 0.8583
   },
   {
     "title": "Parallel execution within GhPython",
@@ -2623,7 +2623,7 @@
       "voxelate"
     ],
     "x": 0.9611,
-    "y": 0.3948
+    "y": 0.3949
   },
   {
     "title": "Local coordinate system",
@@ -2661,7 +2661,7 @@
       "gan"
     ],
     "x": 0.976,
-    "y": 0.4171
+    "y": 0.4172
   },
   {
     "title": "Seeing is solving",
@@ -2709,7 +2709,7 @@
       "intuitions-about-diffusion-models"
     ],
     "x": 0.7407,
-    "y": 0.7515
+    "y": 0.7516
   },
   {
     "title": "Polygon segmentations",
@@ -2747,7 +2747,7 @@
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
     "x": 0.9628,
-    "y": 0.6185
+    "y": 0.6184
   },
   {
     "title": "Landbook Diffusion Pipeline",
