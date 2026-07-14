@@ -518,7 +518,7 @@
       "attention-is-all-you-need"
     ],
     "x": 0.6034,
-    "y": 0.3085
+    "y": 0.3084
   },
   {
     "title": "Attention? Attention!",
@@ -532,7 +532,7 @@
       "cosine-similarity"
     ],
     "x": 0.7211,
-    "y": 0.2596
+    "y": 0.2595
   },
   {
     "title": "Attention Is All You Need",
@@ -578,7 +578,7 @@
       "pca",
       "dot-product"
     ],
-    "x": 0.8459,
+    "x": 0.846,
     "y": 0.344
   },
   {
@@ -669,7 +669,7 @@
       "important-thing-is"
     ],
     "x": 0.4151,
-    "y": 0.5485
+    "y": 0.5486
   },
   {
     "title": "LDLM",
@@ -977,7 +977,7 @@
       "thinking-of-lying"
     ],
     "x": 0.1071,
-    "y": 0.6632
+    "y": 0.6631
   },
   {
     "title": "거짓말",
@@ -1112,7 +1112,7 @@
       "intuition-about-transformer"
     ],
     "x": 0.7796,
-    "y": 0.506
+    "y": 0.5059
   },
   {
     "title": "register_buffer",
@@ -1236,7 +1236,7 @@
       "landbook-diffusion-pipeline"
     ],
     "x": 0.6269,
-    "y": 0.8749
+    "y": 0.8748
   },
   {
     "title": "Chamfer Distance",
@@ -1336,7 +1336,7 @@
       "razors-edge"
     ],
     "x": 0.0204,
-    "y": 0.5809
+    "y": 0.5808
   },
   {
     "title": "DataParallel",
@@ -1899,7 +1899,7 @@
       "cosine-similarity"
     ],
     "x": 0.8344,
-    "y": 0.515
+    "y": 0.5149
   },
   {
     "title": "wsic",
@@ -1925,7 +1925,7 @@
       "hermite-spline"
     ],
     "x": 0.7252,
-    "y": 0.651
+    "y": 0.6509
   },
   {
     "title": "rhinomcptest",
@@ -2182,7 +2182,7 @@
       "some-truth"
     ],
     "x": 0.3673,
-    "y": 0.3234
+    "y": 0.3235
   },
   {
     "title": "Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts",
@@ -2288,7 +2288,7 @@
       "the-selfish-gene"
     ],
     "x": 0.7533,
-    "y": 0.6017
+    "y": 0.6018
   },
   {
     "title": "Mass generator",
@@ -2377,7 +2377,7 @@
       "klemens-torggler-door"
     ],
     "x": 0.7952,
-    "y": 0.886
+    "y": 0.8859
   },
   {
     "title": "Merry christmas",
@@ -2511,7 +2511,7 @@
       "discrete-voronoi",
       "subdivision-curve"
     ],
-    "x": 0.8406,
+    "x": 0.8405,
     "y": 0.8656
   },
   {
@@ -2573,8 +2573,8 @@
       "latent-shapes",
       "intuitions-about-diffusion-models"
     ],
-    "x": 0.8,
-    "y": 0.8583
+    "x": 0.8001,
+    "y": 0.8582
   },
   {
     "title": "Parallel execution within GhPython",
@@ -2623,7 +2623,7 @@
       "voxelate"
     ],
     "x": 0.9611,
-    "y": 0.3949
+    "y": 0.3948
   },
   {
     "title": "Local coordinate system",
@@ -2661,7 +2661,7 @@
       "gan"
     ],
     "x": 0.976,
-    "y": 0.4172
+    "y": 0.4171
   },
   {
     "title": "Seeing is solving",
@@ -2709,7 +2709,7 @@
       "intuitions-about-diffusion-models"
     ],
     "x": 0.7407,
-    "y": 0.7516
+    "y": 0.7515
   },
   {
     "title": "Polygon segmentations",
@@ -2764,7 +2764,7 @@
       "intuitions-about-diffusion-models"
     ],
     "x": 0.8547,
-    "y": 0.7515
+    "y": 0.7514
   },
   {
     "title": "Voxels to Graph",
