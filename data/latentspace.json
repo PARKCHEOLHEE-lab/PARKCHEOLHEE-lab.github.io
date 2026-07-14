@@ -947,7 +947,7 @@
       "good-refactoring-vs-bad-refactoring",
       "writes-and-write-not",
       "look-back",
-      "z"
+      "mmm"
     ],
     "x": 0.3822,
     "y": 0.6567
@@ -1185,7 +1185,7 @@
       "qq",
       "capability-overhang",
       "words",
-      "z"
+      "mmm"
     ],
     "x": 0.3426,
     "y": 0.4706
@@ -1791,7 +1791,7 @@
       "we-are-being-programmed",
       "writes-and-write-not",
       "hallucination-is-a-feature",
-      "z"
+      "mmm"
     ],
     "x": 0.2924,
     "y": 0.372
@@ -2014,7 +2014,7 @@
       "capability-overhang",
       "how-to-pivot-to-a-machine-learning-engineer",
       "important-thing-is",
-      "z"
+      "mmm"
     ],
     "x": 0.2116,
     "y": 0.44
@@ -2178,7 +2178,7 @@
       "words",
       "we-are-being-programmed",
       "hallucination-is-a-feature",
-      "z",
+      "mmm",
       "some-truth"
     ],
     "x": 0.3673,
@@ -2231,9 +2231,9 @@
     "y": 0.6689
   },
   {
-    "title": "ㅋ",
-    "slug": "z",
-    "url": "/z/",
+    "title": "!!!",
+    "slug": "mmm",
+    "url": "/mmm/",
     "category": "note",
     "label": "Eyes",
     "connected": [
