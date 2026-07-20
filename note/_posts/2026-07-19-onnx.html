@@ -1,0 +1,204 @@
+---
+title: "ONNX"
+layout: post
+mermaid: true
+related: []
+---
+
+<br>
+
+<ul>
+    <li>
+        What is ONNX
+    </li>
+        <ul>
+            <li>
+                <b>ONNX</b> (Open Neural Network Exchange) is an open, framework-agnostic format for neural networks
+            </li>
+            <li>
+                A model is stored as a <b>computation graph</b>, where nodes are standardized operators (<code>Gemm</code>, <code>Relu</code>, <code>Conv</code>, …) and edges are the tensors flowing between them
+            </li>
+            <li>
+                It <b>decouples a model from the framework that trained it</b>: the same <code>.onnx</code> file can be produced by PyTorch, TensorFlow, or scikit-learn, and read by any ONNX-compatible runtime
+            </li>
+            <li>
+                <mark>An ONNX file is a single format that many frameworks can produce and many runtimes and hardware backends can run, so a model trained once works anywhere without change</mark>
+            </li>
+            <br>
+<pre class="mermaid narrow">
+flowchart LR
+    pt["PyTorch"] --> onnx
+    tf["TensorFlow"] --> onnx
+    sk["scikit-learn"] --> onnx
+    kr["Keras"] --> onnx
+    onnx["ONNX (.onnx)"] --> ort["ONNX Runtime"]
+    ort --> cpu["CPU"]
+    ort --> cuda["CUDA"]
+    ort --> coreml["CoreML"]
+    ort --> webgpu["WebGPU"]
+    ort --> wasm["WASM"]
+
+    classDef hub fill:#212529,stroke:#212529,color:#ffffff;
+    classDef engine fill:#495057,stroke:#495057,color:#ffffff;
+    classDef browser fill:#d0e2ff,stroke:#9dbef0,color:#1a1a1a;
+    class onnx hub
+    class ort engine
+    class webgpu,wasm browser
+</pre>
+            <figcaption>ONNX decouples training frameworks from runtimes and hardware</figcaption>
+        </ul>
+    <br>
+    <li>
+        Exporting a model to ONNX
+    </li>
+        <ul>
+            <li>
+                <code>torch.onnx.export</code> <b>traces</b> the model once with a dummy input and records the operators it runs into a graph
+            </li>
+            <li>
+                A tiny model is enough to see the whole shape of it. Export a <code>3 → 1</code> linear layer to one self-contained <code>model.onnx</code>:
+
+<pre><code class="python">
+    import torch
+    import torch.nn as nn
+
+    model = nn.Linear(3, 1).eval()  # tiny model: 3 numbers in, 1 out
+    dummy = torch.rand(1, 3)  # one example input
+
+    torch.onnx.export(
+        model,
+        dummy,
+        "model.onnx",
+        input_names=["input"],
+        output_names=["output"],
+        dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}},
+        opset_version=17,
+    )
+</code></pre>
+            </li>
+            <li>
+                The key arguments:
+                <ul>
+                    <li><code>input_names</code> / <code>output_names</code> name the graph's inputs and outputs (<code>input</code> → <code>output</code>)</li>
+                    <li><code>dynamic_axes</code> marks which axes may vary at runtime; here axis <code>0</code>, so one exported model accepts <b>any batch size</b></li>
+                    <li><code>opset_version</code> picks which version of the ONNX <b>operator set</b> to target</li>
+                </ul>
+            </li>
+            <li>
+                The result is a single <code>.onnx</code> file holding both the <b>graph and the weights</b>. No Python or PyTorch is needed to run it
+            </li>
+        </ul>
+    <br>
+    <li>
+        Running it with ONNX Runtime
+    </li>
+        <ul>
+            <li>
+                <b>ONNX Runtime</b> (ORT) is the engine that loads an <code>.onnx</code> graph and executes it. Running the file we just exported takes a few lines:
+
+<pre><code class="python">
+    import numpy as np
+    import onnxruntime as ort
+
+    session = ort.InferenceSession("model.onnx", providers=["CPUExecutionProvider"])
+
+    x = np.random.rand(4, 3).astype("float32")  # a batch of 4
+    out = session.run(None, {"input": x})
+    print(out[0].shape)  # (4, 1)
+</code></pre>
+            </li>
+            <li>
+                <b>Execution providers</b> are pluggable backends, so the same file runs on CPU, CUDA, TensorRT, CoreML, WebGPU, or WASM. The <code>providers=[...]</code> argument above chose the CPU one; swap it and the graph stays unchanged
+            </li>
+        </ul>
+    <br>
+    <li>
+        ONNX Runtime in the browser
+    </li>
+        <ul>
+            <li>
+                <a href="https://www.npmjs.com/package/onnxruntime-web">onnxruntime-web</a> is the WASM / WebGPU build of ORT that runs <b>inside a browser</b>, with no server and no Python
+            </li>
+            <li>
+                The same <code>model.onnx</code> loads client-side, with a graceful fallback that tries WebGPU and drops to WASM if the browser lacks it:
+
+<pre><code class="javascript">
+    import { InferenceSession, Tensor } from "onnxruntime-web/webgpu";
+
+    const session = await InferenceSession
+        .create("model.onnx", { executionProviders: ["webgpu"] })
+        .catch(() => InferenceSession.create("model.onnx", { executionProviders: ["wasm"] }));
+
+    const x = new Tensor("float32", new Float32Array(4 * 3), [4, 3]);
+    const out = await session.run({ input: x });
+</code></pre>
+            </li>
+            <li>
+                The WASM path is plain <a href="https://parkcheolhee-lab.github.io/wasm/">WebAssembly</a>: if the page can't send the COOP/COEP headers that <code>SharedArrayBuffer</code> threads need (GitHub Pages, for example), ORT falls back to running single-threaded
+            </li>
+        </ul>
+    <br>
+    <li>
+        A performance problem with dynamic shapes
+    </li>
+        <ul>
+            <li>
+                The flexibility from <code>dynamic_axes</code> is not free at runtime. GPU backends compile a kernel <b>pipeline per input shape</b>, so if the batch size changes on every call, ORT recompiles every run
+            </li>
+            <li>
+                The fix is to <b>pin the shape</b>: tell ORT the axis is fixed, so the pipeline compiles once and is reused across calls:
+
+<pre><code class="javascript">
+    // fix the "batch" axis so the WebGPU pipeline compiles ONCE, not per call
+    const opts = { executionProviders: ["webgpu"], freeDimensionOverrides: { batch: 4 } };
+    const session = await InferenceSession.create("model.onnx", opts);
+</code></pre>
+            </li>
+            <li>
+                <mark>A dynamic axis is convenient at export time, but the runtime may pay for it with recompilation. Fixing the shape at inference time is a standard performance lever</mark>
+            </li>
+            <br>
+<pre class="mermaid compact">
+%%{init: {"flowchart": {"rankSpacing": 20, "nodeSpacing": 30}}}%%
+flowchart TB
+    subgraph fixed[" "]
+        direction LR
+        f1["batch 4"] --> fc["compile"] --> fr1["run"]
+        f2["batch 4"] --> fr2["run"]
+        f3["batch 4"] --> fr3["run"]
+        f2 ~~~ fc2[" "] ~~~ fr2
+        f3 ~~~ fc3[" "] ~~~ fr3
+    end
+    vs["vs."]
+    subgraph dynamic[" "]
+        direction LR
+        d1["batch 4"] --> dc1["compile"] --> dr1["run"]
+        d2["batch 8"] --> dc2["compile"] --> dr2["run"]
+        d3["batch 16"] --> dc3["compile"] --> dr3["run"]
+    end
+    fixed ~~~ vs ~~~ dynamic
+
+    classDef compile fill:#f8d7da,stroke:#d98a92,color:#1a1a1a;
+    classDef blank fill:transparent,stroke:transparent,color:transparent;
+    class fc,dc1,dc2,dc3 compile
+    class fc2,fc3 blank
+    style fixed fill:transparent,stroke:transparent
+    style dynamic fill:transparent,stroke:transparent
+    style vs fill:transparent,stroke:transparent
+</pre>
+            <figcaption>The top (fixed shape) compiles once and reuses it. The bottom (dynamic shape) recompiles on every call.</figcaption>
+        </ul>
+    <br>
+</ul>
+
+<br><br>
+References:
+<ul>
+    <li><a href="https://onnx.ai/">ONNX (Open Neural Network Exchange)</a></li>
+    <li><a href="https://onnxruntime.ai/">ONNX Runtime</a></li>
+    <li><a href="https://onnxruntime.ai/docs/execution-providers/">ONNX Runtime execution providers</a></li>
+    <li><a href="https://pytorch.org/docs/stable/onnx.html">torch.onnx (PyTorch documentation)</a></li>
+    <li><a href="https://www.npmjs.com/package/onnxruntime-web">onnxruntime-web</a></li>
+</ul>
+
+<br><br>

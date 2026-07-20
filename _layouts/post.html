@@ -22,6 +22,19 @@ layout: default
 </script>
 {% endunless %}
 
+{% if page.mermaid %}
+<style>
+  pre.mermaid { background: transparent; padding: 0; border-radius: 0; text-align: center; }
+  pre.mermaid svg { max-width: 100%; height: auto; }
+  pre.mermaid.narrow svg { max-width: 560px !important; }
+  pre.mermaid.compact svg { max-width: 380px !important; }
+</style>
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+  mermaid.initialize({ startOnLoad: true, theme: "neutral", securityLevel: "strict" });
+</script>
+{% endif %}
+
 <article>
 
   {% include meta.html post=page %}
