@@ -1,0 +1,161 @@
+---
+title: "Coarse-to-Fine SDF"
+layout: post
+related: []
+---
+
+<br>
+
+<ul>
+    <li>
+        A dense grid is mostly waste
+    </li>
+        <ul>
+            <li>
+                A <b>signed distance function</b> (SDF) answers one question per point: how far is the surface, and is the point inside (negative) or outside (positive). The shape is where the answer is zero
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-0.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>. 1: the value at a point is the distance to the nearest surface — plus outside (blue), minus inside (red). 2: every point has one, shown on a flat slice, dark near zero. 3: the shape is exactly where the value is zero. 4: the whole grid, faded far from zero — only a thin shell of points sits near the surface.</figcaption>
+    </figure>
+        <ul>
+            <li>
+                To get a mesh, the function is sampled on an \(R \times R \times R\) grid, and <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a> emits triangles wherever the sign changes between cell corners
+            </li>
+            <li>
+                Where on the edge? Write a point on it as \(p(t) = p_0 + t(p_1 - p_0)\), let the value change linearly, \(v(t) = v_0 + t(v_1 - v_0)\), and ask for the zero:
+                <div class="latex-container">
+                \[
+                    0 = v_0 + t(v_1 - v_0) \quad \Longrightarrow \quad t = \frac{v_0}{v_0 - v_1}
+                \]
+                </div>
+                One \(t\), used twice: solved from the two values, then spent on the position \(p_0 + t(p_1 - p_0)\). So the vertex lands nearer the corner whose value is closer to zero, not at the middle
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-1.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Each number is the real signed distance at that corner: negative inside (red), positive outside (blue). 1: the surface crosses an edge where the values pass zero, here at \(t = 0.75\). 2 and 3: the pattern of signs picks the shape of the cut. 4: the same rule over every cell of a \(32^3\) grid, where 1,844 cells cross the surface and produce 3,692 triangles.</figcaption>
+    </figure>
+        <ul>
+            <li>
+                The grid sets the bill. \(R = 128\) is <code>2,097,152</code> queries, and doubling \(R\) multiplies that by eight. When the SDF is a neural decoder, those queries are nearly the whole cost
+            </li>
+            <li>
+                <mark>A surface is 2D inside a 3D grid. Cost grows like \(R^3\), but the answer only lives on \(R^2\) cells, so almost every query reports empty space</mark>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Refine only near the surface
+    </li>
+        <ul>
+            <li>
+                Start on a cheap grid, then at each finer level re-evaluate only the cells the surface could pass through. Halving \(R = 128\) down to a floor of 16 gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\)
+            </li>
+            <li>
+                <b>Could pass through</b> is wider than <b>does pass through</b>. A cell is kept when its corners change sign, and also when any corner lies within \(\tau h\) of the surface, \(h\) being the cell size. The band is what saves thin parts: a feature thinner than one cell can leave all eight corners outside, and a cell dropped once never comes back
+            </li>
+            <li>
+                Only the coarsest level samples everything, and it is small on purpose: \(16^3\) is <code>4,096</code> points, about 0.2% of the dense grid at \(R = 128\)
+            </li>
+            <li>
+                Every level ends with marching cubes, so each one produces a complete mesh, and the loop repeats until the finest level is reached
+            </li>
+            <li>
+                The result behaves like an <a href="https://en.wikipedia.org/wiki/Octree">octree</a>, but it is not stored as one. Each level allocates a <b>full uniform grid</b>, and only the decoder calls are restricted; unmarked points copy the coarse value. Marching cubes wants a regular grid, and the decoder is where the cost is, so a sparse structure would buy little
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-2.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>A four-cell grid around the bunny; the faint grey shape in every panel is the true surface, for reference. Blue dots sit outside it, red inside — only 4 of the 125 are red, and the pink outline marks the 20 cells that own one. Step 2 keeps those 20 (solid) plus 30 more within half a cell of the surface (light). Step 3 stacks the crossing cells of every level — 20, 82, 430, 1,844 — lighter where the split came earlier. Step 4 meshes the values the run actually holds, and comes out identical to a dense \(64^3\) mesh at 14,706 triangles, from 42,034 samples against 274,625 — 6.5× fewer. The margin here is half a cell to keep the picture readable; <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">latent-shapes</a> uses 2.5 cell widths plus a one-cell grow.</figcaption>
+    </figure>
+    <!-- <br>
+    <li>
+        Which cells count as near
+    </li>
+        <ul>
+            <li>
+                The mask is built from <b>numbers, not from the shape</b>. All the code has is one distance value per coarse point, so it has to keep every cell it cannot rule out
+            </li>
+            <li>
+                Two tests run over the eight corners of a cell. A <b>sign change</b> (<code>min &lt;= 0 &lt;= max</code>) means the surface crosses it. A <b>distance band</b> (<code>min|sdf| &lt; 2.5h</code>, where <code>h</code> is the cell size) catches cells that sit close without crossing, or hold a feature thinner than one cell
+            </li>
+            <li>
+                The marked cells are then <b>grown by one cell</b> in every direction, because the mask comes from the coarse grid, which only locates the surface to about one coarse cell
+            </li>
+            <li>
+                The threshold is measured, not guessed. In <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">latent-shapes</a> the far-field <code>|sdf|</code> runs 0.3–0.7, and <code>1.5h</code> already covered every true surface cell after dilation, so <code>2.5h</code> is margin
+            </li>
+            <li>
+                <mark>The mask must be a superset. A cell marked by mistake costs one query; a cell skipped by mistake is a hole no later level can repair</mark>
+            </li>
+            <li>
+                Marching cubes still walks the full fine grid, so corners nobody queried copy the nearest value from the level above. The copy carries the coarse sign pattern over unchanged, so no surface can appear where nothing was evaluated
+            </li>
+        </ul>
+    <br>
+    <li>
+        What it saves
+    </li>
+        <ul>
+            <li>
+                Meshing that sphere in 3D at \(R = 128\) costs <code>4,096 + 28,442 + 102,506 + 402,218 = 537,262</code> queries, against <code>2,097,152</code> for the dense grid — 4× fewer for the same mesh
+            </li>
+        </ul>
+    <figure>
+        <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-3.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Queries needed to mesh the same sphere, dense grid versus the ladder. Both axes are logarithmic.</figcaption>
+    </figure>
+        <ul>
+            <li>
+                The ratio grows with \(R\) — 1.9× at 64, 4× at 128, 8× at 256 — because the margin is measured in cells. A finer grid means a smaller cell, so the same 2.5 cells cover a thinner band around the surface
+            </li>
+            <li>
+                <mark>Coarse-to-fine does not shave a constant factor. It changes what the count follows, from the volume of the box to the area of the surface</mark>
+            </li>
+            <li>
+                The saved time can also buy <b>streaming</b> instead of latency: since every level is a complete mesh, a viewer watches a blob sharpen rather than a spinner
+            </li>
+        </ul>
+    <br>
+    <li>
+        The same idea inside a network
+    </li>
+        <ul>
+            <li>
+                <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/06748.pdf">Liu et al. (ECCV 2024)</a> reconstruct a hand and the object it holds from one RGB-D image. Here the coarse stage decides not only <b>where</b> to sample, but <b>what the fine stage knows</b>: its distances become semantic scores that keep depth points near the hand or object and drop the rest as background
+            </li>
+            <li>
+                The fine level then aggregates the \(K = 16\) nearest point features around a query point \(x\), weighted by distance:
+                <div class="latex-container">
+                \[
+                    F_{PA} = \sum_{k=0}^{K-1} \frac{1}{d_{x,P_k} + \alpha D_k} F_k^{point}
+                \]
+                </div>
+                where \(d_{x,P_k}\) is the distance to the \(k\)-th point, \(D_k\) is that point's own signed distance, and \(\alpha\) is learned. A 2D pixel lookup cannot separate two surfaces that project to the same pixel; a 3D one can
+            </li>
+            <li>
+                The saving step is familiar under a new name. A low-resolution heatmap predicts which voxels can hold a surface, and queries run only there: <code>2.1M</code> points drop to <code>89.8K</code>, and reconstruction goes from 3.44 s to 1.26 s per frame with accuracy unchanged
+            </li>
+            <li>
+                One difference matters. A distance band is read off the field, so it can only err by being generous. A predicted heatmap can simply miss — in the paper's ablation, heatmap-only queries are faster but measurably less accurate
+            </li>
+            <li>
+                <mark>Coarse-to-fine is one idea used twice: a sampling schedule that spends queries where the surface is, and a feature schedule that lets a rough answer tell the fine stage where to look</mark>
+            </li>
+        </ul> -->
+    <br>
+</ul>
+
+<!-- <br><br>
+References:
+<ul>
+    <li><a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/06748.pdf">Coarse-to-Fine Implicit Representation Learning for 3D Hand-Object Reconstruction from a Single RGB-D Image</a></li>
+    <li><a href="https://github.com/ru1ven/C2F-SDF">ru1ven/C2F-SDF</a></li>
+    <li><a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">PARKCHEOLHEE-lab/latent-shapes</a></li>
+    <li><a href="https://arxiv.org/abs/1901.05103">DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Marching_cubes">Marching cubes</a></li>
+</ul> -->
+
+<br><br>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style id="s"></style></head>
+<body>
+<div id="wrap"><div id="stage"><canvas id="c"></canvas></div><div id="labels"></div></div>
+<script type="module">
+import * as C from "./common.js";
+const { THREE } = C;
+const renderer = C.setupPage(4);
+const cam = C.makeCamera(1.0);
+const data = await (await fetch("./sdf.json")).json();
+const vec = (a) => new THREE.Vector3(a[0], a[1], a[2]);
+
+/** samples coloured by value, in opacity bands so far-away points fade out */
+function cloud(scene, points, values, r, bands) {
+  const geo = new THREE.SphereGeometry(r, 12, 9);
+  const buckets = bands.map(() => []);
+  for (let i = 0; i < values.length; i++) {
+    const d = values[i];
+    buckets[bands.findIndex(([limit]) => Math.abs(d) < limit)]
+      .push([points[i * 3], points[i * 3 + 1], points[i * 3 + 2], C.valueColor(d)]);
+  }
+  buckets.forEach((items, b) => {
+    if (!items.length) return;
+    const m = new THREE.InstancedMesh(geo, new THREE.MeshLambertMaterial({
+      transparent: bands[b][1] < 1, opacity: bands[b][1],
+      depthWrite: bands[b][1] > 0.6 }), items.length);
+    const t = new THREE.Matrix4();
+    items.forEach((it, i) => {
+      t.makeTranslation(it[0], it[1], it[2]);
+      m.setMatrixAt(i, t); m.setColorAt(i, it[3]);
+    });
+    m.instanceMatrix.needsUpdate = true; m.instanceColor.needsUpdate = true;
+    scene.add(m);
+  });
+}
+
+const s1 = C.lit(new THREE.Scene());
+C.boxEdges(s1, [0, 0, 0], 2);
+C.surface(s1, data.mesh, 0.2, 0x9aa2ab);
+data.probes.forEach((pr) => {
+  const p = vec(pr.p), q = vec(pr.q);
+  C.tube(s1, p, q, 0.009, pr.v < 0 ? C.RED : C.BLUE);
+  C.ball(s1, q, 0x495057, 0.026, 1, true);
+  C.ball(s1, p, pr.v < 0 ? C.RED : C.BLUE, 0.05, 1, true);
+});
+
+const s2 = C.lit(new THREE.Scene());
+C.boxEdges(s2, [0, 0, 0], 2);
+cloud(s2, data.plane.points, data.plane.values, 0.026, [[99, 1]]);
+
+const s3 = C.lit(new THREE.Scene());
+C.boxEdges(s3, [0, 0, 0], 2);
+cloud(s3, data.plane.points, data.plane.values, 0.026, [[99, 1]]);
+C.surface(s3, data.mesh, 0.5);
+
+const s4 = C.lit(new THREE.Scene());
+C.boxEdges(s4, [0, 0, 0], 2);
+cloud(s4, data.grid.points, data.grid.values, 0.02,
+      [[0.08, 1], [0.2, 0.5], [0.38, 0.22], [99, 0.08]]);
+C.surface(s4, data.mesh, 0.32);
+
+data.probes.forEach((pr) => {
+  const d = pr.v;
+  C.label(0, vec(pr.p), cam,
+    `<span style="color:${d < 0 ? C.RED_TXT : C.BLUE_TXT}">${d > 0 ? "+" : ""}${d.toFixed(2)}</span>`,
+    "big", d < 0 ? -4 : 52, -34);
+});
+
+C.panelTitles([
+  "1. the value is the distance to the surface",
+  "2. every point in space has one",
+  "3. the shape is where the value is zero",
+  "4. the whole grid · faded where far",
+]);
+C.renderPanels(renderer, [s1, s2, s3, s4], [cam, cam, cam, cam]);
+</script>
+</body>
+</html>

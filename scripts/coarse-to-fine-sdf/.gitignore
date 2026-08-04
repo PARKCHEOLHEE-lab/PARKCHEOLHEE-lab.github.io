@@ -1,0 +1,7 @@
+# Build outputs. Regenerate the data with `python3 export_all.py`, then the images with
+# `node render_all.mjs --install`. Distance fields and three.js live in
+# ~/.cache/coarse-to-fine-sdf and never enter the repo.
+*.json
+out_*.png
+export_log.txt
+three.module.js

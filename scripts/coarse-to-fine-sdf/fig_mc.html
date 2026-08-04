@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style id="s"></style></head>
+<body>
+<div id="wrap"><div id="stage"><canvas id="c"></canvas></div><div id="labels"></div></div>
+<script type="module">
+import * as C from "./common.js";
+const { THREE, W, H } = C;
+const renderer = C.setupPage(4);
+const data = await (await fetch("./mc.json")).json();
+
+// 1. one edge: where do the two values reach zero?
+const E = data.cases.edge;
+const camEdge = (() => {
+  const cam = C.makeCamera(0.6);
+  const halfH = 0.80, aspect = W / H;
+  cam.left = -halfH * aspect; cam.right = halfH * aspect;
+  cam.top = halfH; cam.bottom = -halfH;
+  cam.updateProjectionMatrix();
+  return cam;
+})();
+const s1 = C.lit(new THREE.Scene());
+const right = new THREE.Vector3().setFromMatrixColumn(camEdge.matrixWorld, 0).normalize();
+const up = new THREE.Vector3().setFromMatrixColumn(camEdge.matrixWorld, 1).normalize();
+const LEN = 1.16;
+const p0 = right.clone().multiplyScalar(-LEN / 2);
+const p1 = right.clone().multiplyScalar(LEN / 2);
+const cut = p0.clone().lerp(p1, E.t);
+const mid = p0.clone().lerp(p1, 0.5);
+C.tube(s1, p0, p1, 0.008, C.LINE);
+C.tube(s1, mid.clone().addScaledVector(up, -0.075), mid.clone().addScaledVector(up, 0.075),
+       0.005, C.FAINT);
+C.ball(s1, p0, C.BLUE, 0.055, 0.55);
+C.ball(s1, p1, C.RED, 0.055, 1.0);
+C.ball(s1, cut, C.MESH, 0.045, 1.0, true);
+
+// 2 and 3: one cell, the corner signs decide the cut
+function cellScene(c) {
+  const s = C.lit(new THREE.Scene());
+  C.boxEdges(s, [0, 0, 0], c.size);
+  C.surface(s, c, 1.0, C.MESH, true);
+  c.corners.forEach((k) => {
+    const inside = k.v < 0;
+    C.ball(s, new THREE.Vector3(...k.p), inside ? C.RED : C.BLUE, c.size * 0.055,
+           inside ? 1.0 : 0.55, true);
+  });
+  return s;
+}
+const CASES = [data.cases.one, data.cases.two];
+
+// 4: the same rule over every cell
+const s4 = C.lit(new THREE.Scene());
+C.cubeEdges(s4, data.whole.cells, data.whole.size, C.FAINT, 0.18);
+C.surface(s4, data.whole, 1.0, C.MESH, true);
+
+const scenes = [s1, ...CASES.map(cellScene), s4];
+const cams = [camEdge, ...CASES.map((c) => C.makeCamera(c.size / 2 * 1.5)), C.makeCamera(1.0)];
+
+const v0s = E.v0.toFixed(2), v1s = Math.abs(E.v1).toFixed(2);
+C.label(0, p0, camEdge, `<span style="color:${C.BLUE_TXT}">+${v0s}</span>`, "big", 0, -48);
+C.label(0, p1, camEdge, `<span style="color:${C.RED_TXT}">&minus;${v1s}</span>`, "big", 0, -48);
+C.label(0, mid, camEdge, "middle", "note", 0, -44);
+C.label(0, cut, camEdge, "the surface is here", "big", 0, 52);
+C.label(0, new THREE.Vector3(0, 0, 0), camEdge,
+  `t = <span style="color:${C.BLUE_TXT}">${v0s}</span> / (<span style="color:${C.BLUE_TXT}">${v0s}</span>`
+  + ` + <span style="color:${C.RED_TXT}">${v1s}</span>) = ${E.t.toFixed(2)}`, "big", 0, 170);
+
+CASES.forEach((c, i) => {
+  const panel = i + 1, cam = cams[panel];
+  c.corners.forEach((k) => {
+    const world = new THREE.Vector3(...k.p);
+    const v = world.clone().project(cam);
+    let ox = (v.x * 0.5 + 0.5) * W - W / 2, oy = (1 - (v.y * 0.5 + 0.5)) * H - H / 2;
+    let len = Math.hypot(ox, oy);
+    if (len < 45) { ox = 0; oy = -1; len = 1; }
+    C.label(panel, world, cam,
+      `<span style="color:${k.v < 0 ? C.RED_TXT : C.BLUE_TXT}">${(k.v > 0 ? "+" : "") + k.v.toFixed(2)}</span>`,
+      "", (ox / len) * 46, (oy / len) * 44);
+  });
+});
+
+C.panelTitles([
+  "1. on one edge · where does it reach zero?",
+  `2. one corner inside · ${data.cases.one.triangles} triangle`,
+  `3. two corners inside · ${data.cases.two.triangles} triangles`,
+  `4. every cell together · ${data.whole.triangles} triangles`,
+]);
+C.renderPanels(renderer, scenes, cams);
+</script>
+</body>
+</html>
