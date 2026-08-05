@@ -57,22 +57,19 @@ related:
     </li>
         <ul>
             <li>
-                Start on a cheap grid. At each finer level, evaluate only the cells the surface could pass through. Halve \(R = 128\) until it reaches a floor of 16. That gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\)
+                Start on a cheap grid. At each finer level, evaluate only the cells the surface could pass through. Halve \(R = 128\) until it reaches a floor of 16. That gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\). Only the coarsest level samples everything, and \(16^3\) is just <code>4,096</code> points — about 0.2% of the dense grid
             </li>
             <li>
-                The rule keeps <b>more cells than the surface really crosses</b>. A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface. Here \(h\) is the cell size. This band saves thin parts. A part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back. The figure below uses a narrow band, \(\tau = 0.5\), so the picture stays clear. A real run keeps a wider one, around \(\tau = 2.5\), and then grows the mask by one more cell
-            </li>
-            <li>
-                Only the coarsest level samples everything. It is small on purpose. \(16^3\) is <code>4,096</code> points, about 0.2% of the dense grid at \(R = 128\)
+                The rule keeps <b>more cells than the surface really crosses</b>. A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface, where \(h\) is the cell size. That band saves thin parts: a part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back
             </li>
             <li>
                 Every level ends with marching cubes, so each one produces a complete mesh. The loop repeats until it reaches the finest level
             </li>
             <li>
-                The result behaves like an <a href="https://en.wikipedia.org/wiki/Octree">octree</a>. An octree splits space into eight parts, again and again. But the code does not store one. Each level still builds a <b>full uniform grid</b>. Only the decoder calls are cut. Unmarked points copy the coarse value. Marching cubes wants a regular grid, and the decoder is where the cost is. So a sparse structure would not help much
+                It behaves like an <a href="https://en.wikipedia.org/wiki/Octree">octree</a>, but the code does not store one. An octree splits space into eight parts, again and again. Here each level still builds a <b>full uniform grid</b>, and only the decoder calls are cut. Unmarked points copy the coarse value. Marching cubes wants a regular grid anyway, and the decoder is where the cost is
             </li>
             <li>
-                Building the bunny this way samples <code>42,034</code> points. A dense \(64^3\) grid needs <code>274,625</code>. And the mesh that comes out is <b>identical to the dense one, vertex for vertex</b>. It has 14,706 triangles
+                The figure below runs the ladder \(4 \rightarrow 64\) cells per axis, with a narrow band, \(\tau = 0.5\), so the picture stays clear. It samples <code>42,034</code> points, where sampling every point would need <code>274,625</code>. The mesh that comes out is <b>identical to the dense one, vertex for vertex</b>, at 14,706 triangles. A real run keeps a wider band, around \(\tau = 2.5\), and then grows the mask by one more cell
             </li>
         </ul>
     <figure>
