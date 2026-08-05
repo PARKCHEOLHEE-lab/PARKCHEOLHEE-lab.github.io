@@ -23,6 +23,7 @@ related:
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-0.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>. 1: the value at a point is the distance to the nearest surface — plus outside (blue), minus inside (red). 2: every point has one, shown on a flat slice, dark near zero. 3: the shape is exactly where the value is zero. 4: the whole grid, faded far from zero — only a thin shell of points sits near the surface.</figcaption>
     </figure>
+    <br>
         <ul>
             <li>
                 To get a mesh, the function is sampled on an \(R \times R \times R\) grid, and <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a> emits triangles wherever the sign changes between cell corners
@@ -39,8 +40,9 @@ related:
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-1.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Each number is the real signed distance at that corner: negative inside (red), positive outside (blue). 1: the surface crosses an edge where the values pass zero, here at \(t = 0.75\). 2 and 3: the pattern of signs picks the shape of the cut. 4: the same rule over every cell of a \(32^3\) grid, where 1,844 cells cross the surface and produce 3,692 triangles.</figcaption>
+        <figcaption>Each number is the real signed distance at that corner: negative inside (red), positive outside (blue). 1: the surface crosses an edge where the values pass zero, here at \(t = 0.75\). 2 and 3: the pattern of signs picks the shape of the cut, and every black dot is one crossing with its own \(t\). 4: the same rule over every cell of a \(32^3\) grid, where 1,844 cells cross the surface and produce 3,692 triangles.</figcaption>
     </figure>
+    <br>
         <ul>
             <li>
                 The grid sets the bill. \(R = 128\) is <code>2,097,152</code> queries, and doubling \(R\) multiplies that by eight. When the SDF is a neural decoder, those queries are nearly the whole cost

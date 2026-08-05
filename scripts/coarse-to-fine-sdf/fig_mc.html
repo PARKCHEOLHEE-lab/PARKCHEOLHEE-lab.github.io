@@ -44,9 +44,31 @@ function cellScene(c) {
     C.ball(s, new THREE.Vector3(...k.p), inside ? C.RED : C.BLUE, c.size * 0.055,
            inside ? 1.0 : 0.55, true);
   });
+  // the interpolated points the polygon is built from -- one per crossing edge, drawn as
+  // the same black dot panel 1 puts on its single edge
+  for (let i = 0; i < c.vertices.length; i += 3) {
+    C.ball(s, new THREE.Vector3(c.vertices[i], c.vertices[i + 1], c.vertices[i + 2]),
+           C.MESH, c.size * 0.045, 1.0, true);
+  }
   return s;
 }
 const CASES = [data.cases.one, data.cases.two];
+
+// Which cell edge does an interpolated vertex sit on, and what is its t? Two of its three
+// coordinates are pinned to the cell face (+-size/2); the third is the free axis. t is read
+// from the positive corner toward the negative one, the same direction panel 1 uses.
+function vertexT(c, v) {
+  const h = c.size, eps = h * 1e-6;
+  const b = [v[0] > 0 ? 1 : 0, v[1] > 0 ? 1 : 0, v[2] > 0 ? 1 : 0];
+  let free = 0;
+  for (let a = 0; a < 3; a++) if (Math.abs(Math.abs(v[a]) - h / 2) > eps) free = a;
+  const at = (bits) => c.corners[bits[0] * 4 + bits[1] * 2 + bits[2]].v;
+  const lo = b.slice(); lo[free] = 0;
+  const hi = b.slice(); hi[free] = 1;
+  const va = at(lo), vb = at(hi);
+  const vp = va > 0 ? va : vb, vn = va > 0 ? vb : va;
+  return vp / (vp - vn);
+}
 
 // 4: the same rule over every cell
 const s4 = C.lit(new THREE.Scene());
@@ -65,18 +87,28 @@ C.label(0, new THREE.Vector3(0, 0, 0), camEdge,
   `t = <span style="color:${C.BLUE_TXT}">${v0s}</span> / (<span style="color:${C.BLUE_TXT}">${v0s}</span>`
   + ` + <span style="color:${C.RED_TXT}">${v1s}</span>) = ${E.t.toFixed(2)}`, "big", 0, 170);
 
+// push a label away from the middle of its panel so it clears the cell and its own dot
+function outward(world, cam, rx, ry) {
+  const v = world.clone().project(cam);
+  let ox = (v.x * 0.5 + 0.5) * W - W / 2, oy = (1 - (v.y * 0.5 + 0.5)) * H - H / 2;
+  let len = Math.hypot(ox, oy);
+  if (len < 45) { ox = 0; oy = -1; len = 1; }
+  return [(ox / len) * rx, (oy / len) * ry];
+}
+
 CASES.forEach((c, i) => {
   const panel = i + 1, cam = cams[panel];
   c.corners.forEach((k) => {
     const world = new THREE.Vector3(...k.p);
-    const v = world.clone().project(cam);
-    let ox = (v.x * 0.5 + 0.5) * W - W / 2, oy = (1 - (v.y * 0.5 + 0.5)) * H - H / 2;
-    let len = Math.hypot(ox, oy);
-    if (len < 45) { ox = 0; oy = -1; len = 1; }
     C.label(panel, world, cam,
       `<span style="color:${k.v < 0 ? C.RED_TXT : C.BLUE_TXT}">${(k.v > 0 ? "+" : "") + k.v.toFixed(2)}</span>`,
-      "", (ox / len) * 46, (oy / len) * 44);
+      "", ...outward(world, cam, 46, 44));
   });
+  for (let j = 0; j < c.vertices.length; j += 3) {
+    const world = new THREE.Vector3(c.vertices[j], c.vertices[j + 1], c.vertices[j + 2]);
+    C.label(panel, world, cam, `t = ${vertexT(c, [world.x, world.y, world.z]).toFixed(2)}`,
+            "note", ...outward(world, cam, 52, 40));
+  }
 });
 
 C.panelTitles([
