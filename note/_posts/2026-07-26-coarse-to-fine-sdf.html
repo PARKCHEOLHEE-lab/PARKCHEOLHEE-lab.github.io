@@ -21,7 +21,7 @@ related:
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-0.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>. 1: distance to the nearest surface. 2: one flat slice of it. 3: the shape is where it reaches zero. 4: the whole grid — only a thin shell sits near the surface.</figcaption>
+        <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>, so every value shown is a real distance. The last panel is the point: fade each sample by how far it is from zero and only a thin shell is left.</figcaption>
     </figure>
     <br>
         <ul>
@@ -40,7 +40,7 @@ related:
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-1.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Real signed distances at the eight corners of one cell. 1: the crossing sits at \(t = 0.75\), not the middle. 2 and 3: the signs pick the cut, and each black dot is one crossing. 4: a \(32^3\) grid, 3,692 triangles.</figcaption>
+        <figcaption>Real signed distances at the eight corners of one cell of a \(16^3\) grid. The crossing sits at \(t = 0.75\), not the middle, and every black dot is one crossing placed that way.</figcaption>
     </figure>
     <br>
         <ul>

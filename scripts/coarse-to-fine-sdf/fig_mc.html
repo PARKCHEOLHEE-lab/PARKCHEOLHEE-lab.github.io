@@ -115,7 +115,7 @@ C.panelTitles([
   "1. on one edge · where does it reach zero?",
   `2. one corner inside · ${data.cases.one.triangles} triangle`,
   `3. two corners inside · ${data.cases.two.triangles} triangles`,
-  `4. every cell together · ${data.whole.triangles} triangles`,
+  `4. a ${data.whole.n}³ grid · ${data.whole.triangles.toLocaleString()} triangles`,
 ]);
 C.renderPanels(renderer, scenes, cams);
 </script>
