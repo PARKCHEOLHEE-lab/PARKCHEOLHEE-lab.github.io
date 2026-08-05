@@ -60,7 +60,7 @@ related:
                 Start on a cheap grid. At each finer level, evaluate only the cells the surface could pass through. Halve \(R = 128\) until it reaches a floor of 16. That gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\)
             </li>
             <li>
-                The rule keeps <b>more cells than the surface really crosses</b>. A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface. Here \(h\) is the cell size. This band saves thin parts. A part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back. <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">latent-shapes</a> uses \(\tau = 2.5\), then grows the mask by one cell. The figure below uses a narrower \(\tau = 0.5\), so the picture stays clear
+                The rule keeps <b>more cells than the surface really crosses</b>. A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface. Here \(h\) is the cell size. This band saves thin parts. A part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back. The figure below uses a narrow band, \(\tau = 0.5\), so the picture stays clear. A real run keeps a wider one, around \(\tau = 2.5\), and then grows the mask by one more cell
             </li>
             <li>
                 Only the coarsest level samples everything. It is small on purpose. \(16^3\) is <code>4,096</code> points, about 0.2% of the dense grid at \(R = 128\)
