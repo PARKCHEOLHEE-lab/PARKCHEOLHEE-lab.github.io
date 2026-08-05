@@ -89,9 +89,10 @@ const mn = (v, color) => `<mn${color ? ` style="color:${color}"` : ""}>${v}</mn>
 C.label(0, p0, camEdge, `<span style="color:${C.BLUE_TXT}">+${v0s}</span>`, "big", 0, -48);
 C.label(0, p1, camEdge, `<span style="color:${C.RED_TXT}">&minus;${v1s}</span>`, "big", 0, -48);
 C.label(0, mid, camEdge, "middle", "note", 0, -44);
-// stacked under the dot, clear of the corner values that sit above the line
-C.label(0, cut, camEdge, `t = ${E.t.toFixed(2)}`, "big", 0, 40);
-C.label(0, cut, camEdge, "the surface is here", "big", 0, 80);
+// on the same row as the corner values; each label takes its own dot's colour, so the dark
+// 0.75 reads as the black dot's number rather than another distance
+C.label(0, cut, camEdge, E.t.toFixed(2), "big", 0, -48);
+C.label(0, cut, camEdge, "the surface is here", "big", 0, 44);
 // displaystyle keeps the numerator and denominator full size; inline maths shrinks them
 C.label(0, new THREE.Vector3(0, 0, 0), camEdge,
   `<math display="inline"><mstyle displaystyle="true"><mrow>
