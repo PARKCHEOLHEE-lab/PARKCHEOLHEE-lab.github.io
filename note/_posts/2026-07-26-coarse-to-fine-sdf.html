@@ -21,12 +21,12 @@ related:
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-0.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>, so every value shown is a real distance. The last panel carries the argument: fading each sample by its distance from zero leaves only a thin shell around the surface.</figcaption>
+        <figcaption>Measured on a watertight, normalised copy of the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>, so every value shown is a real distance in model units. Samples run dark as their value nears zero and fade out as it grows, so the last panel leaves only a thin shell around the surface.</figcaption>
     </figure>
     <br>
         <ul>
             <li>
-                To extract a mesh, sample the function on an \(R \times R \times R\) grid and run <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a>, which emits triangles in every cell whose corner signs differ
+                To extract a mesh, sample the function on an \(R \times R \times R\) grid of points, which bounds \((R-1)^3\) cells, and run <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a>, which emits triangles in every cell whose corner signs differ. Cost is counted in points; refinement acts on cells
             </li>
             <li>
                 A sign change means two corners \(p_0\) and \(p_1\) lie on opposite sides, so the surface crosses the <b>edge</b> between them. Take a point on that edge as \(p(t) = p_0 + t(p_1 - p_0)\), assume the field varies linearly along it, \(v(t) = v_0 + t(v_1 - v_0)\), and solve for the zero:
@@ -40,7 +40,7 @@ related:
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-1.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Real signed distances at the eight corners of one cell of a \(16^3\) grid. The crossing sits at \(t = 0.75\), not the midpoint, and every black dot is one such interpolated vertex.</figcaption>
+        <figcaption>Real signed distances at the eight corners of two cells taken from a \(16^3\) grid. On the single edge of panel 1 the crossing sits at \(t = 0.75\), not the midpoint, and every black dot is one such interpolated vertex.</figcaption>
     </figure>
     <br>
         <ul>
@@ -60,7 +60,7 @@ related:
                 Start on a coarse grid and, at each finer level, evaluate only the cells the surface could pass through. Halving \(R = 128\) down to a floor of 16 gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\). Only the coarsest level is evaluated in full, and it is small by design: \(16^3\) is <code>4,096</code> points, about 0.2% of the dense grid
             </li>
             <li>
-                A cell is kept when its corner signs differ, and also when any corner lies within \(\tau h\) of the surface, where \(h\) is the cell size. So \(\tau\) measures the <b>narrow band</b> in cell widths, and a finer grid narrows it automatically. Some kept cells therefore hold no surface at all, which is deliberate: the band preserves features thinner than one cell, whose eight corners can all fall outside, and a cell dropped once never returns
+                A cell is kept when its corner signs differ, and also when any corner lies within \(\tau h\) of the surface, where \(h\) is the cell size. So \(\tau\) measures the <b>narrow band</b> in cell widths, and a finer grid narrows it automatically. Some kept cells therefore hold no surface at all, which is deliberate: a feature thinner than one cell can leave all eight corners outside, and a cell dropped once never returns. The furthest a point inside a cell can sit from every corner is the half-diagonal, \(\tfrac{\sqrt{3}}{2}h\), so only \(\tau \ge \tfrac{\sqrt{3}}{2}\) makes the corner test safe on its own
             </li>
             <li>
                 Every level ends with marching cubes, so each one yields a complete mesh, and the loop repeats until the finest level
@@ -69,12 +69,12 @@ related:
                 The result behaves like an <a href="https://en.wikipedia.org/wiki/Octree">octree</a>, but is not stored as one. Each level allocates a <b>full uniform grid</b> and only the decoder calls are restricted; unmarked points inherit the coarse value. Marching cubes wants a regular grid anyway, and the decoder dominates the cost, so a sparse structure would save little
             </li>
             <li>
-                The figure below runs the ladder \(4 \rightarrow 64\) cells per axis with a narrow band, \(\tau = 0.5\), chosen to keep the picture legible. It samples <code>42,034</code> points where a full evaluation of that grid would need <code>274,625</code>. The resulting mesh is <b>identical to the dense one, vertex for vertex</b>, at 14,706 triangles. A production run uses a wider band, around \(\tau = 2.5\), followed by a one-cell <b>dilation</b> of the mask
+                The figure below runs the ladder \(4 \rightarrow 64\) cells per axis, so its finest grid carries \(65^3 =\) <code>274,625</code> points, of which it samples <code>42,034</code>. The resulting mesh is <b>identical to the dense one, vertex for vertex</b>, at 14,706 triangles. Its band is narrow, \(\tau = 0.5\), chosen for legibility — below the bound above, and on this model it happens to lose nothing. A production run uses a wider band, around \(\tau = 2.5\), followed by a one-cell <b>dilation</b> of the mask
             </li>
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-2.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>A \(4^3\) grid around the bunny; grey is the true surface. 1: only 4 of the 125 points are red. The outline marks the 20 cells that own one. 2: those 20 (solid) plus 30 within half a cell (light). 3: all four levels at once, each at its own cell size — bigger and lighter the coarser the level. 4: the same mesh as a dense \(64^3\), from 6.5× fewer samples.</figcaption>
+        <figcaption>A \(4^3\) grid around the bunny; grey is the dense \(64^3\) reference mesh. 1: only 4 of the 125 points are red. The outline marks the 20 cells that own one. 2: those 20 (solid) plus 30 within half a cell (light). 3: four of the five levels, each at its own cell size — bigger and lighter the coarser the level. Only crossing cells are painted here; the band cells kept alongside them would fill the shape in. 4: the same mesh as the dense one, from 6.5× fewer samples.</figcaption>
     </figure>
     <!-- <br>
     <li>
