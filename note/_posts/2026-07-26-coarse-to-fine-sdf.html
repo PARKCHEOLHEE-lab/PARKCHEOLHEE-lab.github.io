@@ -16,39 +16,39 @@ related:
     </li>
         <ul>
             <li>
-                A <b>signed distance function</b> (SDF) answers one question per point: how far is the surface, and is the point inside (negative) or outside (positive). The shape is where the answer is zero. Every figure below draws inside points <b>red</b> and outside points <b>blue</b>
+                A <b>signed distance function</b> (SDF) answers one question per point. How far away is the surface? And is the point inside or outside? Inside gives a minus value, outside a plus. The shape is where the answer is zero. Every figure below draws inside points <b>red</b> and outside points <b>blue</b>
             </li>
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-0.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>, so every value shown is a real distance. The last panel is the point: fade each sample by how far it is from zero and only a thin shell is left.</figcaption>
+        <figcaption>Measured on the <a href="https://graphics.stanford.edu/data/3Dscanrep/">Stanford bunny</a>, so every value shown is a real distance. The last panel is the point. Fade each sample by its distance from zero, and only a thin shell is left.</figcaption>
     </figure>
     <br>
         <ul>
             <li>
-                To get a mesh, the function is sampled on an \(R \times R \times R\) grid, and <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a> emits triangles wherever the sign changes between cell corners
+                To build a mesh, sample the function on an \(R \times R \times R\) grid. Then <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a> walks every cell. It is the standard way to read a surface off a grid. Where the corner signs differ, it draws triangles
             </li>
             <li>
-                A sign change means two neighbouring corners \(p_0\) and \(p_1\) sit on opposite sides, so the surface must cross the <b>edge</b> between them somewhere. Where exactly? Write a point on that edge as \(p(t) = p_0 + t(p_1 - p_0)\), let the value change linearly, \(v(t) = v_0 + t(v_1 - v_0)\), and ask for the zero:
+                A sign change means two corners \(p_0\) and \(p_1\) sit on opposite sides. So the surface must cross the <b>edge</b> between them. But where on that edge? Write a point on it as \(p(t) = p_0 + t(p_1 - p_0)\). Let the value change in a straight line, \(v(t) = v_0 + t(v_1 - v_0)\). Then ask where it reaches zero:
                 <div class="latex-container">
                 \[
                     0 = v_0 + t(v_1 - v_0) \quad \Longrightarrow \quad t = \frac{v_0}{v_0 - v_1}
                 \]
                 </div>
-                One \(t\), used twice: solved from the two values, then spent on the position \(p_0 + t(p_1 - p_0)\). So the vertex lands nearer the corner whose value is closer to zero, not at the middle
+                One \(t\) does two jobs. The two values give it, and the position uses it: \(p_0 + t(p_1 - p_0)\). So the point lands nearer the corner whose value is closer to zero. It does not sit at the middle
             </li>
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-1.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Real signed distances at the eight corners of one cell of a \(16^3\) grid. The crossing sits at \(t = 0.75\), not the middle, and every black dot is one crossing placed that way.</figcaption>
+        <figcaption>Real signed distances at the eight corners of one cell, from a \(16^3\) grid. The crossing sits at \(t = 0.75\), not the middle. Every black dot is one crossing placed that way.</figcaption>
     </figure>
     <br>
         <ul>
             <li>
-                The grid sets the bill. \(R = 128\) is <code>2,097,152</code> queries, and doubling \(R\) multiplies that by eight. When the SDF is a neural decoder, those queries are nearly the whole cost
+                The grid sets the bill. \(R = 128\) means <code>2,097,152</code> queries. Doubling \(R\) multiplies that by eight. Often the SDF is a small neural network, called a decoder. Then those queries are nearly the whole cost
             </li>
             <li>
-                <mark>A surface is 2D inside a 3D grid. Cost grows like \(R^3\), but the answer only lives on \(R^2\) cells, so almost every query reports empty space</mark>
+                <mark>A surface is 2D inside a 3D grid. Cost grows like \(R^3\). But the answer only lives on \(R^2\) cells. So almost every query reports empty space</mark>
             </li>
         </ul>
     <br>
@@ -57,27 +57,27 @@ related:
     </li>
         <ul>
             <li>
-                Start on a cheap grid, then at each finer level re-evaluate only the cells the surface could pass through. Halving \(R = 128\) down to a floor of 16 gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\)
+                Start on a cheap grid. At each finer level, evaluate only the cells the surface could pass through. Halve \(R = 128\) until it reaches a floor of 16. That gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\)
             </li>
             <li>
-                <b>Could pass through</b> is wider than <b>does pass through</b>. A cell is kept when its corners change sign, and also when any corner lies within \(\tau h\) of the surface, \(h\) being the cell size. The band is what saves thin parts: a feature thinner than one cell can leave all eight corners outside, and a cell dropped once never comes back. <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">latent-shapes</a> uses \(\tau = 2.5\) and then grows the mask by one cell; the figure below uses a narrower \(\tau = 0.5\) so the picture stays readable
+                <b>Could pass through</b> is wider than <b>does pass through</b>. A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface. Here \(h\) is the cell size. This band saves thin parts. A part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back. <a href="https://github.com/PARKCHEOLHEE-lab/latent-shapes">latent-shapes</a> uses \(\tau = 2.5\), then grows the mask by one cell. The figure below uses a narrower \(\tau = 0.5\), so the picture stays clear
             </li>
             <li>
-                Only the coarsest level samples everything, and it is small on purpose: \(16^3\) is <code>4,096</code> points, about 0.2% of the dense grid at \(R = 128\)
+                Only the coarsest level samples everything. It is small on purpose. \(16^3\) is <code>4,096</code> points, about 0.2% of the dense grid at \(R = 128\)
             </li>
             <li>
-                Every level ends with marching cubes, so each one produces a complete mesh, and the loop repeats until the finest level is reached
+                Every level ends with marching cubes, so each one produces a complete mesh. The loop repeats until it reaches the finest level
             </li>
             <li>
-                The result behaves like an <a href="https://en.wikipedia.org/wiki/Octree">octree</a>, but it is not stored as one. Each level allocates a <b>full uniform grid</b>, and only the decoder calls are restricted; unmarked points copy the coarse value. Marching cubes wants a regular grid, and the decoder is where the cost is, so a sparse structure would buy little
+                The result behaves like an <a href="https://en.wikipedia.org/wiki/Octree">octree</a>. An octree splits space into eight parts, again and again. But the code does not store one. Each level still builds a <b>full uniform grid</b>. Only the decoder calls are cut. Unmarked points copy the coarse value. Marching cubes wants a regular grid, and the decoder is where the cost sits. So a sparse structure would buy little
             </li>
             <li>
-                Meshing the bunny this way samples <code>42,034</code> points against <code>274,625</code> for a dense \(64^3\) grid, and the mesh that comes out is <b>identical to the dense one, vertex for vertex</b>, at 14,706 triangles
+                Building the bunny this way samples <code>42,034</code> points. A dense \(64^3\) grid needs <code>274,625</code>. And the mesh that comes out is <b>identical to the dense one, vertex for vertex</b>. It has 14,706 triangles
             </li>
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-2.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>A \(4^3\) grid around the bunny; grey is the true surface. 1: only 4 of the 125 points are red, and the outline marks the 20 cells that own one. 2: those 20 (solid) plus 30 within half a cell (light). 3: every level at once, lighter where the split came earlier. 4: the same mesh as a dense \(64^3\), from 6.5× fewer samples.</figcaption>
+        <figcaption>A \(4^3\) grid around the bunny; grey is the true surface. 1: only 4 of the 125 points are red. The outline marks the 20 cells that own one. 2: those 20 (solid) plus 30 within half a cell (light). 3: every level at once, lighter where the split came earlier. 4: the same mesh as a dense \(64^3\), from 6.5× fewer samples.</figcaption>
     </figure>
     <!-- <br>
     <li>
