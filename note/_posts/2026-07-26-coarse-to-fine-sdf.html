@@ -29,7 +29,7 @@ related:
                 To get a mesh, the function is sampled on an \(R \times R \times R\) grid, and <a href="https://en.wikipedia.org/wiki/Marching_cubes">marching cubes</a> emits triangles wherever the sign changes between cell corners
             </li>
             <li>
-                Where on the edge? Write a point on it as \(p(t) = p_0 + t(p_1 - p_0)\), let the value change linearly, \(v(t) = v_0 + t(v_1 - v_0)\), and ask for the zero:
+                A sign change means two neighbouring corners \(p_0\) and \(p_1\) sit on opposite sides, so the surface must cross the <b>edge</b> between them somewhere. Where exactly? Write a point on that edge as \(p(t) = p_0 + t(p_1 - p_0)\), let the value change linearly, \(v(t) = v_0 + t(v_1 - v_0)\), and ask for the zero:
                 <div class="latex-container">
                 \[
                     0 = v_0 + t(v_1 - v_0) \quad \Longrightarrow \quad t = \frac{v_0}{v_0 - v_1}
