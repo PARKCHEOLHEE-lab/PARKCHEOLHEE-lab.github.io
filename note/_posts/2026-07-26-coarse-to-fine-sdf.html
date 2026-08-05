@@ -60,7 +60,7 @@ related:
                 Start on a cheap grid. At each finer level, evaluate only the cells the surface could pass through. Halve \(R = 128\) until it reaches a floor of 16. That gives the ladder \(16 \rightarrow 32 \rightarrow 64 \rightarrow 128\). Only the coarsest level samples everything, and \(16^3\) is just <code>4,096</code> points — about 0.2% of the dense grid
             </li>
             <li>
-                The rule keeps <b>more cells than the surface really crosses</b>. A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface, where \(h\) is the cell size. That band saves thin parts: a part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back
+                A cell is kept when its corner signs differ. It is also kept when any corner lies within \(\tau h\) of the surface. Here \(h\) is the cell size. So <b>some kept cells hold no surface at all</b>, and that is on purpose. The band saves thin parts: a part thinner than one cell can leave all eight corners outside. And a cell dropped once never comes back
             </li>
             <li>
                 Every level ends with marching cubes, so each one produces a complete mesh. The loop repeats until it reaches the finest level
