@@ -78,14 +78,30 @@ C.surface(s4, data.whole, 1.0, C.MESH, true);
 const scenes = [s1, ...CASES.map(cellScene), s4];
 const cams = [camEdge, ...CASES.map((c) => C.makeCamera(c.size / 2 * 1.5)), C.makeCamera(1.0)];
 
+// Labels are HTML, not canvas, so MathML typesets a real fraction here and the headless
+// screenshot picks it up -- no library, and no font CDN to be blocked.
+document.getElementById("s").textContent += `
+  .value.eq { font-size: 27px; }
+  .value.eq math { font-size: 1em; }`;
+
 const v0s = E.v0.toFixed(2), v1s = Math.abs(E.v1).toFixed(2);
+const mn = (v, color) => `<mn${color ? ` style="color:${color}"` : ""}>${v}</mn>`;
 C.label(0, p0, camEdge, `<span style="color:${C.BLUE_TXT}">+${v0s}</span>`, "big", 0, -48);
 C.label(0, p1, camEdge, `<span style="color:${C.RED_TXT}">&minus;${v1s}</span>`, "big", 0, -48);
 C.label(0, mid, camEdge, "middle", "note", 0, -44);
-C.label(0, cut, camEdge, "the surface is here", "big", 0, 52);
+// stacked under the dot, clear of the corner values that sit above the line
+C.label(0, cut, camEdge, `t = ${E.t.toFixed(2)}`, "big", 0, 40);
+C.label(0, cut, camEdge, "the surface is here", "big", 0, 80);
+// displaystyle keeps the numerator and denominator full size; inline maths shrinks them
 C.label(0, new THREE.Vector3(0, 0, 0), camEdge,
-  `t = <span style="color:${C.BLUE_TXT}">${v0s}</span> / (<span style="color:${C.BLUE_TXT}">${v0s}</span>`
-  + ` + <span style="color:${C.RED_TXT}">${v1s}</span>) = ${E.t.toFixed(2)}`, "big", 0, 170);
+  `<math display="inline"><mstyle displaystyle="true"><mrow>
+     <mi>t</mi><mo>=</mo>
+     <mfrac>
+       ${mn(v0s, C.BLUE_TXT)}
+       <mrow>${mn(v0s, C.BLUE_TXT)}<mo>+</mo>${mn(v1s, C.RED_TXT)}</mrow>
+     </mfrac>
+     <mo>=</mo>${mn(E.t.toFixed(2))}
+   </mrow></mstyle></math>`, "eq", 0, 180);
 
 // push a label away from the middle of its panel so it clears the cell and its own dot
 function outward(world, cam, rx, ry) {
