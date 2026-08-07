@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style id="s"></style></head>
+<body>
+<div id="wrap"><div id="stage"><canvas id="c"></canvas></div><div id="labels"></div></div>
+<script type="module">
+import * as C from "./common.js";
+const { THREE, W, H } = C;
+const renderer = C.setupPage(4);
+const data = await (await fetch("./mc.json")).json();
+
+// 1. one edge: where do the two values reach zero?
+const E = data.cases.edge;
+const camEdge = (() => {
+  const cam = C.makeCamera(0.6);
+  const halfH = 0.80, aspect = W / H;
+  cam.left = -halfH * aspect; cam.right = halfH * aspect;
+  cam.top = halfH; cam.bottom = -halfH;
+  cam.updateProjectionMatrix();
+  return cam;
+})();
+const s1 = C.lit(new THREE.Scene());
+const right = new THREE.Vector3().setFromMatrixColumn(camEdge.matrixWorld, 0).normalize();
+const up = new THREE.Vector3().setFromMatrixColumn(camEdge.matrixWorld, 1).normalize();
+const LEN = 1.16;
+const p0 = right.clone().multiplyScalar(-LEN / 2);
+const p1 = right.clone().multiplyScalar(LEN / 2);
+const cut = p0.clone().lerp(p1, E.t);
+const mid = p0.clone().lerp(p1, 0.5);
+C.tube(s1, p0, p1, 0.008, C.LINE);
+C.tube(s1, mid.clone().addScaledVector(up, -0.075), mid.clone().addScaledVector(up, 0.075),
+       0.005, C.FAINT);
+C.ball(s1, p0, C.BLUE, 0.055, 0.55);
+C.ball(s1, p1, C.RED, 0.055, 1.0);
+C.ball(s1, cut, C.MESH, 0.045, 1.0, true);
+
+// 2 and 3: one cell, the corner signs decide the cut
+function cellScene(c) {
+  const s = C.lit(new THREE.Scene());
+  C.boxEdges(s, [0, 0, 0], c.size);
+  C.surface(s, c, 1.0, C.MESH, true);
+  c.corners.forEach((k) => {
+    const inside = k.v < 0;
+    C.ball(s, new THREE.Vector3(...k.p), inside ? C.RED : C.BLUE, c.size * 0.055,
+           inside ? 1.0 : 0.55, true);
+  });
+  // the interpolated points the polygon is built from -- one per crossing edge, drawn as
+  // the same black dot panel 1 puts on its single edge
+  for (let i = 0; i < c.vertices.length; i += 3) {
+    C.ball(s, new THREE.Vector3(c.vertices[i], c.vertices[i + 1], c.vertices[i + 2]),
+           C.MESH, c.size * 0.045, 1.0, true);
+  }
+  return s;
+}
+const CASES = [data.cases.one, data.cases.two];
+
+// Which cell edge does an interpolated vertex sit on, and what is its t? Two of its three
+// coordinates are pinned to the cell face (+-size/2); the third is the free axis. t is read
+// from the positive corner toward the negative one, the same direction panel 1 uses.
+function vertexT(c, v) {
+  const h = c.size, eps = h * 1e-6;
+  const b = [v[0] > 0 ? 1 : 0, v[1] > 0 ? 1 : 0, v[2] > 0 ? 1 : 0];
+  let free = 0;
+  for (let a = 0; a < 3; a++) if (Math.abs(Math.abs(v[a]) - h / 2) > eps) free = a;
+  const at = (bits) => c.corners[bits[0] * 4 + bits[1] * 2 + bits[2]].v;
+  const lo = b.slice(); lo[free] = 0;
+  const hi = b.slice(); hi[free] = 1;
+  const va = at(lo), vb = at(hi);
+  const vp = va > 0 ? va : vb, vn = va > 0 ? vb : va;
+  return vp / (vp - vn);
+}
+
+// 4: the same rule over every cell
+const s4 = C.lit(new THREE.Scene());
+C.cubeEdges(s4, data.whole.cells, data.whole.size, C.FAINT, 0.18);
+C.surface(s4, data.whole, 1.0, C.MESH, true);
+
+const scenes = [s1, ...CASES.map(cellScene), s4];
+const cams = [camEdge, ...CASES.map((c) => C.makeCamera(c.size / 2 * 1.5)), C.makeCamera(1.0)];
+
+// Labels are HTML, not canvas, so MathML typesets a real fraction here and the headless
+// screenshot picks it up -- no library, and no font CDN to be blocked.
+document.getElementById("s").textContent += `
+  .value.eq { font-size: 27px; }
+  .value.eq math { font-size: 1em; }`;
+
+const v0s = E.v0.toFixed(2), v1s = Math.abs(E.v1).toFixed(2);
+const mn = (v, color) => `<mn${color ? ` style="color:${color}"` : ""}>${v}</mn>`;
+C.label(0, p0, camEdge, `<span style="color:${C.BLUE_TXT}">+${v0s}</span>`, "big", 0, -48);
+C.label(0, p1, camEdge, `<span style="color:${C.RED_TXT}">&minus;${v1s}</span>`, "big", 0, -48);
+C.label(0, mid, camEdge, "middle", "note", 0, -44);
+// on the same row as the corner values; each label takes its own dot's colour, so the dark
+// 0.75 reads as the black dot's number rather than another distance
+C.label(0, cut, camEdge, E.t.toFixed(2), "big", 0, -48);
+C.label(0, cut, camEdge, "the surface is here", "big", 0, 44);
+// displaystyle keeps the numerator and denominator full size; inline maths shrinks them
+C.label(0, new THREE.Vector3(0, 0, 0), camEdge,
+  `<math display="inline"><mstyle displaystyle="true"><mrow>
+     <mi>t</mi><mo>=</mo>
+     <mfrac>
+       ${mn(v0s, C.BLUE_TXT)}
+       <mrow>${mn(v0s, C.BLUE_TXT)}<mo>+</mo>${mn(v1s, C.RED_TXT)}</mrow>
+     </mfrac>
+     <mo>=</mo>${mn(E.t.toFixed(2))}
+   </mrow></mstyle></math>`, "eq", 0, 180);
+
+// push a label away from the middle of its panel so it clears the cell and its own dot
+function outward(world, cam, rx, ry) {
+  const v = world.clone().project(cam);
+  let ox = (v.x * 0.5 + 0.5) * W - W / 2, oy = (1 - (v.y * 0.5 + 0.5)) * H - H / 2;
+  let len = Math.hypot(ox, oy);
+  if (len < 45) { ox = 0; oy = -1; len = 1; }
+  return [(ox / len) * rx, (oy / len) * ry];
+}
+
+CASES.forEach((c, i) => {
+  const panel = i + 1, cam = cams[panel];
+  c.corners.forEach((k) => {
+    const world = new THREE.Vector3(...k.p);
+    C.label(panel, world, cam,
+      `<span style="color:${k.v < 0 ? C.RED_TXT : C.BLUE_TXT}">${(k.v > 0 ? "+" : "") + k.v.toFixed(2)}</span>`,
+      "", ...outward(world, cam, 46, 44));
+  });
+  for (let j = 0; j < c.vertices.length; j += 3) {
+    const world = new THREE.Vector3(c.vertices[j], c.vertices[j + 1], c.vertices[j + 2]);
+    C.label(panel, world, cam, `t = ${vertexT(c, [world.x, world.y, world.z]).toFixed(2)}`,
+            "note", ...outward(world, cam, 52, 40));
+  }
+});
+
+C.panelTitles([
+  "1. on one edge · where does it reach zero?",
+  `2. one corner inside · ${data.cases.one.triangles} triangle`,
+  `3. two corners inside · ${data.cases.two.triangles} triangles`,
+  `4. a ${data.whole.n}³ grid · ${data.whole.triangles.toLocaleString()} triangles`,
+]);
+C.renderPanels(renderer, scenes, cams);
+</script>
+</body>
+</html>

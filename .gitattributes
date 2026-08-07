@@ -37,3 +37,4 @@
 img/image-to-3d-scene/* filter=lfs diff=lfs merge=lfs -text
 img/google-search-console-report/* filter=lfs diff=lfs merge=lfs -text
 /img/wasm/** filter=lfs diff=lfs merge=lfs -text
+/img/coarse-to-fine-sdf/** filter=lfs diff=lfs merge=lfs -text

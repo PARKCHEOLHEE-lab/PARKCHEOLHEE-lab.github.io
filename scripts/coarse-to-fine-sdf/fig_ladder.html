@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><style id="s"></style></head>
+<body>
+<div id="wrap"><div id="stage"><canvas id="c"></canvas></div><div id="labels"></div></div>
+<script type="module">
+import * as C from "./common.js";
+const { THREE } = C;
+const renderer = C.setupPage(4);
+const cam = C.makeCamera(1.0, 1.3);
+const D = await (await fetch("./ladder.json")).json();
+const L0 = D.levels[0], LAST = D.levels[D.levels.length - 1];
+
+document.getElementById("s").textContent += `
+  .arrow { position: absolute; transform: translate(-50%, -50%); color: #ced4da;
+           font-family: "Helvetica Neue", Arial, sans-serif; font-size: 52px; }`;
+
+// Every panel keeps the same stage -- box, coarse lattice, and a ghost of the true surface --
+// so the four read as one sequence and nothing appears or vanishes between them.
+function base() {
+  const s = C.lit(new THREE.Scene());
+  C.boxEdges(s, [0, 0, 0], 2);
+  C.cubeEdges(s, D.points, L0.size, C.LINE, 0.10);
+  C.surface(s, D.true, 0.16, 0x9aa2ab);
+  return s;
+}
+
+// 1. the coarse grid, every corner sampled. The outlined cells are the ones that own a red
+// corner -- the sole proof the surface enters them -- so this block becomes the solid one
+// in panel 2. Line width is ignored by three.js, so the outline reads by colour alone.
+const s1 = base();
+C.cubeEdges(s1, L0.crossing, L0.size, C.PINK, 0.95);
+C.samples(s1, D.points, D.inside.map((b) => (b ? -1 : 1)), L0.size * 0.06);
+
+// 2. solid where the surface crosses the cell, light where it is merely too close to skip
+const s2 = base();
+C.cubes(s2, L0.near, L0.size, C.PINK, 0.28);
+C.cubes(s2, L0.crossing, L0.size, C.PINK, 1.0);
+
+// 3. the crossing cells of every level at once, the deeper split drawn stronger. The margin
+// cells are left to panel 2 -- painting them here closes the shape into a block.
+const s3 = base();
+const SHOWN = D.levels.slice(0, -1);
+const RAMP = [0.10, 0.18, 0.34, 0.75, 1.0];
+SHOWN.forEach((lv, i) => {
+  C.cubes(s3, lv.crossing, lv.size, C.PINK, RAMP[RAMP.length - SHOWN.length + i] ?? 1.0);
+});
+
+// 4. marching cubes on the field the run really has, so the mesh cannot show detail the run
+// never paid for. It lands on the ghost, which is the point of the whole ladder.
+const s4 = base();
+C.cubes(s4, LAST.crossing, LAST.size, C.PINK, 0.10);
+C.surface(s4, D.own, 1.0);
+
+C.panelTitles([
+  "1. coarse grid · sample every corner",
+  "2. mark cells at or near the surface",
+  "3. split only those · repeat",
+  "4. marching cubes",
+]);
+
+const stage = document.getElementById("stage");
+for (let i = 1; i < 4; i++) {
+  const el = document.createElement("div");
+  el.className = "arrow";
+  el.textContent = "→";
+  el.style.left = `${i * C.W}px`;
+  el.style.top = `${C.H * 0.5}px`;
+  stage.appendChild(el);
+}
+
+C.renderPanels(renderer, [s1, s2, s3, s4], [cam, cam, cam, cam]);
+</script>
+</body>
+</html>
