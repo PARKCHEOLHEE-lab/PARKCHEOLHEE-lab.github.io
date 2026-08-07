@@ -8,8 +8,8 @@
     "connected": [
       "reading-list"
     ],
-    "x": 0.5952,
-    "y": 0.8461
+    "x": 0.5951,
+    "y": 0.8457
   },
   {
     "title": "Reading List",
@@ -28,8 +28,8 @@
       "label-smoothing",
       "attention-is-all-you-need"
     ],
-    "x": 0.8341,
-    "y": 0.3215
+    "x": 0.8311,
+    "y": 0.3196
   },
   {
     "title": "SDW 2020",
@@ -38,8 +38,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.4192,
-    "y": 0.8352
+    "x": 0.4193,
+    "y": 0.8371
   },
   {
     "title": "git Commands Cheat Sheet",
@@ -52,8 +52,8 @@
       "github-pr-suggestion",
       "secrets-in-github-actions"
     ],
-    "x": 0.4319,
-    "y": 0.8967
+    "x": 0.4299,
+    "y": 0.897
   },
   {
     "title": "rhino3dm",
@@ -68,8 +68,8 @@
       "rhinomcptest",
       "ghpythonutils"
     ],
-    "x": 0.7354,
-    "y": 0.9307
+    "x": 0.7371,
+    "y": 0.9292
   },
   {
     "title": ".wslconfig",
@@ -78,8 +78,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.5469,
-    "y": 0.8248
+    "x": 0.5467,
+    "y": 0.825
   },
   {
     "title": "*.ghpy, *.ghuser compile",
@@ -94,8 +94,8 @@
       "ghpythonutils",
       "parallel-execution-within-gh"
     ],
-    "x": 0.6939,
-    "y": 0.941
+    "x": 0.6931,
+    "y": 0.9387
   },
   {
     "title": "Inverse Design",
@@ -113,8 +113,8 @@
       "gan",
       "reading-list"
     ],
-    "x": 0.7085,
-    "y": 0.3407
+    "x": 0.7056,
+    "y": 0.3402
   },
   {
     "title": "...",
@@ -126,8 +126,8 @@
       "we-are-being-programmed",
       "writes-and-write-not"
     ],
-    "x": 0.0906,
-    "y": 0.4928
+    "x": 0.088,
+    "y": 0.4989
   },
   {
     "title": "Dot Product",
@@ -141,8 +141,8 @@
       "eigenvalues-eigenvectors",
       "plane-equation"
     ],
-    "x": 0.7473,
-    "y": 0.5463
+    "x": 0.7491,
+    "y": 0.5466
   },
   {
     "title": "Non-linearity",
@@ -156,8 +156,8 @@
       "dropout",
       "normalization-layers"
     ],
-    "x": 0.7238,
-    "y": 0.1943
+    "x": 0.7207,
+    "y": 0.1942
   },
   {
     "title": "Chain Rule",
@@ -173,8 +173,8 @@
       "gradient-accumulation",
       "gradient-penalty"
     ],
-    "x": 0.6358,
-    "y": 0.1821
+    "x": 0.6303,
+    "y": 0.182
   },
   {
     "title": "Cosine Similarity",
@@ -188,8 +188,8 @@
       "attention-attention",
       "attention-is-all-you-need"
     ],
-    "x": 0.6845,
-    "y": 0.5337
+    "x": 0.6846,
+    "y": 0.5341
   },
   {
     "title": "Dropout",
@@ -203,8 +203,8 @@
       "normalization-layers",
       "non-linearity"
     ],
-    "x": 0.6615,
-    "y": 0.3232
+    "x": 0.6578,
+    "y": 0.3229
   },
   {
     "title": "Generative Adversarial Networks",
@@ -224,8 +224,8 @@
       "inverse-design",
       "reading-list"
     ],
-    "x": 0.8061,
-    "y": 0.059
+    "x": 0.8006,
+    "y": 0.0576
   },
   {
     "title": "Optimizers",
@@ -240,8 +240,8 @@
       "gradient-accumulation",
       "mathematics-for-machine-learning"
     ],
-    "x": 0.5747,
-    "y": 0.26
+    "x": 0.5708,
+    "y": 0.261
   },
   {
     "title": "Normalization Layers",
@@ -255,8 +255,8 @@
       "standardization",
       "attention-is-all-you-need"
     ],
-    "x": 0.6124,
-    "y": 0.4052
+    "x": 0.6091,
+    "y": 0.4053
   },
   {
     "title": "super()",
@@ -270,8 +270,8 @@
       "shapely-geometry-inheritance",
       "inspect-getsource"
     ],
-    "x": 0.4742,
-    "y": 0.766
+    "x": 0.4713,
+    "y": 0.7661
   },
   {
     "title": "단순함의 법칙",
@@ -282,8 +282,8 @@
     "connected": [
       "good-refactoring-vs-bad-refactoring"
     ],
-    "x": 0.1836,
-    "y": 0.468
+    "x": 0.1821,
+    "y": 0.4738
   },
   {
     "title": "decorator",
@@ -296,8 +296,8 @@
       "metaclass",
       "inspect-getsource"
     ],
-    "x": 0.556,
-    "y": 0.722
+    "x": 0.5531,
+    "y": 0.7214
   },
   {
     "title": "Linear Interpolation",
@@ -311,10 +311,11 @@
       "autoencoder",
       "exploring-generative-3d-shapes-using-autoencoder-networks",
       "representation-learning",
-      "hermite-spline"
+      "hermite-spline",
+      "coarse-to-fine-sdf"
     ],
-    "x": 0.8244,
-    "y": 0.3014
+    "x": 0.8232,
+    "y": 0.3006
   },
   {
     "title": "mass test",
@@ -328,8 +329,8 @@
       "building-gan",
       "mass-gans"
     ],
-    "x": 0.736,
-    "y": 0.659
+    "x": 0.7392,
+    "y": 0.6595
   },
   {
     "title": "Conditional Generative Adversarial Nets",
@@ -346,8 +347,8 @@
       "label-smoothing",
       "inverse-design"
     ],
-    "x": 0.8033,
-    "y": 0.1461
+    "x": 0.798,
+    "y": 0.1443
   },
   {
     "title": "Intersection over Union (IoU)",
@@ -359,8 +360,8 @@
       "metrics",
       "chamfer-distance"
     ],
-    "x": 0.7056,
-    "y": 0.4732
+    "x": 0.7053,
+    "y": 0.4734
   },
   {
     "title": "Label Smoothing",
@@ -375,8 +376,8 @@
       "gan",
       "conditional-gan"
     ],
-    "x": 0.6807,
-    "y": 0.3065
+    "x": 0.6772,
+    "y": 0.3062
   },
   {
     "title": "ChatGPT Custom Instructions",
@@ -385,8 +386,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.4899,
-    "y": 0.6575
+    "x": 0.4851,
+    "y": 0.6571
   },
   {
     "title": "DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation",
@@ -402,10 +403,11 @@
       "representation-learning",
       "auto-encoding-variational-bayes",
       "maximum-likelihood-estimation",
-      "ldlm"
+      "ldlm",
+      "coarse-to-fine-sdf"
     ],
-    "x": 0.7739,
-    "y": 0.2174
+    "x": 0.7764,
+    "y": 0.2191
   },
   {
     "title": "Skip Connection",
@@ -419,8 +421,8 @@
       "attention-is-all-you-need",
       "non-linearity"
     ],
-    "x": 0.5799,
-    "y": 0.2959
+    "x": 0.576,
+    "y": 0.2966
   },
   {
     "title": "docker CLI Cheat Sheet",
@@ -429,8 +431,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.5151,
-    "y": 0.8705
+    "x": 0.5136,
+    "y": 0.8703
   },
   {
     "title": "eigenvalues, eigenvectors",
@@ -443,8 +445,8 @@
       "pca",
       "intuitive-understanding-of-linear-algebra"
     ],
-    "x": 0.6464,
-    "y": 0.5337
+    "x": 0.6455,
+    "y": 0.5341
   },
   {
     "title": "Mathematics for Machine Learning",
@@ -459,8 +461,8 @@
       "math-notation-cheat-sheet",
       "dot-product"
     ],
-    "x": 0.8229,
-    "y": 0.4007
+    "x": 0.8253,
+    "y": 0.4012
   },
   {
     "title": "Weisfeiler and Leman Go Neural: Higher-order Graph Neural Networks",
@@ -475,8 +477,8 @@
       "inductive-bias",
       "geometric-deep-learning"
     ],
-    "x": 0.769,
-    "y": 0.2159
+    "x": 0.7664,
+    "y": 0.2154
   },
   {
     "title": "Machine Learning Students Overfit to Overfitting",
@@ -489,8 +491,8 @@
       "label-smoothing",
       "metrics"
     ],
-    "x": 0.6651,
-    "y": 0.2279
+    "x": 0.6593,
+    "y": 0.2272
   },
   {
     "title": "Metrics",
@@ -503,8 +505,8 @@
       "chamfer-distance",
       "machine-learning-students-overfit-to-overfitting"
     ],
-    "x": 0.4784,
-    "y": 0.4127
+    "x": 0.476,
+    "y": 0.4148
   },
   {
     "title": "Intuitions about Transformer",
@@ -517,8 +519,8 @@
       "attention-attention",
       "attention-is-all-you-need"
     ],
-    "x": 0.6034,
-    "y": 0.3083
+    "x": 0.5978,
+    "y": 0.308
   },
   {
     "title": "Attention? Attention!",
@@ -531,8 +533,8 @@
       "attention-is-all-you-need",
       "cosine-similarity"
     ],
-    "x": 0.7216,
-    "y": 0.2594
+    "x": 0.7163,
+    "y": 0.2581
   },
   {
     "title": "Attention Is All You Need",
@@ -548,8 +550,8 @@
       "dot-product",
       "cosine-similarity"
     ],
-    "x": 0.7021,
-    "y": 0.1853
+    "x": 0.6971,
+    "y": 0.1846
   },
   {
     "title": "Testing with Github Actions",
@@ -562,8 +564,8 @@
       "secrets-in-github-actions",
       "block-commit"
     ],
-    "x": 0.5731,
-    "y": 0.9971
+    "x": 0.5706,
+    "y": 0.9952
   },
   {
     "title": "Linear Algebra for Programmers (프로그래머를 위한 선형대수)",
@@ -578,7 +580,7 @@
       "pca",
       "dot-product"
     ],
-    "x": 0.8427,
+    "x": 0.8441,
     "y": 0.3445
   },
   {
@@ -592,8 +594,8 @@
       "mathematics-for-machine-learning",
       "intuitive-understanding-of-linear-algebra"
     ],
-    "x": 0.6958,
-    "y": 0.4141
+    "x": 0.6895,
+    "y": 0.4119
   },
   {
     "title": "Autoencoder",
@@ -609,8 +611,8 @@
       "deep-sdf",
       "gan"
     ],
-    "x": 0.7253,
-    "y": 0.1718
+    "x": 0.7202,
+    "y": 0.171
   },
   {
     "title": "U-Net: Convolutional Networks for Biomedical Image Segmentation",
@@ -624,8 +626,8 @@
       "intuitions-about-diffusion-models",
       "representation-learning"
     ],
-    "x": 0.769,
-    "y": 0.2719
+    "x": 0.7668,
+    "y": 0.2713
   },
   {
     "title": "Shapely geometry inheritance",
@@ -638,8 +640,8 @@
       "metaclass",
       "decorator"
     ],
-    "x": 0.8134,
-    "y": 0.8759
+    "x": 0.8145,
+    "y": 0.8736
   },
   {
     "title": "Nausea (구토)",
@@ -654,8 +656,8 @@
       "words",
       "siddhartha"
     ],
-    "x": 0.0612,
-    "y": 0.5484
+    "x": 0.0582,
+    "y": 0.5546
   },
   {
     "title": "You Are NOT Dumb, You Just Lack the Prerequisites",
@@ -668,8 +670,8 @@
       "good-refactoring-vs-bad-refactoring",
       "important-thing-is"
     ],
-    "x": 0.4146,
-    "y": 0.5483
+    "x": 0.4118,
+    "y": 0.5502
   },
   {
     "title": "LDLM",
@@ -683,8 +685,8 @@
       "exploring-generative-3d-shapes-using-autoencoder-networks",
       "building-gan"
     ],
-    "x": 0.723,
-    "y": 0.4083
+    "x": 0.7198,
+    "y": 0.4072
   },
   {
     "title": "?",
@@ -698,8 +700,8 @@
       "distraction",
       "words"
     ],
-    "x": 0.1717,
-    "y": 0.4099
+    "x": 0.1686,
+    "y": 0.4153
   },
   {
     "title": "Setting different learning rates within an optimizer",
@@ -713,8 +715,8 @@
       "numerical-differentitation-for-autograd",
       "mathematics-for-machine-learning"
     ],
-    "x": 0.664,
-    "y": 0.3807
+    "x": 0.6581,
+    "y": 0.3791
   },
   {
     "title": "Good Refactoring vs. Bad Refactoring",
@@ -728,8 +730,8 @@
       "programmers-are-like",
       "writes-and-write-not"
     ],
-    "x": 0.4953,
-    "y": 0.6774
+    "x": 0.4935,
+    "y": 0.6783
   },
   {
     "title": "중꺾마",
@@ -741,8 +743,8 @@
       "you-are-not-dumb-you-just-lack-the-prerequisites",
       "spurting"
     ],
-    "x": 0.2517,
-    "y": 0.6614
+    "x": 0.2509,
+    "y": 0.6657
   },
   {
     "title": "Representation Learning: A Review and New Perspectives",
@@ -759,7 +761,7 @@
       "pca",
       "inductive-bias"
     ],
-    "x": 0.6832,
+    "x": 0.677,
     "y": 0.0
   },
   {
@@ -769,8 +771,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.5078,
-    "y": 0.8886
+    "x": 0.5064,
+    "y": 0.8884
   },
   {
     "title": "Thoughtless Thought",
@@ -785,8 +787,8 @@
       "q",
       "no-exit"
     ],
-    "x": 0.148,
-    "y": 0.4525
+    "x": 0.1443,
+    "y": 0.4578
   },
   {
     "title": "Math Notation Cheat Sheet",
@@ -801,8 +803,8 @@
       "likelihood",
       "maximum-likelihood-estimation"
     ],
-    "x": 0.7403,
-    "y": 0.3053
+    "x": 0.7382,
+    "y": 0.305
   },
   {
     "title": "ルックバック (룩백)",
@@ -815,8 +817,8 @@
       "words",
       "programmers-are-like"
     ],
-    "x": 0.296,
-    "y": 0.5428
+    "x": 0.2915,
+    "y": 0.5455
   },
   {
     "title": "Block Commit",
@@ -827,8 +829,8 @@
     "connected": [
       "useful-git-commands"
     ],
-    "x": 0.4349,
-    "y": 0.8429
+    "x": 0.4341,
+    "y": 0.844
   },
   {
     "title": "哲希",
@@ -837,8 +839,8 @@
     "category": "note",
     "label": "Wordballoon",
     "connected": [],
-    "x": 0.3462,
-    "y": 0.7572
+    "x": 0.345,
+    "y": 0.7597
   },
   {
     "title": "Siddhartha (싯다르타)",
@@ -856,8 +858,8 @@
       "distraction",
       "thoughtless-thought"
     ],
-    "x": 0.1038,
-    "y": 0.538
+    "x": 0.1037,
+    "y": 0.5449
   },
   {
     "title": "Bayes' Theorem",
@@ -872,8 +874,8 @@
       "math-notation-cheat-sheet",
       "kl-divergence"
     ],
-    "x": 0.4216,
-    "y": 0.3524
+    "x": 0.4184,
+    "y": 0.3551
   },
   {
     "title": "likelihood",
@@ -887,7 +889,7 @@
       "regression-model",
       "auto-encoding-variational-bayes"
     ],
-    "x": 0.5991,
+    "x": 0.5947,
     "y": 0.4018
   },
   {
@@ -903,8 +905,8 @@
       "auto-encoding-variational-bayes",
       "kl-divergence"
     ],
-    "x": 0.72,
-    "y": 0.0714
+    "x": 0.7139,
+    "y": 0.0708
   },
   {
     "title": "딴 생각",
@@ -918,8 +920,8 @@
       "words",
       "q"
     ],
-    "x": 0.0714,
-    "y": 0.4522
+    "x": 0.069,
+    "y": 0.4589
   },
   {
     "title": "Polynomial Implicit Neural Representations For Large Diverse Datasets",
@@ -934,8 +936,8 @@
       "representation-learning",
       "non-linearity"
     ],
-    "x": 0.7809,
-    "y": 0.1619
+    "x": 0.7769,
+    "y": 0.1609
   },
   {
     "title": "Programmers are like",
@@ -949,8 +951,8 @@
       "look-back",
       "mmm"
     ],
-    "x": 0.3823,
-    "y": 0.6563
+    "x": 0.3787,
+    "y": 0.6578
   },
   {
     "title": "JustMyCode configuration",
@@ -959,8 +961,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.4248,
-    "y": 0.8128
+    "x": 0.4219,
+    "y": 0.8133
   },
   {
     "title": "No Exit (닫힌 방)",
@@ -976,8 +978,8 @@
       "siddhartha",
       "thinking-of-lying"
     ],
-    "x": 0.1072,
-    "y": 0.6628
+    "x": 0.1079,
+    "y": 0.6696
   },
   {
     "title": "거짓말",
@@ -991,8 +993,8 @@
       "about-behaviorism",
       "some-truth"
     ],
-    "x": 0.1726,
-    "y": 0.5251
+    "x": 0.1692,
+    "y": 0.5299
   },
   {
     "title": "Inductive Bias",
@@ -1007,7 +1009,7 @@
       "attention-is-all-you-need",
       "representation-learning"
     ],
-    "x": 0.6445,
+    "x": 0.6376,
     "y": 0.0437
   },
   {
@@ -1022,8 +1024,8 @@
       "extrapolation",
       "poly-inr"
     ],
-    "x": 0.5157,
-    "y": 0.1816
+    "x": 0.5102,
+    "y": 0.1831
   },
   {
     "title": "HuggingFace Inference Endpoints",
@@ -1038,8 +1040,8 @@
       "python-slack-sdk",
       "onnx"
     ],
-    "x": 0.7265,
-    "y": 0.505
+    "x": 0.7254,
+    "y": 0.5042
   },
   {
     "title": "Grandient Accumulation",
@@ -1053,8 +1055,8 @@
       "setting-different-learning-rates-within-an-optimizer",
       "register_buffer"
     ],
-    "x": 0.8023,
-    "y": 0.3073
+    "x": 0.7991,
+    "y": 0.3056
   },
   {
     "title": "Words (말)",
@@ -1072,7 +1074,7 @@
       "snow-country"
     ],
     "x": 0.0,
-    "y": 0.5661
+    "y": 0.5742
   },
   {
     "title": "Material Masking",
@@ -1086,8 +1088,8 @@
       "landbook-diffusion-pipeline",
       "two-points-perspective"
     ],
-    "x": 0.6885,
-    "y": 0.734
+    "x": 0.6911,
+    "y": 0.7343
   },
   {
     "title": "20년 반도체맨이 말하는 삼성전자 위기론",
@@ -1099,8 +1101,8 @@
       "human-action",
       "wedbush-top-10-christmas-list-for-the-tech-sector-in-2025"
     ],
-    "x": 0.216,
-    "y": 0.4823
+    "x": 0.2132,
+    "y": 0.4869
   },
   {
     "title": "Fancy Indexing Cheat Sheet",
@@ -1112,8 +1114,8 @@
       "attention-is-all-you-need",
       "intuition-about-transformer"
     ],
-    "x": 0.7793,
-    "y": 0.5059
+    "x": 0.7797,
+    "y": 0.5053
   },
   {
     "title": "register_buffer",
@@ -1125,8 +1127,8 @@
       "data-parallel",
       "normalization-layers"
     ],
-    "x": 0.6696,
-    "y": 0.4291
+    "x": 0.6664,
+    "y": 0.4284
   },
   {
     "title": "Free-form Floor Plan Design using Differentiable Voronoi Diagram",
@@ -1144,8 +1146,8 @@
       "wave-function-collapse",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.9603,
-    "y": 0.6523
+    "x": 0.9641,
+    "y": 0.6506
   },
   {
     "title": "nohup",
@@ -1157,8 +1159,8 @@
       "inference-endpoints",
       "python-slack-sdk"
     ],
-    "x": 0.4782,
-    "y": 0.8801
+    "x": 0.4747,
+    "y": 0.8794
   },
   {
     "title": "About Behaviorism (스키너의 행동심리학)",
@@ -1172,8 +1174,8 @@
       "the-selfish-gene",
       "truth"
     ],
-    "x": 0.1199,
-    "y": 0.4248
+    "x": 0.1163,
+    "y": 0.4305
   },
   {
     "title": "Writes and Write-Nots",
@@ -1188,8 +1190,8 @@
       "words",
       "mmm"
     ],
-    "x": 0.3431,
-    "y": 0.4701
+    "x": 0.3396,
+    "y": 0.473
   },
   {
     "title": "numerical differentiation for autograd",
@@ -1204,8 +1206,8 @@
       "gradient-penalty",
       "free-form-floor-plan-design-using-differentiable-voronoi-diagram"
     ],
-    "x": 0.7193,
-    "y": 0.3569
+    "x": 0.7169,
+    "y": 0.3564
   },
   {
     "title": "雪国 (설국)",
@@ -1221,8 +1223,8 @@
       "razors-edge",
       "words"
     ],
-    "x": 0.1702,
-    "y": 0.5805
+    "x": 0.1697,
+    "y": 0.5862
   },
   {
     "title": "Python Slack SDK",
@@ -1236,8 +1238,8 @@
       "landbook-rendering-with-diffusion",
       "landbook-diffusion-pipeline"
     ],
-    "x": 0.6266,
-    "y": 0.8747
+    "x": 0.623,
+    "y": 0.8722
   },
   {
     "title": "Chamfer Distance",
@@ -1252,8 +1254,8 @@
       "cosine-similarity",
       "deep-sdf"
     ],
-    "x": 0.7855,
-    "y": 0.641
+    "x": 0.788,
+    "y": 0.6407
   },
   {
     "title": "Wedbush Top 10 Christmas Wish List for the Tech Sector in 2025",
@@ -1264,8 +1266,8 @@
     "connected": [
       "crisis-discourse-of-samsung"
     ],
-    "x": 0.5079,
-    "y": 0.8173
+    "x": 0.5068,
+    "y": 0.8176
   },
   {
     "title": "Auto-Encoding Variational Bayes",
@@ -1284,8 +1286,8 @@
       "intuitions-about-diffusion-models",
       "representation-learning"
     ],
-    "x": 0.7328,
-    "y": 0.0599
+    "x": 0.7274,
+    "y": 0.0594
   },
   {
     "title": "KL-Divergence",
@@ -1301,8 +1303,8 @@
       "bayes-theorem",
       "chamfer-distance"
     ],
-    "x": 0.6063,
-    "y": 0.3376
+    "x": 0.6029,
+    "y": 0.3383
   },
   {
     "title": "Hallucination is a feature not a bug",
@@ -1318,8 +1320,8 @@
       "truth",
       "some-truth"
     ],
-    "x": 0.4423,
-    "y": 0.4278
+    "x": 0.4364,
+    "y": 0.4287
   },
   {
     "title": "The Myth of Sisyphus (시지프 신화)",
@@ -1336,8 +1338,8 @@
       "words",
       "razors-edge"
     ],
-    "x": 0.02,
-    "y": 0.5806
+    "x": 0.0195,
+    "y": 0.5883
   },
   {
     "title": "DataParallel",
@@ -1351,8 +1353,8 @@
       "nvitop",
       "setting-different-learning-rates-within-an-optimizer"
     ],
-    "x": 0.9012,
-    "y": 0.5487
+    "x": 0.9005,
+    "y": 0.546
   },
   {
     "title": "ghdoc.Path",
@@ -1366,8 +1368,8 @@
       "scriptcontext-sticky",
       "rhino3dm"
     ],
-    "x": 0.6292,
-    "y": 0.9855
+    "x": 0.6296,
+    "y": 0.9844
   },
   {
     "title": "Human Action (인간 행동)",
@@ -1380,8 +1382,8 @@
       "about-behaviorism",
       "truth"
     ],
-    "x": 0.1709,
-    "y": 0.4053
+    "x": 0.1676,
+    "y": 0.4107
   },
   {
     "title": "Building-GAN: Graph-Conditioned Architectural Volumetric Design Generation",
@@ -1401,8 +1403,8 @@
       "gradient-penalty",
       "exploring-generative-3d-shapes-using-autoencoder-networks"
     ],
-    "x": 0.981,
-    "y": 0.5083
+    "x": 0.9823,
+    "y": 0.5058
   },
   {
     "title": "pytest.raises",
@@ -1414,8 +1416,8 @@
       "testing-with-github-actions",
       "inspect-getsource"
     ],
-    "x": 0.5522,
-    "y": 0.7555
+    "x": 0.5492,
+    "y": 0.7548
   },
   {
     "title": "scriptcontext.sticky",
@@ -1429,8 +1431,8 @@
       "ghdoc",
       "rhino3dm"
     ],
-    "x": 0.474,
-    "y": 0.8527
+    "x": 0.4736,
+    "y": 0.8536
   },
   {
     "title": "Message Passing",
@@ -1444,8 +1446,8 @@
       "geometric-deep-learning",
       "voxels-to-graph"
     ],
-    "x": 0.7775,
-    "y": 0.4154
+    "x": 0.775,
+    "y": 0.4139
   },
   {
     "title": "w를 찾아서",
@@ -1454,8 +1456,8 @@
     "category": "note",
     "label": "Eyes",
     "connected": [],
-    "x": 0.2752,
-    "y": 0.6115
+    "x": 0.2734,
+    "y": 0.6153
   },
   {
     "title": "Gumbel-Softmax",
@@ -1468,8 +1470,8 @@
       "auto-encoding-variational-bayes",
       "discrete-voronoi"
     ],
-    "x": 0.7469,
-    "y": 0.2481
+    "x": 0.7442,
+    "y": 0.2475
   },
   {
     "title": "??",
@@ -1484,8 +1486,8 @@
       "writes-and-write-not",
       "hallucination-is-a-feature"
     ],
-    "x": 0.3305,
-    "y": 0.3894
+    "x": 0.3255,
+    "y": 0.3923
   },
   {
     "title": "Wasserstein Distance (Earth Mover's Distance)",
@@ -1499,8 +1501,8 @@
       "kl-divergence",
       "chamfer-distance"
     ],
-    "x": 0.7489,
-    "y": 0.2963
+    "x": 0.7488,
+    "y": 0.2969
   },
   {
     "title": "Gradient Penalty",
@@ -1514,8 +1516,8 @@
       "building-gan",
       "numerical-differentitation-for-autograd"
     ],
-    "x": 0.7349,
-    "y": 0.2899
+    "x": 0.7333,
+    "y": 0.2898
   },
   {
     "title": "Discrete Voronoi",
@@ -1530,8 +1532,8 @@
       "half-plane-clipping",
       "wave-function-collapse"
     ],
-    "x": 0.8349,
-    "y": 0.5912
+    "x": 0.8414,
+    "y": 0.5921
   },
   {
     "title": "we are being programmed",
@@ -1547,8 +1549,8 @@
       "writes-and-write-not",
       "some-truth"
     ],
-    "x": 0.4929,
-    "y": 0.5133
+    "x": 0.4904,
+    "y": 0.5146
   },
   {
     "title": "Two Points Perspective in threejs",
@@ -1562,8 +1564,8 @@
       "local-coordinate-system",
       "window-crossing-selection"
     ],
-    "x": 0.6424,
-    "y": 0.7618
+    "x": 0.645,
+    "y": 0.7628
   },
   {
     "title": "면도날",
@@ -1579,8 +1581,8 @@
       "nausea",
       "snow-country"
     ],
-    "x": 0.1398,
-    "y": 0.6165
+    "x": 0.1396,
+    "y": 0.6226
   },
   {
     "title": "Half-Plane Clipping",
@@ -1595,8 +1597,8 @@
       "intersection-over-union-iou",
       "window-crossing-selection"
     ],
-    "x": 0.8045,
-    "y": 0.7655
+    "x": 0.8094,
+    "y": 0.7654
   },
   {
     "title": "Exploring Generative 3D Shapes Using Autoencoder Networks",
@@ -1612,8 +1614,8 @@
       "auto-encoding-variational-bayes",
       "building-gan"
     ],
-    "x": 0.9382,
-    "y": 0.3922
+    "x": 0.9397,
+    "y": 0.3908
   },
   {
     "title": "4o Image Generation",
@@ -1626,8 +1628,8 @@
       "intuitions-about-diffusion-models",
       "hallucination-is-a-feature"
     ],
-    "x": 0.5734,
-    "y": 0.478
+    "x": 0.5682,
+    "y": 0.4774
   },
   {
     "title": "MCP-related",
@@ -1641,8 +1643,8 @@
       "claude-code-cheat-sheet",
       "office-layout-generation-agents"
     ],
-    "x": 0.6318,
-    "y": 0.7001
+    "x": 0.6267,
+    "y": 0.6977
   },
   {
     "title": "extrapolation",
@@ -1656,8 +1658,8 @@
       "poly-inr",
       "representation-learning"
     ],
-    "x": 0.6564,
-    "y": 0.1431
+    "x": 0.6517,
+    "y": 0.1433
   },
   {
     "title": "Latent Points",
@@ -1671,8 +1673,8 @@
       "exploring-generative-3d-shapes-using-autoencoder-networks",
       "autoencoder"
     ],
-    "x": 0.9,
-    "y": 0.5382
+    "x": 0.9043,
+    "y": 0.5377
   },
   {
     "title": "OpenAI Agents SDK",
@@ -1686,8 +1688,8 @@
       "office-layout-generation-agents",
       "rhinomcptest"
     ],
-    "x": 0.8112,
-    "y": 0.7906
+    "x": 0.8109,
+    "y": 0.7879
   },
   {
     "title": "참을 수 없는 존재의 가벼움",
@@ -1705,8 +1707,8 @@
       "siddhartha",
       "snow-country"
     ],
-    "x": 0.0458,
-    "y": 0.4732
+    "x": 0.0446,
+    "y": 0.4808
   },
   {
     "title": "secrets in Github Actions",
@@ -1719,8 +1721,8 @@
       "block-commit",
       "daily-paper-bot"
     ],
-    "x": 0.4418,
-    "y": 0.841
+    "x": 0.4396,
+    "y": 0.8414
   },
   {
     "title": "Github PR Suggestion",
@@ -1729,8 +1731,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.5036,
-    "y": 0.8245
+    "x": 0.4991,
+    "y": 0.8234
   },
   {
     "title": "metaclass",
@@ -1745,8 +1747,8 @@
       "shapely-geometry-inheritance",
       "openai-agents-sdk"
     ],
-    "x": 0.594,
-    "y": 0.6768
+    "x": 0.5902,
+    "y": 0.6755
   },
   {
     "title": "truth",
@@ -1763,8 +1765,8 @@
       "hallucination-is-a-feature",
       "some-truth"
     ],
-    "x": 0.2554,
-    "y": 0.41
+    "x": 0.2517,
+    "y": 0.4142
   },
   {
     "title": "PyO3",
@@ -1775,8 +1777,8 @@
     "connected": [
       "wasm"
     ],
-    "x": 0.5932,
-    "y": 0.9634
+    "x": 0.5925,
+    "y": 0.9624
   },
   {
     "title": "AI의 진짜 똑똑함을 우리는 아직 모른다",
@@ -1792,8 +1794,8 @@
       "hallucination-is-a-feature",
       "mmm"
     ],
-    "x": 0.2924,
-    "y": 0.3717
+    "x": 0.2877,
+    "y": 0.3752
   },
   {
     "title": "inspect.getsource",
@@ -1807,8 +1809,8 @@
       "openai-agents-sdk",
       "pytest-raises"
     ],
-    "x": 0.541,
-    "y": 0.8371
+    "x": 0.5394,
+    "y": 0.8367
   },
   {
     "title": "SelectionBox",
@@ -1822,8 +1824,8 @@
       "two-points-perspective",
       "window-crossing-selection"
     ],
-    "x": 0.6321,
-    "y": 0.8977
+    "x": 0.6328,
+    "y": 0.8972
   },
   {
     "title": "asdf",
@@ -1832,8 +1834,8 @@
     "category": "note",
     "label": "Wordballoon",
     "connected": [],
-    "x": 0.1511,
-    "y": 0.5349
+    "x": 0.1504,
+    "y": 0.541
   },
   {
     "title": "인간 실격",
@@ -1850,8 +1852,8 @@
       "no-exit",
       "words"
     ],
-    "x": 0.016,
-    "y": 0.6028
+    "x": 0.0163,
+    "y": 0.6107
   },
   {
     "title": "LayoutVLM: Differentiable Optimization of 3D Layout via Vision-Language Models",
@@ -1867,7 +1869,7 @@
       "intersection-over-union-iou",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.6935,
+    "x": 0.6918,
     "y": 0.4315
   },
   {
@@ -1880,8 +1882,8 @@
       "data-parallel",
       "nohup"
     ],
-    "x": 0.5596,
-    "y": 0.7452
+    "x": 0.5571,
+    "y": 0.7447
   },
   {
     "title": "Principal Component Analysis",
@@ -1897,8 +1899,8 @@
       "dot-product",
       "cosine-similarity"
     ],
-    "x": 0.8301,
-    "y": 0.5157
+    "x": 0.8302,
+    "y": 0.5144
   },
   {
     "title": "wsic",
@@ -1907,8 +1909,8 @@
     "category": "note",
     "label": "Wordballoon",
     "connected": [],
-    "x": 0.4019,
-    "y": 0.8677
+    "x": 0.4036,
+    "y": 0.8703
   },
   {
     "title": "Plane Equation",
@@ -1923,8 +1925,8 @@
       "dot-product",
       "hermite-spline"
     ],
-    "x": 0.7211,
-    "y": 0.6515
+    "x": 0.7235,
+    "y": 0.652
   },
   {
     "title": "rhinomcptest",
@@ -1938,7 +1940,7 @@
       "claude-code-cheat-sheet",
       "openai-agents-sdk"
     ],
-    "x": 0.498,
+    "x": 0.4975,
     "y": 1.0
   },
   {
@@ -1948,7 +1950,7 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.5156,
+    "x": 0.5146,
     "y": 0.8674
   },
   {
@@ -1962,8 +1964,8 @@
       "pca",
       "normalization-layers"
     ],
-    "x": 0.6596,
-    "y": 0.4557
+    "x": 0.6591,
+    "y": 0.4564
   },
   {
     "title": "q-sample",
@@ -1976,8 +1978,8 @@
       "standardization",
       "auto-encoding-variational-bayes"
     ],
-    "x": 0.5875,
-    "y": 0.7661
+    "x": 0.5876,
+    "y": 0.7662
   },
   {
     "title": "ssh-keygen shortcut",
@@ -1986,8 +1988,8 @@
     "category": "note",
     "label": "Note",
     "connected": [],
-    "x": 0.3904,
-    "y": 0.8526
+    "x": 0.3871,
+    "y": 0.8531
   },
   {
     "title": "StyleID: A Perception-Aware Dataset and Metric for Stylization-Agnostic Facial Identity Recognition",
@@ -2000,8 +2002,8 @@
       "metrics",
       "representation-learning"
     ],
-    "x": 0.6296,
-    "y": 0.4876
+    "x": 0.6268,
+    "y": 0.4875
   },
   {
     "title": "ego",
@@ -2015,8 +2017,8 @@
       "important-thing-is",
       "mmm"
     ],
-    "x": 0.2121,
-    "y": 0.4395
+    "x": 0.2059,
+    "y": 0.4428
   },
   {
     "title": "Distorted Grid Graph",
@@ -2030,8 +2032,8 @@
       "quadtree",
       "space-syntax"
     ],
-    "x": 0.6577,
-    "y": 0.7864
+    "x": 0.6642,
+    "y": 0.7883
   },
   {
     "title": "Intuitions about Diffusion Models",
@@ -2046,8 +2048,8 @@
       "q-sample",
       "standardization"
     ],
-    "x": 0.6365,
-    "y": 0.2602
+    "x": 0.6346,
+    "y": 0.2613
   },
   {
     "title": "전력 질주",
@@ -2060,8 +2062,8 @@
       "siddhartha",
       "razors-edge"
     ],
-    "x": 0.1323,
-    "y": 0.4779
+    "x": 0.1289,
+    "y": 0.4834
   },
   {
     "title": "Claude Code Cheat Sheet",
@@ -2074,8 +2076,8 @@
       "chat-gpt-custom-instructions",
       "rhinomcptest"
     ],
-    "x": 0.4389,
-    "y": 0.8914
+    "x": 0.4384,
+    "y": 0.8923
   },
   {
     "title": "WASM",
@@ -2088,8 +2090,8 @@
       "pyo3",
       "onnx"
     ],
-    "x": 0.6069,
-    "y": 0.7495
+    "x": 0.6085,
+    "y": 0.7502
   },
   {
     "title": "Regression Model",
@@ -2103,8 +2105,8 @@
       "likelihood",
       "maximum-likelihood-estimation"
     ],
-    "x": 0.7367,
-    "y": 0.3308
+    "x": 0.735,
+    "y": 0.3306
   },
   {
     "title": "IndexedDB",
@@ -2116,8 +2118,8 @@
       "wasm",
       "scriptcontext-sticky"
     ],
-    "x": 0.5577,
-    "y": 0.7752
+    "x": 0.5595,
+    "y": 0.7764
   },
   {
     "title": "Window/Crossing Selection",
@@ -2134,8 +2136,8 @@
       "three-geometries",
       "skeleton-ux-ui"
     ],
-    "x": 0.8396,
-    "y": 0.8302
+    "x": 0.8462,
+    "y": 0.8301
   },
   {
     "title": "Daily Paper Bot",
@@ -2148,7 +2150,7 @@
       "secrets-in-github-actions",
       "python-slack-sdk"
     ],
-    "x": 0.5231,
+    "x": 0.522,
     "y": 0.8244
   },
   {
@@ -2164,8 +2166,8 @@
       "window-crossing-selection",
       "skeleton-ux-ui"
     ],
-    "x": 0.7158,
-    "y": 0.7217
+    "x": 0.7178,
+    "y": 0.7215
   },
   {
     "title": "언어의 한계",
@@ -2181,8 +2183,8 @@
       "mmm",
       "some-truth"
     ],
-    "x": 0.3683,
-    "y": 0.3229
+    "x": 0.3629,
+    "y": 0.3254
   },
   {
     "title": "Behavior-Aware Anthropometric Scene Generation for Human-Usable 3D Layouts",
@@ -2200,8 +2202,8 @@
       "space-syntax",
       "theater-sightlines"
     ],
-    "x": 0.8798,
-    "y": 0.6408
+    "x": 0.8815,
+    "y": 0.6391
   },
   {
     "title": "Hermite Spline",
@@ -2214,8 +2216,8 @@
       "linear-interpolation",
       "plane-equation"
     ],
-    "x": 0.7881,
-    "y": 0.6157
+    "x": 0.7918,
+    "y": 0.6161
   },
   {
     "title": "Skeleton UX · UI",
@@ -2227,8 +2229,8 @@
       "window-crossing-selection",
       "triangle-menu-aim"
     ],
-    "x": 0.5786,
-    "y": 0.6688
+    "x": 0.5813,
+    "y": 0.6706
   },
   {
     "title": "!!!",
@@ -2243,8 +2245,8 @@
       "limits-of-language",
       "programmers-are-like"
     ],
-    "x": 0.3553,
-    "y": 0.8624
+    "x": 0.3557,
+    "y": 0.8651
   },
   {
     "title": "some truth",
@@ -2259,8 +2261,8 @@
       "limits-of-language",
       "hallucination-is-a-feature"
     ],
-    "x": 0.0413,
-    "y": 0.4101
+    "x": 0.0397,
+    "y": 0.4176
   },
   {
     "title": "ONNX",
@@ -2272,8 +2274,22 @@
       "wasm",
       "inference-endpoints"
     ],
-    "x": 0.7978,
-    "y": 0.5508
+    "x": 0.7971,
+    "y": 0.5492
+  },
+  {
+    "title": "Coarse-to-Fine SDF",
+    "slug": "coarse-to-fine-sdf",
+    "url": "/coarse-to-fine-sdf/",
+    "category": "note",
+    "label": "Note",
+    "connected": [
+      "deep-sdf",
+      "latent-shapes-experiment",
+      "linear-interpolation"
+    ],
+    "x": 0.8681,
+    "y": 0.6603
   },
   {
     "title": "Secure room in seoul",
@@ -2286,8 +2302,8 @@
       "mass-generator",
       "plot-shape-estimator"
     ],
-    "x": 0.5986,
-    "y": 0.8641
+    "x": 0.6009,
+    "y": 0.8647
   },
   {
     "title": "Traveling salesman problem",
@@ -2300,8 +2316,8 @@
       "tower-crane-arrangement",
       "the-selfish-gene"
     ],
-    "x": 0.7511,
-    "y": 0.602
+    "x": 0.7512,
+    "y": 0.6012
   },
   {
     "title": "Mass generator",
@@ -2315,8 +2331,8 @@
       "tower-crane-arrangement",
       "synthesized-skyscrapers"
     ],
-    "x": 0.8751,
-    "y": 0.8358
+    "x": 0.8783,
+    "y": 0.8338
   },
   {
     "title": "Theater sightlines",
@@ -2330,8 +2346,8 @@
       "space-syntax",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.7669,
-    "y": 0.7691
+    "x": 0.7699,
+    "y": 0.7685
   },
   {
     "title": "Tower crane arrangement",
@@ -2346,8 +2362,8 @@
       "traveling-salesman-problem",
       "mass-generator"
     ],
-    "x": 0.8278,
-    "y": 0.7848
+    "x": 0.8307,
+    "y": 0.7836
   },
   {
     "title": "Space syntax",
@@ -2362,8 +2378,8 @@
       "floor-plan-generation-with-voronoi-diagram",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.8664,
-    "y": 0.9565
+    "x": 0.8731,
+    "y": 0.9556
   },
   {
     "title": "Subdivision curve",
@@ -2377,8 +2393,8 @@
       "merry-christmass",
       "hermite-spline"
     ],
-    "x": 0.7592,
-    "y": 0.7228
+    "x": 0.7638,
+    "y": 0.7232
   },
   {
     "title": "Dynamic mesh fence",
@@ -2389,8 +2405,8 @@
     "connected": [
       "klemens-torggler-door"
     ],
-    "x": 0.7933,
-    "y": 0.8864
+    "x": 0.7983,
+    "y": 0.8859
   },
   {
     "title": "Merry christmas",
@@ -2402,8 +2418,8 @@
       "quadtree",
       "subdivision-curve"
     ],
-    "x": 0.7554,
-    "y": 0.7908
+    "x": 0.7585,
+    "y": 0.7903
   },
   {
     "title": "Plot shape estimator",
@@ -2417,8 +2433,8 @@
       "apartment",
       "secure-room-in-seoul"
     ],
-    "x": 0.8416,
-    "y": 0.6062
+    "x": 0.8429,
+    "y": 0.6049
   },
   {
     "title": "Voxelate",
@@ -2432,8 +2448,8 @@
       "mass-gans",
       "wave-function-collapse"
     ],
-    "x": 0.9228,
-    "y": 0.7962
+    "x": 0.9292,
+    "y": 0.7952
   },
   {
     "title": "Windows placement helper",
@@ -2447,8 +2463,8 @@
       "apartment",
       "local-coordinate-system"
     ],
-    "x": 0.7524,
-    "y": 0.9145
+    "x": 0.7558,
+    "y": 0.9137
   },
   {
     "title": "three.js geoms",
@@ -2462,8 +2478,8 @@
       "selectionbox",
       "window-crossing-selection"
     ],
-    "x": 0.7751,
-    "y": 0.9725
+    "x": 0.7809,
+    "y": 0.9722
   },
   {
     "title": "ghpythonutils",
@@ -2478,8 +2494,8 @@
       "quadtree",
       "k-rooms-clusters"
     ],
-    "x": 0.7429,
-    "y": 0.9745
+    "x": 0.7421,
+    "y": 0.9714
   },
   {
     "title": "Loading the geometries I have",
@@ -2492,8 +2508,8 @@
       "windows-placement-helper",
       "p2m"
     ],
-    "x": 0.7651,
-    "y": 0.9905
+    "x": 0.7705,
+    "y": 0.9901
   },
   {
     "title": "K-Rooms clusters",
@@ -2508,8 +2524,8 @@
       "space-syntax",
       "wave-function-collapse"
     ],
-    "x": 0.8769,
-    "y": 0.794
+    "x": 0.8807,
+    "y": 0.7925
   },
   {
     "title": "Quadtree",
@@ -2523,8 +2539,8 @@
       "discrete-voronoi",
       "subdivision-curve"
     ],
-    "x": 0.8371,
-    "y": 0.8662
+    "x": 0.8428,
+    "y": 0.8656
   },
   {
     "title": "Klemens Torggler's door",
@@ -2536,8 +2552,8 @@
       "dynamic-mesh-fence",
       "local-coordinate-system"
     ],
-    "x": 0.6552,
-    "y": 0.8121
+    "x": 0.6565,
+    "y": 0.812
   },
   {
     "title": "Plan to Model",
@@ -2552,8 +2568,8 @@
       "image-to-3d-scene",
       "floor-plan-generation-with-voronoi-diagram"
     ],
-    "x": 0.9579,
-    "y": 0.7984
+    "x": 0.9607,
+    "y": 0.7955
   },
   {
     "title": "Analysis of Apt state-spaces",
@@ -2569,8 +2585,8 @@
       "local-coordinate-system",
       "p2m"
     ],
-    "x": 0.8593,
-    "y": 0.8586
+    "x": 0.8637,
+    "y": 0.8573
   },
   {
     "title": "Drafting with AI",
@@ -2584,8 +2600,8 @@
       "synthesized-skyscrapers",
       "intuitions-about-diffusion-models"
     ],
-    "x": 0.8,
-    "y": 0.8584
+    "x": 0.8025,
+    "y": 0.8568
   },
   {
     "title": "Parallel execution within GhPython",
@@ -2599,8 +2615,8 @@
       "ghdoc",
       "scriptcontext-sticky"
     ],
-    "x": 0.8576,
-    "y": 0.7923
+    "x": 0.8583,
+    "y": 0.7896
   },
   {
     "title": "The selfish gene",
@@ -2612,8 +2628,8 @@
       "traveling-salesman-problem",
       "office-layout-generation-agents"
     ],
-    "x": 0.5687,
-    "y": 0.5635
+    "x": 0.5683,
+    "y": 0.5646
   },
   {
     "title": "Mass GANs",
@@ -2632,8 +2648,8 @@
       "deep-sdf",
       "voxelate"
     ],
-    "x": 0.9605,
-    "y": 0.3952
+    "x": 0.9592,
+    "y": 0.3923
   },
   {
     "title": "Local coordinate system",
@@ -2651,8 +2667,8 @@
       "klemens-torggler-door",
       "window-crossing-selection"
     ],
-    "x": 0.9038,
-    "y": 0.7585
+    "x": 0.9069,
+    "y": 0.7565
   },
   {
     "title": "Shape-conditional GANs",
@@ -2670,8 +2686,8 @@
       "gnn",
       "gan"
     ],
-    "x": 0.9739,
-    "y": 0.4178
+    "x": 0.9724,
+    "y": 0.4146
   },
   {
     "title": "Seeing is solving",
@@ -2683,8 +2699,8 @@
       "live-preview",
       "shapely-geometry-inheritance"
     ],
-    "x": 0.6995,
-    "y": 0.8857
+    "x": 0.7021,
+    "y": 0.8852
   },
   {
     "title": "Infinite synthesis",
@@ -2701,8 +2717,8 @@
       "exploring-generative-3d-shapes-using-autoencoder-networks",
       "latent-points"
     ],
-    "x": 0.9204,
-    "y": 0.5379
+    "x": 0.924,
+    "y": 0.5368
   },
   {
     "title": "Landbook Rendering with Diffuser",
@@ -2717,8 +2733,8 @@
       "inference-endpoints",
       "intuitions-about-diffusion-models"
     ],
-    "x": 0.7398,
-    "y": 0.7517
+    "x": 0.7397,
+    "y": 0.7502
   },
   {
     "title": "Polygon segmentations",
@@ -2735,8 +2751,8 @@
       "gnn",
       "message-passing"
     ],
-    "x": 0.9562,
-    "y": 0.4194
+    "x": 0.9555,
+    "y": 0.4167
   },
   {
     "title": "Floor Plan Generation with Voronoi Diagram",
@@ -2755,8 +2771,8 @@
       "numerical-differentitation-for-autograd",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.9604,
-    "y": 0.6191
+    "x": 0.9626,
+    "y": 0.6167
   },
   {
     "title": "Landbook Diffusion Pipeline",
@@ -2773,7 +2789,7 @@
       "intuitions-about-diffusion-models"
     ],
     "x": 0.8541,
-    "y": 0.7517
+    "y": 0.7488
   },
   {
     "title": "Voxels to Graph",
@@ -2794,7 +2810,7 @@
       "wave-function-collapse"
     ],
     "x": 1.0,
-    "y": 0.4781
+    "y": 0.4748
   },
   {
     "title": "Office Layout Generation Agents",
@@ -2813,8 +2829,8 @@
       "wave-function-collapse",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.9218,
-    "y": 0.5872
+    "x": 0.9201,
+    "y": 0.5837
   },
   {
     "title": "Latent Shapes",
@@ -2833,8 +2849,8 @@
       "two-points-perspective",
       "onnx"
     ],
-    "x": 0.9619,
-    "y": 0.5739
+    "x": 0.9649,
+    "y": 0.572
   },
   {
     "title": "Wave Function Collapse",
@@ -2853,8 +2869,8 @@
       "quadtree",
       "k-rooms-clusters"
     ],
-    "x": 0.7633,
-    "y": 0.7653
+    "x": 0.7689,
+    "y": 0.7658
   },
   {
     "title": "Image to 3D Scene Pipeline",
@@ -2870,7 +2886,7 @@
       "deep-sdf",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.9208,
-    "y": 0.6668
+    "x": 0.9243,
+    "y": 0.6652
   }
 ]
