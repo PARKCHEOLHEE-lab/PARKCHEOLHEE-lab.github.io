@@ -68,7 +68,7 @@
       "rhinomcptest",
       "ghpythonutils"
     ],
-    "x": 0.7371,
+    "x": 0.737,
     "y": 0.9292
   },
   {
@@ -432,7 +432,7 @@
     "label": "Note",
     "connected": [],
     "x": 0.5136,
-    "y": 0.8703
+    "y": 0.8702
   },
   {
     "title": "eigenvalues, eigenvectors",
@@ -461,7 +461,7 @@
       "math-notation-cheat-sheet",
       "dot-product"
     ],
-    "x": 0.8253,
+    "x": 0.8252,
     "y": 0.4012
   },
   {
@@ -477,7 +477,7 @@
       "inductive-bias",
       "geometric-deep-learning"
     ],
-    "x": 0.7664,
+    "x": 0.7665,
     "y": 0.2154
   },
   {
@@ -565,7 +565,7 @@
       "block-commit"
     ],
     "x": 0.5706,
-    "y": 0.9952
+    "y": 0.9951
   },
   {
     "title": "Linear Algebra for Programmers (프로그래머를 위한 선형대수)",
@@ -640,7 +640,7 @@
       "metaclass",
       "decorator"
     ],
-    "x": 0.8145,
+    "x": 0.8144,
     "y": 0.8736
   },
   {
@@ -686,7 +686,7 @@
       "building-gan"
     ],
     "x": 0.7198,
-    "y": 0.4072
+    "y": 0.4073
   },
   {
     "title": "?",
@@ -1115,7 +1115,7 @@
       "intuition-about-transformer"
     ],
     "x": 0.7797,
-    "y": 0.5053
+    "y": 0.5052
   },
   {
     "title": "register_buffer",
@@ -1174,7 +1174,7 @@
       "the-selfish-gene",
       "truth"
     ],
-    "x": 0.1163,
+    "x": 0.1162,
     "y": 0.4305
   },
   {
@@ -1255,7 +1255,7 @@
       "deep-sdf"
     ],
     "x": 0.788,
-    "y": 0.6407
+    "y": 0.6406
   },
   {
     "title": "Wedbush Top 10 Christmas Wish List for the Tech Sector in 2025",
@@ -1368,7 +1368,7 @@
       "scriptcontext-sticky",
       "rhino3dm"
     ],
-    "x": 0.6296,
+    "x": 0.6295,
     "y": 0.9844
   },
   {
@@ -1610,6 +1610,7 @@
       "autoencoder",
       "deep-sdf",
       "representation-learning",
+      "latent-shapes-experiment",
       "latent-points",
       "auto-encoding-variational-bayes",
       "building-gan"
@@ -1659,7 +1660,7 @@
       "representation-learning"
     ],
     "x": 0.6517,
-    "y": 0.1433
+    "y": 0.1434
   },
   {
     "title": "Latent Points",
@@ -1668,6 +1669,7 @@
     "category": "note",
     "label": "Storm",
     "connected": [
+      "latent-shapes-experiment",
       "deep-sdf",
       "linear-interpolation",
       "exploring-generative-3d-shapes-using-autoencoder-networks",
@@ -1809,7 +1811,7 @@
       "openai-agents-sdk",
       "pytest-raises"
     ],
-    "x": 0.5394,
+    "x": 0.5393,
     "y": 0.8367
   },
   {
@@ -2091,7 +2093,7 @@
       "onnx"
     ],
     "x": 0.6085,
-    "y": 0.7502
+    "y": 0.7501
   },
   {
     "title": "Regression Model",
@@ -2150,8 +2152,8 @@
       "secrets-in-github-actions",
       "python-slack-sdk"
     ],
-    "x": 0.522,
-    "y": 0.8244
+    "x": 0.5219,
+    "y": 0.8243
   },
   {
     "title": "Triangle Menu-Aim",
@@ -2166,7 +2168,7 @@
       "window-crossing-selection",
       "skeleton-ux-ui"
     ],
-    "x": 0.7178,
+    "x": 0.7177,
     "y": 0.7215
   },
   {
@@ -2262,7 +2264,7 @@
       "hallucination-is-a-feature"
     ],
     "x": 0.0397,
-    "y": 0.4176
+    "y": 0.4177
   },
   {
     "title": "ONNX",
@@ -2272,7 +2274,8 @@
     "label": "Note",
     "connected": [
       "wasm",
-      "inference-endpoints"
+      "inference-endpoints",
+      "latent-shapes-experiment"
     ],
     "x": 0.7971,
     "y": 0.5492
@@ -2303,7 +2306,7 @@
       "plot-shape-estimator"
     ],
     "x": 0.6009,
-    "y": 0.8647
+    "y": 0.8646
   },
   {
     "title": "Traveling salesman problem",
@@ -2363,7 +2366,7 @@
       "mass-generator"
     ],
     "x": 0.8307,
-    "y": 0.7836
+    "y": 0.7835
   },
   {
     "title": "Space syntax",
@@ -2378,7 +2381,7 @@
       "floor-plan-generation-with-voronoi-diagram",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
-    "x": 0.8731,
+    "x": 0.873,
     "y": 0.9556
   },
   {
@@ -2476,6 +2479,7 @@
       "three-loaders",
       "two-points-perspective",
       "selectionbox",
+      "latent-shapes-experiment",
       "window-crossing-selection"
     ],
     "x": 0.7809,
@@ -2569,7 +2573,7 @@
       "floor-plan-generation-with-voronoi-diagram"
     ],
     "x": 0.9607,
-    "y": 0.7955
+    "y": 0.7954
   },
   {
     "title": "Analysis of Apt state-spaces",
@@ -2598,6 +2602,7 @@
       "landbook-diffusion-pipeline",
       "landbook-rendering-with-diffusion",
       "synthesized-skyscrapers",
+      "latent-shapes-experiment",
       "intuitions-about-diffusion-models"
     ],
     "x": 0.8025,
@@ -2640,6 +2645,7 @@
     "connected": [
       "geometric-deep-learning",
       "voxels-to-graph",
+      "latent-shapes-experiment",
       "synthesized-skyscrapers",
       "building-gan",
       "gan",
@@ -2710,6 +2716,7 @@
     "label": "Testbed",
     "connected": [
       "mass-gans",
+      "latent-shapes-experiment",
       "voxels-to-graph",
       "landbook-diffusion-pipeline",
       "drafting-with-ai",
@@ -2879,6 +2886,7 @@
     "category": "testbed",
     "label": "Testbed",
     "connected": [
+      "latent-shapes-experiment",
       "synthesized-skyscrapers",
       "mass-gans",
       "local-coordinate-system",
