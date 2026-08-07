@@ -57,16 +57,13 @@ related:
     </li>
         <ul>
             <li>
-                Start on a coarse grid and, at each finer level, evaluate only the cells the surface could pass through. The figure below runs the ladder \(4 \rightarrow 64\) cells per axis
+                Start on a coarse grid and, at each finer level, evaluate only the cells the surface could pass through. The figure below runs the ladder \(4 \rightarrow 8 \rightarrow 16 \rightarrow 32 \rightarrow 64\) cells per axis
             </li>
             <li>
-                One round, at its coarsest level. Sample all <code>125</code> points of the \(4^3\) grid — the only level ever evaluated in full. Judge its 64 cells: <b>20</b> have a sign change, another <b>30</b> lie within half a cell of the surface, and the remaining 14 are dropped. Split the 50 survivors into eight each, so <b>400</b> cells enter the next level, and sample only their corners — <code>605</code> points, not the full 729. Repeat to \(64^3\)
+                Only the coarsest level is ever sampled in full — all <code>125</code> points of the \(4^3\) grid. Every level after it sees just the corners of the cells its parent kept
             </li>
             <li>
-                Across the five levels that comes to <code>42,034</code> points, where sampling the finest grid in full would take \(65^3 =\) <code>274,625</code>. The mesh it produces is <b>identical to the dense one, vertex for vertex</b>, at 14,706 triangles
-            </li>
-            <li>
-                Why keep more cells than the surface crosses? A cell also survives when any corner lies within \(\tau h\) of the surface, where \(h\) is the cell size, so \(\tau\) measures the <b>narrow band</b> in cell widths. A feature thinner than one cell can leave all eight corners outside, and a cell dropped once never returns. The figure uses \(\tau = 0.5\) to keep the picture legible, which sits below the half-diagonal \(\tfrac{\sqrt{3}}{2}\) that would make the corner test safe on its own; it loses nothing on this model
+                Across the five levels that comes to <code>53,322</code> points, where sampling the finest grid in full would take \(65^3 =\) <code>274,625</code>. The mesh it produces is <b>identical to the dense one, vertex for vertex</b>, at 14,706 triangles
             </li>
             <li>
                 What about the points nobody sampled? They inherit the value from the level above, so the grid stays complete and marching cubes runs on it unchanged
@@ -74,7 +71,7 @@ related:
         </ul>
     <figure>
         <img src="/img/coarse-to-fine-sdf/coarse-to-fine-sdf-2.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>A \(4^3\) grid around the bunny; grey is the dense \(64^3\) reference mesh. 1: only 4 of the 125 points are red. The outline marks the 20 cells that own one. 2: those 20 (solid) plus 30 within half a cell (light). 3: four of the five levels, each at its own cell size — bigger and lighter the coarser the level. Only crossing cells are painted here; the band cells kept alongside them would fill the shape in. 4: the mesh from the finest level.</figcaption>
+        <figcaption>A \(4^3\) grid around the bunny; grey is the dense \(64^3\) reference mesh. 1: 4 of the 125 points are red, and the outline marks the 20 cells that own one. 2: those 20 (solid) plus 42 within half a cell diagonal (light) — the margin that keeps parts thinner than one cell. 3: four levels at once, each at its own cell size — bigger and lighter the coarser the level. Only crossing cells are painted.</figcaption>
     </figure>
     <!-- <br>
     <li>

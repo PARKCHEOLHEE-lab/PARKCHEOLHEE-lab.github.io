@@ -215,10 +215,12 @@ if "2" in FIGURES:
 # A cell is kept when the surface crosses it OR when it lies within BAND cells of the surface.
 # The band is what saves thin parts: an ear is thinner than a coarse cell, so all eight corners
 # can be outside and the sign test alone drops it -- and a dropped cell never comes back.
-# latent-shapes uses 2.5 cells plus a one-cell grow, which at a 4^3 start marks every cell;
-# half a cell keeps the picture readable and still covers the whole surface here.
+# sqrt(3)/2 is half a cell's space diagonal, so it is the farthest any point inside a cell can
+# sit from its nearest corner. That makes it the smallest band that cannot drop a cell the
+# surface passes through, and anything wider only pulls in cells the surface misses:
+# latent-shapes uses 2.5 cells plus a one-cell grow, which at a 4^3 start marks every cell.
 LADDER = [4, 8, 16, 32, 64]
-BAND = 0.5
+BAND = np.sqrt(3) / 2
 
 
 def refine(mask):
