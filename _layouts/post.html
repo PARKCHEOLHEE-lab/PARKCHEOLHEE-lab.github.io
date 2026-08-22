@@ -14,6 +14,13 @@ layout: default
     tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]},
     TeX: {
       extensions: ["cancel.js"]
+    },
+    // MathJax's TeX fonts carry no Hangul, so \text{한국어} was drawn with a
+    // substituted system font inside boxes whose widths came from the missing
+    // TeX metrics — glyphs collided ("머릿속" rendered as "ㅁㅓ릿속"). Inheriting
+    // the page font makes the browser lay the run out with matching metrics.
+    CommonHTML: {
+      mtextFontInherit: true
     }
   });
 </script>
