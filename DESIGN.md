@@ -44,7 +44,6 @@ same shape; do not introduce a non-fluid `px`-only size.
 | `$featured-color` | `#0011e3` | Featured underline (`u.wavy-underline`), pinned title bg |
 | `$inprogress-color` | `#1aff00` | WIP underline |
 | `$bg-subtle` | `#f7f7f8` | Chat bubble + code block background |
-| `$text-chat` | `#343541` | Chat-style body text |
 | `$divider` | `#e5e5e6` | Horizontal rule, hairline divider |
 | `$link-chat` | `#4b83ec` | Link inside chat bubbles |
 
