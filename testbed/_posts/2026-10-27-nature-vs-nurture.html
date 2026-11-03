@@ -1,0 +1,524 @@
+---
+title: "Nature vs Nurture"
+layout: post
+hashtag: "#simulation #monte-carlo #statistics #life"
+comment: true
+splitter: 2
+featured: false
+inprogress: true
+thumbnail: /img/nature-vs-nurture/nature-vs-nurture-thumbnail.png
+related: []
+---
+
+<style>
+/* The site justifies table text, which opens wide gaps in short cells. Numbers sit right, in the LaTeX font. */
+table.nvn td, table.nvn th { text-align: left; }
+table.nvn td.num, table.nvn th.num { text-align: right; white-space: nowrap; }
+table.nvn td:first-child { white-space: nowrap; }
+table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every plan is compared with */
+.nvn-scroll { overflow-x: auto; }  /* a wide table scrolls by itself on a phone, not the page */
+</style>
+
+<div id="toc"></div>
+
+<h3>Introduction</h3>
+<div class="article">
+    This project uses the browser game <a href="https://1in8b.life/en/">1 in 8 Billion</a> to examine how birth conditions, talent, choices and random events affect a simulated life.
+    The game follows a person from birth to death using public statistics from 172 countries.
+    Replaying the same birth under different life plans makes it possible to compare the outcomes while keeping the country, family and talent fixed.
+    <!--break-->
+    <figure>
+        <video src="/img/nature-vs-nurture/nature-vs-nurture-clip-birth.mp4" poster="/img/nature-vs-nurture/nature-vs-nurture-clip-birth.jpg" aria-label="The game drawing a birthplace and showing the birth record" autoplay muted loop playsinline style="display:block; width:100%;"></video>
+        <figcaption>Birthplace selection, the birth record and the first screen of a life in Nigeria (5.7% of births in the game). Recorded from <a href="https://1in8b.life/en/">1 in 8 Billion</a>.</figcaption>
+    </figure>
+    The first experiment replays 1,000 births under 10 life plans, producing 10,000 lives.
+    Each plan sets rules for activities and decisions throughout a life.
+    The outcome is measured in "happy years", which combines lifespan with the game's happiness score.
+    Differences in happy years are then divided into contributions from birth, talent and plan, with an unexplained part left over.
+    <br><br>
+    Further experiments use 101,000 lives to examine events after birth and individual choices.
+    These include replays of the same birth with different random events, random plans kept for a whole life, and choices made at random each time a decision appears.
+    <br><br>
+    <figure>
+        <img alt="Ten babies from five continents, each replayed 200 times with different luck" src="/img/nature-vs-nurture/nature-vs-nurture-0.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Happiness over time for ten babies from five continents, each replayed 200 times under the game-default plan. Thin lines show individual lives; thick lines show mean happiness among lives still alive, while at least 50 of the 200 remain. The top panel shows the distribution of age at death, and the right panel shows the distribution of happy years.</figcaption>
+    </figure>
+    <br>
+    For this figure, two countries are selected from each of five continents.
+    Each baby is selected by the median happy years under the game-default plan among the first 101 births from that country in the runs.
+    Finland and New Zealand have fewer births available, with 46 and 54 respectively.
+    Each replay keeps the birth and plan fixed and changes only the random events after birth.
+    <br><br>
+    The babies are listed by median happy years, from 71.8 for Finland to 34.6 for Nigeria, a difference of about 37 years.
+    Their birth conditions include family, sex and talent as well as country, so this difference cannot be attributed to country alone.
+    The German baby, for example, comes from the poorest fifth of families, while the Australian baby comes from the richest.
+    Within each baby's replays, the middle 90% of outcomes span 31 to 56 happy years.
+    <br><br>
+    The results describe behavior within the game's model.
+    Country selection is weighted by the number of births, while age at death and income use each country's life tables and income distribution (<a href="https://1in8b.life/en/about/">About 1 in 8 Billion</a>).
+    The effects of talent, yearly activities and decisions follow rules chosen by the game's author, which limits what the results can say about real lives.
+    North Korea, for example, has no survey happiness score in the game's data, so the game uses 5 out of 10.
+    <br><br>
+    A related study is the "Talent vs Luck" model by <a href="https://arxiv.org/abs/1802.07068">Pluchino, Biondo and Rapisarda (2018)</a>.
+    It simulates 1,000 people with normally distributed talent who encounter lucky and unlucky events over a 40-year working life.
+    The most successful are almost never the most talented; they tend to have average talent and more favorable events.
+    Here, the experiment uses an existing game based on public statistics and measures outcomes over a whole life.
+</div><br><br>
+
+<h3>The simulator</h3>
+<div class="article">
+    The game represents a life through yearly activities, decisions and events.
+    Each year, the player selects a focus such as study, work, family, health or rest.
+    Its 152 types of decisions cover school, employment, marriage, migration, gambling, medical care and other situations.
+    The game tracks health, happiness, knowledge and relationships on a scale from 0 to 100, together with talent scores fixed at birth.
+    <br><br>
+    The game already runs complete lives without displaying them, using these functions to simulate the four other babies "born in the same second" as the player.
+    This experiment runs those functions through an external program:
+    <ul>
+        <li>Playwright loads the game's code unchanged from a local server into Chromium without a visible browser window. Requests to outside hosts are blocked during the runs.</li>
+        <li>Auto mode handles decisions that the assigned plan does not specify.</li>
+        <li>A random seed fixes the birth, family and talent. Repeating the same seed and plan reproduces the same life.</li>
+        <li>For luck replays, a second seed resets the random events after birth while keeping the birth, family and talent fixed.</li>
+        <li>At each birthday, the program records happiness, health, knowledge, relationships and income. Each decision is also recorded with its available options and selected answer.</li>
+    </ul>
+    <figure>
+        <img alt="How one life is run" src="/img/nature-vs-nurture/nature-vs-nurture-1.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Life simulation loop. Boxes represent steps and diamonds represent checks. The program resolves pending decisions before advancing half a year and records each birthday until death.</figcaption>
+    </figure>
+    <div class="algorithm-box">
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \textbf{Algorithm: } \text{Run one life}
+            \end{array}
+        \]
+        </div>
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \textbf{Input: } \text{seed } s, \text{ plan } \pi, \text{ event seed } e \text{ (luck replays only)} \\
+            \textbf{Output: } \text{yearly records } (h_t, \text{health}, \text{knowledge}, \text{relationships}, \text{income}), \text{ happy years}
+            \end{array}
+        \]
+        </div>
+        <div class="algorithm-section">
+        \[
+            \begin{array}{l}
+            \text{seed the game's random numbers with } s \text{; draw the birth (country, family, sex, talent)} \\
+            \textbf{if } e \text{ is given } \textbf{then } \text{seed the random numbers again with } (s, e) \\
+            \text{turn on auto mode} \\
+            \textbf{while } \text{alive } \textbf{do} \\
+            \quad \textbf{if } \text{a decision is pending } \textbf{then} \\
+            \qquad O \leftarrow \text{the options the game offers} \\
+            \qquad a \leftarrow \pi\text{'s option in } O \text{ if it has one, } \textbf{else } \text{the game's own choice} \\
+            \qquad \text{answer } a\text{; } \textbf{continue} \\
+            \quad \text{focus} \leftarrow \pi\text{'s first focus among this stage's options, } \textbf{else } \text{keep the game's own} \\
+            \quad \text{advance half a year} \\
+            \quad \textbf{if } \text{a birthday passed } \textbf{then } \text{record year } t \text{ and let } \pi \text{ pick the focus again} \\
+            \textbf{return } \text{happy years} = \sum_t h_t / 100
+            \end{array}
+        \]
+        </div>
+    </div>
+    Fixed plans select the first available option in their ordered lists.
+    Balanced selects the middle option, while the random-plan experiments use random choices.
+    <br><br>
+    <br>
+    The game's code belongs to its operator (<a href="https://1in8b.life/en/terms/">Terms</a>).
+    The descriptions and notation here explain the rules needed to interpret the results, without reproducing the game's code.
+</div><br><br>
+
+<h3>Ten life plans</h3>
+<div class="article">
+    Each life plan specifies a focus for each life stage and preferred answers to selected decisions.
+    Focus options are stored as ordered lists for each stage.
+    The plan selects the first option the game offers; for example, a working child cannot select "study", so the plan tries its next option.
+    The game-default plan uses auto mode for every choice and serves as the control group.
+    <br><br>
+    <div class="nvn-scroll"><table class="nvn">
+        <tr><th>Plan</th><th>Focus, young</th><th>Focus, adult</th><th>Focus, old</th><th>Named decisions</th></tr>
+        <tr><td>Scholar</td><td>study</td><td>learn</td><td>mind (learning)</td><td>college, retake the exam, graduate school, PhD</td></tr>
+        <tr><td>Hard worker</td><td>study, help</td><td>work, learn</td><td>work, mind (learning)</td><td>college, every promotion</td></tr>
+        <tr><td>Business owner</td><td>study</td><td>work, learn</td><td>work, mind (learning)</td><td>start a business, invest, take loans</td></tr>
+        <tr><td>Risk taker</td><td>play</td><td>hobby, rest</td><td>rest</td><td>lottery, gambling, drinking</td></tr>
+        <tr><td>Family first</td><td>help</td><td>family</td><td>family</td><td>marry early, have kids, care for parents</td></tr>
+        <tr><td>Health first</td><td>sport</td><td>health</td><td>health</td><td>never smoke, stop drinking, accept treatment</td></tr>
+        <tr><td>Dreamer</td><td>hobby</td><td>hobby</td><td>rest</td><td>try music, art and sport careers</td></tr>
+        <tr><td>Mover</td><td>study, help</td><td>work, learn</td><td>work, mind (learning)</td><td>move to a city, move abroad</td></tr>
+        <tr><td>Balanced</td><td>sport, play</td><td>balance, health</td><td>health, family</td><td>the middle choice in every decision</td></tr>
+        <tr><td>Game default</td><td>auto</td><td>auto</td><td>auto</td><td>none</td></tr>
+    </table></div>
+    <br>
+    If none of a plan's options is available, the game retains its automatic focus for that half-year step.
+    This occurs in at most 4% of steps for any plan.
+</div><br><br>
+
+<h3>Measuring a life: happy years</h3>
+<div class="article">
+    The main outcome, happy years, combines the length of a life with the game's happiness score.
+    Age at death, income, happiness and knowledge each describe only part of the outcome.
+    Happy years is calculated by summing the happiness recorded at each birthday, divided by 100:
+    <div class="latex-container">
+        \[ \text{happy years} = \sum_{t=1}^{T} \frac{h_t}{100} \]
+    </div>
+    where \( h_t \) is the happiness score at birthday \( t \) and \( T \) is the age at death.
+    For example, happiness scores of 60, 80 and 50 on the three birthdays of a child who dies at 3 produce 0.6 + 0.8 + 0.5 = 1.9 happy years.
+    These are birthday observations rather than averages over each year.
+    The calculation can be represented as the area under the happiness curve, with a fully happy year contributing 1.
+    <figure>
+        <img alt="Happy years as the area under one life's happiness curve" src="/img/nature-vs-nurture/nature-vs-nurture-2.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Happiness over time for the median game-default life among the 1,000 births, a boy born in India. A lifespan of 68 years at an average happiness of about 70 produces 47.7 happy years.</figcaption>
+    </figure>
+    <br>
+    <div class="nvn-scroll"><table class="nvn">
+        <tr><th>Life</th><th class="num">Years lived</th><th class="num">Average happiness</th><th class="num">Happy years</th></tr>
+        <tr><td>A</td><td class="num">\( 2 \)</td><td class="num">\( 60 \)</td><td class="num">\( 2 \times 0.6 = 1.2 \)</td></tr>
+        <tr><td>B</td><td class="num">\( 80 \)</td><td class="num">\( 50 \)</td><td class="num">\( 80 \times 0.5 = 40 \)</td></tr>
+        <tr><td>C</td><td class="num">\( 60 \)</td><td class="num">\( 80 \)</td><td class="num">\( 60 \times 0.8 = 48 \)</td></tr>
+    </table></div>
+    <br>
+    The same calculation applies to every life, including those that end in early childhood.
+    <br><br>
+    Happiness is one of the game's four status scores, alongside health, knowledge and relationships.
+    The game describes it as life satisfaction influenced by income, family and friends, health and debt.
+    Each year, the score moves part of the way toward a target level.
+    This target uses the country's average life satisfaction from the <a href="https://worldhappiness.report/">World Happiness Report 2024</a>, the person's income rank (or family income group during childhood), relationships, health and heavy debt.
+    <br><br>
+    Events and decisions also change happiness between yearly updates.
+    Illness, marriage, job loss and a successful hobby can move the score away from its target, while later updates gradually reduce that difference.
+    The yearly focus makes an additional adjustment.
+    <br><br>
+    The game's code defines the yearly target \( T \) and happiness update \( h \) as follows:
+    <div class="latex-container">
+        \[ T = \underbrace{28 + 5.5\,W}_{\text{country}} + I + 0.25\,(R - 50) + 0.2\,(H - H_{\text{age}}) - D - 12\,s \]
+        \[ h \leftarrow h + k\,(T - h) \]
+    </div>
+    Here, \( W \) is the country's World Happiness Report score, measured from 0 to 10 using survey data, and \( I \) is the income contribution.
+    The variables \( R \) and \( H \) represent relationships and health, while \( H_{\text{age}} \) is the expected health at that age and \( D \) is the debt contribution.
+    The adulthood adjustment \( s \) increases from 0 at age 14 to 1 at age 20.
+    The update rate \( k \) determines how far happiness moves toward the target each year.
+    <br><br>
+    The other numbers are constants chosen by the game's author and used for every life:
+    <br><br>
+    <div class="nvn-scroll"><table class="nvn">
+        <tr><th>Number</th><th>Where</th><th>What it means</th></tr>
+        <tr><td style="white-space:nowrap">\( 28 \)</td><td>country part</td><td>Country contribution when the survey score is 0, its lowest possible value.</td></tr>
+        <tr><td style="white-space:nowrap">\( 5.5 \)</td><td>country part</td><td>Each survey point adds 5.5 to the target. Survey scores from 0 to 10 produce country contributions from 28 to 83.</td></tr>
+        <tr><td style="white-space:nowrap">\( 18 \)</td><td>income, adults</td><td>Difference between the lowest and highest income ranks within a country, from −9 to +9.</td></tr>
+        <tr><td style="white-space:nowrap">\( 3 \)</td><td>income, children</td><td>Each family income fifth above or below the middle group changes the target by 3, from −6 to +6.</td></tr>
+        <tr><td style="white-space:nowrap">\( 50,\ 0.25 \)</td><td>relationships</td><td>A score of 50 is neutral. Each point above or below it changes the target by a quarter point, up to ±12.5.</td></tr>
+        <tr><td style="white-space:nowrap">\( 0.2 \)</td><td>health</td><td>Each health point above or below the expected value for that age changes the target by 0.2.</td></tr>
+        <tr><td style="white-space:nowrap">\( 6,\ 1 \)</td><td>debt</td><td>Heavy debt reduces the target by 6. Savings below zero reduce it by 1.</td></tr>
+        <tr><td style="white-space:nowrap">\( 12 \)</td><td>growing up</td><td>Reduction in the adult target relative to childhood, increasing gradually from 0 to 12 between ages 14 and 20.</td></tr>
+        <tr><td style="white-space:nowrap">\( 0.22 \)</td><td>step, child</td><td>A child's happiness closes 22% of the difference from the target each year.</td></tr>
+        <tr><td style="white-space:nowrap">\( 0.35,\ 0.20 \)</td><td>step, adult</td><td>Adult happiness falls by 35% of the difference when above the target and rises by 20% when below it.</td></tr>
+    </table></div>
+    <br>
+    Additional terms include +3 for a dream job, −10 for being a refugee and −4 to −7 during a mental-health struggle.
+    The final happiness score is limited to the range from 0 to 100.
+    For comparison, the country contribution alone is 70.6 in Finland (\( W = 7.74 \)) and 37.5 in Afghanistan (\( W = 1.72 \)).
+    <br><br>
+    This definition makes part of the measured relationship between birth, income and happiness a property of the game's rules.
+    A country with higher life satisfaction or a family with a higher income rank gives the person a higher target.
+    These terms therefore contribute to both the estimated birth effect and the relationship between income and happy years.
+    <br><br>
+    The analysis also reports lifetime income, calculated as the sum of yearly income in PPP dollars, and age at death.
+    Knowledge is excluded because the study focus increases it directly by design.
+    Comparing knowledge across plans would therefore largely restate that rule, as in a finding that Scholar produces the highest knowledge score.
+</div><br><br>
+
+<h3>Experiment design</h3>
+<div class="article">
+    <ul>
+        <li>Fixed plans: 1,000 seeds × 10 plans = 10,000 lives. Each plan uses the same births, families and talents, allowing paired comparisons between plans.</li>
+        <li>Luck replays: the first 200 births, each replayed 5 times under the game default, producing 1,000 lives. A different event seed changes the random events after each birth.</li>
+        <li>Lifelong random plans: 50,000 new births, each assigned a random ordering of focus options and answers. The plan retains these lists throughout the life and selects the first available option.</li>
+        <li>Single random decisions: 50,000 additional births, with an answer drawn at random each time a decision occurs and a focus drawn once a year.</li>
+    </ul>
+    With 1,000 lives per plan, the 95% margin of error for a proportion near 50% is about ±3 percentage points, based on \( \sqrt{p(1-p)/N} \).
+    Each fixed plan is compared with the game default using a paired t-test on the same seeds.
+    The Holm correction accounts for the 9 comparisons when testing for differences.
+    <br><br>
+    Contributions to variation in happy years are estimated with a linear model: happy years ~ birth (country, family means, sex) + talent (6 scores) + plan.
+    The LMG method divides the model's \( R^2 \) among these groups using each group's Shapley value.
+    Variation outside the model is reported as "everything else".
+    <br><br>
+    Individual choice effects are estimated by linear regression with robust (HC1) standard errors.
+    The Benjamini-Hochberg method controls the expected share of false findings among the selected results at 5% across the hundreds of tests.
+    <br><br>
+    Verification checks confirm that the same seed and plan reproduce the same life and that each plan applies its specified focus.
+    India's share of the 1,000 births is 17.0%, compared with the game's birth weight of 17.6%.
+    Random plans use a separate random stream, so selecting a plan does not change the birth.
+    All 111,000 lives finish with 0 failures and no requests to outside hosts.
+</div><br><br>
+
+<h3>Results</h3>
+<div class="article">
+    <figure>
+        <img alt="Happy years by life plan, mean with 95% confidence interval" src="/img/nature-vs-nurture/nature-vs-nurture-3.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by life plan, with 95% confidence intervals. The dashed line indicates the game default.</figcaption>
+    </figure>
+    <br>
+    <div class="nvn-scroll"><table class="nvn">
+        <tr><th>Plan</th><th class="num">Happy years</th><th class="num">vs game default</th><th class="num">p (Holm)</th><th class="num">Lifetime income (PPP $)</th><th class="num">Age at death</th></tr>
+        <tr><td>Health first</td><td class="num">\( 47.87 \)</td><td class="num">\( +2.57 \)</td><td class="num">\( 2.8 \times 10^{-8} \)</td><td class="num">\( 635{,}757 \)</td><td class="num">\( 75.6 \)</td></tr>
+        <tr><td>Dreamer</td><td class="num">\( 46.56 \)</td><td class="num">\( +1.27 \)</td><td class="num">\( 0.047 \)</td><td class="num">\( 626{,}336 \)</td><td class="num">\( 70.6 \)</td></tr>
+        <tr><td>Family first</td><td class="num">\( 45.93 \)</td><td class="num">\( +0.64 \)</td><td class="num">\( 0.44 \)</td><td class="num">\( 543{,}162 \)</td><td class="num">\( 69.5 \)</td></tr>
+        <tr class="ref"><td>Game default</td><td class="num">\( 45.30 \)</td><td class="num">(control)</td><td class="num"></td><td class="num">\( 560{,}689 \)</td><td class="num">\( 69.4 \)</td></tr>
+        <tr><td>Balanced</td><td class="num">\( 45.19 \)</td><td class="num">\( -0.11 \)</td><td class="num">\( 0.82 \)</td><td class="num">\( 633{,}065 \)</td><td class="num">\( 74.2 \)</td></tr>
+        <tr><td>Risk taker</td><td class="num">\( 44.84 \)</td><td class="num">\( -0.46 \)</td><td class="num">\( 0.68 \)</td><td class="num">\( 552{,}770 \)</td><td class="num">\( 68.0 \)</td></tr>
+        <tr><td>Scholar</td><td class="num">\( 42.74 \)</td><td class="num">\( -2.56 \)</td><td class="num">\( 2.8 \times 10^{-8} \)</td><td class="num">\( 838{,}599 \)</td><td class="num">\( 71.3 \)</td></tr>
+        <tr><td>Business owner</td><td class="num">\( 38.12 \)</td><td class="num">\( -7.17 \)</td><td class="num">\( 3.7 \times 10^{-56} \)</td><td class="num">\( 760{,}700 \)</td><td class="num">\( 69.4 \)</td></tr>
+        <tr><td>Hard worker</td><td class="num">\( 37.85 \)</td><td class="num">\( -7.45 \)</td><td class="num">\( 7.9 \times 10^{-59} \)</td><td class="num">\( 867{,}078 \)</td><td class="num">\( 68.6 \)</td></tr>
+        <tr><td>Mover</td><td class="num">\( 37.59 \)</td><td class="num">\( -7.71 \)</td><td class="num">\( 3.9 \times 10^{-61} \)</td><td class="num">\( 773{,}216 \)</td><td class="num">\( 68.5 \)</td></tr>
+    </table></div>
+    <br>
+    Health first and Dreamer produce more happy years than the game default after the Holm correction.
+    Health first adds 2.6 happy years and has the longest mean lifespan, 75.6 years compared with 69.4 under the default.
+    Dreamer adds 1.3 happy years, with a result close to the significance threshold (Holm p = 0.047).
+    Across the plan figures, Health first is green, Hard worker is orange and the game default is gray.
+    <br><br>
+    The four plans with the highest incomes have the lowest mean happy years.
+    Hard worker and Scholar have the two highest lifetime incomes but produce 7.5 and 2.6 fewer happy years, respectively.
+    The three work-based plans each lose 7 to 8 happy years, including 7.7 for Mover.
+    <figure>
+        <img alt="Mean lifetime income against mean happy years for each plan" src="/img/nature-vs-nurture/nature-vs-nurture-4.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean lifetime income and mean happy years for each of the ten life plans.</figcaption>
+    </figure>
+    <br>
+    Variation within each plan is much larger than the difference between plan means.
+    The highest and lowest means are 10.3 happy years apart, while individual lives within any plan range from 0 to 70 or more.
+    <figure>
+        <img alt="Distribution of happy years inside each plan" src="/img/nature-vs-nurture/nature-vs-nurture-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Distribution of happy years within each plan, with dots indicating the means. The left tails mainly contain lives that end in early childhood.</figcaption>
+    </figure>
+    <br>
+    Paired births also allow the change for each baby to be measured directly.
+    Health first produces more happy years than the default for 57% of babies and fewer for 39%.
+    Hard worker produces fewer happy years for 71%.
+    The 4% to 7% with identical outcomes include the 3.2% who die before their first birthday, before a plan can act.
+    <figure>
+        <img alt="Histograms of each baby's happy years under a plan minus under the default" src="/img/nature-vs-nurture/nature-vs-nurture-6.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Change in happy years relative to the game default for each of the 1,000 paired births.</figcaption>
+    </figure>
+    <br>
+    The plan that produces the most happy years varies between babies.
+    Among the 968 who survive their first birthday, Health first has the highest result for 17.8% and Dreamer for 17.1%.
+    Each of the three work-based plans ranks first for fewer than 2%.
+    For comparison, an equal split across ten plans would give 10% per plan.
+    <figure>
+        <img alt="Share of babies for whom each plan gives the most happy years" src="/img/nature-vs-nurture/nature-vs-nurture-7.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Share of the 968 babies for whom each plan produces the most happy years.</figcaption>
+    </figure>
+    <br>
+    These rankings use a single set of random events under each plan.
+    A different replay could change which plan ranks first for the same baby, so the figure does not establish a consistently best plan for an individual.
+    <br><br>
+    The effect of Health first varies across birth groups.
+    Its gains are clearest in the three lower family income fifths (+2.3 to +3.9 happy years) and in Sub-Saharan Africa (+3.7).
+    Sub-Saharan Africa is the only region whose result remains significant after the Holm correction.
+    <br><br>
+    Estimated gains are similar for girls and boys (+2.6 each) and for low, middle and high talent (+2.4 to +2.8).
+    Hard worker reduces happy years in every group, with a larger reduction for men (−8.7) than women (−6.0).
+    Europe &amp; Central Asia contains only 32 births, resulting in wide confidence intervals.
+    <figure>
+        <img alt="Plan effect by family means and by region, for Health first and Hard worker" src="/img/nature-vs-nurture/nature-vs-nurture-8.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Paired changes in happy years by family income group and region, with 95% confidence intervals.</figcaption>
+    </figure>
+    <br>
+    Longer lives account for part of the gain under Health first.
+    Under this plan, 57% of births reach age 80, compared with 38.6% under the game default and 37.6% under Hard worker.
+    The first-year decrease is identical across plans because plans begin to act at school age.
+    <figure>
+        <img alt="Share of babies who reach each age, by plan" src="/img/nature-vs-nurture/nature-vs-nurture-9.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Share of births reaching each age. Gray lines show the other life plans.</figcaption>
+    </figure>
+    <br><br>
+    <figure>
+        <img alt="Share of the spread in happy years by cause" src="/img/nature-vs-nurture/nature-vs-nurture-10.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Contributions to variation in happy years, estimated with the LMG method.</figcaption>
+    </figure>
+    <br>
+    Birth accounts for about 29% of the variation in happy years, the life plan for 5% and talent for 2%.
+    The remaining 64% is unexplained by these groups in the linear model.
+    Birth's contribution is about six times that of the life plan, while talent contributes less than either.
+    <br><br>
+    The unexplained variation may contain random events or combinations of birth conditions and plans that the linear model does not capture.
+    To estimate the contribution of events after birth, 200 births are each replayed five times under the game default with different event seeds.
+    Variation within births accounts for 66.3% of the total variation across the 1,000 replays (95% CI 59.6% to 73.4%).
+    This estimate is close to the model's unexplained 63.6%, suggesting that events after birth account for most of the remainder in this game.
+    <figure>
+        <img alt="Share of the spread that comes from luck alone, next to the share the model leaves unexplained" src="/img/nature-vs-nurture/nature-vs-nurture-11.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Variation from events after birth in the replay experiment (top), with a 95% confidence interval, compared with unexplained variation in the 10,000 fixed-plan lives (bottom).</figcaption>
+    </figure>
+    <br>
+    Both family income and country contribute to differences associated with birth.
+    Within a country, babies from the richest fifth of families have 52.0 happy years on average, compared with 40.6 in the poorest fifth.
+    Among the countries with the most births in the sample, the means range from 56.0 in China to 34.7 in Nigeria.
+    Country estimates based on fewer births have wider confidence intervals.
+    <figure>
+        <img alt="Mean happy years by family means and by country" src="/img/nature-vs-nurture/nature-vs-nurture-12.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by family income group and country, using one game-default life per birth, with 95% confidence intervals.</figcaption>
+    </figure>
+    <br>
+    Talent accounts for 2.1% of variation in happy years (95% bootstrap CI 1.4% to 4.0%).
+    Most of this contribution comes from the study score at 1.9%, while the other five scores together contribute 0.25%.
+    As in the Talent vs Luck model, talent contributes less than random events after birth.
+    <figure>
+        <img alt="Each talent score's share of the spread in happy years" src="/img/nature-vs-nurture/nature-vs-nurture-13.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Contributions of the six talent scores to variation in happy years across the 10,000 fixed-plan lives, estimated with the LMG method.</figcaption>
+    </figure>
+    <br>
+    Higher lifetime income is associated with more happy years across individual lives.
+    Among the 9,469 lives that reach age 18, mean happy years increases from 31.2 in the lowest income tenth to 60.5 in the highest (Spearman correlation 0.60).
+    This comparison describes differences across lives and does not isolate the effect of earning more income.
+    <br><br>
+    This relationship can coexist with the lower happy years of work-based plans.
+    Richer birth conditions produce both higher income and more happy years, while a plan that exchanges free time for work increases income and reduces happiness.
+    <figure>
+        <img alt="Mean happy years by lifetime income tenth" src="/img/nature-vs-nurture/nature-vs-nurture-14.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by lifetime income tenth among adult lives in the fixed-plan experiment, with 95% confidence intervals.</figcaption>
+    </figure>
+</div><br><br>
+
+<h3>Which single choices matter</h3>
+<div class="article">
+    The ten fixed plans combine many choices, so they cannot separate the effects of the game's 152 decision types.
+    The two random-plan experiments vary individual answers to estimate these effects.
+    Random answers allow comparisons between choices, but the available options also depend on a person's situation.
+    These differences must be accounted for before estimating an answer's effect.
+    <br><br>
+    For example, "sell a rented-out house" is offered only to people who own one, in 1% of lives that fall into debt.
+    Comparing everyone who sells one with everyone who asks family for help gives an apparent gain of 12.3 happy years.
+    However, the first group was already wealthier before the decision.
+    Restricting the comparison to lives offered both answers reduces the estimate to +0.6 (95% CI −2.5 to +3.7).
+    <figure>
+        <img alt="Six answers compared over every life and only over lives offered both answers" src="/img/nature-vs-nurture/nature-vs-nurture-15.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Estimated differences for six answers before (gray) and after (blue) restricting comparisons to lives offered both answers, using lifelong random plans with 95% confidence intervals. Percentages indicate how often each answer was offered.</figcaption>
+    </figure>
+    <br>
+    Each answer is therefore compared with the most common answer among lives whose first occurrence of that decision offered both options.
+    The regression controls for the offered options, region, family income group, sex and the six talent scores.
+    The initial analysis omitted this control.
+    Most of its largest estimates reflected differences in the available options.
+    <br><br>
+    After this adjustment, 64 of 283 comparisons pass the significance threshold in the lifelong-plan experiment and 52 of 272 in the per-decision experiment.
+    Decisions occurring in fewer than 200 lives are excluded: 24 decision types in the first experiment and 22 in the second.
+    <br><br>
+    In the lifelong-plan experiment, the same answer is used whenever a decision recurs.
+    The largest estimated effects concern health and employment.
+    Hiding HIV and never starting treatment reduces happy years by 12.1.
+    Repeatedly waiting for a better job, which means never accepting an offered job, reduces the outcome by about 11, while delaying TB treatment reduces it by 6.5.
+    <br><br>
+    An adult work focus produces 4.5 fewer happy years than a balance focus, consistent with the results for the three work-based plans.
+    Accepting marriage adds 4.5 happy years.
+    <figure>
+        <img alt="Largest effects of a lifelong random plan" src="/img/nature-vs-nurture/nature-vs-nurture-16.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>The 15 largest estimated effects in lifelong random plans that pass the Benjamini-Hochberg threshold, with 95% confidence intervals. Each row compares the answer before "vs" with the answer after it.</figcaption>
+    </figure>
+    <br>
+    The per-decision experiment measures the first answer while later answers are drawn again at random.
+    Its estimated effects are smaller because later choices can reverse an earlier decision.
+    Hiding HIV at the first decision reduces happy years by 3.3, compared with 12.1 when repeated throughout life.
+    The largest individual effects include staying home instead of accepting a job (−4.7), receiving TB treatment (+4.4), reducing drinking (+3.3) and refusing the first cigarette (+2.8).
+    <figure>
+        <img alt="Largest effects of single random decisions" src="/img/nature-vs-nurture/nature-vs-nurture-17.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>The 15 largest estimated effects in the per-decision experiment that pass the Benjamini-Hochberg threshold, with 95% confidence intervals. Answers are redrawn each time a decision occurs.</figcaption>
+    </figure>
+</div><br><br>
+
+<h3>Life paths</h3>
+<div class="article">
+    Education and marital status provide another way to group the simulated lives.
+    Among lives that reach age 18, 17.4% never attend school and 22.0% finish university.
+    Their mean happy years differs by 13.9, from 38.5 to 52.4.
+    <figure>
+        <img alt="Mean happy years by schooling and by marriage at death" src="/img/nature-vs-nurture/nature-vs-nurture-18.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by education and marital status at death among adult lives in the fixed-plan experiment, with 95% confidence intervals. Bracketed values show the share in each group.</figcaption>
+    </figure>
+    <br>
+    These comparisons describe the completed lives rather than isolate the effects of education or marriage.
+    Each path is partly determined by how long the person lives.
+    For example, being widowed at death (39.6% of adult lives, 50.8 happy years) largely reflects a long life, while an early death leaves less time to marry.
+</div><br><br>
+
+<h3>What counts as luck</h3>
+<div class="article">
+    Talent can also be treated as part of birth conditions because the game assigns it at birth, together with country and family.
+    Under this grouping, birth conditions account for 31.4% of variation (birth 29.3% + talent 2.1%), events after birth for about two thirds and the life plan for 5%.
+    <br><br>
+    The interpretation of effort is less direct.
+    Rawls argued that "even the willingness to make an effort, to try, and so to be deserving in the ordinary sense is itself dependent upon happy family and social circumstances" (A Theory of Justice, 1971, §17).
+    In the game, the player selects a temperament at age two, including an option to continue trying after failure.
+    <br><br>
+    The game also notes a genetic contribution to temperament.
+    A meta-analysis of behavior genetic studies estimates that genes account for about 40% of differences in personality (<a href="https://pubmed.ncbi.nlm.nih.gov/25961374/">Vukasović and Bratko, 2015</a>).
+    <br><br>
+    This experiment measures how outcomes change when the same baby follows a different assigned plan.
+    It does not resolve whether the willingness to make an effort is itself a form of luck.
+    The plan's 5% contribution describes the effect of choices under this design and does not establish who deserves a particular outcome.
+    Available choices also depend on the person's situation, as the decision comparisons demonstrate.
+</div><br><br>
+
+<h3>Independent replication</h3>
+<div class="article">
+    Claude ran the main simulation and analysis.
+    For an independent comparison, OpenAI's Codex received the same game version (0.8.54 beta) and research question, without access to this article, the analysis code or its results.
+    <br><br>
+    Codex designed a separate experiment with 2,000 births, each replayed with 3 different futures under 8 focus combinations.
+    These combine childhood study or play with adult balance, work, health or family.
+    It also tested six individual decisions on 1,500 new births, producing 58,636 lives in total.
+    Codex accumulates happiness continuously between events, while Claude records it at birthdays.
+    <br><br>
+    <figure>
+        <img alt="Claude's and Codex's estimates side by side for seven questions, with 95% intervals" src="/img/nature-vs-nurture/nature-vs-nurture-19.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Claude and Codex estimates for seven comparisons, with 95% intervals. Asterisks mark rows that measure different quantities.</figcaption>
+    </figure>
+    <br>
+    Two details affect how the intervals are read: Claude's birth contribution has no interval, and Codex's cigarette interval accounts for all six decision tests together.
+    The talent measures also differ.
+    Claude uses LMG to divide variation, while Codex measures how much the six talent scores improve predictions for births excluded from model fitting.
+    <br><br>
+    The work and health comparisons use different plans.
+    Claude compares Hard worker and Health first with the game default; Codex compares work and health focuses with balance.
+    These rows can therefore be compared by direction rather than by the size of the estimate.
+    <br><br>
+    Where the measures are comparable, the estimates agree within their 95% intervals.
+    Codex also finds that work focus increases income while reducing happy years, consistent with the main experiment.
+</div><br><br>
+
+<h3>Limitations</h3>
+<div class="article">
+    <ol>
+        <li>The measurements apply to the game's model. Talent, focus and decision effects follow rules chosen by its author, as does the happiness score. Country life satisfaction and income rank already enter the score's target, contributing to the measured birth and income relationships.</li>
+        <li>The luck estimate uses 200 births under the game default. Other plans or larger samples could produce values within or beyond its 95% interval of 59.6% to 73.4%. The independent experiment using 2,000 births under study and balance found 69.1%.</li>
+        <li>The birth estimate uses 1,000 distinct births. The 10,000 lives contain repeated births because each plan uses the same seeds.</li>
+        <li>Each baby's plan ranking uses one set of random events per plan. Replaying the birth could change the ranking.</li>
+        <li>Choice effects are estimated from the first occurrence of each decision. Rarely available answers have small comparison groups and wide intervals.</li>
+        <li>Income groups and life paths describe completed lives. Their differences combine birth conditions, random events and choices, so they do not isolate causal effects.</li>
+        <li>In the initial run, five plans specified focus options unavailable at the relevant stage, leaving 34% to 100% of their steps on auto focus. The lists were corrected and the 10,000 lives rerun. All reported results use this corrected run.</li>
+    </ol>
+</div><br><br>
+
+<h3>Future work</h3>
+<div class="article">
+    <ol>
+        <li>Replay each birth several times under every plan to estimate whether its plan ranking persists across different random events.</li>
+        <li>Estimate the contribution of events after birth under additional plans and with more births.</li>
+        <li>Repeat the analysis within individual countries to measure the contribution of plans when country is held fixed.</li>
+    </ol>
+</div><br><br>
+
+References:
+<ul>
+    <li><a href="https://1in8b.life/en/">1 in 8 Billion</a>, and its <a href="https://1in8b.life/en/about/">About</a> page for the data sources</li>
+    <li><a href="https://en.wikipedia.org/wiki/Holm%E2%80%93Bonferroni_method">Holm–Bonferroni method</a></li>
+    <li>Lindeman, Merenda and Gold (1980), the LMG decomposition of \( R^2 \)</li>
+    <li>Benjamini and Hochberg (1995), controlling the false discovery rate</li>
+    <li>Gameplay clip recorded from <a href="https://1in8b.life/en/">1 in 8 Billion</a>, whose <a href="https://1in8b.life/en/terms/">terms</a> allow videos of lives played in it</li>
+    <li>Rawls (1971), A Theory of Justice, §17</li>
+    <li>Vukasović and Bratko (2015), <a href="https://pubmed.ncbi.nlm.nih.gov/25961374/">Heritability of personality: a meta-analysis of behavior genetic studies</a>, Psychological Bulletin 141(4), 769-785</li>
+    <li>Pluchino, Biondo and Rapisarda (2018), <a href="https://arxiv.org/abs/1802.07068">Talent vs Luck: the role of randomness in success and failure</a>, Advances in Complex Systems 21(03n04), 1850014</li>
+</ul>
+
+<br><br>
