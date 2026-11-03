@@ -9,15 +9,16 @@ inprogress: true
 thumbnail: /img/nature-vs-nurture/nature-vs-nurture-0.png
 excerpt: >-
   This project uses the browser game 1 in 8 Billion to examine how birth conditions,
-  talent, choices and random events affect a simulated life. The same 1,000 births
-  are replayed under 10 life plans, producing 10,000 lives. A further 101,000 lives
-  test individual choices and random events after birth.
-  Outcomes are measured in happy years, combining the length of a life with the
-  game's happiness score. In this model, birth explains about 29% of the variation
-  in happy years, the plan 5% and talent 2%. Separate replays suggest that luck after
-  birth accounts for about two thirds of the variation. An independent experiment
-  by Codex, using 58,636 lives, gives similar estimates where both studies measure
-  the same thing.
+  talent, choices and random events affect a simulated life. Claude (Opus-5.5) ran
+  the original experiments. Codex (GPT-6.1-sol) reran them with the same code and
+  new random seeds. Each batch replays 1,000 births under 10 life plans, producing
+  10,000 lives, and uses a further 101,000 lives to test choices and later events.
+  Separate figures show each batch's results. Outcomes are measured in happy
+  years, combining the length of a life with the game's happiness score. In the
+  Claude sample, birth explains about 29% of the variation, the plan 5% and talent
+  2%. Separate replays suggest that luck after birth accounts for about two thirds
+  of the variation. An earlier, independently written Codex study used 58,636 lives
+  and a different experiment design; its results are shown in their own section.
 related: []
 ---
 
@@ -27,6 +28,7 @@ table.nvn td, table.nvn th { text-align: left; }
 table.nvn td.num, table.nvn th.num { text-align: right; white-space: nowrap; }
 table.nvn td:first-child { white-space: nowrap; }
 table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every plan is compared with */
+.nvn-run-label { font-weight: 600; text-align: left; margin-bottom: 0.75em; }
 .nvn-scroll { overflow-x: auto; }  /* a wide table scrolls by itself on a phone, not the page */
 </style>
 
@@ -42,6 +44,12 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
         <video src="/img/nature-vs-nurture/nature-vs-nurture-clip-birth.mp4" poster="/img/nature-vs-nurture/nature-vs-nurture-clip-birth.jpg" aria-label="The game drawing a birthplace and showing the birth record" autoplay muted loop playsinline style="display:block; width:100%;"></video>
         <figcaption>Birthplace selection, the birth record and the first screen of a life in Nigeria (5.7% of births in the game). Recorded from <a href="https://1in8b.life/en/">1 in 8 Billion</a>.</figcaption>
     </figure>
+    Claude (Opus-5.5) prepared the original simulation code and runs.
+    Codex (GPT-6.1-sol) reran the same experiments with new birth and policy seeds, using the same code, life plans and measurements.
+    The paired figures show whether the results hold in another sample.
+    They do not compare the models' ability to write simulation code.
+    Numbers in the text and tables refer to the Claude run unless a Codex result is named.
+    <br><br>
     The first experiment replays 1,000 births under 10 life plans, producing 10,000 lives.
     Each plan sets rules for activities and decisions throughout a life.
     The outcome is measured in "happy years", which combines lifespan with the game's happiness score.
@@ -50,17 +58,23 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     Further experiments use 101,000 lives to examine events after birth and individual choices.
     These include replays of the same birth with different random events, random plans kept for a whole life, and choices made at random each time a decision appears.
     <br><br>
-    <figure>
-        <img alt="Ten babies from five continents, each replayed 200 times with different luck" src="/img/nature-vs-nurture/nature-vs-nurture-0.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-0" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Ten babies from five continents, each replayed 200 times with different luck" src="/img/nature-vs-nurture/nature-vs-nurture-0.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Happiness over time for ten babies from five continents, each replayed 200 times under the game-default plan. Thin lines show individual lives; thick lines show mean happiness among lives still alive, while at least 50 of the 200 remain. The top panel shows the distribution of age at death, and the right panel shows the distribution of happy years.</figcaption>
     </figure>
+    <figure id="nvn-codex-0" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Ten babies from five continents, each replayed 200 times with different luck" src="/img/nature-vs-nurture/nature-vs-nurture-20.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Happiness over time for ten babies from five continents, each replayed 200 times under the game-default plan. Thin lines show individual lives; thick lines show mean happiness among lives still alive, while at least 50 of the 200 remain. The top panel shows the distribution of age at death, and the right panel shows the distribution of happy years. Each baby is selected from the new Codex sample using the same country and median-life rule.</figcaption>
+    </figure>
     <br>
-    For this figure, two countries are selected from each of five continents.
+    In the Claude figure, two countries are selected from each of five continents.
     Each baby is selected by the median happy years under the game-default plan among the first 101 births from that country in the runs.
     Finland and New Zealand have fewer births available, with 46 and 54 respectively.
     Each replay keeps the birth and plan fixed and changes only the random events after birth.
     <br><br>
-    The babies are listed by median happy years, from 71.8 for Finland to 34.6 for Nigeria, a difference of about 37 years.
+    In the Claude sample, the babies are listed by median happy years, from 71.8 for Finland to 34.6 for Nigeria, a difference of about 37 years.
     Their birth conditions include family, sex and talent as well as country, so this difference cannot be attributed to country alone.
     The German baby, for example, comes from the poorest fifth of families, while the Australian baby comes from the richest.
     Within each baby's replays, the middle 90% of outcomes span 31 to 56 happy years.
@@ -84,7 +98,8 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     The game tracks health, happiness, knowledge and relationships on a scale from 0 to 100, together with talent scores fixed at birth.
     <br><br>
     The game already runs complete lives without displaying them, using these functions to simulate the four other babies "born in the same second" as the player.
-    This experiment runs those functions through an external program:
+    Both matched batches use the game's companion mode, which omits some player-only events.
+    The experiment runs those functions through an external program:
     <ul>
         <li>Playwright loads the game's code unchanged from a local server into Chromium without a visible browser window. Requests to outside hosts are blocked during the runs.</li>
         <li>Auto mode handles decisions that the assigned plan does not specify.</li>
@@ -94,7 +109,7 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     </ul>
     <figure>
         <img alt="How one life is run" src="/img/nature-vs-nurture/nature-vs-nurture-1.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Life simulation loop. Boxes represent steps and diamonds represent checks. The program resolves pending decisions before advancing half a year and records each birthday until death.</figcaption>
+        <figcaption>Shared simulation loop for both matched batches. Boxes represent steps and diamonds represent checks. The program resolves pending decisions before advancing half a year and records each birthday until death.</figcaption>
     </figure>
     <div class="algorithm-box">
         <div class="algorithm-section">
@@ -176,9 +191,15 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     For example, happiness scores of 60, 80 and 50 on the three birthdays of a child who dies at 3 produce 0.6 + 0.8 + 0.5 = 1.9 happy years.
     These are birthday observations rather than averages over each year.
     The calculation can be represented as the area under the happiness curve, with a fully happy year contributing 1.
-    <figure>
-        <img alt="Happy years as the area under one life's happiness curve" src="/img/nature-vs-nurture/nature-vs-nurture-2.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-2" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Happy years as the area under one life&#x27;s happiness curve" src="/img/nature-vs-nurture/nature-vs-nurture-2.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Happiness over time for the median game-default life among the 1,000 births, a boy born in India. A lifespan of 68 years at an average happiness of about 70 produces 47.7 happy years.</figcaption>
+    </figure>
+    <figure id="nvn-codex-2" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Happy years as the area under one life&#x27;s happiness curve" src="/img/nature-vs-nurture/nature-vs-nurture-21.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Happiness over time for the median game-default life in the Codex sample, a boy born in Mozambique. The life lasts 70 years and produces 47.7 happy years.</figcaption>
     </figure>
     <br>
     <div class="nvn-scroll"><table class="nvn">
@@ -258,18 +279,32 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     The Benjamini-Hochberg method controls the expected share of false findings among the selected results at 5% across the hundreds of tests.
     <br><br>
     Verification checks confirm that the same seed and plan reproduce the same life and that each plan applies its specified focus.
-    India's share of the 1,000 births is 17.0%, compared with the game's birth weight of 17.6%.
+    India's share of the 1,000 births is 17.0% in Claude and 18.5% in Codex, compared with the game's birth weight of 17.6%.
     Random plans use a separate random stream, so selecting a plan does not change the birth.
-    All 111,000 lives finish with 0 failures and no requests to outside hosts.
+    Both 111,000-life batches finish with 0 failures and no requests to outside hosts.
+    The 222,000 lives exclude the example replays and the earlier independent Codex study.
 </div><br><br>
 
 <h3>Results</h3>
 <div class="article">
-    <figure>
-        <img alt="Happy years by life plan, mean with 95% confidence interval" src="/img/nature-vs-nurture/nature-vs-nurture-3.png" width="100%" onerror=handle_image_error(this)>
+    Each result appears first for Claude and then for the matched Codex rerun.
+    Each sample is sorted separately where a chart ranks plans or effects.
+    <br><br>
+    <figure id="nvn-claude-3" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Happy years by life plan, mean with 95% confidence interval" src="/img/nature-vs-nurture/nature-vs-nurture-3.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by life plan, with 95% confidence intervals. The dashed line indicates the game default.</figcaption>
+    </figure>
+    <figure id="nvn-codex-3" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Happy years by life plan, mean with 95% confidence interval" src="/img/nature-vs-nurture/nature-vs-nurture-22.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Mean happy years by life plan, with 95% confidence intervals. The dashed line indicates the game default.</figcaption>
     </figure>
     <br>
+    Health first has the highest mean in both samples: 47.9 happy years in Claude and 48.4 in Codex.
+    The game-default means are 45.3 and 45.1 respectively.
+    <br><br>
+    <div class="nvn-run-label">Claude (Opus-5.5), original plan results</div>
     <div class="nvn-scroll"><table class="nvn">
         <tr><th>Plan</th><th class="num">Happy years</th><th class="num">vs game default</th><th class="num">p (Holm)</th><th class="num">Lifetime income (PPP $)</th><th class="num">Age at death</th></tr>
         <tr><td>Health first</td><td class="num">\( 47.87 \)</td><td class="num">\( +2.57 \)</td><td class="num">\( 2.8 \times 10^{-8} \)</td><td class="num">\( 635{,}757 \)</td><td class="num">\( 75.6 \)</td></tr>
@@ -285,109 +320,175 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     </table></div>
     <br>
     Health first and Dreamer produce more happy years than the game default after the Holm correction.
-    Health first adds 2.6 happy years and has the longest mean lifespan, 75.6 years compared with 69.4 under the default.
+    In Claude's run, Health first adds 2.6 happy years and has the longest mean lifespan, 75.6 years compared with 69.4 under the default.
     Dreamer adds 1.3 happy years, with a result close to the significance threshold (Holm p = 0.047).
     Across the plan figures, Health first is green, Hard worker is orange and the game default is gray.
     <br><br>
-    The four plans with the highest incomes have the lowest mean happy years.
+    In Claude's run, the four plans with the highest incomes have the lowest mean happy years.
     Hard worker and Scholar have the two highest lifetime incomes but produce 7.5 and 2.6 fewer happy years, respectively.
     The three work-based plans each lose 7 to 8 happy years, including 7.7 for Mover.
-    <figure>
-        <img alt="Mean lifetime income against mean happy years for each plan" src="/img/nature-vs-nurture/nature-vs-nurture-4.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-4" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Mean lifetime income against mean happy years for each plan" src="/img/nature-vs-nurture/nature-vs-nurture-4.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean lifetime income and mean happy years for each of the ten life plans.</figcaption>
+    </figure>
+    <figure id="nvn-codex-4" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Mean lifetime income against mean happy years for each plan" src="/img/nature-vs-nurture/nature-vs-nurture-23.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Mean lifetime income and mean happy years for each of the ten life plans.</figcaption>
     </figure>
     <br>
     Variation within each plan is much larger than the difference between plan means.
-    The highest and lowest means are 10.3 happy years apart, while individual lives within any plan range from 0 to 70 or more.
-    <figure>
-        <img alt="Distribution of happy years inside each plan" src="/img/nature-vs-nurture/nature-vs-nurture-5.png" width="100%" onerror=handle_image_error(this)>
+    In Claude's sample, the highest and lowest means are 10.3 happy years apart, while individual lives within any plan range from 0 to 70 or more.
+    <figure id="nvn-claude-5" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Distribution of happy years inside each plan" src="/img/nature-vs-nurture/nature-vs-nurture-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Distribution of happy years within each plan, with dots indicating the means. The left tails mainly contain lives that end in early childhood.</figcaption>
+    </figure>
+    <figure id="nvn-codex-5" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Distribution of happy years inside each plan" src="/img/nature-vs-nurture/nature-vs-nurture-24.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Distribution of happy years within each plan, with dots indicating the means. The left tails mainly contain lives that end in early childhood.</figcaption>
     </figure>
     <br>
     Paired births also allow the change for each baby to be measured directly.
-    Health first produces more happy years than the default for 57% of babies and fewer for 39%.
+    In Claude's sample, Health first produces more happy years than the default for 57% of babies and fewer for 39%.
     Hard worker produces fewer happy years for 71%.
     The 4% to 7% with identical outcomes include the 3.2% who die before their first birthday, before a plan can act.
-    <figure>
-        <img alt="Histograms of each baby's happy years under a plan minus under the default" src="/img/nature-vs-nurture/nature-vs-nurture-6.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-6" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Histograms of each baby&#x27;s happy years under a plan minus under the default" src="/img/nature-vs-nurture/nature-vs-nurture-6.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Change in happy years relative to the game default for each of the 1,000 paired births.</figcaption>
+    </figure>
+    <figure id="nvn-codex-6" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Histograms of each baby&#x27;s happy years under a plan minus under the default" src="/img/nature-vs-nurture/nature-vs-nurture-25.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Change in happy years relative to the game default for each of the 1,000 paired births.</figcaption>
     </figure>
     <br>
     The plan that produces the most happy years varies between babies.
-    Among the 968 who survive their first birthday, Health first has the highest result for 17.8% and Dreamer for 17.1%.
+    In Claude's sample, among the 968 who survive their first birthday, Health first has the highest result for 17.8% and Dreamer for 17.1%.
     Each of the three work-based plans ranks first for fewer than 2%.
     For comparison, an equal split across ten plans would give 10% per plan.
-    <figure>
-        <img alt="Share of babies for whom each plan gives the most happy years" src="/img/nature-vs-nurture/nature-vs-nurture-7.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-7" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Share of babies for whom each plan gives the most happy years" src="/img/nature-vs-nurture/nature-vs-nurture-7.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Share of the 968 babies for whom each plan produces the most happy years.</figcaption>
+    </figure>
+    <figure id="nvn-codex-7" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Share of babies for whom each plan gives the most happy years" src="/img/nature-vs-nurture/nature-vs-nurture-26.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Share of the 970 babies for whom each plan produces the most happy years.</figcaption>
     </figure>
     <br>
     These rankings use a single set of random events under each plan.
     A different replay could change which plan ranks first for the same baby, so the figure does not establish a consistently best plan for an individual.
     <br><br>
-    The effect of Health first varies across birth groups.
+    In Claude's run, the effect of Health first varies across birth groups.
     Its gains are clearest in the three lower family income fifths (+2.3 to +3.9 happy years) and in Sub-Saharan Africa (+3.7).
     Sub-Saharan Africa is the only region whose result remains significant after the Holm correction.
     <br><br>
     Estimated gains are similar for girls and boys (+2.6 each) and for low, middle and high talent (+2.4 to +2.8).
     Hard worker reduces happy years in every group, with a larger reduction for men (−8.7) than women (−6.0).
     Europe &amp; Central Asia contains only 32 births, resulting in wide confidence intervals.
-    <figure>
-        <img alt="Plan effect by family means and by region, for Health first and Hard worker" src="/img/nature-vs-nurture/nature-vs-nurture-8.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-8" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Plan effect by family means and by region, for Health first and Hard worker" src="/img/nature-vs-nurture/nature-vs-nurture-8.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Paired changes in happy years by family income group and region, with 95% confidence intervals.</figcaption>
+    </figure>
+    <figure id="nvn-codex-8" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Plan effect by family means and by region, for Health first and Hard worker" src="/img/nature-vs-nurture/nature-vs-nurture-27.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Paired changes in happy years by family income group and region, with 95% confidence intervals.</figcaption>
     </figure>
     <br>
     Longer lives account for part of the gain under Health first.
-    Under this plan, 57% of births reach age 80, compared with 38.6% under the game default and 37.6% under Hard worker.
+    In Claude's sample, 57% of births reach age 80 under this plan, compared with 38.6% under the game default and 37.6% under Hard worker.
     The first-year decrease is identical across plans because plans begin to act at school age.
-    <figure>
-        <img alt="Share of babies who reach each age, by plan" src="/img/nature-vs-nurture/nature-vs-nurture-9.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-9" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Share of babies who reach each age, by plan" src="/img/nature-vs-nurture/nature-vs-nurture-9.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Share of births reaching each age. Gray lines show the other life plans.</figcaption>
+    </figure>
+    <figure id="nvn-codex-9" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Share of babies who reach each age, by plan" src="/img/nature-vs-nurture/nature-vs-nurture-28.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Share of births reaching each age. Gray lines show the other life plans.</figcaption>
     </figure>
     <br><br>
-    <figure>
-        <img alt="Share of the spread in happy years by cause" src="/img/nature-vs-nurture/nature-vs-nurture-10.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-10" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Share of the spread in happy years by cause" src="/img/nature-vs-nurture/nature-vs-nurture-10.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Contributions to variation in happy years, estimated with the LMG method.</figcaption>
+    </figure>
+    <figure id="nvn-codex-10" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Share of the spread in happy years by cause" src="/img/nature-vs-nurture/nature-vs-nurture-29.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Contributions to variation in happy years, estimated with the LMG method.</figcaption>
     </figure>
     <br>
-    Birth accounts for about 29% of the variation in happy years, the life plan for 5% and talent for 2%.
+    In Claude's run, birth accounts for about 29% of the variation in happy years, the life plan for 5% and talent for 2%.
     The remaining 64% is unexplained by these groups in the linear model.
     Birth's contribution is about six times that of the life plan, while talent contributes less than either.
     <br><br>
     The unexplained variation may contain random events or combinations of birth conditions and plans that the linear model does not capture.
     To estimate the contribution of events after birth, 200 births are each replayed five times under the game default with different event seeds.
-    Variation within births accounts for 66.3% of the total variation across the 1,000 replays (95% CI 59.6% to 73.4%).
+    In Claude's replay batch, variation within births accounts for 66.3% of the total variation across the 1,000 replays (95% CI 59.6% to 73.4%).
     This estimate is close to the model's unexplained 63.6%, suggesting that events after birth account for most of the remainder in this game.
-    <figure>
-        <img alt="Share of the spread that comes from luck alone, next to the share the model leaves unexplained" src="/img/nature-vs-nurture/nature-vs-nurture-11.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-11" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Share of the spread that comes from luck alone, next to the share the model leaves unexplained" src="/img/nature-vs-nurture/nature-vs-nurture-11.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Variation from events after birth in the replay experiment (top), with a 95% confidence interval, compared with unexplained variation in the 10,000 fixed-plan lives (bottom).</figcaption>
+    </figure>
+    <figure id="nvn-codex-11" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Share of the spread that comes from luck alone, next to the share the model leaves unexplained" src="/img/nature-vs-nurture/nature-vs-nurture-30.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Variation from events after birth in the replay experiment (top), with a 95% confidence interval, compared with unexplained variation in the 10,000 fixed-plan lives (bottom).</figcaption>
     </figure>
     <br>
     Both family income and country contribute to differences associated with birth.
-    Within a country, babies from the richest fifth of families have 52.0 happy years on average, compared with 40.6 in the poorest fifth.
+    In Claude's sample, babies from the richest fifth of families within a country have 52.0 happy years on average, compared with 40.6 in the poorest fifth.
     Among the countries with the most births in the sample, the means range from 56.0 in China to 34.7 in Nigeria.
     Country estimates based on fewer births have wider confidence intervals.
-    <figure>
-        <img alt="Mean happy years by family means and by country" src="/img/nature-vs-nurture/nature-vs-nurture-12.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-12" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Mean happy years by family means and by country" src="/img/nature-vs-nurture/nature-vs-nurture-12.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by family income group and country, using one game-default life per birth, with 95% confidence intervals.</figcaption>
+    </figure>
+    <figure id="nvn-codex-12" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Mean happy years by family means and by country" src="/img/nature-vs-nurture/nature-vs-nurture-31.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Mean happy years by family income group and country, using one game-default life per birth, with 95% confidence intervals.</figcaption>
     </figure>
     <br>
-    Talent accounts for 2.1% of variation in happy years (95% bootstrap CI 1.4% to 4.0%).
+    In Claude's analysis, talent accounts for 2.1% of variation in happy years (95% bootstrap CI 1.4% to 4.0%).
     Most of this contribution comes from the study score at 1.9%, while the other five scores together contribute 0.25%.
     As in the Talent vs Luck model, talent contributes less than random events after birth.
-    <figure>
-        <img alt="Each talent score's share of the spread in happy years" src="/img/nature-vs-nurture/nature-vs-nurture-13.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-13" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Each talent score&#x27;s share of the spread in happy years" src="/img/nature-vs-nurture/nature-vs-nurture-13.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Contributions of the six talent scores to variation in happy years across the 10,000 fixed-plan lives, estimated with the LMG method.</figcaption>
+    </figure>
+    <figure id="nvn-codex-13" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Each talent score&#x27;s share of the spread in happy years" src="/img/nature-vs-nurture/nature-vs-nurture-32.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Contributions of the six talent scores to variation in happy years across the 10,000 fixed-plan lives, estimated with the LMG method.</figcaption>
     </figure>
     <br>
     Higher lifetime income is associated with more happy years across individual lives.
-    Among the 9,469 lives that reach age 18, mean happy years increases from 31.2 in the lowest income tenth to 60.5 in the highest (Spearman correlation 0.60).
+    Among the 9,469 lives that reach age 18 in Claude's sample, mean happy years increases from 31.2 in the lowest income tenth to 60.5 in the highest (Spearman correlation 0.60).
     This comparison describes differences across lives and does not isolate the effect of earning more income.
     <br><br>
     This relationship can coexist with the lower happy years of work-based plans.
     Richer birth conditions produce both higher income and more happy years, while a plan that exchanges free time for work increases income and reduces happiness.
-    <figure>
-        <img alt="Mean happy years by lifetime income tenth" src="/img/nature-vs-nurture/nature-vs-nurture-14.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-14" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Mean happy years by lifetime income tenth" src="/img/nature-vs-nurture/nature-vs-nurture-14.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by lifetime income tenth among adult lives in the fixed-plan experiment, with 95% confidence intervals.</figcaption>
+    </figure>
+    <figure id="nvn-codex-14" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Mean happy years by lifetime income tenth" src="/img/nature-vs-nurture/nature-vs-nurture-33.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Mean happy years by lifetime income tenth among adult lives in the fixed-plan experiment, with 95% confidence intervals.</figcaption>
     </figure>
 </div><br><br>
@@ -399,64 +500,91 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     Random answers allow comparisons between choices, but the available options also depend on a person's situation.
     These differences must be accounted for before estimating an answer's effect.
     <br><br>
-    For example, "sell a rented-out house" is offered only to people who own one, in 1% of lives that fall into debt.
+    For example, "sell a rented-out house" is offered only to people who own one, in 1% of lives that fall into debt in Claude's sample.
     Comparing everyone who sells one with everyone who asks family for help gives an apparent gain of 12.3 happy years.
     However, the first group was already wealthier before the decision.
     Restricting the comparison to lives offered both answers reduces the estimate to +0.6 (95% CI −2.5 to +3.7).
-    <figure>
-        <img alt="Six answers compared over every life and only over lives offered both answers" src="/img/nature-vs-nurture/nature-vs-nurture-15.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Estimated differences for six answers before (gray) and after (blue) restricting comparisons to lives offered both answers, using lifelong random plans with 95% confidence intervals. Percentages indicate how often each answer was offered.</figcaption>
+    <figure id="nvn-claude-15" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Six answers compared over every life and only over lives offered both answers" src="/img/nature-vs-nurture/nature-vs-nurture-15.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Estimated differences for six answers before (gray) and after (blue) restricting comparisons to lives offered both answers, using lifelong random plans with 95% confidence intervals. Percentages are among lives reaching that decision.</figcaption>
+    </figure>
+    <figure id="nvn-codex-15" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Six answers compared over every life and only over lives offered both answers" src="/img/nature-vs-nurture/nature-vs-nurture-34.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Estimated differences for six answers before (gray) and after (blue) restricting comparisons to lives offered both answers, using lifelong random plans with 95% confidence intervals. Percentages are among lives reaching that decision. The blue estimate for moving abroad to a child versus staying home is unavailable: only 25 and 28 eligible lives chose the two answers, below the cutoff of 30 each.</figcaption>
     </figure>
     <br>
-    Each answer is therefore compared with the most common answer among lives whose first occurrence of that decision offered both options.
+    Each answer is compared with the most common answer among lives whose first occurrence of that decision offered both options.
+    The matched Codex rerun keeps Claude's comparison answer for the decision types in the six comparisons above and for smoking.
+    Other decision types use the most common answer in their own sample.
     The regression controls for the offered options, region, family income group, sex and the six talent scores.
     The initial analysis omitted this control.
     Most of its largest estimates reflected differences in the available options.
     <br><br>
-    After this adjustment, 64 of 283 comparisons pass the significance threshold in the lifelong-plan experiment and 52 of 272 in the per-decision experiment.
+    In Claude's analysis, 64 of 283 comparisons pass the significance threshold after this adjustment in the lifelong-plan experiment and 52 of 272 in the per-decision experiment.
     Decisions occurring in fewer than 200 lives are excluded: 24 decision types in the first experiment and 22 in the second.
     <br><br>
     In the lifelong-plan experiment, the same answer is used whenever a decision recurs.
+    The following estimates describe Claude's run.
     The largest estimated effects concern health and employment.
     Hiding HIV and never starting treatment reduces happy years by 12.1.
     Repeatedly waiting for a better job, which means never accepting an offered job, reduces the outcome by about 11, while delaying TB treatment reduces it by 6.5.
     <br><br>
     An adult work focus produces 4.5 fewer happy years than a balance focus, consistent with the results for the three work-based plans.
     Accepting marriage adds 4.5 happy years.
-    <figure>
-        <img alt="Largest effects of a lifelong random plan" src="/img/nature-vs-nurture/nature-vs-nurture-16.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-16" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Largest effects of a lifelong random plan" src="/img/nature-vs-nurture/nature-vs-nurture-16.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>The 15 largest estimated effects in lifelong random plans that pass the Benjamini-Hochberg threshold, with 95% confidence intervals. Each row compares the answer before "vs" with the answer after it.</figcaption>
+    </figure>
+    <figure id="nvn-codex-16" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Largest effects of a lifelong random plan" src="/img/nature-vs-nurture/nature-vs-nurture-35.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>The 15 largest estimated effects in lifelong random plans that pass the Benjamini-Hochberg threshold, with 95% confidence intervals. Each row compares the answer before "vs" with the answer after it. Each run ranks its own estimates, so the selected rows can differ.</figcaption>
     </figure>
     <br>
     The per-decision experiment measures the first answer while later answers are drawn again at random.
     Its estimated effects are smaller because later choices can reverse an earlier decision.
-    Hiding HIV at the first decision reduces happy years by 3.3, compared with 12.1 when repeated throughout life.
+    In Claude's sample, hiding HIV at the first decision reduces happy years by 3.3, compared with 12.1 when repeated throughout life.
     The largest individual effects include staying home instead of accepting a job (−4.7), receiving TB treatment (+4.4), reducing drinking (+3.3) and refusing the first cigarette (+2.8).
-    <figure>
-        <img alt="Largest effects of single random decisions" src="/img/nature-vs-nurture/nature-vs-nurture-17.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-17" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Largest effects of single random decisions" src="/img/nature-vs-nurture/nature-vs-nurture-17.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>The 15 largest estimated effects in the per-decision experiment that pass the Benjamini-Hochberg threshold, with 95% confidence intervals. Answers are redrawn each time a decision occurs.</figcaption>
+    </figure>
+    <figure id="nvn-codex-17" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Largest effects of single random decisions" src="/img/nature-vs-nurture/nature-vs-nurture-36.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>The 15 largest estimated effects in the per-decision experiment that pass the Benjamini-Hochberg threshold, with 95% confidence intervals. Answers are redrawn each time a decision occurs. Each run ranks its own estimates, so the selected rows can differ.</figcaption>
     </figure>
 </div><br><br>
 
 <h3>Life paths</h3>
 <div class="article">
     Education and marital status provide another way to group the simulated lives.
-    Among lives that reach age 18, 17.4% never attend school and 22.0% finish university.
+    Among lives that reach age 18 in Claude's sample, 17.4% never attend school and 22.0% finish university.
     Their mean happy years differs by 13.9, from 38.5 to 52.4.
-    <figure>
-        <img alt="Mean happy years by schooling and by marriage at death" src="/img/nature-vs-nurture/nature-vs-nurture-18.png" width="100%" onerror=handle_image_error(this)>
+    <figure id="nvn-claude-18" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5)</div>
+        <img alt="Claude (Opus-5.5): Mean happy years by schooling and by marriage at death" src="/img/nature-vs-nurture/nature-vs-nurture-18.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Mean happy years by education and marital status at death among adult lives in the fixed-plan experiment, with 95% confidence intervals. Bracketed values show the share in each group.</figcaption>
+    </figure>
+    <figure id="nvn-codex-18" data-run="codex" data-study="matched">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), matched rerun</div>
+        <img alt="Codex (GPT-6.1-sol) matched rerun: Mean happy years by schooling and by marriage at death" src="/img/nature-vs-nurture/nature-vs-nurture-37.png" width="100%" onerror=handle_image_error(this)>
         <figcaption>Mean happy years by education and marital status at death among adult lives in the fixed-plan experiment, with 95% confidence intervals. Bracketed values show the share in each group.</figcaption>
     </figure>
     <br>
     These comparisons describe the completed lives rather than isolate the effects of education or marriage.
     Each path is partly determined by how long the person lives.
-    For example, being widowed at death (39.6% of adult lives, 50.8 happy years) largely reflects a long life, while an early death leaves less time to marry.
+    For example, being widowed at death (39.6% of adult lives and 50.8 happy years in Claude's sample) largely reflects a long life, while an early death leaves less time to marry.
 </div><br><br>
 
 <h3>What counts as luck</h3>
 <div class="article">
     Talent can also be treated as part of birth conditions because the game assigns it at birth, together with country and family.
-    Under this grouping, birth conditions account for 31.4% of variation (birth 29.3% + talent 2.1%), events after birth for about two thirds and the life plan for 5%.
+    Under this grouping in Claude's run, birth conditions account for 31.4% of variation (birth 29.3% + talent 2.1%), events after birth for about two thirds and the life plan for 5%.
     <br><br>
     The interpretation of effort is less direct.
     Rawls argued that "even the willingness to make an effort, to try, and so to be deserving in the ordinary sense is itself dependent upon happy family and social circumstances" (A Theory of Justice, 1971, §17).
@@ -471,9 +599,11 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     Available choices also depend on the person's situation, as the decision comparisons demonstrate.
 </div><br><br>
 
-<h3>Independent replication</h3>
+<h3>Earlier independent Codex study</h3>
 <div class="article">
-    Claude (Opus-5.5) wrote and ran the code for the main experiment and analysis.
+    The paired figures above use shared simulation and analysis code.
+    An earlier Codex study used separately written code and a different experiment design.
+    It is kept separate from the matched rerun.
     OpenAI's Codex (GPT-6.1-sol) received the same game version (0.8.54 beta) and research question for an independent comparison.
     It had no access to this article, the analysis code or the results.
     <br><br>
@@ -482,9 +612,15 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     It also tested six individual decisions on 1,500 new births, producing 58,636 lives in total.
     Codex accumulates happiness continuously between events, while Claude records it at birthdays.
     <br><br>
-    <figure>
-        <img alt="Claude (Opus-5.5) and Codex (GPT-6.1-sol) estimates for seven comparisons, with 95% intervals" src="/img/nature-vs-nurture/nature-vs-nurture-19.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Claude (Opus-5.5) and Codex (GPT-6.1-sol) estimates for seven comparisons, with 95% intervals. Asterisks mark rows that measure different quantities.</figcaption>
+    <figure id="nvn-claude-19" data-run="claude" data-study="original">
+        <div class="nvn-run-label">Claude (Opus-5.5), original study</div>
+        <img alt="Claude (Opus-5.5) estimates for seven comparisons, with 95% intervals" src="/img/nature-vs-nurture/nature-vs-nurture-19.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Estimates from the original Claude study for seven comparisons, with 95% intervals. Asterisks mark quantities that differ from the independent Codex study.</figcaption>
+    </figure>
+    <figure id="nvn-codex-19" data-run="codex" data-study="independent">
+        <div class="nvn-run-label">Codex (GPT-6.1-sol), earlier independent study</div>
+        <img alt="Codex (GPT-6.1-sol) independent estimates for seven comparisons, with 95% intervals" src="/img/nature-vs-nurture/nature-vs-nurture-38.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Estimates from the earlier independent Codex study for seven comparisons, with 95% intervals. Asterisks mark quantities that differ from the Claude study.</figcaption>
     </figure>
     <br>
     Two details affect how the intervals are read: Claude's birth contribution has no interval, and Codex's cigarette interval accounts for all six decision tests together.
@@ -503,7 +639,7 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
 <div class="article">
     <ol>
         <li>The measurements apply to the game's model. Talent, focus and decision effects follow rules chosen by its author, as does the happiness score. Country life satisfaction and income rank already enter the score's target, contributing to the measured birth and income relationships.</li>
-        <li>The luck estimate uses 200 births under the game default. Other plans or larger samples could produce values within or beyond its 95% interval of 59.6% to 73.4%. The independent experiment using 2,000 births under study and balance found 69.1%.</li>
+        <li>Claude's luck estimate uses 200 births under the game default. Other plans or larger samples could produce values within or beyond its 95% interval of 59.6% to 73.4%. The independent experiment using 2,000 births under study and balance found 69.1%.</li>
         <li>The birth estimate uses 1,000 distinct births. The 10,000 lives contain repeated births because each plan uses the same seeds.</li>
         <li>Each baby's plan ranking uses one set of random events per plan. Replaying the birth could change the ranking.</li>
         <li>Choice effects are estimated from the first occurrence of each decision. Rarely available answers have small comparison groups and wide intervals.</li>
