@@ -473,8 +473,9 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
 
 <h3>Independent replication</h3>
 <div class="article">
-    Claude ran the main simulation and analysis.
-    For an independent comparison, OpenAI's Codex received the same game version (0.8.54 beta) and research question, without access to this article, the analysis code or its results.
+    Claude (Opus-5.5) wrote and ran the code for the main experiment and analysis.
+    OpenAI's Codex (GPT-6.1-sol) received the same game version (0.8.54 beta) and research question for an independent comparison.
+    It had no access to this article, the analysis code or the results.
     <br><br>
     Codex designed a separate experiment with 2,000 births, each replayed with 3 different futures under 8 focus combinations.
     These combine childhood study or play with adult balance, work, health or family.
@@ -482,8 +483,8 @@ table.nvn tr.ref td { background: #f4f4f2; }  /* the game default, the row every
     Codex accumulates happiness continuously between events, while Claude records it at birthdays.
     <br><br>
     <figure>
-        <img alt="Claude's and Codex's estimates side by side for seven questions, with 95% intervals" src="/img/nature-vs-nurture/nature-vs-nurture-19.png" width="100%" onerror=handle_image_error(this)>
-        <figcaption>Claude and Codex estimates for seven comparisons, with 95% intervals. Asterisks mark rows that measure different quantities.</figcaption>
+        <img alt="Claude (Opus-5.5) and Codex (GPT-6.1-sol) estimates for seven comparisons, with 95% intervals" src="/img/nature-vs-nurture/nature-vs-nurture-19.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Claude (Opus-5.5) and Codex (GPT-6.1-sol) estimates for seven comparisons, with 95% intervals. Asterisks mark rows that measure different quantities.</figcaption>
     </figure>
     <br>
     Two details affect how the intervals are read: Claude's birth contribution has no interval, and Codex's cigarette interval accounts for all six decision tests together.
