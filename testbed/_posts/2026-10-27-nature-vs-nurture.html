@@ -30,7 +30,9 @@ table.nvn td:first-child { white-space: nowrap; }
 table.nvn { width: 100%; border-collapse: collapse; border-radius: 0; box-shadow: none; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; font-family: MJXc-TeX-main-R, MJXc-TeX-main-Rw, serif; }
 table.nvn th, table.nvn td, table.nvn tr:hover td, table.nvn tr:nth-child(odd) td { box-shadow: none; background: none; padding: .35em .9em; }
 table.nvn th { font-family: MJXc-TeX-main-B, MJXc-TeX-main-Bx, MJXc-TeX-main-Bw, serif; font-weight: normal; color: inherit; border-bottom: 1px solid currentColor; }
+table.nvn tr, table.nvn tr:hover { background: none; }  /* the site shades the hovered row itself */
 table.nvn tr[data-model="claude"]:not(:first-child) td { border-top: 1px solid rgba(128,128,128,.35); }  /* a light rule between plans in the results table */
+table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba(128,128,128,.35); }  /* and between rows in the other tables, whose first row is the header */
 .nvn-run-label { font-weight: 600; text-align: left; margin-bottom: 0.75em; }
 .nvn-scroll { overflow-x: auto; }  /* a wide table scrolls by itself on a phone, not the page */
 </style>
