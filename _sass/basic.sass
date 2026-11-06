@@ -395,6 +395,8 @@ a:hover
   flex: 0 0 auto
   display: flex
   align-items: center
+  // wide enough for the Type header above it, so the header and every row share one first column
+  width: 3.5em
   padding-right: 0.2em
   margin-left: -0.4em
 
@@ -409,46 +411,101 @@ a:hover
   margin-top: 0.5em
   margin-bottom: 0.5em
 
-// type filter and sort headers above the list (set up by setup_note_list)
-.note-controls
-  margin-bottom: 0.5em
-
-.note-control
-  padding: 0
-  border: 0
-  background: none
-  font: inherit
-  font-size: calc(0.6rem + 0.2vw)
-  color: reduce(100)
-  &[aria-pressed="true"]
-    color: $dark
+// filter chips and table-style sort headers above the list (set up by setup_note_list)
+.note-filter-bar
+  display: flex
+  flex-wrap: wrap
+  align-items: center
+  gap: 0.5em
+  margin-bottom: 1.5em
 
 .note-type-filter
   display: flex
   flex-wrap: wrap
-  margin-bottom: 1em
-  margin-left: -0.4em
-  .note-control
-    // the list's emoji size plus padding, so each button is a 24px+ tap target
-    font-size: inherit
-    padding: 0.2em 0
-  &.is-filtered .note-control[aria-pressed="false"]
-    opacity: 0.3
+  gap: 0.5em
 
-.note-sort-row
-  .note-control
-    // at least 24px wide and tall to tap, with the text on the column's left edge
-    min-width: 2.4em
-    padding: 0.4em 0
-    text-align: left
+.note-chip
+  display: inline-flex
+  align-items: center
+  gap: 0.4em
+  min-height: 2.4em
+  padding: 0 0.75em 0 0.5em
+  border: 1px solid reduce(14)
+  border-radius: 1.2em
+  background: $light
+  color: reduce(100)
+  font: inherit
+  font-size: calc(0.6rem + 0.2vw)
+  font-variant-numeric: tabular-nums
+  cursor: pointer
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease
+  &:hover
+    border-color: reduce(40)
+    color: $text-dark
+  &[aria-pressed="true"]
+    border-color: $text-dark
+    background: $bg-subtle
+    color: $text-dark
+
+.note-chip-icon
+  width: 1.5em
+  height: 1.5em
+
+.note-clear
+  padding: 0.4em 0.2em
+  border: 0
+  background: none
+  color: reduce(100)
+  font: inherit
+  font-size: calc(0.6rem + 0.2vw)
+  text-decoration: underline
+  cursor: pointer
+  &:hover
+    color: $text-dark
+
+.note-header-row
+  border-bottom: 1px solid $divider
   .note-emoji-column
-    // as wide as a row's emoji with its margins, so the headers line up with the columns below
-    width: calc(1.25em + 0.3em + 0.5em)
-    .note-control
-      min-width: 100%
-      padding-left: 0.3em
-  .note-date-column .note-control
-    text-align: right
+    // starts the Type label where a row's emoji starts; the width gives back the padding
+    width: calc(3.5em - 0.3em)
+    padding-left: 0.3em
+
+.note-sort
+  display: inline-flex
+  align-items: center
+  gap: 0.2em
+  min-height: 2.75em
+  padding: 0
+  border: 0
+  background: none
+  color: reduce(100)
+  font: inherit
+  font-size: calc(0.6rem + 0.2vw)
+  font-weight: $heading-weight
+  white-space: nowrap
+  cursor: pointer
+  &:hover, &:focus-visible, &[aria-pressed="true"]
+    color: $text-dark
+
+.note-sort-icon
+  width: 1.2em
+  height: 1.2em
+  fill: none
+  stroke: currentColor
+  stroke-width: 2
+  stroke-linecap: round
+  stroke-linejoin: round
+  opacity: 0
+  transition: opacity 0.2s ease, transform 0.2s ease
+
+.note-sort:hover .note-sort-icon, .note-sort:focus-visible .note-sort-icon
+  opacity: 0.4
+
+.note-sort[data-direction] .note-sort-icon
+  opacity: 1
+
+.note-sort[data-direction="desc"] .note-sort-icon
+  transform: rotate(180deg)
 
 // --- Testbed-specific classes ---
 

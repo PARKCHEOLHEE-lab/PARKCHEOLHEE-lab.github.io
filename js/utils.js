@@ -94,14 +94,16 @@ function filter_posts(type) {
   }
 }
 
-// The Manifest list: one button per post type (each row's emoji) shows only that type, and the
-// type / title / date headers reorder the rows, a second click reversing the order. Pinned rows
-// stay on top, and the build order (newest first) is the starting state.
+// The Manifest list: filter chips (one per post type, read from each row's emoji, with its post
+// count) show only the chosen types, and the Type / Title / Date headers reorder the rows, a second
+// click reversing the order. Pinned rows stay on top, and the build order (newest first) is the start.
 function setup_note_list() {
   const list = document.getElementById("note-list");
   const filter_bar = document.getElementById("note-type-filter");
+  const clear_button = document.getElementById("note-filter-clear");
   const sort_buttons = document.querySelectorAll("[data-note-sort]");
   const PIN = "/emoji/pin.png";
+  const TYPE_NAMES = { "default": "note", "default-empty": "empty note", "puzzle": "testbed" };
 
   const rows = Array.from(list.querySelectorAll(".note-post-item")).map(function(item, index) {
     return {
@@ -112,14 +114,16 @@ function setup_note_list() {
       time: Date.parse(item.querySelector("time").getAttribute("datetime"))
     };
   });
-  const types = [];
+  const counts = {};
   rows.forEach(function(row) {
-    if (!types.includes(row.type)) {
-      types.push(row.type);
-    }
+    counts[row.type] = (counts[row.type] || 0) + 1;
+  });
+  // the most common type first; types with equal counts keep the order they first appear in
+  const types = Object.keys(counts).sort(function(a, b) {
+    return counts[b] - counts[a];
   });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-  const state = { type: null, key: "date", descending: true };
+  const state = { types: new Set(), key: "date", descending: true };
 
   function compare(a, b) {
     const pinned = (b.type === PIN) - (a.type === PIN);
@@ -143,7 +147,7 @@ function setup_note_list() {
   function render() {
     let last_shown = null;
     rows.slice().sort(compare).forEach(function(row) {
-      const shown = state.type === null || row.type === state.type;
+      const shown = state.types.size === 0 || state.types.has(row.type);
       row.item.style.display = shown ? "" : "none";
       row.item.querySelector(".post-row").classList.add("use-bottom-line");
       list.appendChild(row.item);
@@ -155,35 +159,54 @@ function setup_note_list() {
       last_shown.item.querySelector(".post-row").classList.remove("use-bottom-line");
     }
 
-    filter_bar.classList.toggle("is-filtered", state.type !== null);
     filter_bar.querySelectorAll("button").forEach(function(button) {
-      button.setAttribute("aria-pressed", String(button.dataset.type === state.type));
+      button.setAttribute("aria-pressed", String(state.types.has(button.dataset.type)));
     });
+    clear_button.hidden = state.types.size === 0;
     sort_buttons.forEach(function(button) {
       const active = button.dataset.noteSort === state.key;
+      const label = button.querySelector("span").textContent;
       button.setAttribute("aria-pressed", String(active));
-      button.querySelector(".note-sort-arrow").textContent = active ? (state.descending ? " ↓" : " ↑") : "";
+      if (active) {
+        button.dataset.direction = state.descending ? "desc" : "asc";
+        button.setAttribute("aria-label", label + (state.descending ? ", descending" : ", ascending"));
+      } else {
+        delete button.dataset.direction;
+        button.setAttribute("aria-label", label);
+      }
     });
   }
 
   types.forEach(function(type) {
-    const name = type.split("/").pop().replace(".png", "");
+    const stem = type.split("/").pop().replace(".png", "");
+    const name = TYPE_NAMES[stem] || stem;
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "note-control clickable";
+    button.className = "note-chip";
     button.dataset.type = type;
     button.title = name;
-    button.setAttribute("aria-label", name);
+    button.setAttribute("aria-label", name + ", " + counts[type] + " posts");
     const image = document.createElement("img");
     image.src = type;
     image.alt = "";
-    image.className = "emoji-image";
-    button.appendChild(image);
+    image.className = "note-chip-icon";
+    const count = document.createElement("span");
+    count.textContent = counts[type];
+    button.append(image, count);
     button.addEventListener("click", function() {
-      state.type = state.type === type ? null : type;
+      if (state.types.has(type)) {
+        state.types.delete(type);
+      } else {
+        state.types.add(type);
+      }
       render();
     });
     filter_bar.appendChild(button);
+  });
+
+  clear_button.addEventListener("click", function() {
+    state.types.clear();
+    render();
   });
 
   sort_buttons.forEach(function(button) {
