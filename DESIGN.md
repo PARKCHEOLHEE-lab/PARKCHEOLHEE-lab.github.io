@@ -37,11 +37,11 @@ same shape; do not introduce a non-fluid `px`-only size.
 
 | Token | Value | Use |
 |---|---|---|
-| `$dark` | `#000000` | Body text on light surfaces |
+| `$dark` | `#000000` | Body text on light surfaces, site title block (`.title-main`) |
 | `$light` | `#ffffff` | Page background |
 | `$text-dark` | `rgb(70, 70, 70)` | Strong / table heading text, post titles |
 | `$link-color` | `#66a1ff` | Standard `<a>` link |
-| `$featured-color` | `#0011e3` | Featured underline (`u.wavy-underline`), pinned title bg |
+| `$featured-color` | `#0011e3` | Featured underline (`u.wavy-underline`) |
 | `$inprogress-color` | `#1aff00` | WIP underline |
 | `$bg-subtle` | `#f7f7f8` | Chat bubble + code block background |
 | `$divider` | `#e5e5e6` | Horizontal rule, hairline divider |
@@ -112,8 +112,7 @@ the new feature should be a token instead.
   the content). Defined in `_sass/basic.sass`. Do not invent additional
   per-image shadow utilities without adding them here first.
 - **No decorative gradients.** Backgrounds are flat. Featured emphasis uses
-  `$featured-color` as a solid block (`.title-main`) or wavy underline,
-  never as a gradient sweep.
+  `$featured-color` as a wavy underline, never as a gradient sweep.
 - **No icon emoji libraries.** The site already uses purpose-built emoji
   assets under `emoji/` for post labels. Do not import Font Awesome
   *icons*, Heroicons, or Lucide for decorative purposes. (Font Awesome
