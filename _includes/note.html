@@ -4,15 +4,23 @@
 
   {% assign note_length = site.categories.note | size %}
   {% if page.id == "note" %}
-    <p class="clickable list-filter-button" onclick="location.href='../inprogress'"><b><u class="wip-underline"></u></b></p><br>
-    <p class="clickable list-filter-button" onclick="location.href='../featured'"><b><u class="wavy-underline"></u></b></p>
     <p class="list-spacer">　</p>
+
+    <div id="note-controls" class="note-controls" hidden>
+      <div id="note-type-filter" class="note-type-filter" role="group" aria-label="Filter by type"></div>
+      <div class="post-row note-sort-row" role="group" aria-label="Sort">
+        <div class="note-emoji-column"><button type="button" class="note-control clickable" data-note-sort="type">type<span class="note-sort-arrow"></span></button></div>
+        <div class="title-wrapper"><button type="button" class="note-control clickable" data-note-sort="title">title<span class="note-sort-arrow"></span></button></div>
+        <div class="note-date-column"><button type="button" class="note-control clickable" data-note-sort="date">date<span class="note-sort-arrow"></span></button></div>
+      </div>
+    </div>
 
     {% assign listed_posts = site.posts | where_exp: "post", "post.categories contains 'note' or post.categories contains 'testbed'" %}
     {% assign pinned_posts = listed_posts | where: "emoji", "/emoji/pin.png" %}
     {% assign unpinned_posts = listed_posts | where_exp: "post", "post.emoji != '/emoji/pin.png'" %}
     {% assign all_posts = pinned_posts | concat: unpinned_posts %}
 
+    <div id="note-list">
     {% for post in all_posts %}
       <div class="note-post-item">
         <div class="clickable" onclick="handle_click(event, '{{ post.url | relative_url }}');">
@@ -52,6 +60,8 @@
         </div>
       </div>
     {% endfor %}
+    </div>
+    <script>setup_note_list()</script>
   {% endif %}
 </article>
 <br><br>

@@ -94,6 +94,111 @@ function filter_posts(type) {
   }
 }
 
+// The Manifest list: one button per post type (each row's emoji) shows only that type, and the
+// type / title / date headers reorder the rows, a second click reversing the order. Pinned rows
+// stay on top, and the build order (newest first) is the starting state.
+function setup_note_list() {
+  const list = document.getElementById("note-list");
+  const filter_bar = document.getElementById("note-type-filter");
+  const sort_buttons = document.querySelectorAll("[data-note-sort]");
+  const PIN = "/emoji/pin.png";
+
+  const rows = Array.from(list.querySelectorAll(".note-post-item")).map(function(item, index) {
+    return {
+      item: item,
+      index: index,
+      type: item.querySelector(".emoji-image").getAttribute("src"),
+      title: item.querySelector(".post-title").textContent.trim(),
+      time: Date.parse(item.querySelector("time").getAttribute("datetime"))
+    };
+  });
+  const types = [];
+  rows.forEach(function(row) {
+    if (!types.includes(row.type)) {
+      types.push(row.type);
+    }
+  });
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const state = { type: null, key: "date", descending: true };
+
+  function compare(a, b) {
+    const pinned = (b.type === PIN) - (a.type === PIN);
+    if (pinned !== 0) {
+      return pinned;
+    }
+    let order = 0;
+    if (state.key === "date") {
+      order = a.time - b.time;
+    } else if (state.key === "title") {
+      order = collator.compare(a.title, b.title);
+    } else {
+      order = types.indexOf(a.type) - types.indexOf(b.type);
+    }
+    if (state.descending) {
+      order = -order;
+    }
+    return order !== 0 ? order : a.index - b.index;
+  }
+
+  function render() {
+    let last_shown = null;
+    rows.slice().sort(compare).forEach(function(row) {
+      const shown = state.type === null || row.type === state.type;
+      row.item.style.display = shown ? "" : "none";
+      row.item.querySelector(".post-row").classList.add("use-bottom-line");
+      list.appendChild(row.item);
+      if (shown) {
+        last_shown = row;
+      }
+    });
+    if (last_shown !== null) {
+      last_shown.item.querySelector(".post-row").classList.remove("use-bottom-line");
+    }
+
+    filter_bar.classList.toggle("is-filtered", state.type !== null);
+    filter_bar.querySelectorAll("button").forEach(function(button) {
+      button.setAttribute("aria-pressed", String(button.dataset.type === state.type));
+    });
+    sort_buttons.forEach(function(button) {
+      const active = button.dataset.noteSort === state.key;
+      button.setAttribute("aria-pressed", String(active));
+      button.querySelector(".note-sort-arrow").textContent = active ? (state.descending ? " ↓" : " ↑") : "";
+    });
+  }
+
+  types.forEach(function(type) {
+    const name = type.split("/").pop().replace(".png", "");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "note-control clickable";
+    button.dataset.type = type;
+    button.title = name;
+    button.setAttribute("aria-label", name);
+    const image = document.createElement("img");
+    image.src = type;
+    image.alt = "";
+    image.className = "emoji-image";
+    button.appendChild(image);
+    button.addEventListener("click", function() {
+      state.type = state.type === type ? null : type;
+      render();
+    });
+    filter_bar.appendChild(button);
+  });
+
+  sort_buttons.forEach(function(button) {
+    button.addEventListener("click", function() {
+      const key = button.dataset.noteSort;
+      state.descending = key === state.key ? !state.descending : key === "date";
+      state.key = key;
+      render();
+    });
+  });
+
+  document.getElementById("note-controls").hidden = false;
+  render();
+}
+
 function generate_figure_numbers() {
   try {
     const figcaptions = document.getElementsByTagName("figcaption");

@@ -409,6 +409,47 @@ a:hover
   margin-top: 0.5em
   margin-bottom: 0.5em
 
+// type filter and sort headers above the list (set up by setup_note_list)
+.note-controls
+  margin-bottom: 0.5em
+
+.note-control
+  padding: 0
+  border: 0
+  background: none
+  font: inherit
+  font-size: calc(0.6rem + 0.2vw)
+  color: reduce(100)
+  &[aria-pressed="true"]
+    color: $dark
+
+.note-type-filter
+  display: flex
+  flex-wrap: wrap
+  margin-bottom: 1em
+  margin-left: -0.4em
+  .note-control
+    // the list's emoji size plus padding, so each button is a 24px+ tap target
+    font-size: inherit
+    padding: 0.2em 0
+  &.is-filtered .note-control[aria-pressed="false"]
+    opacity: 0.3
+
+.note-sort-row
+  .note-control
+    // at least 24px wide and tall to tap, with the text on the column's left edge
+    min-width: 2.4em
+    padding: 0.4em 0
+    text-align: left
+  .note-emoji-column
+    // as wide as a row's emoji with its margins, so the headers line up with the columns below
+    width: calc(1.25em + 0.3em + 0.5em)
+    .note-control
+      min-width: 100%
+      padding-left: 0.3em
+  .note-date-column .note-control
+    text-align: right
+
 // --- Testbed-specific classes ---
 
 .testbed-post-item
