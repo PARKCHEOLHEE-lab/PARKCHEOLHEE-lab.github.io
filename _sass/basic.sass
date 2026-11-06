@@ -452,27 +452,18 @@ a:hover
     // exactly a row's emoji column (the icon and its margins), so Title lines up with the titles
     width: calc(1.25em + 0.3em + 0.5em)
 
-// the Type header is icon only: the word does not fit above the narrow emoji column. Its icon sits
-// exactly over the rows' emoji: an up-down arrow while idle, the one sort arrow while active.
-// Two classes, so it wins over .note-sort below.
+// the Type icon sits right over the rows' emoji: the button fills the column, its padding leaves
+// exactly the emoji box, and the icon is centred in it. Two classes, so it wins over .note-sort below.
 .note-sort.note-sort-type
+  box-sizing: border-box
+  justify-content: center
   font-size: inherit
   width: 100%
   min-height: 2.4em
-  padding-left: 0.3em
-  .note-sort-icon, .note-sort-both
-    width: 1.25em
-    height: 1.25em
-  .note-sort-both
-    fill: none
-    stroke: currentColor
-    stroke-width: 2
-    stroke-linecap: round
-    stroke-linejoin: round
-  &:not([data-direction]) .note-sort-icon
-    display: none
-  &[data-direction] .note-sort-both
-    display: none
+  padding: 0 0.5em 0 0.3em
+  .note-sort-icon
+    // the size the Title and Date icons get from their header font
+    font-size: calc(0.6rem + 0.2vw)
 
 .note-sr-only
   position: absolute
@@ -482,10 +473,13 @@ a:hover
   clip-path: inset(50%)
   white-space: nowrap
 
+// the sort headers are icons only, each aligned like its column's content; the words stay for screen
+// readers and as tooltips. The header font sets the icon size.
 .note-sort
   display: inline-flex
   align-items: center
-  gap: 0.2em
+  // the 24px minimum target size (WCAG 2.5.8); the icon alone is narrower
+  min-width: 24px
   min-height: 2.75em
   padding: 0
   border: 0
@@ -493,32 +487,49 @@ a:hover
   color: reduce(100)
   font: inherit
   font-size: calc(0.6rem + 0.2vw)
-  font-weight: $heading-weight
-  white-space: nowrap
   cursor: pointer
   &:hover, &:focus-visible, &[aria-pressed="true"]
     color: $text-dark
 
+// the Date icon ends where the dates end
+.note-date-column .note-sort
+  justify-content: flex-end
+
+// every header has the same icon: three bars at rest, folding into an up or down arrow while its
+// column sorts the list. The middle bar turns into the shaft and the outer bars into the head;
+// the arrow is the one the header used before (M12 19V5 M5 12l7-7 7 7), and a flip between up and
+// down slides the head along the shaft
 .note-sort-icon
+  flex: none
   width: 1.2em
   height: 1.2em
   fill: none
   stroke: currentColor
   stroke-width: 2
   stroke-linecap: round
-  stroke-linejoin: round
-  opacity: 0
-  // only the fade is animated; a turning arrow on the column being left looked like a glitch
-  transition: opacity 0.2s ease
+  path
+    transform-box: fill-box
+    transform-origin: center
+    transition: transform 0.25s ease
 
-.note-sort:hover .note-sort-icon, .note-sort:focus-visible .note-sort-icon
-  opacity: 0.4
+.note-sort[data-direction] .note-sort-bar-middle
+  transform: rotate(90deg)
 
-.note-sort[data-direction] .note-sort-icon
-  opacity: 1
+.note-sort[data-direction="asc"]
+  .note-sort-bar-top
+    transform: translate(-3.5px, 1.5px) rotate(-45deg) scaleX(0.7071)
+  .note-sort-bar-bottom
+    transform: translate(3.5px, -8.5px) rotate(45deg) scaleX(0.7071)
 
-.note-sort[data-direction="desc"] .note-sort-icon
-  transform: rotate(180deg)
+.note-sort[data-direction="desc"]
+  .note-sort-bar-top
+    transform: translate(-3.5px, 8.5px) rotate(45deg) scaleX(0.7071)
+  .note-sort-bar-bottom
+    transform: translate(3.5px, -1.5px) rotate(-45deg) scaleX(0.7071)
+
+@media (prefers-reduced-motion: reduce)
+  .note-sort-icon path
+    transition: none
 
 // --- Testbed-specific classes ---
 
