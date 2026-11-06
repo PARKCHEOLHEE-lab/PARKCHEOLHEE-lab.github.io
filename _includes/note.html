@@ -8,8 +8,9 @@
     <p class="clickable list-filter-button" onclick="location.href='../featured'"><b><u class="wavy-underline"></u></b></p>
     <p class="list-spacer">　</p>
 
-    {% assign pinned_posts = site.categories.note | where: "emoji", "/emoji/pin.png" %}
-    {% assign unpinned_posts = site.categories.note | where_exp: "post", "post.emoji != '/emoji/pin.png'" %}
+    {% assign listed_posts = site.posts | where_exp: "post", "post.categories contains 'note' or post.categories contains 'testbed'" %}
+    {% assign pinned_posts = listed_posts | where: "emoji", "/emoji/pin.png" %}
+    {% assign unpinned_posts = listed_posts | where_exp: "post", "post.emoji != '/emoji/pin.png'" %}
     {% assign all_posts = pinned_posts | concat: unpinned_posts %}
 
     {% for post in all_posts %}
@@ -20,6 +21,8 @@
             <div class="note-emoji-column">
               {% if post.emoji %}
                 <img src="{{ post.emoji }}" alt="" class="emoji-image">
+              {% elsif post.categories contains "testbed" %}
+                <img src="/emoji/puzzle.png" alt="" class="emoji-image">
               {% elsif post.content == empty or post.content == blank %}
                 <img src="/emoji/default-empty.png" alt="" class="emoji-image">
               {% else %}
@@ -49,6 +52,7 @@
         </div>
       </div>
     {% endfor %}
+    <p class="use-gray" style="font-size: calc(0.6rem + 0.2vw);">Puzzle emoji by <a href="https://openmoji.org/">OpenMoji</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>, outline thickened.</p>
   {% endif %}
 </article>
 <br><br>

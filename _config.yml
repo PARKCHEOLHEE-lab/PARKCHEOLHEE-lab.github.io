@@ -21,7 +21,6 @@ minimal: false             # use a dark header
 # Menu
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
-  - {title: "testbed", file: "testbed.html"}
   - {title: "notebook", file: "notebook.html"}
   # - {title: "three", file: "threebed.html"}
   # - {title: "r!　", file: "retrospection.html"}
