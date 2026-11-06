@@ -100,7 +100,6 @@ function filter_posts(type) {
 function setup_note_list() {
   const list = document.getElementById("note-list");
   const filter_bar = document.getElementById("note-type-filter");
-  const clear_button = document.getElementById("note-filter-clear");
   const sort_buttons = document.querySelectorAll("[data-note-sort]");
   const PIN = "/emoji/pin.png";
   const TYPE_NAMES = { "default": "note", "default-empty": "empty note", "puzzle": "testbed" };
@@ -160,9 +159,9 @@ function setup_note_list() {
     }
 
     filter_bar.querySelectorAll("button").forEach(function(button) {
-      button.setAttribute("aria-pressed", String(state.types.has(button.dataset.type)));
+      const type = button.dataset.type;
+      button.setAttribute("aria-pressed", String(type === "" ? state.types.size === 0 : state.types.has(type)));
     });
-    clear_button.hidden = state.types.size === 0;
     sort_buttons.forEach(function(button) {
       const active = button.dataset.noteSort === state.key;
       const label = button.querySelector("span").textContent;
@@ -177,24 +176,22 @@ function setup_note_list() {
     });
   }
 
-  types.forEach(function(type) {
-    const stem = type.split("/").pop().replace(".png", "");
-    const name = TYPE_NAMES[stem] || stem;
+  // one chip: an icon (or the word All) and a post count; the All chip, with type null, clears the choice
+  function add_chip(type, content, name, count) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "note-chip";
-    button.dataset.type = type;
+    button.dataset.type = type === null ? "" : type;
     button.title = name;
-    button.setAttribute("aria-label", name + ", " + counts[type] + " posts");
-    const image = document.createElement("img");
-    image.src = type;
-    image.alt = "";
-    image.className = "note-chip-icon";
-    const count = document.createElement("span");
-    count.textContent = counts[type];
-    button.append(image, count);
+    button.setAttribute("aria-label", name + ", " + count + " posts");
+    const number = document.createElement("span");
+    number.className = "note-chip-count";
+    number.textContent = count;
+    button.append(content, number);
     button.addEventListener("click", function() {
-      if (state.types.has(type)) {
+      if (type === null) {
+        state.types.clear();
+      } else if (state.types.has(type)) {
         state.types.delete(type);
       } else {
         state.types.add(type);
@@ -202,11 +199,18 @@ function setup_note_list() {
       render();
     });
     filter_bar.appendChild(button);
-  });
+  }
 
-  clear_button.addEventListener("click", function() {
-    state.types.clear();
-    render();
+  const all_label = document.createElement("span");
+  all_label.textContent = "All";
+  add_chip(null, all_label, "all", rows.length);
+  types.forEach(function(type) {
+    const stem = type.split("/").pop().replace(".png", "");
+    const image = document.createElement("img");
+    image.src = type;
+    image.alt = "";
+    image.className = "note-chip-icon";
+    add_chip(type, image, TYPE_NAMES[stem] || stem, counts[type]);
   });
 
   sort_buttons.forEach(function(button) {

@@ -412,31 +412,24 @@ a:hover
   margin-bottom: 0.5em
 
 // filter chips and table-style sort headers above the list (set up by setup_note_list)
-.note-filter-bar
-  display: flex
-  flex-wrap: wrap
-  align-items: center
-  gap: 0.5em
-  margin-bottom: 1.5em
-
 .note-type-filter
   display: flex
   flex-wrap: wrap
+  justify-content: center
   gap: 0.5em
+  margin-bottom: 1.5em
 
 .note-chip
   display: inline-flex
   align-items: center
   gap: 0.4em
-  min-height: 2.4em
-  padding: 0 0.75em 0 0.5em
+  min-height: 2.2em
+  padding: 0 0.6em
   border: 1px solid reduce(14)
-  border-radius: 1.2em
+  border-radius: 1.1em
   background: $light
   color: reduce(100)
   font: inherit
-  font-size: calc(0.6rem + 0.2vw)
-  font-variant-numeric: tabular-nums
   cursor: pointer
   transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease
   &:hover
@@ -446,22 +439,14 @@ a:hover
     border-color: $text-dark
     background: $bg-subtle
     color: $text-dark
+  span
+    font-size: calc(0.6rem + 0.2vw)
+    font-variant-numeric: tabular-nums
 
 .note-chip-icon
-  width: 1.5em
-  height: 1.5em
-
-.note-clear
-  padding: 0.4em 0.2em
-  border: 0
-  background: none
-  color: reduce(100)
-  font: inherit
-  font-size: calc(0.6rem + 0.2vw)
-  text-decoration: underline
-  cursor: pointer
-  &:hover
-    color: $text-dark
+  // a row's emoji size (.emoji-image), both measured in the body font
+  width: 1.25em
+  height: 1.25em
 
 .note-header-row
   border-bottom: 1px solid $divider
@@ -496,7 +481,8 @@ a:hover
   stroke-linecap: round
   stroke-linejoin: round
   opacity: 0
-  transition: opacity 0.2s ease, transform 0.2s ease
+  // only the fade is animated; a turning arrow on the column being left looked like a glitch
+  transition: opacity 0.2s ease
 
 .note-sort:hover .note-sort-icon, .note-sort:focus-visible .note-sort-icon
   opacity: 0.4

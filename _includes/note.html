@@ -8,10 +8,7 @@
 
     {% capture sort_icon %}<svg class="note-sort-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>{% endcapture %}
     <div id="note-controls" class="note-controls" hidden>
-      <div class="note-filter-bar">
-        <div id="note-type-filter" class="note-type-filter" role="group" aria-label="Filter by type"></div>
-        <button type="button" id="note-filter-clear" class="note-clear" hidden>Clear</button>
-      </div>
+      <div id="note-type-filter" class="note-type-filter" role="group" aria-label="Filter by type"></div>
       <div class="post-row note-header-row" role="group" aria-label="Sort">
         <div class="note-emoji-column"><button type="button" class="note-sort" data-note-sort="type"><span>Type</span>{{ sort_icon }}</button></div>
         <div class="title-wrapper"><button type="button" class="note-sort" data-note-sort="title"><span>Title</span>{{ sort_icon }}</button></div>
