@@ -395,8 +395,6 @@ a:hover
   flex: 0 0 auto
   display: flex
   align-items: center
-  // wide enough for the Type header above it, so the header and every row share one first column
-  width: 3.5em
   padding-right: 0.2em
   margin-left: -0.4em
 
@@ -451,9 +449,38 @@ a:hover
 .note-header-row
   border-bottom: 1px solid $divider
   .note-emoji-column
-    // starts the Type label where a row's emoji starts; the width gives back the padding
-    width: calc(3.5em - 0.3em)
-    padding-left: 0.3em
+    // exactly a row's emoji column (the icon and its margins), so Title lines up with the titles
+    width: calc(1.25em + 0.3em + 0.5em)
+
+// the Type header is icon only: the word does not fit above the narrow emoji column. Its icon sits
+// exactly over the rows' emoji: an up-down arrow while idle, the one sort arrow while active.
+// Two classes, so it wins over .note-sort below.
+.note-sort.note-sort-type
+  font-size: inherit
+  width: 100%
+  min-height: 2.4em
+  padding-left: 0.3em
+  .note-sort-icon, .note-sort-both
+    width: 1.25em
+    height: 1.25em
+  .note-sort-both
+    fill: none
+    stroke: currentColor
+    stroke-width: 2
+    stroke-linecap: round
+    stroke-linejoin: round
+  &:not([data-direction]) .note-sort-icon
+    display: none
+  &[data-direction] .note-sort-both
+    display: none
+
+.note-sr-only
+  position: absolute
+  width: 1px
+  height: 1px
+  overflow: hidden
+  clip-path: inset(50%)
+  white-space: nowrap
 
 .note-sort
   display: inline-flex
