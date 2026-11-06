@@ -15,8 +15,8 @@
 
     {% comment %}
       Posts pin themselves with the pin emoji and a ¶ in last_modified_at. A page pins itself with
-      pinned: true instead, because its own emoji and last_modified_at feed its SEO image and the line
-      under its title; its row gets the pin and the ¶ here.
+      pinned: true and the same ¶, because its own emoji would become its SEO image; its row gets the
+      pin here.
     {% endcomment %}
     {% assign pinned_pages = site.pages | where_exp: "item", "item.pinned == true" %}
     {% assign listed_posts = site.posts | where_exp: "post", "post.categories contains 'note' or post.categories contains 'testbed'" %}
@@ -54,9 +54,7 @@
 
             <div class="note-date-column">
               <time class="use-gray note-date-time" datetime="{{ post.date | date_to_xmlschema }}">
-                {% if post.pinned %}
-                  ¶
-                {% elsif post.emoji == "/emoji/pin.png" %}
+                {% if post.pinned or post.emoji == "/emoji/pin.png" %}
                   {{ post.last_modified_at }}
                 {% else %}
                   {{ post.date | date: "%m/%d/%Y" }}
