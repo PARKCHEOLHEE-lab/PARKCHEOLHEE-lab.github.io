@@ -16,9 +16,9 @@ excerpt: >-
   each decision. Figures and tables place the samples side by side. Happy years combines
   lifespan with the game's happiness score. Birth accounts for 27.8% (Claude) and 26.8%
   (Codex) of variation, plans for 5.3% (Claude) and 5.7% (Codex), and talent for 1.4%
-  (Claude) and 1.8% (Codex). Separate luck tests find about two thirds, and full-sample
-  birth-group averages differ by about 20 happy years. An earlier independent Codex study
-  used 58,636 lives and remains in its own section.
+  (Claude) and 1.8% (Codex). Separate luck tests find about two thirds, mostly through
+  lifespan, and full-sample birth-group averages differ by about 20 happy years. An earlier
+  independent Codex study used 58,636 lives and remains in its own section.
 related: []
 ---
 
@@ -323,6 +323,12 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 <img alt="Luck-only variation compared with unexplained fixed-plan variation" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-11.png" width="100%"/>
 <figcaption>Variation from later events in the separate luck experiment (200 births × 5 futures per model), with 95% intervals, next to unexplained variation in 50,000 fixed-plan lives per model. Luck-test futures are outside the main 300,000-life total.</figcaption>
 </figure>
+    Luck works mostly through lifespan. In the same experiment, variation within births accounts for 84.8% (Claude) and 84.4% (Codex) of age at death but only 26.5% (Claude) and 25.9% (Codex) of mean birthday happiness.
+    Among lives reaching 65, it accounts for 35.6% (Claude) and 32.8% (Codex) of mean happiness at ages 25 to 65.
+    Birth conditions set most of how happy each year is, while luck sets most of how many years a life has.
+    <br><br>
+<div class="nvn-scroll"><table class="nvn"><tr><th>Outcome</th><th class="num">Claude (95% interval)</th><th class="num">Codex (95% interval)</th></tr><tr><td>Happy years</td><td class="num">66.3% (59.6–73.4)</td><td class="num">65.1% (58.5–72.7)</td></tr><tr><td>Age at death</td><td class="num">84.8% (78.4–91.6)</td><td class="num">84.4% (78.4–90.8)</td></tr><tr><td>Mean birthday happiness</td><td class="num">26.5% (22.6–31.3)</td><td class="num">25.9% (21.9–30.5)</td></tr><tr><td>Mean happiness at ages 25 to 65, lives reaching 65</td><td class="num">35.6% (30.5–41.4)</td><td class="num">32.8% (27.6–38.8)</td></tr></table></div>
+<br>
     Family income and country both contribute to differences associated with birth. Averaging all ten plans within each birth, the richest family fifth has 49.4 (Claude) and 49.2 (Codex) happy years.
     The poorest fifth has 37.8 (Claude and Codex).
     Country estimates with fewer births have wider intervals.
@@ -357,7 +363,7 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 <figcaption>Five girls and five boys per sample, each with 200 futures under the game default. Thin lines show individual lives; thick lines show mean happiness while at least 50 lives remain. The top panel shows age at death. The right panel shows birthday happiness on the same 0–100 scale as the central plot.</figcaption>
 </figure>
     Family, sex and talent differ between the selected babies as well as country. Their differences cannot be attributed to country alone.
-</div><br/><br/>
+</br></br></br></div><br/><br/>
 <h3>Sex at birth</h3><div class="article">Across all 150,000 main-experiment paths per sample, females live 1.92 years longer on average in the Claude sample and 2.55 years longer in the Codex sample.
     The happy-year gaps are smaller: 0.22 and 0.76, respectively.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-21">
@@ -423,7 +429,7 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 <h3>What counts as luck</h3>
 <div class="article">
     Talent can also be treated as part of birth conditions because the game assigns it at birth, together with country and family.
-    Under this grouping, birth conditions account for 29.2% (Claude) and 28.6% (Codex) of variation. Events after birth account for about two thirds, and the life-plan shares are 5.3% (Claude) and 5.7% (Codex).
+    Under this grouping, birth conditions account for 29.2% (Claude) and 28.6% (Codex) of variation. Events after birth account for about two thirds, mostly by changing lifespan, and the life-plan shares are 5.3% (Claude) and 5.7% (Codex).
 <br/><br/>
     The interpretation of effort is less direct.
     Rawls argued that "even the willingness to make an effort, to try, and so to be deserving in the ordinary sense is itself dependent upon happy family and social circumstances" (A Theory of Justice, 1971, §17).
