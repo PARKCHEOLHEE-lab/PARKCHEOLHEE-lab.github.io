@@ -1,11 +1,8 @@
 <article>
-  <header><h2>{{ include.title | default: page.title }}</h2></header>
-  <p class="list-summary">{{page.summary}}</p>
+  <header><h2 class="note-sr-only">{{ include.title | default: page.title }}</h2></header>
 
   {% assign note_length = site.categories.note | size %}
   {% if page.id == "note" %}
-    <p class="list-spacer">　</p>
-
     {% capture sort_icon %}<svg class="note-sort-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="note-sort-bar-top" d="M5 7h14"/><path class="note-sort-bar-middle" d="M5 12h14"/><path class="note-sort-bar-bottom" d="M5 17h14"/></svg>{% endcapture %}
     <div id="note-controls" class="note-controls" hidden>
       <div id="note-type-filter" class="note-type-filter" role="group" aria-label="Filter by type"></div>
