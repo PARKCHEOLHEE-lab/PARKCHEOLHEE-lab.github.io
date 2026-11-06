@@ -388,6 +388,11 @@ a:hover
 
 // --- Note-specific classes ---
 
+// the filter and the sorts rebuild the list, and scroll anchoring would then scroll the page to keep a
+// row that moved in place (246px at 1280px when a second type was chosen)
+#note-list
+  overflow-anchor: none
+
 // a row's content is centred between its lines, which centres the emoji. The title font leaves about
 // 0.1em more room under the baseline than above the capitals, so the title and the date move down
 // 0.05em to leave the same gap above the capitals as below the baseline
@@ -413,45 +418,107 @@ a:hover
   margin-top: 0.55em
   margin-bottom: 0.45em
 
-// filter chips and table-style sort headers above the list (set up by setup_note_list)
+// the type menu under the funnel, a native popover that setup_note_list places, drawn like the map's
+// tooltip, the site's other floating panel: a 1px line, the 2px corners of images and code, no shadow,
+// a fade as it opens (closing is immediate). The type sort on top, a row per type below
+.note-type-menu
+  position: absolute
+  inset: auto
+  margin: 0.4em 0 0
+  padding: 0.25em 0.5em
+  border: 1px solid $divider
+  border-radius: 2px
+  background: $light
+  color: $text-dark
+  // only while open: a display on the closed popover would show it
+  &:popover-open
+    display: flex
+    flex-direction: column
+    transition: opacity 0.15s ease
+
+@starting-style
+  .note-type-menu:popover-open
+    opacity: 0
+
+// the menu's buttons: on top the all-types box and the type sort; then one row per type with its box,
+// icon and post count. They fade on hover, as list rows and links do. Two classes on the sort button,
+// so it wins over .note-sort below
+.note-chip, .note-sort.note-menu-sort, .note-menu-all
+  display: flex
+  align-items: center
+  gap: 0.75em
+  // the 24px minimum target size (WCAG 2.5.8), as for the header buttons
+  min-height: 24px
+  padding: 0 0.8em
+  border: 0
+  background: none
+  color: $text-dark
+  font: inherit
+  text-align: left
+  cursor: pointer
+  &:hover
+    @include hover-fade
+
+// the top row lines up with the type rows: the all-types box over their boxes (0.8em in), the sort
+// icon over their icons (0.8em + a 1.25em box + a 0.75em gap = 2.8em in)
+.note-menu-head
+  display: flex
+  .note-menu-all
+    padding: 0 0.375em 0 0.8em
+  .note-sort.note-menu-sort
+    padding: 0 0.8em 0 0.375em
+
+// a checkbox drawn like the icons: a box, with a tick when checked and a dash when only some types are
+.note-check
+  // as big as the type icons beside it
+  flex: none
+  width: 1.25em
+  height: 1.25em
+  fill: none
+  stroke: currentColor
+  // lines like the sort icons' (.note-sort-icon)
+  stroke-width: 1.32
+  stroke-linecap: square
+  stroke-linejoin: miter
+  .note-check-tick, .note-check-dash
+    display: none
+
+[aria-checked="true"] > .note-check .note-check-tick, [aria-checked="mixed"] > .note-check .note-check-dash
+  display: inline
+
 .note-type-filter
   display: flex
-  flex-wrap: wrap
-  justify-content: center
-  gap: 0.5em
-  margin-bottom: 1.5em
+  flex-direction: column
+  margin-top: 0.2em
+  padding-top: 0.2em
+  border-top: 1px solid $divider
 
 .note-chip
-  display: inline-flex
-  align-items: center
-  gap: 0.4em
-  min-height: 2.2em
-  padding: 0 0.6em
-  border: 1px solid reduce(14)
-  border-radius: 1.1em
-  background: $light
+  width: 100%
+  transition: opacity 0.15s ease
+
+.note-chip-count
+  margin-left: auto
   color: reduce(100)
-  font: inherit
-  cursor: pointer
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease
-  &:hover
-    border-color: reduce(40)
-    color: $text-dark
-  &[aria-pressed="true"]
-    border-color: $text-dark
-    background: $bg-subtle
-    color: $text-dark
-  span
-    font-size: calc(0.6rem + 0.2vw)
-    font-variant-numeric: tabular-nums
+  font-size: calc(0.6rem + 0.2vw)
+  font-variant-numeric: tabular-nums
+
+// an unchecked type fades, its rows hidden
+.note-chip[aria-checked="false"]
+  opacity: 0.35
 
 .note-chip-icon
   // a row's emoji size (.emoji-image), both measured in the body font
+  flex: none
   width: 1.25em
   height: 1.25em
+  // the site centres every img with auto side margins (img above), which in a menu row would push
+  // the icon off the left edge, under the sort icon; the 0.5em above and below set the row height
+  margin-left: 0
+  margin-right: 0
 
+// its line is the rows' own (use-bottom-line in note.html)
 .note-header-row
-  border-bottom: 1px solid $divider
   .note-emoji-column
     // exactly a row's emoji column (the icon and its margins), so Title lines up with the titles
     width: calc(1.25em + 0.3em + 0.5em)
@@ -465,9 +532,6 @@ a:hover
   width: 100%
   min-height: 2.4em
   padding: 0 0.5em 0 0.3em
-  .note-sort-icon
-    // the size the Title and Date icons get from their header font
-    font-size: calc(0.6rem + 0.2vw)
 
 .note-sr-only
   position: absolute
@@ -478,21 +542,21 @@ a:hover
   white-space: nowrap
 
 // the sort headers are icons only, each aligned like its column's content; the words stay for screen
-// readers and as tooltips. The header font sets the icon size.
+// readers and as tooltips. The body font sets the icon size, so it matches the rows' emoji.
 .note-sort
   display: inline-flex
   align-items: center
   // the 24px minimum target size (WCAG 2.5.8); the icon alone is narrower
   min-width: 24px
-  min-height: 2.75em
+  min-height: 2.4em
   padding: 0
   border: 0
   background: none
   color: reduce(100)
   font: inherit
-  font-size: calc(0.6rem + 0.2vw)
   cursor: pointer
-  &:hover, &:focus-visible, &[aria-pressed="true"]
+  // data-active: the funnel while its menu is open, a type filter is on or the type sort is (setup_note_list)
+  &:hover, &:focus-visible, &[aria-pressed="true"], &[data-active="true"]
     color: $text-dark
 
 // the Date icon ends where the dates end
@@ -504,13 +568,17 @@ a:hover
 // the arrow is the one the header used before (M12 19V5 M5 12l7-7 7 7), and a flip between up and
 // down slides the head along the shaft
 .note-sort-icon
+  // a row's emoji size (.emoji-image)
   flex: none
-  width: 1.2em
-  height: 1.2em
+  width: 1.25em
+  height: 1.25em
   fill: none
   stroke: currentColor
-  stroke-width: 2
-  stroke-linecap: round
+  // a little over the emoji's line: the Note emoji's outline is 3.3px of its 60 (0.055), and 1.32 of
+  // the 22 units shown (note.html) is 0.06. Square ends and corners, like the emoji's pixel lines
+  stroke-width: 1.32
+  stroke-linecap: square
+  stroke-linejoin: miter
   path
     transform-box: fill-box
     transform-origin: center
@@ -532,7 +600,7 @@ a:hover
     transform: translate(3.5px, -1.5px) rotate(-45deg) scaleX(0.7071)
 
 @media (prefers-reduced-motion: reduce)
-  .note-sort-icon path
+  .note-sort-icon path, .note-type-menu:popover-open
     transition: none
 
 // --- Testbed-specific classes ---

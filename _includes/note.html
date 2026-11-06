@@ -3,13 +3,21 @@
 
   {% assign note_length = site.categories.note | size %}
   {% if page.id == "note" %}
-    {% capture sort_icon %}<svg class="note-sort-icon" viewBox="0 0 24 24" aria-hidden="true"><path class="note-sort-bar-top" d="M5 7h14"/><path class="note-sort-bar-middle" d="M5 12h14"/><path class="note-sort-bar-bottom" d="M5 17h14"/></svg>{% endcapture %}
+    {% comment %} The icons draw in 24 units and show the middle 22 (viewBox 1 1 22 22), a little closer
+      to how much of their frame the emoji fill. {% endcomment %}
+    {% capture sort_icon %}<svg class="note-sort-icon" viewBox="1 1 22 22" aria-hidden="true"><path class="note-sort-bar-top" d="M5 7h14"/><path class="note-sort-bar-middle" d="M5 12h14"/><path class="note-sort-bar-bottom" d="M5 17h14"/></svg>{% endcapture %}
     <div id="note-controls" class="note-controls" hidden>
-      <div id="note-type-filter" class="note-type-filter" role="group" aria-label="Filter by type"></div>
-      <div class="post-row note-header-row" role="group" aria-label="Sort">
-        <div class="note-emoji-column"><button type="button" class="note-sort note-sort-type" data-note-sort="type" title="Sort by type"><span class="note-sr-only">Type</span>{{ sort_icon }}</button></div>
+      <div class="post-row note-header-row use-bottom-line" role="group" aria-label="Sort and filter">
+        <div class="note-emoji-column"><button type="button" class="note-sort note-sort-type" popovertarget="note-type-menu" title="Filter and sort by type"><span class="note-sr-only">Filter and sort by type</span><svg class="note-sort-icon" viewBox="1 1 22 22" aria-hidden="true"><path d="M5 7h14"/><path d="M5 12h10"/><path d="M5 17h6"/></svg></button></div>
         <div class="title-wrapper"><button type="button" class="note-sort" data-note-sort="title" title="Sort by title"><span class="note-sr-only">Title</span>{{ sort_icon }}</button></div>
         <div class="note-date-column"><button type="button" class="note-sort" data-note-sort="date" title="Sort by date"><span class="note-sr-only">Date</span>{{ sort_icon }}</button></div>
+      </div>
+      <div id="note-type-menu" class="note-type-menu" popover>
+        <div class="note-menu-head">
+          <button type="button" class="note-menu-all" role="checkbox" aria-checked="true" title="All types"><span class="note-sr-only">All types</span><svg class="note-check" viewBox="1 1 22 22" aria-hidden="true"><rect x="4" y="4" width="16" height="16"/><path class="note-check-tick" d="M8 12.5l2.5 2.5 5.5-5.5"/><path class="note-check-dash" d="M8 12h8"/></svg></button>
+          <button type="button" class="note-sort note-menu-sort" data-note-sort="type" title="Sort by type"><span class="note-sr-only">Sort by type</span>{{ sort_icon }}</button>
+        </div>
+        <div id="note-type-filter" class="note-type-filter" role="group" aria-label="Filter by type"></div>
       </div>
     </div>
 
@@ -28,7 +36,7 @@
     {% for post in all_posts %}
       <div class="note-post-item">
         <div class="clickable" onclick="handle_click(event, '{{ post.url | relative_url }}');">
-          <div class="post-row {% if forloop.last == false %}use-bottom-line{% endif %}">
+          <div class="post-row use-bottom-line">
 
             <div class="note-emoji-column">
               {% if post.pinned %}
