@@ -96,7 +96,8 @@ function filter_posts(type) {
 
 // The Manifest list: filter chips (one per post type, read from each row's emoji, with its post
 // count) show only the chosen types, and the Type / Title / Date headers reorder the rows, a second
-// click reversing the order. Pinned rows stay on top, and the build order (newest first) is the start.
+// click reversing the order. Pinned rows stay on top in their build order under every sort (a pinned
+// page has no date), and the build order (newest first) is the start.
 function setup_note_list() {
   const list = document.getElementById("note-list");
   const filter_bar = document.getElementById("note-type-filter");
@@ -125,9 +126,8 @@ function setup_note_list() {
   const state = { types: new Set(), key: "date", descending: true };
 
   function compare(a, b) {
-    const pinned = (b.type === PIN) - (a.type === PIN);
-    if (pinned !== 0) {
-      return pinned;
+    if (a.type === PIN || b.type === PIN) {
+      return (b.type === PIN) - (a.type === PIN) || a.index - b.index;
     }
     let order = 0;
     if (state.key === "date") {
