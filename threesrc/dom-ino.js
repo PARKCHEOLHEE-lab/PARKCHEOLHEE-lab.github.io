@@ -1,6 +1,7 @@
+// the add-ons come through the page's import map ("three/addons/"), so they match its three version
 import * as THREE from "three";
-import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
-import { OBJLoader } from "https://threejs.org/examples/jsm/loaders/OBJLoader.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { OBJLoader } from "three/addons/loaders/OBJLoader.js";
 
 class DomIno {
   constructor () {

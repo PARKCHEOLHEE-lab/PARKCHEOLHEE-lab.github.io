@@ -35,6 +35,8 @@ jobs:
           # published 132-byte pointer files instead of the images. Resolving
           # them here is the whole reason this workflow exists.
           lfs: true
+          # the realbuilding submodule holds wall.ifc, which threesrc/wall.js loads
+          submodules: true
 
       - uses: ruby/setup-ruby@v1
         with:

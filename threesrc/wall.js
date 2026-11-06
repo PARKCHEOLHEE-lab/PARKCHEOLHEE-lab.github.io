@@ -1,5 +1,6 @@
+// the add-ons come through the page's import map ("three/addons/"), so they match its three version
 import * as THREE from "three";
-import { OrbitControls } from "https://threejs.org/examples/jsm/controls/OrbitControls.js";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { IFCLoader } from "web-ifc-three";
 // import { IFCSPACE } from "web-ifc";
 
