@@ -9,14 +9,14 @@ inprogress: true
 thumbnail: /img/nature-vs-nurture/nature-vs-nurture-thumbnail.png
 excerpt: >-
   This project uses the browser game 1 in 8 Billion to examine how birth conditions, talent,
-  choices and random events affect a simulated life. The study contains 300,000
+  choices and random events affect a simulated life. The study contains 310,000
   main-experiment lives, split equally between Claude (Opus-5.5) and Codex (GPT-6.1-sol)
-  samples using shared code. Each tests 5,000 births under all ten fixed plans (50,000
+  samples using shared code. Each tests 5,000 births under all eleven fixed plans (55,000
   paths), plus 50,000 lifelong random plans and 50,000 lives with choices drawn again at
   each decision. Figures and tables place the samples side by side. Happy years combines
-  lifespan with the game's happiness score. Birth accounts for 27.8% (Claude) and 26.8%
-  (Codex) of variation, plans for 5.3% (Claude) and 5.7% (Codex), and talent for 1.4%
-  (Claude) and 1.8% (Codex). Separate luck tests find about two thirds, mostly through
+  lifespan with the game's happiness score. Birth accounts for 26.6% (Claude) and 25.7%
+  (Codex) of variation, plans for 7.7% (Claude) and 7.9% (Codex), and talent for 1.3%
+  (Claude) and 1.6% (Codex). Separate luck tests find about two thirds, mostly through
   lifespan, and full-sample birth-group averages differ by about 20 happy years. An earlier
   independent Codex study used 58,636 lives and remains in its own section.
 related: []
@@ -46,10 +46,11 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 </figure>
     Claude (Opus-5.5) prepared the original simulation code and experiments. Codex (GPT-6.1-sol) ran a matched sample with new birth and policy seeds.
     Both fixed-plan samples have since been expanded from 1,000 to 5,000 births using the same code. These extensions were executed through Codex; no new Claude session was used.
+    The two choice plans described below were added afterwards with the same code, run from a Claude Code session.
     “Claude” and “Codex” identify the original seed samples. The figures compare samples from a shared simulator, not two independent game engines or the models’ coding ability.
     <br/><br/>
-    Each sample contains 50,000 fixed-plan lives (5,000 births × 10 plans), 50,000 lifelong random-plan lives and 50,000 lives with choices drawn again at each decision.
-    All ten fixed plans are included. Together the two samples contain 300,000 main-experiment lives.
+    Each sample contains 55,000 fixed-plan lives (5,000 births × 11 plans), 50,000 lifelong random-plan lives and 50,000 lives with choices drawn again at each decision.
+    All eleven fixed plans are included. Together the two samples contain 310,000 main-experiment lives.
     The outcome, “happy years”, combines lifespan with the game’s happiness score. A separate luck experiment repeats 200 births five times per sample and is outside that total.
     <br/><br/>
     The results describe the game’s model. Country selection is weighted by births, while mortality and income use country life tables and income distributions (<a href="https://1in8b.life/en/about/">About 1 in 8 Billion</a>).
@@ -123,12 +124,12 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
     The game's code belongs to its operator (<a href="https://1in8b.life/en/terms/">Terms</a>).
     The descriptions and notation here explain the rules needed to interpret the results, without reproducing the game's code.
 </div><br/><br/>
-<h3>Ten life plans</h3>
+<h3>Eleven life plans</h3>
 <div class="article">
     Each life plan specifies a focus for each life stage and preferred answers to selected decisions.
     Focus options are stored as ordered lists for each stage.
     The plan selects the first option the game offers; for example, a working child cannot select "study", so the plan tries its next option.
-    The game-default plan uses auto mode for every choice and serves as the control group.
+    Each plan is compared with the same baby’s mean over all eleven plans, so no plan serves as the control group.
     <br/><br/>
 <div class="nvn-scroll"><table class="nvn">
 <tr><th>Plan</th><th>Focus, young</th><th>Focus, adult</th><th>Focus, old</th><th>Named decisions</th></tr>
@@ -141,11 +142,17 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 <tr><td>Dreamer</td><td>hobby</td><td>hobby</td><td>rest</td><td>try music, art and sport careers</td></tr>
 <tr><td>Mover</td><td>study, help</td><td>work, learn</td><td>work, mind (learning)</td><td>move to a city, move abroad</td></tr>
 <tr><td>Balanced</td><td>sport, play</td><td>balance, health</td><td>health, family</td><td>the middle choice in every decision</td></tr>
-<tr><td>Game default</td><td>auto</td><td>auto</td><td>auto</td><td>none</td></tr>
+<tr><td>Worst choices</td><td>play</td><td>work</td><td>auto</td><td>17 answers with the lowest estimate, for example a job instead of college, refusing promotion, drinking and gambling</td></tr>
+<tr><td>Best choices</td><td>study</td><td>family</td><td>auto</td><td>17 answers with the highest estimate, for example college, promotion, having children and stopping drinking</td></tr>
 </table></div>
 <br/>
     If none of a plan's options is available, the game retains its automatic focus for that half-year step.
-    This occurs in at most 4% of steps for the nine prescribed plans.
+    This occurs in at most 4% of steps for the first nine plans. The two choice plans name one option per stage and none for old age, so the game keeps its focus in 36% (Claude) and 37% (Codex) of Worst choices steps and 22% (Claude and Codex) of Best choices steps.
+    <br/><br/>
+    The two choice plans come from the lifelong random-plan experiment, re-estimated for mean birthday happiness at ages 25 to 65 with the same controls.
+    For every focus and decision where both samples agree (Benjamini-Hochberg q &lt; 0.05, same sign), Worst choices takes the answer with the lowest estimate and Best choices the highest.
+    Old-age focus falls outside that age window, so both plans leave it to the game.
+    The game’s own automatic choices (the game default) are no longer one of the compared plans; the median example life that shows how happy years are counted, and the separate luck experiment, still use them.
 </div><br/><br/>
 <h3>Measuring a life: happy years</h3>
 <div class="article">
@@ -223,105 +230,107 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 </div><br/><br/>
 <h3>Experiment design</h3>
 <div class="article"><ul>
-<li>Fixed plans: 5,000 births × 10 plans = 50,000 lives per sample. Every birth uses all ten plans, allowing paired comparisons.</li>
+<li>Fixed plans: 5,000 births × 11 plans = 55,000 lives per sample. Every birth uses all eleven plans, allowing paired comparisons.</li>
 <li>Lifelong random plans: 50,000 new births per sample, each assigned lasting preferences for focus options and answers.</li>
 <li>Random decisions: 50,000 other births per sample, with a new answer at each decision and a new focus each year.</li>
 <li>Luck experiment (separate): the first 200 births, each run five times under the game default with different event seeds, giving 1,000 futures per sample.</li>
 </ul>
-    The main total is 150,000 lives per sample and 300,000 across both samples. It includes every fixed plan.
-    These are 105,000 distinct births per sample because 5,000 births each appear under ten plans. The separate luck experiment and illustrative examples are excluded from the main total.
+    The main total is 155,000 lives per sample and 310,000 across both samples. It includes every fixed plan.
+    These are 105,000 distinct births per sample because 5,000 births each appear under eleven plans. The separate luck experiment and illustrative examples are excluded from the main total.
     <br/><br/>
     With 5,000 lives per plan, the approximate 95% margin for a proportion near 50% is ±1.4 percentage points, using \(1.96\sqrt{p(1-p)/N}\).
-    Plans are compared with the game default on the same birth seeds. The Holm correction covers the nine plan comparisons.
+    Each plan is compared with the same baby’s mean over the eleven plans. The Holm correction covers the eleven plan comparisons.
     Contributions to variation use the linear model happy years ~ birth (country, family income fifth, sex) + six talent scores + plan. LMG divides the fitted \(R^2\) between these groups; the remaining variation stays unexplained.
     <br/><br/>
     Individual-choice regressions use robust HC1 errors and control for the offered options, region, family income fifth, sex and talent.
     Benjamini-Hochberg controls the expected share of false findings among selected results at 5%.
     When an income, life-path or sex comparison includes several paths from the same birth, its interval keeps those paths together. The talent bootstrap also resamples whole births.
     <br/><br/>
-    The original 220,000 main-experiment lives were retained, with 40,000 fixed-plan lives added to each sample. All birthday totals matched the raw records; there were no failed additions or outside requests, and the old inputs were unchanged.
+    The original 220,000 main-experiment lives were retained, with 40,000 fixed-plan lives added to each sample and then 10,000 lives under the two choice plans. The 5,000 game-default lives per sample are kept but left out of the main total.
+    All birthday totals matched the raw records; there were no failed additions or outside requests, and the old inputs were unchanged.
     India represents 17.1% of the 5,000 fixed-plan births in the Claude sample and 18.3% in the Codex sample, against the game’s 17.6% weight.
 </div><br/><br/>
 <h3>Results</h3>
 <div class="article">Every comparison places Claude on the left and Codex on the right. Shared axes are used where measurements match; ranked plots may select different rows in the two samples.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-20">
-<img alt="Happy-year distributions for all 300,000 main-experiment lives, with every fixed plan included" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-20.png" width="100%"/>
-<figcaption>All 150,000 main-experiment lives per sample, including all ten fixed plans and both complete random-policy experiments. Each row shows a birth group’s distribution, with a mark at its mean. The gap describes this experiment’s mix of plans.</figcaption>
+<img alt="Happy-year distributions for all 310,000 main-experiment lives, with every fixed plan included" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-20.png" width="100%"/>
+<figcaption>All 155,000 main-experiment lives per sample, including all eleven fixed plans and both complete random-policy experiments. Each row shows a birth group’s distribution, with a mark at its mean. The gap describes this experiment’s mix of plans.</figcaption>
 </figure>
-    Across all three experiments, the high-income-country group averages 54.4 (Claude) and 54.1 (Codex) happy years.
-    The Sub-Saharan Africa averages are 34.1 (Claude) and 34.2 (Codex).
-    The corresponding gaps are 20.3 and 19.9 happy years in the two samples.
+    Across all three experiments, the high-income-country group averages 54.2 (Claude) and 53.9 (Codex) happy years.
+    The Sub-Saharan Africa averages are 34.0 (Claude) and 34.1 (Codex).
+    The corresponding gaps are 20.2 and 19.8 happy years in the two samples.
     Birth countries, families and plans all vary within these groups, so this is not an estimate of country alone.
     <br/><br/>
     Health first has the highest plan mean in both samples: 48.5 happy years in the Claude sample and 48.3 in the Codex sample.
-    The game-default means are 45.8 and 45.4.
+    Worst choices has the lowest, 34.2 (Claude) and 34.5 (Codex). The mean over all eleven plans is 42.7 (Claude) and 42.5 (Codex).
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-3">
-<img alt="Mean happy years for all ten plans in the two expanded samples" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-3.png" width="100%"/>
-<figcaption>Mean happy years for all ten plans on the same 5,000 births per sample, with 95% intervals. Orange circles identify the Claude sample and black squares the Codex sample. Both panels use shared rows and axes; gray marks and dashed lines show the game-default mean.</figcaption>
+<img alt="Mean happy years for all eleven plans in the two expanded samples" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-3.png" width="100%"/>
+<figcaption>Mean happy years for all eleven plans on the same 5,000 births per sample, with 95% intervals. Orange circles identify the Claude sample and black squares the Codex sample. Both panels use shared rows and axes; dashed lines show the mean over all eleven plans.</figcaption>
 </figure>
-<div class="nvn-scroll"><table class="nvn" id="nvn-plan-table"><thead><tr><th>Plan</th><th>Sample</th><th class="num">Happy<br/>years</th><th class="num">vs game<br/>default</th><th class="num">p (Holm)</th><th class="num">Lifetime income<br/>(PPP $)</th><th class="num">Age at<br/>death</th></tr></thead><tbody><tr data-model="claude" data-plan="health_first"><td rowspan="2">Health first</td><td>Claude</td><td class="num">\( 48.46 \)</td><td class="num">\( +2.71 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 605{,}736 \)</td><td class="num">\( 75.8 \)</td></tr><tr data-model="codex" data-plan="health_first"><td>Codex</td><td class="num">\( 48.28 \)</td><td class="num">\( +2.90 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 610{,}134 \)</td><td class="num">\( 75.8 \)</td></tr><tr data-model="claude" data-plan="dreamer"><td rowspan="2">Dreamer</td><td>Claude</td><td class="num">\( 46.51 \)</td><td class="num">\( +0.76 \)</td><td class="num">\( 0.0015 \)</td><td class="num">\( 592{,}812 \)</td><td class="num">\( 70.1 \)</td></tr><tr data-model="codex" data-plan="dreamer"><td>Codex</td><td class="num">\( 46.45 \)</td><td class="num">\( +1.08 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 550{,}892 \)</td><td class="num">\( 70.4 \)</td></tr><tr data-model="claude" data-plan="family_first"><td rowspan="2">Family first</td><td>Claude</td><td class="num">\( 45.90 \)</td><td class="num">\( +0.15 \)</td><td class="num">\( 0.886 \)</td><td class="num">\( 514{,}114 \)</td><td class="num">\( 69.4 \)</td></tr><tr data-model="codex" data-plan="family_first"><td>Codex</td><td class="num">\( 45.92 \)</td><td class="num">\( +0.54 \)</td><td class="num">\( 0.0191 \)</td><td class="num">\( 498{,}524 \)</td><td class="num">\( 69.7 \)</td></tr><tr data-model="claude" data-plan="balanced"><td rowspan="2">Balanced</td><td>Claude</td><td class="num">\( 45.82 \)</td><td class="num">\( +0.07 \)</td><td class="num">\( 0.886 \)</td><td class="num">\( 619{,}548 \)</td><td class="num">\( 75.0 \)</td></tr><tr data-model="codex" data-plan="balanced"><td>Codex</td><td class="num">\( 45.90 \)</td><td class="num">\( +0.52 \)</td><td class="num">\( 0.0316 \)</td><td class="num">\( 608{,}642 \)</td><td class="num">\( 75.3 \)</td></tr><tr class="ref" data-model="claude" data-plan="game_default"><td rowspan="2">Game default</td><td>Claude</td><td class="num">\( 45.75 \)</td><td class="num">(control)</td><td class="num"></td><td class="num">\( 545{,}721 \)</td><td class="num">\( 69.7 \)</td></tr><tr class="ref" data-model="codex" data-plan="game_default"><td>Codex</td><td class="num">\( 45.38 \)</td><td class="num">(control)</td><td class="num"></td><td class="num">\( 528{,}732 \)</td><td class="num">\( 69.4 \)</td></tr><tr data-model="claude" data-plan="risk_taker"><td rowspan="2">Risk taker</td><td>Claude</td><td class="num">\( 45.01 \)</td><td class="num">\( -0.74 \)</td><td class="num">\( 0.00128 \)</td><td class="num">\( 543{,}771 \)</td><td class="num">\( 68.1 \)</td></tr><tr data-model="codex" data-plan="risk_taker"><td>Codex</td><td class="num">\( 45.02 \)</td><td class="num">\( -0.36 \)</td><td class="num">\( 0.0815 \)</td><td class="num">\( 530{,}032 \)</td><td class="num">\( 68.2 \)</td></tr><tr data-model="claude" data-plan="scholar"><td rowspan="2">Scholar</td><td>Claude</td><td class="num">\( 42.43 \)</td><td class="num">\( -3.33 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 808{,}349 \)</td><td class="num">\( 70.6 \)</td></tr><tr data-model="codex" data-plan="scholar"><td>Codex</td><td class="num">\( 42.06 \)</td><td class="num">\( -3.31 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 779{,}554 \)</td><td class="num">\( 70.4 \)</td></tr><tr data-model="claude" data-plan="hard_worker"><td rowspan="2">Hard worker</td><td>Claude</td><td class="num">\( 37.99 \)</td><td class="num">\( -7.76 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 818{,}516 \)</td><td class="num">\( 68.5 \)</td></tr><tr data-model="codex" data-plan="hard_worker"><td>Codex</td><td class="num">\( 37.63 \)</td><td class="num">\( -7.75 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 786{,}525 \)</td><td class="num">\( 67.9 \)</td></tr><tr data-model="claude" data-plan="business_owner"><td rowspan="2">Business owner</td><td>Claude</td><td class="num">\( 37.97 \)</td><td class="num">\( -7.79 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 719{,}308 \)</td><td class="num">\( 68.8 \)</td></tr><tr data-model="codex" data-plan="business_owner"><td>Codex</td><td class="num">\( 37.49 \)</td><td class="num">\( -7.89 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 701{,}614 \)</td><td class="num">\( 68.2 \)</td></tr><tr data-model="claude" data-plan="mover"><td rowspan="2">Mover</td><td>Claude</td><td class="num">\( 37.58 \)</td><td class="num">\( -8.17 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 751{,}663 \)</td><td class="num">\( 68.1 \)</td></tr><tr data-model="codex" data-plan="mover"><td>Codex</td><td class="num">\( 37.54 \)</td><td class="num">\( -7.84 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 755{,}769 \)</td><td class="num">\( 68.2 \)</td></tr></tbody></table></div>
-    Health first adds 2.7 (Claude) and 2.9 (Codex) happy years.
-    Mean lifespan under Health first is 75.8 (Claude and Codex) years, compared with 69.7 (Claude) and 69.4 (Codex) under the default.
-    Dreamer adds 0.76 (Claude) and 1.08 (Codex) happy years. The table gives both samples' Holm-corrected p-values.
-    Very small p-values in the table are displayed as &lt;0.001. In the following plan plots, Health first is green, Hard worker orange and the game default gray.
+<div class="nvn-scroll"><table class="nvn" id="nvn-plan-table"><thead><tr><th>Plan</th><th>Sample</th><th class="num">Happy<br/>years</th><th class="num">vs mean of<br/>11 plans</th><th class="num">p (Holm)</th><th class="num">Lifetime income<br/>(PPP $)</th><th class="num">Age at<br/>death</th></tr></thead><tbody><tr data-model="claude" data-plan="health_first"><td rowspan="2">Health first</td><td>Claude</td><td class="num">\( 48.46 \)</td><td class="num">\( +5.80 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 605{,}736 \)</td><td class="num">\( 75.8 \)</td></tr><tr data-model="codex" data-plan="health_first"><td>Codex</td><td class="num">\( 48.28 \)</td><td class="num">\( +5.74 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 610{,}134 \)</td><td class="num">\( 75.8 \)</td></tr><tr data-model="claude" data-plan="best_h"><td rowspan="2">Best choices</td><td>Claude</td><td class="num">\( 47.47 \)</td><td class="num">\( +4.81 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 741{,}218 \)</td><td class="num">\( 71.0 \)</td></tr><tr data-model="codex" data-plan="best_h"><td>Codex</td><td class="num">\( 47.19 \)</td><td class="num">\( +4.65 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 718{,}493 \)</td><td class="num">\( 70.9 \)</td></tr><tr data-model="claude" data-plan="dreamer"><td rowspan="2">Dreamer</td><td>Claude</td><td class="num">\( 46.51 \)</td><td class="num">\( +3.85 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 592{,}812 \)</td><td class="num">\( 70.1 \)</td></tr><tr data-model="codex" data-plan="dreamer"><td>Codex</td><td class="num">\( 46.45 \)</td><td class="num">\( +3.91 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 550{,}892 \)</td><td class="num">\( 70.4 \)</td></tr><tr data-model="claude" data-plan="family_first"><td rowspan="2">Family first</td><td>Claude</td><td class="num">\( 45.90 \)</td><td class="num">\( +3.23 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 514{,}114 \)</td><td class="num">\( 69.4 \)</td></tr><tr data-model="codex" data-plan="family_first"><td>Codex</td><td class="num">\( 45.92 \)</td><td class="num">\( +3.38 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 498{,}524 \)</td><td class="num">\( 69.7 \)</td></tr><tr data-model="claude" data-plan="balanced"><td rowspan="2">Balanced</td><td>Claude</td><td class="num">\( 45.82 \)</td><td class="num">\( +3.15 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 619{,}548 \)</td><td class="num">\( 75.0 \)</td></tr><tr data-model="codex" data-plan="balanced"><td>Codex</td><td class="num">\( 45.90 \)</td><td class="num">\( +3.36 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 608{,}642 \)</td><td class="num">\( 75.3 \)</td></tr><tr data-model="claude" data-plan="risk_taker"><td rowspan="2">Risk taker</td><td>Claude</td><td class="num">\( 45.01 \)</td><td class="num">\( +2.34 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 543{,}771 \)</td><td class="num">\( 68.1 \)</td></tr><tr data-model="codex" data-plan="risk_taker"><td>Codex</td><td class="num">\( 45.02 \)</td><td class="num">\( +2.48 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 530{,}032 \)</td><td class="num">\( 68.2 \)</td></tr><tr data-model="claude" data-plan="scholar"><td rowspan="2">Scholar</td><td>Claude</td><td class="num">\( 42.43 \)</td><td class="num">\( -0.24 \)</td><td class="num">\( 0.0722 \)</td><td class="num">\( 808{,}349 \)</td><td class="num">\( 70.6 \)</td></tr><tr data-model="codex" data-plan="scholar"><td>Codex</td><td class="num">\( 42.06 \)</td><td class="num">\( -0.48 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 779{,}554 \)</td><td class="num">\( 70.4 \)</td></tr><tr data-model="claude" data-plan="hard_worker"><td rowspan="2">Hard worker</td><td>Claude</td><td class="num">\( 37.99 \)</td><td class="num">\( -4.68 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 818{,}516 \)</td><td class="num">\( 68.5 \)</td></tr><tr data-model="codex" data-plan="hard_worker"><td>Codex</td><td class="num">\( 37.63 \)</td><td class="num">\( -4.91 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 786{,}525 \)</td><td class="num">\( 67.9 \)</td></tr><tr data-model="claude" data-plan="business_owner"><td rowspan="2">Business owner</td><td>Claude</td><td class="num">\( 37.97 \)</td><td class="num">\( -4.70 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 719{,}308 \)</td><td class="num">\( 68.8 \)</td></tr><tr data-model="codex" data-plan="business_owner"><td>Codex</td><td class="num">\( 37.49 \)</td><td class="num">\( -5.05 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 701{,}614 \)</td><td class="num">\( 68.2 \)</td></tr><tr data-model="claude" data-plan="mover"><td rowspan="2">Mover</td><td>Claude</td><td class="num">\( 37.58 \)</td><td class="num">\( -5.08 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 751{,}663 \)</td><td class="num">\( 68.1 \)</td></tr><tr data-model="codex" data-plan="mover"><td>Codex</td><td class="num">\( 37.54 \)</td><td class="num">\( -5.00 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 755{,}769 \)</td><td class="num">\( 68.2 \)</td></tr><tr data-model="claude" data-plan="worst_h"><td rowspan="2">Worst choices</td><td>Claude</td><td class="num">\( 34.20 \)</td><td class="num">\( -8.47 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 381{,}018 \)</td><td class="num">\( 63.5 \)</td></tr><tr data-model="codex" data-plan="worst_h"><td>Codex</td><td class="num">\( 34.46 \)</td><td class="num">\( -8.08 \)</td><td class="num">\( &lt;0.001 \)</td><td class="num">\( 370{,}314 \)</td><td class="num">\( 64.2 \)</td></tr></tbody></table></div>
+    Each plan is compared with the same baby’s mean over the eleven plans. Health first is 5.8 (Claude) and 5.7 (Codex) happy years above that mean, and Best choices 4.8 (Claude) and 4.7 (Codex) above it.
+    Mean lifespan under Health first is 75.8 (Claude and Codex) years, compared with 71.0 (Claude) and 70.9 (Codex) under Best choices and 69.9 (Claude and Codex) across all eleven plans.
+    The table gives both samples' Holm-corrected p-values.
+    Very small p-values in the table are displayed as &lt;0.001. In the following plan plots, Health first is green and Hard worker orange.
     <br/><br/>
     Work-focused plans combine high income with lower happy-year means in both samples.
-    Hard worker loses 7.8 (Claude and Codex) happy years relative to the default; Scholar loses 3.3 (Claude and Codex).
+    Hard worker is 4.7 (Claude) and 4.9 (Codex) happy years below the baby’s mean; Business owner and Mover are about as far below it. Scholar is within half a happy year of the mean.
+    Worst choices is 8.5 (Claude) and 8.1 (Codex) below it and has the lowest lifetime income of the eleven plans.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-4">
-<img alt="Lifetime income and happy years for all ten plans" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-4.png" width="100%"/>
-<figcaption>Mean lifetime income and mean happy years for all ten plans, using 5,000 births per plan in each sample.</figcaption>
+<img alt="Lifetime income and happy years for all eleven plans" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-4.png" width="100%"/>
+<figcaption>Mean lifetime income and mean happy years for all eleven plans, using 5,000 births per plan in each sample.</figcaption>
 </figure>
-    Individual outcomes cover a much wider range than the plan means. The highest and lowest plan means are 10.9 (Claude) and 10.8 (Codex) happy years apart, while the distributions include early deaths and very long lives.
+    Individual outcomes cover a much wider range than the plan means. The highest and lowest plan means are 14.3 (Claude) and 13.8 (Codex) happy years apart, while the distributions include early deaths and very long lives.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-5">
-<img alt="Happy-year distributions for all ten fixed plans" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-5.png" width="100%"/>
-<figcaption>Distributions of happy years for all ten plans in the 50,000 fixed-plan lives per sample. Dots show means. Both panels use the same horizontal scale.</figcaption>
+<img alt="Happy-year distributions for all eleven fixed plans" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-5.png" width="100%"/>
+<figcaption>Distributions of happy years for all eleven plans in the 55,000 fixed-plan lives per sample. Dots show means. Both panels use the same horizontal scale.</figcaption>
 </figure>
-    Paired births show how each plan changes the same baby's outcome. Health first gives more happy years than the default for 56% (Claude) and 57% (Codex) of births.
-    It gives fewer for 40% (Claude) and 39% (Codex).
-    Hard worker gives fewer for 73% (Claude) and 71% (Codex). Equal outcomes include lives ending before the first birthday: 3.2% (Claude) and 2.9% (Codex).
+    Paired births show how each plan changes the same baby's outcome. Health first gives more happy years than the baby’s eleven-plan mean for 75% (Claude and Codex) of births.
+    It gives fewer for 22% (Claude and Codex).
+    Hard worker gives fewer for 68% (Claude) and 69% (Codex). A birth whose eleven plans give the same result counts as equal: 3.5% (Claude) and 3.1% (Codex), mostly lives ending before the first birthday (3.2% (Claude) and 2.9% (Codex)).
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-6">
-<img alt="Plan-minus-default outcomes for paired births" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-6.png" width="100%"/>
-<figcaption>Changes in happy years for Health first, Family first and Hard worker from the game default, using the same 5,000 births per sample. Each displayed plan is compared with that birth’s own default result.</figcaption>
+<img alt="Plan minus each birth’s eleven-plan mean for paired births" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-6.png" width="100%"/>
+<figcaption>Changes in happy years for Health first, Family first and Hard worker from each birth’s own mean over all eleven plans, using the same 5,000 births per sample.</figcaption>
 </figure>
-    Among the 4,841 (Claude) and 4,857 (Codex) births with nonzero happy years under at least one plan, Health first ranks first for 19.1% (Claude) and 19.5% (Codex).
-    Dreamer ranks first for 17.2% (Claude) and 18.2% (Codex). An equal split would give 10% per plan.
+    Among the 4,841 (Claude) and 4,857 (Codex) births with nonzero happy years under at least one plan, Best choices ranks first for 19.0% (Claude) and 19.2% (Codex).
+    Health first ranks first for 18.2% (Claude and Codex) and Dreamer for 15.7% (Claude) and 16.5% (Codex), although Health first has the higher mean. An equal split would give 9.1% per plan.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-7">
 <img alt="Share of births for which each plan is best" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-7.png" width="100%"/>
 <figcaption>Share of births for which each plan produces the most happy years: 4,841 births in the left panel and 4,857 in the right. Births with zero happy years under every plan are excluded, and ties split their share.</figcaption>
 </figure>
     These rankings use one future under each plan. Different random events could change which plan ranks first for the same baby.
     <br/><br/>
-    Across family income fifths, Health first's mean gain ranges from 1.6 to 3.6 happy years in Claude.
-    In Codex, it ranges from 2.1 to 4.1.
-    Its Sub-Saharan Africa gain is 3.8 (Claude) and 3.4 (Codex) happy years.
+    Across family income fifths, Health first's mean gain over the baby’s eleven-plan mean ranges from 5.5 to 6.2 happy years in Claude.
+    In Codex, it ranges from 5.5 to 6.1.
+    Its Sub-Saharan Africa gain is 6.4 (Claude) and 5.6 (Codex) happy years.
     <br/><br/>
-    Hard worker's mean loss is 8.5 (Claude) and 8.9 (Codex) happy years for males.
-    For females, the loss is 6.9 (Claude) and 6.6 (Codex).
+    Hard worker's mean loss is 4.7 (Claude) and 5.3 (Codex) happy years for males.
+    For females, the loss is 4.6 (Claude) and 4.5 (Codex).
     Europe &amp; Central Asia has only 187 (Claude) and 193 (Codex) births, producing wider intervals.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-8">
 <img alt="Paired plan effects by family income and region" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-8.png" width="100%"/>
-<figcaption>Paired changes for Health first and Hard worker by family income fifth and region, using 5,000 births per sample. Intervals are 95%; the two samples remain separate.</figcaption>
+<figcaption>Paired changes for Health first and Hard worker from each birth’s eleven-plan mean, by family income fifth and region, using 5,000 births per sample. Intervals are 95%; the two samples remain separate.</figcaption>
 </figure>
     Longer lives account for part of the Health first gain. The share reaching age 80 is 57.8% (Claude) and 57.6% (Codex) under Health first.
-    The default shares are 38.7% (Claude) and 37.9% (Codex); Hard worker gives 36.8% (Claude) and 36.0% (Codex).
+    Across all eleven plans it is 40.9% (Claude) and 40.8% (Codex); Hard worker gives 36.8% (Claude) and 36.0% (Codex) and Worst choices 23.0% (Claude) and 24.3% (Codex).
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-9">
 <img alt="Survival by plan in both expanded samples" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-9.png" width="100%"/>
-<figcaption>Share of the 5,000 births per sample reaching each age under each plan. Health first is green, Hard worker orange, and the other plans gray.</figcaption>
+<figcaption>Share of the 5,000 births per sample reaching each age under each of the eleven plans. Health first is green, Hard worker orange, and the other plans gray.</figcaption>
 </figure>
-    Birth conditions account for 27.8% (Claude) and 26.8% (Codex) of variation.
-    The plan accounts for 5.3% (Claude) and 5.7% (Codex); talent accounts for 1.4% (Claude) and 1.8% (Codex).
-    The unexplained shares are 65.5% (Claude) and 65.8% (Codex). These shares describe the game's fitted model and assigned plans.
+    Birth conditions account for 26.6% (Claude) and 25.7% (Codex) of variation.
+    The plan accounts for 7.7% (Claude) and 7.9% (Codex); talent accounts for 1.3% (Claude) and 1.6% (Codex).
+    The unexplained shares are 64.3% (Claude) and 64.8% (Codex). These shares describe the game's fitted model and assigned plans.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-10">
-<img alt="LMG contributions to variation across all ten fixed plans" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-10.png" width="100%"/>
-<figcaption>Contributions to variation in happy years across 50,000 fixed-plan lives per sample, estimated with the LMG method. The remainder is variation outside the fitted linear model.</figcaption>
+<img alt="LMG contributions to variation across all eleven fixed plans" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-10.png" width="100%"/>
+<figcaption>Contributions to variation in happy years across 55,000 fixed-plan lives per sample, estimated with the LMG method. The remainder is variation outside the fitted linear model.</figcaption>
 </figure>
     Unexplained variation may include random events and combinations of birth conditions and plans outside the linear model.
     The separate luck experiment repeats 200 births five times under the game default. Variation within births accounts for 66.3% (Claude) and 65.1% (Codex) of total variation.
     The 95% intervals are 59.6% to 73.4% in Claude and 58.5% to 72.7% in Codex.
-    These estimates are close to each sample's unexplained share.
+    These estimates are close to each sample’s unexplained share.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-11">
 <img alt="Luck-only variation compared with unexplained fixed-plan variation" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-11.png" width="100%"/>
-<figcaption>Variation from later events in the separate luck experiment (200 births × 5 futures per model), with 95% intervals, next to unexplained variation in 50,000 fixed-plan lives per model. Luck-test futures are outside the main 300,000-life total.</figcaption>
+<figcaption>Variation from later events in the separate luck experiment (200 births × 5 futures per model), with 95% intervals, next to unexplained variation in 55,000 fixed-plan lives per model. Luck-test futures are outside the main 310,000-life total.</figcaption>
 </figure>
     Luck works mostly through lifespan. In the same experiment, variation within births accounts for 84.8% (Claude) and 84.4% (Codex) of age at death but only 26.5% (Claude) and 25.9% (Codex) of mean birthday happiness.
     Among lives reaching 65, it accounts for 35.6% (Claude) and 32.8% (Codex) of mean happiness at ages 25 to 65.
@@ -329,22 +338,22 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
     <br><br>
 <div class="nvn-scroll"><table class="nvn"><tr><th>Outcome</th><th class="num">Claude (95% interval)</th><th class="num">Codex (95% interval)</th></tr><tr><td>Happy years</td><td class="num">66.3% (59.6–73.4)</td><td class="num">65.1% (58.5–72.7)</td></tr><tr><td>Age at death</td><td class="num">84.8% (78.4–91.6)</td><td class="num">84.4% (78.4–90.8)</td></tr><tr><td>Mean birthday happiness</td><td class="num">26.5% (22.6–31.3)</td><td class="num">25.9% (21.9–30.5)</td></tr><tr><td>Mean happiness at ages 25 to 65, lives reaching 65</td><td class="num">35.6% (30.5–41.4)</td><td class="num">32.8% (27.6–38.8)</td></tr></table></div>
 <br>
-    Family income and country both contribute to differences associated with birth. Averaging all ten plans within each birth, the richest family fifth has 49.4 (Claude) and 49.2 (Codex) happy years.
-    The poorest fifth has 37.8 (Claude and Codex).
+    Family income and country both contribute to differences associated with birth. Averaging all eleven plans within each birth, the richest family fifth has 48.6 (Claude) and 48.5 (Codex) happy years.
+    The poorest fifth has 37.3 (Claude) and 37.2 (Codex).
     Country estimates with fewer births have wider intervals.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-12">
-<img alt="Family and country averages using all ten plans per birth" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-12.png" width="100%"/>
-<figcaption>Mean happy years by family income fifth and by the eight countries with the most births. Every birth’s ten plan outcomes are averaged first, so all 50,000 fixed-plan paths per sample contribute. Counts and 95% intervals refer to independent births.</figcaption>
+<img alt="Family and country averages using all eleven plans per birth" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-12.png" width="100%"/>
+<figcaption>Mean happy years by family income fifth and by the eight countries with the most births. Every birth’s eleven plan outcomes are averaged first, so all 55,000 fixed-plan paths per sample contribute. Counts and 95% intervals refer to independent births.</figcaption>
 </figure>
-    The six talent scores together account for 1.4% (Claude) and 1.8% (Codex) of variation.
-    The 95% intervals from resampling whole births are 1.1% to 2.0% in Claude and 1.3% to 2.4% in Codex.
-    The individual-score split assigns 1.36% (Claude) and 1.69% (Codex) to study and 0.04% (Claude) and 0.07% (Codex) to the other five scores together.
+    The six talent scores together account for 1.3% (Claude) and 1.6% (Codex) of variation.
+    The 95% intervals from resampling whole births are 1.0% to 1.8% in Claude and 1.2% to 2.1% in Codex.
+    The individual-score split assigns 1.25% (Claude) and 1.55% (Codex) to study and 0.04% (Claude) and 0.05% (Codex) to the other five scores together.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-13">
 <img alt="Individual talent-score contributions in the expanded samples" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-13.png" width="100%"/>
-<figcaption>Contributions of the six talent scores to variation in the 50,000 fixed-plan lives per sample, estimated with the LMG method. These are point estimates, with the combined talent interval reported in the text.</figcaption>
+<figcaption>Contributions of the six talent scores to variation in the 55,000 fixed-plan lives per sample, estimated with the LMG method. These are point estimates, with the combined talent interval reported in the text.</figcaption>
 </figure>
-    Among the 47,268 (Claude) and 47,454 (Codex) adult paths under fixed plans, mean happy years rises from 31.1 to 60.3 across income tenths in Claude and from 31.1 to 59.8 in Codex.
-    The Spearman correlations are 0.60 (Claude) and 0.59 (Codex).
+    Among the 51,986 (Claude) and 52,196 (Codex) adult paths under fixed plans, mean happy years rises from 31.0 to 60.1 across income tenths in Claude and from 30.9 to 59.6 in Codex.
+    The Spearman correlations are 0.59 (Claude) and 0.58 (Codex).
     This describes completed lives and does not isolate the effect of earning more income. Higher-income birth conditions can produce both higher income and more happy years, while a plan focused on work raises income and reduces happiness.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-14">
 <img alt="Happy years by lifetime-income tenth, with intervals grouped by birth" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-14.png" width="100%"/>
@@ -355,7 +364,7 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
     <br/><br/>
     Each sample contains five girls and five boys. To reach this balance, the selection replaces the fewest examples. Replacements use the other sex and stay nearest the same country’s median; countries needing the smallest added distance change first.
     <br/><br/>
-    Each selected birth then follows 200 futures under the Worst choices plan and 200 under the Best choices plan, with the same 200 event seeds for both. For every choice where both samples agree, these plans take the answer with the lowest or the highest mean happiness at ages 25 to 65. These illustrative futures are outside the 300,000-life main total.
+    Each selected birth then follows 200 futures under the Worst choices plan and 200 under the Best choices plan, with the same 200 event seeds for both. These illustrative futures are outside the 310,000-life main total.
     <br/><br/>
     On the right, wider parts of a curve mark more common birthday happiness scores. Each life with recorded scores has equal total weight. Lives ending before the first birthday have no recorded score and do not enter that panel.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-0">
@@ -365,16 +374,16 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
     Under the worst choices, adult happiness falls for every baby and the country lines move closer together. Childhood is happier under that plan because its play focus raises childhood happiness, although it was chosen for its effect on adult years.
     Family, sex and talent differ between the selected babies as well as country. Their differences cannot be attributed to country alone.
 </br></br></br></div><br/><br/>
-<h3>Sex at birth</h3><div class="article">Across all 150,000 main-experiment paths per sample, females live 1.92 years longer on average in the Claude sample and 2.55 years longer in the Codex sample.
-    The happy-year gaps are smaller: 0.22 and 0.76, respectively.
+<h3>Sex at birth</h3><div class="article">Across all 155,000 main-experiment paths per sample, females live 1.99 years longer on average in the Claude sample and 2.63 years longer in the Codex sample.
+    The happy-year gaps are smaller: 0.34 and 0.88, respectively.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-21">
-<img alt="Average lifespan and happy years by sex at birth in all 300,000 lives" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-21.png" width="100%"/>
-<figcaption>Female and male average lifespan and happy years across all 150,000 main-experiment lives per sample. The saved field is sex at birth. Intervals keep the ten paths of a fixed-plan birth together; these are observed group differences.</figcaption>
+<img alt="Average lifespan and happy years by sex at birth in all 310,000 lives" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-21.png" width="100%"/>
+<figcaption>Female and male average lifespan and happy years across all 155,000 main-experiment lives per sample. The saved field is sex at birth. Intervals keep the eleven paths of a fixed-plan birth together; these are observed group differences.</figcaption>
 </figure>
-    The Claude happy-year interval includes zero (-0.07 to 0.50), so that sample does not establish a clear female advantage in the underlying mean.
+    Both happy-year intervals exclude zero (0.05 to 0.63 and 0.60 to 1.16), although the gaps are small next to the lifespan gaps.
     These comparisons describe female and male groups under the experiment’s mix of plans. They do not change only sex at birth while holding every other condition fixed.
 </div><br/><br/><h3>Which single choices matter</h3>
-<div class="article">The ten fixed plans combine many choices, so they cannot separate the effects of the game's 152 decision types.
+<div class="article">The eleven fixed plans combine many choices, so they cannot separate the effects of the game's 152 decision types.
     The two random-plan experiments vary individual answers. Their estimates control for the available options and the person's situation.
     <br/><br/>
     For example, selling a rented-out house is offered only to people who own one, in 0.74% (Claude) and 0.75% (Codex) of lives that fall into debt.
@@ -416,21 +425,21 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 </div><br/><br/>
 <h3>Life paths</h3>
 <div class="article">Education and marital status provide another way to group completed lives.
-    Among adult paths under fixed plans, 16.5% (Claude) and 16.3% (Codex) never attend school, while 23.6% (Claude) and 23.4% (Codex) finish university.
-    The difference in mean happy years between these groups is 13.2 (Claude) and 13.6 (Codex).
-    The group means are 39.0 and 52.1 in Claude, and 38.4 and 52.0 in Codex.
+    Among adult paths under fixed plans, 16.5% (Claude) and 16.3% (Codex) never attend school, while 23.0% (Claude) and 22.8% (Codex) finish university.
+    The difference in mean happy years between these groups is 14.2 (Claude) and 14.5 (Codex).
+    The group means are 38.4 and 52.6 in Claude, and 37.8 and 52.3 in Codex.
     <figure data-runs="claude codex" data-study="expanded" id="nvn-comparison-18">
 <img alt="Happy years by schooling and marriage at death in both expanded samples" onerror="handle_image_error(this)" src="/img/nature-vs-nurture/nature-vs-nurture-18.png" width="100%"/>
 <figcaption>Mean happy years by schooling and marital status at death among adult paths under fixed plans. Brackets show shares; 95% intervals keep paths from the same birth together.</figcaption>
 </figure>
     These are descriptions of completed lives, not isolated effects of education or marriage.
     A path also depends on how long the person lives. Being widowed at death largely reflects a long life, while early death leaves less time to marry.
-    Widowed paths account for 39.4% (Claude) and 39.0% (Codex) of adult paths, with 51.4 (Claude) and 51.3 (Codex) mean happy years.
+    Widowed paths account for 38.7% (Claude) and 38.6% (Codex) of adult paths, with 51.0 (Claude) and 50.8 (Codex) mean happy years.
 </div><br/><br/>
 <h3>What counts as luck</h3>
 <div class="article">
     Talent can also be treated as part of birth conditions because the game assigns it at birth, together with country and family.
-    Under this grouping, birth conditions account for 29.2% (Claude) and 28.6% (Codex) of variation. Events after birth account for about two thirds, mostly by changing lifespan, and the life-plan shares are 5.3% (Claude) and 5.7% (Codex).
+    Under this grouping, birth conditions account for 27.9% (Claude) and 27.3% (Codex) of variation. Events after birth account for about two thirds, mostly by changing lifespan, and the life-plan shares are 7.7% (Claude) and 7.9% (Codex).
 <br/><br/>
     The interpretation of effort is less direct.
     Rawls argued that "even the willingness to make an effort, to try, and so to be deserving in the ordinary sense is itself dependent upon happy family and social circumstances" (A Theory of Justice, 1971, §17).
@@ -441,7 +450,7 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
     <br/><br/>
     This experiment measures how outcomes change when the same baby follows a different assigned plan.
     It does not resolve whether the willingness to make an effort is itself a form of luck.
-    The plan’s contributions of 5.3% (Claude) and 5.7% (Codex) describe the effect of choices under this design and do not establish who deserves a particular outcome.
+    The plan’s contributions of 7.7% (Claude) and 7.9% (Codex) describe the effect of choices under this design and do not establish who deserves a particular outcome.
     Available choices also depend on the person's situation, as the decision comparisons demonstrate.
 </div><br/><br/>
 <h3>Earlier independent Codex study</h3>
@@ -479,12 +488,15 @@ table.nvn:not(#nvn-plan-table) tr:nth-child(n+3) td { border-top: 1px solid rgba
 <ol>
 <li>The measurements apply to the game's model. Talent, focus and decision effects follow rules chosen by its author, as does the happiness score. Country life satisfaction and income rank already enter the score's target, contributing to the measured birth and income relationships.</li>
 <li>The luck experiment uses 200 births per model under the game default. Its 95% intervals are 59.6% to 73.4% in Claude and 58.5% to 72.7% in Codex. Other plans or larger samples could give different estimates. The earlier independent experiment found 69.1% using 2,000 births under study and balance.</li>
-<li>The fixed-plan birth estimate uses 5,000 distinct births. Its 50,000 paths repeat each birth under ten plans. The birth group combines country, family income and sex; it is not an estimate of genetic inheritance.</li>
+<li>The fixed-plan birth estimate uses 5,000 distinct births. Its 55,000 paths repeat each birth under eleven plans. The birth group combines country, family income and sex; it is not an estimate of genetic inheritance.</li>
 <li>Each baby's plan ranking uses one set of random events per plan. Replaying the birth could change the ranking.</li>
 <li>Choice effects are estimated from the first occurrence of each decision. Rarely available answers have small comparison groups and wide intervals.</li>
 <li>Income groups and life paths describe completed lives. Their differences combine birth conditions, random events and choices, so they do not isolate causal effects.</li>
 <li>In the initial run, five plans specified focus options unavailable at the relevant stage, leaving 34% to 100% of their steps on auto focus. The lists were corrected and the 10,000 lives rerun. The expansion uses those same corrected lists; no game rule was changed.</li>
 </ol>
+ <br/><br/>
+    The two choice plans take each answer from estimates on the same game and the same lives they are later compared with, so they show how far the game's rules let choices move happiness, not the best or worst choices for a real life.
+    Each answer was also estimated on its own; when one life follows all of them, their effects need not add up.
 </div><br/><br/>
 <h3>Future work</h3>
 <div class="article">
