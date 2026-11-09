@@ -126,6 +126,10 @@ test('a sideways swipe moves only a cut-off title, never the whole panel', async
   await panel.locator('.post-related summary').click();
   // the panel scrolls up and down only, so a trackpad can not swing it sideways
   await expect(panel).toHaveCSS('overflow-x', 'hidden');
+  // no title bounces under a trackpad's swipe, which moved even a title that fits (Chrome on a Mac)
+  for (const entry of await panel.locator('.post-related span, .post-contents a').all()) {
+    await expect(entry).toHaveCSS('overscroll-behavior-x', 'none');
+  }
   const heading = await panel.locator('.post-related summary').boundingBox();
   // over a title that fits, the swipe has nothing to move
   const fits = await panel.locator('.post-related span', { hasText: 'Latent Shapes' }).boundingBox();

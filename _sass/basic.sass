@@ -622,14 +622,15 @@ a:hover
   align-items: center
   gap: 0.5em
 
-// an entry's words: a heading in Contents, a title beside its emoji in Related. A swipe that slides a
-// cut-off one stops at its end, rather than passing on to the page
+// an entry's words: a heading in Contents, a title beside its emoji in Related. Only a cut-off one
+// slides: a trackpad's sideways bounce is off, which otherwise moved even a title that fits, and a
+// swipe stops at the end rather than passing on to the page
 .post-contents a, .post-related span
   display: block
   min-width: 0
   overflow-x: auto
   overflow-y: hidden
-  overscroll-behavior-x: contain
+  overscroll-behavior-x: none
   white-space: nowrap
   @include hide-scrollbar(height)
 
