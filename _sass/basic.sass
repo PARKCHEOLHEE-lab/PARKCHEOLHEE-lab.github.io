@@ -573,18 +573,19 @@ a:hover
     font-weight: $heading-weight
 
 // from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
-// panel stays below the header while the list scrolls
+// panel stays below the header while the list scrolls. A post with a side panel is laid out the same
+// (post.html), its panel beside the post
 @media (min-width: 768px)
-  .note-index
+  .note-index, .post-index:has(> #post-side)
     display: grid
     grid-template-columns: 12em minmax(0, 1fr)
     column-gap: 2.5em
     align-items: start
-  .note-filter
+  .note-filter, #post-side
     position: sticky
     top: calc(var(--header-height, 0px) + 1.5em)
-  // the search box and the list
-  .note-main
+  // the search box and the list; the post
+  .note-main, .post-main
     grid-column: 2
 
 @media (prefers-reduced-motion: reduce)
@@ -624,31 +625,21 @@ a:hover
     white-space: nowrap
     @include hide-scrollbar(height)
 
-// where the panel goes: in the menu on phones (header.sass); in the post from 768px, Contents at its top
-// and Related at its end; from 72em in the margin left of the post's column, staying below the header
-// while the post scrolls, with a long table of contents scrolling inside it. It floats there, so the
-// post's text keeps its place. lazy: a float, as nothing in the posts clears one; content with clear
-// would drop below the panel, which then needs a grid around the post's content (as .note-index)
+// on phones the panel is in the menu (header.sass); from 768px its first heading sits on the post
+// title's line, and a long table of contents scrolls inside it, which ends 1.5em above the screen's
+// bottom while it stays below the header
 @media (max-width: 767.98px)
-  article .post-side-panel
-    display: none
-
-@media (min-width: 768px) and (max-width: 71.99em)
-  #post-side .post-related
-    display: none
-
-@media (min-width: 72em)
   #post-side
-    float: left
-    position: sticky
-    top: calc(var(--header-height, 0px) + 1.5em)
-    width: 12em
+    display: none
+
+@media (min-width: 768px)
+  #post-side
+    // the title's top margin (layout.sass) less the section's own top padding, with their lines'
+    // centres matched: 1.32em measured at 820 and 1240px wide
+    margin-top: 1.3em
     max-height: calc(100vh - var(--header-height, 0px) - 3em)
-    margin-left: -14.5em
     overflow-y: auto
     overscroll-behavior: contain
-  .post-end
-    display: none
 
 // --- Testbed-specific classes ---
 

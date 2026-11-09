@@ -49,33 +49,31 @@ layout: default
     {%- endif -%}
   {%- endfor -%}
 {%- endcapture -%}
-{%- capture related_section -%}
-  {%- if related_items != "" -%}
-    <details class="post-related" open><summary>Related{% include chevron.html %}</summary><ul>{{ related_items }}</ul></details>
+{%- capture side_label -%}
+  {%- if content contains 'id="toc"' -%}
+    Contents{% if related_items != "" %} and related posts{% endif %}
+  {%- elsif related_items != "" -%}
+    Related posts
   {%- endif -%}
 {%- endcapture -%}
 
 <article>
 
+  {% comment %} the post's side panel and the post, side by side from 768px as the Manifest's panel and
+    list are (basic.sass); below 768px the panel is in the menu {% endcomment %}
+  <div class="post-index">
+  {% if side_label != "" %}
+  {% comment %} Contents, the post's table of contents (setup_post_panel), and Related {% endcomment %}
+  <aside id="post-side" class="post-side-panel" aria-label="{{ side_label }}">
+    {% if content contains 'id="toc"' %}<details class="post-contents" open hidden><summary>Contents{% include chevron.html %}</summary></details>{% endif %}
+    {% if related_items != "" %}<details class="post-related" open><summary>Related{% include chevron.html %}</summary><ul>{{ related_items }}</ul></details>{% endif %}
+  </aside>
+  {% endif %}
+  <div class="post-main">
+
   {% include meta.html post=page %}
 
-  {% comment %} the post's side panel: Contents, its table of contents (setup_post_panel), and Related.
-    Beside the post on wide screens; at its top on tablets, with Related at its end instead; in the menu
-    on phones (basic.sass) {% endcomment %}
-  {% if content contains 'id="toc"' %}
-  <aside id="post-side" class="post-side-panel" aria-label="Contents and related posts">
-    <details class="post-contents" open hidden><summary>Contents{% include chevron.html %}</summary></details>
-    {{ related_section }}
-  </aside>
-  {% elsif related_section != "" %}
-  <aside id="post-side" class="post-side-panel" aria-label="Related posts">{{ related_section }}</aside>
-  {% endif %}
-
   {{ content }}
-
-  {% if related_section != "" %}
-  <aside class="post-end post-side-panel" aria-label="Related posts">{{ related_section }}</aside>
-  {% endif %}
 
   {% if page.comment != false and page.content != empty %}
     <div class="col-lg-8 col-md-10 mx-auto">
@@ -91,5 +89,8 @@ layout: default
       </script>
     </div><br><br>
   {% endif %}
+
+  </div>
+  </div>
 
 </article>

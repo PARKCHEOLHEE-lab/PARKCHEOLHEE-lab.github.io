@@ -1,8 +1,8 @@
 // @ts-check
 const { test, expect } = require('@playwright/test');
 
-// a post's side panel (post.html, setup_post_panel): Contents and Related, beside the post on wide
-// screens, at its top and end on tablets, in the menu on phones
+// a post's side panel (post.html, setup_post_panel): Contents and Related, beside the post from 768px as
+// the Manifest's panel is beside its list, in the menu on phones
 
 // a post with a table of contents and seven related posts, two of them with long titles
 const POST = '/image-to-3d-scene/';
@@ -12,21 +12,31 @@ async function scroll_to(page, top) {
   await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), top);
 }
 
-test('on a wide screen the panel sits in the margin left of the post, with Contents and Related', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto(POST);
-  const panel = page.locator('#post-side');
-  await expect(panel.locator('.post-contents')).toBeVisible();
-  await expect(panel.locator('.post-related')).toBeVisible();
-  await expect(page.locator('.post-end')).toBeHidden();
-  const box = await panel.boundingBox();
-  const title = await page.locator('article h1').boundingBox();
-  const text = await page.locator('article h3').first().boundingBox();
-  // left of the post's column, which keeps its place beside it, and on the screen
-  expect(box.x).toBeGreaterThanOrEqual(16);
-  expect(box.x + box.width).toBeLessThan(title.x - 20);
-  expect(text.x).toBeCloseTo(title.x, 0);
-});
+for (const width of [820, 1280]) {
+  test(`at ${width}px the panel takes the left of the page's column, under the logo, and the post the rest`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(POST);
+    const panel = page.locator('#post-side');
+    await expect(panel.locator('.post-contents')).toBeVisible();
+    await expect(panel.locator('.post-related')).toBeVisible();
+    const box = await panel.boundingBox();
+    const logo = await page.locator('body > header .title-main').boundingBox();
+    const title = await page.locator('article h1').boundingBox();
+    const text = await page.locator('article h3').first().boundingBox();
+    const em = await panel.evaluate((element) => parseFloat(getComputedStyle(element).fontSize));
+    expect(box.x).toBeCloseTo(logo.x, 0);
+    expect(title.x - (box.x + box.width)).toBeCloseTo(2.5 * em, 0);
+    expect(text.x).toBeCloseTo(title.x, 0);
+    // "Contents" sits on the title's line
+    const centres = await page.evaluate(() => [document.querySelector('#post-side summary').firstChild, document.querySelector('article h1')].map((node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const rect = range.getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    }));
+    expect(Math.abs(centres[0] - centres[1])).toBeLessThanOrEqual(2);
+  });
+}
 
 test('on a wide screen the panel stays below the header while the post scrolls, and ends inside the post', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
@@ -84,30 +94,12 @@ test('a post without a table of contents has Related only, and one with neither 
   await expect(page.locator('#post-side .post-related')).toBeVisible();
   await page.goto('/cprofile/');
   await expect(page.locator('#post-side')).toHaveCount(0);
-  await expect(page.locator('.post-end')).toHaveCount(0);
-});
-
-test('on a tablet Contents is at the top of the post and Related at its end', async ({ page }) => {
-  await page.setViewportSize({ width: 1000, height: 800 });
-  await page.goto(POST);
-  const contents = page.locator('#post-side .post-contents');
-  await expect(contents).toBeVisible();
-  await expect(page.locator('#post-side .post-related')).toBeHidden();
-  const related = page.locator('.post-end .post-related');
-  await expect(related).toBeVisible();
-  const first = await page.locator('article h3').first().boundingBox();
-  const last = await page.locator('article h3').last().boundingBox();
-  expect((await contents.boundingBox()).y).toBeLessThan(first.y);
-  expect((await related.boundingBox()).y).toBeGreaterThan(last.y);
 });
 
 test('on a phone the panel is in the menu only, as one copy', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(POST);
-  await expect(page.locator('article .post-side-panel')).toHaveCount(2);
-  for (const panel of await page.locator('article .post-side-panel').all()) {
-    await expect(panel).toBeHidden();
-  }
+  await expect(page.locator('#post-side')).toBeHidden();
   await page.getByRole('button', { name: 'Menu' }).click();
   const menu = page.locator('#post-menu');
   await expect(menu.locator('.post-contents a').first()).toBeVisible();
