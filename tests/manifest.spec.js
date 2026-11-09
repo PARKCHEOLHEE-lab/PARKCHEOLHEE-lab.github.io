@@ -87,13 +87,19 @@ test('a hidden post (Reading List) is not listed, and its page still opens', asy
 
 const row_titled = (page, title) => page.locator('#note-list .note-post-item', { has: page.locator('.post-title', { hasText: title }) });
 
-test('the search finds posts by their text, with a line of it under each title, and the count is a number', async ({ page }) => {
+test('the search finds posts by their text, with a piece of it beside each title on one line, and the count is a number', async ({ page }) => {
   await page.goto('/manifest/');
+  const one_line = (await page.locator('.note-post-item .post-row').first().boundingBox()).height;
   // neither word is in this post's title, only in its text
   await page.locator('#note-search').fill('masked attention');
   const fancy = row_titled(page, 'Fancy Indexing Cheat Sheet');
   await expect(fancy).toBeVisible();
   await expect(fancy.locator('.note-snippet mark')).toHaveText(['Masked', 'Attention']);
+  // the row keeps its height, and the first word found shows inside the piece
+  expect(Math.abs((await fancy.locator('.post-row').boundingBox()).height - one_line)).toBeLessThan(0.5);
+  const piece = await fancy.locator('.note-snippet').boundingBox();
+  const word = await fancy.locator('.note-snippet mark').first().boundingBox();
+  expect(word.x + word.width).toBeLessThanOrEqual(piece.x + piece.width);
   const shown = await shown_rows(page).count();
   expect(shown).toBeGreaterThan(0);
   await expect(page.locator('.note-search-count')).toHaveText(String(shown));

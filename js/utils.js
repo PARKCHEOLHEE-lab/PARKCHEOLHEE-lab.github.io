@@ -99,8 +99,8 @@ function filter_posts(type) {
 // checked types' rows, all of them at first; with none checked the list is empty. Pinned rows stay on
 // top in their build order under every sort (a pinned page has no date), and the build order (newest
 // first) is the start. A press on a type and a drag over others sets them all. The search box keeps
-// the rows whose title or text has every word typed, each with a line of its text around the first
-// one. A choice other than the start stays in the page's address.
+// the rows whose title or text has every word typed, each with a piece of its text from the first one
+// beside its title. A choice other than the start stays in the page's address.
 function setup_note_list() {
   const list = document.getElementById("note-list");
   const panel = document.querySelector(".note-filter");
@@ -213,7 +213,13 @@ function setup_note_list() {
     if (at < 0) {
       return null;
     }
-    const start = Math.max(0, at - 40);
+    // the piece shares the row's one line with the title, so it starts at most 12 letters before the
+    // word, at the start of a word where there is one, and the line cuts the rest
+    let start = Math.max(0, at - 12);
+    const space = row.text.indexOf(" ", start);
+    if (start > 0 && space >= 0 && space < at) {
+      start = space + 1;
+    }
     const end = Math.min(row.text.length, at + 100);
     const piece = (start > 0 ? "…" : "") + row.text.slice(start, end) + (end < row.text.length ? "…" : "");
     const piece_lower = piece.toLowerCase();

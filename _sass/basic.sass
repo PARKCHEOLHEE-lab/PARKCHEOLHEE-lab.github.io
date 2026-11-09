@@ -545,20 +545,22 @@ a:hover
   font-size: smaller
   font-variant-numeric: tabular-nums
 
-// a found row: its title over a line of its text, the words typed marked, the icon and the date by the
-// title
+// a found row stays one line: its title, then a piece of its text from just before the first word found
+// (setup_note_list), cut where the row ends. The title takes up to half the room, so the piece keeps
+// at least the other half
 .note-post-item.has-snippet
   .title-wrapper
-    flex-direction: column
-    align-items: flex-start
-  .note-emoji-column, .note-date-column
-    align-self: flex-start
-  .note-emoji-column
-    padding-top: 0.45em
+    gap: 1em
+  .title-scroll
+    flex: 0 1 auto
+    width: auto
+    max-width: 50%
 
 .note-snippet
-  max-width: 100%
-  margin: -0.35em 0 0.5em
+  flex: 1 1 0
+  min-width: 0
+  // the title's 0.1em, so both sit on one line (.note-post-item .post-title)
+  padding-top: 0.1em
   overflow: hidden
   color: reduce(100)
   font-size: smaller
