@@ -479,17 +479,18 @@ a:hover
   font-size: smaller
   font-variant-numeric: tabular-nums
 
-// the search box (note.html): an icon, the words and, while searching, how many posts are shown, over
-// the panel's dotted line, which darkens while the box has the focus
+// the search box over the list (note.html): an icon, the words and, while searching, how many posts
+// are shown, between the rows' dotted lines. The list's line under it darkens while it has the focus
 .note-search
   display: flex
   align-items: center
   gap: 0.5em
   padding: 0.5em 0
-  border-bottom: 1px dotted reduce(14)
+  border-top: 1px dotted reduce(14)
   color: $text-dark
-  &:focus-within
-    border-bottom-color: $text-dark
+  // hidden until setup_note_list runs, as it does nothing without it
+  &[hidden]
+    display: none
   svg
     flex: none
     width: 1em
@@ -497,6 +498,8 @@ a:hover
   input
     flex: 1
     min-width: 0
+    // as tall as the clear button, so the box keeps its height when the button shows
+    min-height: 24px
     padding: 0
     border: 0
     background: none
@@ -506,6 +509,9 @@ a:hover
     // the browser's own clear button, a bitmap in Chrome and Safari; .note-search-clear replaces it
     &::-webkit-search-cancel-button
       display: none
+
+.note-main:has(.note-search:focus-within) #note-list
+  border-top-color: $text-dark
 
 // the clear button, shown while the box has words (setup_note_list): a cross in the magnifier's line,
 // a little smaller, with the 24px minimum target size (WCAG 2.5.8)
@@ -570,7 +576,8 @@ a:hover
   .note-filter
     position: sticky
     top: calc(var(--header-height, 0px) + 1.5em)
-  #note-list
+  // the search box and the list
+  .note-main
     grid-column: 2
 
 @media (prefers-reduced-motion: reduce)

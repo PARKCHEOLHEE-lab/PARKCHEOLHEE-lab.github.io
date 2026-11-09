@@ -407,18 +407,11 @@ function setup_note_list() {
   search.addEventListener("input", find);
   // the file starts loading as the box is entered, before the first word
   search.addEventListener("focus", load);
-  // Escape empties the box, as the browser's own clear button does. On a phone the box is in the menu,
-  // which covers the list, so Enter (the keyboard's search key) closes the menu to show what it found
+  // Escape empties the box, as its clear button does
   search.addEventListener("keydown", function(event) {
     if (event.key === "Escape" && search.value) {
       search.value = "";
       find();
-    }
-    if (event.key === "Enter" && panel.matches(":popover-open")) {
-      // closing the menu hands the focus back to the Menu button, which the same Enter would then
-      // press, opening the menu again
-      event.preventDefault();
-      panel.hidePopover();
     }
   });
   // "/" goes to the search box from anywhere on the page but another text field
@@ -431,6 +424,7 @@ function setup_note_list() {
 
   read_url();
   panel.hidden = false;
+  search.parentElement.hidden = false;
   find();
 }
 

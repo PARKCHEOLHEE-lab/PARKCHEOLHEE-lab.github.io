@@ -141,32 +141,36 @@ test('"/" goes to the search box', async ({ page }) => {
   await expect(page.locator('#note-search')).toBeFocused();
 });
 
-test('on a phone the search box is in the menu, and Enter closes the menu to show what it found', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/manifest/');
-  const menu = page.locator('#note-menu');
-  const box = menu.locator('.note-search input');
-  await expect(box).toBeHidden();
-  await page.getByRole('button', { name: 'Menu' }).click();
-  await expect(box).toBeVisible();
-  await box.fill('attention');
-  await box.press('Enter');
-  await expect(menu).toBeHidden();
-  await expect(row_titled(page, 'Attention Is All You Need')).toBeVisible();
-  await expect(row_titled(page, 'ONNX')).toBeHidden();
-});
-
-test('the search box has the panel\'s dotted line', async ({ page }) => {
-  await page.goto('/manifest/');
-  const search = await page.locator('.note-search').evaluate((element) => {
-    const style = getComputedStyle(element);
-    return [style.borderBottomStyle, style.borderBottomWidth, style.borderBottomColor];
+for (const width of [390, 1280]) {
+  test(`at ${width}px the search box sits over the list, as wide as it, and not in the panel`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/manifest/');
+    const box = await page.locator('.note-search').boundingBox();
+    const list = await page.locator('#note-list').boundingBox();
+    expect(Math.round(box.x)).toBe(Math.round(list.x));
+    expect(Math.round(box.width)).toBe(Math.round(list.width));
+    expect(Math.round(box.y + box.height)).toBe(Math.round(list.y));
+    expect(await page.locator('#note-menu .note-search').count()).toBe(0);
   });
-  const divider = await page.locator('.note-filter details + details').evaluate((element) => {
+}
+
+test('the search box keeps its height while typing, between the rows\' dotted lines', async ({ page }) => {
+  await page.goto('/manifest/');
+  const box = page.locator('.note-search');
+  const empty = (await box.boundingBox()).height;
+  await page.locator('#note-search').fill('attention');
+  await expect(page.getByRole('button', { name: 'Clear search' })).toBeVisible();
+  expect((await box.boundingBox()).height).toBe(empty);
+
+  const top = await box.evaluate((element) => {
     const style = getComputedStyle(element);
     return [style.borderTopStyle, style.borderTopWidth, style.borderTopColor];
   });
-  expect(search).toEqual(divider);
+  const row = await page.locator('.note-post-item .post-row').first().evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.borderBottomStyle, style.borderBottomWidth, style.borderBottomColor];
+  });
+  expect(top).toEqual(row);
 });
 
 test('Testbed is the first type in the panel', async ({ page }) => {
