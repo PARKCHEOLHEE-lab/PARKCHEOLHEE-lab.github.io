@@ -1,5 +1,5 @@
 // The header every page shares (default.html). It stays at the top of the screen while the page
-// scrolls, and once the page leaves the top the logo's black box spreads over it. Below 990px its Menu
+// scrolls, and once the page leaves the top the logo's black box spreads over it. Below 768px its Menu
 // button opens the Manifest's side panel from the right, with the site's links on top (setup_header in
 // js/utils.js). Pages without the panel keep their links in the header. Its height is set with the
 // other per-site header rules, in assets/css/index.sass.
@@ -49,13 +49,13 @@ body:has(:popover-open)
     display: block
 
 // the site's links that setup_header copies into the panel, for the narrow-screen menu only
-@media (min-width: 990px)
+@media (min-width: 768px)
   .note-filter nav
     display: none
 
-// below 990px the Menu button slides the panel in from the right, below the header and over the page;
+// below 768px the Menu button slides the panel in from the right, below the header and over the page;
 // Escape, a tap outside or a link in it closes it (the browser's popover, and setup_header)
-@media (max-width: 989.98px)
+@media (max-width: 767.98px)
   body:has(.note-filter) > header nav
     display: none
   body:has(.note-filter) .site-menu-button

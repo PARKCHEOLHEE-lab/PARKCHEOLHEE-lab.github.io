@@ -122,8 +122,8 @@ test('a choice other than every type and Newest stays in the address, and the ad
   await expect(page).toHaveURL(/\/manifest\/\?type=testbed$/);
 });
 
-for (const width of [390, 820]) {
-  test(`at ${width}px the menu button opens the panel from the right, over the list`, async ({ page }) => {
+for (const width of [360, 390]) {
+  test(`on a ${width}px phone the menu button opens the panel from the right, over the list`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/manifest/');
     const menu = page.locator('#note-menu');
@@ -146,5 +146,18 @@ for (const width of [390, 820]) {
 
     await page.keyboard.press('Escape');
     await expect(menu).toBeHidden();
+  });
+}
+
+for (const width of [768, 820]) {
+  test(`on a ${width}px tablet the panel sits beside the list and the header keeps its link`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 1024 });
+    await page.goto('/manifest/');
+    const panel = await page.locator('#note-menu').boundingBox();
+    const row = await page.locator('#note-list .post-row').first().boundingBox();
+    expect(panel.x + panel.width).toBeLessThan(row.x);
+    await expect(page.locator('#note-sort')).toBeVisible();
+    await expect(page.locator('body > header nav')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
   });
 }

@@ -431,7 +431,7 @@ a:hover
 // the side panel (note.html), after aaro Academy's Resources sidebar (aaro-lab/aaro-domus,
 // apps/academy/components/resources-browser.tsx): Sort by and Type, each a section that folds under
 // its heading, with a chevron that points up while it is open. Its words are the list's size and its
-// lines the rows' dotted line. Below 990px it is the header's menu panel (header.sass)
+// lines the rows' dotted line. Below 768px it is the header's menu panel (header.sass)
 .note-filter
   color: $text-dark
   details
@@ -479,9 +479,9 @@ a:hover
   font-size: smaller
   font-variant-numeric: tabular-nums
 
-// from 990px the panel takes the left of the page's column, under the logo, and the list the rest; the
+// from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
 // panel stays below the header while the list scrolls
-@media (min-width: 990px)
+@media (min-width: 768px)
   .note-index
     display: grid
     grid-template-columns: 12em minmax(0, 1fr)

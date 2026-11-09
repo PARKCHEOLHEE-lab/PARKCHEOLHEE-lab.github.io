@@ -289,7 +289,7 @@ function setup_note_list() {
 }
 
 // The header on every page stays at the top of the screen, and once the page leaves the top the logo's
-// black box spreads over it (header.sass). Below 990px its Menu button opens the Manifest's side panel
+// black box spreads over it (header.sass). Below 768px its Menu button opens the Manifest's side panel
 // from the right, with the site's links on top.
 function setup_header() {
   const header = document.querySelector("body > header");
@@ -320,9 +320,9 @@ function setup_header() {
   }
   menu.prepend(header.querySelector("nav").cloneNode(true));
   header.querySelector(".site-menu-button").setAttribute("popovertarget", menu.id);
-  // a popover below 990px only: from there the panel is back beside the list, where the browser's
+  // a popover below 768px only: from there the panel is back beside the list, where the browser's
   // popover styles would hide it, and one left open closes as the attribute goes
-  const wide = matchMedia("(min-width: 990px)");
+  const wide = matchMedia("(min-width: 768px)");
   function place() {
     menu.toggleAttribute("popover", !wide.matches);
   }
