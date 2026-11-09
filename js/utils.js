@@ -96,9 +96,7 @@ function filter_posts(type) {
 
 // The Manifest list and its side panel. Sort by orders the rows newest or oldest first, by title, or
 // by type. A checkbox per post type (read from each row's emoji, with its post count) shows the
-// checked types' rows, all of them at first, and unchecking the last one checks them all again, as on
-// aaro Academy's Resources page (an empty list is a dead end that reads the same as a fresh visit).
-// Pinned rows stay on top in their build order under every sort (a pinned page has no date), and the
+// checked types' rows, all of them at first; with none checked the list is empty. Pinned rows stay on top in their build order under every sort (a pinned page has no date), and the
 // build order (newest first) is the start. A press on a type and a drag over others sets them all, and
 // a choice other than the start stays in the page's address.
 function setup_note_list() {
@@ -140,7 +138,7 @@ function setup_note_list() {
     names[type] = TYPE_NAMES[stem] || stem.charAt(0).toUpperCase() + stem.slice(1);
   });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-  // the checked types, never empty
+  // the checked types
   const state = { types: new Set(types), sort: "newest" };
 
   function compare(a, b) {
@@ -194,15 +192,15 @@ function setup_note_list() {
     history.replaceState(history.state, "", location.pathname + (parts.length ? "?" + parts.join("&") : "") + location.hash);
   }
 
-  // an address written by hand may name types or a sort that do not exist; those are left out
+  // an address written by hand may name types or a sort that do not exist; those are left out. An
+  // empty type= is no type checked
   function read_url() {
     const params = new URLSearchParams(location.search);
-    const wanted = (params.get("type") || "").toLowerCase().split(",");
-    const picked = types.filter(function(type) {
-      return wanted.includes(names[type].toLowerCase());
-    });
-    if (picked.length > 0) {
-      state.types = new Set(picked);
+    if (params.has("type")) {
+      const wanted = params.get("type").toLowerCase().split(",");
+      state.types = new Set(types.filter(function(type) {
+        return wanted.includes(names[type].toLowerCase());
+      }));
     }
     const sorts = Array.from(sort.querySelectorAll("input"), function(radio) {
       return radio.value;
@@ -233,11 +231,6 @@ function setup_note_list() {
       state.types.add(type);
     } else {
       state.types.delete(type);
-    }
-    if (state.types.size === 0) {
-      types.forEach(function(type) {
-        state.types.add(type);
-      });
     }
     render();
   }

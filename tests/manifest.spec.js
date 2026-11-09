@@ -4,7 +4,7 @@ const { test, expect } = require('@playwright/test');
 const shown_rows = (page) => page.locator('#note-list .note-post-item:visible');
 const type_box = (page, icon) => page.locator(`#note-type-filter input[value="/emoji/${icon}.png"]`);
 
-test('type filter: unchecked types hide, and unchecking the last one checks them all again', async ({ page }) => {
+test('type filter: unchecked types hide, and every type can be unchecked', async ({ page }) => {
   await page.goto('/manifest/');
   const total = await page.locator('#note-list .note-post-item').count();
   const boxes = page.locator('#note-type-filter input');
@@ -25,10 +25,13 @@ test('type filter: unchecked types hide, and unchecking the last one checks them
   }
 
   await type_box(page, 'puzzle').click();
-  await expect(shown_rows(page)).toHaveCount(total);
+  await expect(shown_rows(page)).toHaveCount(0);
   for (const box of await boxes.all()) {
-    await expect(box).toBeChecked();
+    await expect(box).not.toBeChecked();
   }
+  await expect(page).toHaveURL(/\/manifest\/\?type=$/);
+  await page.reload();
+  await expect(shown_rows(page)).toHaveCount(0);
 });
 
 test('sort by: pinned rows stay on top, and Oldest puts the oldest post first', async ({ page }) => {
@@ -110,12 +113,11 @@ test('a choice other than every type and Newest stays in the address, and the ad
   await expect(page).toHaveURL(/\/manifest\/$/);
 
   // names and sorts that do not exist are left out
-  await page.goto('/manifest/?type=nothing&sort=sideways');
-  for (const box of await page.locator('#note-type-filter input').all()) {
-    await expect(box).toBeChecked();
-  }
+  await page.goto('/manifest/?type=nothing,testbed&sort=sideways');
+  await expect(page.locator('#note-type-filter input:checked')).toHaveCount(1);
+  await expect(type_box(page, 'puzzle')).toBeChecked();
   await expect(radio('Newest')).toBeChecked();
-  await expect(page).toHaveURL(/\/manifest\/$/);
+  await expect(page).toHaveURL(/\/manifest\/\?type=testbed$/);
 });
 
 for (const width of [390, 820]) {
