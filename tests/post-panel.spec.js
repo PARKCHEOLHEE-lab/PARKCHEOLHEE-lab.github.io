@@ -38,6 +38,27 @@ for (const width of [820, 1280]) {
   });
 }
 
+for (const width of [820, 1240, 1920]) {
+  test(`at ${width}px the post panel's first heading is at the height of the Manifest panel's`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    // the middle of a node's words, from the top of the page
+    const centre = (selector) => page.evaluate((selector) => {
+      const range = document.createRange();
+      range.selectNodeContents(document.querySelector(selector));
+      const rect = range.getBoundingClientRect();
+      return rect.top + rect.height / 2;
+    }, selector);
+    await page.goto(POST);
+    const post = await centre('#post-side summary');
+    await page.goto('/manifest/');
+    const manifest = await centre('.note-filter summary');
+    const search = await page.locator('#note-search').boundingBox();
+    expect(Math.abs(post - manifest)).toBeLessThanOrEqual(1);
+    // on the search box's line, as the post's is on its title's
+    expect(Math.abs(manifest - (search.y + search.height / 2))).toBeLessThanOrEqual(1);
+  });
+}
+
 test('on a wide screen the panel stays below the header while the post scrolls, and ends inside the post', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(POST);

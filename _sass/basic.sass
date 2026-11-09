@@ -584,6 +584,10 @@ a:hover
   .note-filter, #post-side
     position: sticky
     top: calc(var(--header-height, 0px) + 1.5em)
+  // its first heading on the search box's line, at the height a post panel's sits on its title's
+  // (#post-side below): 0.17em measured at 820, 1240 and 1920px wide
+  .note-filter
+    margin-top: -0.17em
   // the search box and the list; the post
   .note-main, .post-main
     grid-column: 2
