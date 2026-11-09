@@ -1,0 +1,14 @@
+{%- comment -%} The path of a post's emoji, for the Manifest's rows (note.html) and a post's Related list
+  (post.html): a pinned page's pin, the post's own, the Testbed's puzzle, or the default, an empty
+  post's own {%- endcomment -%}
+{%- if include.post.pinned -%}
+  /emoji/pin.png
+{%- elsif include.post.emoji -%}
+  {{ include.post.emoji }}
+{%- elsif include.post.categories contains "testbed" -%}
+  /emoji/puzzle.png
+{%- elsif include.post.content == empty or include.post.content == blank -%}
+  /emoji/default-empty.png
+{%- else -%}
+  /emoji/default.png
+{%- endif -%}
