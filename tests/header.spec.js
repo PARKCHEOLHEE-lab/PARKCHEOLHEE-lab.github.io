@@ -108,7 +108,7 @@ test('a page without a menu (the Testbed page) keeps its link in the header on a
   await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
 });
 
-test('on a phone the Menu icon is in the links\' colour and folds into a ">" while the menu is open', async ({ page }) => {
+test('on a phone the Menu icon is in the links\' colour and folds into an X while the menu is open', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/onnx/');
   const button = page.getByRole('button', { name: 'Menu' });
@@ -125,11 +125,11 @@ test('on a phone the Menu icon is in the links\' colour and folds into a ">" whi
   const closed = await lines();
   expect(closed.map((line) => [line.left, line.right])).toEqual([[3, 17], [3, 17], [3, 17]]);
   await button.click();
-  // the tip at (13, 10) and the ends at (8, 5) and (8, 15), once the 0.25s fold is done
+  // both outer lines across the square from (5, 5) to (15, 15), once the 0.25s fold is done
   await expect.poll(async () => {
     const [top, middle, bottom] = await lines();
-    return [top.left, top.top, top.right, top.bottom, bottom.top, bottom.bottom, middle.opacity].map((v) => Math.round(Number(v)));
-  }).toEqual([8, 5, 13, 10, 10, 15, 0]);
+    return [top.left, top.top, top.right, top.bottom, bottom.left, bottom.top, bottom.right, bottom.bottom, middle.opacity].map((v) => Math.round(Number(v)));
+  }).toEqual([5, 5, 15, 15, 5, 5, 15, 15, 0]);
 });
 
 test('on a phone a post without a table of contents has the Menu button, with the site\'s link in its menu', async ({ page }) => {

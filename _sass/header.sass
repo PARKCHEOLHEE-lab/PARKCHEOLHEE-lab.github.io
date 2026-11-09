@@ -41,23 +41,20 @@ html
   background: none
   cursor: pointer
 
-// while the menu is open the icon's three lines fold into a ">", pointing the way the menu slides out:
-// the middle one fades, and the outer two turn 45° about their middles and shorten to the arms of a
-// chevron with its tip at (13, 10) and its ends at (8, 5) and (8, 15) of the 20-unit box. Their round
-// ends stay round as they shorten (non-scaling-stroke)
+// while the menu is open the icon's three lines fold into an X: the middle one fades, and the outer two
+// move to the middle and turn 45° each way, crossing from (5, 5) to (15, 15) of the 20-unit box
 .site-menu-icon path
   transform-box: fill-box
   transform-origin: center
-  vector-effect: non-scaling-stroke
   transition: transform 0.25s, opacity 0.25s
 
 body:has(:popover-open) .site-menu-icon
   path:nth-child(1)
-    transform: translate(0.5px, 1.5px) rotate(45deg) scaleX(0.505)
+    transform: translateY(4px) rotate(45deg)
   path:nth-child(2)
     opacity: 0
   path:nth-child(3)
-    transform: translate(0.5px, -1.5px) rotate(-45deg) scaleX(0.505)
+    transform: translateY(-4px) rotate(-45deg)
 
 // the copies setup_header puts in the menu are the phone's: from 768px the site's links are in the
 // header, a post's side panel in the post, and the Manifest's panel beside its list
