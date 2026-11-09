@@ -62,7 +62,8 @@ for (const path of PAGES) {
     await expect(header).toHaveCSS('box-shadow', 'none');
     let greys = await header_greys(page);
     expect(greys.end).toBeGreaterThan(240);
-    expect(greys.darkest).toBeLessThan(60);
+    // the link in the panels' text colour ($text-dark, 70) on the white bar, a light grey (185) on the black
+    expect(greys.darkest).toBeCloseTo(70, -1);
 
     // halfway through, the black has spread past the logo but not yet to the far end; a fade would be
     // grey everywhere
@@ -80,12 +81,12 @@ for (const path of PAGES) {
     await page.evaluate(() => document.getAnimations().forEach((a) => a.finish()));
     greys = await header_greys(page);
     expect(greys.end).toBeLessThan(15);
-    expect(greys.lightest).toBeGreaterThan(200);
+    expect(greys.lightest).toBeCloseTo(185, -1);
 
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await expect.poll(async () => {
       const { end, darkest } = await header_greys(page);
-      return end > 240 && darkest < 60;
+      return end > 240 && Math.abs(darkest - 70) < 5;
     }).toBe(true);
   });
 }
@@ -115,6 +116,8 @@ test('on a phone a post without a table of contents has the Menu button, with th
   await page.getByRole('button', { name: 'Menu' }).click();
   await expect(menu).toBeVisible();
   await expect(menu.getByRole('link', { name: 'manifest' })).toBeVisible();
+  // in the panel's text colour, as in the header
+  await expect(menu.getByRole('link', { name: 'manifest' })).toHaveCSS('color', 'rgb(70, 70, 70)');
   await expect(menu.locator('.section-nav')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(menu).toBeHidden();

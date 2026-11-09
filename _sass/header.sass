@@ -28,6 +28,10 @@ body > header
   nav, .site-menu-button
     color: $light
     mix-blend-mode: difference
+  // the links in the panels' text colour on the white bar (the blend takes the inverse back to it), and
+  // a light grey over the black
+  nav
+    color: invert($text-dark)
 
 // a link to a heading, as in a table of contents, lands below the header instead of under it
 html
@@ -91,6 +95,8 @@ body:has(:popover-open)
       margin: 0
       padding: 16px 0
       border-bottom: 1px dotted reduce(14)
+      // in the panel's text colour, as in the header
+      color: $text-dark
       a
         margin: 0
         padding: 6px 0
