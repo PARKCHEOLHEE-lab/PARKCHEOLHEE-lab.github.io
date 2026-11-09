@@ -478,13 +478,12 @@ a:hover
   font-variant-numeric: tabular-nums
 
 // from 990px the panel takes the left of the page's column, under the logo, and the list the rest; the
-// panel stays below the header while the list scrolls. The list starts 17.5em in, where the owner
-// placed it; the panel is narrower than that, so the type counts sit closer to the names
+// panel stays below the header while the list scrolls
 @media (min-width: 990px)
   .note-index
     display: grid
     grid-template-columns: 12em minmax(0, 1fr)
-    column-gap: 5.5em
+    column-gap: 2.5em
     align-items: start
   .note-filter
     position: sticky

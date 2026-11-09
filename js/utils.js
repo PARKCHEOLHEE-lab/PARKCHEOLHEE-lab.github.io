@@ -99,7 +99,8 @@ function filter_posts(type) {
 // checked types' rows, all of them at first, and unchecking the last one checks them all again, as on
 // aaro Academy's Resources page (an empty list is a dead end that reads the same as a fresh visit).
 // Pinned rows stay on top in their build order under every sort (a pinned page has no date), and the
-// build order (newest first) is the start.
+// build order (newest first) is the start. A press on a type and a drag over others sets them all, and
+// a choice other than the start stays in the page's address.
 function setup_note_list() {
   const list = document.getElementById("note-list");
   const panel = document.querySelector(".note-filter");
@@ -131,6 +132,12 @@ function setup_note_list() {
   const TESTBED = "/emoji/puzzle.png";
   const types = Object.keys(counts).sort(function(a, b) {
     return (b === TESTBED) - (a === TESTBED) || counts[b] - counts[a];
+  });
+  // each type's name as the panel shows it; the page's address uses it in lower case
+  const names = {};
+  types.forEach(function(type) {
+    const stem = type.split("/").pop().replace(".png", "");
+    names[type] = TYPE_NAMES[stem] || stem.charAt(0).toUpperCase() + stem.slice(1);
   });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
   // the checked types, never empty
@@ -166,11 +173,47 @@ function setup_note_list() {
     sort.querySelectorAll("input").forEach(function(radio) {
       radio.checked = radio.value === state.sort;
     });
+    write_url();
+  }
+
+  // the address keeps a choice other than every type and Newest, so a reload or a shared link shows
+  // the same list: /manifest/?type=testbed,note&sort=oldest. The plain /manifest/ is the start; replaced,
+  // not added, so Back leaves the page instead of undoing each click
+  function write_url() {
+    const parts = [];
+    if (state.types.size < types.length) {
+      parts.push("type=" + types.filter(function(type) {
+        return state.types.has(type);
+      }).map(function(type) {
+        return names[type].toLowerCase();
+      }).join(","));
+    }
+    if (state.sort !== "newest") {
+      parts.push("sort=" + state.sort);
+    }
+    history.replaceState(history.state, "", location.pathname + (parts.length ? "?" + parts.join("&") : "") + location.hash);
+  }
+
+  // an address written by hand may name types or a sort that do not exist; those are left out
+  function read_url() {
+    const params = new URLSearchParams(location.search);
+    const wanted = (params.get("type") || "").toLowerCase().split(",");
+    const picked = types.filter(function(type) {
+      return wanted.includes(names[type].toLowerCase());
+    });
+    if (picked.length > 0) {
+      state.types = new Set(picked);
+    }
+    const sorts = Array.from(sort.querySelectorAll("input"), function(radio) {
+      return radio.value;
+    });
+    if (sorts.includes(params.get("sort"))) {
+      state.sort = params.get("sort");
+    }
   }
 
   // one checkbox per type, with the type's icon, its name and its post count
   types.forEach(function(type) {
-    const stem = type.split("/").pop().replace(".png", "");
     const label = document.createElement("label");
     const box = document.createElement("input");
     box.type = "checkbox";
@@ -182,14 +225,14 @@ function setup_note_list() {
     const count = document.createElement("span");
     count.className = "note-filter-count";
     count.textContent = counts[type];
-    label.append(box, icon, TYPE_NAMES[stem] || stem.charAt(0).toUpperCase() + stem.slice(1), count);
+    label.append(box, icon, names[type], count);
     filter.appendChild(label);
   });
-  filter.addEventListener("change", function(event) {
-    if (event.target.checked) {
-      state.types.add(event.target.value);
+  function show_type(type, shown) {
+    if (shown) {
+      state.types.add(type);
     } else {
-      state.types.delete(event.target.value);
+      state.types.delete(type);
     }
     if (state.types.size === 0) {
       types.forEach(function(type) {
@@ -197,6 +240,49 @@ function setup_note_list() {
       });
     }
     render();
+  }
+  // the keyboard, and a finger's tap
+  filter.addEventListener("change", function(event) {
+    show_type(event.target.value, event.target.checked);
+  });
+
+  // with a mouse or a pen, a press on a type flips it, and dragging over other types gives them the same
+  // state; a finger keeps the plain tap, since its drag scrolls the panel
+  let pointer = "";
+  let drag = null;
+  filter.addEventListener("pointerdown", function(event) {
+    pointer = event.pointerType;
+    const label = event.target.closest("label");
+    if (!label || pointer === "touch" || event.button !== 0) {
+      return;
+    }
+    // no text selection while dragging
+    event.preventDefault();
+    const type = label.querySelector("input").value;
+    drag = !state.types.has(type);
+    show_type(type, drag);
+  });
+  document.addEventListener("pointermove", function(event) {
+    if (drag === null) {
+      return;
+    }
+    const under = document.elementFromPoint(event.clientX, event.clientY);
+    const label = under && under.closest("#note-type-filter label");
+    if (label && state.types.has(label.querySelector("input").value) !== drag) {
+      show_type(label.querySelector("input").value, drag);
+    }
+  });
+  ["pointerup", "pointercancel"].forEach(function(name) {
+    document.addEventListener(name, function() {
+      drag = null;
+    });
+  });
+  // the press has already flipped the box, and the click after it would flip it back; a keyboard's
+  // click has no count (detail 0)
+  filter.addEventListener("click", function(event) {
+    if (event.detail > 0 && pointer !== "touch") {
+      event.preventDefault();
+    }
   });
 
   sort.addEventListener("change", function(event) {
@@ -204,6 +290,7 @@ function setup_note_list() {
     render();
   });
 
+  read_url();
   panel.hidden = false;
   render();
 }
