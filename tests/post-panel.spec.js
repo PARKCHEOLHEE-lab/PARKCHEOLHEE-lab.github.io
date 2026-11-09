@@ -194,3 +194,11 @@ test('on a phone the panel is in the menu only, as one copy', async ({ page }) =
   await expect(menu.locator('.post-related a')).toHaveCount(7);
   await expect(page.locator('[id="post-side"]')).toHaveCount(1);
 });
+
+test('every post shows its date as the Testbed posts do, the month in words', async ({ page }) => {
+  // a Note post and a Testbed post
+  for (const [path, date] of [['/onnx/', 'July 19, 2026'], ['/wave-function-collapse/', 'January 13, 2026']]) {
+    await page.goto(path);
+    await expect(page.locator('article header time')).toHaveText(date);
+  }
+});
