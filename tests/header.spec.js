@@ -90,9 +90,53 @@ for (const path of PAGES) {
   });
 }
 
-test('a page without the side panel keeps its link in the header on a phone', async ({ page }) => {
+test('a page without a menu (the Testbed page) keeps its link in the header on a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/testbed/');
+  await expect(page.locator('body > header nav')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
+});
+
+test('on a phone a post without a table of contents has the Menu button, with the site\'s link in its menu', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/onnx/');
+  const menu = page.locator('#post-menu');
+  await expect(page.locator('body > header nav')).toBeHidden();
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await expect(menu).toBeVisible();
+  await expect(menu.getByRole('link', { name: 'manifest' })).toBeVisible();
+  await expect(menu.locator('.section-nav')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(menu).toBeHidden();
+});
+
+test('on a phone a post\'s table of contents is in its menu, and a link in it closes the menu with its heading below the header', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/attention-attention/');
+  const menu = page.locator('#post-menu');
+  const header = page.locator('body > header');
+  await expect(page.locator('article #toc')).toBeHidden();
+
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await expect(menu.getByRole('link', { name: 'manifest' })).toBeVisible();
+  const link = menu.locator('.section-nav a').nth(2);
+  await expect(link).toBeVisible();
+  const id = (await link.getAttribute('href')).slice(1);
+  await link.click();
+  await expect(menu).toBeHidden();
+  // the page scrolls smoothly to the heading, which ends just below the header
+  await expect.poll(async () => {
+    const heading = await page.locator(`[id="${id}"]`).boundingBox();
+    const bar = await header.boundingBox();
+    return heading.y >= bar.height - 1 && heading.y < bar.height + 40;
+  }).toBe(true);
+});
+
+test('from 768px a post keeps its table of contents in the post and its link in the header', async ({ page }) => {
+  await page.setViewportSize({ width: 820, height: 1024 });
+  await page.goto('/attention-attention/');
+  await expect(page.locator('article #toc .section-nav')).toBeVisible();
+  await expect(page.locator('#post-menu')).toBeHidden();
   await expect(page.locator('body > header nav')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
 });

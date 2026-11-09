@@ -35,6 +35,10 @@ layout: default
 </script>
 {% endif %}
 
+{% comment %} the post's menu, behind the header's Menu button on phones: setup_header fills it with the
+  site's links and the post's table of contents (header.sass) {% endcomment %}
+<div id="post-menu" class="site-menu"></div>
+
 <article>
 
   {% include meta.html post=page %}

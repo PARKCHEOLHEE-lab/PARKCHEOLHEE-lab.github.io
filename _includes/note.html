@@ -7,7 +7,7 @@
     {% comment %} The side panel, left of the list on wide screens and behind the header's Menu button on
       narrow ones (setup_header); setup_note_list adds a checkbox per type and shows it {% endcomment %}
     {% capture chevron %}<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endcapture %}
-    <aside id="note-menu" class="note-filter" hidden>
+    <aside id="note-menu" class="note-filter site-menu" hidden>
       <details open>
         <summary>Sort by{{ chevron }}</summary>
         <div id="note-sort" class="note-options" role="group" aria-label="Sort by">

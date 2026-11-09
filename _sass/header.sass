@@ -1,7 +1,8 @@
 // The header every page shares (default.html). It stays at the top of the screen while the page
 // scrolls, and once the page leaves the top the logo's black box spreads over it. Below 768px its Menu
-// button opens the Manifest's side panel from the right, with the site's links on top (setup_header in
-// js/utils.js). Pages without the panel keep their links in the header. Its height is set with the
+// button opens the page's menu (.site-menu) from the right, with the site's links on top: the
+// Manifest's side panel, or a post's menu with its table of contents (setup_header in js/utils.js).
+// Pages without a menu keep their links in the header. Its height is set with the
 // other per-site header rules, in assets/css/index.sass.
 
 // the header stays above the page
@@ -48,19 +49,25 @@ body:has(:popover-open)
   .site-menu-close
     display: block
 
-// the site's links that setup_header copies into the panel, for the narrow-screen menu only
+// the copies setup_header puts in the menu are the phone's: from 768px the site's links are in the
+// header, a post's table of contents in the post, and the Manifest's panel beside its list
 @media (min-width: 768px)
-  .note-filter nav
+  .site-menu nav
+    display: none
+  #post-menu
     display: none
 
-// below 768px the Menu button slides the panel in from the right, below the header and over the page;
-// Escape, a tap outside or a link in it closes it (the browser's popover, and setup_header)
+// below 768px the Menu button slides the page's menu in from the right, below the header and over the
+// page; Escape, a tap outside or a link in it closes it (the browser's popover, and setup_header)
 @media (max-width: 767.98px)
-  body:has(.note-filter) > header nav
+  body:has(.site-menu) > header nav
     display: none
-  body:has(.note-filter) .site-menu-button
+  body:has(.site-menu) .site-menu-button
     display: flex
-  .note-filter
+  // its copy is in the menu
+  article #toc
+    display: none
+  .site-menu
     position: fixed
     inset: var(--header-height, 0px) 0 0 auto
     box-sizing: border-box
@@ -91,11 +98,19 @@ body:has(:popover-open)
         margin: 0
         padding: 6px 0
         color: inherit
-  // the panel starts off the screen when it opens, so it slides in
+      // nothing under it in a post without a table of contents
+      &:last-child
+        border-bottom: 0
+    // a post's table of contents (generate_table_of_contents)
+    .section-nav
+      margin: 16px 0 0
+      padding-left: 1.2em
+      line-height: 1.7
+  // the menu starts off the screen when it opens, so it slides in
   @starting-style
-    .note-filter:popover-open
+    .site-menu:popover-open
       transform: translateX(100%)
 
 @media (prefers-reduced-motion: reduce)
-  body > header[data-scroll]::before, .note-filter
+  body > header[data-scroll]::before, .site-menu
     transition: none

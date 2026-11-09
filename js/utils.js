@@ -289,8 +289,9 @@ function setup_note_list() {
 }
 
 // The header on every page stays at the top of the screen, and once the page leaves the top the logo's
-// black box spreads over it (header.sass). Below 768px its Menu button opens the Manifest's side panel
-// from the right, with the site's links on top.
+// black box spreads over it (header.sass). Below 768px its Menu button opens the page's menu from the
+// right, with the site's links on top: the Manifest's side panel, or a post's menu with its table of
+// contents.
 function setup_header() {
   const header = document.querySelector("body > header");
   const logo = header.querySelector(".title-main");
@@ -314,11 +315,17 @@ function setup_header() {
   window.addEventListener("scroll", mark_scroll, { passive: true });
   mark_scroll();
 
-  const menu = document.querySelector(".note-filter");
+  const menu = document.querySelector(".site-menu");
   if (!menu) {
     return;
   }
   menu.prepend(header.querySelector("nav").cloneNode(true));
+  // a post's table of contents, built in the post by generate_table_of_contents, which the menu shows
+  // in its place on phones (header.sass)
+  const contents = document.querySelector("#toc .section-nav");
+  if (contents && contents.querySelector("a")) {
+    menu.append(contents.cloneNode(true));
+  }
   header.querySelector(".site-menu-button").setAttribute("popovertarget", menu.id);
   // a popover below 768px only: from there the panel is back beside the list, where the browser's
   // popover styles would hide it, and one left open closes as the attribute goes
