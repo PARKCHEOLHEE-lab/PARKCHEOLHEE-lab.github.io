@@ -622,15 +622,15 @@ a:hover
   align-items: center
   gap: 0.5em
 
-// an entry's words: a heading in Contents, a title beside its emoji in Related. Only a cut-off one
-// slides: a trackpad's sideways bounce is off, which otherwise moved even a title that fits, and a
-// swipe stops at the end rather than passing on to the page
+// an entry's words: a heading in Contents, a title beside its emoji in Related. As a Manifest row's
+// title (.title-scroll) each fills its row, so one that fits has room to spare and never scrolls; a
+// cut-off one slides, and a sideways swipe past its end still turns the page back or forward
 .post-contents a, .post-related span
   display: block
+  flex: 1
   min-width: 0
   overflow-x: auto
   overflow-y: hidden
-  overscroll-behavior-x: none
   white-space: nowrap
   @include hide-scrollbar(height)
 
@@ -651,7 +651,8 @@ a:hover
     // up and down only: as a sideways scroller too (overflow-y's default), a subpixel of overflow let a
     // trackpad swipe swing the whole panel; a cut-off entry still slides on its own
     overflow-x: hidden
-    overscroll-behavior: contain
+    // its own end does not scroll the page on, and a sideways swipe still reaches the page
+    overscroll-behavior-y: contain
 
 // --- Testbed-specific classes ---
 

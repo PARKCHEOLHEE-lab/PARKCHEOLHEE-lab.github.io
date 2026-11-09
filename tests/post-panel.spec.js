@@ -124,10 +124,21 @@ test('a sideways swipe moves only a cut-off title, never the whole panel', async
   const panel = page.locator('#post-side');
   // the panel scrolls up and down only, so a trackpad can not swing it sideways
   await expect(panel).toHaveCSS('overflow-x', 'hidden');
-  // no title bounces under a trackpad's swipe, which moved even a title that fits (Chrome on a Mac)
+  // nothing stops a sideways swipe on its way to the page, where it turns the page back or forward
+  await expect(panel).toHaveCSS('overscroll-behavior-x', 'auto');
   for (const entry of await panel.locator('.post-related span, .post-contents a').all()) {
-    await expect(entry).toHaveCSS('overscroll-behavior-x', 'none');
+    await expect(entry).toHaveCSS('overscroll-behavior-x', 'auto');
   }
+  // each Related title fills its row, as a Manifest row's does, so one that fits has room to spare
+  for (const row of await panel.locator('.post-related a').all()) {
+    const [title, end] = await row.evaluate((link) => [link.querySelector('span').getBoundingClientRect().right, link.getBoundingClientRect().right]);
+    expect(title).toBeCloseTo(end, 0);
+  }
+  expect(await panel.locator('.post-related span', { hasText: 'Latent Shapes' }).evaluate((span) => {
+    const range = document.createRange();
+    range.selectNodeContents(span);
+    return span.clientWidth - range.getBoundingClientRect().width;
+  })).toBeGreaterThan(10);
   const heading = await panel.locator('.post-related summary').boundingBox();
   // over a title that fits, the swipe has nothing to move
   const fits = await panel.locator('.post-related span', { hasText: 'Latent Shapes' }).boundingBox();
