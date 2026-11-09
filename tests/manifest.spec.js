@@ -71,6 +71,15 @@ test('on a wide screen the panel and the list share the page column, the panel u
   await expect(page.locator('#note-list')).toHaveCSS('border-top-style', 'dotted');
 });
 
+test('a hidden post (Reading List) is not listed, and its page still opens', async ({ page }) => {
+  await page.goto('/manifest/');
+  await expect(page.locator('#note-list .post-title', { hasText: 'Reading List' })).toHaveCount(0);
+  await expect(page.locator('#note-list .post-title', { hasText: 'latentspace.' })).toHaveCount(1);
+  const response = await page.goto('/reading-list/');
+  expect(response.status()).toBe(200);
+  await expect(page.locator('body > article')).toContainText('Reading List');
+});
+
 test('Testbed is the first type in the panel', async ({ page }) => {
   await page.goto('/manifest/');
   await expect(page.locator('#note-type-filter input').first()).toHaveAttribute('value', '/emoji/puzzle.png');
