@@ -622,12 +622,14 @@ a:hover
   align-items: center
   gap: 0.5em
 
-// an entry's words: a heading in Contents, a title beside its emoji in Related
+// an entry's words: a heading in Contents, a title beside its emoji in Related. A swipe that slides a
+// cut-off one stops at its end, rather than passing on to the page
 .post-contents a, .post-related span
   display: block
   min-width: 0
   overflow-x: auto
   overflow-y: hidden
+  overscroll-behavior-x: contain
   white-space: nowrap
   @include hide-scrollbar(height)
 
@@ -645,6 +647,9 @@ a:hover
     margin-top: 1.3em
     max-height: calc(100vh - var(--header-height, 0px) - 3em)
     overflow-y: auto
+    // up and down only: as a sideways scroller too (overflow-y's default), a subpixel of overflow let a
+    // trackpad swipe swing the whole panel; a cut-off entry still slides on its own
+    overflow-x: hidden
     overscroll-behavior: contain
 
 // --- Testbed-specific classes ---

@@ -83,6 +83,8 @@ body:has(:popover-open) .site-menu-icon
     border: 0
     border-left: 1px solid reduce(14)
     overflow-y: auto
+    // up and down only, as the post's panel (basic.sass)
+    overflow-x: hidden
     overscroll-behavior: contain
     background: $light
     transform: translateX(100%)

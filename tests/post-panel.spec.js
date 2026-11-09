@@ -119,6 +119,36 @@ test('each Related title stays on one line, a long one cut and shown whole on ho
   await expect(long).toHaveAttribute('title', 'DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation');
 });
 
+test('a sideways swipe moves only a cut-off title, never the whole panel', async ({ page }) => {
+  await page.setViewportSize({ width: 1240, height: 800 });
+  await page.goto('/coarse-to-fine-sdf/');
+  const panel = page.locator('#post-side');
+  await panel.locator('.post-related summary').click();
+  // the panel scrolls up and down only, so a trackpad can not swing it sideways
+  await expect(panel).toHaveCSS('overflow-x', 'hidden');
+  const heading = await panel.locator('.post-related summary').boundingBox();
+  // over a title that fits, the swipe has nothing to move
+  const fits = await panel.locator('.post-related span', { hasText: 'Latent Shapes' }).boundingBox();
+  await page.mouse.move(fits.x + 10, fits.y + fits.height / 2);
+  for (let i = 0; i < 5; i++) await page.mouse.wheel(60, 0);
+  await page.waitForTimeout(300);
+  expect(await panel.evaluate((element) => element.scrollLeft)).toBe(0);
+  expect((await panel.locator('.post-related summary').boundingBox()).x).toBe(heading.x);
+  // a cut-off title slides
+  const long = panel.locator('.post-related span', { hasText: 'DeepSDF' });
+  const box = await long.boundingBox();
+  await page.mouse.move(box.x + 10, box.y + box.height / 2);
+  for (let i = 0; i < 5; i++) await page.mouse.wheel(60, 0);
+  await expect.poll(() => long.evaluate((span) => span.scrollLeft)).toBeGreaterThan(0);
+  expect(await panel.evaluate((element) => element.scrollLeft)).toBe(0);
+});
+
+test('on a phone the menu scrolls up and down only', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/coarse-to-fine-sdf/');
+  await expect(page.locator('#post-menu')).toHaveCSS('overflow-x', 'hidden');
+});
+
 test('each Contents entry stays on one line too, a long one cut and shown whole on hover', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(POST);
