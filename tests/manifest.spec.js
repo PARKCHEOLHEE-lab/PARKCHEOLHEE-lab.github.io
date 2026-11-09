@@ -154,6 +154,16 @@ for (const width of [390, 1280]) {
   });
 }
 
+for (const width of [360, 1280, 1920]) {
+  test(`at ${width}px the search box is as tall as a row`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/manifest/');
+    const box = (await page.locator('.note-search').boundingBox()).height;
+    const row = (await page.locator('.note-post-item .post-row').first().boundingBox()).height;
+    expect(Math.abs(box - row)).toBeLessThan(0.5);
+  });
+}
+
 test('the search box keeps its height while typing, between the rows\' dotted lines', async ({ page }) => {
   await page.goto('/manifest/');
   const box = page.locator('.note-search');

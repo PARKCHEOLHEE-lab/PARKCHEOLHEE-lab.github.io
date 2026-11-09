@@ -485,7 +485,11 @@ a:hover
   display: flex
   align-items: center
   gap: 0.5em
-  padding: 0.5em 0
+  box-sizing: border-box
+  // as tall as a row: its date line comes to 2.25em (2.248 measured from 360 to 1920px wide), and each
+  // has one 1px line; at least 26.8px, room for the 24px clear button
+  height: calc(2.25em + 1px)
+  padding: 0
   border-top: 1px dotted reduce(14)
   color: $text-dark
   // hidden until setup_note_list runs, as it does nothing without it
