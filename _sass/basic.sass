@@ -431,7 +431,8 @@ a:hover
 // the side panel (note.html), after aaro Academy's Resources sidebar (aaro-lab/aaro-domus,
 // apps/academy/components/resources-browser.tsx): Sort by and Type, each a section that folds under
 // its heading, with a chevron that points up while it is open. Its words are the list's size and its
-// lines the rows' dotted line. Below 768px it is the header's menu panel (header.sass)
+// lines the rows' dotted line; the headings are regular, as the header's links are, which sit right
+// above them in the phone menu. Below 768px it is the header's menu panel (header.sass)
 .note-filter
   color: $text-dark
   details
@@ -445,7 +446,6 @@ a:hover
     align-items: center
     justify-content: space-between
     list-style: none
-    font-weight: $heading-weight
     cursor: pointer
     &::-webkit-details-marker
       display: none

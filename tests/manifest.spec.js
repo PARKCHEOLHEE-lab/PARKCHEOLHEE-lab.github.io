@@ -69,6 +69,11 @@ test('on a wide screen the panel and the list share the page column, the panel u
   await expect(page.locator('#note-sort')).toBeVisible();
   // the rows' dotted line over the first row too
   await expect(page.locator('#note-list')).toHaveCSS('border-top-style', 'dotted');
+  // the panel's headings in the header link's size and weight
+  const link = await page.locator('body > header nav a').evaluate((a) => [getComputedStyle(a).fontSize, getComputedStyle(a).fontWeight]);
+  for (const summary of await page.locator('.note-filter summary').all()) {
+    expect(await summary.evaluate((s) => [getComputedStyle(s).fontSize, getComputedStyle(s).fontWeight])).toEqual(link);
+  }
 });
 
 test('a hidden post (Reading List) is not listed, and its page still opens', async ({ page }) => {
