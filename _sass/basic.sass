@@ -418,121 +418,6 @@ a:hover
   margin-top: 0.55em
   margin-bottom: 0.45em
 
-// the type menu under the funnel, a native popover that setup_note_list places, drawn like the map's
-// tooltip, the site's other floating panel: a 1px line, the 2px corners of images and code, no shadow,
-// a fade as it opens (closing is immediate). The type sort on top, a row per type below
-.note-type-menu
-  position: absolute
-  inset: auto
-  margin: 0.4em 0 0
-  padding: 0.25em 0.5em
-  border: 1px solid $divider
-  border-radius: 2px
-  background: $light
-  color: $text-dark
-  // only while open: a display on the closed popover would show it
-  &:popover-open
-    display: flex
-    flex-direction: column
-    transition: opacity 0.15s ease
-
-@starting-style
-  .note-type-menu:popover-open
-    opacity: 0
-
-// the menu's buttons: on top the all-types box and the type sort; then one row per type with its box,
-// icon and post count. They fade on hover, as list rows and links do. Two classes on the sort button,
-// so it wins over .note-sort below
-.note-chip, .note-sort.note-menu-sort, .note-menu-all
-  display: flex
-  align-items: center
-  gap: 0.75em
-  // the 24px minimum target size (WCAG 2.5.8), as for the header buttons
-  min-height: 24px
-  padding: 0 0.8em
-  border: 0
-  background: none
-  color: $text-dark
-  font: inherit
-  text-align: left
-  cursor: pointer
-  &:hover
-    @include hover-fade
-
-// the top row lines up with the type rows: the all-types box over their boxes (0.8em in), the sort
-// icon over their icons (0.8em + a 1.25em box + a 0.75em gap = 2.8em in)
-.note-menu-head
-  display: flex
-  .note-menu-all
-    padding: 0 0.375em 0 0.8em
-  .note-sort.note-menu-sort
-    padding: 0 0.8em 0 0.375em
-
-// a checkbox drawn like the icons: a box, with a tick when checked and a dash when only some types are
-.note-check
-  // as big as the type icons beside it
-  flex: none
-  width: 1.25em
-  height: 1.25em
-  fill: none
-  stroke: currentColor
-  // lines like the sort icons' (.note-sort-icon)
-  stroke-width: 1.32
-  stroke-linecap: square
-  stroke-linejoin: miter
-  .note-check-tick, .note-check-dash
-    display: none
-
-[aria-checked="true"] > .note-check .note-check-tick, [aria-checked="mixed"] > .note-check .note-check-dash
-  display: inline
-
-.note-type-filter
-  display: flex
-  flex-direction: column
-  margin-top: 0.2em
-  padding-top: 0.2em
-  border-top: 1px solid $divider
-
-.note-chip
-  width: 100%
-  transition: opacity 0.15s ease
-
-.note-chip-count
-  margin-left: auto
-  color: reduce(100)
-  font-size: calc(0.6rem + 0.2vw)
-  font-variant-numeric: tabular-nums
-
-// an unchecked type fades, its rows hidden
-.note-chip[aria-checked="false"]
-  opacity: 0.35
-
-.note-chip-icon
-  // a row's emoji size (.emoji-image), both measured in the body font
-  flex: none
-  width: 1.25em
-  height: 1.25em
-  // the site centres every img with auto side margins (img above), which in a menu row would push
-  // the icon off the left edge, under the sort icon; the 0.5em above and below set the row height
-  margin-left: 0
-  margin-right: 0
-
-// its line is the rows' own (use-bottom-line in note.html)
-.note-header-row
-  .note-emoji-column
-    // exactly a row's emoji column (the icon and its margins), so Title lines up with the titles
-    width: calc(1.25em + 0.3em + 0.5em)
-
-// the Type icon sits right over the rows' emoji: the button fills the column, its padding leaves
-// exactly the emoji box, and the icon is centred in it. Two classes, so it wins over .note-sort below.
-.note-sort.note-sort-type
-  box-sizing: border-box
-  justify-content: center
-  font-size: inherit
-  width: 100%
-  min-height: 2.4em
-  padding: 0 0.5em 0 0.3em
-
 .note-sr-only
   position: absolute
   width: 1px
@@ -541,66 +426,80 @@ a:hover
   clip-path: inset(50%)
   white-space: nowrap
 
-// the sort headers are icons only, each aligned like its column's content; the words stay for screen
-// readers and as tooltips. The body font sets the icon size, so it matches the rows' emoji.
-.note-sort
-  display: inline-flex
-  align-items: center
-  // the 24px minimum target size (WCAG 2.5.8); the icon alone is narrower
-  min-width: 24px
-  min-height: 2.4em
-  padding: 0
-  border: 0
-  background: none
-  color: reduce(100)
-  font: inherit
-  cursor: pointer
-  // data-active: the funnel while its menu is open, a type filter is on or the type sort is (setup_note_list)
-  &:hover, &:focus-visible, &[aria-pressed="true"], &[data-active="true"]
-    color: $text-dark
+// the side panel (note.html), after aaro Academy's Resources sidebar (aaro-lab/aaro-domus,
+// apps/academy/components/resources-browser.tsx): Sort by and Type, each a section that folds under
+// its heading, with a chevron that points up while it is open. Its words are the list's size and its
+// lines the rows' dotted line. Below 1100px it sits above the list, its sections folded
+// (setup_note_list)
+.note-filter
+  margin-bottom: 0.5em
+  border-bottom: 1px dotted reduce(14)
+  color: $text-dark
+  details
+    padding: 0.6em 0
+    &[open] summary svg
+      transform: rotate(180deg)
+    & + details
+      border-top: 1px dotted reduce(14)
+  summary
+    display: flex
+    align-items: center
+    justify-content: space-between
+    list-style: none
+    font-weight: $heading-weight
+    cursor: pointer
+    &::-webkit-details-marker
+      display: none
+    svg
+      transition: transform 0.15s
+  label
+    display: flex
+    align-items: center
+    gap: 0.5em
+    padding: 0.25em 0
+    cursor: pointer
+  input
+    margin: 0
+    accent-color: $dark
 
-// the Date icon ends where the dates end
-.note-date-column .note-sort
-  justify-content: flex-end
+.note-options
+  display: flex
+  flex-direction: column
+  margin-top: 0.4em
 
-// every header has the same icon: three bars at rest, folding into an up or down arrow while its
-// column sorts the list. The middle bar turns into the shaft and the outer bars into the head;
-// the arrow is the one the header used before (M12 19V5 M5 12l7-7 7 7), and a flip between up and
-// down slides the head along the shaft
-.note-sort-icon
-  // a row's emoji size (.emoji-image)
+// a row's emoji size (.emoji-image); the site centres every img with auto side margins (img above)
+.note-filter-icon
   flex: none
   width: 1.25em
   height: 1.25em
-  fill: none
-  stroke: currentColor
-  // a little over the emoji's line: the Note emoji's outline is 3.3px of its 60 (0.055), and 1.32 of
-  // the 22 units shown (note.html) is 0.06. Square ends and corners, like the emoji's pixel lines
-  stroke-width: 1.32
-  stroke-linecap: square
-  stroke-linejoin: miter
-  path
-    transform-box: fill-box
-    transform-origin: center
-    transition: transform 0.25s ease
+  margin: 0
 
-.note-sort[data-direction] .note-sort-bar-middle
-  transform: rotate(90deg)
+.note-filter-count
+  margin-left: auto
+  color: reduce(100)
+  font-size: smaller
+  font-variant-numeric: tabular-nums
 
-.note-sort[data-direction="asc"]
-  .note-sort-bar-top
-    transform: translate(-3.5px, 1.5px) rotate(-45deg) scaleX(0.7071)
-  .note-sort-bar-bottom
-    transform: translate(3.5px, -8.5px) rotate(45deg) scaleX(0.7071)
-
-.note-sort[data-direction="desc"]
-  .note-sort-bar-top
-    transform: translate(-3.5px, 8.5px) rotate(45deg) scaleX(0.7071)
-  .note-sort-bar-bottom
-    transform: translate(3.5px, -1.5px) rotate(-45deg) scaleX(0.7071)
+// from 1100px the panel sits in the page's left margin, so the list keeps its place, and stays while
+// the list scrolls. The margin is 40vw - 17em from 64em (assets/css/index.sass), 212px at 1100px,
+// and the panel and its gap take 13.5em (181px there)
+@media (min-width: 1100px)
+  .note-index
+    display: grid
+    grid-template-columns: 11em minmax(0, 1fr)
+    column-gap: 2.5em
+    align-items: start
+    margin-left: -13.5em
+  .note-filter
+    position: sticky
+    top: 1.5em
+    margin-bottom: 0
+    border-bottom: 0
+  #note-list
+    grid-column: 2
 
 @media (prefers-reduced-motion: reduce)
-  .note-sort-icon path, .note-type-menu:popover-open
+  .note-filter summary svg
     transition: none
 
 // --- Testbed-specific classes ---

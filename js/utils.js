@@ -94,18 +94,17 @@ function filter_posts(type) {
   }
 }
 
-// The Manifest list: the funnel over the emoji column opens a menu with the type sort and a checkbox
-// per post type (read from each row's emoji, with its post count) that shows or hides that type's
-// rows, plus one for all types. The type, title and date sort buttons reorder the rows, a second
-// click reversing the order. Pinned rows stay on top in their build order under every sort (a pinned
-// page has no date), and the build order (newest first) is the start.
+// The Manifest list and its side panel. Sort by orders the rows newest or oldest first, by title, or
+// by type. A checkbox per post type (read from each row's emoji, with its post count) shows the
+// checked types' rows, all of them at first, and unchecking the last one checks them all again, as on
+// aaro Academy's Resources page (an empty list is a dead end that reads the same as a fresh visit).
+// Pinned rows stay on top in their build order under every sort (a pinned page has no date), and the
+// build order (newest first) is the start.
 function setup_note_list() {
   const list = document.getElementById("note-list");
-  const filter_bar = document.getElementById("note-type-filter");
-  const sort_buttons = document.querySelectorAll("[data-note-sort]");
-  const menu = document.getElementById("note-type-menu");
-  const menu_button = document.querySelector("[popovertarget='note-type-menu']");
-  const all_box = menu.querySelector(".note-menu-all");
+  const panel = document.querySelector(".note-filter");
+  const filter = document.getElementById("note-type-filter");
+  const sort = document.getElementById("note-sort");
   const PIN = "/emoji/pin.png";
   // the names the latent-space map shows beside the same icons (LABEL_EMOJIS in js/latentspace.js);
   // any other type is named after its icon file, capitalized
@@ -132,133 +131,84 @@ function setup_note_list() {
     return counts[b] - counts[a];
   });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-  // the types unchecked in the menu, whose rows are hidden; none at the start
-  const state = { hidden: new Set(), key: "date", descending: true };
+  // the checked types, never empty
+  const state = { types: new Set(types), sort: "newest" };
 
   function compare(a, b) {
     if (a.type === PIN || b.type === PIN) {
       return (b.type === PIN) - (a.type === PIN) || a.index - b.index;
     }
     let order = 0;
-    if (state.key === "date") {
+    if (state.sort === "newest") {
+      order = b.time - a.time;
+    } else if (state.sort === "oldest") {
       order = a.time - b.time;
-    } else if (state.key === "title") {
+    } else if (state.sort === "title") {
       order = collator.compare(a.title, b.title);
     } else {
       order = types.indexOf(a.type) - types.indexOf(b.type);
-    }
-    if (state.descending) {
-      order = -order;
     }
     return order !== 0 ? order : a.index - b.index;
   }
 
   function render() {
     rows.slice().sort(compare).forEach(function(row) {
-      row.item.style.display = state.hidden.has(row.type) ? "none" : "";
+      row.item.style.display = state.types.has(row.type) ? "" : "none";
       list.appendChild(row.item);
     });
 
-    filter_bar.querySelectorAll("button").forEach(function(button) {
-      button.setAttribute("aria-checked", String(!state.hidden.has(button.dataset.type)));
+    filter.querySelectorAll("input").forEach(function(box) {
+      box.checked = state.types.has(box.value);
     });
-    // the all-types box: checked with every type shown, empty with none, a dash in between
-    all_box.setAttribute("aria-checked", state.hidden.size === 0 ? "true" : state.hidden.size === types.length ? "false" : "mixed");
-    mark_menu_button(menu.matches(":popover-open"));
-    sort_buttons.forEach(function(button) {
-      const active = button.dataset.noteSort === state.key;
-      const label = button.querySelector("span").textContent;
-      button.setAttribute("aria-pressed", String(active));
-      if (active) {
-        button.dataset.direction = state.descending ? "desc" : "asc";
-        button.setAttribute("aria-label", label + (state.descending ? ", descending" : ", ascending"));
-      } else {
-        delete button.dataset.direction;
-        button.setAttribute("aria-label", label);
-      }
+    // the browser may bring back the choice of an earlier visit to the page; the rows follow state
+    sort.querySelectorAll("input").forEach(function(radio) {
+      radio.checked = radio.value === state.sort;
     });
   }
 
-  // one checkbox, a row of the type menu: the all-types box's box, the type's icon and its post count,
-  // the name kept for the tooltip and screen readers. A click shows or hides the type's rows
-  function add_chip(type, icon, name, count) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "note-chip";
-    button.setAttribute("role", "checkbox");
-    button.dataset.type = type;
-    button.title = name;
-    button.setAttribute("aria-label", name + ", " + count + " posts");
-    const number = document.createElement("span");
-    number.className = "note-chip-count";
-    number.textContent = count;
-    button.append(all_box.querySelector("svg").cloneNode(true), icon, number);
-    button.addEventListener("click", function() {
-      if (state.hidden.has(type)) {
-        state.hidden.delete(type);
-      } else {
-        state.hidden.add(type);
-      }
-      render();
-    });
-    filter_bar.appendChild(button);
-  }
-
+  // one checkbox per type, with the type's icon, its name and its post count
   types.forEach(function(type) {
     const stem = type.split("/").pop().replace(".png", "");
-    const image = document.createElement("img");
-    image.src = type;
-    image.alt = "";
-    image.className = "note-chip-icon";
-    add_chip(type, image, TYPE_NAMES[stem] || stem.charAt(0).toUpperCase() + stem.slice(1), counts[type]);
+    const label = document.createElement("label");
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.value = type;
+    const icon = document.createElement("img");
+    icon.src = type;
+    icon.alt = "";
+    icon.className = "note-filter-icon";
+    const count = document.createElement("span");
+    count.className = "note-filter-count";
+    count.textContent = counts[type];
+    label.append(box, icon, TYPE_NAMES[stem] || stem.charAt(0).toUpperCase() + stem.slice(1), count);
+    filter.appendChild(label);
   });
-
-  sort_buttons.forEach(function(button) {
-    button.addEventListener("click", function() {
-      const key = button.dataset.noteSort;
-      state.descending = key === state.key ? !state.descending : key === "date";
-      state.key = key;
-      render();
-    });
-  });
-
-  // the all-types box checks every type, or unchecks them all when every type is checked
-  all_box.addEventListener("click", function() {
-    if (state.hidden.size === 0) {
-      types.forEach(function(type) {
-        state.hidden.add(type);
-      });
+  filter.addEventListener("change", function(event) {
+    if (event.target.checked) {
+      state.types.add(event.target.value);
     } else {
-      state.hidden.clear();
+      state.types.delete(event.target.value);
+    }
+    if (state.types.size === 0) {
+      types.forEach(function(type) {
+        state.types.add(type);
+      });
     }
     render();
   });
 
-  // the funnel is dark while its menu is open, a type is unchecked or the rows are sorted by type
-  function mark_menu_button(open) {
-    menu_button.dataset.active = String(open || state.hidden.size > 0 || state.key === "type");
+  sort.addEventListener("change", function(event) {
+    state.sort = event.target.value;
+    render();
+  });
+
+  // below 1100px the panel sits above the list (basic.sass), folded so the rows come first
+  if (!matchMedia("(min-width: 1100px)").matches) {
+    panel.querySelectorAll("details").forEach(function(section) {
+      section.open = false;
+    });
   }
-
-  // the menu is a native popover, which closes on Escape or a click outside it. It opens right under
-  // the header row, from the funnel's left edge, and closes when a resize would move the funnel.
-  // beforetoggle, unlike toggle, fires at once, with the state the menu is about to take
-  menu.addEventListener("beforetoggle", function(event) {
-    const open = event.newState === "open";
-    if (open) {
-      const button = menu_button.getBoundingClientRect();
-      const row = menu_button.closest(".post-row").getBoundingClientRect();
-      menu.style.left = button.left + window.scrollX + "px";
-      menu.style.top = row.bottom + window.scrollY + "px";
-    }
-    mark_menu_button(open);
-  });
-  window.addEventListener("resize", function() {
-    if (menu.matches(":popover-open")) {
-      menu.hidePopover();
-    }
-  });
-
-  document.getElementById("note-controls").hidden = false;
+  panel.hidden = false;
   render();
 }
 

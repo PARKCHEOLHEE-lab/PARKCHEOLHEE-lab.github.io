@@ -1,0 +1,80 @@
+// @ts-check
+const { test, expect } = require('@playwright/test');
+
+const shown_rows = (page) => page.locator('#note-list .note-post-item:visible');
+const type_box = (page, icon) => page.locator(`#note-type-filter input[value="/emoji/${icon}.png"]`);
+
+test('type filter: unchecked types hide, and unchecking the last one checks them all again', async ({ page }) => {
+  await page.goto('/manifest/');
+  const total = await page.locator('#note-list .note-post-item').count();
+  const boxes = page.locator('#note-type-filter input');
+  for (const box of await boxes.all()) {
+    await expect(box).toBeChecked();
+  }
+
+  for (const box of await boxes.all()) {
+    if ((await box.getAttribute('value')) !== '/emoji/puzzle.png') {
+      await box.click();
+    }
+  }
+  const testbed = await shown_rows(page).count();
+  expect(testbed).toBeGreaterThan(0);
+  expect(testbed).toBeLessThan(total);
+  for (const icon of await shown_rows(page).locator('.emoji-image').evaluateAll((images) => images.map((image) => image.getAttribute('src')))) {
+    expect(icon).toBe('/emoji/puzzle.png');
+  }
+
+  await type_box(page, 'puzzle').click();
+  await expect(shown_rows(page)).toHaveCount(total);
+  for (const box of await boxes.all()) {
+    await expect(box).toBeChecked();
+  }
+});
+
+test('sort by: pinned rows stay on top, and Oldest puts the oldest post first', async ({ page }) => {
+  await page.goto('/manifest/');
+  const rows = page.locator('#note-list .note-post-item');
+  const sort = (name) => page.locator('#note-sort').getByRole('radio', { name, exact: true });
+  const icons = () => rows.locator('.emoji-image').evaluateAll((images) => images.map((image) => image.getAttribute('src')));
+  const pinned = (await icons()).filter((icon) => icon === '/emoji/pin.png').length;
+  expect(pinned).toBeGreaterThan(0);
+  await expect(sort('Newest')).toBeChecked();
+  for (const name of ['Oldest', 'A–Z', 'Type', 'Newest']) {
+    await sort(name).check();
+    const order = await icons();
+    expect(order.slice(0, pinned).every((icon) => icon === '/emoji/pin.png')).toBe(true);
+    expect(order.slice(pinned).includes('/emoji/pin.png')).toBe(false);
+  }
+
+  await sort('Oldest').check();
+  const times = await rows.evaluateAll((items) => items.map((item) => Date.parse(item.querySelector('time').getAttribute('datetime'))));
+  const posts = times.slice(pinned);
+  expect(posts).toEqual([...posts].sort((a, b) => a - b));
+});
+
+test('on a wide screen the panel sits in the left margin and the list keeps its place under the logo', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/manifest/');
+  const panel = await page.locator('.note-filter').boundingBox();
+  const row = await page.locator('#note-list .post-row').first().boundingBox();
+  const logo = await page.locator('.title-main').boundingBox();
+  expect(Math.round(row.x)).toBe(Math.round(logo.x));
+  expect(panel.x).toBeGreaterThan(0);
+  expect(panel.x + panel.width).toBeLessThan(row.x);
+  await expect(page.locator('#note-sort')).toBeVisible();
+});
+
+test('on a phone the panel sits folded above the list', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/manifest/');
+  await expect(page.locator('#note-sort')).toBeHidden();
+  await expect(page.locator('#note-type-filter')).toBeHidden();
+  const first = await page.locator('#note-list .post-row').first().boundingBox();
+  expect(first.y).toBeLessThan(844 / 3);
+
+  await page.locator('.note-filter summary', { hasText: 'Type' }).click();
+  await type_box(page, 'puzzle').click();
+  const testbed = await page.locator('#note-list .emoji-image[src="/emoji/puzzle.png"]').count();
+  const total = await page.locator('#note-list .note-post-item').count();
+  await expect(shown_rows(page)).toHaveCount(total - testbed);
+});
