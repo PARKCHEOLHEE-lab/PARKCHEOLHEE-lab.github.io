@@ -434,10 +434,58 @@ function setup_note_list() {
   find();
 }
 
+// A post's side panel (post.html): Contents, the list generate_table_of_contents builds in the post's
+// #toc, moved in here, and Related. While the post scrolls, Contents marks the section being read, in
+// the panel and in its copy in the phone menu (setup_header).
+function setup_post_panel() {
+  const contents = document.querySelector("#post-side .post-contents");
+  const toc = document.getElementById("toc");
+  if (!contents || !toc) {
+    return;
+  }
+  const list = toc.querySelector(".section-nav");
+  toc.remove();
+  if (!list || !list.querySelector("a")) {
+    return;
+  }
+  contents.append(list);
+  contents.hidden = false;
+  const headings = Array.from(list.querySelectorAll("a"), function(link) {
+    return document.getElementById(link.getAttribute("href").slice(1));
+  });
+  const header = document.querySelector("body > header");
+  // the last heading at or above the header's bottom, where a link to it lands (scroll-padding-top), or
+  // the last of all once the page can scroll no further; the first while the page is above them all.
+  // lazy: a long table of contents scrolls in the panel without following the mark (the longest has 56
+  // entries, the next 10); keep the marked entry in view there if it matters
+  function mark() {
+    const line = header.offsetHeight + 2;
+    let current = 0;
+    headings.forEach(function(heading, i) {
+      if (heading && heading.getBoundingClientRect().top <= line) {
+        current = i;
+      }
+    });
+    if (window.scrollY > 0 && window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+      current = headings.length - 1;
+    }
+    document.querySelectorAll(".post-contents .section-nav").forEach(function(nav) {
+      nav.querySelectorAll("a").forEach(function(link, i) {
+        if (i === current) {
+          link.setAttribute("aria-current", "location");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      });
+    });
+  }
+  window.addEventListener("scroll", mark, { passive: true });
+  mark();
+}
+
 // The header on every page stays at the top of the screen, and once the page leaves the top the logo's
 // black box spreads over it (header.sass). Below 768px its Menu button opens the page's menu from the
-// right, with the site's links on top: the Manifest's side panel, or a post's menu with its table of
-// contents.
+// right, with the site's links on top: the Manifest's side panel, or a post's menu with its side panel.
 function setup_header() {
   const header = document.querySelector("body > header");
   const logo = header.querySelector(".title-main");
@@ -466,11 +514,12 @@ function setup_header() {
     return;
   }
   menu.prepend(header.querySelector("nav").cloneNode(true));
-  // a post's table of contents, built in the post by generate_table_of_contents, which the menu shows
-  // in its place on phones (header.sass)
-  const contents = document.querySelector("#toc .section-nav");
-  if (contents && contents.querySelector("a")) {
-    menu.append(contents.cloneNode(true));
+  // a post's side panel (setup_post_panel), which the menu shows in its place on phones (header.sass)
+  const panel = document.getElementById("post-side");
+  if (panel) {
+    const copy = panel.cloneNode(true);
+    copy.removeAttribute("id");
+    menu.append(copy);
   }
   header.querySelector(".site-menu-button").setAttribute("popovertarget", menu.id);
   // a popover below 768px only: from there the panel is back beside the list, where the browser's

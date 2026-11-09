@@ -36,14 +36,46 @@ layout: default
 {% endif %}
 
 {% comment %} the post's menu, behind the header's Menu button on phones: setup_header fills it with the
-  site's links and the post's table of contents (header.sass) {% endcomment %}
+  site's links and a copy of the post's side panel (header.sass) {% endcomment %}
 <div id="post-menu" class="site-menu"></div>
+
+{%- comment -%} the posts that this one's related: front matter names by slug, each with its emoji and
+  its title; a slug with no post (a disabled one) is left out {%- endcomment -%}
+{%- capture related_items -%}
+  {%- for slug in page.related -%}
+    {%- assign related_post = site.posts | where: "slug", slug | first -%}
+    {%- if related_post -%}
+      <li><a href="{{ related_post.url | relative_url }}" title="{{ related_post.title | escape }}"><img src="{% include post-emoji.html post=related_post %}" alt="" class="note-filter-icon"><span>{{ related_post.title }}</span></a></li>
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- capture related_section -%}
+  {%- if related_items != "" -%}
+    <details class="post-related" open><summary>Related{% include chevron.html %}</summary><ul>{{ related_items }}</ul></details>
+  {%- endif -%}
+{%- endcapture -%}
 
 <article>
 
   {% include meta.html post=page %}
 
+  {% comment %} the post's side panel: Contents, its table of contents (setup_post_panel), and Related.
+    Beside the post on wide screens; at its top on tablets, with Related at its end instead; in the menu
+    on phones (basic.sass) {% endcomment %}
+  {% if content contains 'id="toc"' %}
+  <aside id="post-side" class="post-side-panel" aria-label="Contents and related posts">
+    <details class="post-contents" open hidden><summary>Contents{% include chevron.html %}</summary></details>
+    {{ related_section }}
+  </aside>
+  {% elsif related_section != "" %}
+  <aside id="post-side" class="post-side-panel" aria-label="Related posts">{{ related_section }}</aside>
+  {% endif %}
+
   {{ content }}
+
+  {% if related_section != "" %}
+  <aside class="post-end post-side-panel" aria-label="Related posts">{{ related_section }}</aside>
+  {% endif %}
 
   {% if page.comment != false and page.content != empty %}
     <div class="col-lg-8 col-md-10 mx-auto">

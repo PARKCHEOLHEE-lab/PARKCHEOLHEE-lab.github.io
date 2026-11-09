@@ -135,7 +135,8 @@ test('on a phone a post\'s table of contents is in its menu, and a link in it cl
 test('from 768px a post keeps its table of contents in the post and its link in the header', async ({ page }) => {
   await page.setViewportSize({ width: 820, height: 1024 });
   await page.goto('/attention-attention/');
-  await expect(page.locator('article #toc .section-nav')).toBeVisible();
+  // in the post's side panel (setup_post_panel)
+  await expect(page.locator('article #post-side .section-nav')).toBeVisible();
   await expect(page.locator('#post-menu')).toBeHidden();
   await expect(page.locator('body > header nav')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
