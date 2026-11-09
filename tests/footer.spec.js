@@ -16,3 +16,14 @@ test('the footer links the mail address, GitHub, the resume and the architectura
     await expect(nav.locator(`a[href="${href}"] svg[aria-label="${label}"]`)).toBeVisible();
   }
 });
+
+for (const width of [390, 1240]) {
+  test(`at ${width}px the footer's first icon starts on the column's left edge`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/onnx/');
+    const footer = page.locator('body > footer');
+    const left = await footer.evaluate((element) => element.getBoundingClientRect().left + parseFloat(getComputedStyle(element).paddingLeft));
+    const icon = await footer.locator('nav a').first().boundingBox();
+    expect(icon.x).toBeCloseTo(left, 0);
+  });
+}

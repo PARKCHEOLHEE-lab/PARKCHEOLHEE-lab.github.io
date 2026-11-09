@@ -90,6 +90,16 @@ for (const path of PAGES) {
   });
 }
 
+for (const width of [820, 1240, 1920]) {
+  test(`at ${width}px the header's link ends on the column's right edge, where the Manifest's dates end`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/manifest/');
+    const link = await page.locator('body > header nav a').last().boundingBox();
+    const date = await page.locator('#note-list .note-date-time').first().boundingBox();
+    expect(link.x + link.width).toBeCloseTo(date.x + date.width, 0);
+  });
+}
+
 test('a page without a menu (the Testbed page) keeps its link in the header on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/testbed/');
