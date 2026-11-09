@@ -593,8 +593,8 @@ a:hover
     transition: none
 
 // a post's side panel (post.html, setup_post_panel): Contents, which marks the section being read, and
-// Related, whose titles stay on one line and scroll sideways when long, as the Manifest's rows do
-// (.title-scroll); a long title's full words show on hover
+// Related. Each entry stays on one line and scrolls sideways when long, as the Manifest's rows do
+// (.title-scroll); a long entry's full words show on hover
 .post-side-panel
   ul
     margin: 0.4em 0 0
@@ -613,17 +613,19 @@ a:hover
   [aria-current]
     font-weight: $heading-weight
 
-.post-related
-  a
-    display: flex
-    align-items: center
-    gap: 0.5em
-  span
-    min-width: 0
-    overflow-x: auto
-    overflow-y: hidden
-    white-space: nowrap
-    @include hide-scrollbar(height)
+.post-related a
+  display: flex
+  align-items: center
+  gap: 0.5em
+
+// an entry's words: a heading in Contents, a title beside its emoji in Related
+.post-contents a, .post-related span
+  display: block
+  min-width: 0
+  overflow-x: auto
+  overflow-y: hidden
+  white-space: nowrap
+  @include hide-scrollbar(height)
 
 // on phones the panel is in the menu (header.sass); from 768px its first heading sits on the post
 // title's line, and a long table of contents scrolls inside it, which ends 1.5em above the screen's

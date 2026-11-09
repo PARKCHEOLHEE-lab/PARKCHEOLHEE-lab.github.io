@@ -451,6 +451,9 @@ function setup_post_panel() {
   contents.append(list);
   contents.hidden = false;
   const headings = Array.from(list.querySelectorAll("a"), function(link) {
+    // a long heading is cut at the panel's edge (basic.sass); its full words show on hover, as a
+    // Related title's do
+    link.title = link.textContent;
     return document.getElementById(link.getAttribute("href").slice(1));
   });
   const header = document.querySelector("body > header");

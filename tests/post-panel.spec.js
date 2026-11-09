@@ -87,6 +87,19 @@ test('each Related title stays on one line, a long one cut and shown whole on ho
   await expect(long).toHaveAttribute('title', 'DeepSDF: Learning Continuous Signed Distance Functions for Shape Representation');
 });
 
+test('each Contents entry stays on one line too, a long one cut and shown whole on hover', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(POST);
+  const items = page.locator('#post-side .post-contents a');
+  const line = await items.first().evaluate((link) => link.getBoundingClientRect().height);
+  for (const item of await items.all()) {
+    expect((await item.boundingBox()).height).toBeCloseTo(line, 0);
+  }
+  const long = items.filter({ hasText: 'Post-Processing for Alignment Correction' });
+  expect(await long.evaluate((link) => link.scrollWidth > link.clientWidth)).toBe(true);
+  await expect(long).toHaveAttribute('title', 'Post-Processing for Alignment Correction');
+});
+
 test('a post without a table of contents has Related only, and one with neither has no panel', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/onnx/');
