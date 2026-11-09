@@ -4,18 +4,16 @@
   {% assign note_length = site.categories.note | size %}
   {% if page.id == "note" %}
     <div class="note-index">
-    <div class="note-side">
-    {% comment %} The search box, on top of the side panel on wide screens and above the list on phones,
-      where the menu would cover the list; setup_note_list reads the posts' text from search.json {% endcomment %}
-    <label class="note-search" hidden>
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
-      <input id="note-search" type="search" placeholder="Search posts" aria-label="Search posts" autocomplete="off" data-index="{{ '/search.json' | relative_url }}">
-      <span class="note-search-count" aria-live="polite"></span>
-    </label>
     {% comment %} The side panel, left of the list on wide screens and behind the header's Menu button on
-      narrow ones (setup_header); setup_note_list adds a checkbox per type and shows it {% endcomment %}
+      narrow ones (setup_header): the search box, which reads the posts' text from search.json, Sort by
+      and Type. setup_note_list adds a checkbox per type and shows it {% endcomment %}
     {% capture chevron %}<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M3 5l3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>{% endcapture %}
     <aside id="note-menu" class="note-filter site-menu" hidden>
+      <label class="note-search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        <input id="note-search" type="search" placeholder="Search posts" aria-label="Search posts" autocomplete="off" enterkeyhint="search" data-index="{{ '/search.json' | relative_url }}">
+        <span class="note-search-count" aria-live="polite"></span>
+      </label>
       <details open>
         <summary>Sort by{{ chevron }}</summary>
         <div id="note-sort" class="note-options" role="group" aria-label="Sort by">
@@ -30,7 +28,6 @@
         <div id="note-type-filter" class="note-options" role="group" aria-label="Filter by type"></div>
       </details>
     </aside>
-    </div>
 
     {% include manifest-posts.html %}
     <div id="note-list">

@@ -479,15 +479,14 @@ a:hover
   font-size: smaller
   font-variant-numeric: tabular-nums
 
-// the search box (note.html): an icon, the words and, while searching, how many posts are shown, over a
-// line that darkens while the box has the focus
+// the search box (note.html): an icon, the words and, while searching, how many posts are shown, over
+// the panel's dotted line, which darkens while the box has the focus
 .note-search
   display: flex
   align-items: center
   gap: 0.5em
-  margin-bottom: 0.4em
   padding: 0.5em 0
-  border-bottom: 1px solid reduce(40)
+  border-bottom: 1px dotted reduce(14)
   color: $text-dark
   &:focus-within
     border-bottom-color: $text-dark
@@ -539,22 +538,15 @@ a:hover
     color: $text-dark
     font-weight: $heading-weight
 
-// below 768px the search box sits above the list, and the panel is the header's menu (header.sass)
-@media (max-width: 767.98px)
-  .note-side
-    display: contents
-  .note-search
-    margin-bottom: 0.5em
-
-// from 768px the search box and the panel take the left of the page's column, under the logo, and the
-// list the rest; they stay below the header while the list scrolls
+// from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
+// panel stays below the header while the list scrolls
 @media (min-width: 768px)
   .note-index
     display: grid
     grid-template-columns: 12em minmax(0, 1fr)
     column-gap: 2.5em
     align-items: start
-  .note-side
+  .note-filter
     position: sticky
     top: calc(var(--header-height, 0px) + 1.5em)
   #note-list

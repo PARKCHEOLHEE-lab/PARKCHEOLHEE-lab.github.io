@@ -130,16 +130,32 @@ test('"/" goes to the search box', async ({ page }) => {
   await expect(page.locator('#note-search')).toBeFocused();
 });
 
-test('on a phone the search box sits above the list, not in the menu', async ({ page }) => {
+test('on a phone the search box is in the menu, and Enter closes the menu to show what it found', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/manifest/');
-  const box = page.locator('.note-search');
+  const menu = page.locator('#note-menu');
+  const box = menu.locator('.note-search input');
+  await expect(box).toBeHidden();
+  await page.getByRole('button', { name: 'Menu' }).click();
   await expect(box).toBeVisible();
-  expect(await page.locator('#note-menu .note-search').count()).toBe(0);
-  const top = (await box.boundingBox()).y;
-  expect(top).toBeLessThan((await page.locator('#note-list').boundingBox()).y);
-  await box.locator('input').fill('attention');
+  await box.fill('attention');
+  await box.press('Enter');
+  await expect(menu).toBeHidden();
   await expect(row_titled(page, 'Attention Is All You Need')).toBeVisible();
+  await expect(row_titled(page, 'ONNX')).toBeHidden();
+});
+
+test('the search box has the panel\'s dotted line', async ({ page }) => {
+  await page.goto('/manifest/');
+  const search = await page.locator('.note-search').evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.borderBottomStyle, style.borderBottomWidth, style.borderBottomColor];
+  });
+  const divider = await page.locator('.note-filter details + details').evaluate((element) => {
+    const style = getComputedStyle(element);
+    return [style.borderTopStyle, style.borderTopWidth, style.borderTopColor];
+  });
+  expect(search).toEqual(divider);
 });
 
 test('Testbed is the first type in the panel', async ({ page }) => {
