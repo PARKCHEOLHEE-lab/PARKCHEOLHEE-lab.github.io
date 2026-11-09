@@ -94,20 +94,19 @@ test('Contents marks the section being read, one entry at a time, and follows a 
   await expect(page.locator('#post-side [aria-current]')).toHaveCount(1);
 });
 
-test('Related starts folded, under its heading, and opens on a click', async ({ page }) => {
+test('Related starts open, under its heading, and folds on a click', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(POST);
   const related = page.locator('#post-side .post-related');
   await expect(related.locator('summary')).toBeVisible();
-  await expect(related.locator('a').first()).toBeHidden();
-  await related.locator('summary').click();
   await expect(related.locator('a').first()).toBeVisible();
+  await related.locator('summary').click();
+  await expect(related.locator('a').first()).toBeHidden();
 });
 
 test('each Related title stays on one line, a long one cut and shown whole on hover', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(POST);
-  await page.locator('#post-side .post-related summary').click();
   const items = page.locator('#post-side .post-related a');
   await expect(items).toHaveCount(7);
   const line = await items.first().evaluate((link) => link.getBoundingClientRect().height);
@@ -123,7 +122,6 @@ test('a sideways swipe moves only a cut-off title, never the whole panel', async
   await page.setViewportSize({ width: 1240, height: 800 });
   await page.goto('/coarse-to-fine-sdf/');
   const panel = page.locator('#post-side');
-  await panel.locator('.post-related summary').click();
   // the panel scrolls up and down only, so a trackpad can not swing it sideways
   await expect(panel).toHaveCSS('overflow-x', 'hidden');
   // no title bounces under a trackpad's swipe, which moved even a title that fits (Chrome on a Mac)

@@ -63,10 +63,10 @@ layout: default
     list are (basic.sass); below 768px the panel is in the menu {% endcomment %}
   <div class="post-index">
   {% if side_label != "" %}
-  {% comment %} Contents, the post's table of contents (setup_post_panel), and Related, folded at first {% endcomment %}
+  {% comment %} Contents, the post's table of contents (setup_post_panel), and Related {% endcomment %}
   <aside id="post-side" class="post-side-panel" aria-label="{{ side_label }}">
     {% if content contains 'id="toc"' %}<details class="post-contents" open hidden><summary>Contents{% include chevron.html %}</summary></details>{% endif %}
-    {% if related_items != "" %}<details class="post-related"><summary>Related{% include chevron.html %}</summary><ul>{{ related_items }}</ul></details>{% endif %}
+    {% if related_items != "" %}<details class="post-related" open><summary>Related{% include chevron.html %}</summary><ul>{{ related_items }}</ul></details>{% endif %}
   </aside>
   {% endif %}
   <div class="post-main">
