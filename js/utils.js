@@ -96,14 +96,18 @@ function filter_posts(type) {
 
 // The Manifest list and its side panel. Sort by orders the rows newest or oldest first, by title, or
 // by type. A checkbox per post type (read from each row's emoji, with its post count) shows the
-// checked types' rows, all of them at first; with none checked the list is empty. Pinned rows stay on top in their build order under every sort (a pinned page has no date), and the
-// build order (newest first) is the start. A press on a type and a drag over others sets them all, and
-// a choice other than the start stays in the page's address.
+// checked types' rows, all of them at first; with none checked the list is empty. Pinned rows stay on
+// top in their build order under every sort (a pinned page has no date), and the build order (newest
+// first) is the start. A press on a type and a drag over others sets them all. The search box keeps
+// the rows whose title or text has every word typed, each with a line of its text around the first
+// one. A choice other than the start stays in the page's address.
 function setup_note_list() {
   const list = document.getElementById("note-list");
   const panel = document.querySelector(".note-filter");
   const filter = document.getElementById("note-type-filter");
   const sort = document.getElementById("note-sort");
+  const search = document.getElementById("note-search");
+  const found = search.parentElement.querySelector(".note-search-count");
   const PIN = "/emoji/pin.png";
   // the names the latent-space map shows beside the same icons (LABEL_EMOJIS in js/latentspace.js);
   // any other type is named after its icon file, capitalized
@@ -118,7 +122,11 @@ function setup_note_list() {
       index: index,
       type: SAME_TYPE[icon] || icon,
       title: item.querySelector(".post-title").textContent.trim(),
-      time: Date.parse(item.querySelector("time").getAttribute("datetime"))
+      time: Date.parse(item.querySelector("time").getAttribute("datetime")),
+      url: item.dataset.url,
+      // the post's text from search.json, and its title and text in lower case to match against
+      text: "",
+      haystack: null
     };
   });
   const counts = {};
@@ -138,8 +146,11 @@ function setup_note_list() {
     names[type] = TYPE_NAMES[stem] || stem.charAt(0).toUpperCase() + stem.slice(1);
   });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-  // the checked types
-  const state = { types: new Set(types), sort: "newest" };
+  // the checked types, the sort and the words typed in the search box
+  const state = { types: new Set(types), sort: "newest", query: "" };
+  // search.json, fetched once, the first time the search box is used
+  let loaded = false;
+  let loading = null;
 
   function compare(a, b) {
     if (a.type === PIN || b.type === PIN) {
@@ -158,11 +169,101 @@ function setup_note_list() {
     return order !== 0 ? order : a.index - b.index;
   }
 
+  // the words typed, in lower case; lazy: toLowerCase keeps the length of English and Korean text, which
+  // the line under a title relies on to mark the words; a language whose letters change length would
+  // need the marks found on the original text
+  function words() {
+    return state.query.toLowerCase().split(/\s+/).filter(Boolean);
+  }
+
+  function load() {
+    if (!loading) {
+      loading = fetch(search.dataset.index).then(function(response) {
+        return response.json();
+      }).then(function(items) {
+        // the text keeps the entities of the posts' HTML (&lt;, &amp;), which a textarea decodes
+        const decoder = document.createElement("textarea");
+        const texts = {};
+        items.forEach(function(item) {
+          decoder.innerHTML = item.text;
+          texts[item.url] = decoder.value;
+        });
+        rows.forEach(function(row) {
+          row.text = texts[row.url] || "";
+          row.haystack = (row.title + " " + row.text).toLowerCase();
+        });
+        loaded = true;
+      }).catch(function() {
+        // offline, or the file failed: the next word typed tries again
+        loading = null;
+      });
+    }
+    return loading;
+  }
+
+  // a line of the row's text around the first word found in it, every word typed marked
+  function snippet(row, terms) {
+    const lower = row.text.toLowerCase();
+    let at = -1;
+    terms.some(function(term) {
+      at = lower.indexOf(term);
+      return at >= 0;
+    });
+    if (at < 0) {
+      return null;
+    }
+    const start = Math.max(0, at - 40);
+    const end = Math.min(row.text.length, at + 100);
+    const piece = (start > 0 ? "…" : "") + row.text.slice(start, end) + (end < row.text.length ? "…" : "");
+    const piece_lower = piece.toLowerCase();
+    const line = document.createElement("div");
+    line.className = "note-snippet";
+    let from = 0;
+    while (from < piece.length) {
+      let next = -1;
+      let size = 0;
+      terms.forEach(function(term) {
+        const found_at = piece_lower.indexOf(term, from);
+        if (found_at >= 0 && (next < 0 || found_at < next)) {
+          next = found_at;
+          size = term.length;
+        }
+      });
+      if (next < 0) {
+        line.append(piece.slice(from));
+        break;
+      }
+      const mark = document.createElement("mark");
+      mark.textContent = piece.slice(next, next + size);
+      line.append(piece.slice(from, next), mark);
+      from = next + size;
+    }
+    return line;
+  }
+
   function render() {
+    const terms = words();
+    // the rows show unfiltered until search.json arrives, a moment after the first word
+    const searching = terms.length > 0 && loaded;
+    let shown = 0;
     rows.slice().sort(compare).forEach(function(row) {
-      row.item.style.display = state.types.has(row.type) ? "" : "none";
+      const visible = state.types.has(row.type) && (!searching || terms.every(function(term) {
+        return row.haystack.includes(term);
+      }));
+      row.item.style.display = visible ? "" : "none";
+      const old = row.item.querySelector(".note-snippet");
+      if (old) {
+        old.remove();
+      }
+      const line = visible && searching ? snippet(row, terms) : null;
+      if (line) {
+        row.item.querySelector(".title-wrapper").append(line);
+      }
+      row.item.classList.toggle("has-snippet", line !== null);
+      shown += visible ? 1 : 0;
       list.appendChild(row.item);
     });
+    found.textContent = searching ? shown : "";
 
     filter.querySelectorAll("input").forEach(function(box) {
       box.checked = state.types.has(box.value);
@@ -174,11 +275,14 @@ function setup_note_list() {
     write_url();
   }
 
-  // the address keeps a choice other than every type and Newest, so a reload or a shared link shows
-  // the same list: /manifest/?type=testbed,note&sort=oldest. The plain /manifest/ is the start; replaced,
-  // not added, so Back leaves the page instead of undoing each click
+  // the address keeps a search and a choice other than every type and Newest, so a reload or a shared
+  // link shows the same list: /manifest/?q=attention&type=testbed,note&sort=oldest. The plain /manifest/
+  // is the start; replaced, not added, so Back leaves the page instead of undoing each click
   function write_url() {
     const parts = [];
+    if (state.query.trim()) {
+      parts.push("q=" + encodeURIComponent(state.query.trim()));
+    }
     if (state.types.size < types.length) {
       parts.push("type=" + types.filter(function(type) {
         return state.types.has(type);
@@ -208,6 +312,8 @@ function setup_note_list() {
     if (sorts.includes(params.get("sort"))) {
       state.sort = params.get("sort");
     }
+    state.query = params.get("q") || "";
+    search.value = state.query;
   }
 
   // one checkbox per type, with the type's icon, its name and its post count
@@ -283,9 +389,36 @@ function setup_note_list() {
     render();
   });
 
+  function find() {
+    state.query = search.value;
+    if (loaded || !words().length) {
+      render();
+    } else {
+      load().then(render);
+    }
+  }
+  search.addEventListener("input", find);
+  // the file starts loading as the box is entered, before the first word
+  search.addEventListener("focus", load);
+  // Escape empties the box, as the browser's own clear button does
+  search.addEventListener("keydown", function(event) {
+    if (event.key === "Escape" && search.value) {
+      search.value = "";
+      find();
+    }
+  });
+  // "/" goes to the search box from anywhere on the page but another text field
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "/" && !event.metaKey && !event.ctrlKey && !event.altKey && !event.target.closest("input, textarea, select, [contenteditable]")) {
+      event.preventDefault();
+      search.focus();
+    }
+  });
+
   read_url();
   panel.hidden = false;
-  render();
+  search.parentElement.hidden = false;
+  find();
 }
 
 // The header on every page stays at the top of the screen, and once the page leaves the top the logo's

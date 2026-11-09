@@ -479,15 +479,82 @@ a:hover
   font-size: smaller
   font-variant-numeric: tabular-nums
 
-// from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
-// panel stays below the header while the list scrolls
+// the search box (note.html): an icon, the words and, while searching, how many posts are shown, over a
+// line that darkens while the box has the focus
+.note-search
+  display: flex
+  align-items: center
+  gap: 0.5em
+  margin-bottom: 0.4em
+  padding: 0.5em 0
+  border-bottom: 1px solid reduce(40)
+  color: $text-dark
+  &:focus-within
+    border-bottom-color: $text-dark
+  svg
+    flex: none
+    width: 1em
+    height: 1em
+  input
+    flex: 1
+    min-width: 0
+    padding: 0
+    border: 0
+    background: none
+    color: inherit
+    font: inherit
+    outline: none
+    // the browser's clear button, blue in Chrome and Safari, in the page's greys
+    &::-webkit-search-cancel-button
+      filter: grayscale(1)
+      opacity: 0.6
+
+.note-search-count
+  flex: none
+  color: reduce(100)
+  font-size: smaller
+  font-variant-numeric: tabular-nums
+
+// a found row: its title over a line of its text, the words typed marked, the icon and the date by the
+// title
+.note-post-item.has-snippet
+  .title-wrapper
+    flex-direction: column
+    align-items: flex-start
+  .note-emoji-column, .note-date-column
+    align-self: flex-start
+  .note-emoji-column
+    padding-top: 0.45em
+
+.note-snippet
+  max-width: 100%
+  margin: -0.35em 0 0.5em
+  overflow: hidden
+  color: reduce(100)
+  font-size: smaller
+  text-overflow: ellipsis
+  white-space: nowrap
+  mark
+    background: none
+    color: $text-dark
+    font-weight: $heading-weight
+
+// below 768px the search box sits above the list, and the panel is the header's menu (header.sass)
+@media (max-width: 767.98px)
+  .note-side
+    display: contents
+  .note-search
+    margin-bottom: 0.5em
+
+// from 768px the search box and the panel take the left of the page's column, under the logo, and the
+// list the rest; they stay below the header while the list scrolls
 @media (min-width: 768px)
   .note-index
     display: grid
     grid-template-columns: 12em minmax(0, 1fr)
     column-gap: 2.5em
     align-items: start
-  .note-filter
+  .note-side
     position: sticky
     top: calc(var(--header-height, 0px) + 1.5em)
   #note-list

@@ -85,6 +85,63 @@ test('a hidden post (Reading List) is not listed, and its page still opens', asy
   await expect(page.locator('body > article')).toContainText('Reading List');
 });
 
+const row_titled = (page, title) => page.locator('#note-list .note-post-item', { has: page.locator('.post-title', { hasText: title }) });
+
+test('the search finds posts by their text, with a line of it under each title, and the count is a number', async ({ page }) => {
+  await page.goto('/manifest/');
+  // neither word is in this post's title, only in its text
+  await page.locator('#note-search').fill('masked attention');
+  const fancy = row_titled(page, 'Fancy Indexing Cheat Sheet');
+  await expect(fancy).toBeVisible();
+  await expect(fancy.locator('.note-snippet mark')).toHaveText(['Masked', 'Attention']);
+  const shown = await shown_rows(page).count();
+  expect(shown).toBeGreaterThan(0);
+  await expect(page.locator('.note-search-count')).toHaveText(String(shown));
+  await expect(page).toHaveURL(/\/manifest\/\?q=masked%20attention$/);
+
+  await page.locator('#note-search').fill('언어');
+  await expect(row_titled(page, 'verbalization loss')).toBeVisible();
+  await expect(row_titled(page, 'verbalization loss').locator('.note-snippet mark').first()).toHaveText('언어');
+});
+
+test('the address brings a search back, it keeps the type filter, and Escape clears it', async ({ page }) => {
+  await page.goto('/manifest/?q=attention&type=note');
+  await expect(page.locator('#note-search')).toHaveValue('attention');
+  await expect.poll(() => shown_rows(page).count()).toBeGreaterThan(0);
+  for (const icon of await shown_rows(page).locator('.emoji-image').evaluateAll((images) => images.map((image) => image.getAttribute('src')))) {
+    expect(['/emoji/default.png', '/emoji/default-empty.png']).toContain(icon);
+  }
+  const total = await page.locator('#note-list .note-post-item').count();
+  const notes = Number((await page.locator('#note-type-filter label', { hasText: 'Note' }).locator('.note-filter-count').textContent()));
+  expect(await shown_rows(page).count()).toBeLessThan(notes);
+
+  await page.locator('#note-search').press('Escape');
+  await expect(page.locator('#note-search')).toHaveValue('');
+  await expect(page.locator('.note-snippet')).toHaveCount(0);
+  await expect(page.locator('.note-search-count')).toHaveText('');
+  await expect(shown_rows(page)).toHaveCount(notes);
+  await expect(page).toHaveURL(/\/manifest\/\?type=note$/);
+  expect(total).toBeGreaterThan(notes);
+});
+
+test('"/" goes to the search box', async ({ page }) => {
+  await page.goto('/manifest/');
+  await page.keyboard.press('/');
+  await expect(page.locator('#note-search')).toBeFocused();
+});
+
+test('on a phone the search box sits above the list, not in the menu', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/manifest/');
+  const box = page.locator('.note-search');
+  await expect(box).toBeVisible();
+  expect(await page.locator('#note-menu .note-search').count()).toBe(0);
+  const top = (await box.boundingBox()).y;
+  expect(top).toBeLessThan((await page.locator('#note-list').boundingBox()).y);
+  await box.locator('input').fill('attention');
+  await expect(row_titled(page, 'Attention Is All You Need')).toBeVisible();
+});
+
 test('Testbed is the first type in the panel', async ({ page }) => {
   await page.goto('/manifest/');
   await expect(page.locator('#note-type-filter input').first()).toHaveAttribute('value', '/emoji/puzzle.png');
