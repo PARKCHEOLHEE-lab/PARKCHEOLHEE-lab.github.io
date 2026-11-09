@@ -3,18 +3,20 @@ const { test, expect } = require('@playwright/test');
 
 // the footer every page shares (default.html): the site's external links, as icons (_config.yml)
 
-test('the footer links the mail address, GitHub, the resume and the architectural portfolio', async ({ page }) => {
+test('the footer links GitHub, the resume, the architectural portfolio and, last, the mail address', async ({ page }) => {
   await page.goto('/onnx/');
   const nav = page.locator('body > footer nav');
   const links = [
-    ['Mail', 'mailto:park112368@gmail.com'],
     ['Github', 'https://github.com/PARKCHEOLHEE-lab'],
     ['resume', '/resume.pdf'],
-    ['Architectural portfolio', '/portfolio-architectural.pdf']
+    ['Architectural portfolio', '/portfolio-architectural.pdf'],
+    ['Mail', 'mailto:park112368@gmail.com']
   ];
   for (const [label, href] of links) {
     await expect(nav.locator(`a[href="${href}"] svg[aria-label="${label}"]`)).toBeVisible();
   }
+  await expect(nav.locator('a')).toHaveCount(links.length);
+  expect(await nav.locator('a').evaluateAll((items) => items.map((a) => a.getAttribute('href')))).toEqual(links.map(([, href]) => href));
 });
 
 for (const width of [390, 1240]) {
