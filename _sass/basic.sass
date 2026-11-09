@@ -389,9 +389,11 @@ a:hover
 // --- Note-specific classes ---
 
 // the filter and the sorts rebuild the list, and scroll anchoring would then scroll the page to keep a
-// row that moved in place (246px at 1280px when a second type was chosen)
+// row that moved in place (246px at 1280px when a second type was chosen). Every row has the dotted
+// line under it (use-bottom-line in note.html), and the list draws the same line over the first one
 #note-list
   overflow-anchor: none
+  border-top: 1px dotted reduce(14)
 
 // a row's content is centred between its lines, which centres the emoji. The title font leaves about
 // 0.1em more room under the baseline than above the capitals, so the title and the date move down
@@ -412,21 +414,11 @@ a:hover
   align-items: center
   margin-left: 0.5em
 
-// the dates, and the columns' names over the list (note.html), which are as tall so their row is too
-.note-date-time, .note-head-label
+.note-date-time
   font-size: smaller
   // 1em in total, as the row height comes from it; 0.05em more on top (see .note-post-item)
   margin-top: 0.55em
   margin-bottom: 0.45em
-
-// as wide as a row's emoji column (the icon, its 0.3em and 0.5em margins and the column's 0.2em), so
-// Title starts where the titles do. Its content box is the icon's, and Type is centred on it, spilling
-// out evenly on both sides, as the word is wider than an icon
-.note-head .note-emoji-column
-  width: 1.25em
-  padding-left: 0.3em
-  padding-right: 0.7em
-  justify-content: center
 
 .note-sr-only
   position: absolute
@@ -498,7 +490,7 @@ a:hover
   .note-filter
     position: sticky
     top: calc(var(--header-height, 0px) + 1.5em)
-  .note-table
+  #note-list
     grid-column: 2
 
 @media (prefers-reduced-motion: reduce)

@@ -67,23 +67,8 @@ test('on a wide screen the panel and the list share the page column, the panel u
   expect(panel.x + panel.width).toBeLessThan(row.x);
   expect(Math.round(row.x + row.width)).toBe(Math.round(column_right));
   await expect(page.locator('#note-sort')).toBeVisible();
-});
-
-test('Type, Title and Date head the list, over the emoji, the titles and the dates, with the rows\' line under them', async ({ page }) => {
-  await page.goto('/manifest/');
-  const head = page.locator('.note-head');
-  const type = await head.getByText('Type', { exact: true }).boundingBox();
-  const title = await head.getByText('Title', { exact: true }).boundingBox();
-  const date = await head.getByText('Date', { exact: true }).boundingBox();
-  const emoji = await page.locator('.note-post-item .emoji-image').first().boundingBox();
-  const row_title = await page.locator('.note-post-item .post-title').first().boundingBox();
-  const row_date = await page.locator('.note-post-item .note-date-time').first().boundingBox();
-  expect(Math.abs(type.x + type.width / 2 - (emoji.x + emoji.width / 2))).toBeLessThan(1);
-  expect(type.x + type.width).toBeLessThan(title.x);
-  expect(Math.round(title.x)).toBe(Math.round(row_title.x));
-  expect(Math.round(date.x + date.width)).toBe(Math.round(row_date.x + row_date.width));
-  await expect(head).toHaveCSS('border-bottom-style', 'dotted');
-  expect((await head.boundingBox()).y).toBeLessThan(row_title.y);
+  // the rows' dotted line over the first row too
+  await expect(page.locator('#note-list')).toHaveCSS('border-top-style', 'dotted');
 });
 
 test('Testbed is the first type in the panel', async ({ page }) => {

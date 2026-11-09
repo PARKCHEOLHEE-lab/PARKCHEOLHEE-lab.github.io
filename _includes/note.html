@@ -34,14 +34,6 @@
     {% assign unpinned_posts = listed_posts | where_exp: "post", "post.emoji != '/emoji/pin.png'" %}
     {% assign all_posts = pinned_pages | concat: pinned_posts | concat: unpinned_posts %}
 
-    <div class="note-table">
-    {% comment %} the columns' names, over the emoji, the titles and the dates, with the rows' line
-      under them {% endcomment %}
-    <div class="post-row note-head use-bottom-line">
-      <div class="note-emoji-column"><span class="use-gray note-head-label">Type</span></div>
-      <div class="title-wrapper"><span class="use-gray note-head-label">Title</span></div>
-      <div class="note-date-column"><span class="use-gray note-head-label">Date</span></div>
-    </div>
     <div id="note-list">
     {% for post in all_posts %}
       <div class="note-post-item">
@@ -84,7 +76,6 @@
         </div>
       </div>
     {% endfor %}
-    </div>
     </div>
     </div>
     <script>setup_note_list()</script>
