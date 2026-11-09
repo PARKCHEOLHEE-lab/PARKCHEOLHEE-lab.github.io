@@ -108,6 +108,30 @@ test('a page without a menu (the Testbed page) keeps its link in the header on a
   await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
 });
 
+test('on a phone the Menu icon is in the links\' colour and folds into a ">" while the menu is open', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/onnx/');
+  const button = page.getByRole('button', { name: 'Menu' });
+  const link = await page.locator('body > header nav a').evaluate((a) => getComputedStyle(a).color);
+  await expect(button).toHaveCSS('color', link);
+  // each line's box, from the icon's top left corner, in its 20-unit box
+  const lines = () => page.evaluate(() => {
+    const icon = document.querySelector('.site-menu-icon').getBoundingClientRect();
+    return Array.from(document.querySelectorAll('.site-menu-icon path'), (path) => {
+      const box = path.getBoundingClientRect();
+      return { left: box.left - icon.left, top: box.top - icon.top, right: box.right - icon.left, bottom: box.bottom - icon.top, opacity: getComputedStyle(path).opacity };
+    });
+  });
+  const closed = await lines();
+  expect(closed.map((line) => [line.left, line.right])).toEqual([[3, 17], [3, 17], [3, 17]]);
+  await button.click();
+  // the tip at (13, 10) and the ends at (8, 5) and (8, 15), once the 0.25s fold is done
+  await expect.poll(async () => {
+    const [top, middle, bottom] = await lines();
+    return [top.left, top.top, top.right, top.bottom, bottom.top, bottom.bottom, middle.opacity].map((v) => Math.round(Number(v)));
+  }).toEqual([8, 5, 13, 10, 10, 15, 0]);
+});
+
 test('on a phone a post without a table of contents has the Menu button, with the site\'s link in its menu', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/onnx/');

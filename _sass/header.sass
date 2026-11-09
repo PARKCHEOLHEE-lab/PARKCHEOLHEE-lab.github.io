@@ -24,14 +24,11 @@ body > header
     transition: clip-path 0.4s ease
   &[data-scroll="down"]::before
     clip-path: inset(0)
-  // the bar's other words and the menu icon are white wherever the black is under them, black elsewhere
+  // the bar's links and the menu icon in the panels' text colour on the white bar (the difference blend
+  // takes the inverse back to it), and a light grey wherever the black is under them
   nav, .site-menu-button
-    color: $light
-    mix-blend-mode: difference
-  // the links in the panels' text colour on the white bar (the blend takes the inverse back to it), and
-  // a light grey over the black
-  nav
     color: invert($text-dark)
+    mix-blend-mode: difference
 
 // a link to a heading, as in a table of contents, lands below the header instead of under it
 html
@@ -44,14 +41,23 @@ html
   background: none
   cursor: pointer
 
-.site-menu-close
-  display: none
+// while the menu is open the icon's three lines fold into a ">", pointing the way the menu slides out:
+// the middle one fades, and the outer two turn 45° about their middles and shorten to the arms of a
+// chevron with its tip at (13, 10) and its ends at (8, 5) and (8, 15) of the 20-unit box. Their round
+// ends stay round as they shorten (non-scaling-stroke)
+.site-menu-icon path
+  transform-box: fill-box
+  transform-origin: center
+  vector-effect: non-scaling-stroke
+  transition: transform 0.25s, opacity 0.25s
 
-body:has(:popover-open)
-  .site-menu-open
-    display: none
-  .site-menu-close
-    display: block
+body:has(:popover-open) .site-menu-icon
+  path:nth-child(1)
+    transform: translate(0.5px, 1.5px) rotate(45deg) scaleX(0.505)
+  path:nth-child(2)
+    opacity: 0
+  path:nth-child(3)
+    transform: translate(0.5px, -1.5px) rotate(-45deg) scaleX(0.505)
 
 // the copies setup_header puts in the menu are the phone's: from 768px the site's links are in the
 // header, a post's side panel in the post, and the Manifest's panel beside its list
@@ -110,5 +116,5 @@ body:has(:popover-open)
       transform: translateX(100%)
 
 @media (prefers-reduced-motion: reduce)
-  body > header[data-scroll]::before, .site-menu
+  body > header[data-scroll]::before, .site-menu, .site-menu-icon path
     transition: none
