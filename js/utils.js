@@ -202,8 +202,8 @@ function setup_note_list() {
     render();
   });
 
-  // below 1100px the panel sits above the list (basic.sass), folded so the rows come first
-  if (!matchMedia("(min-width: 1100px)").matches) {
+  // below 990px the panel sits above the list (basic.sass), folded so the rows come first
+  if (!matchMedia("(min-width: 990px)").matches) {
     panel.querySelectorAll("details").forEach(function(section) {
       section.open = false;
     });

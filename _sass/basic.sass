@@ -429,7 +429,7 @@ a:hover
 // the side panel (note.html), after aaro Academy's Resources sidebar (aaro-lab/aaro-domus,
 // apps/academy/components/resources-browser.tsx): Sort by and Type, each a section that folds under
 // its heading, with a chevron that points up while it is open. Its words are the list's size and its
-// lines the rows' dotted line. Below 1100px it sits above the list, its sections folded
+// lines the rows' dotted line. Below 990px it sits above the list, its sections folded
 // (setup_note_list)
 .note-filter
   margin-bottom: 0.5em
@@ -480,16 +480,14 @@ a:hover
   font-size: smaller
   font-variant-numeric: tabular-nums
 
-// from 1100px the panel sits in the page's left margin, so the list keeps its place, and stays while
-// the list scrolls. The margin is 40vw - 17em from 64em (assets/css/index.sass), 212px at 1100px,
-// and the panel and its gap take 13.5em (181px there)
-@media (min-width: 1100px)
+// from 990px the panel takes the left of the page's column, under the logo, and the list the rest; the
+// panel stays while the list scrolls
+@media (min-width: 990px)
   .note-index
     display: grid
-    grid-template-columns: 11em minmax(0, 1fr)
-    column-gap: 2.5em
+    grid-template-columns: 14.5em minmax(0, 1fr)
+    column-gap: 3em
     align-items: start
-    margin-left: -13.5em
   .note-filter
     position: sticky
     top: 1.5em

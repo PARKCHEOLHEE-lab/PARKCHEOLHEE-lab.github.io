@@ -52,15 +52,17 @@ test('sort by: pinned rows stay on top, and Oldest puts the oldest post first', 
   expect(posts).toEqual([...posts].sort((a, b) => a - b));
 });
 
-test('on a wide screen the panel sits in the left margin and the list keeps its place under the logo', async ({ page }) => {
+test('on a wide screen the panel and the list share the page column, the panel under the logo', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/manifest/');
   const panel = await page.locator('.note-filter').boundingBox();
   const row = await page.locator('#note-list .post-row').first().boundingBox();
   const logo = await page.locator('.title-main').boundingBox();
-  expect(Math.round(row.x)).toBe(Math.round(logo.x));
-  expect(panel.x).toBeGreaterThan(0);
+  // the right edge of the article's content, where the rows ended before the panel
+  const column_right = await page.locator('body > article').evaluate((article) => article.getBoundingClientRect().right - parseFloat(getComputedStyle(article).paddingRight));
+  expect(Math.round(panel.x)).toBe(Math.round(logo.x));
   expect(panel.x + panel.width).toBeLessThan(row.x);
+  expect(Math.round(row.x + row.width)).toBe(Math.round(column_right));
   await expect(page.locator('#note-sort')).toBeVisible();
 });
 
