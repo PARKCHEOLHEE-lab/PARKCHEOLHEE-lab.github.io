@@ -11,7 +11,9 @@
     <aside id="note-menu" class="note-filter site-menu" hidden>
       <label class="note-search">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
-        <input id="note-search" type="search" placeholder="Search posts" aria-label="Search posts" autocomplete="off" enterkeyhint="search" data-index="{{ '/search.json' | relative_url }}">
+        <input id="note-search" type="search" placeholder="Search posts" aria-label="Search posts" autocomplete="off" spellcheck="false" enterkeyhint="search" data-index="{{ '/search.json' | relative_url }}">
+        {% comment %} in place of the browser's own clear button, drawn like the magnifier {% endcomment %}
+        <button type="button" class="note-search-clear" aria-label="Clear search" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
         <span class="note-search-count" aria-live="polite"></span>
       </label>
       <details open>

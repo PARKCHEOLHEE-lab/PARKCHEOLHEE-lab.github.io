@@ -503,10 +503,31 @@ a:hover
     color: inherit
     font: inherit
     outline: none
-    // the browser's clear button, blue in Chrome and Safari, in the page's greys
+    // the browser's own clear button, a bitmap in Chrome and Safari; .note-search-clear replaces it
     &::-webkit-search-cancel-button
-      filter: grayscale(1)
-      opacity: 0.6
+      display: none
+
+// the clear button, shown while the box has words (setup_note_list): a cross in the magnifier's line,
+// a little smaller, with the 24px minimum target size (WCAG 2.5.8)
+.note-search-clear
+  display: flex
+  flex: none
+  align-items: center
+  justify-content: center
+  min-width: 24px
+  min-height: 24px
+  padding: 0
+  border: 0
+  background: none
+  color: inherit
+  cursor: pointer
+  &[hidden]
+    display: none
+  svg
+    width: 0.85em
+    height: 0.85em
+  &:hover
+    @include hover-fade
 
 .note-search-count
   flex: none

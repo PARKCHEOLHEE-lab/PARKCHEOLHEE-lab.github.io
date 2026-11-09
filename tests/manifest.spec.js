@@ -122,6 +122,17 @@ test('the address brings a search back, it keeps the type filter, and Escape cle
   await expect(shown_rows(page)).toHaveCount(notes);
   await expect(page).toHaveURL(/\/manifest\/\?type=note$/);
   expect(total).toBeGreaterThan(notes);
+
+  // the clear button shows with words in the box, and empties it
+  const clear = page.getByRole('button', { name: 'Clear search' });
+  await expect(clear).toBeHidden();
+  await page.locator('#note-search').fill('attention');
+  await expect(clear).toBeVisible();
+  await clear.click();
+  await expect(page.locator('#note-search')).toHaveValue('');
+  await expect(page.locator('#note-search')).toBeFocused();
+  await expect(clear).toBeHidden();
+  await expect(shown_rows(page)).toHaveCount(notes);
 });
 
 test('"/" goes to the search box', async ({ page }) => {

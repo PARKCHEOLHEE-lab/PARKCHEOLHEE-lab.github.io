@@ -108,6 +108,7 @@ function setup_note_list() {
   const sort = document.getElementById("note-sort");
   const search = document.getElementById("note-search");
   const found = search.parentElement.querySelector(".note-search-count");
+  const clear = search.parentElement.querySelector(".note-search-clear");
   const PIN = "/emoji/pin.png";
   // the names the latent-space map shows beside the same icons (LABEL_EMOJIS in js/latentspace.js);
   // any other type is named after its icon file, capitalized
@@ -391,12 +392,18 @@ function setup_note_list() {
 
   function find() {
     state.query = search.value;
+    clear.hidden = !search.value;
     if (loaded || !words().length) {
       render();
     } else {
       load().then(render);
     }
   }
+  clear.addEventListener("click", function() {
+    search.value = "";
+    find();
+    search.focus();
+  });
   search.addEventListener("input", find);
   // the file starts loading as the box is entered, before the first word
   search.addEventListener("focus", load);
