@@ -126,9 +126,11 @@ function setup_note_list() {
   rows.forEach(function(row) {
     counts[row.type] = (counts[row.type] || 0) + 1;
   });
-  // the most common type first; types with equal counts keep the order they first appear in
+  // Testbed first, as the owner asked, then the most common type first; types with equal counts keep
+  // the order they first appear in. The Type sort follows the same order
+  const TESTBED = "/emoji/puzzle.png";
   const types = Object.keys(counts).sort(function(a, b) {
-    return counts[b] - counts[a];
+    return (b === TESTBED) - (a === TESTBED) || counts[b] - counts[a];
   });
   const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
   // the checked types, never empty
@@ -202,14 +204,56 @@ function setup_note_list() {
     render();
   });
 
-  // below 990px the panel sits above the list (basic.sass), folded so the rows come first
-  if (!matchMedia("(min-width: 990px)").matches) {
-    panel.querySelectorAll("details").forEach(function(section) {
-      section.open = false;
-    });
-  }
   panel.hidden = false;
   render();
+}
+
+// The header on every page stays at the top of the screen, and once the page leaves the top the logo's
+// black box spreads over it (header.sass). Below 990px its Menu button opens the Manifest's side panel
+// from the right, with the site's links on top.
+function setup_header() {
+  const header = document.querySelector("body > header");
+  const logo = header.querySelector(".title-main");
+  // the side panel sits below the header, so its height is kept in a CSS variable; the black spreads
+  // from the logo's box, kept as distances from the header's edges
+  function measure() {
+    document.documentElement.style.setProperty("--header-height", header.offsetHeight + "px");
+    const right = header.clientWidth - logo.offsetLeft - logo.offsetWidth;
+    const bottom = header.clientHeight - logo.offsetTop - logo.offsetHeight;
+    header.style.setProperty("--logo-inset", [logo.offsetTop, right, bottom, logo.offsetLeft].join("px ") + "px");
+  }
+  // measured before data-scroll is first set, which brings in the black layer: one that appeared before
+  // the measure would spread from nowhere to the logo
+  measure();
+  const resize = new ResizeObserver(measure);
+  resize.observe(header);
+  resize.observe(logo);
+  function mark_scroll() {
+    header.dataset.scroll = window.scrollY > 0 ? "down" : "top";
+  }
+  window.addEventListener("scroll", mark_scroll, { passive: true });
+  mark_scroll();
+
+  const menu = document.querySelector(".note-filter");
+  if (!menu) {
+    return;
+  }
+  menu.prepend(header.querySelector("nav").cloneNode(true));
+  header.querySelector(".site-menu-button").setAttribute("popovertarget", menu.id);
+  // a popover below 990px only: from there the panel is back beside the list, where the browser's
+  // popover styles would hide it, and one left open closes as the attribute goes
+  const wide = matchMedia("(min-width: 990px)");
+  function place() {
+    menu.toggleAttribute("popover", !wide.matches);
+  }
+  wide.addEventListener("change", place);
+  place();
+  // a link in the panel leaves the page, or goes to a part of it the open panel would cover
+  menu.addEventListener("click", function(event) {
+    if (event.target.closest("a") && menu.matches(":popover-open")) {
+      menu.hidePopover();
+    }
+  });
 }
 
 function generate_figure_numbers() {

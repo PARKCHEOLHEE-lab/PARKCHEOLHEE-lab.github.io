@@ -1,0 +1,101 @@
+// The header every page shares (default.html). It stays at the top of the screen while the page
+// scrolls, and once the page leaves the top the logo's black box spreads over it. Below 990px its Menu
+// button opens the Manifest's side panel from the right, with the site's links on top (setup_header in
+// js/utils.js). Pages without the panel keep their links in the header. Its height is set with the
+// other per-site header rules, in assets/css/index.sass.
+
+// the header stays above the page
+body > header
+  position: sticky
+  top: 0
+  z-index: 3
+  background: $light
+  // once the page leaves the top (setup_header), the logo's black box spreads over the whole bar,
+  // and shrinks back into the logo at the top. It is the bar's own layer, cut to the logo's box
+  // (--logo-inset), not the logo's shadow, which the site's link hover would fade with the logo
+  &[data-scroll]::before
+    content: ""
+    position: absolute
+    inset: 0
+    z-index: -1
+    background: $dark
+    clip-path: inset(var(--logo-inset))
+    transition: clip-path 0.4s ease
+  &[data-scroll="down"]::before
+    clip-path: inset(0)
+  // the bar's other words and the menu icon are white wherever the black is under them, black elsewhere
+  nav, .site-menu-button
+    color: $light
+    mix-blend-mode: difference
+
+// a link to a heading, as in a table of contents, lands below the header instead of under it
+html
+  scroll-padding-top: var(--header-height, 0px)
+
+.site-menu-button
+  display: none
+  padding: 0
+  border: 0
+  background: none
+  cursor: pointer
+
+.site-menu-close
+  display: none
+
+body:has(:popover-open)
+  .site-menu-open
+    display: none
+  .site-menu-close
+    display: block
+
+// the site's links that setup_header copies into the panel, for the narrow-screen menu only
+@media (min-width: 990px)
+  .note-filter nav
+    display: none
+
+// below 990px the Menu button slides the panel in from the right, below the header and over the page;
+// Escape, a tap outside or a link in it closes it (the browser's popover, and setup_header)
+@media (max-width: 989.98px)
+  body:has(.note-filter) > header nav
+    display: none
+  body:has(.note-filter) .site-menu-button
+    display: flex
+  .note-filter
+    position: fixed
+    inset: var(--header-height, 0px) 0 0 auto
+    box-sizing: border-box
+    width: 320px
+    max-width: 85vw
+    height: auto
+    margin: 0
+    padding: 0 24px 24px
+    border: 0
+    border-left: 1px solid reduce(14)
+    overflow-y: auto
+    overscroll-behavior: contain
+    background: $light
+    transform: translateX(100%)
+    transition: transform 0.25s, overlay 0.25s allow-discrete, display 0.25s allow-discrete
+    &:popover-open
+      transform: none
+    &::backdrop
+      top: var(--header-height, 0px)
+      background: rgba($dark, 0.2)
+    nav
+      display: flex
+      flex-direction: column
+      margin: 0
+      padding: 16px 0
+      border-bottom: 1px dotted reduce(14)
+      a
+        margin: 0
+        padding: 6px 0
+        color: inherit
+  // the panel starts off the screen when it opens, so it slides in
+  @starting-style
+    .note-filter:popover-open
+      transform: translateX(100%)
+
+@media (prefers-reduced-motion: reduce)
+  body > header[data-scroll]::before, .note-filter
+    transition: none

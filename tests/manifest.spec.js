@@ -66,17 +66,34 @@ test('on a wide screen the panel and the list share the page column, the panel u
   await expect(page.locator('#note-sort')).toBeVisible();
 });
 
-test('on a phone the panel sits folded above the list', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+test('Testbed is the first type in the panel', async ({ page }) => {
   await page.goto('/manifest/');
-  await expect(page.locator('#note-sort')).toBeHidden();
-  await expect(page.locator('#note-type-filter')).toBeHidden();
-  const first = await page.locator('#note-list .post-row').first().boundingBox();
-  expect(first.y).toBeLessThan(844 / 3);
-
-  await page.locator('.note-filter summary', { hasText: 'Type' }).click();
-  await type_box(page, 'puzzle').click();
-  const testbed = await page.locator('#note-list .emoji-image[src="/emoji/puzzle.png"]').count();
-  const total = await page.locator('#note-list .note-post-item').count();
-  await expect(shown_rows(page)).toHaveCount(total - testbed);
+  await expect(page.locator('#note-type-filter input').first()).toHaveAttribute('value', '/emoji/puzzle.png');
 });
+
+for (const width of [390, 820]) {
+  test(`at ${width}px the menu button opens the panel from the right, over the list`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/manifest/');
+    const menu = page.locator('#note-menu');
+    const header = page.locator('body > header');
+    await expect(menu).toBeHidden();
+    await expect(header.locator('nav')).toBeHidden();
+
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('link', { name: 'manifest' })).toBeVisible();
+    await expect.poll(async () => {
+      const box = await menu.boundingBox();
+      return [Math.round(box.x + box.width), Math.round(box.y)];
+    }).toEqual([width, Math.round((await header.boundingBox()).height)]);
+
+    const total = await page.locator('#note-list .note-post-item').count();
+    await type_box(page, 'puzzle').click();
+    const testbed = await page.locator('#note-list .emoji-image[src="/emoji/puzzle.png"]').count();
+    await expect(shown_rows(page)).toHaveCount(total - testbed);
+
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+  });
+}
