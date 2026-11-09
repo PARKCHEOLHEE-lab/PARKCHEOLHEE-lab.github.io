@@ -29,3 +29,13 @@ for (const width of [390, 1240]) {
     expect(icon.x).toBeCloseTo(left, 0);
   });
 }
+
+for (const width of [390, 820, 1240, 1920]) {
+  test(`at ${width}px the footer is as tall as the header`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto('/onnx/');
+    const header = await page.locator('body > header').boundingBox();
+    const footer = await page.locator('body > footer').boundingBox();
+    expect(footer.height).toBeCloseTo(header.height, 0);
+  });
+}
