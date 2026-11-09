@@ -73,9 +73,20 @@ test('Contents marks the section being read, one entry at a time, and follows a 
   await expect(page.locator('#post-side [aria-current]')).toHaveCount(1);
 });
 
+test('Related starts folded, under its heading, and opens on a click', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(POST);
+  const related = page.locator('#post-side .post-related');
+  await expect(related.locator('summary')).toBeVisible();
+  await expect(related.locator('a').first()).toBeHidden();
+  await related.locator('summary').click();
+  await expect(related.locator('a').first()).toBeVisible();
+});
+
 test('each Related title stays on one line, a long one cut and shown whole on hover', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(POST);
+  await page.locator('#post-side .post-related summary').click();
   const items = page.locator('#post-side .post-related a');
   await expect(items).toHaveCount(7);
   const line = await items.first().evaluate((link) => link.getBoundingClientRect().height);
