@@ -36,6 +36,9 @@ python3 -m pytest .agents/shared/skills/build-latentspace/scripts/test_build_pos
 
 # Rebuild latent-space data; requires OPENAI_API_KEY and Python deps
 python3 .agents/shared/skills/build-latentspace/scripts/build_post_map.py
+
+# Test the build step that adds lazy loading and skeleton boxes to content images (stdlib only)
+python3 -m pytest _plugins/test_image_sizes.py -v
 ```
 
 Python dependencies for latent-space work are installed in CI with:
@@ -73,6 +76,7 @@ Do not run `build-latentspace` without confirming `OPENAI_API_KEY` is available;
 - For layout, Sass, include, config, or broad content changes, run `bundle exec jekyll build`.
 - For `related` frontmatter changes, run `python3 .agents/shared/skills/add-related/scripts/verify_related.py`.
 - For latent-space script changes, run the pytest command above after installing the Python dependencies.
+- For `_plugins/image_sizes.py` changes, run its pytest command above, then `bundle exec jekyll build` and `npx playwright test tests/images.spec.js`.
 - For agent-structure changes, run `bash .agents/setup-symlinks.sh` and verify the symlinks with `find .agents .claude .codex -maxdepth 3`.
 
 <!-- setup-design-system: do not edit between markers -->

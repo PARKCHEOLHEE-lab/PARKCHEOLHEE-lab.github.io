@@ -28,13 +28,12 @@ function handle_image_error(img) {
     if (tried === branches[i] && i + 1 < branches.length) {
       img.dataset.fallback_tried = branches[i + 1];
       img.src = base + branches[i + 1] + "/" + tail;
-      if (i + 1 === branches.length - 1) {
-        img.onerror = null;
-      }
       return;
     }
   }
+  // every copy failed: the image's skeleton (basic.sass) stops promising an image that is not on its way
   img.onerror = null;
+  img.removeAttribute("data-skeleton");
 }
 
 function resize_iframe(obj) {
