@@ -66,7 +66,7 @@ class DomIno {
     const loader = new OBJLoader();
 
     loader.load(
-      "../model/dom-ino/dom-ino.obj",
+      "/assets/models/dom-ino/dom-ino.obj",
       function ( object ) {
         object.traverse(function ( child ) {
           if (child.isMesh) {

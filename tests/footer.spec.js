@@ -8,8 +8,8 @@ test('the footer links GitHub, the resume, the architectural portfolio and, last
   const nav = page.locator('body > footer nav');
   const links = [
     ['Github', 'https://github.com/PARKCHEOLHEE-lab'],
-    ['resume', '/resume.pdf'],
-    ['Architectural portfolio', '/portfolio-architectural.pdf'],
+    ['resume', '/assets/docs/resume.pdf'],
+    ['Architectural portfolio', '/assets/docs/portfolio-architectural.pdf'],
     ['Mail', 'mailto:park112368@gmail.com']
   ];
   for (const [label, href] of links) {
