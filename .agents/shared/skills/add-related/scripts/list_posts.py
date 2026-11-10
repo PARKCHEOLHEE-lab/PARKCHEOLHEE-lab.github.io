@@ -59,10 +59,10 @@ def has_body(filepath):
     return bool(match.group(1).strip())
 
 
-def list_posts():
-    """Yield (filepath, slug, title) for each eligible post."""
+def list_posts(root=REPO_ROOT):
+    """Yield (filepath, slug, title) for each eligible post under root."""
     for subdir in ("note/_posts", "testbed/_posts"):
-        post_dir = os.path.join(REPO_ROOT, subdir)
+        post_dir = os.path.join(root, subdir)
         if not os.path.isdir(post_dir):
             continue
         for filepath in sorted(glob.glob(os.path.join(post_dir, "*.html"))):

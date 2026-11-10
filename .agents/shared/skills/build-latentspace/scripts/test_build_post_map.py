@@ -539,3 +539,24 @@ class TestRequestTokenBudget:
         # every chunk still embedded, one vector per post
         assert sorted(t for c in calls for t in c) == sorted(p["embed_chunks"][0] for p in posts)
         assert result.shape == (4, 4)
+
+
+class TestPostDiscovery:
+    """build_post_map embeds the posts add-related's list_posts finds eligible, so the two skills
+    agree on where posts live, which files are drafts, and how a slug is made."""
+
+    def test_load_posts_takes_its_posts_from_list_posts(self, tmp_path):
+        post_dir = tmp_path / "note" / "_posts"
+        post_dir.mkdir(parents=True)
+        titled = post_dir / "2026-01-01-titled.html"
+        titled.write_text("---\ntitle: titled\n---\n<p>body</p>\n", encoding="utf-8")
+        untitled = post_dir / "2026-01-02-untitled.html"
+        untitled.write_text("---\nlayout: post\n---\n<p>body</p>\n", encoding="utf-8")
+        listed = [(str(titled), "listed-slug", "titled"), (str(untitled), "untitled", "")]
+
+        with patch.object(bpm, "REPO_ROOT", str(tmp_path)), \
+             patch.object(bpm, "list_posts", return_value=listed) as found:
+            posts = bpm.load_posts()
+
+        found.assert_called_once_with(str(tmp_path))
+        assert [(p["slug"], p["url"]) for p in posts] == [("listed-slug", "/listed-slug/")]

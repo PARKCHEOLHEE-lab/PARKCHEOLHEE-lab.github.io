@@ -9,12 +9,11 @@ only when the text it would send differs from the text its vector came from.
 """
 
 import fcntl
-import glob
 import hashlib
 import json
 import os
 import re
-import subprocess
+import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -22,6 +21,10 @@ from openai import OpenAI
 from sklearn.decomposition import PCA
 import numpy as np
 import tiktoken
+
+# add-related's list_posts decides which posts are eligible, and where the repo is, for both skills
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "add-related" / "scripts"))
+from list_posts import REPO_ROOT, list_posts  # noqa: E402
 
 EMOJI_TO_LABEL = {
     "brain": "Brain",
@@ -33,28 +36,6 @@ EMOJI_TO_LABEL = {
     "storm": "Storm",
 }
 
-def find_repo_root():
-    """Return the git repo root even when this script is reached via symlink."""
-    try:
-        root = subprocess.check_output(
-            ["git", "rev-parse", "--show-toplevel"],
-            cwd=os.path.dirname(__file__),
-            stderr=subprocess.DEVNULL,
-            text=True,
-        ).strip()
-        if root:
-            return root
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        pass
-
-    for parent in Path(__file__).resolve().parents:
-        if (parent / "_config.yml").exists() and (parent / ".git").exists():
-            return str(parent)
-
-    return os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "..", "..", ".."))
-
-
-REPO_ROOT = find_repo_root()
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 LATENTSPACE_PATH = os.path.join(DATA_DIR, "latentspace.json")
 EMBEDDINGS_PATH = os.path.join(DATA_DIR, "embeddings.json")
@@ -186,50 +167,34 @@ def _batch_indices_by_tokens(token_lens, budget):
 
 
 def load_posts():
-    """Load all eligible posts from note/_posts and testbed/_posts."""
-    patterns = [
-        os.path.join(REPO_ROOT, "note/_posts/*.html"),
-        os.path.join(REPO_ROOT, "testbed/_posts/*.html"),
-    ]
-
+    """Load the posts list_posts finds eligible, leaving out any without a title."""
     posts = []
-    for pattern in patterns:
-        for path in sorted(glob.glob(pattern)):
-            basename = os.path.basename(path)
+    for path, slug, _title in list_posts(REPO_ROOT):
+        with open(path, encoding="utf-8") as f:
+            raw = f.read()
+        fm, body = parse_frontmatter(raw)
+        title = fm.get("title", "")
+        if not title:
+            continue
 
-            if basename.startswith("_"):
-                continue
+        category = "testbed" if "/testbed/" in path else "note"
 
-            with open(path, encoding="utf-8") as f:
-                raw = f.read()
-            fm, body = parse_frontmatter(raw)
-            title = fm.get("title", "")
-            if not title:
-                continue
+        label = emoji_to_label(fm.get("emoji", ""))
+        if label is None:
+            label = "Testbed" if category == "testbed" else "Note"
 
-            if not body.strip():
-                continue
+        clean_text = strip_html(body)
+        embed_chunks = chunk_to_token_limit(f"{title}. {clean_text}")
 
-            slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", basename.rsplit(".", 1)[0])
-
-            category = "testbed" if "/testbed/" in path else "note"
-
-            label = emoji_to_label(fm.get("emoji", ""))
-            if label is None:
-                label = "Testbed" if category == "testbed" else "Note"
-
-            clean_text = strip_html(body)
-            embed_chunks = chunk_to_token_limit(f"{title}. {clean_text}")
-
-            posts.append({
-                "title": title,
-                "slug": slug,
-                "url": f"/{slug}/",
-                "category": category,
-                "label": label,
-                "connected": fm.get("related", []),
-                "embed_chunks": embed_chunks,
-            })
+        posts.append({
+            "title": title,
+            "slug": slug,
+            "url": f"/{slug}/",
+            "category": category,
+            "label": label,
+            "connected": fm.get("related", []),
+            "embed_chunks": embed_chunks,
+        })
 
     return posts
 
