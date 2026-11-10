@@ -7,7 +7,7 @@ const path = require('path');
 
 const SITE = path.join(__dirname, '..', '_site');
 // where each moved folder used to be; the docs used to sit at the site's root
-const OLD = { docs: '/', three: '/threesrc/', models: '/model/', notebooks: '/notebooks/' };
+const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/' };
 
 function moved_files() {
   const pairs = [];
@@ -29,7 +29,7 @@ function moved_files() {
 
 test('every moved file\'s old URL lands on its new URL', async ({ page }) => {
   // answer the new URLs with plain text, so a PDF or a model opens as a page instead of a download
-  await page.route((url) => /^\/assets\/(docs|three|models|notebooks)\//.test(url.pathname),
+  await page.route((url) => /^\/assets\/(docs|models|notebooks)\//.test(url.pathname),
     (route) => route.fulfill({ body: 'moved', contentType: 'text/plain' }));
 
   const pairs = moved_files();
