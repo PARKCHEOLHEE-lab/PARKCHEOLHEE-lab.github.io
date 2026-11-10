@@ -512,6 +512,24 @@ function setup_comments() {
   setTimeout(done, 10000);
 }
 
+// A content image's skeleton (basic.sass) shimmers only while on screen: a moving background repaints its
+// image every frame, and a long post holds dozens of skeletons below the screen. An image that has arrived
+// has no skeleton left to watch
+function setup_image_skeletons() {
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.target.hasAttribute("data-skeleton")) {
+        observer.unobserve(entry.target);
+        return;
+      }
+      entry.target.toggleAttribute("data-on-screen", entry.isIntersecting);
+    });
+  });
+  document.querySelectorAll("img[data-skeleton]").forEach(function(img) {
+    observer.observe(img);
+  });
+}
+
 // The Testbed's puzzles shine together (basic.sass), but a browser starts an image's shine when it draws
 // it: a row the Manifest's list moves or shows again, a menu or a folded list as it opens. Each shine is
 // set to the page's own clock as it starts, so every puzzle sweeps at once

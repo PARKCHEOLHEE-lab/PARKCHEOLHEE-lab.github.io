@@ -63,6 +63,35 @@ test('when every copy of an image fails, its skeleton stops promising it', async
   await expect(image).not.toHaveAttribute('data-skeleton');
 });
 
+test('a skeleton shimmers only while it is on screen', async ({ page }) => {
+  // a running shimmer repaints its image every frame, and a long post holds dozens of skeletons below the
+  // screen. Reproduced-perf, PR #121 review round 2. Every image stays on its way, so every skeleton stays
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.route('**/img/**', () => {});
+  await page.goto('/apartment/', { waitUntil: 'domcontentloaded' });
+  const first = page.locator('img[data-skeleton]').first();
+  const last = page.locator('img[data-skeleton]').last();
+  await expect(first).toHaveCSS('animation-play-state', 'running');
+  await expect(last).toHaveCSS('animation-play-state', 'paused');
+
+  await last.scrollIntoViewIfNeeded();
+  await expect(last).toHaveCSS('animation-play-state', 'running');
+  await expect(first).toHaveCSS('animation-play-state', 'paused');
+});
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('a content image shows no skeleton, as nothing could take it away', async ({ page }) => {
+    // its load handler is a script. Reproduced-bug, PR #121 review round 2
+    await page.goto('/two-points-perspective/');
+    const image = page.locator('img[src="/img/two-points-perspective.jpg"]');
+    await expect(image).toHaveAttribute('data-skeleton', '');
+    await expect(image).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(image).toHaveCSS('animation-name', 'none');
+  });
+});
+
 test('the skeleton rests for a reader who asks for less motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await hold(page, '**/img/two-points-perspective.jpg');

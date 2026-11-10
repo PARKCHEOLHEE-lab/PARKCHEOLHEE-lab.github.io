@@ -118,7 +118,16 @@ img
 img[data-skeleton]
   background: linear-gradient(90deg, rgba($light, 0) 33.33%, rgba($light, 0.65) 50%, rgba($light, 0) 66.67%) 100% 0 / 300% 100% no-repeat, $skeleton
   animation: image-shimmer 1.4s ease-in-out infinite
+  // still, but on screen (data-on-screen, setup_image_skeletons): a moving background repaints its image
+  // every frame, and a long post holds dozens of skeletons below the screen
+  animation-play-state: paused
+  &[data-on-screen]
+    animation-play-state: running
   @media (prefers-reduced-motion: reduce)
+    animation: none
+  // not drawn without JavaScript, as only a script (its load handler) takes it away
+  @media (scripting: none)
+    background: none
     animation: none
 
 @keyframes image-shimmer
