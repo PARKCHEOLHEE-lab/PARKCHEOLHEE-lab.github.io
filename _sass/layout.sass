@@ -29,6 +29,129 @@ nav
 nav a
   margin: .5em 0.7em
 
+// a post's comments (post.html, setup_comments): while giscus loads, a skeleton of its empty comment box, in
+// the gray and shimmer of the skeleton-ux-ui post, stands in for giscus's frame, which loads out of sight at
+// its full width so it arrives at its height. Every part sits where giscus draws it, in giscus's px
+.comments
+  position: relative
+  // never shorter than the skeleton, even for the moment the frame takes to report its height after the
+  // swap: a page that shrank there would scroll a reader at its very bottom up, and leave them there
+  min-height: $comments-height
+
+  // a block, so no line's descent sits under it and it ends where the skeleton does
+  .giscus-frame
+    display: block
+
+.comments-skeleton
+  display: none
+
+// an outlined part of the box: the box itself, the Write tab, the text area
+@mixin comments-outline($radius)
+  position: absolute
+  box-sizing: border-box
+  border: 1px solid reduce(16)
+  border-radius: $radius
+
+.comments[aria-busy]
+  .giscus
+    position: absolute
+    top: 0
+    width: 100%
+    // not visibility: hidden, as Chrome stops drawing a hidden frame from another site, and giscus could not
+    // measure and report its height until it was shown
+    opacity: 0
+    pointer-events: none
+
+  .comments-skeleton
+    display: block
+    position: relative
+    // lazy: the height with no comments; a post with comments still grows once they load
+    height: $comments-height
+    overflow: hidden
+
+    // the shimmer, across every placeholder at once
+    &::after
+      content: ""
+      position: absolute
+      inset: 0
+      background: linear-gradient(90deg, rgba($light, 0) 0%, rgba($light, 0.65) 50%, rgba($light, 0) 100%)
+      transform: translateX(-100%)
+      animation: comments-shimmer 1.4s ease-in-out infinite
+
+  // "0 comments"
+  .comments-skeleton-count
+    position: absolute
+    top: 5px
+    left: 0
+    width: 94px
+    height: 14px
+    border-radius: 4px
+    background: $skeleton
+
+  .comments-skeleton-box
+    +comments-outline(6px)
+    top: 48px
+    right: 0
+    left: 0
+    height: 234px
+    overflow: hidden
+
+  // the Write / Preview bar, and its Write tab
+  .comments-skeleton-tabs
+    position: absolute
+    top: 0
+    right: 0
+    left: 0
+    height: 45px
+    box-sizing: border-box
+    border-bottom: 1px solid reduce(16)
+    background: $bg-subtle
+
+  .comments-skeleton-write
+    +comments-outline(4px 4px 0 0)
+    top: 8px
+    left: 8px
+    width: 68px
+    height: 37px
+    border-bottom: 0
+    background: $light
+
+  // the text area, and its dashed foot
+  .comments-skeleton-input
+    +comments-outline(4px)
+    top: 53px
+    right: 8px
+    left: 8px
+    height: 131px
+    background: $bg-subtle
+
+  .comments-skeleton-extras
+    position: absolute
+    top: 99px
+    right: 0
+    bottom: 0
+    left: 0
+    border-top: 1px dashed reduce(16)
+
+  // Sign in with GitHub
+  .comments-skeleton-button
+    position: absolute
+    right: 8px
+    bottom: 8px
+    width: 181px
+    height: 32px
+    border-radius: 6px
+    background: $skeleton
+
+@keyframes comments-shimmer
+  100%
+    transform: translateX(100%)
+
+@media (prefers-reduced-motion: reduce)
+  .comments-skeleton::after
+    animation: none
+    opacity: 0
+
 @media (max-width: 40em)
   nav
     margin: .3em -0.5em
