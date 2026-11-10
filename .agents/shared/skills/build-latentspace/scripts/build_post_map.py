@@ -8,6 +8,7 @@ Cached embeddings avoid redundant OpenAI API calls: a post is embedded again
 only when the text it would send differs from the text its vector came from.
 """
 
+import fcntl
 import glob
 import hashlib
 import json
@@ -334,6 +335,21 @@ def normalize_coords(coords):
 
 
 def main():
+    # Two builds in one checkout would interleave their writes, and one could
+    # leave its hash beside the other's vector. A second build waits here
+    # until the first finishes, then reads the files the first one wrote.
+    # lazy: fcntl is POSIX-only (macOS, Linux CI); use a lock-file package if
+    # this ever has to run on Windows.
+    os.makedirs(DATA_DIR, exist_ok=True)
+    data_dir = os.open(DATA_DIR, os.O_RDONLY)
+    try:
+        fcntl.flock(data_dir, fcntl.LOCK_EX)
+        _build()
+    finally:
+        os.close(data_dir)  # closing the descriptor releases the lock
+
+
+def _build():
     client = OpenAI()
     posts = load_posts()
     print(f"Loaded {len(posts)} posts")

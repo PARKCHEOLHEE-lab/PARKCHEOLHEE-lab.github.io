@@ -3,9 +3,11 @@
 Guards against unnecessary OpenAI API calls (= real money).
 """
 
+import fcntl
 import json
 import os
 import tempfile
+import threading
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
@@ -336,6 +338,33 @@ class TestCacheSkip:
 
         mock_embed.assert_called_once()
         assert [p["slug"] for p in mock_embed.call_args[0][0]] == ["aaa"]
+
+    def test_overlapping_build_waits_for_the_running_one(self, tmp_data_dir):
+        """A second build in the same checkout must not start while one is
+        running, or their writes interleave and one build's hash can land
+        beside the other's vector. Reproduced-bug, PR #114 review round 3."""
+        posts = _fake_posts(["aaa", "bbb"])
+        _write_cache(tmp_data_dir, {s: np.random.randn(FAKE_DIM).tolist() for s in ["aaa", "bbb"]}, posts)
+        started = threading.Event()
+
+        def load_posts():
+            started.set()
+            return posts
+
+        held = os.open(str(tmp_data_dir), os.O_RDONLY)
+        fcntl.flock(held, fcntl.LOCK_EX)  # the build that is already running
+        with patch.object(bpm, "load_posts", side_effect=load_posts), \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
+            build = threading.Thread(target=bpm.main)
+            build.start()
+            try:
+                waited = not started.wait(0.5)
+            finally:
+                os.close(held)  # the running build finishes
+                build.join(10)
+
+        assert waited, "the second build started while the first one was running"
+        assert started.is_set() and not build.is_alive()
 
 
 class TestChunkToTokenLimit:
