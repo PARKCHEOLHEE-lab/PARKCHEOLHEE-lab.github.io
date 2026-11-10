@@ -401,27 +401,6 @@ function init_latentspace() {
             }
         }
 
-        function set_initial_min_zoom() {
-            const x0 = d3.min(nodes, function(d) { return d.x; });
-            const x1 = d3.max(nodes, function(d) { return d.x; });
-            const y0 = d3.min(nodes, function(d) { return d.y; });
-            const y1 = d3.max(nodes, function(d) { return d.y; });
-            const cx = (x0 + x1) / 2;
-            const cy = (y0 + y1) / 2;
-            let tx = width / 2 - cx * MIN_ZOOM;
-            let ty = height / 2 - cy * MIN_ZOOM;
-            const min_tx = width - x1 * MIN_ZOOM;
-            const max_tx = -x0 * MIN_ZOOM;
-            const min_ty = height - y1 * MIN_ZOOM;
-            const max_ty = -y0 * MIN_ZOOM;
-
-            if (min_tx <= max_tx) tx = Math.max(min_tx, Math.min(max_tx, tx));
-            if (min_ty <= max_ty) ty = Math.max(min_ty, Math.min(max_ty, ty));
-
-            const transform = d3.zoomIdentity.translate(tx, ty).scale(MIN_ZOOM);
-            svg.call(zoom.transform, transform);
-        }
-
         fit_btn.on("click", function() { fit_all(500); });
         svg.on("dblclick", function() { fit_all(500); });
 
