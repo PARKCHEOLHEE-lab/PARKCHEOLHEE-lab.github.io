@@ -52,7 +52,6 @@ highlightjs:
 
 exclude:
   - AGENTS.md
-  - data/umap_model.pkl
   # Playwright's output while the tests run (tests/), which would otherwise rebuild the site under them
   - test-results
   - playwright-report
