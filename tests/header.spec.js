@@ -78,7 +78,8 @@ for (const path of PAGES) {
     expect(greys.beside_logo).toBeLessThan(15);
     expect(greys.end).toBeGreaterThan(240);
 
-    await page.evaluate(() => document.getAnimations().forEach((a) => a.finish()));
+    // the header's transitions; a Testbed puzzle's shine runs for ever and has no end
+    await page.evaluate(() => document.getAnimations().filter((a) => a.transitionProperty).forEach((a) => a.finish()));
     greys = await header_greys(page);
     expect(greys.end).toBeLessThan(15);
     expect(greys.lightest).toBeGreaterThan(245);

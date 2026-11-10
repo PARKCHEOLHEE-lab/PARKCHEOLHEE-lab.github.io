@@ -486,6 +486,19 @@ function setup_post_panel() {
   mark();
 }
 
+// The Testbed's puzzles shine together (basic.sass), but a browser starts an image's shine when it draws
+// it: a row the Manifest's list moves or shows again, a menu or a folded list as it opens. Each shine is
+// set to the page's own clock as it starts, so every puzzle sweeps at once
+function sync_puzzle_shines() {
+  document.addEventListener("animationstart", function(event) {
+    if (event.animationName === "puzzle-shine") {
+      event.target.getAnimations().forEach(function(animation) {
+        animation.startTime = 0;
+      });
+    }
+  });
+}
+
 // The header on every page stays at the top of the screen, and once the page leaves the top the logo's
 // black box spreads over it (header.sass). Below 768px its Menu button opens the page's menu from the
 // right, with the site's links on top: the Manifest's side panel, or a post's menu with its side panel.

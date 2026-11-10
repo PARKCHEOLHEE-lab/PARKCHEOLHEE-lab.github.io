@@ -317,3 +317,33 @@ test('a row and a link fade on hover with a mouse, and never on a touch screen',
   }
 });
 
+test('the Testbed\'s puzzle shines every 2 seconds wherever it shows, and rests for reduced motion', async ({ page }) => {
+  // each running shine: the image it is on, its length in ms and how many times it runs
+  const shines = () => page.evaluate(() => document.getAnimations().filter((a) => a.animationName === 'puzzle-shine').map((a) => [a.effect.target.getAttribute('src'), a.effect.getTiming().duration, a.effect.getTiming().iterations]));
+  // the Manifest's rows and its type in the panel; a post's Related list (its copy in the phone menu is
+  // not drawn on a wide screen, and runs nothing)
+  for (const path of ['/manifest/', '/image-to-3d-scene/']) {
+    await page.goto(path);
+    const count = await page.locator('img[src="/emoji/puzzle.png"]:visible').count();
+    expect(count).toBeGreaterThan(0);
+    expect(await shines()).toEqual(Array(count).fill(['/emoji/puzzle.png', 2000, Infinity]));
+  }
+  // a while after the page opens, a type unchecked moves and shows the rows again, and on a phone the menu
+  // draws the panel, each starting those puzzles' shine over; every puzzle still sweeps in step
+  const steps = () => page.evaluate(() => document.getAnimations().filter((a) => a.animationName === 'puzzle-shine').map((a) => Math.round(a.currentTime % 2000)));
+  await page.goto('/manifest/');
+  await page.waitForTimeout(500);
+  await page.locator('#note-type-filter input').nth(1).click();
+  await page.waitForTimeout(100);
+  expect(new Set(await steps()).size).toBe(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/manifest/');
+  await page.waitForTimeout(500);
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await page.waitForTimeout(100);
+  expect((await steps()).length).toBeGreaterThan(1);
+  expect(new Set(await steps()).size).toBe(1);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/manifest/');
+  expect(await shines()).toEqual([]);
+});
