@@ -77,9 +77,19 @@ class TestAddSkeletons:
         page = '<p>a</p><img src="/img/a.png" alt="A"><p>b</p>'
         assert image_sizes.add_skeletons(page, site) == (
             '<p>a</p><img src="/img/a.png" alt="A" width="800" style="aspect-ratio: 800 / 600"'
-            ' loading="lazy" data-skeleton onload="this.removeAttribute(\'data-skeleton\')"'
+            ' data-skeleton onload="this.removeAttribute(\'data-skeleton\')"'
             ' onerror="this.removeAttribute(\'data-skeleton\')"><p>b</p>'
         )
+
+    def test_only_the_first_two_content_images_load_at_once(self, site):
+        """A page's first content images are usually what a reader sees first, and a lazy image is
+        requested only once the page is laid out: the first two stay eager, the rest are lazy.
+        Reproduced-perf, PR #121 review round 1; two, as measured on 25 posts' LCP."""
+        img = '<img src="/img/a.png">'
+        page = '<img src="/emoji/brain.png">' + img * 3
+        tags = image_sizes.add_skeletons(page, site).split("<img ")[2:]
+        assert ['loading="lazy"' in tag for tag in tags] == [False, False, True]
+        assert all("data-skeleton" in tag for tag in tags)
 
     def test_a_width_the_post_set_is_kept_and_only_the_ratio_added(self, site):
         out = image_sizes.add_skeletons('<img src="/img/a.png" width="45%">', site)

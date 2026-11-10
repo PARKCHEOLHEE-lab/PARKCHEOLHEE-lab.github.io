@@ -1,8 +1,8 @@
 """Lazy loading and a skeleton box for the site's content images, added after Jekyll writes the site.
 
 Posts write plain <img src="/img/..."> tags. For each one this reads the image's size from its file and adds
-loading="lazy", the box the image will fill (its aspect ratio, and its width where the post sets none) and
-data-skeleton, which basic.sass draws as a gray, shimmering box until the image's load or error drops it.
+loading="lazy" (to all but the page's first two), the box the image will fill (its aspect ratio, and its width
+where the post sets none) and data-skeleton, which basic.sass draws as a gray, shimmering box until the image's load or error drops it.
 It runs on the written site because only there is every page's final HTML, and every image is the real file
 rather than its Git LFS pointer (pages.yml checks out with lfs: true).
 
@@ -16,6 +16,9 @@ from html.parser import HTMLParser
 from urllib.parse import unquote
 
 CONTENT_PREFIX = "/img/"
+# two: of 25 posts measured on a slow connection, one left the largest paint of two posts 0.3 to 0.5s
+# later than loading every image at once; two did not, and three gained nothing more
+EAGER_IMAGES = 2
 DROP_SKELETON = "this.removeAttribute('data-skeleton')"
 
 
@@ -95,21 +98,25 @@ def add_skeletons(page, site_dir):
     parser.close()
     line_starts = [0] + [i + 1 for i, char in enumerate(page) if char == "\n"]
     out, end = [], 0
+    # a page's first content images stay eager: they are usually what a reader sees first, and a lazy image
+    # is requested only once the page is laid out, about a second later on a slow connection
+    seen = 0
     for (line, column), text, attrs in parser.tags:
         start = line_starts[line - 1] + column
         if page[start:start + len(text)] != text:
             raise ValueError(f"line {line}: the <img> tag is not where the parser reported it")
-        tag = _with_skeleton(text, attrs, site_dir)
+        tag = _with_skeleton(text, attrs, site_dir, seen >= EAGER_IMAGES)
         if tag is not None:
             out += [page[end:start], tag]
             end = start + len(text)
+        seen += (dict(attrs).get("src") or "").startswith(CONTENT_PREFIX)
     out.append(page[end:])
     return "".join(out)
 
 
-def _with_skeleton(text, attrs, site_dir):
-    """The tag rewritten with its skeleton, or None to leave it as written: not a content image, already
-    done, its loading chosen by the post, or no size to read."""
+def _with_skeleton(text, attrs, site_dir, lazy):
+    """The tag rewritten with its skeleton (and loading="lazy" when lazy), or None to leave it as
+    written: not a content image, already done, its loading chosen by the post, or no size to read."""
     names = {name for name, _ in attrs}
     src = dict(attrs).get("src") or ""
     if not src.startswith(CONTENT_PREFIX) or names & {"loading", "data-skeleton", "onload"}:
@@ -130,7 +137,9 @@ def _with_skeleton(text, attrs, site_dir):
         attrs.append(("width", str(width)))
     if style is None:
         attrs.append(("style", ratio))
-    attrs += [("loading", "lazy"), ("data-skeleton", None), ("onload", DROP_SKELETON)]
+    if lazy:
+        attrs.append(("loading", "lazy"))
+    attrs += [("data-skeleton", None), ("onload", DROP_SKELETON)]
     if "onerror" not in names:
         attrs.append(("onerror", DROP_SKELETON))
 

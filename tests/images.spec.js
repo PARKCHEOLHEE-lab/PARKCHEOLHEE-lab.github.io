@@ -20,7 +20,8 @@ test('a content image keeps its own box under a skeleton until it arrives, and t
   await page.goto('/two-points-perspective/', { waitUntil: 'domcontentloaded' });
   const image = page.locator('img[src="/img/two-points-perspective.jpg"]');
   await expect(image).toHaveAttribute('data-skeleton', '');
-  await expect(image).toHaveAttribute('loading', 'lazy');
+  // the post's first image loads at once, as the one a reader sees first
+  await expect(image).not.toHaveAttribute('loading');
   // the comments skeleton's gray ($skeleton), with the shimmer sweeping over it
   await expect(image).toHaveCSS('background-color', 'rgb(236, 236, 236)');
   await expect(image).toHaveCSS('animation-name', 'image-shimmer');
