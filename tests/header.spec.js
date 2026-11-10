@@ -147,6 +147,93 @@ test('on a phone a post without a table of contents has the Menu button, with th
   await expect(menu).toBeHidden();
 });
 
+test('on a phone the X closes the menu, even where the browser closes it as the finger comes down', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/onnx/');
+  const menu = page.locator('#post-menu');
+  const button = page.getByRole('button', { name: 'Menu' });
+  await button.click();
+  await expect(menu).toBeVisible();
+  await button.click();
+  await expect(menu).toBeHidden();
+  // a phone browser that treats the finger coming down on the X as a tap outside the menu closes it
+  // there, before the X's click
+  await button.click();
+  await expect(menu).toBeVisible();
+  await page.evaluate(() => {
+    const menu = document.getElementById('post-menu');
+    document.querySelector('.site-menu-button').addEventListener('pointerdown', () => menu.hidePopover());
+  });
+  await button.click();
+  await page.waitForTimeout(300);
+  await expect(menu).toBeHidden();
+});
+
+// a tap just beside the 20px X comes down on the header, which closes the menu, and Safari then moves
+// the click onto the button, which would open it again
+test('in Safari\'s engine, on a phone a tap just beside the X closes the menu', async ({ playwright, baseURL }) => {
+  const browser = await playwright.webkit.launch();
+  const context = await browser.newContext({ ...playwright.devices['iPhone 13'], baseURL });
+  const page = await context.newPage();
+  for (const path of ['/manifest/', '/onnx/']) {
+    await page.goto(path);
+    const menu = page.locator('.site-menu');
+    const button = await page.getByRole('button', { name: 'Menu' }).boundingBox();
+    await page.touchscreen.tap(button.x + button.width / 2, button.y + button.height / 2);
+    await expect(menu).toBeVisible();
+    await page.touchscreen.tap(button.x - 8, button.y + button.height / 2);
+    await page.waitForTimeout(400);
+    await expect(menu).toBeHidden();
+  }
+  await browser.close();
+});
+
+test('with the menu open, a tap on the list beside it only closes the menu, in Chrome\'s and Safari\'s engines', async ({ playwright, baseURL }) => {
+  for (const type of ['chromium', 'webkit']) {
+    const browser = await playwright[type].launch();
+    const page = await browser.newPage({ baseURL, viewport: { width: 600, height: 900 }, hasTouch: true });
+    await page.goto('/manifest/');
+    const menu = page.locator('.site-menu');
+    await page.getByRole('button', { name: 'Menu' }).tap();
+    await expect(menu).toBeVisible();
+    // the row's left end, which the menu leaves uncovered
+    const row = await page.locator('#note-list .clickable').nth(3).boundingBox();
+    expect(row.x + 10).toBeLessThan((await menu.boundingBox()).x);
+    await page.touchscreen.tap(row.x + 10, row.y + row.height / 2);
+    await page.waitForTimeout(400);
+    await expect(menu).toBeHidden();
+    expect(new URL(page.url()).pathname).toBe('/manifest/');
+    // with the menu closed, the same tap opens the post
+    await page.touchscreen.tap(row.x + 10, row.y + row.height / 2);
+    await page.waitForURL((url) => url.pathname !== '/manifest/');
+    await browser.close();
+  }
+});
+
+test('with the menu open, the list beside it does not answer the mouse, the menu does, and the page still scrolls', async ({ page }) => {
+  await page.setViewportSize({ width: 600, height: 900 });
+  await page.goto('/manifest/');
+  const menu = page.locator('.site-menu');
+  await page.getByRole('button', { name: 'Menu' }).click();
+  await expect(menu).toBeVisible();
+  const row = page.locator('#note-list .clickable').nth(3);
+  const box = await row.boundingBox();
+  const point = { x: box.x + 10, y: box.y + box.height / 2 };
+  await page.mouse.move(point.x, point.y);
+  // past the 0.5s fade
+  await page.waitForTimeout(600);
+  await expect(row).toHaveCSS('opacity', '1');
+  expect(await page.evaluate(({ x, y }) => getComputedStyle(document.elementFromPoint(x, y)).cursor, point)).not.toBe('pointer');
+  const link = menu.getByRole('link', { name: 'manifest' });
+  await link.hover();
+  await expect(link).toHaveCSS('opacity', '0.5');
+  const top = await page.evaluate(() => window.scrollY);
+  await page.mouse.move(point.x, point.y);
+  await page.mouse.wheel(0, 400);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(top);
+  await expect(menu).toBeVisible();
+});
+
 // Safari kept a closed menu drawn just off the screen, where the keyboard's Tab still reached its controls
 test('in Safari\'s engine, on a phone the closed menu is not drawn off the screen, before or after it opens', async ({ playwright, baseURL }) => {
   const browser = await playwright.webkit.launch();

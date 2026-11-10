@@ -524,7 +524,24 @@ function setup_header() {
     copy.removeAttribute("id");
     menu.append(copy);
   }
-  header.querySelector(".site-menu-button").setAttribute("popovertarget", menu.id);
+  const button = header.querySelector(".site-menu-button");
+  button.setAttribute("popovertarget", menu.id);
+  // a tap outside the open menu only closes it: the browser closes it as the finger comes down or lifts,
+  // and the click after that, on a row or a link under the menu, does nothing. The X's own click, the menu
+  // still open, closes it; a finger that comes down just beside the 20px X closes the menu the same way,
+  // and Safari then moves the click onto the X, which would open it again. A keyboard's click has no
+  // count (detail 0)
+  let began_open = false;
+  document.addEventListener("pointerdown", function() {
+    began_open = menu.matches(":popover-open");
+  }, true);
+  document.addEventListener("click", function(event) {
+    if (event.detail && began_open && !menu.matches(":popover-open") && !menu.contains(event.target)) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    began_open = false;
+  }, true);
   // a popover below 768px only: from there the panel is back beside the list, where the browser's
   // popover styles would hide it, and one left open closes as the attribute goes
   const wide = matchMedia("(min-width: 768px)");

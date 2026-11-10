@@ -56,6 +56,13 @@ body:has(:popover-open) .site-menu-icon
   path:nth-child(3)
     transform: translateY(-4px) rotate(-45deg)
 
+// while the menu is open the page around it does not answer the mouse: no hover and no hand cursor. The
+// page still scrolls, and a tap on it only closes the menu (setup_header)
+body:has(.site-menu:popover-open)
+  pointer-events: none
+  .site-menu, .site-menu-button
+    pointer-events: auto
+
 // the copies setup_header puts in the menu are the phone's: from 768px the site's links are in the
 // header, a post's side panel in the post, and the Manifest's panel beside its list
 @media (min-width: 768px)
