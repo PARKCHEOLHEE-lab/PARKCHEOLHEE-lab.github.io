@@ -174,3 +174,32 @@ test('a dot highlighted by a hover and by the idle walk looks the same, painted 
   const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'latentspace.js'), 'utf8');
   expect((source.match(/(?<![\d.])5 \/ current_zoom\.k/g) || []).length).toBeLessThanOrEqual(1);
 });
+
+// a dot's neighbours are a property of the data, worked out once from the links: the idle walk steps
+// from a dot to one linked to it, and nothing scans the links again for a dot's ends
+test('the idle walk steps to a linked dot, and the links are scanned for neighbours in one place', async ({ page }) => {
+  const linked = linked_slugs();
+  await page.goto('/latentspace/');
+  await page.waitForSelector('#post-map svg circle.dot');
+
+  // the dot the idle walk has highlighted, once its 400ms fade has ended
+  const settled_top = async () => {
+    const map = await painted_map(page);
+    if (!map.dots.some((d) => d.opacity === '0.1') || !map.dots.every((d) => d.opacity === '1' || d.opacity === '0.1')) return null;
+    return map.dots.reduce((a, b) => (b.r > a.r ? b : a)).slug;
+  };
+  let first = null;
+  await expect.poll(async () => (first = await settled_top()), { timeout: 15000, intervals: [100] }).not.toBeNull();
+  let second = null;
+  await expect.poll(async () => {
+    second = await settled_top();
+    return second !== null && second !== first;
+  }, { timeout: 15000, intervals: [100] }).toBe(true);
+  expect(linked[first].has(second)).toBe(true);
+
+  const fs = require('fs');
+  const path = require('path');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'latentspace.js'), 'utf8');
+  expect((source.match(/\.index === /g) || []).length).toBe(0);
+  expect((source.match(/\blinks\.(forEach|some|filter)\(/g) || []).length).toBeLessThanOrEqual(1);
+});

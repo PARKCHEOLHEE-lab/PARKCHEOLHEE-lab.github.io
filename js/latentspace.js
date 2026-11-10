@@ -331,12 +331,7 @@ function init_latentspace() {
         // --- Highlight helpers ---
 
         function get_connected_slugs(d) {
-            const slugs = new Set();
-            links.forEach(function(l) {
-                if (l.source === d || l.source.index === d.index) slugs.add(l.target.slug);
-                if (l.target === d || l.target.index === d.index) slugs.add(l.source.slug);
-            });
-            return slugs;
+            return new Set(neighbors.get(d).map(function(n) { return n.slug; }));
         }
 
         // d at the hover radius, its linked dots whole and the rest faded, its links in its colour and wider;
@@ -440,6 +435,14 @@ function init_latentspace() {
             .force("y", d3.forceY(function(d) { return d.ty; }).strength(0.3))
             .alphaDecay(0.02)
             .on("tick", on_tick);
+
+        // each dot's linked dots, once per link end and in the links' order (pick_least_visited draws from
+        // them); forceLink above has replaced each link's two indices with the dots themselves
+        const neighbors = new Map(nodes.map(function(n) { return [n, []]; }));
+        links.forEach(function(l) {
+            neighbors.get(l.source).push(l.target);
+            neighbors.get(l.target).push(l.source);
+        });
 
         // --- Render elements ---
 
@@ -625,11 +628,7 @@ function init_latentspace() {
         }
 
         function idle_walk() {
-            const nodes_with_edges = nodes.filter(function(n) {
-                return links.some(function(l) {
-                    return l.source === n || l.target === n || l.source.index === n.index || l.target.index === n.index;
-                });
-            });
+            const nodes_with_edges = nodes.filter(function(n) { return neighbors.get(n).length > 0; });
             if (nodes_with_edges.length === 0) return;
 
             walk_step(pick_least_visited(nodes_with_edges));
@@ -647,14 +646,9 @@ function init_latentspace() {
                 setTimeout(function() {
                     if (!idle_anim_running || user_interacting) return;
 
-                    const neighbors = [];
-                    links.forEach(function(l) {
-                        if (l.source === current || l.source.index === current.index) neighbors.push(l.target);
-                        if (l.target === current || l.target.index === current.index) neighbors.push(l.source);
-                    });
-
-                    if (neighbors.length > 0) {
-                        walk_step(pick_least_visited(neighbors));
+                    const next = neighbors.get(current);
+                    if (next.length > 0) {
+                        walk_step(pick_least_visited(next));
                     } else {
                         idle_walk();
                     }
