@@ -347,6 +347,11 @@ a:hover
   margin-left: 0.3em
   margin-right: 0.5em
 
+// a selection skips a post's icon, a picture only (alt=""), so it paints no square over it
+.emoji-image, .note-filter-icon
+  -webkit-user-select: none
+  user-select: none
+
 // the Testbed's puzzle, wherever it shows (a Manifest row, its type in the panel, a Related post): a band
 // of light crosses it every 2 seconds, every puzzle at once. The puzzle is drawn again under the band as
 // the image's background, its own picture pushed out of view, and both are cut to the puzzle's shape
