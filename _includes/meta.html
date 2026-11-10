@@ -1,10 +1,6 @@
 <header>
   <h1>{{ include.post.title }}</h1>
-  {%- if include.post.categories contains "note" -%}
-    {%- assign date_format = "%m/%d/%Y" -%}
-  {%- else -%}
-    {%- assign date_format = site.date_format | default: "%B %d, %Y" -%}
-  {%- endif -%}
+  {%- assign date_format = site.date_format | default: "%B %d, %Y" -%}
   <time datetime="{{ include.post.date | date_to_xmlschema }}">
     {% if include.post.last_modified_at %}
       {{ include.post.last_modified_at }}

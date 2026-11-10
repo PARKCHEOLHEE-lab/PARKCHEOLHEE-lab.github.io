@@ -21,20 +21,19 @@ minimal: false             # use a dark header
 # Menu
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
-  - {title: "testbed", file: "testbed.html"}
-  - {title: "notebook", file: "notebook.html"}
+  - {title: "manifest", file: "manifest.html"}
   # - {title: "three", file: "threebed.html"}
   # - {title: "r!　", file: "retrospection.html"}
   # - {title: "　", file: "retrospection.html"}
 
 # fontawesome.com/icons
 external:  
-  # - {title: Mail, icon: envelope, url: "mailto:park112368@gmail.com"}
   - {title: Github, icon: github, url: "https://github.com/PARKCHEOLHEE-lab"}
   # - {title: Linkedin, icon: linkedin, url: "https://www.linkedin.com/in/cheolhee-park-94577b228/"}
   - {title: resume, icon: id-badge, url: "resume.pdf"}
   # - {title: Issuu, icon: book, url: "https://issuu.com/brighthope03"}
-  - {title: p-arc, icon: codepen, url: "portfolio-architectural.pdf"}
+  - {title: Architectural portfolio, icon: codepen, url: "portfolio-architectural.pdf"}
+  - {title: Mail, icon: envelope, url: "mailto:park112368@gmail.com"}
   # - {title: resume, icon: address-book, url: "s.pdf"}
 
 comments:
@@ -51,6 +50,9 @@ highlightjs:
 exclude:
   - AGENTS.md
   - data/umap_model.pkl
+  # Playwright's output while the tests run (tests/), which would otherwise rebuild the site under them
+  - test-results
+  - playwright-report
 
 plugins:
  - jekyll-feed

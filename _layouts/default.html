@@ -24,6 +24,11 @@
 <header>
   <a href="{{ "/" | relative_url }}" class="title-main">{{ site.title | escape }}</a>
   {% include menu.html menu=pages %}
+  {% comment %} shown on narrow screens when the page has the side panel (header.sass); setup_header
+    points it at the panel {% endcomment %}
+  <button type="button" class="site-menu-button" aria-label="Menu">
+    <svg class="site-menu-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true"><path d="M3 6h14"/><path d="M3 10h14"/><path d="M3 14h14"/></svg>
+  </button>
 </header>
 
 {{ content }}
@@ -41,6 +46,9 @@
 <script>
   generate_table_of_contents()
   generate_figure_numbers()
+  setup_post_panel()
+  setup_header()
+  sync_puzzle_shines()
 </script>
 
 </html>

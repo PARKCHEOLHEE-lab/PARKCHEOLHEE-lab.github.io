@@ -1,7 +1,7 @@
 ---
 ---
 
-@import index, font, basic, layout, classes, latentspace
+@import index, font, basic, layout, classes, latentspace, header
 
 @media (min-width: 40em) and (max-width: 64em)
   body > header, body > article, body > footer
@@ -11,17 +11,19 @@
   body > header, body > article, body > footer
     padding: 1.75em calc(40vw - 17em)
 
+// the header is as tall on every screen as on a phone, 55px at 390px wide (its 1em above and below
+// the logo then), and the footer as tall as the header; each grows only if its links wrap
+body > header, body > footer
+  box-sizing: border-box
+  min-height: 55px
+  padding-top: 0
+  padding-bottom: 0
+
 {% if site.minimal %}
-  
+
 body > header
   background: $dark
   color: $light
-  border-bottom: 1px solid reduce(14)
-
-{% else %}
-
-body > header
-  box-shadow: 0 0 .6em rgba($dark, 0.04)
   border-bottom: 1px solid reduce(14)
 
 {% endif %}

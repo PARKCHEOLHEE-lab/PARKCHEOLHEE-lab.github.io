@@ -21,19 +21,17 @@ article header h1
   font-size: 1.5em
   margin: 1em 0 .1em
 
+// the nav's side margins take back its links' own, so the first and last links end on the page
+// column's edges, as the list's dates and the post's text do
 nav
-  margin: .5em -1.2em
+  margin: .5em -0.7em
 
 nav a
   margin: .5em 0.7em
 
 @media (max-width: 40em)
-  body > header
-    padding-top: 1em
-    padding-bottom: 1em
-
   nav
-    margin: .3em -0.6em
+    margin: .3em -0.5em
 
   nav a
     margin: .3em 0.5em

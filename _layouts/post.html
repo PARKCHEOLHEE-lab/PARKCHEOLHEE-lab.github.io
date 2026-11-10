@@ -35,7 +35,50 @@ layout: default
 </script>
 {% endif %}
 
+{% comment %} the post's menu, behind the header's Menu button on phones: setup_header fills it with the
+  site's links and a copy of the post's side panel (header.sass) {% endcomment %}
+<div id="post-menu" class="site-menu"></div>
+
+{%- comment -%} the pinned latentspace. page, the map every post leads back to (a page, so no related:
+  slug names it), on every page but its own; then the posts that this one's related: front matter names
+  by slug, a slug with no post (a disabled one) left out. Each with its emoji and its title {%- endcomment -%}
+{%- assign map = site.pages | where: "name", "latentspace.html" | first -%}
+{%- assign related_posts = "" | split: "" -%}
+{%- if map and map.url != page.url -%}
+  {%- assign related_posts = related_posts | push: map -%}
+{%- endif -%}
+{%- for slug in page.related -%}
+  {%- assign related_post = site.posts | where: "slug", slug | first -%}
+  {%- if related_post -%}
+    {%- assign related_posts = related_posts | push: related_post -%}
+  {%- endif -%}
+{%- endfor -%}
+{%- capture related_items -%}
+  {%- for related_post in related_posts -%}
+    <li><a href="{{ related_post.url | relative_url }}" title="{{ related_post.title | escape }}"><img src="{% include post-emoji.html post=related_post %}" alt="" class="note-filter-icon"><span>{{ related_post.title }}</span></a></li>
+  {%- endfor -%}
+{%- endcapture -%}
+{%- capture side_label -%}
+  {%- if content contains 'id="toc"' -%}
+    Contents{% if related_items != "" %} and related posts{% endif %}
+  {%- elsif related_items != "" -%}
+    Related posts
+  {%- endif -%}
+{%- endcapture -%}
+
 <article>
+
+  {% comment %} the post's side panel and the post, side by side from 768px as the Manifest's panel and
+    list are (basic.sass); below 768px the panel is in the menu {% endcomment %}
+  <div class="post-index">
+  {% if side_label != "" %}
+  {% comment %} Contents, the post's table of contents (setup_post_panel), and Related {% endcomment %}
+  <aside id="post-side" class="post-side-panel" aria-label="{{ side_label }}">
+    {% if content contains 'id="toc"' %}<details class="post-contents" open hidden><summary>Contents{% include chevron.html %}</summary></details>{% endif %}
+    {% if related_items != "" %}<details class="post-related" open><summary>Related{% include chevron.html %}</summary><ul>{{ related_items }}</ul></details>{% endif %}
+  </aside>
+  {% endif %}
+  <div class="post-main">
 
   {% include meta.html post=page %}
 
@@ -55,5 +98,8 @@ layout: default
       </script>
     </div><br><br>
   {% endif %}
+
+  </div>
+  </div>
 
 </article>
