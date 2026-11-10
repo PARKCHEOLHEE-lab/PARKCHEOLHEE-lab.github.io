@@ -234,6 +234,39 @@ test('with the menu open, the list beside it does not answer the mouse, the menu
   await expect(menu).toBeVisible();
 });
 
+for (const path of ['/manifest/', '/image-to-3d-scene/']) {
+  test(`${path}: in the phone menu each dotted line has as much space above it as below`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(path);
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(page.locator('.site-menu')).toBeVisible();
+    // the white between the line and the nearest words, box or icon on each side
+    const gaps = await page.evaluate(() => {
+      const menu = document.querySelector('.site-menu');
+      const boxes = [];
+      const walker = document.createTreeWalker(menu, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        if (!walker.currentNode.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(walker.currentNode);
+        boxes.push(range.getBoundingClientRect());
+      }
+      menu.querySelectorAll('input, img, svg').forEach((element) => boxes.push(element.getBoundingClientRect()));
+      const shown = boxes.filter((box) => box.height > 0);
+      // a line's top edge: the menu's links end with theirs, each later section starts with its own
+      const lines = [menu.querySelector('nav').getBoundingClientRect().bottom - 1, ...Array.from(menu.querySelectorAll('details + details'), (details) => details.getBoundingClientRect().top)];
+      return lines.map((y) => [
+        y - Math.max(...shown.filter((box) => box.bottom <= y).map((box) => box.bottom)),
+        Math.min(...shown.filter((box) => box.top >= y + 1).map((box) => box.top)) - (y + 1)
+      ]);
+    });
+    expect(gaps.length).toBe(2);
+    for (const [above, below] of gaps) {
+      expect(Math.abs(above - below)).toBeLessThanOrEqual(1);
+    }
+  });
+}
+
 // Safari kept a closed menu drawn just off the screen, where the keyboard's Tab still reached its controls
 test('in Safari\'s engine, on a phone the closed menu is not drawn off the screen, before or after it opens', async ({ playwright, baseURL }) => {
   const browser = await playwright.webkit.launch();

@@ -105,7 +105,9 @@ body:has(.site-menu:popover-open)
       display: flex
       flex-direction: column
       margin: 0
-      padding: 16px 0
+      // none below: a link's own padding and line spacing leave as much space above the dotted line as
+      // the panel leaves below it
+      padding: 16px 0 0
       border-bottom: 1px dotted reduce(14)
       // in the panel's text colour, as in the header
       color: $text-dark
