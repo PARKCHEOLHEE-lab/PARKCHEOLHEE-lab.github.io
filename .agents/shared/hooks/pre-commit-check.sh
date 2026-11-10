@@ -73,7 +73,8 @@ if printf '%s\n' "$staged" | grep -Eq '^(note/_posts|testbed/_posts|\.agents/sha
     run_related_verify
 fi
 
-if printf '%s\n' "$staged" | grep -Eq '^(\.agents/shared/skills/build-latentspace/scripts/|\.claude/skills/build-latentspace/scripts/|\.codex/skills/build-latentspace/scripts/|\.github/workflows/build-latentspace\.yml)'; then
+# build_post_map.py imports from add-related/scripts (list_posts), so a change there can break it too
+if printf '%s\n' "$staged" | grep -Eq '^(\.agents/shared/skills/(build-latentspace|add-related)/scripts/|\.claude/skills/(build-latentspace|add-related)/scripts/|\.codex/skills/(build-latentspace|add-related)/scripts/|\.github/workflows/build-latentspace\.yml)'; then
     run_latentspace_tests
 fi
 
