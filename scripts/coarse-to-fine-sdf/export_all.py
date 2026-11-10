@@ -63,6 +63,16 @@ def closest_on_surface(p):
     return q[0]
 
 
+def cell_size(n):
+    """the width of a cell when n cells span [-EXTENT, EXTENT]"""
+    return 2 * EXTENT / n
+
+
+def grid_to_world(v, n):
+    """grid coordinates on an n-cell grid (marching cubes' output) to world coordinates"""
+    return v / n * (2 * EXTENT) - EXTENT
+
+
 def grid_field(n):
     """Distances on an (n+1)^3 grid, cached on disk."""
     a = np.linspace(-EXTENT, EXTENT, n + 1)
@@ -131,7 +141,7 @@ if "1" in FIGURES:
 
 # ------------------------------------------------------- figure 2: marching cubes
 N_CELL, N_WHOLE = 16, 32
-H = 2 * EXTENT / N_CELL
+H = cell_size(N_CELL)
 
 
 def cut_quality(vals):
@@ -200,12 +210,12 @@ if "2" in FIGURES:
 
     a_w, field_w = grid_field(N_WHOLE)
     verts, faces, _, _ = measure.marching_cubes(field_w, level=0.0)
-    verts = verts / N_WHOLE * 2.0 - EXTENT
+    verts = grid_to_world(verts, N_WHOLE)
     cross = crossing_mask(field_w, N_WHOLE)
     json.dump({"cases": cases,
                "whole": {**mesh_json(verts, faces),
                          "cells": [round(float(x), 5) for x in centres(cross, a_w).reshape(-1)],
-                         "size": 2 * EXTENT / N_WHOLE, "cellCount": int(cross.sum()),
+                         "size": cell_size(N_WHOLE), "cellCount": int(cross.sum()),
                          "triangles": int(len(faces)), "n": N_WHOLE}},
               open(HERE / "mc.json", "w"))
     print(f"   {N_WHOLE}^3: {int(cross.sum())} cells cross the surface, {len(faces)} triangles")
@@ -242,7 +252,7 @@ if "3" in FIGURES:
     for n in LADDER:
         a_lv, f_lv = grid_field(n)
         cross = crossing_mask(f_lv, n)
-        near = np.abs(corner_stack(f_lv, n)).min(0) < BAND * (2 * EXTENT / n)
+        near = np.abs(corner_stack(f_lv, n)).min(0) < BAND * cell_size(n)
         mark = cross | near
         if parent is not None:
             mark &= parent                      # a cell only lives where its parent lived
@@ -276,7 +286,7 @@ if "3" in FIGURES:
     pts0 = np.stack(np.meshgrid(a0, a0, a0, indexing="ij"), axis=-1).reshape(-1, 3)
     dense = (FINE + 1) ** 3
     json.dump({"ladder": LADDER, "band": BAND,
-               "levels": [{"n": int(n), "size": float(2 * EXTENT / n),
+               "levels": [{"n": int(n), "size": float(cell_size(n)),
                            "crossing": [round(float(x), 5) for x in centres(c, a).reshape(-1)],
                            "near": [round(float(x), 5) for x in centres(m & ~c, a).reshape(-1)],
                            "counts": {"kept": int(m.sum()), "crossing": int(c.sum()),
@@ -284,8 +294,8 @@ if "3" in FIGURES:
                           for n, m, c, a in zip(LADDER, masks, crossings, axes)],
                "points": [round(float(x), 4) for x in pts0.reshape(-1)],
                "inside": [bool(x) for x in (fields[0].reshape(-1) < 0)],
-               "own": mesh_json(v_own / FINE * 2.0 - EXTENT, f_own),
-               "true": mesh_json(v_true / FINE * 2.0 - EXTENT, f_true),
+               "own": mesh_json(grid_to_world(v_own, FINE), f_own),
+               "true": mesh_json(grid_to_world(v_true, FINE), f_true),
                "stats": {"sampled": sampled, "dense": dense,
                          "save": round(dense / sampled, 1), "gap": round(gap, 1),
                          "triangles": int(len(f_own)), "trueTriangles": int(len(f_true))}},
