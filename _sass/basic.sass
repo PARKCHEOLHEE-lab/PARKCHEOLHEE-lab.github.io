@@ -484,30 +484,49 @@ img[src$="/emoji/puzzle.png"]
     cursor: pointer
   // the checkboxes and radio buttons drawn here, since the browser's own are round or have round corners
   // and a thick mark: a white square, its edge and thin mark in the panel's text colour when chosen, as
-  // the marked Contents entry is. A type's mark is a tick, the chosen sort's a short line
+  // the marked Contents entry is. A type's mark is a tick, the chosen sort's a short line. The mark grows
+  // in and shrinks away over the chevron's 0.15s, as the menu icon folds
+  // The mark is placed by geometry alone, at the box's middle, since a layout's centring rounds
+  // differently in each browser and at each screen density
   input
     appearance: none
-    display: grid
-    place-content: center
+    position: relative
     width: 13px
     height: 13px
     margin: 0
     border: 1px solid reduce(100)
     border-radius: 0
+    transition: border-color 0.15s
+    &::after
+      content: ""
+      position: absolute
+      top: 50%
+      left: 50%
+      border: 0 solid $text-dark
+      opacity: 0
+      transition: transform 0.15s, opacity 0.15s
     &:checked
       border-color: $text-dark
     &:checked::after
-      content: ""
-      border: 0 solid $text-dark
-  input[type="checkbox"]:checked::after
-    width: 3px
-    height: 7px
-    margin-top: -2px
+      opacity: 1
+    @media (prefers-reduced-motion: reduce)
+      &, &::after
+        transition: none
+  // the tick, a corner of a 3.5 by 7px box turned 45°: its ink sits 0.88px below the box's middle, so
+  // it is lifted by that much
+  input[type="checkbox"]::after
+    width: 2.5px
+    height: 6px
     border-width: 0 1px 1px 0
-    transform: rotate(45deg)
-  input[type="radio"]:checked::after
+    transform: translate(-50%, -50%) translateY(-0.88px) rotate(45deg) scale(0.3)
+  input[type="checkbox"]:checked::after
+    transform: translate(-50%, -50%) translateY(-0.88px) rotate(45deg)
+  input[type="radio"]::after
     width: 7px
     border-top-width: 1px
+    transform: translate(-50%, -50%) scaleX(0)
+  input[type="radio"]:checked::after
+    transform: translate(-50%, -50%)
 
 .note-options
   display: flex

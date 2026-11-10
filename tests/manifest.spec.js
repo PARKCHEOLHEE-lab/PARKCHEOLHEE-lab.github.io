@@ -74,6 +74,24 @@ test('the panel\'s checkboxes and radio buttons are in the colour of a post\'s m
   }
 });
 
+test('a box\'s mark grows in and shrinks away over the chevron\'s time, and changes at once for reduced motion', async ({ page }) => {
+  // the mark's and the box edge's transition lengths, beside the chevron's
+  const times = () => page.evaluate(() => {
+    const box = document.querySelector('#note-type-filter input');
+    const chevron = getComputedStyle(document.querySelector('#note-menu summary svg')).transitionDuration;
+    return [getComputedStyle(box, '::after').transitionDuration, getComputedStyle(box).transitionDuration, chevron];
+  });
+  await page.goto('/manifest/');
+  expect(await times()).toEqual(['0.15s, 0.15s', '0.15s', '0.15s']);
+  // unchecked, the mark is there but hidden, so it has somewhere to grow from
+  const box = page.locator('#note-type-filter input').first();
+  await box.click();
+  await expect(box).not.toBeChecked();
+  await expect.poll(() => box.evaluate((input) => getComputedStyle(input, '::after').opacity)).toBe('0');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  expect((await times()).slice(0, 2)).toEqual(['0s', '0s']);
+});
+
 test('on a wide screen the panel and the list share the page column, the panel under the logo', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/manifest/');
