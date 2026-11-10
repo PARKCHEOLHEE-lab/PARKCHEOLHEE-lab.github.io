@@ -327,10 +327,10 @@ a:hover
 // --- Shared list component classes (from note.html/testbed.html inline <style>) ---
 
 .use-bottom-line
-  border-bottom: 1px dotted reduce(14)
+  border-bottom: $row-line
 
 .use-bottom-line--padded
-  border-bottom: 1px dotted reduce(14)
+  border-bottom: $row-line
   padding-bottom: 2em
 
 .clickable
@@ -415,7 +415,7 @@ img[src$="/emoji/puzzle.png"]
 // line under it (use-bottom-line in note.html), and the list draws the same line over the first one
 #note-list
   overflow-anchor: none
-  border-top: 1px dotted reduce(14)
+  border-top: $row-line
 
 // a row's content is centred between its lines, which centres the emoji. The title font leaves about
 // 0.1em more room under the baseline than above the capitals, so the title and the date move down
@@ -465,7 +465,7 @@ img[src$="/emoji/puzzle.png"]
     &[open] summary svg
       transform: rotate(180deg)
     & + details
-      border-top: 1px dotted reduce(14)
+      border-top: $row-line
   summary
     display: flex
     align-items: center
@@ -557,7 +557,7 @@ img[src$="/emoji/puzzle.png"]
   // has one 1px line; at least 26.8px, room for the 24px clear button
   height: calc(2.25em + 1px)
   padding: 0
-  border-top: 1px dotted reduce(14)
+  border-top: $row-line
   color: $text-dark
   // hidden until setup_note_list runs, as it does nothing without it
   &[hidden]
