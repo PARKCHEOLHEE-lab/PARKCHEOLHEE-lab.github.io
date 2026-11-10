@@ -106,7 +106,7 @@ test('click on empty canvas during idle walk clears active node + tooltip', asyn
 function linked_slugs() {
   const fs = require('fs');
   const path = require('path');
-  const posts = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'data', 'latentspace.json'), 'utf8'))
+  const posts = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'data', 'latentspace.json'), 'utf8'))
     .filter((post) => post.slug.charAt(0) !== '_');
   const known = new Set(posts.map((post) => post.slug));
   const linked = Object.fromEntries(posts.map((post) => [post.slug, new Set()]));
@@ -171,7 +171,7 @@ test('a dot highlighted by a hover and by the idle walk looks the same, painted 
 
   const fs = require('fs');
   const path = require('path');
-  const source = fs.readFileSync(path.join(__dirname, '..', 'assets', 'js', 'latentspace.js'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'js', 'latentspace.js'), 'utf8');
   expect((source.match(/(?<![\d.])5 \/ current_zoom\.k/g) || []).length).toBeLessThanOrEqual(1);
 });
 
@@ -199,7 +199,7 @@ test('the idle walk steps to a linked dot, and the links are scanned for neighbo
 
   const fs = require('fs');
   const path = require('path');
-  const source = fs.readFileSync(path.join(__dirname, '..', 'assets', 'js', 'latentspace.js'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', '..', 'assets', 'js', 'latentspace.js'), 'utf8');
   expect((source.match(/\.index === /g) || []).length).toBe(0);
   expect((source.match(/\blinks\.(forEach|some|filter)\(/g) || []).length).toBeLessThanOrEqual(1);
 });

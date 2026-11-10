@@ -381,7 +381,7 @@ test('the rows\' dotted line is one token, drawn the same over the list and unde
 
   const fs = require('fs');
   const path = require('path');
-  const sass_dir = path.join(__dirname, '..', '_sass');
+  const sass_dir = path.join(__dirname, '..', '..', '_sass');
   const written = fs.readdirSync(sass_dir).filter((name) => name.endsWith('.sass'))
     .map((name) => fs.readFileSync(path.join(sass_dir, name), 'utf8').split('1px dotted reduce(14)').length - 1)
     .reduce((sum, count) => sum + count, 0);

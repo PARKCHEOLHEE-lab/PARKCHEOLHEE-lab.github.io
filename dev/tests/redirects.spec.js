@@ -5,7 +5,7 @@ const path = require('path');
 
 // files that moved under assets/ keep working at their old URLs: the site's 404 page sends a visitor on (404.html)
 
-const SITE = path.join(__dirname, '..', '_site');
+const SITE = path.join(__dirname, '..', '..', '_site');
 // where each moved folder used to be; the docs used to sit at the site's root
 const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/', js: '/js/', data: '/data/', emoji: '/emoji/' };
 // a file whose old URL was not in its folder's old place: wall.ifc came from the realbuilding submodule

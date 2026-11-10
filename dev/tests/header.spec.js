@@ -327,7 +327,7 @@ test('the panel breakpoint is one token: from 768px the header keeps its links, 
 
   const fs = require('fs');
   const path = require('path');
-  const sass_dir = path.join(__dirname, '..', '_sass');
+  const sass_dir = path.join(__dirname, '..', '..', '_sass');
   const written = fs.readdirSync(sass_dir).filter((name) => name.endsWith('.sass'))
     .flatMap((name) => fs.readFileSync(path.join(sass_dir, name), 'utf8').split('\n'))
     .filter((line) => !line.trim().startsWith('//') && /\b(768|767\.98)px\b/.test(line));

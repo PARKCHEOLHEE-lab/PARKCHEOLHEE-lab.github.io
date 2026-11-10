@@ -28,6 +28,9 @@ bundle exec jekyll build
 # Serve locally
 bundle exec jekyll serve --host 0.0.0.0 --port 4000
 
+# Run the browser tests (dev/tests) against the built _site
+npx playwright test -c dev/playwright.config.js
+
 # Verify related-post frontmatter
 python3 .agents/shared/skills/add-related/scripts/verify_related.py
 
@@ -78,7 +81,7 @@ Do not run `build-latentspace` without confirming `OPENAI_API_KEY` is available;
 <!-- setup-design-system: do not edit between markers -->
 ## Design System
 
-This project's UI rules and design tokens live in [DESIGN.md](/DESIGN.md).
+This project's UI rules and design tokens live in [dev/DESIGN.md](/dev/DESIGN.md).
 Read it before any Sass, layout, include, or post-style change.
 
 - Tokens are Sass variables in `_sass/index.sass`. Reference them; do not

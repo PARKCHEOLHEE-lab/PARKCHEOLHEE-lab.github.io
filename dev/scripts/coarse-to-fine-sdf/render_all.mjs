@@ -7,7 +7,7 @@ import os from "node:os";
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const CACHE = path.join(os.homedir(), ".cache", "coarse-to-fine-sdf");
-const REPO = path.resolve(HERE, "..", "..");
+const REPO = path.resolve(HERE, "..", "..", "..");
 const PORT = 8931;
 
 // playwright lives in the cache folder, so no node_modules ends up in the repo:
