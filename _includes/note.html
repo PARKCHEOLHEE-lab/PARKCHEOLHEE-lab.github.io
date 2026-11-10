@@ -26,10 +26,11 @@
     {% comment %} The search box, over the list on every screen; setup_note_list reads the posts' text
       from search.json and shows it {% endcomment %}
     <label class="note-search" hidden>
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      {% comment %} its line 1px at any size, as the panel's boxes and the other line icons are {% endcomment %}
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><circle cx="7" cy="7" r="4.5" vector-effect="non-scaling-stroke"/><path d="M10.5 10.5L14 14" vector-effect="non-scaling-stroke"/></svg>
       <input id="note-search" type="search" placeholder="Search posts" aria-label="Search posts" autocomplete="off" spellcheck="false" enterkeyhint="search" data-index="{{ '/search.json' | relative_url }}">
       {% comment %} in place of the browser's own clear button, drawn like the magnifier {% endcomment %}
-      <button type="button" class="note-search-clear" aria-label="Clear search" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+      <button type="button" class="note-search-clear" aria-label="Clear search" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" vector-effect="non-scaling-stroke"/></svg></button>
       <span class="note-search-count" aria-live="polite"></span>
     </label>
     {% include manifest-posts.html %}
