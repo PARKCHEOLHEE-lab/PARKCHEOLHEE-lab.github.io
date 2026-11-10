@@ -39,14 +39,23 @@ layout: default
   site's links and a copy of the post's side panel (header.sass) {% endcomment %}
 <div id="post-menu" class="site-menu"></div>
 
-{%- comment -%} the posts that this one's related: front matter names by slug, each with its emoji and
-  its title; a slug with no post (a disabled one) is left out {%- endcomment -%}
+{%- comment -%} the pinned latentspace. page, the map every post leads back to (a page, so no related:
+  slug names it), on every page but its own; then the posts that this one's related: front matter names
+  by slug, a slug with no post (a disabled one) left out. Each with its emoji and its title {%- endcomment -%}
+{%- assign map = site.pages | where: "name", "latentspace.html" | first -%}
+{%- assign related_posts = "" | split: "" -%}
+{%- if map and map.url != page.url -%}
+  {%- assign related_posts = related_posts | push: map -%}
+{%- endif -%}
+{%- for slug in page.related -%}
+  {%- assign related_post = site.posts | where: "slug", slug | first -%}
+  {%- if related_post -%}
+    {%- assign related_posts = related_posts | push: related_post -%}
+  {%- endif -%}
+{%- endfor -%}
 {%- capture related_items -%}
-  {%- for slug in page.related -%}
-    {%- assign related_post = site.posts | where: "slug", slug | first -%}
-    {%- if related_post -%}
-      <li><a href="{{ related_post.url | relative_url }}" title="{{ related_post.title | escape }}"><img src="{% include post-emoji.html post=related_post %}" alt="" class="note-filter-icon"><span>{{ related_post.title }}</span></a></li>
-    {%- endif -%}
+  {%- for related_post in related_posts -%}
+    <li><a href="{{ related_post.url | relative_url }}" title="{{ related_post.title | escape }}"><img src="{% include post-emoji.html post=related_post %}" alt="" class="note-filter-icon"><span>{{ related_post.title }}</span></a></li>
   {%- endfor -%}
 {%- endcapture -%}
 {%- capture side_label -%}

@@ -4,7 +4,8 @@ const { test, expect } = require('@playwright/test');
 // a post's side panel (post.html, setup_post_panel): Contents and Related, beside the post from 768px as
 // the Manifest's panel is beside its list, in the menu on phones
 
-// a post with a table of contents and seven related posts, two of them with long titles
+// a post with a table of contents and seven related posts, two of them with long titles; its Related
+// list starts with the latentspace. map, as every post's does
 const POST = '/image-to-3d-scene/';
 
 async function scroll_to(page, top) {
@@ -108,7 +109,8 @@ test('each Related title stays on one line, a long one cut and shown whole on ho
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(POST);
   const items = page.locator('#post-side .post-related a');
-  await expect(items).toHaveCount(7);
+  // the map and the seven
+  await expect(items).toHaveCount(8);
   const line = await items.first().evaluate((link) => link.getBoundingClientRect().height);
   for (const item of await items.all()) {
     expect((await item.boundingBox()).height).toBeCloseTo(line, 0);
@@ -175,13 +177,22 @@ test('each Contents entry stays on one line too, a long one cut and shown whole 
   await expect(long).toHaveAttribute('title', 'Post-Processing for Alignment Correction');
 });
 
-test('a post without a table of contents has Related only, and one with neither has no panel', async ({ page }) => {
+test('a post without a table of contents has Related only, every post\'s Related starts with the latentspace. map, and the map leaves itself out', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto('/onnx/');
   await expect(page.locator('#post-side .post-contents')).toHaveCount(0);
   await expect(page.locator('#post-side .post-related')).toBeVisible();
-  await page.goto('/cprofile/');
-  await expect(page.locator('#post-side')).toHaveCount(0);
+  // a post that names no related posts still leads to the map
+  for (const path of ['/onnx/', POST, '/cprofile/']) {
+    await page.goto(path);
+    const first = page.locator('#post-side .post-related a').first();
+    await expect(first).toHaveAttribute('href', '/latentspace/');
+    await expect(first).toHaveText('latentspace.');
+    await expect(first.locator('img')).toHaveAttribute('src', '/emoji/pin.png');
+  }
+  await expect(page.locator('#post-side .post-related a')).toHaveCount(1);
+  await page.goto('/latentspace/');
+  await expect(page.locator('#post-side .post-related a[href="/latentspace/"]')).toHaveCount(0);
 });
 
 test('on a phone the panel is in the menu only, as one copy', async ({ page }) => {
@@ -191,7 +202,7 @@ test('on a phone the panel is in the menu only, as one copy', async ({ page }) =
   await page.getByRole('button', { name: 'Menu' }).click();
   const menu = page.locator('#post-menu');
   await expect(menu.locator('.post-contents a').first()).toBeVisible();
-  await expect(menu.locator('.post-related a')).toHaveCount(7);
+  await expect(menu.locator('.post-related a')).toHaveCount(8);
   await expect(page.locator('[id="post-side"]')).toHaveCount(1);
 });
 
