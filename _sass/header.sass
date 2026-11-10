@@ -29,6 +29,11 @@ body > header
   nav, .site-menu-button
     color: invert($text-dark)
     mix-blend-mode: difference
+  // once the page leaves the top, white over the black as the logo's words are; while the black is
+  // still spreading under them the blend shows them dark on the white
+  &[data-scroll="down"]
+    nav, .site-menu-button
+      color: $light
 
 // a link to a heading, as in a table of contents, lands below the header instead of under it
 html

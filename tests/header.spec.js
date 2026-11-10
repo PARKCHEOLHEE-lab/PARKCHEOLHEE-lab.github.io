@@ -62,7 +62,7 @@ for (const path of PAGES) {
     await expect(header).toHaveCSS('box-shadow', 'none');
     let greys = await header_greys(page);
     expect(greys.end).toBeGreaterThan(240);
-    // the link in the panels' text colour ($text-dark, 70) on the white bar, a light grey (185) on the black
+    // the link in the panels' text colour ($text-dark, 70) on the white bar, white on the black as the logo's words
     expect(greys.darkest).toBeCloseTo(70, -1);
 
     // halfway through, the black has spread past the logo but not yet to the far end; a fade would be
@@ -81,7 +81,7 @@ for (const path of PAGES) {
     await page.evaluate(() => document.getAnimations().forEach((a) => a.finish()));
     greys = await header_greys(page);
     expect(greys.end).toBeLessThan(15);
-    expect(greys.lightest).toBeCloseTo(185, -1);
+    expect(greys.lightest).toBeGreaterThan(245);
 
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     await expect.poll(async () => {
