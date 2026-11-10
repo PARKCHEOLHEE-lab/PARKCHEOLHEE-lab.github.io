@@ -529,7 +529,12 @@ function setup_header() {
   // popover styles would hide it, and one left open closes as the attribute goes
   const wide = matchMedia("(min-width: 768px)");
   function place() {
+    // with the slide off: Safari keeps a panel that becomes a closed popover drawn just off the screen,
+    // its slide-out never ending (header.sass), where the keyboard's Tab still reached its controls
+    menu.style.transition = "none";
     menu.toggleAttribute("popover", !wide.matches);
+    getComputedStyle(menu).display;
+    menu.style.transition = "";
   }
   wide.addEventListener("change", place);
   place();

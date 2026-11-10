@@ -147,6 +147,22 @@ test('on a phone a post without a table of contents has the Menu button, with th
   await expect(menu).toBeHidden();
 });
 
+// Safari kept a closed menu drawn just off the screen, where the keyboard's Tab still reached its controls
+test('in Safari\'s engine, on a phone the closed menu is not drawn off the screen, before or after it opens', async ({ playwright, baseURL }) => {
+  const browser = await playwright.webkit.launch();
+  const page = await browser.newPage({ baseURL, viewport: { width: 390, height: 844 } });
+  for (const path of ['/manifest/', '/image-to-3d-scene/']) {
+    await page.goto(path);
+    const menu = page.locator('.site-menu');
+    await expect(menu).toBeHidden();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await expect(menu).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeHidden();
+  }
+  await browser.close();
+});
+
 test('on a phone a post\'s table of contents is in its menu, and a link in it closes the menu with its heading below the header', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/attention-attention/');
