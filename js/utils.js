@@ -72,28 +72,6 @@ function generate_table_of_contents() {
   }
 }
 
-function filter_posts(type) {
-  const posts = document.querySelectorAll(".testbed-post");
-  const back_button = document.getElementById("back-button");
-  const filter_buttons = document.getElementById("filter-buttons");
-
-  posts.forEach(function(post) {
-    if (type === "all") {
-      post.style.display = "";
-    } else {
-      post.style.display = post.dataset[type] === "true" ? "" : "none";
-    }
-  });
-
-  if (type === "all") {
-    back_button.style.display = "none";
-    filter_buttons.style.display = "";
-  } else {
-    back_button.style.display = "";
-    filter_buttons.style.display = "none";
-  }
-}
-
 // The Manifest list and its side panel. Sort by orders the rows newest or oldest first, by title, or
 // by type. A checkbox per post type (read from each row's emoji, with its post count) shows the
 // checked types' rows, all of them at first; with none checked the list is empty. Pinned rows stay on
