@@ -22,7 +22,6 @@ minimal: false             # use a dark header
 
 navigation:                # accepts {file, title, url, icon, sidebaricon}
   - {title: "manifest", file: "manifest.html"}
-  # - {title: "three", file: "threebed.html"}
   # - {title: "r!　", file: "retrospection.html"}
   # - {title: "　", file: "retrospection.html"}
 
