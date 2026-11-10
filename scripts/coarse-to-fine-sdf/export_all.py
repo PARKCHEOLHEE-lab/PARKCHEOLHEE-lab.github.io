@@ -163,12 +163,14 @@ def faces_camera(vals):
     return 0.0 if norm == 0 else abs(float(np.dot(n / norm, VIEW)))
 
 
-def find_cell(count):
+def find_cell(field, count):
+    """the corner values of the cell of field that has count corners inside, cuts its edges most
+    evenly and best faces the camera"""
     best = None
     for i in range(N_CELL):
         for j in range(N_CELL):
             for k in range(N_CELL):
-                vals = cell_values(field_c, i, j, k)
+                vals = cell_values(field, i, j, k)
                 if (vals < 0).sum() != count:
                     continue
                 score = cut_quality(vals) + 0.5 * faces_camera(vals)
@@ -187,7 +189,7 @@ def pack_cell(vals):
 if "2" in FIGURES:
     print("figure 2 ...")
     a_c, field_c = grid_field(N_CELL)
-    cases = {"one": pack_cell(find_cell(1)), "two": pack_cell(find_cell(2))}
+    cases = {"one": pack_cell(find_cell(field_c, 1)), "two": pack_cell(find_cell(field_c, 2))}
 
     best = None                                 # a crossing edge with a lopsided split
     for i in range(N_CELL):
