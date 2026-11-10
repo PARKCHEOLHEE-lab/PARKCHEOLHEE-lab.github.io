@@ -68,14 +68,23 @@ unless there is a clear reason. Body padding scales by viewport via
 
 ### Breakpoints
 
-Two breakpoints, both in `em`:
+Two padding breakpoints, both in `em`:
 
 - `min-width: 40em` — tablet+
 - `min-width: 64em` — desktop+
 
-Defined in `assets/css/index.sass`. Do not introduce a third breakpoint
-without a concrete reason; the layout is content-width driven, not
-device-class driven.
+Defined in `assets/css/index.sass`.
+
+One layout breakpoint, the token `$panel-breakpoint` (`768px`) in
+`_sass/index.sass`. From it the site's links sit in the header and a side
+panel (`$panel-width`) beside its list or post; below it both are in the
+phone menu. Write `@media (min-width: $panel-breakpoint)` and
+`@media (max-width: $panel-breakpoint - 0.02px)`. `setup_header` in
+`js/utils.js` repeats `768px` for `matchMedia`, which cannot read a Sass
+token, so change the two together.
+
+Do not introduce another breakpoint without a concrete reason; the layout
+is content-width driven, not device-class driven.
 
 ## Excluded zones (intentional raw values)
 

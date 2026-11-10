@@ -70,7 +70,7 @@ body:has(.site-menu:popover-open)
 
 // the copies setup_header puts in the menu are the phone's: from 768px the site's links are in the
 // header, a post's side panel in the post, and the Manifest's panel beside its list
-@media (min-width: 768px)
+@media (min-width: $panel-breakpoint)
   .site-menu nav
     display: none
   #post-menu
@@ -78,7 +78,7 @@ body:has(.site-menu:popover-open)
 
 // below 768px the Menu button slides the page's menu in from the right, below the header and over the
 // page; Escape, a tap outside or a link in it closes it (the browser's popover, and setup_header)
-@media (max-width: 767.98px)
+@media (max-width: $panel-breakpoint - 0.02px)
   body:has(.site-menu) > header nav
     display: none
   body:has(.site-menu) .site-menu-button

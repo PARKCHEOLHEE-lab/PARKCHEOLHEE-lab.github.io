@@ -641,8 +641,7 @@ img[src$="/emoji/puzzle.png"]
 // from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
 // panel stays below the header while the list scrolls. A post with a side panel is laid out the same
 // (post.html), its panel beside the post. Below 768px the Manifest's menu is as wide (header.sass)
-$panel-width: 12em
-@media (min-width: 768px)
+@media (min-width: $panel-breakpoint)
   .note-index, .post-index:has(> #post-side)
     display: grid
     grid-template-columns: $panel-width minmax(0, 1fr)
@@ -704,11 +703,11 @@ $panel-width: 12em
 // on phones the panel is in the menu (header.sass); from 768px its first heading sits on the post
 // title's line, and a long table of contents scrolls inside it, which ends 1.5em above the screen's
 // bottom while it stays below the header
-@media (max-width: 767.98px)
+@media (max-width: $panel-breakpoint - 0.02px)
   #post-side
     display: none
 
-@media (min-width: 768px)
+@media (min-width: $panel-breakpoint)
   #post-side
     // the title's top margin (layout.sass) less the section's own top padding, with their lines'
     // centres matched: 1.32em measured at 820 and 1240px wide
