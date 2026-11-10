@@ -29,15 +29,15 @@ function init_latentspace() {
     const EDGE_COLOR_DIM = root_style.getPropertyValue("--edge-color-dim").trim();
 
     const LABEL_EMOJIS = {
-        "Brain": "/emoji/brain.png",
-        "Books": "/emoji/books.png",
-        "Eyes": "/emoji/eyes.png",
-        "Wordballoon": "/emoji/wordballoon.png",
-        "Robot": "/emoji/robot.png",
-        "Storm": "/emoji/storm.png",
-        "Testbed": "/emoji/dna.png",
-        "Pin": "/emoji/pin.png",
-        "Note": "/emoji/default.png"
+        "Brain": "/assets/emoji/brain.png",
+        "Books": "/assets/emoji/books.png",
+        "Eyes": "/assets/emoji/eyes.png",
+        "Wordballoon": "/assets/emoji/wordballoon.png",
+        "Robot": "/assets/emoji/robot.png",
+        "Storm": "/assets/emoji/storm.png",
+        "Testbed": "/assets/emoji/dna.png",
+        "Pin": "/assets/emoji/pin.png",
+        "Note": "/assets/emoji/default.png"
     };
 
     const BASE_RADIUS = 3;
@@ -257,7 +257,7 @@ function init_latentspace() {
         const el = tooltip.node();
         el.style.width = "";
         tooltip
-            .html("<strong>" + d.title + "</strong><br><span style='display:inline-flex;align-items:center;white-space:nowrap'><img src='" + (LABEL_EMOJIS[label] || "/emoji/default.png") + "' style='width:1em;height:1em;margin-right:0.3em'><span>" + label + "</span></span>")
+            .html("<strong>" + d.title + "</strong><br><span style='display:inline-flex;align-items:center;white-space:nowrap'><img src='" + (LABEL_EMOJIS[label] || "/assets/emoji/default.png") + "' style='width:1em;height:1em;margin-right:0.3em'><span>" + label + "</span></span>")
             .style("opacity", 1);
 
         const label_row = el.querySelector("span");

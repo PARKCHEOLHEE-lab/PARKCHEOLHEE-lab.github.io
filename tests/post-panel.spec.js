@@ -188,7 +188,7 @@ test('a post without a table of contents has Related only, every post\'s Related
     const first = page.locator('#post-side .post-related a').first();
     await expect(first).toHaveAttribute('href', '/latentspace/');
     await expect(first).toHaveText('latentspace.');
-    await expect(first.locator('img')).toHaveAttribute('src', '/emoji/pin.png');
+    await expect(first.locator('img')).toHaveAttribute('src', '/assets/emoji/pin.png');
   }
   await expect(page.locator('#post-side .post-related a')).toHaveCount(1);
   await page.goto('/latentspace/');

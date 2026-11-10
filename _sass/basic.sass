@@ -355,10 +355,10 @@ a:hover
 // the Testbed's puzzle, wherever it shows (a Manifest row, its type in the panel, a Related post): a band
 // of light crosses it every 2 seconds, every puzzle at once. The puzzle is drawn again under the band as
 // the image's background, its own picture pushed out of view, and both are cut to the puzzle's shape
-img[src$="/emoji/puzzle.png"]
+img[src$="/assets/emoji/puzzle.png"]
   object-position: -999px 0
-  background: linear-gradient(110deg, transparent 38%, rgba($light, 0.9) 50%, transparent 62%) 100% 0 / 300% 100% no-repeat, url("/emoji/puzzle.png") center / contain no-repeat
-  mask: url("/emoji/puzzle.png") center / contain no-repeat
+  background: linear-gradient(110deg, transparent 38%, rgba($light, 0.9) 50%, transparent 62%) 100% 0 / 300% 100% no-repeat, url("/assets/emoji/puzzle.png") center / contain no-repeat
+  mask: url("/assets/emoji/puzzle.png") center / contain no-repeat
   animation: puzzle-shine 2s ease-in-out infinite
   @media (prefers-reduced-motion: reduce)
     animation: none

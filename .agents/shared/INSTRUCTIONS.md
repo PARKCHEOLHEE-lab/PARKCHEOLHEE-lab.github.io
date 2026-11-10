@@ -50,7 +50,7 @@ pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
 - Active posts live in `note/_posts` and `testbed/_posts`; underscore-prefixed files are treated as drafts or disabled posts by local scripts.
 - Post slugs are filename-derived: remove the `YYYY-MM-DD-` prefix and `.html` extension.
 - `related` entries must use slugs only, not titles or filenames.
-- Store post images under `img/` and reuse existing emoji assets under `emoji/` when assigning labels.
+- Store post images under `img/` and reuse existing emoji assets under `assets/emoji/` when assigning labels.
 - Do not edit generated `_site/` files; change source files and rebuild instead.
 
 ## Skill Workflow

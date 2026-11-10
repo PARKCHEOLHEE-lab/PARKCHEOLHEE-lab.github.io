@@ -7,6 +7,6 @@
 {%- assign pinned_pages = site.pages | where_exp: "item", "item.pinned == true" -%}
 {%- assign listed_posts = site.posts | where_exp: "post", "post.categories contains 'note' or post.categories contains 'testbed'" -%}
 {%- assign listed_posts = listed_posts | where_exp: "post", "post.hidden != true" -%}
-{%- assign pinned_posts = listed_posts | where: "emoji", "/emoji/pin.png" -%}
-{%- assign unpinned_posts = listed_posts | where_exp: "post", "post.emoji != '/emoji/pin.png'" -%}
+{%- assign pinned_posts = listed_posts | where: "emoji", "/assets/emoji/pin.png" -%}
+{%- assign unpinned_posts = listed_posts | where_exp: "post", "post.emoji != '/assets/emoji/pin.png'" -%}
 {%- assign all_posts = pinned_pages | concat: pinned_posts | concat: unpinned_posts -%}

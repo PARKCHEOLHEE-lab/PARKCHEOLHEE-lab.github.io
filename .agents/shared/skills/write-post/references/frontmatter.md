@@ -18,9 +18,9 @@ related: []
 
 | Field | When | Example |
 |---|---|---|
-| `emoji` | Only for essay / observation / reflective posts | `emoji: /emoji/eyes.png` |
+| `emoji` | Only for essay / observation / reflective posts | `emoji: /assets/emoji/eyes.png` |
 
-The `emoji` field maps to a label on the latent-space visualization. **Only the seven files in the table below have label mappings** — the latent-space mapper (`.agents/shared/skills/build-latentspace/scripts/build_post_map.py`'s `EMOJI_TO_LABEL`) recognises exactly these. Setting any other filename (even ones present under `emoji/` like `bulb.png`, `pencil.png`, `dna.png`, `clip.png`, `fire.png`, `wordballoon.png`) silently falls back to the "Note" label, which is almost never what you want.
+The `emoji` field maps to a label on the latent-space visualization. **Only the seven files in the table below have label mappings** — the latent-space mapper (`.agents/shared/skills/build-latentspace/scripts/build_post_map.py`'s `EMOJI_TO_LABEL`) recognises exactly these. Setting any other filename (even ones present under `assets/emoji/` like `bulb.png`, `pencil.png`, `dna.png`, `clip.png`, `fire.png`, `wordballoon.png`) silently falls back to the "Note" label, which is almost never what you want.
 
 | File | Label | Used for |
 |---|---|---|
@@ -50,7 +50,7 @@ related: []
 ---
 title: "ego"
 layout: post
-emoji: /emoji/eyes.png
+emoji: /assets/emoji/eyes.png
 related: []
 ---
 ```
@@ -60,7 +60,7 @@ related: []
 ---
 title: "언어의 한계"
 layout: post
-emoji: /emoji/wordballoon-with-dots.png
+emoji: /assets/emoji/wordballoon-with-dots.png
 related: []
 ---
 ```

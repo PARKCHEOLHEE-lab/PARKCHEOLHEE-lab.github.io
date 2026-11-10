@@ -7,7 +7,7 @@ const path = require('path');
 
 const SITE = path.join(__dirname, '..', '_site');
 // where each moved folder used to be; the docs used to sit at the site's root
-const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/', js: '/js/', data: '/data/' };
+const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/', js: '/js/', data: '/data/', emoji: '/emoji/' };
 // a file whose old URL was not in its folder's old place: wall.ifc came from the realbuilding submodule
 const ORIGIN = { '/assets/models/wall.ifc': '/realbuilding/wall.ifc' };
 

@@ -130,7 +130,7 @@ the new feature should be a token instead.
 - **No decorative gradients.** Backgrounds are flat. Featured emphasis uses
   `$featured-color` as a wavy underline, never as a gradient sweep.
 - **No icon emoji libraries.** The site already uses purpose-built emoji
-  assets under `emoji/` for post labels. Do not import Font Awesome
+  assets under `assets/emoji/` for post labels. Do not import Font Awesome
   *icons*, Heroicons, or Lucide for decorative purposes. (Font Awesome
   *fonts* under `assets/fontawesome/` are kept for legacy posts that
   reference them; do not extend their use.)

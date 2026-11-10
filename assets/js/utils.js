@@ -109,12 +109,12 @@ function setup_note_list() {
   const search = document.getElementById("note-search");
   const found = search.parentElement.querySelector(".note-search-count");
   const clear = search.parentElement.querySelector(".note-search-clear");
-  const PIN = "/emoji/pin.png";
+  const PIN = "/assets/emoji/pin.png";
   // the names the latent-space map shows beside the same icons (LABEL_EMOJIS in js/latentspace.js);
   // any other type is named after its icon file, capitalized
   const TYPE_NAMES = { "default": "Note", "puzzle": "Testbed", "wordballoon-with-dots": "Wordballoon" };
   // an empty note is a note, for the filter and the type sort; its row keeps its own icon
-  const SAME_TYPE = { "/emoji/default-empty.png": "/emoji/default.png" };
+  const SAME_TYPE = { "/assets/emoji/default-empty.png": "/assets/emoji/default.png" };
 
   const rows = Array.from(list.querySelectorAll(".note-post-item")).map(function(item, index) {
     const icon = item.querySelector(".emoji-image").getAttribute("src");
@@ -136,7 +136,7 @@ function setup_note_list() {
   });
   // Testbed first, as the owner asked, then the most common type first; types with equal counts keep
   // the order they first appear in. The Type sort follows the same order
-  const TESTBED = "/emoji/puzzle.png";
+  const TESTBED = "/assets/emoji/puzzle.png";
   const types = Object.keys(counts).sort(function(a, b) {
     return (b === TESTBED) - (a === TESTBED) || counts[b] - counts[a];
   });
