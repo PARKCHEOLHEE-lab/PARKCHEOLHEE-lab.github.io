@@ -339,16 +339,18 @@ function init_latentspace() {
             return slugs;
         }
 
-        function apply_highlight(d) {
+        // d at the hover radius, its linked dots whole and the rest faded, its links in its colour and wider;
+        // the idle walk passes transitions of the dots and links to fade the same look in
+        function apply_highlight(d, dots = dot_elements, edges = link_elements) {
             const connected = get_connected_slugs(d);
 
-            dot_elements.attr("opacity", function(dd) {
+            dots.attr("opacity", function(dd) {
                 return (dd.slug === d.slug || connected.has(dd.slug)) ? 1 : 0.1;
             }).attr("r", function(dd) {
                 return (dd.slug === d.slug) ? 5 / current_zoom.k : BASE_RADIUS / current_zoom.k;
             });
 
-            link_elements
+            edges
                 .attr("stroke", function(l) {
                     return (l.source === d || l.target === d)
                         ? highlighted_edge_color(d) : EDGE_COLOR_DIM;
@@ -484,7 +486,7 @@ function init_latentspace() {
             link_elements.interrupt();
             link_elements.interrupt("idle");
 
-            d3.select(el).raise().attr("r", 5 / current_zoom.k).attr("opacity", 1);
+            d3.select(el).raise();
             apply_highlight(d);
             show_tooltip(d);
         }
@@ -616,24 +618,8 @@ function init_latentspace() {
             active_hover_node = d;
             if (is_touch_device) touch_selected_node = d;
             d.visits = (d.visits || 0) + 1;
-            const connected = get_connected_slugs(d);
-
-            dot_elements.transition("idle").duration(400)
-                .attr("opacity", function(dd) {
-                    return (dd.slug === d.slug || connected.has(dd.slug)) ? 1 : 0.1;
-                })
-                .attr("r", function(dd) {
-                    return (dd.slug === d.slug) ? 5 / current_zoom.k : BASE_RADIUS / current_zoom.k;
-                });
-
-            link_elements.transition("idle").duration(400)
-                .attr("stroke", function(l) {
-                    return (l.source === d || l.target === d)
-                        ? highlighted_edge_color(d) : EDGE_COLOR_DIM;
-                })
-                .attr("stroke-width", function(l) {
-                    return (l.source === d || l.target === d) ? 0.75 / current_zoom.k : 0.5 / current_zoom.k;
-                });
+            apply_highlight(d, dot_elements.transition("idle").duration(400),
+                link_elements.transition("idle").duration(400));
 
             show_tooltip(d);
         }
