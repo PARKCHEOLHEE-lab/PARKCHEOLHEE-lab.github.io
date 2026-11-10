@@ -458,9 +458,32 @@ a:hover
     gap: 0.5em
     padding: 0.25em 0
     cursor: pointer
+  // the checkboxes and radio buttons drawn here, since the browser's own are round or have round corners
+  // and a thick mark: a white square, its edge and thin mark in the panel's text colour when chosen, as
+  // the marked Contents entry is. A type's mark is a tick, the chosen sort's a short line
   input
+    appearance: none
+    display: grid
+    place-content: center
+    width: 13px
+    height: 13px
     margin: 0
-    accent-color: $dark
+    border: 1px solid reduce(100)
+    border-radius: 0
+    &:checked
+      border-color: $text-dark
+    &:checked::after
+      content: ""
+      border: 0 solid $text-dark
+  input[type="checkbox"]:checked::after
+    width: 3px
+    height: 7px
+    margin-top: -2px
+    border-width: 0 1px 1px 0
+    transform: rotate(45deg)
+  input[type="radio"]:checked::after
+    width: 7px
+    border-top-width: 1px
 
 .note-options
   display: flex

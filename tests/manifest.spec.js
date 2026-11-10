@@ -55,6 +55,25 @@ test('sort by: pinned rows stay on top, and Oldest puts the oldest post first', 
   expect(posts).toEqual([...posts].sort((a, b) => a - b));
 });
 
+test('the panel\'s checkboxes and radio buttons are in the colour of a post\'s marked Contents entry', async ({ page }) => {
+  await page.goto('/image-to-3d-scene/');
+  const marked = await page.locator('#post-side [aria-current]').evaluate((link) => getComputedStyle(link).color);
+  await page.goto('/manifest/');
+  // a chosen box is a white square, its edge and its thin mark in that colour: a type's a tick (its
+  // right side and bottom, turned), the sort's a short line (its top)
+  for (const [box, side] of [[page.locator('#note-type-filter input').first(), 'Right'], [page.locator('#note-sort input:checked'), 'Top']]) {
+    await expect(box).toBeChecked();
+    await expect(box).toHaveCSS('border-radius', '0px');
+    await expect(box).toHaveCSS('border-top-color', marked);
+    await expect(box).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    const mark = await box.evaluate((input, side) => {
+      const style = getComputedStyle(input, '::after');
+      return [style[`border${side}Color`], style[`border${side}Width`]];
+    }, side);
+    expect(mark).toEqual([marked, '1px']);
+  }
+});
+
 test('on a wide screen the panel and the list share the page column, the panel under the logo', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto('/manifest/');
