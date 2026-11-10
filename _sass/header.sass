@@ -96,6 +96,11 @@ body:has(.site-menu:popover-open)
     background: $light
     transform: translateX(100%)
     transition: transform 0.25s, overlay 0.25s allow-discrete, display 0.25s allow-discrete
+    // the Manifest's menu is its side panel, its words a little wider than beside the list from 768px
+    // (basic.sass), so a type's count sits near its name with room for a finger
+    &.note-filter
+      box-sizing: content-box
+      width: $panel-width + 3em
     &:popover-open
       transform: none
     &::backdrop

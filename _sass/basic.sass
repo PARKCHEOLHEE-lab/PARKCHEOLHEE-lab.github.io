@@ -599,11 +599,12 @@ a:hover
 
 // from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
 // panel stays below the header while the list scrolls. A post with a side panel is laid out the same
-// (post.html), its panel beside the post
+// (post.html), its panel beside the post. Below 768px the Manifest's menu is as wide (header.sass)
+$panel-width: 12em
 @media (min-width: 768px)
   .note-index, .post-index:has(> #post-side)
     display: grid
-    grid-template-columns: 12em minmax(0, 1fr)
+    grid-template-columns: $panel-width minmax(0, 1fr)
     column-gap: 2.5em
     align-items: start
   .note-filter, #post-side
