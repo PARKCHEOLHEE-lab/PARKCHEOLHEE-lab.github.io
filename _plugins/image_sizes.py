@@ -6,7 +6,7 @@ where the post sets none) and data-skeleton, which basic.sass draws as a gray, s
 It runs on the written site because only there is every page's final HTML, and every image is the real file
 rather than its Git LFS pointer (pages.yml checks out with lfs: true).
 
-Run by image_sizes.rb as: python3 image_sizes.py <site dir>
+Run by image_sizes.rb as: python3 image_sizes.py <site dir> <rendered page>...
 """
 
 import os
@@ -133,7 +133,9 @@ def _with_skeleton(text, attrs, site_dir, lazy):
     ratio = f"aspect-ratio: {width} / {height}"
     # the post's own style comes after the ratio, so an aspect-ratio it sets still wins
     attrs = [(name, f"{ratio}; {value}" if name == "style" else value) for name, value in attrs]
-    if "width" not in names and "width" not in style_names:
+    # the image's own width gives its box a width before it arrives, unless the post sizes it: a width beside a
+    # height limit would squash it once it arrives
+    if not names & {"width", "height"} and not style_names & {"width", "height", "min-height", "max-height"}:
         attrs.append(("width", str(width)))
     if style is None:
         attrs.append(("style", ratio))
@@ -151,24 +153,22 @@ def _quote(value):
     return value.replace("&", "&amp;").replace('"', "&quot;")
 
 
-def main(site_dir):
+def main(site_dir, paths):
+    """Add skeletons to the given pages: the ones Jekyll rendered, which carry the site's layout and so its
+    skeleton styles. A static HTML file is copied as it is, in whatever encoding, and is not read."""
     pages = 0
-    for root, _, files in os.walk(site_dir):
-        for name in files:
-            if not name.endswith(".html"):
-                continue
-            path = os.path.join(root, name)
-            with open(path, encoding="utf-8") as f:
-                page = f.read()
-            if CONTENT_PREFIX not in page:
-                continue
-            new = add_skeletons(page, site_dir)
-            if new != page:
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(new)
-                pages += 1
+    for path in paths:
+        with open(path, encoding="utf-8") as f:
+            page = f.read()
+        if CONTENT_PREFIX not in page:
+            continue
+        new = add_skeletons(page, site_dir)
+        if new != page:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(new)
+            pages += 1
     print(f"image_sizes: skeletons added on {pages} pages")
 
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2:])
