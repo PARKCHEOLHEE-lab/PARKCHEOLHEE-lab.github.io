@@ -8,6 +8,8 @@ const path = require('path');
 const SITE = path.join(__dirname, '..', '_site');
 // where each moved folder used to be; the docs used to sit at the site's root
 const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/' };
+// a file whose old URL was not in its folder's old place: wall.ifc came from the realbuilding submodule
+const ORIGIN = { '/assets/models/wall.ifc': '/realbuilding/wall.ifc' };
 
 function moved_files() {
   const pairs = [];
@@ -17,7 +19,8 @@ function moved_files() {
         const full = path.join(dir, entry.name);
         if (entry.isDirectory()) { walk(full); continue; }
         const rest = path.relative(path.join(SITE, 'assets', folder), full).split(path.sep).join('/');
-        pairs.push([old_prefix + rest, `/assets/${folder}/${rest}`]);
+        const new_url = `/assets/${folder}/${rest}`;
+        pairs.push([ORIGIN[new_url] || old_prefix + rest, new_url]);
       }
     };
     walk(path.join(SITE, 'assets', folder));
