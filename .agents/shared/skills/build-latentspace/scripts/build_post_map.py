@@ -371,9 +371,13 @@ def main():
     if stale_slugs:
         cached_embeddings = {k: v for k, v in cached_embeddings.items() if k in valid_slugs}
         print(f"Pruned {len(stale_slugs)} stale entries from cache")
+    # The two files are written one after the other, so a crash between them
+    # must not leave a new vector beside an old hash: that old hash would match
+    # again if the post were reverted, and the edited vector would be reused.
+    # Drop the hashes of re-embedded posts first; until the final write they
+    # have none, so any failure makes the next run embed them again.
+    save_embedding_hashes({s: h for s, h in embedding_hashes.items() if s not in set(new_slugs)})
     save_cached_embeddings(cached_embeddings)
-    # Every post's vector now matches its current input. Saved after the
-    # vectors, so a failed run never marks an un-embedded post as fresh.
     save_embedding_hashes(current_hashes)
 
     # Build embedding matrix in post order

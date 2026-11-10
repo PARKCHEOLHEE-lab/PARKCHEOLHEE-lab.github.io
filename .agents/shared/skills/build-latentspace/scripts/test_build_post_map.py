@@ -307,6 +307,36 @@ class TestCacheSkip:
 
         assert json.load(open(tmp_data_dir / "embedding-hashes.json")) == old_hashes
 
+    def test_failed_hash_write_never_pairs_new_vector_with_old_hash(self, tmp_data_dir):
+        """If recording the new hash fails after the new vector is saved, a
+        reverted post must not match its old hash and reuse the edited
+        vector. Reproduced-bug, PR #114 review round 1."""
+        posts = _fake_posts(["aaa", "bbb"])
+        _write_cache(tmp_data_dir, {s: np.random.randn(FAKE_DIM).tolist() for s in ["aaa", "bbb"]}, posts)
+        edited = [{**posts[0], "embed_chunks": ["edited text for aaa"]}, posts[1]]
+        edited_hash = bpm.embed_input_hash(edited[0])
+        real_save = bpm.save_embedding_hashes
+
+        def fail_to_record_edit(hashes):
+            if hashes.get("aaa") == edited_hash:
+                raise OSError("disk full")
+            real_save(hashes)
+
+        with patch.object(bpm, "load_posts", return_value=edited), \
+             patch.object(bpm, "get_embeddings", return_value=_fake_embedding(1)), \
+             patch.object(bpm, "save_embedding_hashes", side_effect=fail_to_record_edit), \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()), \
+             pytest.raises(OSError):
+            bpm.main()
+
+        with patch.object(bpm, "load_posts", return_value=posts), \
+             patch.object(bpm, "get_embeddings", return_value=_fake_embedding(1)) as mock_embed, \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
+            bpm.main()
+
+        mock_embed.assert_called_once()
+        assert [p["slug"] for p in mock_embed.call_args[0][0]] == ["aaa"]
+
 
 class TestChunkToTokenLimit:
     """Over-budget inputs are split into chunks that each stay under the
