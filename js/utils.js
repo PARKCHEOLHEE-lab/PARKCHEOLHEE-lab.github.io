@@ -486,6 +486,33 @@ function setup_post_panel() {
   mark();
 }
 
+// A post's comments (post.html): the skeleton stands in for giscus's frame (layout.sass) until the frame
+// draws the comment box. giscus reports its frame's height to the page, and its loading screen is shorter
+// than the empty comment box, the shortest box it draws (the area's min-height): a height at least that tall
+// means the box is drawn. Its "Discussion not found" (a post with no comments yet) is no sign, as giscus
+// sends it while its loading screen still shows; any other error shows giscus's error at once. With no word
+// from it in 10s, blocked or down, the skeleton stops promising comments that are not on their way
+function setup_comments() {
+  const comments = document.querySelector(".comments");
+  if (!comments) {
+    return;
+  }
+  const empty_box = parseFloat(getComputedStyle(comments).minHeight);
+  const done = function() {
+    comments.removeAttribute("aria-busy");
+  };
+  window.addEventListener("message", function(event) {
+    const giscus = event.origin === "https://giscus.app" && event.data && event.data.giscus;
+    if (!giscus) {
+      return;
+    }
+    if (giscus.resizeHeight >= empty_box || (giscus.error && giscus.error !== "Discussion not found")) {
+      done();
+    }
+  });
+  setTimeout(done, 10000);
+}
+
 // The Testbed's puzzles shine together (basic.sass), but a browser starts an image's shine when it draws
 // it: a row the Manifest's list moves or shows again, a menu or a folded list as it opens. Each shine is
 // set to the page's own clock as it starts, so every puzzle sweeps at once

@@ -46,6 +46,7 @@ same shape; do not introduce a non-fluid `px`-only size.
 | `$bg-subtle` | `#f7f7f8` | Chat bubble + code block background |
 | `$divider` | `#e5e5e6` | Horizontal rule, hairline divider |
 | `$link-chat` | `#4b83ec` | Link inside chat bubbles |
+| `$skeleton` | `#ececec` | Skeleton placeholder (the comments' loading state) |
 
 For tinted overlays (borders, hover states, disabled text) use the existing
 `reduce($percent)` function — it returns `rgba(mix($dark, $light), $percent / 100)`,
@@ -125,7 +126,10 @@ the new feature should be a token instead.
   one tolerated exception — `.chat-message` and every `.message-content`
   descendant rule may use `px` (e.g. `padding: 10px 15px`,
   `margin-top: 20px`) to lock bubble shape and keep the bubble UI
-  visually consistent across post font sizes.
+  visually consistent across post font sizes. The comments' skeleton
+  (`.comments-skeleton` in `_sass/layout.sass`) and `$comments-height` are
+  the other: they copy the `px` sizes giscus draws its comment box at,
+  inside its own frame, where the site's font size does not reach.
 
 ## What this project does NOT use
 

@@ -15,6 +15,13 @@ $bg-subtle: #f7f7f8 !default
 $divider: #e5e5e6 !default
 $link-chat: #4b83ec !default
 
+// a skeleton's placeholder, the gray of the skeleton-ux-ui post (the comments' skeleton, layout.sass)
+$skeleton: #ececec !default
+
+// the height giscus draws a post's comment box at with no comments, in px as giscus draws it inside its
+// frame, where the site's font size does not reach (the comments' skeleton, layout.sass)
+$comments-height: 282px !default
+
 @function reduce ($percent)
   @return rgba(mix($dark, $light), $percent / 100)
 

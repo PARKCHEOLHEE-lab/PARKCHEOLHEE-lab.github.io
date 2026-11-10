@@ -89,22 +89,33 @@ layout: default
       <hr />
 
       {% comment %} giscus keeps each post's comments in a Discussion of this repo, found by the sha1 of the
-        page's path (data-strict) in the Discussion's body, so a link with ?query still finds it {% endcomment %}
-      <script src="https://giscus.app/client.js"
-        data-repo="{{ site.giscus.repo }}"
-        data-repo-id="{{ site.giscus.repo_id }}"
-        data-category="{{ site.giscus.category }}"
-        data-category-id="{{ site.giscus.category_id }}"
-        data-mapping="pathname"
-        data-strict="1"
-        data-reactions-enabled="0"
-        data-emit-metadata="0"
-        data-input-position="bottom"
-        data-theme="light"
-        data-lang="en"
-        crossorigin="anonymous"
-        async>
-      </script>
+        page's path (data-strict) in the Discussion's body, so a link with ?query still finds it. Until giscus
+        draws its comment box (setup_comments), a skeleton of the empty box stands in for its frame {% endcomment %}
+      <div class="comments" aria-busy="true">
+        <div class="comments-skeleton" aria-hidden="true">
+          <span class="comments-skeleton-count"></span>
+          <div class="comments-skeleton-box">
+            <div class="comments-skeleton-tabs"><div class="comments-skeleton-write"></div></div>
+            <div class="comments-skeleton-input"><div class="comments-skeleton-extras"></div></div>
+            <span class="comments-skeleton-button"></span>
+          </div>
+        </div>
+        <script src="https://giscus.app/client.js"
+          data-repo="{{ site.giscus.repo }}"
+          data-repo-id="{{ site.giscus.repo_id }}"
+          data-category="{{ site.giscus.category }}"
+          data-category-id="{{ site.giscus.category_id }}"
+          data-mapping="pathname"
+          data-strict="1"
+          data-reactions-enabled="0"
+          data-emit-metadata="0"
+          data-input-position="bottom"
+          data-theme="light"
+          data-lang="en"
+          crossorigin="anonymous"
+          async>
+        </script>
+      </div>
     </div><br><br>
   {% endif %}
 
