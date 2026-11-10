@@ -1,8 +1,9 @@
 """Lazy loading and a skeleton box for the site's content images, added after Jekyll writes the site.
 
-Posts write plain <img src="/img/..."> tags. For each one this reads the image's size from its file and adds
-loading="lazy" (to all but the page's first two), the box the image will fill (its aspect ratio, and its width
-where the post sets none) and data-skeleton, which basic.sass draws as a gray, shimmering box until the image's load or error drops it.
+Posts write plain <img> tags whose src reaches /img/ (as "/img/..." or "../img/..."). For each one this reads
+the image's size from its file and adds loading="lazy" (to all but the page's first two), the box the image
+will fill (its aspect ratio, and its width where the post sets none) and data-skeleton, which basic.sass draws
+as a gray, shimmering box until the image's load or error drops it.
 It runs on the written site because only there is every page's final HTML, and every image is the real file
 rather than its Git LFS pointer (pages.yml checks out with lfs: true).
 
@@ -13,7 +14,7 @@ import os
 import struct
 import sys
 from html.parser import HTMLParser
-from urllib.parse import unquote
+from urllib.parse import unquote, urljoin
 
 CONTENT_PREFIX = "/img/"
 # two: of 25 posts measured on a slow connection, one left the largest paint of two posts 0.3 to 0.5s
@@ -90,9 +91,10 @@ class _ImageTags(HTMLParser):
     handle_startendtag = handle_starttag
 
 
-def add_skeletons(page, site_dir):
+def add_skeletons(page, site_dir, url="/"):
     """The page with each content image whose size is known made lazy and given its skeleton box. Only those
-    tags change; every other character of the page is kept."""
+    tags change; every other character of the page is kept. A relative src is read against url, the page's
+    own address."""
     parser = _ImageTags()
     parser.feed(page)
     parser.close()
@@ -105,20 +107,21 @@ def add_skeletons(page, site_dir):
         start = line_starts[line - 1] + column
         if page[start:start + len(text)] != text:
             raise ValueError(f"line {line}: the <img> tag is not where the parser reported it")
-        tag = _with_skeleton(text, attrs, site_dir, seen >= EAGER_IMAGES)
+        src = urljoin(url, dict(attrs).get("src") or "")
+        tag = _with_skeleton(text, attrs, src, site_dir, seen >= EAGER_IMAGES)
         if tag is not None:
             out += [page[end:start], tag]
             end = start + len(text)
-        seen += (dict(attrs).get("src") or "").startswith(CONTENT_PREFIX)
+        seen += src.startswith(CONTENT_PREFIX)
     out.append(page[end:])
     return "".join(out)
 
 
-def _with_skeleton(text, attrs, site_dir, lazy):
+def _with_skeleton(text, attrs, src, site_dir, lazy):
     """The tag rewritten with its skeleton (and loading="lazy" when lazy), or None to leave it as
-    written: not a content image, already done, its loading chosen by the post, or no size to read."""
+    written: not a content image, already done, its loading chosen by the post, a size the skeleton
+    cannot hold, or no size to read. src is the tag's address read against the page."""
     names = {name for name, _ in attrs}
-    src = dict(attrs).get("src") or ""
     if not src.startswith(CONTENT_PREFIX) or names & {"loading", "data-skeleton", "onload"}:
         return None
     path = os.path.join(site_dir, unquote(src.split("#")[0].split("?")[0]).lstrip("/"))
@@ -129,13 +132,20 @@ def _with_skeleton(text, attrs, site_dir, lazy):
 
     style = dict(attrs).get("style")
     # lazy: a style holding a ";" inside a value (a url) splits wrongly; no post's image style has one
-    style_names = {part.split(":")[0].strip().lower() for part in (style or "").split(";")}
+    props = {name.strip().lower(): value.strip().lower()
+             for name, _, value in (part.partition(":") for part in (style or "").split(";"))}
+    # the skeleton holds the box only from a known width and the ratio: a height beside the image's width
+    # squashes the loaded image, and a width that is not a length (auto) leaves Chromium no box while it
+    # waits. The height attribute is not a height: basic.sass sets height: auto
+    if props.keys() & {"height", "min-height", "max-height"}:
+        return None
+    if "width" in props and not props["width"].endswith(("%", "px")):
+        return None
     ratio = f"aspect-ratio: {width} / {height}"
     # the post's own style comes after the ratio, so an aspect-ratio it sets still wins
     attrs = [(name, f"{ratio}; {value}" if name == "style" else value) for name, value in attrs]
-    # the image's own width gives its box a width before it arrives, unless the post sizes it: a width beside a
-    # height limit would squash it once it arrives
-    if not names & {"width", "height"} and not style_names & {"width", "height", "min-height", "max-height"}:
+    # the image's own width gives its box a width before it arrives, unless the post sets one
+    if "width" not in names and "width" not in props:
         attrs.append(("width", str(width)))
     if style is None:
         attrs.append(("style", ratio))
@@ -160,9 +170,7 @@ def main(site_dir, paths):
     for path in paths:
         with open(path, encoding="utf-8") as f:
             page = f.read()
-        if CONTENT_PREFIX not in page:
-            continue
-        new = add_skeletons(page, site_dir)
+        new = add_skeletons(page, site_dir, "/" + os.path.relpath(path, site_dir).replace(os.sep, "/"))
         if new != page:
             with open(path, "w", encoding="utf-8") as f:
                 f.write(new)

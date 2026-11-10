@@ -105,17 +105,18 @@ class TestAddSkeletons:
         out = image_sizes.add_skeletons('<img src="/img/a.png" style="max-width: 50%">', site)
         assert 'width="800"' in out
 
-    @pytest.mark.parametrize("style", ["max-height: 300px", "height: 300px", "min-height: 900px"])
-    def test_a_height_the_post_set_leaves_the_width_to_the_image(self, site, style):
-        """A fixed width beside a height limit squashes the loaded image. Reproduced-bug, PR #121
-        review round 3."""
-        out = image_sizes.add_skeletons(f'<img src="/img/a.png" style="{style}">', site)
-        assert "width=" not in out
-        assert f'style="aspect-ratio: 800 / 600; {style}"' in out
+    @pytest.mark.parametrize("style", ["max-height: 300px", "height: 300px", "min-height: 900px", "width: auto;"])
+    def test_a_box_the_skeleton_cannot_hold_is_left_as_written(self, site, style):
+        """With the image's width beside it, a height squashes the loaded image (PR #121 review round 3);
+        without a known width, Chromium draws no box while waiting (round 4). Reproduced-bug, both."""
+        page = f'<img src="/img/a.png" style="{style}">'
+        assert image_sizes.add_skeletons(page, site) == page
 
-    def test_a_height_attribute_leaves_the_width_to_the_image(self, site):
+    def test_a_height_attribute_still_gets_the_width(self, site):
+        """basic.sass sets height: auto, so the attribute does not size the image. Reproduced-bug, PR #121
+        review round 4."""
         out = image_sizes.add_skeletons('<img src="/img/a.png" height="300">', site)
-        assert 'height="300"' in out and "width=" not in out
+        assert 'width="800"' in out
 
     def test_the_post_error_fallback_is_kept(self, site):
         out = image_sizes.add_skeletons('<img src="/img/a.png" onerror=handle_image_error(this)>', site)
@@ -162,3 +163,11 @@ class TestMain:
         image_sizes.main(str(site), [str(site / "post.html")])
         assert "data-skeleton" in (site / "post.html").read_text(encoding="utf-8")
         assert (site / "legacy.html").read_bytes() == legacy
+
+    def test_a_relative_address_is_read_against_the_page(self, site):
+        """Five posts write src="../img/...". Reproduced-bug, PR #121 review round 4."""
+        (site / "post").mkdir()
+        (site / "post" / "index.html").write_text('<img src="../img/a.png">', encoding="utf-8")
+        image_sizes.main(str(site), [str(site / "post" / "index.html")])
+        out = (site / "post" / "index.html").read_text(encoding="utf-8")
+        assert 'src="../img/a.png"' in out and "data-skeleton" in out
