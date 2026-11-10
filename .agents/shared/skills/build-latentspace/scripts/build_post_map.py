@@ -4,10 +4,13 @@ Outputs data/latentspace.json for D3.js visualization.
 
 PCA is fully deterministic: same inputs always produce identical coordinates.
 Adding a post causes only minimal coordinate shifts (~1/N).
-Cached embeddings avoid redundant OpenAI API calls.
+Cached embeddings avoid redundant OpenAI API calls: a post is embedded again
+only when the text it would send differs from the text its vector came from.
 """
 
+import fcntl
 import glob
+import hashlib
 import json
 import os
 import re
@@ -55,6 +58,7 @@ REPO_ROOT = find_repo_root()
 DATA_DIR = os.path.join(REPO_ROOT, "data")
 LATENTSPACE_PATH = os.path.join(DATA_DIR, "latentspace.json")
 EMBEDDINGS_PATH = os.path.join(DATA_DIR, "embeddings.json")
+EMBEDDING_HASHES_PATH = os.path.join(DATA_DIR, "embedding-hashes.json")
 
 
 def parse_frontmatter(raw):
@@ -271,26 +275,53 @@ def get_embeddings(posts, client):
     return np.array(embeddings)
 
 
-def load_cached_embeddings():
-    """Load cached embeddings as {slug: [float, ...]}."""
-    if not os.path.exists(EMBEDDINGS_PATH):
+def embed_input_hash(post):
+    """Fingerprint of exactly what the API would embed for this post.
+
+    It covers the model and every chunk, so an edited post, a new chunking
+    rule and a new model all change it, while an unchanged post never does.
+    """
+    payload = json.dumps([EMBED_MODEL, post["embed_chunks"]], ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _load_json_dict(path, what):
+    if not os.path.exists(path):
         return {}
     try:
-        with open(EMBEDDINGS_PATH, encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
         if not isinstance(data, dict):
             return {}
         return data
     except (json.JSONDecodeError, ValueError):
-        print("Warning: corrupt embeddings cache, starting fresh")
+        print(f"Warning: corrupt {what}, starting fresh")
         return {}
+
+
+def _save_json(path, data):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f)
+
+
+def load_cached_embeddings():
+    """Load cached embeddings as {slug: [float, ...]}."""
+    return _load_json_dict(EMBEDDINGS_PATH, "embeddings cache")
 
 
 def save_cached_embeddings(embeddings_dict):
     """Save embeddings cache."""
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(EMBEDDINGS_PATH, "w", encoding="utf-8") as f:
-        json.dump(embeddings_dict, f)
+    _save_json(EMBEDDINGS_PATH, embeddings_dict)
+
+
+def load_embedding_hashes():
+    """Load {slug: embed_input_hash} for the text each cached vector came from."""
+    return _load_json_dict(EMBEDDING_HASHES_PATH, "embedding hashes")
+
+
+def save_embedding_hashes(hashes):
+    _save_json(EMBEDDING_HASHES_PATH, hashes)
 
 
 def normalize_coords(coords):
@@ -304,27 +335,41 @@ def normalize_coords(coords):
 
 
 def main():
+    # Two builds in one checkout would interleave their writes, and one could
+    # leave its hash beside the other's vector. A second build waits here
+    # until the first finishes, then reads the files the first one wrote.
+    # lazy: fcntl is POSIX-only (macOS, Linux CI); use a lock-file package if
+    # this ever has to run on Windows.
+    os.makedirs(DATA_DIR, exist_ok=True)
+    data_dir = os.open(DATA_DIR, os.O_RDONLY)
+    try:
+        fcntl.flock(data_dir, fcntl.LOCK_EX)
+        _build()
+    finally:
+        os.close(data_dir)  # closing the descriptor releases the lock
+
+
+def _build():
     client = OpenAI()
     posts = load_posts()
     print(f"Loaded {len(posts)} posts")
 
     # Load cached embeddings to avoid redundant API calls
     cached_embeddings = load_cached_embeddings()
+    embedding_hashes = load_embedding_hashes()
+    current_hashes = {p["slug"]: embed_input_hash(p) for p in posts}
 
-    # Reuse a cached vector only when it can be trusted from the slug alone.
-    # Single-chunk posts qualify: their embedding input is the verbatim post
-    # text, so the cached vector still matches. Multi-chunk posts do not — their
-    # vector is a pooled average that depends on the current chunking, so an
-    # entry cached under an older algorithm (e.g. truncation) is stale. There
-    # are only a handful of multi-chunk posts and each is a few cheap chunk
-    # embeds, so recompute them every run.
+    # Reuse a cached vector only when it was made from the exact input the
+    # post would send now. The slug alone cannot tell: an edited post, or a
+    # long post chunked under an older rule, keeps its slug but not its text.
     def _is_stale(post):
-        return post["slug"] not in cached_embeddings or len(post["embed_chunks"]) > 1
+        slug = post["slug"]
+        return slug not in cached_embeddings or embedding_hashes.get(slug) != current_hashes[slug]
 
     new_slugs = [p["slug"] for p in posts if _is_stale(p)]
     cached_slugs = [p["slug"] for p in posts if not _is_stale(p)]
 
-    print(f"Cached: {len(cached_slugs)}, New: {len(new_slugs)}")
+    print(f"Cached: {len(cached_slugs)}, New or changed: {len(new_slugs)}")
 
     # Embed only new posts
     if new_slugs:
@@ -342,7 +387,14 @@ def main():
     if stale_slugs:
         cached_embeddings = {k: v for k, v in cached_embeddings.items() if k in valid_slugs}
         print(f"Pruned {len(stale_slugs)} stale entries from cache")
+    # The two files are written one after the other, so a crash between them
+    # must not leave a new vector beside an old hash: that old hash would match
+    # again if the post were reverted, and the edited vector would be reused.
+    # Drop the hashes of re-embedded posts first; until the final write they
+    # have none, so any failure makes the next run embed them again.
+    save_embedding_hashes({s: h for s, h in embedding_hashes.items() if s not in set(new_slugs)})
     save_cached_embeddings(cached_embeddings)
+    save_embedding_hashes(current_hashes)
 
     # Build embedding matrix in post order
     all_embeddings = np.array([cached_embeddings[p["slug"]] for p in posts])

@@ -3,9 +3,11 @@
 Guards against unnecessary OpenAI API calls (= real money).
 """
 
+import fcntl
 import json
 import os
 import tempfile
+import threading
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call, patch
 
@@ -20,6 +22,7 @@ def tmp_data_dir(tmp_path):
     """Redirect DATA_DIR / paths to a temp directory."""
     with patch.object(bpm, "DATA_DIR", str(tmp_path)), \
          patch.object(bpm, "EMBEDDINGS_PATH", str(tmp_path / "embeddings.json")), \
+         patch.object(bpm, "EMBEDDING_HASHES_PATH", str(tmp_path / "embedding-hashes.json")), \
          patch.object(bpm, "LATENTSPACE_PATH", str(tmp_path / "latentspace.json")):
         yield tmp_path
 
@@ -47,6 +50,14 @@ def _fake_embedding(n=1):
     return rng.randn(n, FAKE_DIM)
 
 
+def _write_cache(data_dir, cache, posts):
+    """Write a vector cache plus hashes that match these posts' current text."""
+    with open(data_dir / "embeddings.json", "w") as f:
+        json.dump(cache, f)
+    with open(data_dir / "embedding-hashes.json", "w") as f:
+        json.dump({p["slug"]: bpm.embed_input_hash(p) for p in posts}, f)
+
+
 class TestCacheSkip:
     """Verify that cached slugs skip the API call."""
 
@@ -54,10 +65,8 @@ class TestCacheSkip:
         """When all slugs exist in cache, get_embeddings must NOT be called."""
         slugs = ["aaa", "bbb", "ccc"]
         cache = {s: np.random.randn(FAKE_DIM).tolist() for s in slugs}
-        with open(tmp_data_dir / "embeddings.json", "w") as f:
-            json.dump(cache, f)
-
         posts = _fake_posts(slugs)
+        _write_cache(tmp_data_dir, cache, posts)
 
         mock_client = MagicMock()
         with patch.object(bpm, "load_posts", return_value=posts), \
@@ -74,8 +83,7 @@ class TestCacheSkip:
         all_slugs = cached_slugs + new_slugs
 
         cache = {s: np.random.randn(FAKE_DIM).tolist() for s in cached_slugs}
-        with open(tmp_data_dir / "embeddings.json", "w") as f:
-            json.dump(cache, f)
+        _write_cache(tmp_data_dir, cache, _fake_posts(cached_slugs))
 
         posts = _fake_posts(all_slugs)
 
@@ -107,8 +115,7 @@ class TestCacheSkip:
     def test_deleted_post_removed_from_cache(self, tmp_data_dir):
         """Slugs in cache but not in posts should be pruned."""
         cache = {s: np.random.randn(FAKE_DIM).tolist() for s in ["aaa", "bbb", "deleted"]}
-        with open(tmp_data_dir / "embeddings.json", "w") as f:
-            json.dump(cache, f)
+        _write_cache(tmp_data_dir, cache, _fake_posts(["aaa", "bbb", "deleted"]))
 
         posts = _fake_posts(["aaa", "bbb", "new"])
 
@@ -121,15 +128,15 @@ class TestCacheSkip:
         saved = json.load(open(tmp_data_dir / "embeddings.json"))
         assert "deleted" not in saved
         assert set(saved.keys()) == {"aaa", "bbb", "new"}
+        hashes = json.load(open(tmp_data_dir / "embedding-hashes.json"))
+        assert set(hashes.keys()) == {"aaa", "bbb", "new"}
 
     def test_output_json_has_all_posts(self, tmp_data_dir):
         """latentspace.json should contain all posts with valid coords."""
         slugs = ["aaa", "bbb", "ccc"]
         cache = {s: np.random.randn(FAKE_DIM).tolist() for s in slugs}
-        with open(tmp_data_dir / "embeddings.json", "w") as f:
-            json.dump(cache, f)
-
         posts = _fake_posts(slugs)
+        _write_cache(tmp_data_dir, cache, posts)
 
         mock_client = MagicMock()
         with patch.object(bpm, "load_posts", return_value=posts), \
@@ -153,8 +160,7 @@ class TestCacheSkip:
 
         results = []
         for _ in range(2):
-            with open(tmp_data_dir / "embeddings.json", "w") as f:
-                json.dump(cache, f)
+            _write_cache(tmp_data_dir, cache, posts)
             with patch.object(bpm, "load_posts", return_value=posts), \
                  patch.object(bpm, "OpenAI", return_value=mock_client):
                 bpm.main()
@@ -187,8 +193,7 @@ class TestCacheSkip:
     def test_deleted_post_pruned_without_new_posts(self, tmp_data_dir):
         """Stale cache entries should be pruned even when no new posts exist."""
         cache = {s: np.random.randn(FAKE_DIM).tolist() for s in ["aaa", "bbb", "deleted"]}
-        with open(tmp_data_dir / "embeddings.json", "w") as f:
-            json.dump(cache, f)
+        _write_cache(tmp_data_dir, cache, _fake_posts(["aaa", "bbb", "deleted"]))
 
         # Only aaa and bbb remain — no new posts, but "deleted" should be pruned
         posts = _fake_posts(["aaa", "bbb"])
@@ -238,33 +243,128 @@ class TestCacheSkip:
         mock_embed.assert_called_once()
         assert len(mock_embed.call_args[0][0]) == len(slugs)
 
-    def test_cached_multichunk_post_is_reembedded(self, tmp_data_dir):
-        """A cached post that is multi-chunk must still be re-embedded: its
-        pooled vector depends on the current chunking, so a slug-only cache
-        entry (e.g. one made under the old truncation) is stale. The cached
-        single-chunk companion must stay cached. Reproduced-bug, PR #87 round 1."""
-        cache = {
-            "mathy": np.random.randn(FAKE_DIM).tolist(),
-            "solo": np.random.randn(FAKE_DIM).tolist(),
-        }
-        with open(tmp_data_dir / "embeddings.json", "w") as f:
-            json.dump(cache, f)
-
+    def test_unchanged_multichunk_post_skips_api(self, tmp_data_dir):
+        """A multi-chunk post whose text has not changed keeps its cached
+        vector: the CI build must not need API credits when no post changed."""
         multichunk = {
             "title": "Post mathy", "slug": "mathy", "url": "/mathy/",
             "category": "note", "label": "Note", "connected": [],
             "embed_chunks": ["chunk one", "chunk two"],
         }
-        singlechunk = _fake_posts(["solo"])[0]  # embed_chunks == ["text for solo"]
+        posts = [multichunk] + _fake_posts(["solo"])
+        _write_cache(tmp_data_dir, {s: np.random.randn(FAKE_DIM).tolist() for s in ["mathy", "solo"]}, posts)
 
-        mock_client = MagicMock()
-        with patch.object(bpm, "load_posts", return_value=[multichunk, singlechunk]), \
+        with patch.object(bpm, "load_posts", return_value=posts), \
+             patch.object(bpm, "get_embeddings", wraps=bpm.get_embeddings) as mock_embed, \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
+            bpm.main()
+
+        mock_embed.assert_not_called()
+
+    def test_edited_post_is_reembedded(self, tmp_data_dir):
+        """A cached post whose embed input changed (an edit, or a new chunking
+        of a long post) is re-embedded; its unchanged neighbour stays cached."""
+        posts = _fake_posts(["edited", "solo"])
+        _write_cache(tmp_data_dir, {s: np.random.randn(FAKE_DIM).tolist() for s in ["edited", "solo"]}, posts)
+        posts[0] = {**posts[0], "embed_chunks": ["rewritten text for edited"]}
+
+        with patch.object(bpm, "load_posts", return_value=posts), \
              patch.object(bpm, "get_embeddings", return_value=_fake_embedding(1)) as mock_embed, \
-             patch.object(bpm, "OpenAI", return_value=mock_client):
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
             bpm.main()
 
         mock_embed.assert_called_once()
-        assert [p["slug"] for p in mock_embed.call_args[0][0]] == ["mathy"]
+        assert [p["slug"] for p in mock_embed.call_args[0][0]] == ["edited"]
+        hashes = json.load(open(tmp_data_dir / "embedding-hashes.json"))
+        assert hashes["edited"] == bpm.embed_input_hash(posts[0])
+
+    def test_cached_vector_without_hash_is_reembedded(self, tmp_data_dir):
+        """A vector with no recorded hash cannot be matched to its text, so it
+        is re-embedded rather than trusted by slug alone."""
+        slugs = ["aaa", "bbb"]
+        with open(tmp_data_dir / "embeddings.json", "w") as f:
+            json.dump({s: np.random.randn(FAKE_DIM).tolist() for s in slugs}, f)
+
+        with patch.object(bpm, "load_posts", return_value=_fake_posts(slugs)), \
+             patch.object(bpm, "get_embeddings", return_value=_fake_embedding(len(slugs))) as mock_embed, \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
+            bpm.main()
+
+        mock_embed.assert_called_once()
+        assert [p["slug"] for p in mock_embed.call_args[0][0]] == slugs
+
+    def test_failed_embed_keeps_old_hashes(self, tmp_data_dir):
+        """If the API call fails (e.g. no credits), no hash is advanced, so the
+        stale post is retried on the next run instead of being marked fresh."""
+        posts = _fake_posts(["edited"])
+        _write_cache(tmp_data_dir, {"edited": np.random.randn(FAKE_DIM).tolist()}, posts)
+        old_hashes = json.load(open(tmp_data_dir / "embedding-hashes.json"))
+        posts[0] = {**posts[0], "embed_chunks": ["rewritten text for edited"]}
+
+        with patch.object(bpm, "load_posts", return_value=posts), \
+             patch.object(bpm, "get_embeddings", side_effect=RuntimeError("429")), \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()), \
+             pytest.raises(RuntimeError):
+            bpm.main()
+
+        assert json.load(open(tmp_data_dir / "embedding-hashes.json")) == old_hashes
+
+    def test_failed_hash_write_never_pairs_new_vector_with_old_hash(self, tmp_data_dir):
+        """If recording the new hash fails after the new vector is saved, a
+        reverted post must not match its old hash and reuse the edited
+        vector. Reproduced-bug, PR #114 review round 1."""
+        posts = _fake_posts(["aaa", "bbb"])
+        _write_cache(tmp_data_dir, {s: np.random.randn(FAKE_DIM).tolist() for s in ["aaa", "bbb"]}, posts)
+        edited = [{**posts[0], "embed_chunks": ["edited text for aaa"]}, posts[1]]
+        edited_hash = bpm.embed_input_hash(edited[0])
+        real_save = bpm.save_embedding_hashes
+
+        def fail_to_record_edit(hashes):
+            if hashes.get("aaa") == edited_hash:
+                raise OSError("disk full")
+            real_save(hashes)
+
+        with patch.object(bpm, "load_posts", return_value=edited), \
+             patch.object(bpm, "get_embeddings", return_value=_fake_embedding(1)), \
+             patch.object(bpm, "save_embedding_hashes", side_effect=fail_to_record_edit), \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()), \
+             pytest.raises(OSError):
+            bpm.main()
+
+        with patch.object(bpm, "load_posts", return_value=posts), \
+             patch.object(bpm, "get_embeddings", return_value=_fake_embedding(1)) as mock_embed, \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
+            bpm.main()
+
+        mock_embed.assert_called_once()
+        assert [p["slug"] for p in mock_embed.call_args[0][0]] == ["aaa"]
+
+    def test_overlapping_build_waits_for_the_running_one(self, tmp_data_dir):
+        """A second build in the same checkout must not start while one is
+        running, or their writes interleave and one build's hash can land
+        beside the other's vector. Reproduced-bug, PR #114 review round 3."""
+        posts = _fake_posts(["aaa", "bbb"])
+        _write_cache(tmp_data_dir, {s: np.random.randn(FAKE_DIM).tolist() for s in ["aaa", "bbb"]}, posts)
+        started = threading.Event()
+
+        def load_posts():
+            started.set()
+            return posts
+
+        held = os.open(str(tmp_data_dir), os.O_RDONLY)
+        fcntl.flock(held, fcntl.LOCK_EX)  # the build that is already running
+        with patch.object(bpm, "load_posts", side_effect=load_posts), \
+             patch.object(bpm, "OpenAI", return_value=MagicMock()):
+            build = threading.Thread(target=bpm.main)
+            build.start()
+            try:
+                waited = not started.wait(0.5)
+            finally:
+                os.close(held)  # the running build finishes
+                build.join(10)
+
+        assert waited, "the second build started while the first one was running"
+        assert started.is_set() and not build.is_alive()
 
 
 class TestChunkToTokenLimit:
@@ -395,6 +495,7 @@ class TestEmbeddingInputBoundary:
         with patch.object(bpm, "REPO_ROOT", str(tmp_path)), \
              patch.object(bpm, "DATA_DIR", str(tmp_path / "data")), \
              patch.object(bpm, "EMBEDDINGS_PATH", str(tmp_path / "data" / "embeddings.json")), \
+             patch.object(bpm, "EMBEDDING_HASHES_PATH", str(tmp_path / "data" / "embedding-hashes.json")), \
              patch.object(bpm, "LATENTSPACE_PATH", str(tmp_path / "data" / "latentspace.json")), \
              patch.object(bpm, "OpenAI", return_value=fake_client):
             bpm.main()

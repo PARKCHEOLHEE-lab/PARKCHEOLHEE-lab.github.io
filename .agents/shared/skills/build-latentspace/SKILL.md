@@ -18,7 +18,7 @@ Rebuild `data/latentspace.json` — the single data source for the D3.js latent 
 5. Extracts `connected` links from `related` frontmatter
 6. Writes the result to `data/latentspace.json`
 
-Incremental mode: cached embeddings in `data/embeddings.json` avoid repeat OpenAI calls. Coordinates are recomputed from the full embedding matrix with deterministic PCA.
+Incremental mode: cached embeddings in `data/embeddings.json` avoid repeat OpenAI calls. A post is embedded again only when the text it would send changes: `data/embedding-hashes.json` stores a hash of the exact input (model and chunks) each cached vector came from, so a run with no changed post makes no API call. Coordinates are recomputed from the full embedding matrix with deterministic PCA.
 
 ## Prerequisites
 
