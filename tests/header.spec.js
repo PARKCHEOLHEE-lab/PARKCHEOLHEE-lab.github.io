@@ -315,3 +315,21 @@ test('from 768px a post keeps its table of contents in the post and its link in 
   await expect(page.locator('body > header nav')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
 });
+
+// the width the site's links move into the header and a side panel beside its list is one design decision
+// (DESIGN.md: tokens in _sass/index.sass), so the partials' media queries name the token instead of 768px
+test('the panel breakpoint is one token: from 768px the header keeps its links, below it the menu has them', async ({ page }) => {
+  for (const [width, in_header] of [[767, false], [768, true]]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/manifest/');
+    expect(await page.locator('body > header nav').isVisible()).toBe(in_header);
+  }
+
+  const fs = require('fs');
+  const path = require('path');
+  const sass_dir = path.join(__dirname, '..', '_sass');
+  const written = fs.readdirSync(sass_dir).filter((name) => name.endsWith('.sass'))
+    .flatMap((name) => fs.readFileSync(path.join(sass_dir, name), 'utf8').split('\n'))
+    .filter((line) => !line.trim().startsWith('//') && /\b(768|767\.98)px\b/.test(line));
+  expect(written.length).toBeLessThanOrEqual(1);
+});

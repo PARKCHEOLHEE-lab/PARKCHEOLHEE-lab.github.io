@@ -365,3 +365,25 @@ test('the Testbed\'s puzzle shines every 2 seconds wherever it shows, and rests 
   await page.goto('/manifest/');
   expect(await shines()).toEqual([]);
 });
+
+// the rows' dotted line is one design decision (DESIGN.md: tokens in _sass/index.sass): the list, its rows,
+// the search box, the side panel's sections and the phone menu all draw it, so a partial names the token
+// instead of writing the line out
+test('the rows\' dotted line is one token, drawn the same over the list and under each row', async ({ page }) => {
+  await page.goto('/manifest/');
+  const line = (selector, side) => page.locator(selector).first().evaluate((el, side) => {
+    const style = getComputedStyle(el);
+    return [style[`border-${side}-width`], style[`border-${side}-style`], style[`border-${side}-color`]].join(' ');
+  }, side);
+  const dotted = '1px dotted rgba(128, 128, 128, 0.14)';
+  expect(await line('#note-list', 'top')).toBe(dotted);
+  expect(await line('#note-list .use-bottom-line', 'bottom')).toBe(dotted);
+
+  const fs = require('fs');
+  const path = require('path');
+  const sass_dir = path.join(__dirname, '..', '_sass');
+  const written = fs.readdirSync(sass_dir).filter((name) => name.endsWith('.sass'))
+    .map((name) => fs.readFileSync(path.join(sass_dir, name), 'utf8').split('1px dotted reduce(14)').length - 1)
+    .reduce((sum, count) => sum + count, 0);
+  expect(written).toBeLessThanOrEqual(1);
+});

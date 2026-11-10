@@ -327,10 +327,10 @@ a:hover
 // --- Shared list component classes (from note.html/testbed.html inline <style>) ---
 
 .use-bottom-line
-  border-bottom: 1px dotted reduce(14)
+  border-bottom: $row-line
 
 .use-bottom-line--padded
-  border-bottom: 1px dotted reduce(14)
+  border-bottom: $row-line
   padding-bottom: 2em
 
 .clickable
@@ -415,7 +415,7 @@ img[src$="/emoji/puzzle.png"]
 // line under it (use-bottom-line in note.html), and the list draws the same line over the first one
 #note-list
   overflow-anchor: none
-  border-top: 1px dotted reduce(14)
+  border-top: $row-line
 
 // a row's content is centred between its lines, which centres the emoji. The title font leaves about
 // 0.1em more room under the baseline than above the capitals, so the title and the date move down
@@ -465,7 +465,7 @@ img[src$="/emoji/puzzle.png"]
     &[open] summary svg
       transform: rotate(180deg)
     & + details
-      border-top: 1px dotted reduce(14)
+      border-top: $row-line
   summary
     display: flex
     align-items: center
@@ -557,7 +557,7 @@ img[src$="/emoji/puzzle.png"]
   // has one 1px line; at least 26.8px, room for the 24px clear button
   height: calc(2.25em + 1px)
   padding: 0
-  border-top: 1px dotted reduce(14)
+  border-top: $row-line
   color: $text-dark
   // hidden until setup_note_list runs, as it does nothing without it
   &[hidden]
@@ -641,8 +641,7 @@ img[src$="/emoji/puzzle.png"]
 // from 768px the panel takes the left of the page's column, under the logo, and the list the rest; the
 // panel stays below the header while the list scrolls. A post with a side panel is laid out the same
 // (post.html), its panel beside the post. Below 768px the Manifest's menu is as wide (header.sass)
-$panel-width: 12em
-@media (min-width: 768px)
+@media (min-width: $panel-breakpoint)
   .note-index, .post-index:has(> #post-side)
     display: grid
     grid-template-columns: $panel-width minmax(0, 1fr)
@@ -704,11 +703,11 @@ $panel-width: 12em
 // on phones the panel is in the menu (header.sass); from 768px its first heading sits on the post
 // title's line, and a long table of contents scrolls inside it, which ends 1.5em above the screen's
 // bottom while it stays below the header
-@media (max-width: 767.98px)
+@media (max-width: $panel-breakpoint - 0.02px)
   #post-side
     display: none
 
-@media (min-width: 768px)
+@media (min-width: $panel-breakpoint)
   #post-side
     // the title's top margin (layout.sass) less the section's own top padding, with their lines'
     // centres matched: 1.32em measured at 820 and 1240px wide
