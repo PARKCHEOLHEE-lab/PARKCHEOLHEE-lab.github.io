@@ -331,24 +331,21 @@ function init_latentspace() {
         // --- Highlight helpers ---
 
         function get_connected_slugs(d) {
-            const slugs = new Set();
-            links.forEach(function(l) {
-                if (l.source === d || l.source.index === d.index) slugs.add(l.target.slug);
-                if (l.target === d || l.target.index === d.index) slugs.add(l.source.slug);
-            });
-            return slugs;
+            return new Set(neighbors.get(d).map(function(n) { return n.slug; }));
         }
 
-        function apply_highlight(d) {
+        // d at the hover radius, its linked dots whole and the rest faded, its links in its colour and wider;
+        // the idle walk passes transitions of the dots and links to fade the same look in
+        function apply_highlight(d, dots = dot_elements, edges = link_elements) {
             const connected = get_connected_slugs(d);
 
-            dot_elements.attr("opacity", function(dd) {
+            dots.attr("opacity", function(dd) {
                 return (dd.slug === d.slug || connected.has(dd.slug)) ? 1 : 0.1;
             }).attr("r", function(dd) {
                 return (dd.slug === d.slug) ? 5 / current_zoom.k : BASE_RADIUS / current_zoom.k;
             });
 
-            link_elements
+            edges
                 .attr("stroke", function(l) {
                     return (l.source === d || l.target === d)
                         ? highlighted_edge_color(d) : EDGE_COLOR_DIM;
@@ -404,27 +401,6 @@ function init_latentspace() {
             }
         }
 
-        function set_initial_min_zoom() {
-            const x0 = d3.min(nodes, function(d) { return d.x; });
-            const x1 = d3.max(nodes, function(d) { return d.x; });
-            const y0 = d3.min(nodes, function(d) { return d.y; });
-            const y1 = d3.max(nodes, function(d) { return d.y; });
-            const cx = (x0 + x1) / 2;
-            const cy = (y0 + y1) / 2;
-            let tx = width / 2 - cx * MIN_ZOOM;
-            let ty = height / 2 - cy * MIN_ZOOM;
-            const min_tx = width - x1 * MIN_ZOOM;
-            const max_tx = -x0 * MIN_ZOOM;
-            const min_ty = height - y1 * MIN_ZOOM;
-            const max_ty = -y0 * MIN_ZOOM;
-
-            if (min_tx <= max_tx) tx = Math.max(min_tx, Math.min(max_tx, tx));
-            if (min_ty <= max_ty) ty = Math.max(min_ty, Math.min(max_ty, ty));
-
-            const transform = d3.zoomIdentity.translate(tx, ty).scale(MIN_ZOOM);
-            svg.call(zoom.transform, transform);
-        }
-
         fit_btn.on("click", function() { fit_all(500); });
         svg.on("dblclick", function() { fit_all(500); });
 
@@ -438,6 +414,14 @@ function init_latentspace() {
             .force("y", d3.forceY(function(d) { return d.ty; }).strength(0.3))
             .alphaDecay(0.02)
             .on("tick", on_tick);
+
+        // each dot's linked dots, once per link end and in the links' order (pick_least_visited draws from
+        // them); forceLink above has replaced each link's two indices with the dots themselves
+        const neighbors = new Map(nodes.map(function(n) { return [n, []]; }));
+        links.forEach(function(l) {
+            neighbors.get(l.source).push(l.target);
+            neighbors.get(l.target).push(l.source);
+        });
 
         // --- Render elements ---
 
@@ -484,7 +468,7 @@ function init_latentspace() {
             link_elements.interrupt();
             link_elements.interrupt("idle");
 
-            d3.select(el).raise().attr("r", 5 / current_zoom.k).attr("opacity", 1);
+            d3.select(el).raise();
             apply_highlight(d);
             show_tooltip(d);
         }
@@ -616,34 +600,14 @@ function init_latentspace() {
             active_hover_node = d;
             if (is_touch_device) touch_selected_node = d;
             d.visits = (d.visits || 0) + 1;
-            const connected = get_connected_slugs(d);
-
-            dot_elements.transition("idle").duration(400)
-                .attr("opacity", function(dd) {
-                    return (dd.slug === d.slug || connected.has(dd.slug)) ? 1 : 0.1;
-                })
-                .attr("r", function(dd) {
-                    return (dd.slug === d.slug) ? 5 / current_zoom.k : BASE_RADIUS / current_zoom.k;
-                });
-
-            link_elements.transition("idle").duration(400)
-                .attr("stroke", function(l) {
-                    return (l.source === d || l.target === d)
-                        ? highlighted_edge_color(d) : EDGE_COLOR_DIM;
-                })
-                .attr("stroke-width", function(l) {
-                    return (l.source === d || l.target === d) ? 0.75 / current_zoom.k : 0.5 / current_zoom.k;
-                });
+            apply_highlight(d, dot_elements.transition("idle").duration(400),
+                link_elements.transition("idle").duration(400));
 
             show_tooltip(d);
         }
 
         function idle_walk() {
-            const nodes_with_edges = nodes.filter(function(n) {
-                return links.some(function(l) {
-                    return l.source === n || l.target === n || l.source.index === n.index || l.target.index === n.index;
-                });
-            });
+            const nodes_with_edges = nodes.filter(function(n) { return neighbors.get(n).length > 0; });
             if (nodes_with_edges.length === 0) return;
 
             walk_step(pick_least_visited(nodes_with_edges));
@@ -661,14 +625,9 @@ function init_latentspace() {
                 setTimeout(function() {
                     if (!idle_anim_running || user_interacting) return;
 
-                    const neighbors = [];
-                    links.forEach(function(l) {
-                        if (l.source === current || l.source.index === current.index) neighbors.push(l.target);
-                        if (l.target === current || l.target.index === current.index) neighbors.push(l.source);
-                    });
-
-                    if (neighbors.length > 0) {
-                        walk_step(pick_least_visited(neighbors));
+                    const next = neighbors.get(current);
+                    if (next.length > 0) {
+                        walk_step(pick_least_visited(next));
                     } else {
                         idle_walk();
                     }
