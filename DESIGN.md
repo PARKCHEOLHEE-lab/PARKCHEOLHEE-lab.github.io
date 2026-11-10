@@ -80,7 +80,7 @@ One layout breakpoint, the token `$panel-breakpoint` (`768px`) in
 panel (`$panel-width`) beside its list or post; below it both are in the
 phone menu. Write `@media (min-width: $panel-breakpoint)` and
 `@media (max-width: $panel-breakpoint - 0.02px)`. `setup_header` in
-`js/utils.js` repeats `768px` for `matchMedia`, which cannot read a Sass
+`assets/js/utils.js` repeats `768px` for `matchMedia`, which cannot read a Sass
 token, so change the two together.
 
 Do not introduce another breakpoint without a concrete reason; the layout
@@ -106,7 +106,7 @@ still use tokens:
    intentionally exempt:
    - The D3 categorical `--label-*` palette (`#f19cb0`, `#00b341`, ...).
      Each color encodes a post category and is read by
-     `js/latentspace.js`; renaming would silently change the
+     `assets/js/latentspace.js`; renaming would silently change the
      visualization.
    - Map-UI raw values (map border / hover border, control color, the
      `#969696` control text, tooltip background, zoom button border).

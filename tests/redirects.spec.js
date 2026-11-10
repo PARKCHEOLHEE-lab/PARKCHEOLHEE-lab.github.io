@@ -7,7 +7,7 @@ const path = require('path');
 
 const SITE = path.join(__dirname, '..', '_site');
 // where each moved folder used to be; the docs used to sit at the site's root
-const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/' };
+const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/', js: '/js/', data: '/data/' };
 // a file whose old URL was not in its folder's old place: wall.ifc came from the realbuilding submodule
 const ORIGIN = { '/assets/models/wall.ifc': '/realbuilding/wall.ifc' };
 
@@ -32,7 +32,8 @@ function moved_files() {
 
 test('every moved file\'s old URL lands on its new URL', async ({ page }) => {
   // answer the new URLs with plain text, so a PDF or a model opens as a page instead of a download
-  await page.route((url) => /^\/assets\/(docs|models|notebooks)\//.test(url.pathname),
+  const moved_folder = new RegExp(`^/assets/(${Object.keys(OLD).join('|')})/`);
+  await page.route((url) => moved_folder.test(url.pathname),
     (route) => route.fulfill({ body: 'moved', contentType: 'text/plain' }));
 
   const pairs = moved_files();

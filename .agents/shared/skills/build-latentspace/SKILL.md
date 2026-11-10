@@ -7,7 +7,7 @@ allowed-tools: "Bash Read"
 
 # Build Latent Space
 
-Rebuild `data/latentspace.json` — the single data source for the D3.js latent space visualization on the landing page.
+Rebuild `assets/data/latentspace.json` — the single data source for the D3.js latent space visualization on the landing page.
 
 ## What it does
 
@@ -16,9 +16,9 @@ Rebuild `data/latentspace.json` — the single data source for the D3.js latent 
 3. Reduces embeddings to 2D with deterministic PCA
 4. Assigns a label based on `emoji` frontmatter
 5. Extracts `connected` links from `related` frontmatter
-6. Writes the result to `data/latentspace.json`
+6. Writes the result to `assets/data/latentspace.json`
 
-Incremental mode: cached embeddings in `data/embeddings.json` avoid repeat OpenAI calls. A post is embedded again only when the text it would send changes: `data/embedding-hashes.json` stores a hash of the exact input (model and chunks) each cached vector came from, so a run with no changed post makes no API call. Coordinates are recomputed from the full embedding matrix with deterministic PCA.
+Incremental mode: cached embeddings in `assets/data/embeddings.json` avoid repeat OpenAI calls. A post is embedded again only when the text it would send changes: `assets/data/embedding-hashes.json` stores a hash of the exact input (model and chunks) each cached vector came from, so a run with no changed post makes no API call. Coordinates are recomputed from the full embedding matrix with deterministic PCA.
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ python3 "${SKILL_DIR}/scripts/build_post_map.py"
 Verify the output looks correct:
 
 ```bash
-python3 -c "import json; data=json.load(open('data/latentspace.json')); print(f'{len(data)} posts'); print({d['label'] for d in data}); print(f'{sum(len(d[\"connected\"]) for d in data)} connections')"
+python3 -c "import json; data=json.load(open('assets/data/latentspace.json')); print(f'{len(data)} posts'); print({d['label'] for d in data}); print(f'{sum(len(d[\"connected\"]) for d in data)} connections')"
 ```
 
 ## Output schema

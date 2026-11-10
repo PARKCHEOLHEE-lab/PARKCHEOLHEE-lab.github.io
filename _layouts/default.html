@@ -19,7 +19,7 @@
   {% assign pages = site.pages | where_exp: "item", "item.title and item.sitemap != false" | sort: "order" %}
 {% endif %}
 
-<script src="/js/utils.js"></script>
+<script src="/assets/js/utils.js"></script>
 
 <header>
   <a href="{{ "/" | relative_url }}" class="title-main">{{ site.title | escape }}</a>

@@ -102,11 +102,11 @@ test('click on empty canvas during idle walk clears active node + tooltip', asyn
     .toBeLessThan(0.1);
 });
 
-// the dots each one is linked to in data/latentspace.json, either way round, as the map draws its links
+// the dots each one is linked to in assets/data/latentspace.json, either way round, as the map draws its links
 function linked_slugs() {
   const fs = require('fs');
   const path = require('path');
-  const posts = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'latentspace.json'), 'utf8'))
+  const posts = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'assets', 'data', 'latentspace.json'), 'utf8'))
     .filter((post) => post.slug.charAt(0) !== '_');
   const known = new Set(posts.map((post) => post.slug));
   const linked = Object.fromEntries(posts.map((post) => [post.slug, new Set()]));
@@ -145,7 +145,7 @@ function expect_highlight(map, slug, linked) {
 }
 
 // what a highlighted dot looks like is one decision, whether the mouse or the idle walk picked the dot,
-// so js/latentspace.js writes the highlighted dot's radius in one place
+// so assets/js/latentspace.js writes the highlighted dot's radius in one place
 test('a dot highlighted by a hover and by the idle walk looks the same, painted in one place', async ({ page }) => {
   const linked = linked_slugs();
   await page.goto('/latentspace/');
@@ -171,7 +171,7 @@ test('a dot highlighted by a hover and by the idle walk looks the same, painted 
 
   const fs = require('fs');
   const path = require('path');
-  const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'latentspace.js'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'assets', 'js', 'latentspace.js'), 'utf8');
   expect((source.match(/(?<![\d.])5 \/ current_zoom\.k/g) || []).length).toBeLessThanOrEqual(1);
 });
 
@@ -199,7 +199,7 @@ test('the idle walk steps to a linked dot, and the links are scanned for neighbo
 
   const fs = require('fs');
   const path = require('path');
-  const source = fs.readFileSync(path.join(__dirname, '..', 'js', 'latentspace.js'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'assets', 'js', 'latentspace.js'), 'utf8');
   expect((source.match(/\.index === /g) || []).length).toBe(0);
   expect((source.match(/\blinks\.(forEach|some|filter)\(/g) || []).length).toBeLessThanOrEqual(1);
 });

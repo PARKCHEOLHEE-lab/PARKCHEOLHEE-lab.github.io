@@ -1,6 +1,6 @@
 """
 Embed blog posts with OpenAI text-embedding-3-small and reduce to 2D with PCA.
-Outputs data/latentspace.json for D3.js visualization.
+Outputs assets/data/latentspace.json for D3.js visualization.
 
 PCA is fully deterministic: same inputs always produce identical coordinates.
 Adding a post causes only minimal coordinate shifts (~1/N).
@@ -36,7 +36,7 @@ EMOJI_TO_LABEL = {
     "storm": "Storm",
 }
 
-DATA_DIR = os.path.join(REPO_ROOT, "data")
+DATA_DIR = os.path.join(REPO_ROOT, "assets", "data")
 LATENTSPACE_PATH = os.path.join(DATA_DIR, "latentspace.json")
 EMBEDDINGS_PATH = os.path.join(DATA_DIR, "embeddings.json")
 EMBEDDING_HASHES_PATH = os.path.join(DATA_DIR, "embedding-hashes.json")

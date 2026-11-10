@@ -16,7 +16,7 @@ This repository is the source for `PARKCHEOLHEE-lab.github.io`, a Jekyll-based p
 - **Tech stack**: Jekyll 4, Ruby/Bundler, Sass, vanilla JavaScript, Python helper scripts.
 - **Primary content**: HTML posts with YAML frontmatter under `note/_posts` and `testbed/_posts`.
 - **Generated output**: `_site/` is build output and must not be edited by hand.
-- **Latent space data**: `data/latentspace.json` drives the D3 post map; `data/embeddings.json` caches OpenAI embeddings, and `data/embedding-hashes.json` records which post text each cached vector came from.
+- **Latent space data**: `assets/data/latentspace.json` drives the D3 post map; `assets/data/embeddings.json` caches OpenAI embeddings, and `assets/data/embedding-hashes.json` records which post text each cached vector came from.
 - **Repo-local skills**: `add-related` maintains `related` frontmatter; `build-latentspace` rebuilds the post map data.
 
 ## Common Commands
@@ -62,9 +62,9 @@ Use the `add-related` skill when adding or refreshing related-post links. The ca
 
 Use the `build-latentspace` skill when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
 
-- `data/latentspace.json`
-- `data/embeddings.json`
-- `data/embedding-hashes.json`
+- `assets/data/latentspace.json`
+- `assets/data/embeddings.json`
+- `assets/data/embedding-hashes.json`
 
 Do not run `build-latentspace` without confirming `OPENAI_API_KEY` is available; it can call a paid API.
 
