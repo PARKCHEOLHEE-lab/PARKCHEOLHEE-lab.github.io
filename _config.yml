@@ -40,8 +40,11 @@ comments:
 #  disqus_shortname: ""    # see https://disqus.com/
 #  isso_domain: ""         # see https://posativ.org/isso/
 
-utterances:
+giscus:
   repo: "PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io"
+  repo_id: "R_kgDOIjHB9Q"
+  category: "Announcements"
+  category_id: "DIC_kwDOIjHB9c4DKx9m"
 
 highlightjs:
   css: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.2.0/styles/stackoverflow-light.min.css"
