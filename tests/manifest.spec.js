@@ -279,3 +279,22 @@ for (const width of [768, 820]) {
     await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
   });
 }
+
+// on an iPhone a fade on hover kept a swipe from sliding a cut-off title until its row had been tapped, so
+// rows and links fade only where a pointer hovers
+test('a row and a link fade on hover with a mouse, and never on a touch screen', async ({ browser, baseURL }) => {
+  for (const touch of [false, true]) {
+    const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, hasTouch: touch, isMobile: touch });
+    const page = await context.newPage();
+    await page.goto('/manifest/');
+    expect(await page.evaluate(() => matchMedia('(hover: none)').matches)).toBe(touch);
+    for (const item of [page.locator('#note-list .clickable').first(), page.locator('body > header a').first()]) {
+      await item.hover();
+      // past the 0.5s fade
+      await page.waitForTimeout(600);
+      await expect(item).toHaveCSS('opacity', touch ? '1' : '0.5');
+    }
+    await context.close();
+  }
+});
+
