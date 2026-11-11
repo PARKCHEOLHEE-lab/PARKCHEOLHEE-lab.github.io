@@ -1,6 +1,6 @@
 ---
 name: add-related
-description: Add or update related frontmatter for blog posts in note/_posts and testbed/_posts. Supports a full-site pass (--all=true, default) or a single-post focus pass (--post-name=<slug>). Run when user wants to refresh related post links.
+description: Add or update related frontmatter for blog posts in _posts/. Supports a full-site pass (--all=true, default) or a single-post focus pass (--post-name=<slug>). Run when user wants to refresh related post links.
 user-invocable: true
 allowed-tools: "Read Edit Bash Glob Grep"
 ---

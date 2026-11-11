@@ -177,7 +177,8 @@ def load_posts():
         if not title:
             continue
 
-        category = "testbed" if "/testbed/" in path else "note"
+        # the post's own categories, read the way _includes/post-emoji.html reads them
+        category = "testbed" if "testbed" in fm.get("categories", "").split() else "note"
 
         label = emoji_to_label(fm.get("emoji", ""))
         if label is None:

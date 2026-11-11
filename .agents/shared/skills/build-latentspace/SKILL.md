@@ -11,7 +11,7 @@ Rebuild `assets/data/latentspace.json` — the single data source for the D3.js 
 
 ## What it does
 
-1. Collects all eligible posts from `note/_posts` and `testbed/_posts` (excludes `_` prefixed files and empty posts)
+1. Collects all eligible posts from `_posts/` (excludes `_` prefixed files and empty posts); a post's category is `testbed` when its `categories` front matter says so, otherwise `note`
 2. Embeds each post using OpenAI `text-embedding-3-small`
 3. Reduces embeddings to 2D with deterministic PCA
 4. Assigns a label based on `emoji` frontmatter

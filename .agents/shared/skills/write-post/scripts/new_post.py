@@ -60,6 +60,7 @@ def frontmatter_note(title: str, emoji: str | None) -> str:
     if emoji:
         lines.append(f"emoji: {emoji}")
     lines.append("related: []")
+    lines.append("categories: note")
     lines.append("---")
     return "\n".join(lines) + "\n"
 
@@ -88,6 +89,7 @@ def frontmatter_testbed(
     if emoji:
         lines.append(f"emoji: {emoji}")
     lines.append("related: []")
+    lines.append("categories: testbed")
     lines.append("---")
     return "\n".join(lines) + "\n"
 
@@ -180,7 +182,8 @@ def build_post(
             f"category 'testbed' requires style 'testbed-longform', got {style!r}"
         )
 
-    posts_dir = root / category / "_posts"
+    # every post lives in _posts/; its front matter says which category it is
+    posts_dir = root / "_posts"
     posts_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"{date.isoformat()}-{slug}.html"

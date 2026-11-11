@@ -61,9 +61,9 @@ Rules:
 - Indentation inside `<pre>` uses 4 spaces.
 
 Reference posts:
-- `note/_posts/2026-04-25-window-crossing-selection.html`
-- `note/_posts/2026-04-09-triangle-menu-aim.html`
-- `note/_posts/2026-03-15-regression-model.html`
+- `_posts/2026-04-25-window-crossing-selection.html`
+- `_posts/2026-04-09-triangle-menu-aim.html`
+- `_posts/2026-03-15-regression-model.html`
 
 ## 2. Prose (short essay / observation)
 
@@ -103,9 +103,9 @@ Rules:
 - Korean prose: pick `~다` or `~합니다` and stick with it. Do not mix.
 
 Reference posts:
-- `note/_posts/2026-02-13-intuitions-about-diffusion-models.html`
-- `note/_posts/2026-02-05-ego.html` (Korean)
-- `note/_posts/2026-03-08-spurting.html` (Korean)
+- `_posts/2026-02-13-intuitions-about-diffusion-models.html`
+- `_posts/2026-02-05-ego.html` (Korean)
+- `_posts/2026-03-08-spurting.html` (Korean)
 
 ## 3. Keyword (Korean thought-jump)
 
@@ -136,12 +136,12 @@ Rules:
 - The user has historically rejected the first attempt and asked for many candidates. If `--language=kr` and the chosen style is `keyword`, the assistant should be ready to fall back to "propose 30–50 candidate lines, let the user pick" if the first draft is rejected.
 
 Reference posts:
-- `note/_posts/2026-04-17-limits-of-language.html`
-- `note/_posts/_words.html` (disabled but stylistically the same)
+- `_posts/2026-04-17-limits-of-language.html`
+- `_posts/_words.html` (disabled but stylistically the same)
 
 ## Testbed long-form
 
-Long technical writeups in `testbed/_posts/` use a different wrapper: top-level `<h3>` headings, each section in its own `<div class="article">`.
+Long technical writeups (testbed posts) use a different wrapper: top-level `<h3>` headings, each section in its own `<div class="article">`.
 
 ```html
 <div id="toc"></div>
@@ -175,7 +175,7 @@ Rules:
 - Long quoted blocks from papers can be HTML-commented out (`<!-- … -->`) if the paraphrase replaces them — keep the original for reference but don't render.
 
 Reference post:
-- `testbed/_posts/2026-02-03-image-to-3d-scene.html`
+- `_posts/2026-02-03-image-to-3d-scene.html`
 
 ## Code blocks
 

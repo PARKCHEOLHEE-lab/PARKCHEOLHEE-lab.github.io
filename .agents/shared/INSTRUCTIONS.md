@@ -14,7 +14,7 @@ This repository is the source for `PARKCHEOLHEE-lab.github.io`, a Jekyll-based p
 ## Project Overview
 
 - **Tech stack**: Jekyll 4, Ruby/Bundler, Sass, vanilla JavaScript, Python helper scripts.
-- **Primary content**: HTML posts with YAML frontmatter under `note/_posts` and `testbed/_posts`.
+- **Primary content**: HTML posts with YAML frontmatter under `_posts/`; each post's `categories` field (`note` or `testbed`) says which kind it is.
 - **Generated output**: `_site/` is build output and must not be edited by hand.
 - **Latent space data**: `assets/data/latentspace.json` drives the D3 post map; `assets/data/embeddings.json` caches OpenAI embeddings, and `assets/data/embedding-hashes.json` records which post text each cached vector came from.
 - **Repo-local skills**: `add-related` maintains `related` frontmatter; `build-latentspace` rebuilds the post map data.
@@ -50,7 +50,7 @@ pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
 ## Content Conventions
 
 - Posts are HTML files with YAML frontmatter. Keep frontmatter fields stable unless the task explicitly targets them.
-- Active posts live in `note/_posts` and `testbed/_posts`; underscore-prefixed files are treated as drafts or disabled posts by local scripts.
+- Active posts live in `_posts/` and each sets `categories: note` or `categories: testbed` in its front matter; underscore-prefixed files are treated as drafts or disabled posts by local scripts.
 - Post slugs are filename-derived: remove the `YYYY-MM-DD-` prefix and `.html` extension.
 - `related` entries must use slugs only, not titles or filenames.
 - Store post images under `img/` and reuse existing emoji assets under `assets/emoji/` when assigning labels.

@@ -1,6 +1,6 @@
 ---
 name: write-post
-description: Scaffold and draft a new blog post under note/_posts or testbed/_posts following this repo's frontmatter, body-style, image, and follow-up conventions. Use when the user asks to write a post, draft a post, or expand a topic into a post.
+description: Scaffold and draft a new blog post in _posts/ following this repo's frontmatter, body-style, image, and follow-up conventions. Use when the user asks to write a post, draft a post, or expand a topic into a post.
 argument-hint: "[topic] [--language=en|kr] [--emoji=<file>] [--sources=<urls,paths>] [--category=note|testbed] [--slug=<slug>] [--at=<venue>] [--thumbnail=<path>]"
 user-invocable: true
 allowed-tools: "Read Write Edit Bash Glob Grep WebFetch"
@@ -30,9 +30,9 @@ A free-text topic (anything in `ARGUMENTS:` outside the flags) is treated as the
 
 1. **Do not infer or write `related:` slugs.** The `related:` field is delegated to the `/add-related` skill. Leave it as an empty list (`related: []`) or omit the field entirely. After the post is written, instruct the user to run `/add-related --post-name=<slug>`.
 2. **Do not write SVG by hand.** All diagrams must be produced by validated math libraries: `matplotlib` for 2D, `three.js` + headless Chromium for 3D, `numpy` for numerical work. Hand-coded SVG paths are forbidden because they tend to be geometrically wrong.
-3. **`<figure>` tags must not sit inside `<li>` tags.** Place figures as siblings of the surrounding `<ul>`/`<ol>`, never as children of a list item. Compare to `note/_posts/2023-08-23-normalization-layers.html` for the canonical pattern.
+3. **`<figure>` tags must not sit inside `<li>` tags.** Place figures as siblings of the surrounding `<ul>`/`<ol>`, never as children of a list item. Compare to `_posts/2023-08-23-normalization-layers.html` for the canonical pattern.
 4. **No matplotlib spines on diagrams.** Always call `for s in ax.spines.values(): s.set_visible(False)` before saving — the user has explicitly rejected bordered figures.
-5. **Block math (`\[ ... \]`) must be wrapped in `<div class="latex-container">...</div>`.** Inline math (`\( ... \)`) does not need a wrapper. Reference: `note/_posts/2024-04-18-mathematics-for-machine-learning.html`.
+5. **Block math (`\[ ... \]`) must be wrapped in `<div class="latex-container">...</div>`.** Inline math (`\( ... \)`) does not need a wrapper. Reference: `_posts/2024-04-18-mathematics-for-machine-learning.html`.
 6. **Image paths follow `img/<slug>/<slug>-N.{png,jpg}`.** Single-image posts may use `img/<slug>/<slug>.png`. Always create the `img/<slug>/` directory before writing files.
 7. **Reference images are allowed when they clarify the post.** Prefer original, official, or license-friendly sources. Store the image under `img/<slug>/` using the normal naming rule, and cite the source in the figure caption or final `References:` section.
 8. **Do not edit the generated `_site/` directory.** Source files only — Jekyll regenerates `_site/` on build.
@@ -89,8 +89,8 @@ Pick from four templates (full HTML wrappers in `references/body-styles.md`). Th
 | `testbed-longform` | All `testbed` posts — long-form experiment / project writeups | `<div id="toc"></div>` + repeated `<h3>Title</h3><div class="article">…</div><br><br>` blocks |
 
 Category → style hard rules:
-- `--category=testbed` → **must** use `testbed-longform`. The other three styles are `note` wrappers and produce the wrong HTML structure for testbed posts. See `testbed/_posts/2026-02-03-image-to-3d-scene.html` for the canonical shape.
-- `--category=note` → pick one of `outline`, `prose`, `keyword`. `testbed-longform` is forbidden inside `note/_posts`.
+- `--category=testbed` → **must** use `testbed-longform`. The other three styles are `note` wrappers and produce the wrong HTML structure for testbed posts. See `_posts/2026-02-03-image-to-3d-scene.html` for the canonical shape.
+- `--category=note` → pick one of `outline`, `prose`, `keyword`. `testbed-longform` is forbidden for a note post.
 
 Inference cues for `note`:
 - `--language=kr` + topic is reflective/philosophical → likely `keyword` or `prose`
