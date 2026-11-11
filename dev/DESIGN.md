@@ -56,7 +56,7 @@ so the same percentage gives a consistent tint across the site.
 
 | Token | Value | Use |
 |---|---|---|
-| `$row-line` | `1px dotted reduce(14)` | The Manifest's and Testbed's row lines, a side panel's section lines, the phone menu's line |
+| `$row-line` | `1px dotted reduce(14)` | The Manifest's row lines, a side panel's section lines, the phone menu's line |
 
 ### Spacing
 

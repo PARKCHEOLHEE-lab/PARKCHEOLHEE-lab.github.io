@@ -47,6 +47,15 @@ test('every moved file\'s old URL lands on its new URL', async ({ page }) => {
   }
 });
 
+// the Testbed page was folded into the Manifest; its old address opens the Manifest filtered to Testbed
+// entries (manifest.spec.js checks what ?type=testbed shows). The redirect page names the site's full URL,
+// so this reads where it points instead of following it off this server
+test('the old Testbed page sends a visitor to the Manifest filtered to Testbed', async ({ request }) => {
+  const response = await request.get('/testbed/');
+  expect(response.status()).toBe(200);
+  expect(await response.text()).toMatch(/http-equiv="refresh" content="0; url=[^"]*\/manifest\/\?type=testbed"/);
+});
+
 test('a path that never existed still shows the 404 page', async ({ page }) => {
   const response = await page.goto('/no-such-page/');
   expect(response && response.status()).toBe(404);

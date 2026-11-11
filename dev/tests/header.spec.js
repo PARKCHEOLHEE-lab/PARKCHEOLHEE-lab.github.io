@@ -102,13 +102,6 @@ for (const width of [820, 1240, 1920]) {
   });
 }
 
-test('a page without a menu (the Testbed page) keeps its link in the header on a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/testbed/');
-  await expect(page.locator('body > header nav')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
-});
-
 test('on a phone the Menu icon is in the links\' colour and folds into an X while the menu is open', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/onnx/');
