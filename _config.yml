@@ -54,6 +54,12 @@ exclude:
   # the tests, the figure scripts, the Playwright config and DESIGN.md; Playwright also writes its output
   # here while the tests run, which would otherwise rebuild the site under them
   - dev
+  # npm's files for the tests, which no page loads
+  - package.json
+  - package-lock.json
+  # the latent-space build's embedding cache; the map reads only assets/data/latentspace.json
+  - assets/data/embeddings.json
+  - assets/data/embedding-hashes.json
 
 plugins:
  - jekyll-feed
