@@ -1,6 +1,6 @@
 // behavior-aware-conflict.js
 // Interactive "conflict zone" figure for the Behavior-Aware Anthropometric Scene
-// Generation paper-review note. Follows the repo's threebed convention:
+// Generation paper-review note. Follows the repo's other three.js figures:
 // ES module + importmap ("three") + unpkg CDN for examples/jsm.
 // Geometry logic is reused from the paper-viz prototype; labels are English-only
 // (the blog has no language toggle).

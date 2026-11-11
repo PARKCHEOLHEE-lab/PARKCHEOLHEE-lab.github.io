@@ -1,6 +1,6 @@
 """List all eligible posts with their slug and title.
 
-Excludes: underscore-prefixed files, __template.html, threebed
+Excludes: underscore-prefixed files, __template.html
 Output format: filepath|slug|title (one per line)
 """
 

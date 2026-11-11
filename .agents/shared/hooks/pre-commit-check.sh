@@ -59,7 +59,7 @@ run_latentspace_tests() {
 
     echo "[pre-commit] latent-space pytest" >&2
     if ! (cd "$ROOT" && "$python_bin" -c 'import pytest, openai, numpy, sklearn, bs4, tiktoken' >/dev/null 2>&1); then
-        fail "missing Python deps for latent-space tests; rebuild the devcontainer or set LATENTSPACE_PYTHON to a venv with openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken"
+        fail "missing Python deps for latent-space tests; create ~/.venvs/latentspace or set LATENTSPACE_PYTHON to a venv with openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken"
     fi
 
     (cd "$ROOT" && "$python_bin" -m pytest "$test_file" -v) >&2 || fail "latent-space tests failed"
