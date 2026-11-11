@@ -1,11 +1,11 @@
 """
-Embed blog posts with OpenAI text-embedding-3-small and reduce to 2D with PCA.
+Embed blog posts locally with Qwen/Qwen3-Embedding-0.6B and reduce to 2D with PCA.
 Outputs assets/data/latentspace.json for D3.js visualization.
 
 PCA is fully deterministic: same inputs always produce identical coordinates.
 Adding a post causes only minimal coordinate shifts (~1/N).
-Cached embeddings avoid redundant OpenAI API calls: a post is embedded again
-only when the text it would send differs from the text its vector came from.
+Cached embeddings avoid loading the model again: a post is embedded again
+only when the text it would embed differs from the text its vector came from.
 """
 
 import fcntl
@@ -17,10 +17,8 @@ import sys
 from pathlib import Path
 
 from bs4 import BeautifulSoup
-from openai import OpenAI
 from sklearn.decomposition import PCA
 import numpy as np
-import tiktoken
 
 # add-related's list_posts decides which posts are eligible, and where the repo is, for both skills
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "add-related" / "scripts"))
@@ -89,33 +87,41 @@ def strip_html(html_text):
     return text
 
 
-# text-embedding-3-small rejects inputs over 8192 tokens. Character-count
-# heuristics undercount dense-tokenizing text (compatibility jamo like
-# "ㅋ", emoji, digit runs), so the budget is enforced with the model's own
-# tokenizer. Over-budget posts are split into chunks and pooled into one
-# vector (OpenAI cookbook "embedding long inputs" pattern) rather than
-# truncated, so the whole post is represented instead of just its head.
-EMBED_MODEL = "text-embedding-3-small"
-EMBED_TOKEN_LIMIT = 8192
-EMBED_TOKEN_MARGIN = 500
+# Posts longer than one window are split into windows and their vectors
+# pooled into one (OpenAI cookbook "embedding long inputs" pattern) rather
+# than truncated, so the whole post is represented instead of just its head.
+# The model reads up to 32k tokens, but it was compared against the old
+# OpenAI map with 4096-token windows, so that is the window. Windows are cut
+# with the model's own tokenizer: character counts undercount
+# dense-tokenizing text (compatibility jamo like "ㅋ", emoji, digit runs).
+EMBED_MODEL = "Qwen/Qwen3-Embedding-0.6B"
+EMBED_TOKEN_LIMIT = 4096
 
-# The API also caps the total tokens across all inputs in a single request at
-# 300k, independent of the 8192 per-input cap. Requests are batched to stay
-# under it; the margin leaves room for one max-size chunk of counting slack.
-EMBED_REQUEST_TOKEN_LIMIT = 300_000
-EMBED_REQUEST_TOKEN_MARGIN = 8_192
-
-_ENCODING = None
+_TOKENIZER = None
 
 
-def _encoding():
-    global _ENCODING
-    if _ENCODING is None:
-        _ENCODING = tiktoken.encoding_for_model(EMBED_MODEL)
-    return _ENCODING
+def _tokenizer():
+    """The model's own tokenizer, loaded once. It needs only the small tokenizer files, not torch or the weights."""
+    global _TOKENIZER
+    if _TOKENIZER is None:
+        from transformers import AutoTokenizer
+        _TOKENIZER = AutoTokenizer.from_pretrained(EMBED_MODEL)
+    return _TOKENIZER
 
 
-def chunk_to_token_limit(text, limit=EMBED_TOKEN_LIMIT - EMBED_TOKEN_MARGIN):
+def load_model():
+    """The embedding model on this Mac's GPU (MPS), or the CPU elsewhere.
+
+    It is imported only when a post needs embedding, so a fully cached build
+    and the tests run without torch or a model download.
+    """
+    import torch
+    from sentence_transformers import SentenceTransformer
+    device = "mps" if torch.backends.mps.is_available() else "cpu"
+    return SentenceTransformer(EMBED_MODEL, device=device)
+
+
+def chunk_to_token_limit(text, limit=EMBED_TOKEN_LIMIT):
     """Split text into consecutive chunks that each fit the token budget.
 
     Text already within budget is returned as a single-element list holding
@@ -123,13 +129,13 @@ def chunk_to_token_limit(text, limit=EMBED_TOKEN_LIMIT - EMBED_TOKEN_MARGIN):
     stay valid. A token slice can split a multi-byte character, so any
     replacement char at a chunk boundary is stripped.
     """
-    tokens = _encoding().encode(text)
+    tokens = _tokenizer().encode(text, add_special_tokens=False)
     if len(tokens) <= limit:
         return [text]
     # lazy: fixed-size token windows; no sentence-boundary or overlap logic —
     # a blended theme vector for the 2D map does not need boundary fidelity.
     return [
-        _encoding().decode(tokens[i:i + limit]).strip("�")
+        _tokenizer().decode(tokens[i:i + limit]).strip("�")
         for i in range(0, len(tokens), limit)
     ]
 
@@ -139,31 +145,14 @@ def _pool_chunk_embeddings(chunk_vectors, chunk_token_lens):
 
     Token-length-weighted mean (longer chunks carry proportionally more
     weight), then L2-renormalized back onto the unit sphere so the pooled
-    vector stays comparable with single-chunk embeddings, which the API
-    already returns at unit norm. (OpenAI cookbook pattern.)
+    vector stays comparable with single-chunk embeddings, which the model
+    returns at unit norm. (OpenAI cookbook pattern.)
     """
     pooled = np.average(np.array(chunk_vectors), axis=0, weights=chunk_token_lens)
     norm = np.linalg.norm(pooled)
     if norm > 0:  # numerical guard; real chunk embeddings never sum to zero
         pooled = pooled / norm
     return pooled
-
-
-def _batch_indices_by_tokens(token_lens, budget):
-    """Group chunk indices into batches whose token sums each stay under budget.
-
-    Each chunk is already under the per-input cap (well below budget), so every
-    batch holds at least one chunk and no batch exceeds the budget.
-    """
-    batch, batch_tokens = [], 0
-    for i, tokens in enumerate(token_lens):
-        if batch and batch_tokens + tokens > budget:
-            yield batch
-            batch, batch_tokens = [], 0
-        batch.append(i)
-        batch_tokens += tokens
-    if batch:
-        yield batch
 
 
 def load_posts():
@@ -200,35 +189,25 @@ def load_posts():
     return posts
 
 
-def get_embeddings(posts, client):
-    """Batch embed posts via OpenAI API, one vector per post.
+def get_embeddings(posts, model):
+    """Embed posts with the local model, one vector per post.
 
     Each post carries one or more chunks (multiple only when its text exceeds
-    the token budget). Chunks across all posts are sent in as few requests as
-    the aggregate per-request token cap allows; a post's chunk vectors are then
-    pooled back into one vector, so the output stays 1:1 with posts and both
-    the per-input and per-request token limits are respected.
+    the token budget). The chunks of all posts are encoded together; a post's
+    chunk vectors are then pooled back into one vector, so the output stays
+    1:1 with posts.
     """
     all_chunks = []
-    chunk_token_lens = []
     spans = []  # (start index into all_chunks, [token length per chunk]) per post
     for post in posts:
         chunks = post["embed_chunks"]
-        token_lens = [len(_encoding().encode(c)) for c in chunks]
+        token_lens = [len(_tokenizer().encode(c, add_special_tokens=False)) for c in chunks]
         spans.append((len(all_chunks), token_lens))
         all_chunks.extend(chunks)
-        chunk_token_lens.extend(token_lens)
 
     print(f"Embedding {len(posts)} posts ({len(all_chunks)} chunks)...")
-    chunk_vectors = [None] * len(all_chunks)
-    budget = EMBED_REQUEST_TOKEN_LIMIT - EMBED_REQUEST_TOKEN_MARGIN
-    for batch in _batch_indices_by_tokens(chunk_token_lens, budget):
-        response = client.embeddings.create(
-            model=EMBED_MODEL,
-            input=[all_chunks[i] for i in batch],
-        )
-        for i, item in zip(batch, response.data):
-            chunk_vectors[i] = item.embedding
+    # batch_size 2 is the setting the 4096-token windows were timed with (190 posts in 119 s on MPS)
+    chunk_vectors = model.encode(all_chunks, batch_size=2, normalize_embeddings=True)
 
     embeddings = []
     for start, token_lens in spans:
@@ -242,7 +221,7 @@ def get_embeddings(posts, client):
 
 
 def embed_input_hash(post):
-    """Fingerprint of exactly what the API would embed for this post.
+    """Fingerprint of exactly what the model would embed for this post.
 
     It covers the model and every chunk, so an edited post, a new chunking
     rule and a new model all change it, while an unchanged post never does.
@@ -316,11 +295,10 @@ def main():
 
 
 def _build():
-    client = OpenAI()
     posts = load_posts()
     print(f"Loaded {len(posts)} posts")
 
-    # Load cached embeddings to avoid redundant API calls
+    # Load cached embeddings to avoid embedding unchanged posts again
     cached_embeddings = load_cached_embeddings()
     embedding_hashes = load_embedding_hashes()
     current_hashes = {p["slug"]: embed_input_hash(p) for p in posts}
@@ -340,7 +318,7 @@ def _build():
     # Embed only new posts
     if new_slugs:
         new_posts = [p for p in posts if p["slug"] in set(new_slugs)]
-        new_emb = get_embeddings(new_posts, client)
+        new_emb = get_embeddings(new_posts, load_model())
         for i, post in enumerate(new_posts):
             cached_embeddings[post["slug"]] = new_emb[i].tolist()
         print(f"Embedded {len(new_slugs)} new posts")
