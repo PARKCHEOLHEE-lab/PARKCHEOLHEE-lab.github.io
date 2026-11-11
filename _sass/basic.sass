@@ -138,12 +138,9 @@ pre
   overflow-x: auto
   @include hover-scrollbar
 
-// the code inside a block is what scrolls (hljs); its side padding becomes margin, so the text stays
-// where it was and the scrollbar ends 1em short of the block's edges. More specific than hljs's own
-// `pre code.hljs`, whose stylesheet loads after this one
-.post-main pre > code.hljs
-  margin-inline: 1em
-  padding-inline: 0
+// the code inside a block is what scrolls (hljs); its scrollbar ends 1em short of the block's edges
+pre > code
+  @include hover-scrollbar($inset: 1em)
 
 \:not(pre) > code
   font-size: .83em
