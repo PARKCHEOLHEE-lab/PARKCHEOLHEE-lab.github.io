@@ -27,6 +27,8 @@ function moved_files() {
   }
   // the resume was cv.* before it was resume.*
   pairs.push(['/cv.pdf', '/assets/docs/resume.pdf'], ['/cv.docx', '/assets/docs/resume.docx']);
+  // the favicon moved on its own, not with a folder
+  pairs.push(['/favicon.png', '/assets/favicon.png']);
   return pairs;
 }
 
