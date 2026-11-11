@@ -1,0 +1,423 @@
+---
+title: "three.js geoms"
+layout: post
+emoji: /assets/emoji/default.png
+hashtag: "#three.js #WebGL #javascript"
+comment: true
+thumbnail: /img/three-geometries-0.png
+related:
+  - three-loaders
+  - two-points-perspective
+  - selectionbox
+  - latent-shapes-experiment
+  - window-crossing-selection
+categories: testbed
+---
+
+<div id="toc"></div>
+<h3>About the three.js</h3>
+<div style="text-align: justify;">
+    <a href="https://threejs.org/">Three.js</a> is a cross-browser JavaScript library 
+    and application programming interface used to create and display animated 3D computer graphics in a web browser using WebGL. 
+    The source code is hosted in a repository on GitHub.
+    <br><br>
+    Three.js allows the creation of graphical processing unit (GPU)-accelerated 3D animations using the JavaScript language as part of a website without relying on proprietary browser plugins.
+    This is possible due to the advent of WebGL, a low-level graphics API created specifically for the web.
+    <!--break-->
+    
+    <br><br>
+    <a href="https://en.wikipedia.org/wiki/Three.js">(...)</a> 
+    <br><br>
+    One notable difference is that, unlike common geometry-handling tools (Rhino, Sketchup, Revit, etc.), Three.js <code>reverses the y-axis and z-axis.</code>
+</div>
+<br><br>
+<h3>THREE.BoxGeometry array</h3>
+<div id="threejsBox">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.151.3/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module">
+import * as THREE from "three";
+import dat from "https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js";
+import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
+import { TextGeometry } from "https://threejs.org/examples/jsm/geometries/TextGeometry.js"
+import { Font } from "https://threejs.org/examples/jsm/loaders/FontLoader.js"
+
+
+const helvetiker_regular = await fetch("https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json")
+  .then((res) => res.json());
+
+class Box {
+  constructor (size=6) {
+    this.size = size;
+    this.container = document.getElementById("threejsBox");
+
+    this._setScene();
+    this._setAxes();
+    this._setCamera();
+    this._setRenderer();
+    this._setOrbit();
+    this._setGeometry();
+    // this._setGUI();
+  }
+
+  _setScene () {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xffffff);
+  }
+
+  _setAxes() {
+      const axes = new THREE.AxesHelper(25);
+      axes.material.depthTest = false;
+      axes.renderOrder = 1;
+      this.scene.add(axes);
+  }
+
+  _setCamera () {
+    this.camera = new THREE.PerspectiveCamera(5, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
+    this.camera.position.x = -200;
+    this.camera.position.y = 200;
+    this.camera.position.z = 200;
+  }
+
+  _setRenderer () {
+    this.renderer = new THREE.WebGLRenderer();
+    this.container.appendChild(this.renderer.domElement);
+  }
+
+  _setOrbit () {
+    this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbit.minDistance = 10;
+    this.orbit.maxDistance = 500;
+  }
+
+  _setGeometry () {
+
+    const container = this.container;
+    const renderer = this.renderer
+    const scene = this.scene
+    const camera = this.camera
+    const gridHelper = new THREE.GridHelper(50, 50);
+    
+    scene.add(gridHelper);
+    
+    const font = new Font(helvetiker_regular)
+    const axisString = ["x", "y", "z"];
+
+    const axisArray = [];
+    for (let i = 0; i < axisString.length; i++) {
+      const eachAxisString = axisString[i]
+      const axisStringGeometry = new TextGeometry(
+        eachAxisString,
+        {
+          font: font,
+          size: 2,
+          height: 0,
+          curveSegments: 12,
+          depth: 0.1
+        }
+      )
+      
+      const axisStringGeometrymaterial = new THREE.MeshBasicMaterial({color: 0xff0000});
+      const axisStringGeometrymesh = new THREE.Mesh(axisStringGeometry, axisStringGeometrymaterial);
+      
+      const translateDistance = 7;
+      if (eachAxisString === "x") {
+        axisStringGeometrymesh.translateX(translateDistance)
+      } else if (eachAxisString === "y") {
+        axisStringGeometrymesh.translateY(translateDistance)
+        axisStringGeometrymesh.material.color = new THREE.Color(0x00ff00)
+      } else {
+        axisStringGeometrymesh.translateZ(translateDistance)
+        axisStringGeometrymesh.material.color = new THREE.Color(0x0000ff)
+      }
+      
+      axisArray.push(axisStringGeometrymesh);
+
+    }
+    
+    for (let i = 1; i <= this.size; i++) {
+      const geometry = new THREE.BoxGeometry(i, i, i);
+      const edges = new THREE.WireframeGeometry(geometry);
+      const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+      
+      const material = new THREE.MeshBasicMaterial({color: 0x0011e3});
+      const cube = new THREE.Mesh(geometry, material);
+      
+      let interval = i;
+      if (i == 1) {
+        interval = 0;
+      } else {
+        interval = i / 2 * i * 1.5
+      }
+      
+      line.position.x = -interval;
+      cube.position.x = -interval;
+      
+      cube.position.y = i / 2;
+      line.position.y = i / 2;
+      
+      line.renderOrder = 1;
+      
+      scene.add(cube);
+      scene.add(line);
+
+      scene.add(axisArray[0]);
+      scene.add(axisArray[1]);
+      scene.add(axisArray[2]);
+
+    }
+    
+    animate();
+    
+    this.orbit.update();
+    
+    function animate () {
+      requestAnimationFrame(animate);
+
+      axisArray[0].rotation.y -= 0.03;
+      axisArray[1].rotation.y -= 0.03;
+      axisArray[2].rotation.y -= 0.03;
+
+      // cube.rotation.x += 0.005;
+      // cube.rotation.y += 0.005;
+      
+      // line.rotation.x += 0.005;
+      // line.rotation.y += 0.005;
+
+      renderer.render(scene, camera);
+
+      resize();
+    }
+
+    function resize () {
+      camera.aspect = container.clientWidth / (container.clientWidth / 2);
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientWidth / 2);
+    }
+  }
+  
+  _setGUI () {
+
+    const gui = new dat.GUI({width: 150, closeOnTop: true});
+
+    gui.add(this.cube.material, "wireframe");
+    gui.add(this.cube.scale, "x", 0.5, 2, 0.1).name("scaleX");
+    gui.add(this.cube.scale, "y", 0.5, 2, 0.1).name("scaleY");
+    gui.add(this.cube.scale, "z", 0.5, 2, 0.1).name("scaleZ");
+
+    document.getElementById("gui").appendChild(gui.domElement);
+
+  }
+}
+
+new Box();
+    </script>
+</div>
+<figcaption style="text-align: center">Reversed axes and boxes array<br>The camera can be controlled with the mouse.</figcaption>
+
+<br><br>
+
+
+<div style="text-align: justify;">
+    <a href="https://threejs.org/docs/?q=box#api/en/geometries/BoxGeometry">BoxGeometry</a> is a geometry class for a rectangular cuboid with a given 'width', 'height', and 'depth'. 
+    On creation, the cuboid is centered on the origin, with each edge parallel to one of the axes.
+    Using these properties, where the cuboid is centered, the box array shown above can be created.
+    The detailed code is available on <a href="https://github.com/PARKCHEOLHEE-lab/PARKCHEOLHEE-lab.github.io/blob/caa3cba3ca809b3d13b2d7995589d141569bb99f/threesrc/box.js#L60-L87"">GitHub</a>.
+</div>
+<div style="text-align: justify;">
+<pre class="highlight"><code class="JavaScript">
+    for (<span class="gi">let</span> i = 1; i <= this.size; i++) {
+        <span class="gi">const</span> geometry = new THREE.<span class="blue">BoxGeometry</span>(i, i, i);
+        <span class="gi">const</span> edges = new THREE.<span class="blue">WireframeGeometry</span>(geometry);
+        <span class="gi">const</span> line = new THREE.<span class="blue">LineSegments</span>( edges, new THREE.<span>LineBasicMaterial</span>( { color: 0xffffff } ) );
+    
+        <span class="gi">const</span> material = new THREE.<span class="blue">MeshBasicMaterial</span>({color: 0x0011e3});
+        <span class="gi">const</span> cube = new THREE.<span class="blue">Mesh</span>(geometry, material);
+  
+        <span class="gi">let</span> interval = i;
+        if (i == 1) {
+          interval = 0;
+        } else {
+          interval = i / 2 * i * 1.5
+        }
+  
+        cube.position.x = -interval;
+        line.position.x = -interval;
+  
+        cube.position.y = i / 2;
+        line.position.y = i / 2;
+  
+        line.renderOrder = 1;
+  
+        scene.add(cube);
+        scene.add(line);
+      }
+</code></pre>
+</div>
+
+<br><br>
+<h3>THREE.SphereGeometry</h3>
+<div style="text-align: justify;">
+    <a href="https://threejs.org/docs/index.html?q=sphere#api/en/geometries/SphereGeometry">SphereGeometry</a> is a 
+    geometry class for a sphere with a given 'radius', 'widthSegments', and 'heightSegments'.
+    <br><br>
+    All geometries in Three.js are expressed as a <code>Mesh.</code>
+    Thus, incomplete spheres can be created depending on the number of <code>Mesh</code> segments.
+    The initial <code>SphereGeometry</code> has 10 by 10 meshes (the Segments value in the control box).
+    Increasing these values using the control box located in the upper right
+    produces a more finely expressed SphereGeometry.
+</div>
+<br>
+<div id="gui"></div>
+<div id="threejsSphere">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.126.1/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module">
+import * as THREE from "three";
+import dat from "https://unpkg.com/dat.gui@0.7.7/build/dat.gui.module.js";
+import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
+
+
+class Box {
+  constructor (size=4) {
+    this.size = size;
+    this.container = document.getElementById("threejsSphere");
+
+    this._initialSegments = 10;
+
+    this._setScene();
+    this._setAxes();
+    this._setCamera();
+    this._setRenderer();
+    this._setOrbit();
+    this._setGeometry();
+    this._setGUI();
+  }
+
+  _setScene () {
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xffffff);
+  }
+
+  _setAxes() {
+      const axes = new THREE.AxesHelper(this.size * 5);
+      axes.material.depthTest = false;
+      axes.renderOrder = 1;
+      this.scene.add(axes);
+  }
+
+  _setCamera () {
+    this.camera = new THREE.PerspectiveCamera(45, this.container.clientWidth / (this.container.clientWidth / 2), 0.1, 1000); 
+    this.camera.position.x = 13;
+    this.camera.position.y = 13;
+    this.camera.position.z = 13;
+  }
+
+  _setRenderer () {
+    this.renderer = new THREE.WebGLRenderer();
+    this.container.appendChild(this.renderer.domElement);
+  }
+
+  _setOrbit () {
+    this.orbit = new OrbitControls(this.camera, this.renderer.domElement);
+    this.orbit.minDistance = 10;
+    this.orbit.maxDistance = 50;
+  }
+
+  _setGeometry () {
+    const geometry = new THREE.SphereGeometry(this.size, this._initialSegments, this._initialSegments);
+    const material = new THREE.MeshBasicMaterial({color: 0xff00a1, wireframe: false});
+    const sphere = new THREE.Mesh(geometry, material);
+
+    const edges = new THREE.WireframeGeometry(geometry);
+    const line = new THREE.LineSegments( edges, new THREE.LineBasicMaterial( { color: 0xffffff } ) );
+
+    const container = this.container;
+    const renderer = this.renderer
+    const scene = this.scene
+    const camera = this.camera
+    const gridHelper = new THREE.GridHelper(this.size * 10, this.size * 30);
+    
+    line.renderOrder = 1;
+    scene.add(gridHelper);
+    scene.add(sphere);
+    scene.add(line);
+    animate();
+
+    this.sphere = sphere;
+    this.sphere.position.y = 4.5;
+    
+    this.line = line;
+    this.line.position.y = 4.5;
+    this.orbit.update();
+
+    function animate () {
+      requestAnimationFrame(animate);
+
+      sphere.rotation.x += 0.005;
+      sphere.rotation.y += 0.005;
+
+      line.rotation.x += 0.005;
+      line.rotation.y += 0.005;
+
+      renderer.render(scene, camera);
+
+      resize();
+    }
+
+    function resize () {
+      camera.aspect = container.clientWidth / (container.clientWidth / 2);
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientWidth / 2);
+    }
+  }
+  
+  _setGUI () {
+
+    const gui = new dat.GUI({width: 230, closeOnTop: true});
+
+    const sphereData = {
+        sphere: this.sphere,
+        line: this.line,
+        radius: this.size,
+        widthSegments: this._initialSegments,
+        heightSegments: this._initialSegments
+    }
+
+    gui.add(sphereData, "radius", 1, this.size * 2).onChange(regenerateSphereGeometry);
+    gui.add(sphereData, "widthSegments", 5, 50).onChange(regenerateSphereGeometry);
+    gui.add(sphereData, "heightSegments", 5, 50).onChange(regenerateSphereGeometry);
+
+    document.getElementById("gui").appendChild(gui.domElement);
+    
+    function regenerateSphereGeometry() {
+        const newGeometry = new THREE.SphereGeometry(
+            sphereData.radius, sphereData.widthSegments, sphereData.heightSegments
+        )
+        sphereData.sphere.geometry.dispose()
+        sphereData.sphere.geometry = newGeometry
+
+        const newEdges = new THREE.WireframeGeometry(newGeometry);
+        sphereData.line.geometry.dispose()
+        sphereData.line.geometry = newEdges
+    }
+
+  }
+}
+
+new Box();
+    </script>
+</div>
+<figcaption style="text-align: center">Sphere geometry<br>The camera and the sphere properties can be controlled with the mouse.</figcaption>
+
+<br><br>

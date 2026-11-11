@@ -1,0 +1,453 @@
+---
+title: "Shape-conditional GANs"
+layout: post
+hashtag: "#geometry #conditional-generative-adversairal-networks #deep-learning"
+featured: false
+comment: true
+splitter: 0
+thumbnail: /img/polygons-thumbnail.gif
+related:
+  - mass-gans
+  - polygon-segmentation
+  - voxels-to-graph
+  - building-gan
+  - message-passing
+  - conditional-gan
+  - gnn
+  - gan
+categories: testbed
+---
+
+<div id="toc"></div>
+
+<h3>What is Conditional Generative Adversarial Networks ❓</h3>
+<div class="article">
+
+    <code>Conditional Generative Adversarial Networks</code> (cGANs) are an extension of the original Generative Adversarial Networks.
+    cGANs extend conventional GANs by feeding additional information into both the generator and the discriminator, which enables the generation of data that is more specific and controlled.
+
+    This information acts as a directive or constraint that specifies the type of data the generator is expected to produce.
+
+    <br><br>
+    
+    The paper for <a href="https://arxiv.org/pdf/1411.1784.pdf">Conditional Generative Adversarial Nets</a> says:
+    <br>
+    <b>"</b> Generative adversarial nets can be extended to a conditional model if both the generator and discriminator are conditioned on some <code>extra information y.</code> 
+    y could be any kind of auxiliary information, such as class labels or data from other modalities. We can perform the conditioning by feeding y into the both the discriminator and generator as additional input layer. <b>"</b>
+    
+    <!--break-->
+
+    <figure>
+        <img alt="Conditional adversarial net" src="/img/shape-conditional-gan/geometric-losses-7.png" style="width: 80%;" onerror=handle_image_error(this)>
+        <figcaption style="text-align: center; margin-top: 1em">
+            Conditional adversarial net
+        </figcaption>
+    </figure><br>
+    
+    Because my research interest lies in handling geometry and generative design, I sought to combine these interests with cGANs in order to solve a simple problem and to better understand the underlying concepts.
+
+</div><br>
+
+<h3>Problem definition</h3>
+<div class="article">
+
+    To experiment with the approach described above,
+    a simple geometric problem is defined.
+    The task is to find the <code>largest inscribed rectangle</code> within a given 2D polygon, as shown below.
+    <br><br>
+
+    <figure style="display: flex;">
+        <img alt="Problem definition" src="/img/shape-conditional-gan/geometric-losses-2.png" width="25%" onerror=handle_image_error(this)>
+        <img alt="Problem definition" src="/img/shape-conditional-gan/geometric-losses-3.png" width="25%" onerror=handle_image_error(this)>
+        <img alt="Problem definition" src="/img/shape-conditional-gan/geometric-losses-1.png" width="25%" onerror=handle_image_error(this)>
+    </figure>
+    <figcaption style="text-align: center; margin-top: 1em">
+        <a href="https://community.esri.com/t5/spatial-data-science-questions/how-to-find-the-maximum-rectangle-contained-within/td-p/408977">The largest inscribed rectangle</a>    
+    </figcaption>
+
+    <br><br>
+
+    After defining the geometric problem, I implemented the algorithm for finding the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/largest_inscribed_rectangle.py#L12-L133">LIR</a>.
+    In this algorithm, a given polygon is represented as a <code>binary grid</code> of 1s and 0s.
+    A value of 1 denotes a solid part, and a value of 0 denotes a void part.
+    The following representation of a binary grid-shaped polygon uses a 100 x 100 grid size. A larger grid size yields a more precise representation.
+
+    <br><br>
+
+    <figure>
+        <img alt="Representation of a geometry From the left, Vector-shaped polygon · Binary grid-shaped polygon" src="/img/shape-conditional-gan/geometric-losses-4.png" style="width: 80%;" onerror=handle_image_error(this)>
+        <figcaption style="text-align: center; margin-top: 1em">
+            Representation of a geometry<br>
+            From the left, Vector-shaped polygon · Binary grid-shaped polygon
+        </figcaption>
+    </figure>
+
+
+</div><br>
+
+<h3>Data preparation</h3>
+<div class="article">
+
+    The previous section established the problem and a method for representing geometric data.
+    This section describes the construction of a dataset used to train a generator that estimates the <code>LIR</code> for a given input polygon.
+
+    <br><br>
+
+    First, the function for creating a polygon with random coordinates, named <code>_get_random_coordinates</code>, is defined as follows:
+    
+<pre><code class="python">
+    def _get_random_coordinates(
+        self, vertices_count_min: int, vertices_count_max: int, scale_factor: float = 1.0
+    ) -> np.ndarray:
+        """Generate non-intersected polygon randomly
+
+        Args:
+            vertices_count_min (int): random vertices count minimum value
+            vertices_count_max (int): random vertices count maximum value
+            scale_factor (float, optional): constant to scale. Defaults to 1.0.
+
+        Returns:
+            np.ndarray: random coordinates
+        """
+
+        vertices_count = np.random.randint(vertices_count_min, vertices_count_max)
+        vertices = np.random.rand(vertices_count, 2)
+        vertices_centroid = np.mean(vertices, axis=0)
+
+        coordinates = sorted(vertices, key=lambda p, c=vertices_centroid: np.arctan2(p[1] - c[1], p[0] - c[0]))
+
+        coordinates = np.array(coordinates)
+        coordinates[:, 0] *= scale_factor
+        coordinates[:, 1] *= scale_factor
+
+        return coordinates
+</pre></code><br><br>
+
+    This algorithm sorts the polygon vertices by the angle from the center to each vertex, so that the resulting polygon does not self-intersect.
+    The complete process of creating a random polygon is illustrated below, and the corresponding code is available at this <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L45-L69">link</a>.
+    <br><br>
+
+    <figure>
+        <img alt="The process of creating a random polygon" src="/img/shape-conditional-gan/geometric-losses-5.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <figcaption style="text-align: center; margin-top: 1em">
+            The process of creating a random polygon
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    After creating each random polygon, it must be <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/data_creator.py#L71-L98">resized</a> to match the grid size, which was set to 256x256.
+    It is then necessary to <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/data/utils.py#L59-L74">convert</a> these <code>vector-shaped polygons to binary grid-shaped polygons</code> consisting of 1s and 0s, which is straightforward with OpenCV.
+    Through this process, <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/tree/main/lirGAN/data/binpy">5000 datasets</a> were created, as shown in the figure below. Additional datasets can be generated easily if required.
+
+    <br><br>
+
+    <figure>
+        <img alt="The created random polygons (1 of 10)" src="/img/shape-conditional-gan/geometric-losses-6.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (2 of 10)" src="/img/shape-conditional-gan/geometric-losses-8.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (3 of 10)" src="/img/shape-conditional-gan/geometric-losses-9.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (4 of 10)" src="/img/shape-conditional-gan/geometric-losses-10.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (5 of 10)" src="/img/shape-conditional-gan/geometric-losses-11.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (6 of 10)" src="/img/shape-conditional-gan/geometric-losses-12.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (7 of 10)" src="/img/shape-conditional-gan/geometric-losses-13.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (8 of 10)" src="/img/shape-conditional-gan/geometric-losses-14.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (9 of 10)" src="/img/shape-conditional-gan/geometric-losses-15.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <img alt="The created random polygons (10 of 10)" src="/img/shape-conditional-gan/geometric-losses-16.png" style="width: 70%;" onerror=handle_image_error(this)>
+        <figcaption style="text-align: center; margin-top: 1em">
+            The created random polygons
+        </figcaption>
+    </figure>
+
+
+</div><br>
+
+<h3>Building models and loss functions</h3>
+<div class="article">
+
+    This section describes the construction of a model based on the DCGAN architecture for 256x256 data and the implementation of a geometric loss function.
+
+    <br><br>
+
+    In the LIR problem context defined above, the <code>extra information y</code> corresponds to an input polygon.
+    The following <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L235-L244">forward</a> propagation method takes two inputs: a noise vector and an input polygon.
+    The <code>input_polygon</code> is first flattened, and the reshaped tensor is then mapped to feature space by passing through fully connected layers.
+
+    <br><br>
+
+    The output (128) of the linear transformation is concatenated with the noise (128) tensor.
+    This concatenation (256) allows the model to use both the random noise and the information from the <code>input_polygon</code> to generate the output.
+    
+<pre><code class="python">
+    class LirGenerator(nn.Module, ModelConfig):
+
+        ( ... )
+
+        def forward(self, noise, input_polygon):
+            fc = self.linear(input_polygon.reshape(input_polygon.shape[0], -1))
+            x = torch.cat([noise, fc], dim=1)
+            x = x.reshape(x.shape[0], 256, 1, 1)
+            x = self.main(x)
+
+            if self.use_tanh:
+                return nn.Tanh()(x)
+
+            return nn.Sigmoid()(x)
+</pre></code><br><br>
+
+    Similarly, the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L247C10-L272">discriminator</a> takes the input polygon as an additional input.
+    In the forward propagation method of the discriminator, the <code>rectangle</code> and <code>input_polygon</code> tensors share the same shape.
+    They are therefore concatenated and passed to the main layer.
+
+    <pre><code class="python">
+        class LirDiscriminator(nn.Module, ModelConfig):
+            def __init__(self):
+                super().__init__()
+        
+                self.main = nn.Sequential(
+                    nn.Conv2d(2, 64, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.BatchNorm2d(128),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.BatchNorm2d(256),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(256, 512, kernel_size=4, stride=2, padding=1, bias=False),
+                    nn.BatchNorm2d(512),
+                    nn.LeakyReLU(0.2, inplace=True),
+                    nn.Conv2d(512, 1, kernel_size=4, stride=2, padding=0, bias=False),
+                    nn.AdaptiveAvgPool2d(1),
+                    nn.Sigmoid(),
+                )
+        
+                self.to(self.DEVICE)
+
+            def forward(self, rectangle, input_polygon):
+                x = torch.cat([rectangle, input_polygon], dim=1)
+                return self.main(x).view(-1, 1).squeeze(1)
+    </pre></code><br><br>
+    
+    Next, the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/766853852c332c66decf3478eace9fd034c0602d/lirGAN/model.py#L55C7-L168">additional loss functions</a> that compute the geometric features of the generated data are defined. These losses are intended to help train the generator more stably.
+    
+    The losses consist of:
+    
+    <ul style="padding-left: 2em;">
+        <li class="decimal"><u>BCE loss</u> is a standard loss function used for binary classification tasks. Conventional GANs use only the adversarial loss, but without these additional losses the generator did not produce rectangles during training.</li>
+        <li class="decimal"><u><a href="https://deep-learning-study.tistory.com/634">DIoU</a> loss</u>, or Distance Intersection over Union loss, is a metric used to evaluate the similarity between two boxes.</li>
+        <li class="decimal"><u>Feasibility loss</u> measures how well the generated rectangle fits within the input polygon and the target rectangle, without extending beyond their boundaries or underfitting within them.</li>
+        <li class="decimal"><u>Connectivity loss</u> verifies whether the generated rectangle forms a single connected piece, using the labeling function.</li>
+    </ul>
+    
+    <br><br>
+    The base models and loss functions are now defined. As an initial check, the model is trained on a single data point to verify that the problem has a structure that can be learned.
+
+    <figure>
+        <img alt="The process of training one data for 2000 epochs From the left, ground truth · training process" src="/img/shape-conditional-gan/with-geometric-loss-polygons-2000.gif" style="width: 90%;" onerror=handle_image_error(this)>
+        <figcaption style="text-align: center; margin-top: 1em">
+            The process of training one data for 2000 epochs<br>
+            From the left, ground truth · training process
+        </figcaption>
+    </figure>
+
+</div><br>
+
+<h3>Training and evaluating</h3>
+<div class="article">
+    Training then proceeds with <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/lirGAN.ipynb">training</a> on the 5,000 datasets prepared earlier.
+    The configuration used for training the models is as follows:
+    
+<pre><code class="python">
+    """Train models with Geometric loss and Tanh using all data"""
+    """Test base models using all data"""
+
+    lir_dataset = LirDataset()
+    lir_dataloader = DataLoader(
+        dataset=lir_dataset,
+        batch_size=32,
+        shuffle=True,
+        drop_last=True,
+    )
+
+    lir_generator = LirGenerator(use_tanh=True)
+    lir_discriminator = LirDiscriminator()
+
+    lir_geometric_loss_function = LirGeometricLoss(
+        bce_weight=1.0, diou_weight=0.5, feasibility_weight=0.01, connectivity_weight=0.01
+    )
+
+    lir_gan_trainer = LirGanTrainer(
+        epochs=1000,
+        lir_generator=lir_generator,
+        lir_discriminator=lir_discriminator,
+        lir_dataloader=lir_dataloader,
+        lir_geometric_loss_function=lir_geometric_loss_function,
+        initial_weights_key=ModelConfig.XAVIER,
+        log_interval=1,
+        use_gradient_penalty=True,
+        use_lr_scheduler=True,
+        is_record=True,
+        record_name="with-geometric-loss-all-data",
+    )
+
+    lir_gan_trainer.set_seed()
+    lir_gan_trainer.train()
+</pre></code><br><br>
+
+The number of epochs and the batch size were set to 1000 and 32, respectively.
+In addition, to qualitatively assess the quality of the generated data, the function was configured to visualize the generated data whenever the given <code>log_interval</code> is reached, as demonstrated in the following figure.
+
+The following figures show the training process corresponding to the configuration above:
+
+
+<figure>
+    <img alt="Training process The left 3 datasets are not included in the dataloader, whereas the right 3 are. (1 of 2)" src="/img/shape-conditional-gan/geometric-losses-17.gif" style="width: 100%;" onerror=handle_image_error(this)>
+    <img alt="Training process The left 3 datasets are not included in the dataloader, whereas the right 3 are. (2 of 2)" src="/img/shape-conditional-gan/geometric-losses-18.gif" style="width: 100%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Training process <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<!-- 약 200 epochs 정도부터는 더이상 손실값이 감소하지 않는 것을 볼 수 있습니다. 이쯤에서 학습을 멈추고 (700epochs) 모델을 로드해서 정성적 평가를 해봅시다. 이번에는 ground truth를 함께 출력하겠습니다.-->
+At approximately 200 epochs, the loss no longer decreases. Training is stopped at this point (700 epochs) and the model is loaded for qualitative evaluation. In this case, the ground truth is printed alongside the generated output.
+
+<br><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-0.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-0.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-1.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-1.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-2.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-2.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-3.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-3.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-4.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-4.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-5.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-5.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-6.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-6.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-7.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-7.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure><br>
+
+<figure>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (1 of 2)" src="/img/shape-conditional-gan/generated-8.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <img alt="Evaluating the generator From the top, generated data · ground truth The left 3 datasets are not included in the dataloader,… (2 of 2)" src="/img/shape-conditional-gan/truth-8.png" style="width: 70%;" onerror=handle_image_error(this)>
+    <figcaption style="text-align: center; margin-top: 1em">
+        Evaluating the generator <br>
+        From the top, generated data · ground truth <br>
+        The left 3 datasets are not included in the dataloader, whereas the right 3 are.
+    </figcaption>
+</figure>
+</div><br>
+
+<h3>Conclusions & future works</h3>
+<div class="article">
+
+    As shown above, the model produces accurate results for the data on which it was trained, which explains why the loss no longer decreased.
+    Performance on the test data, however, is limited. A notable observation is that when a relatively simple polygon is provided as input, the model produces results similar to the ground truth.
+
+    <br><br>
+
+    When defining the loss function, I expected that incorporating a geometric loss function would help <code>generalize</code> the model.
+    Two versions were therefore compared: one using BCELoss with the geometric loss, and another using BCELoss without it.
+    The additional loss functions, however, appear to have no measurable effect.
+
+    <br><br>
+
+    The following directions could be explored further:
+    
+    <br><br>
+    <ul style="padding-left: 2em;">
+        <li>Increasing the volume of training data.</li>
+        <ul style="list-style-type: none;">
+            Because the <a href="https://github.com/PARKCHEOLHEE-lab/toytorch/blob/main/lirGAN/data/data_creator.py#L101-L158">DataCreator</a> class generates data through the LIR algorithm, the dataset can be expanded to any desired size.
+            It is therefore worth increasing the amount of training data, making the model structure more complex, overfitting, and then examining whether the model generalizes.
+        </ul>
+        <br>
+        <li>Experimenting with a dataset that has fewer vertices and simpler geometry.</li>
+        <ul style="list-style-type: none;">
+            In this project, the training data was generated by creating random geometries with a number of vertices between <code>3 and 25</code> and computing the Largest Inscribed Rectangle for each.
+            This is why the polygon datasets are highly complex, as seen in the <code>Data preparation</code> section.
+            It would therefore be worthwhile to simplify and generalize the training data before training the model.
+        </ul>
+    </ul>
+
+</div><br>
+
+<h3>References</h3>
+<div class="article">
+
+    <ul>
+        <li><a href="https://towardsdatascience.com/a-brief-introduction-to-geometric-deep-learning-dae114923ddb">https://towardsdatascience.com/a-brief-introduction-to-geometric-deep-learning-dae114923ddb</a></li>
+        <li><a href="https://deep-learning-study.tistory.com/634">https://deep-learning-study.tistory.com/634</a></li>
+        <li><a href="https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html">https://pytorch.org/tutorials/beginner/dcgan_faces_tutorial.html</a></li>
+        <li><a href="https://www.kaggle.com/code/arturlacerda/pytorch-conditional-gan">https://www.kaggle.com/code/arturlacerda/pytorch-conditional-gan</a></li>
+        <li><a href="https://arxiv.org/pdf/1411.1784.pdf">https://arxiv.org/pdf/1411.1784.pdf</a></li>
+        <li><a href="https://deep-learning-study.tistory.com/634">https://deep-learning-study.tistory.com/634</a></li>
+    </ul>
+    
+</div><br><br>

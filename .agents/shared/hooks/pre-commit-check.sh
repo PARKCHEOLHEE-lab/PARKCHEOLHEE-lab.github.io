@@ -69,7 +69,7 @@ staged="$(git -C "$ROOT" diff --cached --name-only 2>/dev/null || true)"
 
 run_jekyll_build
 
-if printf '%s\n' "$staged" | grep -Eq '^(note/_posts|testbed/_posts|\.agents/shared/skills/add-related/|\.claude/skills/add-related/|\.codex/skills/add-related/)'; then
+if printf '%s\n' "$staged" | grep -Eq '^(_posts/|\.agents/shared/skills/add-related/|\.claude/skills/add-related/|\.codex/skills/add-related/)'; then
     run_related_verify
 fi
 

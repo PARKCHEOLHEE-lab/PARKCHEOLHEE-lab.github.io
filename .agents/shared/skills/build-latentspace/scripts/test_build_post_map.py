@@ -469,7 +469,7 @@ class TestEmbeddingInputBoundary:
     (Adapted from the PR #87 review reproduction artifact.)"""
 
     def test_dense_post_reaches_client_under_limit(self, tmp_path):
-        post_dir = tmp_path / "note" / "_posts"
+        post_dir = tmp_path / "_posts"
         post_dir.mkdir(parents=True)
         (post_dir / "2026-01-01-dense.html").write_text(
             "---\ntitle: dense\n---\n<p>" + ("ㅋ" * 32000) + "</p>\n",
@@ -546,7 +546,7 @@ class TestPostDiscovery:
     agree on where posts live, which files are drafts, and how a slug is made."""
 
     def test_load_posts_takes_its_posts_from_list_posts(self, tmp_path):
-        post_dir = tmp_path / "note" / "_posts"
+        post_dir = tmp_path / "_posts"
         post_dir.mkdir(parents=True)
         titled = post_dir / "2026-01-01-titled.html"
         titled.write_text("---\ntitle: titled\n---\n<p>body</p>\n", encoding="utf-8")
@@ -560,3 +560,19 @@ class TestPostDiscovery:
 
         found.assert_called_once_with(str(tmp_path))
         assert [(p["slug"], p["url"]) for p in posts] == [("listed-slug", "/listed-slug/")]
+
+    def test_category_comes_from_the_posts_own_categories(self, tmp_path):
+        # every post sits in _posts/, so its folder no longer says whether it is a testbed post
+        post_dir = tmp_path / "_posts"
+        post_dir.mkdir(parents=True)
+        listed = []
+        for name, categories in [("noted", "note"), ("tested", "testbed")]:
+            path = post_dir / f"2026-01-01-{name}.html"
+            path.write_text(f"---\ntitle: {name}\ncategories: {categories}\n---\n<p>body</p>\n", encoding="utf-8")
+            listed.append((str(path), name, name))
+
+        with patch.object(bpm, "REPO_ROOT", str(tmp_path)), patch.object(bpm, "list_posts", return_value=listed):
+            posts = bpm.load_posts()
+
+        assert [(p["slug"], p["category"], p["label"]) for p in posts] == [
+            ("noted", "note", "Note"), ("tested", "testbed", "Testbed")]

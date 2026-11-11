@@ -1,0 +1,408 @@
+---
+title:  "Free-form Floor Plan Design using Differentiable Voronoi Diagram"
+layout: post
+emoji: /assets/emoji/brain.png
+related:
+  - discrete-voronoi
+  - floor-plan-generation-with-voronoi-diagram
+  - building-gan
+  - half-plane-clipping
+  - layout-vlm
+  - numerical-differentitation-for-autograd
+  - wave-function-collapse
+  - behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts
+categories: note
+---
+
+<br>
+
+<ul>
+    <li>
+        <a href="https://www.dropbox.com/scl/fi/culi7j1v14r9ax98rfmd6/2024_pg24_floorplan.pdf?rlkey=s5xwncuybrtsj5vyphhn61u0h&e=2&dl=0">Free-form Floor Plan Design using Differentiable Voronoi Diagram</a>
+    </li>
+        <ol>
+            <li>
+                Introduction
+            </li>
+                <ul>
+                    <!-- <li>
+                        Manual creation of the floor layout often requires significant time and skills from the
+                        architect due to the diversity in the shape of the available space
+                        and the constraints that individual rooms must satisfy, such as their
+                        sizes and connectivity.
+                    </li> -->
+                    <li>
+                        Recent data-driven methods have employed deep learning to create floor plans. 
+                        However, these learning-based methods often fail
+                        to support unconventional room shapes and new constraints that are
+                        not assumed in a specific training dataset.
+                    </li>
+                    <li>
+                        Unfortunately, the existing methods are not suitable 
+                        for <i>"free design of the ground plans"</i>
+                        advocated by an architect <i>Le Corbusier</i>.
+                    </li>
+                    <li>
+                        In this paper, we present a <b>differentiable room representation</b>
+                        for the flexible generation of floor plans, 
+                        while considering various constraints on the shape and connectivity of the room.
+                        <mark>
+                            Our representation uses the Voronoi diagram to partition the floor into
+                            multiple rooms.
+                        </mark> 
+                        Specifically, <b>one room is defined using multiple Voronoi cells</b> that are implicitly
+                        defined based on the distance to the
+                        Voronoi sites(centroids of the voronoi cells) and support topology changes,
+                        which facilitates flexible exploration of room connectivity
+                        during optimization.
+                    </li>
+                    <li>
+                        Although the Voronoi diagram represents rooms with changing
+                        topologies, the unconstrained Voronoi diagram is excessively flexible 
+                        to produce plausible floor plans. For instance, a room may be
+                        separated into multiple islands or may have unnecessarily complicated wall shapes.
+                        <mark>
+                            To overcome these issues, we develop 
+                            <b>tailored loss functions that encourage rooms to have connected shapes</b> with
+                            simple wall shapes.
+                        </mark>
+                    </li>
+                    <li>
+                        In addition, by performing the optimization multiple times with different random initial-
+                        izations, the user can efficiently obtain various design options
+                    </li>
+                </ul>
+            <br>
+            <li>
+                Related Work
+            </li>
+                <ul>
+                    <li>
+                        <b>Automatic layout generation</b>: In this paper, we focus 
+                        on the generation of architectural floor plans, where the rooms
+                        must satisfy varying <b>connectivity</b> and <b>size constraints</b> specified by
+                        the architect, as well as other geometric requirements, such as the
+                        simplicity of a wall.
+                    </li>
+                        <ul type="circle">
+                            <li>
+                                <a href="https://archive.ymsc.tsinghua.edu.cn/pacm_download/42/456-urbanPattern_siga13.pdf">Urban pattern: layout design by hierarchical domain splitting</a>
+                            </li>
+                            <li>
+                                <a href="https://www.tandfonline.com/doi/epdf/10.1080/13658816.2017.1313980?needAccess=true">Data-driven estimation of building interior plans</a>
+                            </li>
+                            <li>
+                                <a href="https://cs.stanford.edu/people/eschkufz/docs/siggraph_11.pdf">Interactive Furniture Layout Using Interior Design Guidelines</a>
+                            </li>
+                            <li>
+                                <a href="https://web.cs.ucla.edu/~dt/papers/siggraph11/siggraph11.pdf">Make it Home: Automatic Optimization of Furniture Arrangement</a>
+                            </li>
+                            <li>
+                                <a href="http://chongyangma.com/publications/gl/2014_gl_preprint.pdf">Game Level Layout from Design Specification</a>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        <b>Floor plan gneeration</b>:  this work aims
+                        to generate the layout and connectivity of rectangular or cubic
+                        rooms using different computational approaches,
+                    </li>
+                        <ul type="circle">
+                            <li>
+                                <a href="https://pdf.sciencedirectassets.com/282185/1-s2.0-S2095263517X00022/1-s2.0-S2095263516300565/main.pdf?X-Amz-Security-Token=IQoJb3JpZ2luX2VjEFYaCXVzLWVhc3QtMSJHMEUCIHMmJIqgjIWxqoijNjkg1foqp%2FNpsXCwBWa%2Fs7mO0FS3AiEAzA2NYpUnndT8KpJvm%2F%2FzcrRwSsDPkEZda4QwgEzjc54qvAUIz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAFGgwwNTkwMDM1NDY4NjUiDAKcNtSVv0qCDbzZOSqQBWe3UoTiivxJZvlV2afULZJAWSQdxQlv%2BItS1%2FEnkr79b7d1Jhv7hOwtO8x%2F4%2BU1OjFsUldFQdBlUa32Thk9QPvDBDzcuFUPHKxRNgmuV5EFJCl5hpqWCYDagYE7vWmLI2zjLVj7D13sjpwrJoWg5SETK%2FILmHssFhfWeAmHWJH7jiErdSaN8%2BtzCLOYCagIUM50c9q8%2FXgUWrXhML8oLeWUpMDPhWSDqMkAhP61do0X%2B1tNLmuBOHLnbBnsRF2UYE5iaoUibwxI2M9TxrZq%2Bdx2F5zBPGXBTRT6Q6dX8cu0%2FxbwDkJgkg0%2BgUtCNH%2BhM%2BNti0z0IIURe8p0%2BY6nUoCYT9NPufrx6xmL2qyo3SZbNtpgmNkdT7T%2BR2NMBEn9e6Ym%2FGueZNc8UhJIQZx3zXHLyzI03OibjF2Fech2F4H9EqWo5CB9yMBuGRbDkQKtqXAieNBWYupgMWct0A0Hlqy0h0v78RGkPqABsfx1EgJnvZXX3DgPvTjBF5x56BcTwaM9JYoDhWlMtprU6ZyBhptk05IjH4y81mSG%2B4Eup%2Fgly9j5wYp01oL0YPeC2xFwX9fvCIfuCdeVF6tr3LEwyNONwnlZc8bXmZwmr7gKG3SNo7N8RDmdC9LeI2nMtgddskKz6Or5UHNXibCAtMx5NySqEMVSM7jg4omuB0rUGwEzK2PHYnwt0pLyipE44w50At4YWbtciSN1AOFEP8eK9tyLY%2FwyrSBgQW02FV9ZEO7RJlJTnDVQeiRsEpoHr98pv9AyfPsn%2BuW4%2FhQIU%2FVr0%2BzRzXlPhEKwkhx2Duuk4WpyokGhJlkx6L2iUebelQuwWfqV50phuQWy5uf21Q6w2kcRNTQT84I3fsIaZV0h3onGMOmRnLkGOrEBh8QYKfKBVUll6UErQk4U61zAo3wVJQAfx%2BgChOG0wP1aVbsUiT8JqXhJMkENeIJWwVP6Op5r5%2F%2FO0OpyEUrivJdGhT0YUj%2FDZ7Ys3D88qAI8yAybLykp8tNKorJiOqH8EoRXoQbZom7p%2FjX5WPX3xnQVDlqN7RgvrkWtIUfA8I5VFrrKPSGKFSekw%2FqVkgyT0t1vTiWeN7fPz0jDWzY3t4PJH6TDNmHZJYl2STVSzrXh&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20241103T064419Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAQ3PHCVTYXSSVBNDL%2F20241103%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=4cc653e67539709419db9b9637f2bb95fd31ba5fd5d5df64e82bf8dd0baa6e44&hash=dd45a14c71c15a90c6db25a50ea5e497e36c609bfc1692e7cf6514a1d94c6204&host=68042c943591013ac2b2430a89b270f6af2c76d8dfd086a07176afe7c76c2c61&pii=S2095263516300565&tid=spdf-dfb5d600-60b1-4287-bcd0-4cba81190a00&sid=a52bb5289458e944a988dcf75810a5120461gxrqa&type=client&tsoh=d3d3LnNjaWVuY2VkaXJlY3QuY29t&ua=0d105f020c0656515655&rr=8dca6523df6f30a3&cc=kr">Evolutionary approach for spatialarchitecture layout design enhancedby an agent-based topology finding system</a>
+                            </li>
+                            <li>
+                                <a href="https://lbfan.oss-cn-hangzhou.aliyuncs.com/personal_webpage/publications/2018-eg-iplayout.lres.pdf">MIQP-based Layout Design for Building Interiors</a>
+                            </li>
+                            <li>
+                                <a href="https://cs.stanford.edu/people/eschkufz/docs/siggraph_asia_10.pdf">Computer-Generated Residential Building Layouts</a>
+                            </li>
+                            <li>
+                                <a href="https://www.yongliangyang.net/docs/layoutTemplates_sig14.pdf">Computing Layouts with Deformable Templates</a>
+                            </li>
+                            <li>
+                                <a href="https://arxiv.org/pdf/2203.14412">iPLAN: Interactive and Procedural Layout Planning</a>
+                            </li>
+                            <li>
+                                <a href="https://faculty.hfut.edu.cn/_resources/group1/M00/00/05/rB_zSGKQLX6AFSp_ADVQUUY7pFk748.pdf">WallPlan: Synthesizing Floorplans by Learning to Generate Wall Graphs</a>
+                            </li>
+                            <li>
+                                <a href="https://diglib.eg.org/server/api/core/bitstreams/39cdfd7a-a225-4cc1-b493-05c0636ca113/content">BubbleFormer: Bubble Diagram Generation via Dual Transformer Models.</a>
+                            </li>
+                            <li>
+                                <a href="https://arxiv.org/pdf/2211.13287">HouseDiffusion: Vector Floorplan Generation via a Diffusion Model with Discrete and Continuous Denoising</a>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        <b>Voronoi diagram in graphics and vision</b>:  our method can represent various 
+                        free-form wall and boundary shapes using the <b>differentiable Voronoi diagram</b>, 
+                        whose shapes can be fluidly optimized through gradient-based optimization.
+                    </li>
+                        <ul>
+                            <li>
+                                <a href="https://arxiv.org/pdf/2204.10313">Cellular Topology Optimization on Differentiable Voronoi Diagrams</a>
+                            </li>
+                            <li>
+                                <a href="https://arxiv.org/pdf/2404.18629">Differentiable Voronoi Diagrams for Simulation of Cell-Based Mechanical Systems</a>
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        <b>Hybrid explicit-implicit representations</b>: 
+                        hybrid representations allow the algorithms to handle constraints
+                        on the explicit boundary geometry better while enabling a flexible
+                        topology change. 
+                    </li>
+                        <ul>
+                            <li>
+                                <a href="https://arxiv.org/pdf/1910.02926">Cubic Stylization</a>
+                            </li>
+                        </ul>
+                </ul>
+            <br>
+            <li>
+                Method
+            </li>
+                <ol type="i">
+                    <li>
+                        Floor plan representation
+                    </li>
+                        <ul>
+                            <li>
+                                The user provides a 2D region \(\Omega\), which is the outline of the available space.
+                                Given the region, a connected and bounded shape in the 2D space \(\mathbb{R}^2\), 
+                                we intend to compute a partition of \(\Omega\) into multiple rooms. 
+                            </li>
+                            <br>
+                            <li>
+                                <b>Voronoi diagram</b>: To achieve topological flexibility in the connectivity 
+                                between rooms, we use the Voronoi diagram to represent the
+                                partition. A Voronoi diagram is generated from a set of points,
+                                called sites \(\mathcal{S} = \{s_1 \,...\, s_N\}\). 
+                                Each site \(s_i\) is assiciated with a region \(\mathcal{C}_i\) called cell, 
+                                which comprises the points whose nearest site is the cell's site, i.e.,
+                                \[
+                                    \,\\
+                                    \mathcal{C}_i = \{ \mathbf{x} \in \Omega \, | \, ||\, \mathbf{x}-s_i \,|| \leq ||\, \mathbf{x}-s_j \,|| \text{ for all } i \neq j \}
+                                    \,\\
+                                \]
+                            </li>
+                            <li>
+                                <b>Voronoi vertex</b>: The cells take polygonal shapes, whose corner
+                                vertices are called Voronoi vertices. We denote the set of all the
+                                Voronoi vertices in the diagram as \(\mathcal{V} = \{ \mathbf{v}_1 \, ... \, \mathbf{v}_M \}\).
+                                <br><br>
+                                To compute the deformation of the room boundary from the site
+                                motion, classifying the Voronoi vertices into the following three
+                                types is convenient (see Fig 1 above): 
+                                \(\text{(a)}\) the intersection of the three bisectors, 
+                                \(\text{(b)}\) the intersection of one bisector and the boundary \(\Omega\),
+                                and \(\text{(c)}\) the vertex forming the corner of \(\Omega\).
+                                Unlike \(\text{(a)}\) and \(\text{(b)}\), the position of \(\text{(c)}\) does not depend on the Voronoi sites and
+                                is constant during our optimization.
+                                <br>
+                                <figure>
+                                    <img alt="The Voronoi diagram shows the partition of the input region by a set of points called sites . The corners of the Voronoi…" src="/img/floor-plan-1.png" width="60%">
+                                    <figcaption>
+                                        The Voronoi diagram shows the partition of the input
+                                        region \(\Omega\) by a set of points called sites
+                                        \(\mathcal{S}\). 
+                                        The corners of the Voronoi cells are Voronoi vertices \(\mathcal{V}\).
+                                        The Voronoi vertex is either a vertex of \(\Omega\) \(\text{(c)}\), on the boundary edge \(\text{(b)}\), or inside \(\Omega\) \(\text{(a)}\). 
+                                        The combination of multiple cells represents a room.
+                                    </figcaption>
+                                </figure>
+                            </li>
+                            <br>
+                            <li>
+                                <b>Room representation</b>:
+                                A typical floor plan is complex and thus its room cannot be represented by
+                                a single Voronoi cell. To increase the representation capability, 
+                                we combine multiple cells to represent one room (see Fig 1 right-most). 
+                                This is concretely achieved by associating each site with one
+                                of the rooms, which is determined at the initialization and then remains constant.
+                            </li>
+                            <br>
+                            <li>
+                                <b>Initialization</b>: 
+                                At the time of initialization, <b>
+                                    we randomly generate
+                                    a user-specified number of sites
+                                </b> in the input region
+                                \(\Omega\). To ensure that no two sites are excessively close to each other, we use the
+                                <a href="https://lifeisforu.tistory.com/545">Poisson disk sampling</a> with the dart-throwing algorithm.
+                                Note that the areas of individual sites are not constrained during the optimization, 
+                                and the room area of the output plan is governed by the area loss explained later.
+                            </li>
+                        </ul>
+                    <br>
+                    <li>
+                        Floor plan optimization
+                    </li>
+                    <ul>
+                        <li>
+                            We optimize the shape and connectivity of the rooms by moving the positions of the sites.
+                            <mark>The sites are moved to minimize the scalar loss function \(\mathcal{L}\) that formulates the desirable properties of the rooms.</mark>
+                            Since the optimization variables are continuous values
+                            of 2D coordinates, they can be easily incorporated into the optimization framework using the gradients of \(\mathcal{L}\).
+                        </li>
+                        <br>
+                        <li>
+                            During the optimization, we do not strictly constrain the site to be inside the region \(\Omega\). 
+                            Instead, by allowing the sites to move freely outside \(\Omega\), we can
+                            handle a concave input region \(\Omega\).
+                        </li>
+                        <br>
+                        <li>
+                            <b>Differentiable Voronoi diagram</b>: We differentiate these components
+                            with respect to the site positions \(\mathcal{S}\) using the chainr rele
+                            by computing the gradients \(\partial\mathcal{V} / \partial\mathcal{S} \).
+                            The positions of the Voronoi vertices change linearly with the infinitesimal movement of the sites.
+                            However, this change does not affect the loss or gradient computation, which is performed independently for each iteration.
+                        </li>
+                        <br>
+                        <li>
+                            <b>Loss function</b>: We update the coordinates of the sites \(\mathcal{S}\) to minimize the loss \(\mathcal{L}\).
+                            Specifically, our loss \(\mathcal{L}\) is defined as the weighted sum of the different losses as
+                            \[
+                                \,\\
+                                \begin{align*}
+                                \mathcal{S}^{*} &= \arg \min_{\mathcal{S}} \mathcal{L}(\mathcal{S}, \mathcal{V}(\mathcal{S})) \\
+                                \mathcal{L} &= \mathcal{L}_{\text{wall}} + \mathcal{L}_{\text{area}} + \mathcal{L}_{\text{fix}} + \mathcal{L}_{\text{topo}} + \mathcal{L}_{\text{Lloyd}}
+                                \end{align*}
+                                \,\\
+                            \]
+
+                            We use gradient-based optimization to minimize the loss function \(\mathcal{L}\) in the above.
+                            Each time the sites are moved by the optimization, the Voronoi diagram is updated.
+                            <br><br>
+                            We use \(\mathcal{L}_{\text{fix}}\) to fix some of the sites. 
+                            For instance, the entrance to the house is specified by the user by fixing the sites related to the entrance there.
+                        </li>
+                        <br>
+                        <li>
+                            <b>Wall loss</b>: 
+                            As the unconstrained Voronoi diagram typically produce 
+                            undesirable fluctuations in the wall orientations, 
+                            we design a tailored loss function to regularize the wall complexity.
+                            Inspired by the <a href="https://arxiv.org/pdf/1910.02926">Cubic Stylization</a>, 
+                            we regularize the \(\mathcal{L}_1\) norm of the wall length.
+                            \(L_1\) norm is defined as \(v_x + v_y\) (norm of \(x\) + norm of \(y\)), 
+                            <mark>
+                                therefore the \(\mathcal{L}_{\text{wall}}\) has the minimal when vector \(\mathbb{v}_j - \mathbb{v}_i\) is vertical or horizontal.
+                            </mark>
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{wall}} = w_{\text{wall}} \sum_{(v_i, v_j) \, \in \, \mathcal{E}} ||\, \mathbb{v}_i - \mathbb{v}_j \,||_{L1}
+                                \,\\
+                            \]
+                            
+                            where \(\mathcal{E}\) denotes the set of edges of the Voronoi cells between two
+                            adjacent rooms and the \(\mathbb{v}_i\) and \(\mathbb{v}_j\) denote the Voronoi vertices belonging to the edge.
+                            <br>
+
+                            <figure>
+                                <img alt="Computation of loss functions" src="/img/floor-plan-2.png" width="80%">
+                                <figcaption>
+                                    Computation of loss functions <br>
+                                </figcaption>
+                            </figure>
+                        </li>
+                        <br>
+                        <li>
+                            <b>Area loss</b>: The area of each room is specified by the user. 
+                            We minimize the quadratic difference between the current room areas and
+                            the user-specified targets. Here, \(\bar{A}_r\) denotes the target area for the room \(r\).
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{area}} = w_{\text{area}} \sum_{r=1}^{\#Room} ||\, A_r(\mathcal{V}) - \bar{A}_r \,||^2
+                                \,\\
+                            \]
+
+                            
+                        </li>
+                        <br>
+                        <li>
+                            <b>Lloyd loss</b>: To regulate the site density, we design a loss function inspired by the <a href="https://www.microsoft.com/en-us/research/wp-content/uploads/2016/12/On-Centroidal-Voronoi-Tessellation-Energy-Smoothness-and-Fast-Computation.pdf">Lloyd's algorithm</a>.
+                            Here, \(\mathbb{c}_i \) denotes the centroid of the \(i\)-th Voronoi cell.
+                            This is useful for attracting these exterior sites inside \(\Omega\).
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{Lloyd}} = w_{\text{Lloyd}} \sum_{i=1}^N ||\, \mathbb{s}_i - \mathbb{c}_i \,||^2
+                                \,\\
+                            \]
+                        </li>
+                        <br>
+                        <li>
+                            <b>Topology loss</b>: We design the topology loss such that each room is
+                            a single connected region, and the specified connections between
+                            rooms are achieved. We move the site to satisfy the desired topology by setting the goal position
+                            \(\mathbb{t}_i\) for each site
+                            \(\mathbb{s}_i\) as
+                            \[
+                                \,\\
+                                \mathcal{L}_{\text{topo}} = w_{\text{topo}} \sum_{i=1}^N ||\, \mathbb{s}_i - \mathbb{t}_i \,||^2
+                                \,\\
+                            \]
+
+                            The goal position
+                            \(\mathbb{t}_i\)
+                            can be automatically computed as the nearest
+                            site to the site from the same group.
+
+                            <br>
+                            <figure>
+                                <img alt="The positions of target sites for topology loss" src="/img/floor-plan-3.png" width="80%">
+                                <figcaption>
+                                    The positions of target sites for topology loss
+                                </figcaption>
+                            </figure>
+                            <br>
+                            For each room, we
+                            first group the sites belonging to that room into groups of adjacent
+                            sites. If multiple groups are present, that is, a room is split into
+                            separated regions, 
+                            <mark>
+                                we set the target position of the site \(\mathbb{t}_i\)
+                                as the
+                                nearest site to that group.
+                            </mark>
+                            <br><br>
+                            If a room is connected in one piece, we examine the connectivity
+                            between two different rooms specified by the user. If two rooms
+                            that are specified as “connected” in the input are not adjacent, we
+                            compute the nearest pair of sites from each room and then set the
+                            positions as the target positions for each other.
+                        </li>
+                    </ul>
+                </ol>
+            <br>
+            <li>
+                Results
+            </li>
+                <ul>
+                    <figure style="display: flex;">
+                        <img alt="Free-form Floor Plan Design using Differentiable Voronoi Diagram" src="/img/floor-plan-4.gif" width="35%">
+                        <img alt="Free-form Floor Plan Design using Differentiable Voronoi Diagram" src="/img/floor-plan-5.gif" width="35%">
+                    </figure>
+                    <figure style="display: flex;">
+                        <img alt="Free-form Floor Plan Design using Differentiable Voronoi Diagram" src="/img/floor-plan-6.gif" width="35%">
+                        <img alt="Free-form Floor Plan Design using Differentiable Voronoi Diagram" src="/img/floor-plan-7.gif" width="35%">
+                    </figure>
+                    <figcaption>
+                        Demos
+                    </figcaption>
+                </ul>
+        </ol>
+    <br>
+    <p style="text-align: center;">
+        (&nbsp;...&nbsp;)
+    </p>
+    <br>
+    <li>
+        <a href="https://github.com/nobuyuki83/floor_plan">https://github.com/nobuyuki83/floor_plan</a>
+    </li>
+</ul>
+
+<br><br>

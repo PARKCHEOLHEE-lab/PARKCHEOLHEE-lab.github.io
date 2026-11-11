@@ -1,0 +1,771 @@
+---
+title: "Voxels to Graph"
+layout: post
+hashtag: "#graph #gnn #building-gan #voxel"
+comment: true
+splitter: 1
+featured: false
+inprogress: false
+thumbnail: /img/voxels-to-graph/voxels-to-graph-thumbnail.gif
+related:
+  - mass-gans
+  - polygon-segmentation
+  - synthesized-skyscrapers
+  - floor-plan-generation-with-voronoi-diagram
+  - building-gan
+  - geometric-deep-learning
+  - gnn
+  - message-passing
+  - gumbel-softmax
+  - wave-function-collapse
+categories: testbed
+---
+
+<div id="toc"></div>
+
+<h3>Introduction 🔗</h3>
+<div class="article">
+    This project <mark>explores the key contributions of <a href="https://arxiv.org/pdf/2104.13316">Building-GAN</a> by AutodeskAILab: 
+    1) a novel 3D representation called <strong>voxel graph</strong> that can encode <strong>irregular voxel grids</strong></mark> with non-uniform space partitioning, overcoming limitations of traditional regular voxel grids, and 
+    2) a graph-conditioned generative adversarial network (GAN) leveraging graph neural networks (GNNs).
+    The implementation uses their <a href="https://github.com/AutodeskAILab/Building-GAN?tab=readme-ov-file">dataset</a> to study these approaches.
+    The structure of the raw data is examined first in the following section.
+
+    <figure>
+        <div style="width:100%; overflow:hidden; display:flex; justify-content:center;">
+            <img alt="Generated Buildings" src="/img/voxels-to-graph/voxels-to-graph-0.gif"
+                 style="width:110%; max-width:none; margin-left:-10%; margin-right:-10%;" 
+                 onerror="handle_image_error(this)">
+        </div>
+        <figcaption>
+          Generated Buildings
+        </figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Raw Data</h3>
+<div class="article">
+
+    In the Data Collection part of the paper, it says that the dataset was created as follows:
+    <br><br>
+    Since there is no publicly available dataset for volumetric designs from real buildings, we create a synthetic
+    dataset with 120,000 volumetric designs for commercial buildings using parametric models. 
+    The heuristics behind the parametric models are based on the rules and knowledge provided by professional architects. 
+    
+    <!--break-->
+    
+    Although these parametric models are able to explore possible volumetric designs, they are not capable of fitting the constraints.
+    Therefore, we generate the designs first and then compute the voxel graph, program graph, FAR, and TPR for each design. 
+
+    (...)
+    
+    <strong>Here, we consider 6 program types: lobby/corridor, restroom, stairs, elevator, office, and mechanical room.</strong> 
+    Each program node feature includes the program type and the story level.
+
+    <br><br>
+
+    Each datum of the created dataset consists of three JSONs as follows:
+    <ol>
+        <li>
+            <strong>graph_global_*.json</strong>: 
+            contains the FAR (Floor Area Ratio), site area (Total land area to build a building), program ratios, and program types (6 program types described above + void type).
+
+<pre><code class="json">
+    {
+        "far": 3.1144640998959425,
+        "site_area": 961,
+        "global_node": [
+            {
+                "type": 3,
+                "proportion": 0.04811226194453724,
+            
+                (...)
+            },
+            {
+                "type": 0,
+                "proportion": 0.25526227865018364,
+            
+                (...)
+            },
+
+            (...)
+        ]
+    }
+</code></pre>
+<figcaption class="snip">
+    graph_global_*.json
+</figcaption><br>
+        </li>
+        <li>
+            <strong>graph_local_*.json</strong>: 
+            contains the nodes. 
+            Each node has the following attributes:
+            floor \(\text{F}\) (the floor level on which the node is placed), 
+            program type \(\text{T}\), index \(\text{I}\), and neighbors that indicate connectivity between nodes.
+            In the local graph, the unique index of each node is created as \(\text{[F, T, I]}\), 
+            and the neighbors contain these unique indices.
+            In the example below, the first node's unique index is \(\text{[0, 3, 0]}\), 
+            and it has \(\text{[1, 3, 0]}\) as a neighbor. 
+            Similarly, the node with index \(\text{[1, 3, 0]}\) has \(\text{[0, 3, 0]}\) as a neighbor.
+<pre><code class="json">
+    {
+        "node": [
+            {
+                "floor": 0,
+                "type": 3,
+                "type_id": 0,
+                "neighbors": [[0, 0, 0], [1, 3, 0]]
+            
+                (...)
+            },
+            {
+                "floor": 1,
+                "type": 3,
+                "type_id": 0,
+                "neighbors": [[1, 0, 0], [2, 3, 0], [0, 3, 0]]
+            
+                (...)
+            },
+            
+            (...)
+        ]
+    }
+</code></pre>
+<figcaption class="snip">
+    graph_local_*.json
+</figcaption><br>
+        </li>
+        <li>
+            <strong>voxel_*.json</strong>:
+            contains the voxel nodes. Each voxel node has the following attributes:
+            location (which serves as a unique index in the voxel graph),
+            program type,
+            dimension (the depth, height, and width of an irregular voxel),
+            coordinate (the center of the voxel),
+            and neighbors that indicate connectivity between nodes.
+
+<pre><code class="json">
+    {
+        "voxel_node": [
+            {
+                "location": [0, 2, 7],
+                "type": 3,
+                "coordinate": [0.0, 20.0, 37.0],
+                "dimension": [7.0, 3.0, 3.0],
+                "neighbors": [[1, 2, 7], [0, 1, 7], [0, 3, 7], [0, 2, 6]]
+            
+                (...)
+            },
+            {
+                "location": [1, 2, 7],
+                "type": 3,
+                "coordinate": [7.0, 20.0, 37.0],
+                "dimension": [4.0, 3.0, 3.0],
+                "neighbors": [[0, 2, 7], [2, 2, 7], [1, 1, 7], [1, 3, 7], [1, 2, 6]]
+            
+                (...)
+            },
+            
+            (...)
+        ]
+    }
+</code></pre>
+<figcaption class="snip">
+    voxel_*.json
+</figcaption>
+        </li>
+    </ol>
+
+</div><br><br>
+
+<h3>Representing Voxels as a Graph</h3>
+<div class="article">
+
+    
+    A Graph data structure consists of vertices and edges \(G(V, E)\).
+    The vertices are sometimes also referred to as nodes 
+    and the edges are lines or arcs that connect any two nodes in the graph.
+
+    The graph data structure can be represented as an adjacency list (or matrix) to indicate connectivity between nodes.
+
+    <br><br>
+
+    To convert voxel data into a graph structure, an index must be assigned to each voxel.
+    The index of each voxel has an \(\text{(x, y, z)} \)-shaped structure and is unique, so that it can be converted into an \(\text{(0, 1, 2,} \cdot \cdot \cdot \text{, n)} \)-shaped structure.
+    Because each voxel is treated as a node, the last index of the node is the number of voxels minus one.
+
+    <br><br>
+    
+    Since a voxel is a cuboid-shaped geometry, connectivity between voxel nodes can be determined by 3D 6-way connectivity.
+    Consider the uppermost voxel with index \(319\) in the right diagram of the figure below.
+
+    Among the six faces of this voxel, only three (right, front, and bottom) are connected to adjacent voxels.
+    The other faces do not touch any neighboring voxels. According to the 3D 6-way connectivity system, the node with index \(319\) has neighbor nodes with indices \(255\), \(311\), and \(318\).
+    Therefore, using the adjacency list representation, it can be expressed as \(\text{319: [255, 311, 318]}\).
+
+    Similarly, by the same logic, the node with index \(24\) has faces that are adjacent to four voxels located to the left, right, front, and top.
+    Therefore, using the adjacency list representation, it can be expressed as \(\text{24: [16, 25, 32, 88]}\).
+
+    <br><br>
+
+    In this system, <b>the number of neighboring voxel nodes is at least 3 and at most 6</b>, since a voxel is a cuboid-shaped geometry with 6 faces.
+
+    <br><br>
+
+    <figure>
+        <img alt="Voxel to Graph From the left, Unique Index · Adjacency List Representation" src="/img/voxels-to-graph/voxels-to-graph-1.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Voxel to Graph <br>
+            From the left, Unique Index · Adjacency List Representation
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    Each node in the graph data has feature vectors of the same shape as every other node.
+    As noted above, each voxel is converted into a node, so the node's features are the voxel's geometric attributes.
+
+    In the raw data, each voxel node has the following features: coordinate \((3)\), dimension \((3)\), and location \((3)\) 
+    (<code>voxel_graph_features</code> is a flattened vector \((9)\) containing all three).
+    Additionally, the FAR \((1)\) feature from <strong>graph_global_*.json</strong> and the floor level \((1)\) of each voxel are combined as part of the node features.
+    The final feature vector of each node has a length of \((11)\); therefore, each graph is represented as an \((\text{N}, 11)\)-shaped matrix, where \(\text{N}\) is the number of nodes.
+
+    <br><br>
+
+    The details of processing the local graph are omitted here.
+    The code for processing the local graph is available at this <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py#L16-L41">link</a>.
+
+    <br><br>
+
+<pre><code class="python">
+    class VoxelGraphData:
+        def __init__(self, voxel_graph_data: dict):
+            voxel_graph_types_onehot = voxel_graph_data["voxel_graph_types_onehot"]
+            voxel_graph_features = voxel_graph_data["voxel_graph_features"]
+            voxel_graph_far_per_node = torch.zeros(voxel_graph_types_onehot.shape[0], 1) + voxel_graph_data["far"]
+            voxel_graph_floor_levels_normalized = voxel_graph_data["voxel_graph_floor_levels_normalized"].unsqueeze(0).t()
+
+            self.x = torch.cat(
+                [
+                    voxel_graph_features,
+                    voxel_graph_far_per_node,
+                    voxel_graph_floor_levels_normalized,
+                ],
+                dim=1,
+            )
+
+            self.data_number = voxel_graph_data["data_number"]
+            self.voxel_graph_types = voxel_graph_data["voxel_graph_types"]
+            self.voxel_graph_types_onehot = voxel_graph_types_onehot
+            self.edge_index = voxel_graph_data["voxel_graph_edge_indices"]
+            self.voxel_graph_floor_levels = voxel_graph_data["voxel_graph_floor_levels"]
+            self.voxel_graph_node_coordinate = voxel_graph_data["voxel_graph_node_coordinate"]
+            self.voxel_graph_node_dimension = voxel_graph_data["voxel_graph_node_dimension"]
+            self.voxel_graph_location = voxel_graph_data["voxel_graph_location"]
+            self.voxel_graph_node_ratio = voxel_graph_types_onehot * voxel_graph_data["voxel_graph_node_ratio"]
+            self.voxel_graph_node_ratio = self.voxel_graph_node_ratio.max(dim=1)[0].unsqueeze(1)
+</code></pre>
+<figcaption class="snip">
+    VoxelGraphData class
+</figcaption>
+
+<br><br>
+
+    Here, since PyTorch Geometric is used for training models with graphs, 
+    node features and the connectivity between nodes are represented as <code>x</code> and <code>edge_index</code>, respectively.
+
+    Each graph is instantiated by <code>Data</code> of PyTorch Geometric.
+    The raw data, excluding <code>x</code> and <code>edge_index</code>, can also be passed as kwargs to be used during training or evaluation.
+    It should be noted that, in training with graphs, mini-batching is performed at the node level.
+    Each data field must therefore match the number of nodes; otherwise, problems may occur during batching.
+
+    <br><br>
+
+<pre><code class="python">
+    class GraphDataset(Dataset):
+        def __init__(self, configuration: Configuration):
+            super().__init__()
+
+            self.configuration = configuration
+            
+            (...)
+
+            self.voxel_graph_data = []
+            for local_graph_file, voxel_graph_file in zip(self.local_graph_data_files, self.voxel_graph_data_files):
+                assert local_graph_file.split("/")[-1].split("_")[0] == voxel_graph_file.split("/")[-1].split("_")[0]
+                
+                (...)
+    
+                voxel_graph = torch.load(voxel_graph_file)
+                self.voxel_graph_data.append(
+                    Data(
+                        x=voxel_graph.x,
+                        edge_index=voxel_graph.edge_index,
+                        voxel_level=voxel_graph.voxel_graph_floor_levels,
+                        type=voxel_graph.voxel_graph_types,
+                        types_onehot=voxel_graph.voxel_graph_types_onehot,
+                        coordinate=voxel_graph.voxel_graph_node_coordinate,
+                        dimension=voxel_graph.voxel_graph_node_dimension,
+                        location=voxel_graph.voxel_graph_location,
+                        node_ratio=voxel_graph.voxel_graph_node_ratio,
+                        data_number=[voxel_graph.data_number] * voxel_graph.x.shape[0],
+                    )
+                )
+    
+        def __getitem__(self, i):
+            return self.local_graph_data[i], self.voxel_graph_data[i]
+    
+        def __len__(self):
+            return len(self.local_graph_data)
+</code></pre>
+<figcaption class="snip">
+    GraphDataset class
+</figcaption>
+
+    <br><br>
+
+    The detailed logic for converting voxels into a graph at the code level
+    can be found through the following <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/data.py">link</a>.
+
+</div><br><br>
+
+<h3>VoxelGNNs</h3>
+<div class="article">
+
+    The GNN model can be broadly divided into link prediction and node classification tasks.
+    In the paper, the model generates a building consisting of voxels with labels given a local graph and a voxel graph, so the task corresponds to <strong>node prediction</strong>.
+    The diagram below briefly illustrates the training process. The process follows a <strong>WGAN-GP architecture</strong>, in which both the generator and the discriminator are based on Graph Neural Networks.
+
+    <br><br>
+
+    VoxelGNNGenerator and VoxelGNNDiscriminator both use the local graph and the voxel graph as inputs. 
+    Additionally, the generator takes noise <code>z</code> as an input, while the discriminator takes the labels generated by VoxelGNNGenerator as an additional input.
+    The discriminator learns to determine whether the node labels are real or fake based on the two input graphs and <code>z</code>. 
+    The generator is then updated using both the discriminator's feedback and auxiliary losses.
+
+    <br><br>
+    
+    <figure>
+        <img alt="Training Process" src="/img/voxels-to-graph/voxels-to-graph-2.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+          Training Process
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+    The detailed code of VoxelGNNGenerator is as follows.
+    The very first step in the generator's forward pass is to compute <code>matched_x</code>,
+    which is matched by combining features from the local graph and the voxel graph.
+
+    The local graph is a bubble diagram that abstractly represents the building's spatial composition, 
+    so it and the voxel graph have different numbers of nodes and cannot be matched 1:1.
+    Therefore, their features are combined by aggregating nodes of the same type, using averaging.
+    In this way, <strong>the features of the local graph nodes are abstractly combined for each type of voxel node</strong>.
+
+    <br><br>
+
+    Then, the abstractly combined graph features are passed through the <code>matched_features_encoder</code> module for encoding.
+    Next, these encoded matched features are concatenated with the original voxel graph features and the noise vector <code>z</code> to create <code>combined_features</code>.
+
+    This concatenation serves multiple purposes:
+    the voxel graph features <strong>preserve the geometric details</strong>, 
+    and the noise vector <code>z</code> enables the model to <strong>produce diverse outputs even with the same conditions.</strong>
+
+    <br><br>
+
+    The <code>combined_features</code> are then passed through the <code>mlp_encoder</code> to produce encoded graph features, which serve as the input to the <code>encoder</code> of VoxelGNNGenerator.
+    The encoder performs message passing using the voxel graph's edge connections to generate node embeddings.
+
+    <br><br>
+
+<pre><code class="python">
+    class VoxelGNNGenerator(nn.Module):
+        def __init__(self, configuration: Configuration):
+            super().__init__()
+
+            (...)
+
+        def forward(self, local_graph, voxel_graph, z):
+            device = local_graph.x.device
+    
+            matched_x = torch.zeros((voxel_graph.x.shape[0], local_graph.x.shape[1]), device=device)
+    
+            for type_idx in torch.unique(voxel_graph.type):
+                voxel_mask = voxel_graph.type == type_idx
+                local_mask = local_graph.type == type_idx
+    
+                if local_mask.sum() > 0:
+                    matched_x[voxel_mask] = local_graph.x[local_mask].mean(dim=0)
+    
+            encoded_matched_features = self.matched_features_encoder(
+                matched_x.to(self.matched_features_encoder[0].weight.device)
+            )
+    
+            combined_features = torch.cat(
+                [
+                    encoded_matched_features, 
+                    voxel_graph.x.to(encoded_matched_features.device), 
+                    z.squeeze(0).to(encoded_matched_features.device)
+                ], dim=-1
+            )
+    
+            x = self.mlp_encoder(combined_features)
+            encoded = self.encoder(x=x, edge_index=voxel_graph.edge_index)
+    
+            final_features = torch.cat([encoded, x, encoded_matched_features, voxel_graph.x, z.squeeze(0)], dim=-1)
+    
+            logits = self.decoder(final_features)
+
+            # https://github.com/AutodeskAILab/Building-GAN/blob/master/util.py
+            label_soft = torch.nn.functional.gumbel_softmax(logits, tau=1.0)
+            label_hard = torch.zeros_like(label_soft)
+            label_hard.scatter_(-1, label_soft.argmax(dim=1, keepdim=True), 1.0)
+            label_hard = label_hard - label_soft.detach() + label_soft
+    
+            return logits, label_hard, label_soft
+</code></pre>
+<figcaption class="snip">
+    VoxelGNNGenerator
+</figcaption>
+
+
+    <br><br>
+
+    Finally, the model creates <code>final_features</code> by concatenating the encoded output with all previous feature representations: 
+    the encoder output, the initial combined features, the encoded matched features, the original voxel features, and the noise vector.
+    This rich feature representation is passed through a decoder to produce <code>logits</code> for each voxel's class prediction.
+
+    <br><br>
+
+    In this project, auxiliary losses are used in addition to WGAN-GP, namely the FAR of the building generated by the model and the ratio of voxel types.
+    For this purpose, the <code>logits</code> need to be converted to hard labels, but using simple argmax would break the gradient, so <strong>Gumbel Softmax</strong> is used.
+
+    The temperature parameter \(\tau\) controls how discrete the output is: 
+    when \(\tau\) is close to \(0\), the output becomes like a one-hot vector (hard), 
+    when \(\tau = 1.0\) the output is soft, and when \(\tau\) approaches \(\infty\), the output becomes almost uniform.
+
+    \[
+        \,\\
+        y_i = \frac{\exp( ( \log(\pi_i) + g_i ) / \tau)}{\sum_{j=1}^{\tiny{K}} \exp( ( \log(\pi_j) + g_j ) / \tau)}
+        \,\\
+    \]
+<!--     
+    discriminator의 loss는 실제 데이터 분포와 생성된 데이터 분포의 거리를 최소화 (1-lipshitz 조건을 만족하는 함수 출력 차이의 최대화) 하는 <code>d_fake.mean() - d_real.mean()</code> 이고, 
+    discriminator는 가짜 데이터에 대해 작은 값을, 진자 데이터에 대해 큰 값을 부여하도록 학습한다.
+
+    generator는 이 거리를 최소화 하기 위해 실제 데이터와 유사한 분포를 갖는 건물을 생성해야 한다. 
+    즉 가짜 데이터에 대한 discriminator의 점수를 높게 만들어야 하므로 adversarial loss를 기본으로 하며 위에서 언급한 losses들을 보조로 사용한다:
+    -->
+    
+    The discriminator's <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/cf7f92d4d4cf6c15b08511153fe5e02d9d1e762f/building_gan/src/trainer.py#L285-L299">loss</a> 
+    is defined as <code>d_fake.mean() - d_real.mean()</code>, 
+    which minimizes the distance between the real data distribution and the generated data distribution 
+    (maximizing the output difference of a function satisfying the 1-Lipschitz condition).
+    <strong>The discriminator is trained to assign low values to fake data and high values to real data.</strong>
+
+    <br><br>
+
+    To minimize this distance, the generator must produce buildings with a distribution that resembles the real data.
+    In other words, <strong>the generator aims to increase the discriminator's score for fake data</strong>, using adversarial <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/main/building_gan/src/trainer.py#L301-L352">loss</a> as the main objective, 
+    with the above-mentioned auxiliary losses as additional objectives:
+
+    \[  
+        \,\\
+        \begin{aligned}
+        \text{Loss}_{\text{G}} \, = &\quad\, \text{loss}_{\text{adv}} \cdot \lambda_{\text{adv}} \\
+                                 & + \text{loss}_{\text{ratio}} \cdot \lambda_{\text{ratio}} \\
+                                 & + \text{loss}_{\text{far}} \cdot \lambda_{\text{far}}    
+        \end{aligned}
+        \,\\
+    \]
+
+    <br>
+
+
+<pre><code class="python">
+    def _compute_generator_loss(self, local_graph, voxel_graph, logits, label_hard):
+
+        d_fake = self.discriminator(local_graph, voxel_graph, label_hard)
+        if self.configuration.USE_WGANGP:
+            g_loss_adv = -d_fake.mean()
+        
+        else:
+            g_loss_adv = torch.nn.functional.binary_cross_entropy(d_fake, torch.ones_like(d_fake))
+            
+        g_loss_adv *= self.configuration.LAMBDA_ADV
+        
+        label_ratio_g = label_hard.squeeze(0).sum(dim=0) / voxel_graph.num_nodes
+        label_ratio = voxel_graph.types_onehot.sum(dim=0) / voxel_graph.num_nodes
+
+        g_loss_ratio = torch.nn.functional.mse_loss(label_ratio_g[:-2], label_ratio[:-2])
+        g_loss_ratio *= self.configuration.LAMBDA_RATIO
+
+        g_loss_ratio_voids = torch.nn.functional.mse_loss(label_ratio_g[-2:], label_ratio[-2:])
+        g_loss_ratio_voids *= self.configuration.LAMBDA_RATIO_VOID
+        
+        voxel_types_generated = label_hard.squeeze(0).argmax(dim=1)
+            
+        far_unique = []
+        far_unique_generated = []
+
+        si = 0
+        for gi in range(voxel_graph.num_graphs):
+            each_voxel_graph = voxel_graph[gi]
+            each_far = each_voxel_graph.x[0][9]
+            each_dimension = each_voxel_graph.x[:, 3:6] * self.configuration.NORMALIZATION_FACTOR_DIMENSION
+            
+            ei = si + each_voxel_graph.num_nodes
+            each_voxel_types_generated = voxel_types_generated[si:ei]
+            each_dimension_to_use = each_dimension[each_voxel_types_generated != self.configuration.VOID]
+            
+            each_gfa = (each_dimension_to_use[:, 1] * each_dimension_to_use[:, 2]).sum()
+            each_far_generated = each_gfa / each_voxel_graph.site_area[0]
+            
+            far_unique.append(each_far)
+            far_unique_generated.append(each_far_generated)
+            
+            si = ei
+            
+        g_loss_far = torch.nn.functional.mse_loss(torch.tensor(far_unique_generated), torch.tensor(far_unique))
+        g_loss_far *= self.configuration.LAMBDA_FAR
+        
+        g_loss = g_loss_adv + g_loss_ratio + g_loss_ratio_voids + g_loss_far
+        
+        return g_loss
+</code></pre>
+<figcaption class="snip">
+    \( \text{Loss}_{\text{G}} \) computation
+</figcaption>
+
+    <br><br>
+
+    The lambdas for the generator are carefully balanced to ensure stable training.
+    The adversarial loss takes priority with \(\lambda_{\text{adv}} = 1.0\), 
+    while the auxiliary losses for program type ratios and FAR are weighted at \(\lambda_{\text{ratio}} = 0.1\) and \(\lambda_{\text{far}} = 0.1\) respectively.
+    This configuration allows the model to focus primarily on generating buildings' program distribution while maintaining architectural constraints.
+
+    <!-- 
+    auxiliary loss 계산시 l1 loss를 사용한 이유는? 
+    라플라스 분포. 모델이 생성한 레이블 결과에 따른 ratio는 곧 FAR과 관련되어 있음.
+    voxelgnngenerator는 타겟팅하는 far에 대한 입력을 받아서 컨디셔널하게 생성하므로 모델의 생성 결과에 따른 
+    far의 값이 라플라스 분포의 평균 주변에 밀집해있을 것이라고 가정하고 주변 값 근처에서 생성하고 업데이트 되도록 설정 
+     -->
+</div><br><br>
+
+<h3>Training VoxelGNNs</h3>
+<div class="article">
+
+    For this implementation, a subset of 10,000 graphs from the total 120,000 dataset is used.
+
+    The monitoring results from training on 10,000 graphs for 1,000 epochs are as follows.
+    Each metric commonly used for evaluating classification models was measured, and all graphs show convergence.
+
+    
+    <figure>
+        <img alt="Losses &amp; Metrics From the left, Generator Loss · Accuracy · Recall · Precision · F1" src="/img/voxels-to-graph/voxels-to-graph-3.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Losses & Metrics <br>
+            From the left, Generator Loss · Accuracy · Recall · Precision · F1 
+        </figcaption>
+    </figure>
+
+    <br><br>
+        
+    However, since the total number of nodes within the 10,000 samples is approximately 4,000,000,
+    the large number of nodes means that, even when misclassified labels are present, the metrics cannot reflect the performance differences.
+
+    In addition, since VoxelGNNGenerator performs node-wise label prediction,
+    <strong>it is difficult to evaluate the generation quality at the graph level.</strong>
+
+
+    <figure>
+        <img alt="Graph-wise f1 scores From the left, Minimum f1 score of training dataset Minimum f1 score of validation dataset Weighted sum…" src="/img/voxels-to-graph/voxels-to-graph-4.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Graph-wise f1 scores <br>
+            From the left, 
+            Minimum f1 score of training dataset <br>
+            Minimum f1 score of validation dataset <br>
+            Weighted sum of f1 scores 
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+<!-- <pre><code class="text">
+    voxel_types_ratio: [
+        [-1, 1342993, 0.3365],  # void (exterior)
+        [0, 522887, 0.13101],   # lobby/corridor
+        [1, 253412, 0.06349],   # restroom
+        [2, 109624, 0.02747],   # stairs
+        [3, 197512, 0.04949],   # elevator
+        [4, 1520140, 0.38088],  # office
+        [5, 44545, 0.01116]     # mechanical room
+    ]
+</code></pre> -->
+
+    To address this problem, the validation method <a href="https://github.com/PARKCHEOLHEE-lab/building-gan-graph-conditioned-architectural-volume-generation/blob/fd906a029e1c085b3b27c9641c912a938c50aa67/building_gan/src/trainer.py#L412-L435">computes the graph-wise f1 scores</a> on both training and validation datasets.
+    <strong>By calculating f1 scores for node labels separately for each graph, the quality of each building can be evaluated</strong>,
+    even though generating these metrics takes more time.
+    Therefore, the model selection criterion \(\mathcal{C}\) uses a weighted sum of the worst-performing graphs from both sets.
+    The model is saved when this weighted sum of f1 scores improves, computed as follows, where \(w_{\text{t}} = 0.05\) and \(w_{\text{v}} = 1.0\).
+
+    \[
+        \,\\
+            \mathcal{C} = 
+            \min_{g \,\in\, G_{\text{t}}} \text{f1}(g) \cdot w_{\text{t}} 
+            + \min_{g \,\in\, G_{\text{v}}} \text{f1}(g) \cdot w_{\text{v}}
+        \,\\
+    \]
+
+<pre><code class="python">
+    current_f1_score = (
+        f1_score_min_train * self.configuration.F1_SCORE_TRAIN_WEIGHT
+        + f1_score_min_validation * self.configuration.F1_SCORE_VALIDATION_WEIGHT
+    )
+    
+    if best_f1_score < current_f1_score:
+        best_f1_score = current_f1_score
+
+        torch.save(
+            {
+                "epoch_start": epoch,
+                "epoch_end": epoch_end,
+                "best_f1_score": best_f1_score,
+                "f1_score_train": f1_score_train,
+                "f1_score_validation": f1_score_validation,
+                "f1_score_min_train": f1_score_min_train,
+                "f1_score_min_validation": f1_score_min_validation,
+                "recall_score_train": recall_score_train,
+                "recall_score_validation": recall_score_validation,
+                "accuracy_score_train": accuracy_score_train,
+                "accuracy_score_validation": accuracy_score_validation,
+                "generator": self.generator.state_dict(),
+                "discriminator": self.discriminator.state_dict(),
+                "optimizer_generator": self.optimizer_generator.state_dict(),
+                "optimizer_discriminator": self.optimizer_discriminator.state_dict(),
+                "scheduler_generator": self.scheduler_generator.state_dict(),
+            },
+            os.path.join(self.log_dir, "states.pt"),
+        )
+</code></pre>
+<figcaption class="snip">
+    Condition to save model status
+</figcaption>
+
+    <br><br>
+
+    
+        Graph-based models operate with <strong>graphs as batch, but since computations are performed at the node level,
+        even when the batch size remains constant, the number of nodes varies with each input</strong>.
+
+    Therefore, when using <code>BatchNorm</code>, statistical instability can occur in graphs with fewer nodes.
+    Particularly when using running mean and variance in <code>eval()</code> mode, performance may drop significantly. 
+    This is because graphs with fewer nodes tend to have larger differences from the overall training distribution.
+    As a solution to this issue, <code>LayerNorm</code> can be used. It performs normalization independently for each node across the feature dimension</strong>,
+    making it more suitable for graphs with varying numbers of nodes and providing more stable performance during evaluation.
+
+    <!-- 그래프 기반의 모델은 배치 단위가 그래프이지만, 계산은 노드단위로 계산되므로 배치 개수가 늘 동일하더라도 매번 다른 노드의 개수가 입력으로 들어오게 된다.
+    따라서 batch normalization을 사용하는 경우, 노드 수가 적은 그래프에서는 통계적 불안정성이 발생할 수 있다.
+    특히 eval() 모드에서 running mean과 variance를 사용할 때, 성능이 크게 저하될 가능성이 있다. 
+    이는 그래프의 노드 수가 적을수록 전체 학습 분포와의 차이가 커지기 때문이다.
+    이에 대한 해결책으로 layer normalization을 사용할 수 있다. Layer normalization은 각 노드에 대해 독립적으로 feature 차원에서 정규화를 수행하므로, 
+    노드 수가 다양한 그래프에 더 적합하며 평가 시에도 더 안정적인 성능을 제공한다. -->
+
+    <figure>
+        <img alt="BatchNorm vs. LayerNorm in validation From the left, BatchNorm · LayerNorm" src="/img/voxels-to-graph/voxels-to-graph-6.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            BatchNorm vs. LayerNorm in validation<br>
+            From the left, BatchNorm · LayerNorm
+        </figcaption>
+    </figure>
+
+</div><br><br>
+
+<h3>Building Generation</h3>
+<div class="article">
+
+    Finally, passing the test dataset through the trained VoxelGNNGenerator model produces results such as the following.
+    
+    <figure>
+        <img alt="Generated Buildings w/ Test Dataset" src="/img/voxels-to-graph/voxels-to-graph-5.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>
+            Generated Buildings w/ Test Dataset
+        </figcaption>
+    </figure>
+
+    <br><br>
+
+
+</div><br><br>
+
+<h3>Future Works</h3>
+<div class="article">
+
+    This project yielded several important findings.
+    The most significant was that layer normalization performs considerably better than batch normalization when working with graphs that have varying numbers of nodes.
+    This insight will be helpful for building better graph neural networks in the future.
+
+    <br><br>
+    The following directions are planned for future work:
+
+    <ul>
+        <li>
+            <strong>Implement Building Generation Interface</strong>: Develop an interface, in the form of a web application or a CAD plugin, that allows the two input graphs to be drawn easily and scheme designs for buildings to be generated quickly.
+        </li>
+        <li>
+            <strong>Apply Sun Light Regulation</strong>: Apply building regulations, particularly the fundamental daylight regulations, so that the generated design proposals comply with these requirements.
+        </li>
+        <li>
+            <strong>Evaluate with metrics for generative model</strong>: Implement more reliable methods for measuring generative-model quality, such as the FID score, the Inception score, and other established metrics.
+        </li>
+        <!-- <li>
+            Implement Building Generation Interface: web or cad plugin 형태로 두 입력 그래프를 만들고 빠르게 건물에 대한 scheme design을 할 수 있는 인터페이스 구현
+        </li>
+        <li>
+            Apply Sun Light Regulation: 건축 법규 중 가장 기본이 되는 일조 사선을 반영하여 설계안을 생성할 수 있도록 적용용
+        </li>
+        <li>
+            Evaluate with metrics for generative model: 생성모델의 품질 측정에 대해서 더 신뢰도 높은 방식으로 .... fid score, inception....
+        </li> -->
+    </ul>
+</div><br><br>
+
+<h3>References</h3>
+<div class="article">
+    <ul>
+        <li>
+            <a href="https://arxiv.org/pdf/2104.13316">https://arxiv.org/pdf/2104.13316</a>
+        </li>
+        <li>
+            <a href="https://github.com/AutodeskAILab/Building-GAN">https://github.com/AutodeskAILab/Building-GAN</a>
+        </li>
+        <li>
+            <a href="https://www.youtube.com/watch?v=eA4aBKKjiCk">https://www.youtube.com/watch?v=eA4aBKKjiCk</a>
+        </li>
+        <li>
+            <a href="https://arxiv.org/pdf/1406.2661">https://arxiv.org/pdf/1406.2661</a>
+        </li>
+        <li>
+            <a href="https://arxiv.org/pdf/1610.09585">https://arxiv.org/pdf/1610.09585</a>
+        </li>
+        <li>
+            <a href="https://kaen2891.tistory.com/81">https://kaen2891.tistory.com/81</a>
+        </li>
+        <li>
+            <a href="https://blog.naver.com/qbxlvnf11/223168163836">https://blog.naver.com/qbxlvnf11/223168163836</a>
+        </li>
+        <li>
+            <a href="https://haawron.tistory.com/21">https://haawron.tistory.com/21</a>
+        </li>
+        <li>
+            <a href="https://parkcheolhee-lab.github.io/wasserstein-distance/">https://parkcheolhee-lab.github.io/wasserstein-distance/</a>
+        </li>
+        <li>
+            <a href="https://parkcheolhee-lab.github.io/gradient-penalty/">https://parkcheolhee-lab.github.io/gradient-penalty/</a>
+        </li>
+    </ul>
+</div><br><br>
+
+<br><br>

@@ -61,27 +61,23 @@ def has_body(filepath):
 
 def list_posts(root=REPO_ROOT):
     """Yield (filepath, slug, title) for each eligible post under root."""
-    for subdir in ("note/_posts", "testbed/_posts"):
-        post_dir = os.path.join(root, subdir)
-        if not os.path.isdir(post_dir):
+    for filepath in sorted(glob.glob(os.path.join(root, "_posts", "*.html"))):
+        basename = os.path.basename(filepath)
+
+        # Skip underscore-prefixed files
+        if basename.startswith("_"):
             continue
-        for filepath in sorted(glob.glob(os.path.join(post_dir, "*.html"))):
-            basename = os.path.basename(filepath)
 
-            # Skip underscore-prefixed files
-            if basename.startswith("_"):
-                continue
+        # Skip empty posts
+        if not has_body(filepath):
+            continue
 
-            # Skip empty posts
-            if not has_body(filepath):
-                continue
+        # Extract slug: remove date prefix and .html extension
+        slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", basename)
+        slug = slug.removesuffix(".html")
 
-            # Extract slug: remove date prefix and .html extension
-            slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", basename)
-            slug = slug.removesuffix(".html")
-
-            title = extract_title(filepath)
-            yield filepath, slug, title
+        title = extract_title(filepath)
+        yield filepath, slug, title
 
 
 def main():

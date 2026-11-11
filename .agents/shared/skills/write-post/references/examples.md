@@ -2,7 +2,7 @@
 
 Representative existing posts mapped to category, language, and style. Use these as reference when classifying a new post.
 
-## note/_posts/
+## Note posts (`categories: note`)
 
 | Slug | Language | Style | Emoji | Why |
 |---|---|---|---|---|
@@ -21,7 +21,7 @@ Representative existing posts mapped to category, language, and style. Use these
 | `2025-06-16-capability-overhang` | en | prose | `eyes.png` | Industry observation |
 | `2025-06-09-truth` | en | prose | `wordballoon-with-dots.png` | Philosophy / reflection |
 
-## testbed/_posts/
+## Testbed posts (`categories: testbed`)
 
 | Slug | Language | Style | At | Notes |
 |---|---|---|---|---|
