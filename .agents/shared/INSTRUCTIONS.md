@@ -16,7 +16,7 @@ This repository is the source for `PARKCHEOLHEE-lab.github.io`, a Jekyll-based p
 - **Tech stack**: Jekyll 4, Ruby/Bundler, Sass, vanilla JavaScript, Python helper scripts.
 - **Primary content**: HTML posts with YAML frontmatter under `_posts/`; each post's `categories` field (`note` or `testbed`) says which kind it is.
 - **Generated output**: `_site/` is build output and must not be edited by hand.
-- **Latent space data**: `assets/data/latentspace.json` drives the D3 post map; `assets/data/embeddings.json` caches OpenAI embeddings, and `assets/data/embedding-hashes.json` records which post text each cached vector came from.
+- **Latent space data**: `assets/data/latentspace.json` drives the D3 post map; `assets/data/embeddings.json` caches the post embeddings (Qwen3-Embedding-0.6B, run locally), and `assets/data/embedding-hashes.json` records which post text each cached vector came from.
 - **Repo-local skills**: `add-related` maintains `related` frontmatter; `build-latentspace` rebuilds the post map data.
 
 ## Common Commands
@@ -37,15 +37,17 @@ python3 .agents/shared/skills/add-related/scripts/verify_related.py
 # Run latent-space tests when Python deps are installed
 python3 -m pytest .agents/shared/skills/build-latentspace/scripts/test_build_post_map.py -v
 
-# Rebuild latent-space data; requires OPENAI_API_KEY and Python deps
-python3 .agents/shared/skills/build-latentspace/scripts/build_post_map.py
+# Rebuild latent-space data locally; needs sentence-transformers on top of the test deps
+~/.venvs/latentspace/bin/python .agents/shared/skills/build-latentspace/scripts/build_post_map.py
 ```
 
-Python dependencies for latent-space work are installed in CI with:
+Python dependencies for the latent-space tests are installed in CI with:
 
 ```bash
-pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
+pip install beautifulsoup4 lxml numpy scikit-learn pytest
 ```
+
+The rebuild also needs `pip install sentence-transformers`, which brings torch and transformers; CI never installs it.
 
 ## Content Conventions
 
@@ -63,13 +65,13 @@ Use the `add-related` skill when adding or refreshing related-post links. The ca
 - `.agents/shared/skills/add-related/scripts/list_posts.py`
 - `.agents/shared/skills/add-related/scripts/verify_related.py`
 
-Use the `build-latentspace` skill when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
+Use the `build-latentspace` skill when posts are added, removed, or labels need refreshing. The build script embeds posts locally with `Qwen/Qwen3-Embedding-0.6B` and rewrites:
 
 - `assets/data/latentspace.json`
 - `assets/data/embeddings.json`
 - `assets/data/embedding-hashes.json`
 
-Do not run `build-latentspace` without confirming `OPENAI_API_KEY` is available; it can call a paid API.
+GitHub Actions no longer rebuilds these files, so commit them with the post change. The first run downloads the model (about 1.1 GB) into the Hugging Face cache.
 
 ## Verification Rules
 

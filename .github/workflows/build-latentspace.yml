@@ -1,10 +1,15 @@
 name: Build Latent Space
 
+# The map is rebuilt locally (build-latentspace skill), because the embedding
+# model runs on the author's machine. CI only runs the build script's tests,
+# which stub the model, so they need no torch, no download and no secret.
 on:
   push:
     branches: [main]
     paths:
-      - '_posts/**'
+      - '.agents/shared/skills/build-latentspace/scripts/**'
+      - '.agents/shared/skills/add-related/scripts/**'
+      - '.github/workflows/build-latentspace.yml'
   workflow_dispatch:
 
 jobs:
@@ -19,46 +24,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
+        run: pip install beautifulsoup4 lxml numpy scikit-learn pytest
 
       - name: Run tests
         run: python3 -m pytest .agents/shared/skills/build-latentspace/scripts/test_build_post_map.py -v
-
-      - name: Build latentspace.json
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python3 .agents/shared/skills/build-latentspace/scripts/build_post_map.py
-
-      - name: Verify output
-        run: |
-          python3 -c "
-          import json
-          data = json.load(open('assets/data/latentspace.json'))
-          print(f'{len(data)} posts')
-          print({d['label'] for d in data})
-          print(f'{sum(len(d[\"connected\"]) for d in data)} connections')
-          "
-
-      - name: Create PR and merge if changed
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add assets/data/latentspace.json assets/data/embeddings.json assets/data/embedding-hashes.json
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            BRANCH="auto/update-latentspace-$(date +%Y%m%d-%H%M%S)"
-            git checkout -b "$BRANCH"
-            git commit -m "Update latentspace.json [automated]"
-            git fetch origin main
-            git rebase origin/main
-            git push -u origin "$BRANCH"
-            PR_URL=$(gh pr create \
-              --title "Update latentspace.json [automated]" \
-              --body "Automated latentspace rebuild triggered by post changes." \
-              --base main \
-              --head "$BRANCH")
-            gh pr merge "$PR_URL" --squash --delete-branch
-          fi
