@@ -355,10 +355,10 @@ a:hover
 // the Testbed's puzzle, wherever it shows (a Manifest row, its type in the panel, a Related post): a band
 // of light crosses it every 2 seconds, every puzzle at once. The puzzle is drawn again under the band as
 // the image's background, its own picture pushed out of view, and both are cut to the puzzle's shape
-img[src$="/emoji/puzzle.png"]
+img[src$="/assets/emoji/puzzle.png"]
   object-position: -999px 0
-  background: linear-gradient(110deg, transparent 38%, rgba($light, 0.9) 50%, transparent 62%) 100% 0 / 300% 100% no-repeat, url("/emoji/puzzle.png") center / contain no-repeat
-  mask: url("/emoji/puzzle.png") center / contain no-repeat
+  background: linear-gradient(110deg, transparent 38%, rgba($light, 0.9) 50%, transparent 62%) 100% 0 / 300% 100% no-repeat, url("/assets/emoji/puzzle.png") center / contain no-repeat
+  mask: url("/assets/emoji/puzzle.png") center / contain no-repeat
   animation: puzzle-shine 2s ease-in-out infinite
   @media (prefers-reduced-motion: reduce)
     animation: none
@@ -399,11 +399,6 @@ img[src$="/emoji/puzzle.png"]
   margin-top: -1.5em
   color: reduce(100)
   float: left
-
-.list-filter-button
-  margin-top: -1.5em
-  float: right
-  font-size: smaller
 
 .list-spacer
   margin-top: -1em
@@ -719,37 +714,6 @@ img[src$="/emoji/puzzle.png"]
     overflow-x: hidden
     // its own end does not scroll the page on, and a sideways swipe still reaches the page
     overscroll-behavior-y: contain
-
-// --- Testbed-specific classes ---
-
-.testbed-post-item
-  margin-top: -0.2em
-
-.testbed-date
-  margin-top: -0.5em
-  margin-bottom: 0.5em
-
-.testbed-excerpt-wrapper
-  display: flex
-  font-size: calc(0.45rem + 0.2vw)
-  text-align: justify
-
-.testbed-excerpt-text
-  margin-bottom: -0.4em
-
-.testbed-thumbnail
-  margin-left: 7em
-  margin-top: 1.2em
-  display: block
-  width: 25%
-  object-fit: cover
-
-.testbed-hashtag
-  margin-top: 3em
-  margin-bottom: 0.5em
-  font-size: calc(0.35rem + 0.2vw)
-  text-align: right
-  color: reduce(100)
 
 // --- Embed classes ---
 

@@ -72,28 +72,6 @@ function generate_table_of_contents() {
   }
 }
 
-function filter_posts(type) {
-  const posts = document.querySelectorAll(".testbed-post");
-  const back_button = document.getElementById("back-button");
-  const filter_buttons = document.getElementById("filter-buttons");
-
-  posts.forEach(function(post) {
-    if (type === "all") {
-      post.style.display = "";
-    } else {
-      post.style.display = post.dataset[type] === "true" ? "" : "none";
-    }
-  });
-
-  if (type === "all") {
-    back_button.style.display = "none";
-    filter_buttons.style.display = "";
-  } else {
-    back_button.style.display = "";
-    filter_buttons.style.display = "none";
-  }
-}
-
 // The Manifest list and its side panel. Sort by orders the rows newest or oldest first, by title, or
 // by type. A checkbox per post type (read from each row's emoji, with its post count) shows the
 // checked types' rows, all of them at first; with none checked the list is empty. Pinned rows stay on
@@ -109,12 +87,12 @@ function setup_note_list() {
   const search = document.getElementById("note-search");
   const found = search.parentElement.querySelector(".note-search-count");
   const clear = search.parentElement.querySelector(".note-search-clear");
-  const PIN = "/emoji/pin.png";
+  const PIN = "/assets/emoji/pin.png";
   // the names the latent-space map shows beside the same icons (LABEL_EMOJIS in js/latentspace.js);
   // any other type is named after its icon file, capitalized
   const TYPE_NAMES = { "default": "Note", "puzzle": "Testbed", "wordballoon-with-dots": "Wordballoon" };
   // an empty note is a note, for the filter and the type sort; its row keeps its own icon
-  const SAME_TYPE = { "/emoji/default-empty.png": "/emoji/default.png" };
+  const SAME_TYPE = { "/assets/emoji/default-empty.png": "/assets/emoji/default.png" };
 
   const rows = Array.from(list.querySelectorAll(".note-post-item")).map(function(item, index) {
     const icon = item.querySelector(".emoji-image").getAttribute("src");
@@ -136,7 +114,7 @@ function setup_note_list() {
   });
   // Testbed first, as the owner asked, then the most common type first; types with equal counts keep
   // the order they first appear in. The Type sort follows the same order
-  const TESTBED = "/emoji/puzzle.png";
+  const TESTBED = "/assets/emoji/puzzle.png";
   const types = Object.keys(counts).sort(function(a, b) {
     return (b === TESTBED) - (a === TESTBED) || counts[b] - counts[a];
   });

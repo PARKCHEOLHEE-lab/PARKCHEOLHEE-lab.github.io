@@ -42,7 +42,7 @@ When unsure which category to pick, use these rules of thumb (then confirm with 
 4. **Cheat sheet or reference list** → note (use `pin.png` emoji, or omit emoji to fall back to the "Note" label)
 5. **Book or quote-driven essay** → note with `books.png` emoji
 
-Only the seven emojis mapped in `build-latentspace`'s `EMOJI_TO_LABEL` (`brain`, `books`, `pin`, `eyes`, `wordballoon-with-dots`, `robot`, `storm`) produce a non-default latent-space label. Other emoji files exist under `emoji/` but are silently labeled "Note" — see `references/frontmatter.md` for the canonical table.
+Only the seven emojis mapped in `build-latentspace`'s `EMOJI_TO_LABEL` (`brain`, `books`, `pin`, `eyes`, `wordballoon-with-dots`, `robot`, `storm`) produce a non-default latent-space label. Other emoji files exist under `assets/emoji/` but are silently labeled "Note" — see `references/frontmatter.md` for the canonical table.
 
 When unsure which body style to pick:
 

@@ -16,6 +16,8 @@ module.exports = defineConfig({
     },
   ],
   webServer: {
+    // run from the repo root, where _site is; Playwright starts it in this file's folder (dev/) otherwise
+    cwd: '..',
     command: 'npx http-server _site -p 4000 -s -c-1',
     url: 'http://127.0.0.1:4000/latentspace/',
     reuseExistingServer: true,

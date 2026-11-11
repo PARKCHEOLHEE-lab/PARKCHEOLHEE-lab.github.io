@@ -1,4 +1,5 @@
 ---
+permalink: /search.json
 layout: null
 ---
 {%- comment -%} The Manifest's search (setup_note_list): each listed page's address and text, without

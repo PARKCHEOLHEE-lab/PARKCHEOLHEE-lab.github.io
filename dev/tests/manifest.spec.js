@@ -2,7 +2,7 @@
 const { test, expect } = require('@playwright/test');
 
 const shown_rows = (page) => page.locator('#note-list .note-post-item:visible');
-const type_box = (page, icon) => page.locator(`#note-type-filter input[value="/emoji/${icon}.png"]`);
+const type_box = (page, icon) => page.locator(`#note-type-filter input[value="/assets/emoji/${icon}.png"]`);
 
 test('type filter: unchecked types hide, and every type can be unchecked', async ({ page }) => {
   await page.goto('/manifest/');
@@ -13,7 +13,7 @@ test('type filter: unchecked types hide, and every type can be unchecked', async
   }
 
   for (const box of await boxes.all()) {
-    if ((await box.getAttribute('value')) !== '/emoji/puzzle.png') {
+    if ((await box.getAttribute('value')) !== '/assets/emoji/puzzle.png') {
       await box.click();
     }
   }
@@ -21,7 +21,7 @@ test('type filter: unchecked types hide, and every type can be unchecked', async
   expect(testbed).toBeGreaterThan(0);
   expect(testbed).toBeLessThan(total);
   for (const icon of await shown_rows(page).locator('.emoji-image').evaluateAll((images) => images.map((image) => image.getAttribute('src')))) {
-    expect(icon).toBe('/emoji/puzzle.png');
+    expect(icon).toBe('/assets/emoji/puzzle.png');
   }
 
   await type_box(page, 'puzzle').click();
@@ -39,14 +39,14 @@ test('sort by: pinned rows stay on top, and Oldest puts the oldest post first', 
   const rows = page.locator('#note-list .note-post-item');
   const sort = (name) => page.locator('#note-sort').getByRole('radio', { name, exact: true });
   const icons = () => rows.locator('.emoji-image').evaluateAll((images) => images.map((image) => image.getAttribute('src')));
-  const pinned = (await icons()).filter((icon) => icon === '/emoji/pin.png').length;
+  const pinned = (await icons()).filter((icon) => icon === '/assets/emoji/pin.png').length;
   expect(pinned).toBeGreaterThan(0);
   await expect(sort('Newest')).toBeChecked();
   for (const name of ['Oldest', 'A–Z', 'Type', 'Newest']) {
     await sort(name).check();
     const order = await icons();
-    expect(order.slice(0, pinned).every((icon) => icon === '/emoji/pin.png')).toBe(true);
-    expect(order.slice(pinned).includes('/emoji/pin.png')).toBe(false);
+    expect(order.slice(0, pinned).every((icon) => icon === '/assets/emoji/pin.png')).toBe(true);
+    expect(order.slice(pinned).includes('/assets/emoji/pin.png')).toBe(false);
   }
 
   await sort('Oldest').check();
@@ -152,7 +152,7 @@ test('the address brings a search back, it keeps the type filter, and Escape cle
   await expect(page.locator('#note-search')).toHaveValue('attention');
   await expect.poll(() => shown_rows(page).count()).toBeGreaterThan(0);
   for (const icon of await shown_rows(page).locator('.emoji-image').evaluateAll((images) => images.map((image) => image.getAttribute('src')))) {
-    expect(['/emoji/default.png', '/emoji/default-empty.png']).toContain(icon);
+    expect(['/assets/emoji/default.png', '/assets/emoji/default-empty.png']).toContain(icon);
   }
   const total = await page.locator('#note-list .note-post-item').count();
   const notes = Number((await page.locator('#note-type-filter label', { hasText: 'Note' }).locator('.note-filter-count').textContent()));
@@ -228,7 +228,7 @@ test('the search box keeps its height while typing, between the rows\' dotted li
 
 test('Testbed is the first type in the panel', async ({ page }) => {
   await page.goto('/manifest/');
-  await expect(page.locator('#note-type-filter input').first()).toHaveAttribute('value', '/emoji/puzzle.png');
+  await expect(page.locator('#note-type-filter input').first()).toHaveAttribute('value', '/assets/emoji/puzzle.png');
 });
 
 test('dragging the mouse over types gives them all the first one\'s new state, and a click still flips one', async ({ page }) => {
@@ -296,7 +296,7 @@ for (const width of [360, 390]) {
 
     const total = await page.locator('#note-list .note-post-item').count();
     await type_box(page, 'puzzle').click();
-    const testbed = await page.locator('#note-list .emoji-image[src="/emoji/puzzle.png"]').count();
+    const testbed = await page.locator('#note-list .emoji-image[src="/assets/emoji/puzzle.png"]').count();
     await expect(shown_rows(page)).toHaveCount(total - testbed);
 
     await page.keyboard.press('Escape');
@@ -342,9 +342,9 @@ test('the Testbed\'s puzzle shines every 2 seconds wherever it shows, and rests 
   // not drawn on a wide screen, and runs nothing)
   for (const path of ['/manifest/', '/image-to-3d-scene/']) {
     await page.goto(path);
-    const count = await page.locator('img[src="/emoji/puzzle.png"]:visible').count();
+    const count = await page.locator('img[src="/assets/emoji/puzzle.png"]:visible').count();
     expect(count).toBeGreaterThan(0);
-    expect(await shines()).toEqual(Array(count).fill(['/emoji/puzzle.png', 2000, Infinity]));
+    expect(await shines()).toEqual(Array(count).fill(['/assets/emoji/puzzle.png', 2000, Infinity]));
   }
   // a while after the page opens, a type unchecked moves and shows the rows again, and on a phone the menu
   // draws the panel, each starting those puzzles' shine over; every puzzle still sweeps in step
@@ -381,7 +381,7 @@ test('the rows\' dotted line is one token, drawn the same over the list and unde
 
   const fs = require('fs');
   const path = require('path');
-  const sass_dir = path.join(__dirname, '..', '_sass');
+  const sass_dir = path.join(__dirname, '..', '..', '_sass');
   const written = fs.readdirSync(sass_dir).filter((name) => name.endsWith('.sass'))
     .map((name) => fs.readFileSync(path.join(sass_dir, name), 'utf8').split('1px dotted reduce(14)').length - 1)
     .reduce((sum, count) => sum + count, 0);

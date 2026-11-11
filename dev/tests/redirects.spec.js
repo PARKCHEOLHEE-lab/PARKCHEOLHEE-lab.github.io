@@ -5,9 +5,9 @@ const path = require('path');
 
 // files that moved under assets/ keep working at their old URLs: the site's 404 page sends a visitor on (404.html)
 
-const SITE = path.join(__dirname, '..', '_site');
+const SITE = path.join(__dirname, '..', '..', '_site');
 // where each moved folder used to be; the docs used to sit at the site's root
-const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/' };
+const OLD = { docs: '/', models: '/model/', notebooks: '/notebooks/', js: '/js/', data: '/data/', emoji: '/emoji/' };
 // a file whose old URL was not in its folder's old place: wall.ifc came from the realbuilding submodule
 const ORIGIN = { '/assets/models/wall.ifc': '/realbuilding/wall.ifc' };
 
@@ -27,12 +27,15 @@ function moved_files() {
   }
   // the resume was cv.* before it was resume.*
   pairs.push(['/cv.pdf', '/assets/docs/resume.pdf'], ['/cv.docx', '/assets/docs/resume.docx']);
+  // the favicon moved on its own, not with a folder
+  pairs.push(['/favicon.png', '/assets/favicon.png']);
   return pairs;
 }
 
 test('every moved file\'s old URL lands on its new URL', async ({ page }) => {
   // answer the new URLs with plain text, so a PDF or a model opens as a page instead of a download
-  await page.route((url) => /^\/assets\/(docs|models|notebooks)\//.test(url.pathname),
+  const moved_folder = new RegExp(`^/assets/(${Object.keys(OLD).join('|')})/`);
+  await page.route((url) => moved_folder.test(url.pathname),
     (route) => route.fulfill({ body: 'moved', contentType: 'text/plain' }));
 
   const pairs = moved_files();
@@ -42,6 +45,15 @@ test('every moved file\'s old URL lands on its new URL', async ({ page }) => {
     await page.waitForURL((url) => url.pathname === new_url);
     expect(page.url()).toContain('?q=1#top');
   }
+});
+
+// the Testbed page was folded into the Manifest; its old address opens the Manifest filtered to Testbed
+// entries (manifest.spec.js checks what ?type=testbed shows). The redirect page names the site's full URL,
+// so this reads where it points instead of following it off this server
+test('the old Testbed page sends a visitor to the Manifest filtered to Testbed', async ({ request }) => {
+  const response = await request.get('/testbed/');
+  expect(response.status()).toBe(200);
+  expect(await response.text()).toMatch(/http-equiv="refresh" content="0; url=[^"]*\/manifest\/\?type=testbed"/);
 });
 
 test('a path that never existed still shows the 404 page', async ({ page }) => {

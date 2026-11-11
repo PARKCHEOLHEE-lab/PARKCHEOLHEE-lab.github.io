@@ -37,15 +37,11 @@ def kebab(text: str) -> str:
 
 
 def normalize_emoji(value: str) -> str:
-    """Accept either 'brain.png' or '/emoji/brain.png' and return the path form."""
+    """Accept 'brain.png' or any path ending in it ('/assets/emoji/brain.png', the old '/emoji/brain.png')
+    and return the path form."""
     if not value:
         return ""
-    value = value.strip()
-    if value.startswith("/emoji/"):
-        return value
-    if value.startswith("emoji/"):
-        return "/" + value
-    return f"/emoji/{value}"
+    return f"/assets/emoji/{Path(value.strip()).name}"
 
 
 def yaml_double_quote(value: str) -> str:

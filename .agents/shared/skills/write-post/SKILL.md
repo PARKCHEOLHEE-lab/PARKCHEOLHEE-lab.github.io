@@ -17,7 +17,7 @@ Parse the slash-command `ARGUMENTS:` line for the following flags. All optional.
 | Flag | Values | Default | Meaning |
 |---|---|---|---|
 | `--language` | `en` / `kr` | `en` | Body language. `en` = English, `kr` = Korean. |
-| `--emoji` | One of `brain.png`, `books.png`, `pin.png`, `eyes.png`, `wordballoon-with-dots.png`, `robot.png`, `storm.png` (or the same with `/emoji/` prefix) | _(none)_ | Sets the `emoji:` frontmatter field. **Only the seven emojis listed have label mappings in `build-latentspace`** — others silently fall back to "Note". If none fits, omit the flag. Full table: `references/frontmatter.md`. |
+| `--emoji` | One of `brain.png`, `books.png`, `pin.png`, `eyes.png`, `wordballoon-with-dots.png`, `robot.png`, `storm.png` (or the same with `/assets/emoji/` prefix) | _(none)_ | Sets the `emoji:` frontmatter field. **Only the seven emojis listed have label mappings in `build-latentspace`** — others silently fall back to "Note". If none fits, omit the flag. Full table: `references/frontmatter.md`. |
 | `--sources` | comma-separated list of URLs and/or local file paths | _(none)_ | Reference material. URLs are fetched via `WebFetch`; local paths are read with `Read`. |
 | `--category` | `note` / `testbed` | _(ask)_ | Skip if not provided — always confirm with `AskUserQuestion`. |
 | `--slug` | kebab-case slug | _(derive + confirm)_ | Filename slug without date prefix or extension. |

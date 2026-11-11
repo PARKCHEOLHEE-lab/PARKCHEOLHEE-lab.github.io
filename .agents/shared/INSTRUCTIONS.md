@@ -16,7 +16,7 @@ This repository is the source for `PARKCHEOLHEE-lab.github.io`, a Jekyll-based p
 - **Tech stack**: Jekyll 4, Ruby/Bundler, Sass, vanilla JavaScript, Python helper scripts.
 - **Primary content**: HTML posts with YAML frontmatter under `note/_posts` and `testbed/_posts`.
 - **Generated output**: `_site/` is build output and must not be edited by hand.
-- **Latent space data**: `data/latentspace.json` drives the D3 post map; `data/embeddings.json` caches OpenAI embeddings, and `data/embedding-hashes.json` records which post text each cached vector came from.
+- **Latent space data**: `assets/data/latentspace.json` drives the D3 post map; `assets/data/embeddings.json` caches OpenAI embeddings, and `assets/data/embedding-hashes.json` records which post text each cached vector came from.
 - **Repo-local skills**: `add-related` maintains `related` frontmatter; `build-latentspace` rebuilds the post map data.
 
 ## Common Commands
@@ -27,6 +27,9 @@ bundle exec jekyll build
 
 # Serve locally
 bundle exec jekyll serve --host 0.0.0.0 --port 4000
+
+# Run the browser tests (dev/tests) against the built _site
+npx playwright test -c dev/playwright.config.js
 
 # Verify related-post frontmatter
 python3 .agents/shared/skills/add-related/scripts/verify_related.py
@@ -50,7 +53,7 @@ pip install openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken
 - Active posts live in `note/_posts` and `testbed/_posts`; underscore-prefixed files are treated as drafts or disabled posts by local scripts.
 - Post slugs are filename-derived: remove the `YYYY-MM-DD-` prefix and `.html` extension.
 - `related` entries must use slugs only, not titles or filenames.
-- Store post images under `img/` and reuse existing emoji assets under `emoji/` when assigning labels.
+- Store post images under `img/` and reuse existing emoji assets under `assets/emoji/` when assigning labels.
 - Do not edit generated `_site/` files; change source files and rebuild instead.
 
 ## Skill Workflow
@@ -62,9 +65,9 @@ Use the `add-related` skill when adding or refreshing related-post links. The ca
 
 Use the `build-latentspace` skill when posts are added, removed, or labels need refreshing. The build script embeds posts with OpenAI and rewrites:
 
-- `data/latentspace.json`
-- `data/embeddings.json`
-- `data/embedding-hashes.json`
+- `assets/data/latentspace.json`
+- `assets/data/embeddings.json`
+- `assets/data/embedding-hashes.json`
 
 Do not run `build-latentspace` without confirming `OPENAI_API_KEY` is available; it can call a paid API.
 
@@ -78,7 +81,7 @@ Do not run `build-latentspace` without confirming `OPENAI_API_KEY` is available;
 <!-- setup-design-system: do not edit between markers -->
 ## Design System
 
-This project's UI rules and design tokens live in [DESIGN.md](/DESIGN.md).
+This project's UI rules and design tokens live in [dev/DESIGN.md](/dev/DESIGN.md).
 Read it before any Sass, layout, include, or post-style change.
 
 - Tokens are Sass variables in `_sass/index.sass`. Reference them; do not

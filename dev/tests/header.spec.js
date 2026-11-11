@@ -102,13 +102,6 @@ for (const width of [820, 1240, 1920]) {
   });
 }
 
-test('a page without a menu (the Testbed page) keeps its link in the header on a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/testbed/');
-  await expect(page.locator('body > header nav')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Menu' })).toBeHidden();
-});
-
 test('on a phone the Menu icon is in the links\' colour and folds into an X while the menu is open', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/onnx/');
@@ -327,7 +320,7 @@ test('the panel breakpoint is one token: from 768px the header keeps its links, 
 
   const fs = require('fs');
   const path = require('path');
-  const sass_dir = path.join(__dirname, '..', '_sass');
+  const sass_dir = path.join(__dirname, '..', '..', '_sass');
   const written = fs.readdirSync(sass_dir).filter((name) => name.endsWith('.sass'))
     .flatMap((name) => fs.readFileSync(path.join(sass_dir, name), 'utf8').split('\n'))
     .filter((line) => !line.trim().startsWith('//') && /\b(768|767\.98)px\b/.test(line));
