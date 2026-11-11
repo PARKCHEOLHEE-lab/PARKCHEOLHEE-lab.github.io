@@ -136,6 +136,13 @@ pre
   padding-top: 0em
   padding-bottom: 1.4em
   overflow-x: auto
+  // a long line's scrollbar shows only while the pointer is over the block, even where the system
+  // keeps scrollbars always on (a Mac with a mouse); it is the code inside (hljs) that scrolls, and
+  // scrollbar-color is inherited. A phone has no hover, so it keeps its own scrolling indicator
+  @media (hover: hover)
+    scrollbar-color: transparent transparent
+    &:hover
+      scrollbar-color: reduce(50) transparent
 
 \:not(pre) > code
   font-size: .83em
