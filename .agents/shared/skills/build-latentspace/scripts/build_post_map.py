@@ -343,8 +343,10 @@ def _build():
     # Build embedding matrix in post order
     all_embeddings = np.array([cached_embeddings[p["slug"]] for p in posts])
 
-    # PCA to 2D — fully deterministic
-    pca = PCA(n_components=2)
+    # PCA to 2D — fully deterministic. The exact solver, because for more than
+    # 500 features scikit-learn's "auto" picks a randomized one that moves
+    # points between runs on the same vectors.
+    pca = PCA(n_components=2, svd_solver="full")
     coords_2d = pca.fit_transform(all_embeddings)
     coords_normalized = normalize_coords(coords_2d)
 

@@ -168,9 +168,10 @@ class TestCacheSkip:
 
     def test_pca_determinism(self, tmp_data_dir):
         """Same embeddings should produce identical coordinates."""
-        slugs = ["aaa", "bbb", "ccc"]
+        slugs = [f"p{i}" for i in range(40)]
         rng = np.random.RandomState(123)
-        cache = {s: rng.randn(FAKE_DIM).tolist() for s in slugs}
+        # the model's real width: past 500 features scikit-learn's auto solver turns randomized
+        cache = {s: rng.randn(1024).tolist() for s in slugs}
 
         posts = _fake_posts(slugs)
         mock_model = MagicMock()
