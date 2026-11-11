@@ -136,13 +136,14 @@ pre
   padding-top: 0em
   padding-bottom: 1.4em
   overflow-x: auto
-  // a long line's scrollbar shows only while the pointer is over the block, even where the system
-  // keeps scrollbars always on (a Mac with a mouse); it is the code inside (hljs) that scrolls, and
-  // scrollbar-color is inherited. A phone has no hover, so it keeps its own scrolling indicator
-  @media (hover: hover)
-    scrollbar-color: transparent transparent
-    &:hover
-      scrollbar-color: reduce(50) transparent
+  @include hover-scrollbar
+
+// the code inside a block is what scrolls (hljs); its side padding becomes margin, so the text stays
+// where it was and the scrollbar ends 1em short of the block's edges. More specific than hljs's own
+// `pre code.hljs`, whose stylesheet loads after this one
+.post-main pre > code.hljs
+  margin-inline: 1em
+  padding-inline: 0
 
 \:not(pre) > code
   font-size: .83em
@@ -721,6 +722,7 @@ img[src$="/assets/emoji/puzzle.png"]
     overflow-x: hidden
     // its own end does not scroll the page on, and a sideways swipe still reaches the page
     overscroll-behavior-y: contain
+    @include hover-scrollbar
 
 // --- Embed classes ---
 
