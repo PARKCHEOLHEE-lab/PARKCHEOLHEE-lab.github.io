@@ -3,7 +3,34 @@ permalink: /404.html
 title: "404: Page not found"
 layout: default
 sitemap: false
+# Files that moved. GitHub Pages has no server redirects, and serves this page for every path it cannot
+# find, so the script below sends an old URL to the new one. A path ending in / moves everything under it.
+# Pages Jekyll still builds use redirect_from / redirect_to (jekyll-redirect-from) instead.
+moved:
+  /resume.pdf: /assets/docs/resume.pdf
+  /resume.docx: /assets/docs/resume.docx
+  /portfolio-architectural.pdf: /assets/docs/portfolio-architectural.pdf
+  # the resume's name before it became resume.*
+  /cv.pdf: /assets/docs/resume.pdf
+  /cv.docx: /assets/docs/resume.docx
+  /model/: /assets/models/
+  # wall.ifc came from the realbuilding submodule, which the site used for this one file
+  /realbuilding/wall.ifc: /assets/models/wall.ifc
+  /notebooks/: /assets/notebooks/
 ---
+
+<script>
+  (function () {
+    const moved = {{ page.moved | jsonify }};
+    const path = location.pathname;
+    for (const from in moved) {
+      if (from.endsWith("/") ? path.startsWith(from) : path === from) {
+        location.replace(moved[from] + path.slice(from.length) + location.search + location.hash);
+        return;
+      }
+    }
+  })();
+</script>
 
 <article>
   <header><h2>404</h2></header>
