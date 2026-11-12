@@ -55,3 +55,25 @@ $panel-width: 12em !default
   &::-webkit-scrollbar-track,
   &::-webkit-scrollbar-thumb
     background: transparent
+
+// a scrollbar that fades in only while the pointer is over its box, the same with a mouse or a
+// trackpad. The system's own one shows always (a Mac with a mouse) or only while scrolling (a
+// trackpad), so the page draws its own: its thumb takes the box's border-color, which can fade while
+// the scrollbar's parts cannot, and the box has no border to show that colour. $inset ends a sideways
+// one short of the box's edges. A phone has no hover, so it keeps its own scrolling indicator, and
+// Firefox, which has no ::-webkit-scrollbar, keeps the system's
+@mixin hover-scrollbar($size: 8px, $inset: 0, $duration: 0.3s)
+  @media (hover: hover)
+    border-color: transparent
+    transition: border-color $duration ease
+    &:hover
+      border-color: reduce(50)
+    &::-webkit-scrollbar
+      width: $size
+      height: $size
+    &::-webkit-scrollbar-thumb
+      border: $size * 0.5 solid
+      border-color: inherit
+      border-radius: $size * 0.5
+    &::-webkit-scrollbar-track
+      margin-inline: $inset

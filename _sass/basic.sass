@@ -136,6 +136,11 @@ pre
   padding-top: 0em
   padding-bottom: 1.4em
   overflow-x: auto
+  @include hover-scrollbar
+
+// the code inside a block is what scrolls (hljs); its scrollbar ends 1em short of the block's edges
+pre > code
+  @include hover-scrollbar($inset: 1em)
 
 \:not(pre) > code
   font-size: .83em
@@ -714,6 +719,7 @@ img[src$="/assets/emoji/puzzle.png"]
     overflow-x: hidden
     // its own end does not scroll the page on, and a sideways swipe still reaches the page
     overscroll-behavior-y: contain
+    @include hover-scrollbar
 
 // --- Embed classes ---
 
