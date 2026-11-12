@@ -56,14 +56,14 @@ For 3D scenes, prefer real WebGL renders captured by Playwright / Puppeteer head
 
 Skeleton:
 
-1. Write `scripts/render_<slug>.html` containing a Three.js scene that:
+1. Write `dev/scripts/render_<slug>.html` containing a Three.js scene that:
    - Sets up the camera, geometry, lights, and any helpers (`THREE.CameraHelper`, `THREE.GridHelper`).
    - Renders to a canvas and exposes a global flag (e.g. `window.__rendered = true`) once render completes.
    - Optionally projects 3D points back to 2D for HTML overlay labels (use `Vector3.project(camera)`).
 2. Run a headless Chromium screenshot:
    ```bash
    npx playwright install chromium  # one-time
-   node scripts/render_<slug>.js    # opens the HTML, waits for __rendered, screenshots canvas
+   node dev/scripts/render_<slug>.js    # opens the HTML, waits for __rendered, screenshots canvas
    ```
 3. Write the resulting PNG to `img/<slug>/<slug>-<N>.png`.
 

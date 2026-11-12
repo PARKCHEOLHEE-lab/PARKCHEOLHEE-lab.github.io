@@ -1,7 +1,7 @@
 {%- comment -%}
   Hand-rolled SEO head: title, meta description, canonical, Open Graph,
   Twitter Card, and JSON-LD structured data. Reads this repo's existing
-  fields (page.title, page.thumbnail, page.emoji, page.summary) directly.
+  fields (page.title, page.thumbnail, page.summary) directly.
 {%- endcomment -%}
 {%- assign brand = site.title_tab | default: site.title -%}
 {%- if page.title and page.title != " " and page.title != site.title -%}
@@ -24,14 +24,6 @@
 {%- comment -%} If the chosen source was textless after stripping (e.g. an image-only or embed-only excerpt), fall back to the site description. {%- endcomment -%}
 {%- if seo_description == "" -%}
   {%- assign seo_description = site.description | strip_html | normalize_whitespace | strip | truncate: 200 -%}
-{%- endif -%}
-
-{%- if page.thumbnail -%}
-  {%- assign seo_image = page.thumbnail | absolute_url -%}
-{%- elsif page.emoji -%}
-  {%- assign seo_image = page.emoji | absolute_url -%}
-{%- else -%}
-  {%- assign seo_image = "/favicon.png" | absolute_url -%}
 {%- endif -%}
 
 {%- comment -%} Only a real preview (thumbnail) is large enough for social cards; emoji/favicon are too small. {%- endcomment -%}
@@ -107,7 +99,7 @@
   "publisher": {
     "@type": "Organization",
     "name": {{ site.title | strip_html | jsonify }},
-    "logo": { "@type": "ImageObject", "url": {{ "/favicon.png" | absolute_url | jsonify }} }
+    "logo": { "@type": "ImageObject", "url": {{ "/assets/favicon.png" | absolute_url | jsonify }} }
   }
 }
 </script>

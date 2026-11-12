@@ -25,6 +25,17 @@ $comments-height: 282px !default
 @function reduce ($percent)
   @return rgba(mix($dark, $light), $percent / 100)
 
+// the dotted line of the Manifest: over the list and its search box, under each row, between a side
+// panel's sections and under the phone menu's links
+$row-line: 1px dotted reduce(14) !default
+
+// from this width the site's links are in the header, and the Manifest's and a post's side panel sit
+// beside the list or post; below it both are in the phone menu (basic.sass, header.sass). setup_header
+// (assets/js/utils.js) asks matchMedia for the same width, which cannot read this token
+$panel-breakpoint: 768px !default
+// the side panel's width beside the list or post; in the phone menu it is 3em wider (header.sass)
+$panel-width: 12em !default
+
 // only where a pointer hovers: on an iPhone a fade on :hover kept a swipe from sliding a cut-off title
 // (a Manifest row's, Related's, Contents') until the row had been tapped
 @mixin hover-fade($opacity: 0.5, $duration: 0.5s)

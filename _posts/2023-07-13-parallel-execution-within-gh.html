@@ -1,0 +1,191 @@
+---
+title: "Parallel execution within GhPython"
+layout: post
+emoji: /assets/emoji/default.png
+hashtag: "#algorithm #python #multiprocessing"
+featured: false
+comment: true
+splitter: 1
+thumbnail: /img/parallel-1.gif
+related:
+  - ghpythonutils
+  - ghpy-ghuser-compile
+  - ghdoc
+  - scriptcontext-sticky
+categories: testbed
+---
+
+<div id="toc"></div>
+<h3>A simple understanding of multiprocessing</h3>
+<div class="article">
+    Multiprocessing refers to the ability of a computer system to execute multiple processes or tasks concurrently.
+    It involves the use of multiple processors or processor cores to perform multiple tasks <code>simultaneously</code>, thereby improving overall system performance and efficiency.
+
+    <br><br>
+    In a multiprocessing system, each process is an independent unit of execution with its own program counter, stack, and data section.
+    These <code>processes</code> can run concurrently, enabling parallelism and the efficient utilization of system resources.
+    
+    <ul style="padding-left: 2em;">
+        <li>Processes: A process is an instance of a running program. Each process has its own memory space, file descriptors, and system resources. Processes are created and managed by the operating system. <code>They can communicate with each other</code> using inter-process communication mechanisms.</li>
+    </ul>    
+    
+    <br>
+    
+    Multiprocessing can be understood easily through a very simple example, as follows:
+    <!--break-->
+
+<pre class="highlight"><code class="python">
+    from multiprocessing import <spab class="method">Pool</spab>, cpu_count
+    import <span class="defName">time</span>
+    
+    def <span class="defName">f</span>(x):
+        time.<span class="defName">sleep</span>(1)
+        return x*x
+    
+    def <span class="defName">parallel_execution</span>(max_range):
+        start = time.time()
+        with <span class="method">Pool</span>(processes=cpu_count()) as p:
+            x_squared = p.<span class="defName">map</span>(f, range(max_range))
+    
+        parallel_time = time.time() - start
+        print(f"Parallel execution time: {parallel_time}")      
+        
+        return x_squared
+    
+    def <span class="defName">sequential_execution</span>(max_range):
+        start = time.time()
+        x_squared = []
+        for x in range(max_range):
+            x_squared.<span class="defName">append</span>(f(x))
+    
+        sequential_time = time.time() - start
+        print(f"Sequential execution time: {sequential_time}")  
+    
+        return x_squared
+    
+    
+    if __name__ == '__main__':
+
+        max_range = 10
+        x_squared_parallel = <span class="defName">parallel_execution</span>(max_range)
+        x_squared_sequential = <span class="defName">sequential_execution</span>(max_range)
+
+        <span class="annotation"># Parallel execution time: 1.8122541904449463</span>
+        <span class="annotation"># Sequential execution time: 10.073817014694214</span>
+</code></pre>
+
+<br>
+The <code>parallel_execution</code> and <code>sequential_execution</code> functions both use <code>f(x)</code>,
+which returns the squared value of a given x after waiting 1 second (sleep).
+In the sequential function, therefore, the result is obtained only after waiting <code>at least max_range * 1</code> seconds (on my computer, this took 10.073817014694214 seconds).
+<br><br>
+The parallel function, on the other hand, took 1.8122541904449463 seconds.
+Because it executes as many tasks simultaneously as <code>cpu_count</code>, waiting <code>max_range * 1</code> seconds is no longer necessary.
+</div>
+<br><br>
+
+<h3>Improving performance of the real algorithm</h3>
+<div class="article">
+    The performance of a real algorithm can now be improved by applying multiprocessing (this task corresponds to defining the f(x) shown above).
+    The algorithm below finds the <code>MIR</code> (Maximal Inner Rectangle) for a given polygon.
+    <figure>
+        <img alt="Algorithm for finding MIR" src="/img/parallel-1.gif" width="100%" onerror=handle_image_error(this)>
+        <figcaption>Algorithm for finding MIR</figcaption>
+    </figure><br>
+
+    This algorithm approximates the maximal rectangle within a given polygon based on the rotation interval degree and the grid size.
+    Smaller values for the <code>rotation interval degree</code> and the <code>grid size</code> produce more accurate rectangles but run more slowly.
+
+    <br><br>
+
+    The algorithm is based on rotating a polygon at the input rotation intervals and creating a binary grid (AABB, axis-aligned).
+    That is, the same logic is executed at every rotation interval. Accordingly, the code for finding the MIR can be written with <code>parallelism</code> in mind, as follows.
+
+<pre class="highlight"><code class="python">
+    def <span class="defName">_generate_maximal_inner_rectangle</span>(
+        self, polygon, rotation_degree, grid_size, is_strict
+    ):
+        <span class="annotation">"""Estimates the maximum inner rectangle of the given polygon by `rotation_degree` and `grid_size`
+
+        Args:
+            polygon (Rhino.Geometry.PolylineCurve): polygon to estimate
+            rotation_degree (float): rotation step
+            grid_size (float): size of the grid each cell
+            is_strict (bool, optional): if true, only uses fully inner cells. Defaults to False.
+
+        Returns:
+            Rhino.Geometry.PolylineCurve: estimated maximal rectangle
+
+        Reference:
+            https://leetcode.com/problems/maximal-rectangle/solutions/3407011/ex-amazon-explains-a-solution-with-a-video-python-javascript-java-and-c/
+            https://chat.openai.com/share/50607e72-da71-4938-8a4d-61d94b097ede
+        """</span>
+
+        anchor = rg.AreaMassProperties.Compute(polygon).Centroid
+        mir_args_list = []
+
+        each_degree = 0
+        while each_degree <= 359:
+            each_args = []
+
+            each_angle = math.radians(each_degree)
+
+            rotation_transform = rg.<span class="method">Transform</span>.<span class="method">Rotation</span>(each_angle, anchor)
+            rotated_polygon = copy.copy(polygon)
+            rotated_polygon.<span class="method">Transform</span>(rotation_transform)
+
+            each_args = [
+                rotated_polygon,
+                anchor,
+                each_angle,
+                grid_size,
+                is_strict,
+            ]
+
+            mir_args_list.append(each_args)
+
+            each_degree += rotation_degree
+        
+        <span class="annotation"># Parallel execution</span>
+        if self.is_parallel:
+            mirs = ghpythonlib.parallel.<span class="defName">run</span>(self.<span class="defName">_get_each_mir</span>, mir_args_list, True)
+        
+        <span class="annotation"># Sequential execution</span>
+        else:
+            mirs = [self.<span class="defName">_get_each_mir</span>(each_args) for each_args in mir_args_list]
+        
+        mir = max(
+            list(mirs), key=lambda m: rg.AreaMassProperties.Compute(m).Area
+        )
+
+        return mir
+</code></pre><br>
+
+It should be noted that GhPython has no multiprocessing module, so parallelization is achieved through the <code>ghpythonlib.parallel</code> module.
+Because GhPython is IronPython implemented on the .NET Framework, the multiprocessing module used in C# could presumably be used instead.
+
+</div>
+<br><br>
+
+<h3>Comparing execution time</h3>
+<div class="article">
+    On my computer, the following results were obtained. When run in parallel, it takes 1.9735183715820313 seconds, and when run sequentially, it takes 8.2854690551757813 seconds.
+    With parallel processing, the result can therefore be obtained roughly <code>4x</code> faster. A larger number of inputs can be expected to yield an even greater performance gain.
+    <br><br>
+    <figure>
+        <img alt="Compare execution time for Parallel vs. Sequential" src="/img/parallel-execution-within-gh/parallel-2.png" width="60%" onerror=handle_image_error(this)>
+        <figcaption>Compare execution time for Parallel vs. Sequential</figcaption>
+    </figure><br>
+    The code for the above is available at <a href="https://github.com/PARKCHEOLHEE-lab/ghpythonutils/blob/main/utils/mir/mir.py">this link</a>.
+</div>
+<br><br>
+
+<h3>References</h3>
+<div class="article">
+    <ul style="padding-left: 2em;">
+        <li><a href="https://discourse.mcneel.com/t/ghpython-and-parallel/125510">https://discourse.mcneel.com/t/ghpython-and-parallel/125510</a></li>
+        <li><a href="https://leetcode.com/problems/maximal-rectangle/solutions/3407011/ex-amazon-explains-a-solution-with-a-video-python-javascript-java-and-c/">https://leetcode.com/problems/maximal-rectangle/solutions/3407011/ex-amazon-explains-a-solution-with-a-video-python-javascript-java-and-c/</a></li>
+        <li><a href="https://chat.openai.com/share/50607e72-da71-4938-8a4d-61d94b097ede">https://chat.openai.com/share/50607e72-da71-4938-8a4d-61d94b097ede</a></li>
+    </ul>    
+</div>
+<br><br>

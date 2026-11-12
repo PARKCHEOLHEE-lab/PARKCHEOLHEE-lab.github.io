@@ -37,15 +37,11 @@ def kebab(text: str) -> str:
 
 
 def normalize_emoji(value: str) -> str:
-    """Accept either 'brain.png' or '/emoji/brain.png' and return the path form."""
+    """Accept 'brain.png' or any path ending in it ('/assets/emoji/brain.png', the old '/emoji/brain.png')
+    and return the path form."""
     if not value:
         return ""
-    value = value.strip()
-    if value.startswith("/emoji/"):
-        return value
-    if value.startswith("emoji/"):
-        return "/" + value
-    return f"/emoji/{value}"
+    return f"/assets/emoji/{Path(value.strip()).name}"
 
 
 def yaml_double_quote(value: str) -> str:
@@ -64,6 +60,7 @@ def frontmatter_note(title: str, emoji: str | None) -> str:
     if emoji:
         lines.append(f"emoji: {emoji}")
     lines.append("related: []")
+    lines.append("categories: note")
     lines.append("---")
     return "\n".join(lines) + "\n"
 
@@ -92,6 +89,7 @@ def frontmatter_testbed(
     if emoji:
         lines.append(f"emoji: {emoji}")
     lines.append("related: []")
+    lines.append("categories: testbed")
     lines.append("---")
     return "\n".join(lines) + "\n"
 
@@ -184,7 +182,8 @@ def build_post(
             f"category 'testbed' requires style 'testbed-longform', got {style!r}"
         )
 
-    posts_dir = root / category / "_posts"
+    # every post lives in _posts/; its front matter says which category it is
+    posts_dir = root / "_posts"
     posts_dir.mkdir(parents=True, exist_ok=True)
 
     filename = f"{date.isoformat()}-{slug}.html"

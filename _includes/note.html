@@ -54,7 +54,7 @@
 
             <div class="note-date-column">
               <time class="use-gray note-date-time" datetime="{{ post.date | date_to_xmlschema }}">
-                {% if post.pinned or post.emoji == "/emoji/pin.png" %}
+                {% if post.pinned or post.emoji == "/assets/emoji/pin.png" %}
                   {{ post.last_modified_at }}
                 {% else %}
                   {{ post.date | date: "%m/%d/%Y" }}

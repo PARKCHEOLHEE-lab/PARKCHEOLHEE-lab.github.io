@@ -58,8 +58,8 @@ run_latentspace_tests() {
     command -v "$python_bin" >/dev/null 2>&1 || fail "python not found: $python_bin"
 
     echo "[pre-commit] latent-space pytest" >&2
-    if ! (cd "$ROOT" && "$python_bin" -c 'import pytest, openai, numpy, sklearn, bs4, tiktoken' >/dev/null 2>&1); then
-        fail "missing Python deps for latent-space tests; rebuild the devcontainer or set LATENTSPACE_PYTHON to a venv with openai beautifulsoup4 lxml numpy scikit-learn pytest tiktoken"
+    if ! (cd "$ROOT" && "$python_bin" -c 'import pytest, numpy, sklearn, bs4' >/dev/null 2>&1); then
+        fail "missing Python deps for latent-space tests; create ~/.venvs/latentspace or set LATENTSPACE_PYTHON to a venv with beautifulsoup4 lxml numpy scikit-learn pytest"
     fi
 
     (cd "$ROOT" && "$python_bin" -m pytest "$test_file" -v) >&2 || fail "latent-space tests failed"
@@ -69,11 +69,12 @@ staged="$(git -C "$ROOT" diff --cached --name-only 2>/dev/null || true)"
 
 run_jekyll_build
 
-if printf '%s\n' "$staged" | grep -Eq '^(note/_posts|testbed/_posts|\.agents/shared/skills/add-related/|\.claude/skills/add-related/|\.codex/skills/add-related/)'; then
+if printf '%s\n' "$staged" | grep -Eq '^(_posts/|\.agents/shared/skills/add-related/|\.claude/skills/add-related/|\.codex/skills/add-related/)'; then
     run_related_verify
 fi
 
-if printf '%s\n' "$staged" | grep -Eq '^(\.agents/shared/skills/build-latentspace/scripts/|\.claude/skills/build-latentspace/scripts/|\.codex/skills/build-latentspace/scripts/|\.github/workflows/build-latentspace\.yml)'; then
+# build_post_map.py imports from add-related/scripts (list_posts), so a change there can break it too
+if printf '%s\n' "$staged" | grep -Eq '^(\.agents/shared/skills/(build-latentspace|add-related)/scripts/|\.claude/skills/(build-latentspace|add-related)/scripts/|\.codex/skills/(build-latentspace|add-related)/scripts/|\.github/workflows/build-latentspace\.yml)'; then
     run_latentspace_tests
 fi
 

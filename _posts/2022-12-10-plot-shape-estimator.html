@@ -1,0 +1,97 @@
+---
+title:  "Plot shape estimator"
+layout: post
+hashtag: "#python #machine-learning"
+comment: true
+thumbnail: https://user-images.githubusercontent.com/83874157/212064783-0ee1f467-cf23-4073-8296-2ce010aa1b7e.png
+related:
+  - mass-generator
+  - polygon-segmentation
+  - apartment
+  - secure-room-in-seoul
+categories: testbed
+---
+
+
+<div id="toc"></div>
+<h3>How many shapes does the plot have? 🏷️</h3>
+<div style='text-align: justify;'>
+
+    The shapes of plots in Seoul are highly diverse. They include <code>flags, squares, long-squares, trapezoids, triangles</code> and other forms that are difficult to define, and a building exists within each plot.
+    Since architects design within a given plot, the direction of the design may change depending on the shape of the site.
+    <br><br>
+
+    An architect empirically judges the shape of a plot and develops the design accordingly. For an excessively long-square shape, the architect scales the building down along the long-side axis.
+    For a triangular plot, the architect designs the building to eliminate acute angles. In this way, a person can subjectively <code>judge</code> the type and <code>define</code> the shape.
+    <!--break-->
+
+    <figure>
+        <img alt="Somewhere in Seoul" src="https://user-images.githubusercontent.com/83874157/211546606-03adc3b9-0111-4e8a-8531-13dfc190b651.png" style="width:100%;">
+        <figcaption style="text-align: center">Somewhere in Seoul</figcaption>
+    </figure>
+    <br>
+    The question, then, is how a computer can determine and define the shape of a plot. This article examines how computers can determine the shape of a plot and support the development of designs.
+</div>
+
+<br><br>
+
+<h3>Properties of the plot</h3>
+<div style='text-align: justify;'>
+    A plot is an individual 2D geometry, and expressions such as long, short, round, and pointed are related to the properties of that geometry.
+    The question is how a computer can be made to understand such properties. The first step is to <code>define the properties</code> of the plot.
+    The most common plot shapes are considered here, and they are shown below.
+    
+    <figure>
+        <img alt="Most common shapes of plots From the left, square · flag · trapezoid · long-square · triangle" src="https://user-images.githubusercontent.com/97011129/211963124-515e33c0-95df-430f-aeaa-e005a5243ed3.png" style="width:100%;">
+        <figcaption style="text-align: center">Most common shapes of plots <br> From the left, square · flag · trapezoid · long-square · triangle</figcaption>
+    </figure>
+    <br>
+    The square and long-square shapes can be defined based on the aspect ratio, the sum of the interior angles(360'), the bounding box ratio, and similar measures. Similarly, the triangle shape can be defined by the sum of its interior angles(180').
+    In general, the defining feature of a flag shape is that the shape obtained by subtracting the flag shape itself from its convex hull is a triangle.
+    Finally, the trapezoid shape can be defined by the number of triangles obtained by subtracting the trapezoid shape from its bounding box. These properties are visualized as follows.
+    
+    <figure>
+        <img alt="Properties of each plot" src="https://user-images.githubusercontent.com/97011129/211976673-cd2b4727-d911-4898-9626-4d40952e1b6e.png" style="width:100%;">
+        <figcaption style="text-align: center">Properties of each plot</figcaption>
+    </figure>
+</div>
+
+<br>
+
+<h3>Generate training data</h3>
+<div style='text-align: justify;'>
+    To teach the computer the properties of each plot, <code>data</code> must be generated. A person understands information visually, whereas <code>computers only understand numeric</code> values.
+    Therefore, all properties must be converted into numeric form. For this purpose, a <code>PlotData</code> object is defined. <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/data/plot_data.py">PlotData has properties</a> defined above.
+    However, these properties alone do not fully categorize the shape of the plot. This can be regarded as a primary classification task for training the computer.
+    <br><br>
+    
+    As noted above, examining the <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/tree/main/data/QA">preprocessed data</a> reveals plots that are <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/preprocess.py">classified</a> differently from the defined properties.
+    After the misclassified data is filtered out once more and the <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/tree/main/data/end_data">end data</a> is generated, the computer is ready to be trained.
+    The structure of the end data is as follows.
+    
+    <figure>
+        <img alt="End data of the flag plot (defined ShapeLabel )" src="https://user-images.githubusercontent.com/97011129/212032404-c5a98dff-6766-45ca-a104-d5280dbd83ed.png" style="width:100%;">
+        <figcaption style="text-align: center">End data of the flag plot (defined <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/8e8e4be1cbbb9295ac797174823a4657dc1cf868/utils/utils.py#L14-L21">ShapeLabel</a>)</figcaption>
+    </figure>
+    
+    
+</div>
+
+<br>
+<h3>Plot shape estimator</h3>
+<div style='text-align: justify;'>
+    As the detailed background in machine learning is beyond the scope of this work, the detailed training procedure is omitted here.
+    All of scikit-learn's classification models were tested, but their performance was lower than expected, so a TensorFlow sequential <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/model/tf.py">model</a> was used instead.
+    <br><br>
+
+    From <a href="https://github.com/PARKCHEOLHEE-lab/plot-shape-estimator/blob/main/plot_shape_estimator.py">testing a few cases</a>, a usable model appears to have been created as a prototype, although the result is not yet fully satisfactory.
+    With this model, the computer can be directed to decide the direction in which to cut the mass.
+    
+    <figure>
+        <img alt="Getting mass" src="https://user-images.githubusercontent.com/83874157/212064783-0ee1f467-cf23-4073-8296-2ce010aa1b7e.png" style="width:100%;">
+        <figcaption style="text-align: center">Getting mass</figcaption>
+    </figure>
+
+</div>
+
+<br><br>

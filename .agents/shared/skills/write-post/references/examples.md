@@ -2,7 +2,7 @@
 
 Representative existing posts mapped to category, language, and style. Use these as reference when classifying a new post.
 
-## note/_posts/
+## Note posts (`categories: note`)
 
 | Slug | Language | Style | Emoji | Why |
 |---|---|---|---|---|
@@ -21,7 +21,7 @@ Representative existing posts mapped to category, language, and style. Use these
 | `2025-06-16-capability-overhang` | en | prose | `eyes.png` | Industry observation |
 | `2025-06-09-truth` | en | prose | `wordballoon-with-dots.png` | Philosophy / reflection |
 
-## testbed/_posts/
+## Testbed posts (`categories: testbed`)
 
 | Slug | Language | Style | At | Notes |
 |---|---|---|---|---|
@@ -42,7 +42,7 @@ When unsure which category to pick, use these rules of thumb (then confirm with 
 4. **Cheat sheet or reference list** → note (use `pin.png` emoji, or omit emoji to fall back to the "Note" label)
 5. **Book or quote-driven essay** → note with `books.png` emoji
 
-Only the seven emojis mapped in `build-latentspace`'s `EMOJI_TO_LABEL` (`brain`, `books`, `pin`, `eyes`, `wordballoon-with-dots`, `robot`, `storm`) produce a non-default latent-space label. Other emoji files exist under `emoji/` but are silently labeled "Note" — see `references/frontmatter.md` for the canonical table.
+Only the seven emojis mapped in `build-latentspace`'s `EMOJI_TO_LABEL` (`brain`, `books`, `pin`, `eyes`, `wordballoon-with-dots`, `robot`, `storm`) produce a non-default latent-space label. Other emoji files exist under `assets/emoji/` but are silently labeled "Note" — see `references/frontmatter.md` for the canonical table.
 
 When unsure which body style to pick:
 

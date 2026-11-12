@@ -1,0 +1,114 @@
+---
+title:  "Secure room in seoul"
+layout: post
+emoji: /assets/emoji/default.png
+hashtag: "#web-scrapping #information #visualization"
+done: true
+comment: true
+thumbnail: /img/secure-room-2.png
+related:
+  - k-rooms-clusters
+  - mass-generator
+  - plot-shape-estimator
+categories: testbed
+---
+
+<div id="toc"></div>
+<h3>Recommend a room with a high security score</h3>
+<div class="article">
+    This project maps rooms with high security scores by overlapping the number of crimes with location data from 2014 to 2019.
+
+    <br><br>
+    The open API of the "Getting a good room with Peter Pan" property sales site is used to scrape room information data in Seoul.
+    The scraped data is stored as csv, inserted into Elasticsearch using Logstash and Beats from the <code>Elastic Stack</code>, and visualized with Kibana.
+
+    <!--break-->
+</div>
+
+<br><br>
+<h3>Collecting data</h3>
+<div class="article">
+    In the HTML source of the "Getting a good room with Peter Pan" real estate sales site shown below,
+    there is a tag indicating the presence or absence of <code>security facilities</code>.
+    The goal is to collect this information and compute a security score from it.
+<pre><code class="python">
+    ＜div class="col-md-3 col-xs-4 column left-padding-20"＞
+        보안시설
+    ＜/div＞
+    ＜div class="col-md-3 col-xs-8 column value"＞
+        현관보안, CCTV, 인터폰, 비디오폰, 카드키
+    ＜/div＞
+</code></pre><br>
+
+Basic information such as contract type, price, and area was collected from the property sales site.
+The tags containing security facility data were then parsed, and a security score was aggregated for each property. The full code related to scraping is available <a href="https://github.com/PARKCHEOLHEE-lab/SecrueRoomInSeoul/blob/PCH/peterpan.py">here</a>.
+
+<pre class="highlight"><code class="python">
+    r_contract = soup.select("div#contract_type")[0].string                                                               <span class="gi"># 계약형태</span>
+    r_price = soup.select("tr > td")[5].string.strip()                                                                    <span class="gi"># 가격</span>
+    r_btype = soup.select("div.column.value")[12].string.strip()                                                          <span class="gi"># 건물유형</span>
+    r_area = float(str(soup.select("div.column.value")[15]).split()[5].replace("m<sup>2</sup>", ""))                                 <span class="gi"># 면적</span>
+    r_security = soup.select(".commonHouse > .row.border-top > .col-md-3.col-xs-8.column.value")\
+                                [1].string.string.strip().replace(" ", "").replace("\n", " ").replace(",", " ").split()   <span class="gi"># 보안시설</span>
+    r_sigudong = soup.select("div#sigudong")[0].string                                                                    <span class="gi"># 시구동</span>
+    r_lat = float(str(soup.select("script")[44].string).split()[77].replace("'", "").replace(";", ""))                    <span class="gi"># 위도</span>
+    r_long = float(str(soup.select("script")[44].string).split()[81].replace("'", "").replace(";", ""))                   <span class="gi"># 경도</span>
+
+    <span class="gd">btype = {"아파트": 3, "공동주택": 2, "단독주택": 1}</span>
+    <span class="gd">rsecu = {"자체경비원": 7, "현관보안": 6, "CCTV": 5, "방범창": 4, "인터폰": 2, "비디오폰": 2, "카드키": 1, "-": 0}</span>
+    r_score = 0                                                                                                           <span class="gi"># 보안점수</span>
+
+    for j in btype:
+        if r_btype == j:
+            r_score = btype[j]    
+    
+    for j in r_security:
+        r_score += rsecu[j]
+
+    r_security = " / ".join(r_security)
+    
+    <span class="gd">info = {"매물번호" : room_info[i],
+            "계약형태" : r_contract,
+            "가격정보" : r_price,
+            "건물유형" : r_btype,
+            "면적"     : r_area,
+            "보안시설" : r_security,
+            "보안점수" : r_score,
+            "시구동"   : r_sigudong,
+            "위도"     : r_lat,
+            "경도"     : r_long,
+            "링크"     : ROOM_URL}</span>
+
+    peterpan = peterpan.append(info, ignore_index=True)                                                                    
+    <span class="gd">peterpan.to_csv("dataset/seoul_room.csv", index=False, encoding="utf-8", header=False)</span>                                 
+</code></pre><br>
+
+<!-- 스크래핑된 데이터 형태는 다음과 같습니다. 계산된 보안점수와, 보안 점수 계산에 사용된 보안시설, 그리고 방의 위치 정보인 위도와 경도를 포함합니다. -->
+The structure of the scraped data is as follows. It contains the aggregated <code>security scores</code>, the <code>security facilities</code> used to calculate each score, and location data given as <code>latitude</code> and <code>longitude</code>.
+<figure>
+    <img alt="Scraped data saved in CSV format" src="/img/secure-room-0.png" width="80%">
+    <figcaption>Scraped data saved in CSV format</figcaption>
+</figure>
+
+</div>
+<br>
+<h3>Visualization</h3>
+<div class="article">
+    Based on the data, a map of the number of crimes in Seoul was created using Kibana.
+    Hovering the mouse over the map reveals the number of crimes for each area.
+    The rooms aggregated with security scores were overlapped on the map below so that users could filter out rooms without security facilities.
+
+    <br><br>
+    In addition, the site link containing detailed information about each property was converted from a string type to a URL type, so that users could navigate to the web page through the URL when they selected a room of interest.
+
+    <br><br>
+    <figure>
+        <img alt="Secure room in Seoul From the top, crime score by area · rooms filtered by high security score" src="/img/secure-room-1.png" width="100%">
+        <figcaption>
+            Secure room in Seoul <br>
+            From the top, crime score by area · rooms filtered by high security score
+        </figcaption>
+    </figure>
+</div>
+
+<br><br>

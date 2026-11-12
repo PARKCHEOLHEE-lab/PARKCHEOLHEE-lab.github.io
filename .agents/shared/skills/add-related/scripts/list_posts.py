@@ -1,6 +1,6 @@
 """List all eligible posts with their slug and title.
 
-Excludes: underscore-prefixed files, __template.html, threebed
+Excludes: underscore-prefixed files, __template.html
 Output format: filepath|slug|title (one per line)
 """
 
@@ -59,29 +59,25 @@ def has_body(filepath):
     return bool(match.group(1).strip())
 
 
-def list_posts():
-    """Yield (filepath, slug, title) for each eligible post."""
-    for subdir in ("note/_posts", "testbed/_posts"):
-        post_dir = os.path.join(REPO_ROOT, subdir)
-        if not os.path.isdir(post_dir):
+def list_posts(root=REPO_ROOT):
+    """Yield (filepath, slug, title) for each eligible post under root."""
+    for filepath in sorted(glob.glob(os.path.join(root, "_posts", "*.html"))):
+        basename = os.path.basename(filepath)
+
+        # Skip underscore-prefixed files
+        if basename.startswith("_"):
             continue
-        for filepath in sorted(glob.glob(os.path.join(post_dir, "*.html"))):
-            basename = os.path.basename(filepath)
 
-            # Skip underscore-prefixed files
-            if basename.startswith("_"):
-                continue
+        # Skip empty posts
+        if not has_body(filepath):
+            continue
 
-            # Skip empty posts
-            if not has_body(filepath):
-                continue
+        # Extract slug: remove date prefix and .html extension
+        slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", basename)
+        slug = slug.removesuffix(".html")
 
-            # Extract slug: remove date prefix and .html extension
-            slug = re.sub(r"^\d{4}-\d{2}-\d{2}-", "", basename)
-            slug = slug.removesuffix(".html")
-
-            title = extract_title(filepath)
-            yield filepath, slug, title
+        title = extract_title(filepath)
+        yield filepath, slug, title
 
 
 def main():

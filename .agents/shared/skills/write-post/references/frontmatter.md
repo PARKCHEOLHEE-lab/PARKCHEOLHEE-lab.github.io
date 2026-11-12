@@ -2,7 +2,7 @@
 
 This repo's posts use YAML frontmatter at the top of every `.html` file, between `---` delimiters. The fields differ by category.
 
-## `note/_posts/` — short concept / essay / focused technical note
+## Note posts (`categories: note`) — short concept / essay / focused technical note
 
 ### Minimum (always required)
 
@@ -11,6 +11,7 @@ This repo's posts use YAML frontmatter at the top of every `.html` file, between
 title: "<Title>"
 layout: post
 related: []
+categories: note
 ---
 ```
 
@@ -18,9 +19,9 @@ related: []
 
 | Field | When | Example |
 |---|---|---|
-| `emoji` | Only for essay / observation / reflective posts | `emoji: /emoji/eyes.png` |
+| `emoji` | Only for essay / observation / reflective posts | `emoji: /assets/emoji/eyes.png` |
 
-The `emoji` field maps to a label on the latent-space visualization. **Only the seven files in the table below have label mappings** — the latent-space mapper (`.agents/shared/skills/build-latentspace/scripts/build_post_map.py`'s `EMOJI_TO_LABEL`) recognises exactly these. Setting any other filename (even ones present under `emoji/` like `bulb.png`, `pencil.png`, `dna.png`, `clip.png`, `fire.png`, `wordballoon.png`) silently falls back to the "Note" label, which is almost never what you want.
+The `emoji` field maps to a label on the latent-space visualization. **Only the seven files in the table below have label mappings** — the latent-space mapper (`.agents/shared/skills/build-latentspace/scripts/build_post_map.py`'s `EMOJI_TO_LABEL`) recognises exactly these. Setting any other filename (even ones present under `assets/emoji/` like `bulb.png`, `pencil.png`, `dna.png`, `clip.png`, `fire.png`, `wordballoon.png`) silently falls back to the "Note" label, which is almost never what you want.
 
 | File | Label | Used for |
 |---|---|---|
@@ -36,7 +37,7 @@ The `emoji` field maps to a label on the latent-space visualization. **Only the 
 
 ### Examples
 
-`note/_posts/2026-04-25-window-crossing-selection.html` — technical note, no emoji:
+`_posts/2026-04-25-window-crossing-selection.html` — technical note, no emoji:
 ```yaml
 ---
 title: "Window/Crossing Selection"
@@ -45,27 +46,27 @@ related: []
 ---
 ```
 
-`note/_posts/2026-02-05-ego.html` — reflective essay, emoji set:
+`_posts/2026-02-05-ego.html` — reflective essay, emoji set:
 ```yaml
 ---
 title: "ego"
 layout: post
-emoji: /emoji/eyes.png
+emoji: /assets/emoji/eyes.png
 related: []
 ---
 ```
 
-`note/_posts/2026-04-17-limits-of-language.html` — Korean keyword post:
+`_posts/2026-04-17-limits-of-language.html` — Korean keyword post:
 ```yaml
 ---
 title: "언어의 한계"
 layout: post
-emoji: /emoji/wordballoon-with-dots.png
+emoji: /assets/emoji/wordballoon-with-dots.png
 related: []
 ---
 ```
 
-## `testbed/_posts/` — long-form experiment / project writeup
+## Testbed posts (`categories: testbed`) — long-form experiment / project writeup
 
 ### Scaffold-time template (no venue, no thumbnail yet)
 
@@ -79,6 +80,7 @@ splitter: 2
 featured: false
 inprogress: false
 related: []
+categories: testbed
 ---
 ```
 
@@ -112,7 +114,7 @@ thumbnail: /img/<slug>/<slug>-thumbnail.png
 
 ### Example
 
-`testbed/_posts/2026-02-03-image-to-3d-scene.html`:
+`_posts/2026-02-03-image-to-3d-scene.html`:
 ```yaml
 ---
 title: "Image to 3D Scene Pipeline"
@@ -132,7 +134,6 @@ related: []
 
 - `date:` — the date is in the filename. Do not duplicate.
 - `tags:` (Jekyll's default tags taxonomy) — this repo uses `hashtag` for testbed instead.
-- `categories:` — the category is implicit from `note/_posts/` vs `testbed/_posts/`.
 - `permalink:` — Jekyll derives it from the slug.
 - `author:` — single-author blog, configured at the site level.
 

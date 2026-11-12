@@ -1,0 +1,247 @@
+---
+title:  "Principal Component Analysis"
+layout: post
+related:
+  - eigenvalues-eigenvectors
+  - mathematics-for-machine-learning
+  - intuitive-understanding-of-linear-algebra
+  - standardization
+  - dot-product
+  - cosine-similarity
+categories: note
+---
+
+
+<br>
+
+
+<ul>
+    <li>
+        Principal Component Analysis
+        <ul>
+            <li>
+                The objective of <mark>PCA is to find the axes that maximize the variance of data</mark>, 
+                and then project it into the lower dimensional space. 
+            </li>
+            <br>
+            <li>
+                PCA is not just a process of reducing dimensions, 
+                but rather it finds the axes that best explain the essential structure of the data.
+            </li>
+            <br>
+            <li>
+                <strong>Covariance Matrix</strong>
+                <ul>
+                    <li>
+                        For the data matrix \(\hat{X} \in \mathbb{R}^{n \times d}\), covariance matrix \(\Sigma\) is defined as follows,
+                        where the \(n\) is the number of samples, \(d\) is the number of features, 
+                        and \(\Sigma_{ij} = Cov(\hat{X}_i, \hat{X}_j) \) means a covariance between feature \(i\) and feature \(j\).
+                        \[
+                            \begin{aligned}
+                            \,\\
+                                \Sigma &= \frac{1}{n}\hat{X}^{\top}\hat{X} \quad \in \mathbb{R}^{d \times d}
+                                \,\\
+                                \,\\
+                                \Sigma &= \frac{1}{n}
+                                \begin{bmatrix}
+                                dot(\hat{X}_1, \hat{X}_1) & dot(\hat{X}_1, \hat{X}_2) & \cdots & dot(\hat{X}_1, \hat{X}_d) \\
+                                dot(\hat{X}_2, \hat{X}_1) & dot(\hat{X}_2, \hat{X}_2) & \cdots & dot(\hat{X}_2, \hat{X}_d) \\
+                                \vdots & \vdots & \ddots & \vdots \\
+                                dot(\hat{X}_d, \hat{X}_1) & dot(\hat{X}_d, \hat{X}_2) & \cdots & dot(\hat{X}_d, \hat{X}_d)
+                                \end{bmatrix}
+                            \,\\
+                            \end{aligned}
+                        \]
+                    </li>
+                    <br>
+                    <li>
+                        Let the data matrix \(X\) be as follows, where each row is a sample and each column is a variable.
+                        \[
+                            \,\\
+                            X = 
+                            \begin{bmatrix}
+                            -6 &  2 \\
+                             6 &  4 \\
+                             3 & -5 \\
+                            -5 & -4 \\
+                            -5 & -9
+                            \end{bmatrix}
+                            \,\\
+                            \,\\
+                        \]
+
+                        For this data, we can obtain the centralized data matrix \(\hat{X}\) with zero mean by using \(\mu = [ -1.4, -2.4 ]\):
+                        \[
+                            \,\\
+                            \hat{X} = 
+                            \begin{bmatrix}
+                            -4.6 &  4.4 \\
+                             7.4 &  6.4 \\
+                             4.4 & -2.6 \\
+                            -3.6 & -1.6 \\
+                            -3.6 & -6.6
+                            \end{bmatrix}
+                            \,\\
+                            \,\\
+                        \]
+                        
+                        Here, the covariance matrix is calculated using the definition above:
+                        \[
+                            \,\\
+                                \Sigma = 
+                                \frac{1}{5} 
+                                \begin{bmatrix}
+                                121.2 & 45.2 \\
+                                45.2 & 113.2
+                                \end{bmatrix}
+                                =
+                                \begin{bmatrix}
+                                \color{red}{24.24} & \color{green}{9.04} \\
+                                \color{green}{9.04} & \color{blue}{22.64}
+                                \end{bmatrix}
+                            \,\\
+                            \,\\
+                        \]
+                        
+                        where, from a 
+                        <a href="https://angeloyeo.github.io/2019/07/27/PCA.html#:~:text=%EA%B7%B8%EB%A6%BC%204.%20%EA%B3%B5%EB%B6%84%EC%82%B0%ED%96%89%EB%A0%AC%20Matrix%201%EC%9D%98%20%EA%B0%81%20%EC%9B%90%EC%86%8C%EB%93%A4%EC%9D%B4%20%EC%9D%98%EB%AF%B8%ED%95%98%EB%8A%94%20%EA%B2%83">
+                            geometric perspective
+                        </a>,
+                        the diagonal elements \(\Sigma_{11}\) and \(\Sigma_{22}\) are the variances along the \(\color{red}{\text{x-axis}}\) and \(\color{blue}{\text{y-axis}}\), respectively.
+                        The symmetric off-diagonal elements \(\Sigma_{12}\) and \(\Sigma_{21}\) represent the \(\color{green}{\text{covariance}}\) between x and y,
+                        which indicates how much x and y change together. 
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                <strong>Eigenvalues and Eigenvectors of Covariance Matrix</strong>
+                <ul>
+                    <li>
+                        Due to the geometric properties of the covariance matrix,
+                        <mark>
+                        we can find the principal component with the maximum variance
+                        by computing its <a href="https://parkcheolhee-lab.github.io/eigenvalues-eigenvectors/">eigenvalues, eigenvectors</a>.
+                        Here, the eigenvalues indicate the amount of variance of each eigenvector
+                        </mark>.
+                    </li>
+                    <br>
+                    <li>
+                        As mentioned above, the covariance matrix is a symmetric matrix, and one important property of symmetric matrices
+                        is that their eigenvectors are orthogonal to each other.  
+                        Since an \(n \times n\) matrix can have up to \(n\) independent eigenvectors,
+                        the eigendecomposition of the covariance matrix allows us to obtain a complete set of
+                        orthogonal axes.  
+                    </li>
+                    <br>
+                    <li>
+                        Why do the eigenvalues of each eigenvector represent the variance? 
+
+
+                        <br><br>
+                    
+                        For the centered data matrix, \(\hat{X} \in \mathbb{R}^{n \times d}\)
+                        projecting all samples onto direction \(v\) gives:
+                    
+                        \[
+                            \,\\
+                            \hat{X}v \in \mathbb{R}^{n \times 1}.
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        The variance of the vector obtained by projecting all data onto \(v\) 
+                        can be written as follows, according to the definition above:
+                    
+                        \[  
+                            \,\\
+                            \begin{aligned}
+                            \text{Var}(\hat{X}v) 
+                            &= \frac{1}{n} (\hat{X}v)^\top \hat{X}v
+                            \,\\
+                            \,\\
+                            &= \frac{1}{n} v^\top \hat{X}^\top \hat{X} v
+                            \,\\
+                            \,\\
+                            &= v^\top \left( \frac{1}{n} \hat{X}^\top \hat{X} \right) v
+                            \end{aligned}
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        The covariance matrix is defined as \( \Sigma = \frac{1}{n}\hat{X}^\top \hat{X} \),
+                        so it can be rewritten:
+                    
+                        \[
+                            \,\\
+                            \text{Var}(\hat{X}v) = v^\top \Sigma \, v
+                            \,\\
+                            \,\\
+                        \]
+                    
+                        If \(v\) is an eigenvector of \(\Sigma\), 
+                        by the definition of eigenvectors \(\Sigma v = \lambda v\), we can obtain the following:
+                    
+                        \[
+                            \begin{aligned}
+                            \,\\
+                            v^\top \Sigma \, v &= v^\top \lambda v 
+                            \,\\
+                            \,\\
+                            &= \lambda \, v^\top v
+                            \,\\
+                            \,\\
+                            \end{aligned}
+                        \]
+                    
+                        Normalizing \(v\) to be \(\|v\|=1\) gives \(v^\top v = 1\).
+                        Therefore:
+                    
+                        \[
+                            \begin{aligned}
+                            \,\\
+                            \text{Var}(\hat{X}v) &= \lambda v^{\top} v
+                                                \,\\
+                                                \,\\
+                                                &= \lambda \cdot 1
+                                                \,\\
+                                                \,\\
+                                                 &= \lambda
+                            \,\\
+                            \,\\
+                            \end{aligned}
+                        \]
+                    
+                        So, the eigenvalue \(\lambda\) directly represents the variance of the data along its corresponding eigenvector \(v\).
+                    </li>
+                </ul>
+            </li>
+            <br>
+            <li>
+                Notebook
+            </li>
+            <span style="display: block; margin-left: -4em;">
+                {% include embed.html url="/assets/notebooks/pca.html" %}
+            </span>
+        </ul>
+    </li>
+    <br>
+    <li>
+        References
+        <ul>
+            <li>
+                <a href="https://angeloyeo.github.io/2019/07/27/PCA.html">https://angeloyeo.github.io/2019/07/27/PCA.html</a>
+            </li>
+            <li>
+                <a href="https://angeloyeo.github.io/2020/11/19/eigen_decomposition.html">https://angeloyeo.github.io/2020/11/19/eigen_decomposition.html</a>
+            </li>
+            <li>
+                <a href="https://ranasinghiitkgp.medium.com/principal-component-analysis-pca-with-code-on-mnist-dataset-da7de0d07c22">https://ranasinghiitkgp.medium.com/principal-component-analysis</a>
+            </li>
+        </ul>
+    </li>
+</ul>
+
+
+
+<br><br>
