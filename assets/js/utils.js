@@ -28,13 +28,12 @@ function handle_image_error(img) {
     if (tried === branches[i] && i + 1 < branches.length) {
       img.dataset.fallback_tried = branches[i + 1];
       img.src = base + branches[i + 1] + "/" + tail;
-      if (i + 1 === branches.length - 1) {
-        img.onerror = null;
-      }
       return;
     }
   }
+  // every copy failed: the image's skeleton (basic.sass) stops promising an image that is not on its way
   img.onerror = null;
+  img.removeAttribute("data-skeleton");
 }
 
 function resize_iframe(obj) {
@@ -489,6 +488,24 @@ function setup_comments() {
     }
   });
   setTimeout(done, 10000);
+}
+
+// A content image's skeleton (basic.sass) shimmers only while on screen: a moving background repaints its
+// image every frame, and a long post holds dozens of skeletons below the screen. An image that has arrived
+// has no skeleton left to watch
+function setup_image_skeletons() {
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (!entry.target.hasAttribute("data-skeleton")) {
+        observer.unobserve(entry.target);
+        return;
+      }
+      entry.target.toggleAttribute("data-on-screen", entry.isIntersecting);
+    });
+  });
+  document.querySelectorAll("img[data-skeleton]").forEach(function(img) {
+    observer.observe(img);
+  });
 }
 
 // The Testbed's puzzles shine together (basic.sass), but a browser starts an image's shine when it draws

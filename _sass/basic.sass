@@ -111,6 +111,29 @@ img
   margin-left: auto
   margin-right: auto
 
+// a content image until it arrives (data-skeleton, which _plugins/image_sizes.py adds along with the box the
+// image will fill, and which its load or final error drops): the comments skeleton's gray and shimmer, drawn
+// as the image's own background, as an <img> takes no ::after. The band is one box wide and sweeps from
+// just off its left edge to just off its right, as the comments' does
+img[data-skeleton]
+  background: linear-gradient(90deg, rgba($light, 0) 33.33%, rgba($light, 0.65) 50%, rgba($light, 0) 66.67%) 100% 0 / 300% 100% no-repeat, $skeleton
+  animation: image-shimmer 1.4s ease-in-out infinite
+  // still, but on screen (data-on-screen, setup_image_skeletons): a moving background repaints its image
+  // every frame, and a long post holds dozens of skeletons below the screen
+  animation-play-state: paused
+  &[data-on-screen]
+    animation-play-state: running
+  @media (prefers-reduced-motion: reduce)
+    animation: none
+  // not drawn without JavaScript, as only a script (its load handler) takes it away
+  @media (scripting: none)
+    background: none
+    animation: none
+
+@keyframes image-shimmer
+  100%
+    background-position: 0% 0
+
 img.book-cover
   box-shadow: 0 4px 8px rgba($dark, 0.2)
 
