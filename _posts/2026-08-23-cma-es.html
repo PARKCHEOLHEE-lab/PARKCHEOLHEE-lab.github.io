@@ -92,11 +92,11 @@ categories: note
             <canvas class="cma-gauge" aria-label="The search shape C, then the recent steps used to adjust the search size sigma."></canvas>
         </div>
         <div class="panels">
-            <div class="panel"><div class="plabel read"></div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centres shown together. After ranking, orange marks the best candidate and its enclosing circle. The cross is the mean."></canvas></div>
+            <div class="panel"><div class="plabel read"></div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centres shown together. After ranking, the best circle is orange and the worst is gray. Each dashed radius connects its centre to a farthest fixed point. The cross is the mean."></canvas></div>
             <div class="panel"><div class="plabel">\(f\) as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The radius f as a 3D surface over the centre, with the same samples and search ellipse lying on the surface."></div></div>
         </div>
         <figcaption>
-            Black dots stay fixed. Hollow dots are candidate centres; orange marks the best candidate and its circle. The cross is the mean, which moves towards the best three centres. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Black dots are fixed targets; hollow dots are candidate centres. Orange marks the best circle and gray the worst, with dashed lines for their radii. The cross moves to the weighted mean of the best three centres. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -614,17 +614,19 @@ categories: note
             POINTS.forEach(add);
             H.forEach(function (h) {
                 h.X.forEach(add); add(h.m); add(h.m1);
-                var c = h.X[h.order[0]], r = fn(c);
-                add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
+                [h.order[0], h.order[P.lam - 1]].forEach(function (k) {
+                    var c = h.X[k], r = fn(c);
+                    add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
+                });
             });
             circleView = bounds();
             return surfaceView;
         })();
         function phaseText(h, ph) {
             if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " candidate centres together, shown as hollow dots.";
-            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Orange marks the smallest circle.";
+            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Orange is best; gray is worst. Dashed lines show their radii.";
             if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres (filled dots). Their weights are " + W3 + ".";
-            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centres. The orange circle stays with the best candidate.";
+            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centres. The two circles stay with their candidates.";
             if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search. The small box shows the new shape.";
             var r = h.sigma1 / h.sigma;
             return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.") + " The small box shows the change.";
@@ -644,9 +646,13 @@ categories: note
             if (ph >= 1 && r === 0) { s.col = COL.path; s.rad = Math.max(5, s.rad); }
             return s;
         }
-        function circle(ctx, map, c, col, width) {        // the smallest circle centred at c
-            ctx.beginPath(); ctx.arc(map.x(c[0]), map.y(c[1]), fn(c) * map.s, 0, 2 * Math.PI);
+        function circle(ctx, map, c, col, width) {        // enclosing circle and its true radius to a farthest target
+            var r = fn(c), farthest = POINTS.find(function (p) { return Math.hypot(p[0] - c[0], p[1] - c[1]) === r; });
+            ctx.setLineDash([]);
+            ctx.beginPath(); ctx.arc(map.x(c[0]), map.y(c[1]), r * map.s, 0, 2 * Math.PI);
             ctx.strokeStyle = col; ctx.lineWidth = width; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(map.x(c[0]), map.y(c[1])); ctx.lineTo(map.x(farthest[0]), map.y(farthest[1]));
+            ctx.setLineDash([4, 3]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
         }
         function render(t) {
             var g = Math.min(NG - 1, Math.floor(t / NP)), u = Math.min(NP, t - g * NP), ph = Math.min(NP - 1, Math.floor(u)), f = u - ph, h = H[g];
@@ -661,9 +667,12 @@ categories: note
             if (ph >= 4) m = h.m1;
             if (ph === 4) { old = h.C; C = lerpC(h.C, h.C1, e); }
             if (ph === 5) { old = h.C1; C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
-            // One complete population; only the best candidate gets a circle after ranking.
-            var best = h.X[h.order[0]];
-            if (ph >= 1) circle(ctx, map, best, COL.path, 3);
+            // Compare the best and worst candidates after ranking; all six centres stay visible.
+            var best = h.X[h.order[0]], worst = h.X[h.order[P.lam - 1]];
+            if (ph >= 1) {
+                circle(ctx, map, worst, COL.neutral, 2);
+                circle(ctx, map, best, COL.path, 3);
+            }
             POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
             styles.forEach(function (st, k) {
                 var filled = (ph >= 1 && rank[k] === 0) || (ph >= 2 && rank[k] < P.mu);
@@ -681,7 +690,7 @@ categories: note
             if (toPath > 0) { gx.globalAlpha = toPath; drawPathInset(gx, box, run, ph === 5 ? g : g - 1); }
             gx.globalAlpha = 1;
 
-            read.textContent = ph === 0 ? P.lam + " candidate centres / not ranked" : "Best radius " + fn(best).toFixed(2) + " / cross: mean";
+            read.textContent = ph === 0 ? P.lam + " candidate centres / not ranked" : "Best r " + fn(best).toFixed(2) + " / worst r " + fn(worst).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m, trail: H.slice(0, g + 1).map(function (q) { return q.m; }).concat([m]),
                               ell: ellipsePoints(m, sigma, C, 96), old: old ? ellipsePoints(m, h.sigma, old, 96) : null };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
