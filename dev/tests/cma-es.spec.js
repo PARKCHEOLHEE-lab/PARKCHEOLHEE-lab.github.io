@@ -6,7 +6,7 @@ const assert = require('node:assert/strict');
 
 test('one circle follows each candidate and keeps the six points and controls', async ({ page }) => {
   // Unit checks use the real inline function, without starting any demo.
-  const source = fs.readFileSync(path.join(__dirname, '../../_posts/2026-08-22-cma-es.html'), 'utf8');
+  const source = fs.readFileSync(path.join(__dirname, '../../_posts/2026-08-23-cma-es.html'), 'utf8');
   const radii = await page.evaluate((html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const script = [...doc.scripts].find((s) => !s.type).textContent;
