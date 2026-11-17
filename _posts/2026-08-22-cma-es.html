@@ -1,0 +1,927 @@
+---
+title: "CMA-ES"
+layout: post
+related: []
+categories: note
+---
+
+<br>
+
+    <style>
+        .cma-demo { --link: #66a1ff; --r30: rgba(128, 128, 128, 0.30); --r14: rgba(128, 128, 128, 0.14); --td: rgb(70, 70, 70); --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: initial; margin: 1.4em 0; }
+        .cma-demo .ctrls { display: flex; gap: 0.5em 1em; align-items: center; flex-wrap: wrap; margin: 0.5em 0; }
+        .cma-demo .play { cursor: pointer; border: 1px solid var(--r30); background: transparent; color: inherit; border-radius: 4px; width: 1.9em; height: 1.9em; line-height: 1; font-size: 0.85em; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .cma-demo .play:hover, .cma-demo .btn:hover, .cma-demo .seg button:hover { background: var(--r14); }
+        .cma-demo .play[data-playing="true"] { border-color: var(--link); color: var(--link); }
+        .cma-demo .play-icon { width: 1em; height: 1em; display: block; fill: currentColor; }
+        .cma-demo .scrub { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 3px; background: var(--r30); flex: 1 1 auto; min-width: 36px; outline: none; }
+        .cma-demo .scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--link); cursor: pointer; }
+        .cma-demo .scrub::-moz-range-thumb { width: 14px; height: 14px; border: none; border-radius: 50%; background: var(--link); cursor: pointer; }
+        .cma-demo .tval { font-family: var(--mono); font-size: 0.85em; color: var(--td); white-space: nowrap; }
+        .cma-demo .seg { display: inline-flex; border: 1px solid var(--r30); border-radius: 4px; overflow: hidden; }
+        .cma-demo .seg button, .cma-demo .btn { cursor: pointer; border: 0; background: transparent; color: inherit; font: inherit; font-size: 0.85em; padding: 0.2em 0.6em; }
+        .cma-demo .seg button + button { border-left: 1px solid var(--r30); }
+        .cma-demo .seg button[aria-pressed="true"] { color: var(--link); background: var(--r14); }
+        .cma-demo .btn { border: 1px solid var(--r30); border-radius: 4px; }
+        .cma-demo .panels { display: flex; flex-wrap: wrap; gap: 1em; }
+        .cma-demo .panel { flex: 1 1 15em; min-width: 0; }
+        .cma-demo .cma-3d canvas { cursor: grab; }
+        .cma-demo .cma-3d canvas:active { cursor: grabbing; }
+        .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
+        .cma-demo .phase-row { display: flex; gap: 1em; align-items: flex-start; }
+        .cma-demo .phase-row .phase { flex: 1 1 auto; }
+        .cma-demo .phase-row .cma-gauge { flex: 0 0 9em; width: 9em; }
+        .cma-demo .plabel { font-size: 0.85em; color: var(--td); margin-bottom: 0.2em; }
+        .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
+        .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
+        /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
+        table.cma-table { width: 100%; border-collapse: collapse; border-radius: 0; box-shadow: none; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; font-family: MJXc-TeX-main-R, MJXc-TeX-main-Rw, serif; }
+        table.cma-table td, table.cma-table th { text-align: left; }
+        table.cma-table td:first-child { white-space: nowrap; }
+        table.cma-table th, table.cma-table td, table.cma-table tr:hover td, table.cma-table tr:nth-child(odd) td { box-shadow: none; background: none; padding: .35em .9em; }
+        table.cma-table th { font-family: MJXc-TeX-main-B, MJXc-TeX-main-Bx, MJXc-TeX-main-Bw, serif; font-weight: normal; color: inherit; border-bottom: 1px solid currentColor; }
+        table.cma-table tr, table.cma-table tr:hover { background: none; }   /* the site shades the hovered row itself */
+        table.cma-table tr:nth-child(n+3) td { border-top: 1px solid rgba(128, 128, 128, .35); }
+        .cma-scroll { overflow-x: auto; }   /* a wide table scrolls by itself on a phone, not the page */
+    </style>
+
+<ul>
+    <li>
+        Optimizing without a gradient
+    </li>
+        <ul>
+            <li>
+                <b>CMA-ES</b> (Covariance Matrix Adaptation Evolution Strategy) minimizes a function \(f\) from its values alone, so it needs no gradient
+            </li>
+            <li>
+                It keeps a normal distribution \(\mathcal{N}(m, \sigma^2 C)\). Every generation samples \(\lambda\) points from it, ranks them by \(f\), and moves the distribution toward the best ones
+            </li>
+            <li>
+                <mark>The mean \(m\) says where to search, the step size \(\sigma\) how far, and the covariance \(C\) in which shape</mark>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Example: the smallest circle
+    </li>
+        <ul>
+            <li>
+                Find the smallest circle that holds six points. Search for its centre \((x, y)\), so there are two parameters (\(n = 2\))
+            </li>
+            <li>
+                Once the centre is fixed, the circle only has to reach the farthest point, so its radius is
+                <div class="latex-container">
+                \[
+                    f(x, y) = \max_i \, \lVert (x, y) - p_i \rVert
+                \]
+                </div>
+                A smaller \(f\) is a smaller circle
+            </li>
+        </ul>
+
+    <div class="cma-demo" id="cma-step">
+        <div class="ctrls">
+            <button type="button" class="play" aria-label="play the generations step by step">
+                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="step within the generations">
+            <span class="tval"><span class="gen">gen 1, step 1</span></span>
+        </div>
+        <div class="phase-row">
+            <div class="phase" aria-live="polite"></div>
+            <canvas class="cma-gauge" aria-label="The search shape C, then the recent steps used to adjust the search size sigma."></canvas>
+        </div>
+        <div class="panels">
+            <div class="panel" style="flex-basis: 100%;"><div class="plabel read"></div><canvas class="cma-top" aria-label="Six fixed points and one enclosing circle at a time. Each candidate centre gives a different radius; a smaller circle is better."></canvas></div>
+            <div class="panel"><div class="plabel">\(f\) as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The radius f as a 3D surface over the centre, with the same samples and search ellipse lying on the surface."></div></div>
+        </div>
+        <figcaption>
+            Try one centre at a time. Each circle holds all six points; smaller is better. After selection, the circle follows the mean. The 3D view puts smaller circles lower. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span>. The animation shows <span class="n-gen">9</span> generations.
+        </figcaption>
+    </div>
+    <br>
+    <li>
+        One generation as equations
+    </li>
+        <ul>
+            <li>
+                The figure above runs these four updates:
+                <div class="latex-container">
+                \[
+                \begin{aligned}
+                    x_k &= m + \sigma\, y_k, \quad y_k \sim \mathcal{N}(0, C) \\
+                    m &\leftarrow \textstyle\sum_{i=1}^{\mu} w_i\, x_{i:\lambda} \\
+                    C &\leftarrow (1 - c_1 - c_\mu)\, C + c_1\, p_c p_c^\top + c_\mu \textstyle\sum_{i=1}^{\mu} w_i\, y_{i:\lambda} y_{i:\lambda}^\top \\
+                    \sigma &\leftarrow \sigma \exp\!\left( \tfrac{c_\sigma}{d_\sigma} \left( \tfrac{\| p_\sigma \|}{\mathbb{E} \| \mathcal{N}(0, I) \|} - 1 \right) \right)
+                \end{aligned}
+                \]
+                </div>
+            </li>
+            <li>
+                Here \(x_{i:\lambda}\) is the \(i\)-th best sample, \(y_{i:\lambda}\) its step from the old mean, and \(p_c, p_\sigma\) are decaying sums of recent mean steps. The rates \(c\) and weights \(w\) have defaults
+            </li>
+            <li>
+                In genetic-algorithm terms:
+                <br><br>
+                <div class="cma-scroll"><table class="cma-table">
+        <tr><th>Genetic algorithm</th><th>CMA-ES</th></tr>
+        <tr><td>Population size</td><td>\(\lambda\) samples per generation, by default \(4 + \lfloor 3 \ln n \rfloor\) (6 in the figures)</td></tr>
+        <tr><td>Fitness</td><td>Only the rank of \(f\), not its value</td></tr>
+        <tr><td>Selected parents</td><td>The best \(\mu = \lfloor \lambda / 2 \rfloor\) samples (3 in the figures)</td></tr>
+        <tr><td>Crossover</td><td>The weighted average of the parents, which becomes the new mean \(m\)</td></tr>
+        <tr><td>Mutation</td><td>Sampling from \(\mathcal{N}(m, \sigma^2 C)\), whose size \(\sigma\) and shape \(C\) are learned</td></tr>
+        <tr><td>Kept between generations</td><td>Only \(m\), \(\sigma\), and \(C\); the samples are dropped, not carried over</td></tr>
+    </table></div>
+            </li>
+        </ul>
+    <br>
+    <li>
+        Many generations
+    </li>
+        <ul>
+            <li>
+                Over many generations, \(C\) takes the shape of the contour lines, and \(\sigma\) follows whether recent steps agree
+            </li>
+        </ul>
+
+    <div class="cma-demo" id="cma-run">
+        <div class="ctrls">
+            <button type="button" class="play" aria-label="play the run">
+                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="generation">
+            <span class="tval">gen <span class="gen">0</span></span>
+        </div>
+        <div class="ctrls">
+            <span class="seg" role="group" aria-label="objective function">
+                <button type="button" data-fn="ellipse" aria-pressed="true">rotated ellipse</button>
+                <button type="button" data-fn="rosenbrock" aria-pressed="false">Rosenbrock</button>
+                <button type="button" data-fn="rastrigin" aria-pressed="false">Rastrigin</button>
+            </span>
+            <span class="seg" role="group" aria-label="population size">
+                <button type="button" data-lam="6" aria-pressed="true">&lambda; = 6</button>
+                <button type="button" data-lam="12" aria-pressed="false">12</button>
+                <button type="button" data-lam="24" aria-pressed="false">24</button>
+            </span>
+            <button type="button" class="btn reseed">new seed</button>
+        </div>
+        <div class="panels">
+            <div class="panel"><canvas class="cma-plot" aria-label="CMA-ES on a 2D function: the samples of one generation, the best ones highlighted, the search distribution drawn as an ellipse, and the path of its mean."></canvas></div>
+            <div class="panel"><canvas class="cma-chart" aria-label="Two insets and a chart: the shape of C next to the shape of the contour lines, the path p sigma against the length random steps would give, and f at the mean over the generations."></canvas></div>
+        </div>
+        <figcaption>
+            Blue points are the best \(\mu\) samples and gray points are dropped. Left inset: the shape of \(C\) (blue) against the contour lines at \(m\) (gray), both scaled to one size. Right inset: the recent steps of \(p_\sigma\) laid head to tail; ending outside the dashed circle, where random steps would end, makes \(\sigma\) grow, and ending inside makes it shrink. On Rastrigin, \(\lambda = 6\) found the global minimum in 6 of 40 seeds and \(\lambda = 24\) in 32.
+        </figcaption>
+    </div>
+    <br>
+    <li>
+        Why learn \(C\)
+    </li>
+        <ul>
+            <li>
+                <mark>Learning \(C\) matters most when the contours are long and thin</mark>
+            </li>
+            <li>
+                With \(C\) fixed to a circle, \(\sigma\) must stay small enough for the narrow direction, so the search crawls along the long one
+            </li>
+        </ul>
+
+    <div class="cma-demo" id="cma-race">
+        <div class="ctrls">
+            <button type="button" class="play" aria-label="play the race">
+                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" min="0" max="1000" value="0" step="1" aria-label="generation, log scale">
+            <span class="tval">gen <span class="gen">0</span></span>
+        </div>
+        <div class="panels">
+            <div class="panel"><div class="plabel">CMA-ES</div><canvas class="cma-a" aria-label="CMA-ES on an ill-conditioned rotated ellipse: the distribution aligns with the narrow valley and converges quickly."></canvas></div>
+            <div class="panel"><div class="plabel">\(C\) fixed to \(I\), only \(\sigma\) adapts</div><canvas class="cma-b" aria-label="The same algorithm with C fixed to the identity: the round distribution creeps along the narrow valley."></canvas></div>
+        </div>
+        <canvas class="cma-chart" aria-label="f at the mean over the generations on a log-log scale for both runs."></canvas>
+        <figcaption>
+            Same start, seed, and \(\lambda = 6\); both stop at \(f(m) &lt; 10^{-10}\). CMA-ES takes <span class="n-cma">74</span> generations and ends with \(C\) at an axis ratio of <span class="n-ratio">36.9</span>, near the contours' \(\sqrt{1000} \approx 31.6\). Fixed \(C\) takes <span class="n-iso">2,167</span>.
+        </figcaption>
+    </div>
+    <br>
+    <li>
+        In practice
+    </li>
+        <ul>
+            <li>
+                Only a start \(m_0\) and a step size \(\sigma_0\) are chosen; the rest has defaults, such as \(\lambda = 4 + \lfloor 3 \ln n \rfloor\). Memory grows as \(n^2\)
+            </li>
+            <li>
+                The Python package <code>pycma</code> runs the same loop:
+
+<pre><code class="python">
+    import cma
+
+    def f(x):
+        return sum((i + 1) * xi**2 for i, xi in enumerate(x))
+
+    es = cma.CMAEvolutionStrategy(x0=[1.0] * 10, sigma0=0.5)
+    while not es.stop():
+        X = es.ask()                   # sample lambda candidates
+        es.tell(X, [f(x) for x in X])  # rank, update m, sigma, C
+    print(es.result.xbest)
+</code></pre>
+
+            </li>
+            <li>
+                The figures run a JavaScript port of <code>purecma.py</code> from <code>pycma</code>, with positive weights only
+            </li>
+        </ul>
+</ul>
+
+<script>
+(function () {
+    // ---- 2-D CMA-ES core: a line-by-line port of pycma's purecma.py (ask / tell), positive weights ----
+    function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    function gaussian(seed) {
+        var rand = mulberry32(seed);
+        return function () { var u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    }
+    function cmaParams(lam) {
+        var n = 2, mu = Math.floor(lam / 2), w = [], s = 0, s2 = 0, i;
+        for (i = 0; i < mu; i++) { w.push(Math.log(lam / 2 + 0.5) - Math.log(i + 1)); s += w[i]; }
+        for (i = 0; i < mu; i++) { w[i] /= s; s2 += w[i] * w[i]; }
+        var mueff = 1 / s2;
+        var cs = (mueff + 2) / (n + mueff + 5);
+        var c1 = 2 / ((n + 1.3) * (n + 1.3) + mueff);
+        return {
+            n: n, lam: lam, mu: mu, w: w, mueff: mueff, cs: cs, c1: c1,
+            cc: (4 + mueff / n) / (n + 4 + 2 * mueff / n),
+            cmu: Math.min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((n + 2) * (n + 2) + mueff)),
+            damps: 2 * mueff / lam + 0.3 + cs,
+            chiN: Math.sqrt(n) * (1 - 1 / (4 * n) + 1 / (21 * n * n))
+        };
+    }
+    function eig2(C) {                                    // C = [a, b, c] = [[a, b], [b, c]]
+        var a = C[0], b = C[1], c = C[2];
+        var h = (a + c) / 2, d = Math.sqrt((a - c) * (a - c) / 4 + b * b), l1 = h + d, l2 = h - d;
+        var ux = a >= c ? l1 - c : b, uy = a >= c ? b : l1 - a;
+        var nn = Math.sqrt(ux * ux + uy * uy);
+        if (nn === 0) { ux = 1; uy = 0; } else { ux /= nn; uy /= nn; }
+        return { l1: l1, l2: l2, ux: ux, uy: uy };       // major axis u = (ux, uy), minor axis (-uy, ux)
+    }
+    function invSqrt(e) {                                 // C^(-1/2) = B D^(-1) B^T
+        var i1 = 1 / Math.sqrt(e.l1), i2 = 1 / Math.sqrt(e.l2);
+        return [e.ux * e.ux * i1 + e.uy * e.uy * i2, e.ux * e.uy * (i1 - i2), e.uy * e.uy * i1 + e.ux * e.ux * i2];
+    }
+    function newState(m0, sigma0) {
+        return { m: m0.slice(), sigma: sigma0, C: [1, 0, 1], pc: [0, 0], ps: [0, 0], evals: 0, inv: [1, 0, 1] };
+    }
+    function ask(S, P, randn) {                           // x = m + sigma * B D z
+        var e = eig2(S.C), s1 = Math.sqrt(e.l1), s2 = Math.sqrt(e.l2), X = [];
+        S.inv = invSqrt(e);
+        for (var k = 0; k < P.lam; k++) {
+            var z1 = s1 * randn(), z2 = s2 * randn();
+            X.push([S.m[0] + S.sigma * (e.ux * z1 - e.uy * z2), S.m[1] + S.sigma * (e.uy * z1 + e.ux * z2)]);
+        }
+        return X;
+    }
+    function tell(S, P, X, F) {
+        S.evals += X.length;
+        var order = F.map(function (_, i) { return i; }).sort(function (i, j) { return F[i] - F[j]; });
+        var xold = S.m, m = [0, 0], i, k;
+        for (i = 0; i < P.mu; i++) { m[0] += P.w[i] * X[order[i]][0]; m[1] += P.w[i] * X[order[i]][1]; }
+        var y = [m[0] - xold[0], m[1] - xold[1]], I = S.inv;
+        var z = [I[0] * y[0] + I[1] * y[1], I[1] * y[0] + I[2] * y[1]];
+        var csn = Math.sqrt(P.cs * (2 - P.cs) * P.mueff) / S.sigma;
+        S.ps = [(1 - P.cs) * S.ps[0] + csn * z[0], (1 - P.cs) * S.ps[1] + csn * z[1]];
+        var ps2 = S.ps[0] * S.ps[0] + S.ps[1] * S.ps[1];
+        var hsig = ps2 / P.n / (1 - Math.pow(1 - P.cs, 2 * S.evals / P.lam)) < 2 + 4 / (P.n + 1) ? 1 : 0;
+        var ccn = Math.sqrt(P.cc * (2 - P.cc) * P.mueff) / S.sigma;
+        S.pc = [(1 - P.cc) * S.pc[0] + ccn * hsig * y[0], (1 - P.cc) * S.pc[1] + ccn * hsig * y[1]];
+        var c1a = P.c1 * (1 - (1 - hsig * hsig) * P.cc * (2 - P.cc)), f0 = 1 - c1a - P.cmu;
+        var C = [f0 * S.C[0] + P.c1 * S.pc[0] * S.pc[0], f0 * S.C[1] + P.c1 * S.pc[0] * S.pc[1], f0 * S.C[2] + P.c1 * S.pc[1] * S.pc[1]];
+        for (i = 0; i < P.mu; i++) {                      // rank-mu: weighted outer products of the selected steps
+            k = order[i];
+            var dx = X[k][0] - xold[0], dy = X[k][1] - xold[1], g = P.w[i] * P.cmu / (S.sigma * S.sigma);
+            C[0] += g * dx * dx; C[1] += g * dx * dy; C[2] += g * dy * dy;
+        }
+        S.C = C; S.m = m;
+        S.sigma *= Math.exp(Math.min(1, P.cs / P.damps * (Math.sqrt(ps2) / P.chiN - 1)));
+        return order;
+    }
+
+    // ---- objectives ----
+    function rotatedEllipse(k, deg, cx, cy) {
+        var t = deg * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
+        return function (x) { var u = c * (x[0] - cx) + s * (x[1] - cy), v = -s * (x[0] - cx) + c * (x[1] - cy); return u * u + k * v * v; };
+    }
+    function rosenbrock(x) { var a = 1 - x[0], b = x[1] - x[0] * x[0]; return a * a + 100 * b * b; }
+    function rastrigin(x) { return 20 + x[0] * x[0] - 10 * Math.cos(2 * Math.PI * x[0]) + x[1] * x[1] - 10 * Math.cos(2 * Math.PI * x[1]); }
+    function hessian(fn, p, h) {                          // lazy: central differences; accurate enough for these smooth 2-D test functions
+        var x = p[0], y = p[1], f0 = fn(p);
+        return [(fn([x + h, y]) - 2 * f0 + fn([x - h, y])) / (h * h),
+                (fn([x + h, y + h]) - fn([x + h, y - h]) - fn([x - h, y + h]) + fn([x - h, y - h])) / (4 * h * h),
+                (fn([x, y + h]) - 2 * f0 + fn([x, y - h])) / (h * h)];
+    }
+
+    // run and keep every generation: the distribution before (m, sigma, C), the samples, and the state after
+    function record(fn, m0, s0, lam, seed, adaptC, maxGen) {
+        var P = cmaParams(lam);
+        if (!adaptC) { P.c1 = 0; P.cmu = 0; }
+        var S = newState(m0, s0), randn = gaussian(seed), H = [];
+        for (var g = 0; g < maxGen; g++) {
+            var m = S.m, sigma = S.sigma, C = S.C;
+            var X = ask(S, P, randn), order = tell(S, P, X, X.map(fn)), e = eig2(S.C);
+            H.push({ m: m, sigma: sigma, C: C, X: X, order: order, m1: S.m, sigma1: S.sigma, C1: S.C, pc1: S.pc, ps1: S.ps, f1: fn(S.m), ratio1: Math.sqrt(e.l1 / e.l2) });
+            if (H[g].f1 < 1e-10 || S.sigma * Math.sqrt(e.l1) < 1e-8) break;
+        }
+        return { P: P, H: H, f0: fn(m0), s0: s0 };
+    }
+    function series(run, key, first) { return [first].concat(run.H.map(function (h) { return h[key]; })); }
+    function pathChain(run, g, K) {                       // p_sigma after generation g, as its last K terms laid head to tail
+        var H = run.H, q = 1 - run.P.cs, k0 = Math.max(0, g - K + 1);
+        function before(k) { return k > 0 ? H[k - 1].ps1 : [0, 0]; }
+        var w = Math.pow(q, g - k0 + 1), p = [w * before(k0)[0], w * before(k0)[1]], pts = [p];   // older terms, already faded
+        for (var k = k0; k <= g; k++) {                   // term k = ps_k - q ps_(k-1), faded by q^(g-k)
+            var a = before(k), b = H[k].ps1, d = Math.pow(q, g - k);
+            p = [p[0] + d * (b[0] - q * a[0]), p[1] + d * (b[1] - q * a[1])];
+            pts.push(p);
+        }
+        return pts;
+    }
+
+    // ---- drawing helpers ----
+    var COL = { mean: "#1d4ed8", dist: "#3b82f6", distFill: "rgba(59, 130, 246, 0.08)", pick: "#3b82f6", drop: "#a1a1aa", neutral: "#71717a",
+                trail: "rgba(29, 78, 216, 0.55)", path: "#f59e0b", base: "#d4d4d8", tick: "#71717a", txt: "rgb(70, 70, 70)" };
+    var MONO = "10px ui-monospace, monospace", SANS = "11px -apple-system, sans-serif";
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    function ease(x) { return x < 0.5 ? 2 * x * x : 1 - 2 * (1 - x) * (1 - x); }
+    function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function lerp2(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t)]; }
+    function lerpC(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
+    function geo(a, b, t) { return a * Math.pow(b / a, t); }
+    function mix(c1, c2, t) {                             // "#rrggbb" blend
+        var p = function (c, i) { return parseInt(c.slice(i, i + 2), 16); };
+        return "rgb(" + [1, 3, 5].map(function (i) { return Math.round(lerp(p(c1, i), p(c2, i), t)); }).join(", ") + ")";
+    }
+
+    function fit(canvas, aspect) {                        // backing store follows the css width; height from the aspect
+        var W = canvas.clientWidth || 300, H = Math.round(W * aspect);
+        canvas.style.height = H + "px";
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        var ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: W, H: H };
+    }
+    function viewMap(view, W, H) {                        // view = { cx, cy, half }, y axis up
+        var s = Math.min(W, H) / (2 * view.half);
+        return { s: s, x: function (x) { return W / 2 + (x - view.cx) * s; }, y: function (y) { return H / 2 - (y - view.cy) * s; } };
+    }
+    function landscape(fn, view, W, H) {                  // banded log10 contours of f
+        var w = Math.round(W * dpr), h = Math.round(H * dpr), off = document.createElement("canvas");
+        off.width = w; off.height = h;
+        var oc = off.getContext("2d"), img = oc.createImageData(w, h), d = img.data;
+        var s = Math.min(w, h) / (2 * view.half), L = new Float64Array(w * h), lo = Infinity, hi = -Infinity, i, j, k;
+        for (j = 0; j < h; j++) for (i = 0; i < w; i++) {
+            var v = Math.log(fn([view.cx + (i + 0.5 - w / 2) / s, view.cy - (j + 0.5 - h / 2) / s]) + 1e-300) / Math.LN10;
+            L[j * w + i] = v; if (v < lo) lo = v; if (v > hi) hi = v;
+        }
+        lo = Math.max(lo, hi - 6);
+        var NB = 14, step = (hi - lo) / NB || 1, B = new Int16Array(w * h);
+        for (k = 0; k < w * h; k++) B[k] = Math.min(NB - 1, Math.floor((Math.max(L[k], lo) - lo) / step));
+        for (j = 0; j < h; j++) for (i = 0; i < w; i++) {
+            k = j * w + i;
+            var b = B[k], edge = (i + 1 < w && B[k + 1] !== b) || (j + 1 < h && B[k + w] !== b), t = b / (NB - 1);
+            d[4 * k] = edge ? 196 : Math.round(lerp(232, 255, t));
+            d[4 * k + 1] = edge ? 203 : Math.round(lerp(238, 255, t));
+            d[4 * k + 2] = edge ? 214 : Math.round(lerp(248, 255, t));
+            d[4 * k + 3] = 255;
+        }
+        oc.putImageData(img, 0, 0);
+        return off;
+    }
+    function dot(ctx, map, p, r, fill, stroke) {
+        ctx.beginPath(); ctx.arc(map.x(p[0]), map.y(p[1]), r, 0, 2 * Math.PI);
+        ctx.fillStyle = fill; ctx.fill();
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+    function ellipse(ctx, map, m, sigma, C, dashed) {     // two standard deviations of N(m, sigma^2 C)
+        var e = eig2(C), a = 2 * sigma * Math.sqrt(Math.max(0, e.l1)) * map.s, b = 2 * sigma * Math.sqrt(Math.max(0, e.l2)) * map.s;
+        ctx.beginPath(); ctx.ellipse(map.x(m[0]), map.y(m[1]), a, b, -Math.atan2(e.uy, e.ux), 0, 2 * Math.PI);
+        if (dashed) { ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]); return; }
+        ctx.fillStyle = COL.distFill; ctx.fill();
+        ctx.strokeStyle = COL.dist; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    function arrow(ctx, map, p, q, col, width) {
+        var x0 = map.x(p[0]), y0 = map.y(p[1]), x1 = map.x(q[0]), y1 = map.y(q[1]), a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0);
+        if (L < 1) return;
+        var hd = Math.min(8, L / 2);
+        ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - hd * 0.7 * Math.cos(a), y1 - hd * 0.7 * Math.sin(a)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x1, y1);
+        ctx.lineTo(x1 - hd * Math.cos(a - 0.4), y1 - hd * Math.sin(a - 0.4));
+        ctx.lineTo(x1 - hd * Math.cos(a + 0.4), y1 - hd * Math.sin(a + 0.4));
+        ctx.closePath(); ctx.fill();
+    }
+    function cross(ctx, map, p) {
+        var x = map.x(p[0]), y = map.y(p[1]);
+        ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(x - 4, y - 4); ctx.lineTo(x + 4, y + 4); ctx.moveTo(x - 4, y + 4); ctx.lineTo(x + 4, y - 4); ctx.stroke();
+    }
+    function labels(ctx, x, y, segs, font, baseline) {   // colored text runs from (x, y)
+        ctx.font = font; ctx.textAlign = "left"; ctx.textBaseline = baseline;
+        segs.forEach(function (seg) { ctx.fillStyle = seg[1]; ctx.fillText(seg[0], x, y); x += ctx.measureText(seg[0]).width + 8; });
+    }
+
+    // ---- insets: the two ideas the formulas hide ----
+    function insetFrame(ctx, box, title) {
+        ctx.fillStyle = "rgba(255, 255, 255, 0.92)"; ctx.fillRect(box.x, box.y, box.s, box.s);
+        ctx.strokeStyle = "rgba(128, 128, 128, 0.3)"; ctx.lineWidth = 1; ctx.strokeRect(box.x + 0.5, box.y + 0.5, box.s - 1, box.s - 1);
+        labels(ctx, box.x + 6, box.y + 5, title, SANS, "top");
+    }
+    function unitEllipse(ctx, cx, cy, R, C) {            // the ellipse of C scaled so its long semi-axis is R; returns its axis ratio
+        var e = eig2(C), r = Math.sqrt(Math.max(0, e.l2) / e.l1);
+        ctx.beginPath(); ctx.ellipse(cx, cy, R, R * r, -Math.atan2(e.uy, e.ux), 0, 2 * Math.PI);
+        return 1 / r;
+    }
+    function drawShapeInset(ctx, box, fn, m, C) {        // shape of C against the shape of the contour lines at m (the inverse Hessian); fn null draws C alone
+        insetFrame(ctx, box, fn ? [["shape of C", COL.dist], ["contours", COL.neutral]] : [["shape of C", COL.dist]]);
+        var cx = box.x + box.s / 2, cy = box.y + box.s / 2, R = box.s * 0.34, Hm = fn ? hessian(fn, m, 1e-3) : null, det = Hm ? Hm[0] * Hm[2] - Hm[1] * Hm[1] : 0, rows = [];
+        if (Hm && Hm[0] > 0 && det > 0) {
+            var rc = unitEllipse(ctx, cx, cy, R, [Hm[2] / det, -Hm[1] / det, Hm[0] / det]);
+            ctx.setLineDash([4, 3]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
+            rows.push(["contours " + rc.toFixed(1) + " : 1", COL.neutral]);
+        } else if (Hm) rows.push(["contours: not elliptic here", COL.neutral]);
+        var r = unitEllipse(ctx, cx, cy, R, C);
+        ctx.fillStyle = COL.distFill; ctx.fill(); ctx.strokeStyle = COL.dist; ctx.lineWidth = 1.5; ctx.stroke();
+        rows.unshift(["C " + r.toFixed(1) + " : 1", COL.dist]);
+        rows.forEach(function (seg, i) { labels(ctx, box.x + 6, box.y + box.s - 5 - 12 * (rows.length - 1 - i), [seg], MONO, "bottom"); });
+    }
+    function drawPathInset(ctx, box, run, g) {           // p_sigma as recent steps head to tail, against where random steps would end
+        var h = run.H[g], ratio = h.sigma1 / h.sigma, col = ratio > 1 ? COL.path : COL.dist;
+        insetFrame(ctx, box, [["path p\u03c3", COL.txt], ["random", COL.neutral]]);
+        var cx = box.x + box.s / 2, cy = box.y + box.s / 2, R = box.s * 0.25, k = R / run.P.chiN;
+        var map = { x: function (x) { return cx + x * k; }, y: function (y) { return cy - y * k; } }, pts = pathChain(run, g, 6), i;
+        ctx.save(); ctx.beginPath(); ctx.rect(box.x, box.y + 18, box.s, box.s - 40); ctx.clip();
+        ctx.setLineDash([4, 3]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.stroke(); ctx.setLineDash([]);
+        dot(ctx, map, [0, 0], 2, COL.txt);
+        var a0 = ctx.globalAlpha;                         // the caller's fade; older steps are fainter on top of it
+        for (i = 1; i < pts.length; i++) { ctx.globalAlpha = a0 * (0.3 + 0.7 * i / (pts.length - 1)); arrow(ctx, map, pts[i - 1], pts[i], col, 1.5); }
+        ctx.restore();
+        labels(ctx, box.x + 6, box.y + box.s - 5, [[(ratio > 1 ? "\u03c3 grows \u00d7" : "\u03c3 shrinks \u00d7") + ratio.toFixed(2), col]], MONO, "bottom");
+    }
+
+    // distribution at continuous time t in [0, G]: generation floor(t), blended toward its updated state
+    function stateAt(run, t) {
+        var G = run.H.length, g = Math.min(G - 1, Math.floor(Math.max(0, t))), a = clamp01(t - g), h = run.H[g];
+        return { g: g, h: h, m: lerp2(h.m, h.m1, a), sigma: geo(h.sigma, h.sigma1, a), C: lerpC(h.C, h.C1, a) };
+    }
+    function drawRun(ctx, W, H, run, t, view, bg, opt, note) {
+        var map = viewMap(view, W, H), st = stateAt(run, t), P = run.P, h = st.h, i;
+        ctx.clearRect(0, 0, W, H);
+        if (bg) ctx.drawImage(bg, 0, 0, W, H);
+        cross(ctx, map, opt);
+        ctx.strokeStyle = COL.trail; ctx.lineWidth = 1.2; ctx.beginPath();
+        ctx.moveTo(map.x(run.H[0].m[0]), map.y(run.H[0].m[1]));
+        for (i = 1; i <= st.g; i++) ctx.lineTo(map.x(run.H[i].m[0]), map.y(run.H[i].m[1]));
+        ctx.lineTo(map.x(st.m[0]), map.y(st.m[1])); ctx.stroke();
+        ellipse(ctx, map, st.m, st.sigma, st.C);
+        for (i = P.mu; i < P.lam; i++) dot(ctx, map, h.X[h.order[i]], 2.5, COL.drop);
+        for (i = 0; i < P.mu; i++) dot(ctx, map, h.X[h.order[i]], 3, COL.pick);
+        dot(ctx, map, st.m, 3.5, COL.mean, "#fff");
+        if (note) labels(ctx, 8, 8, [[note, COL.txt]], SANS, "top");
+        return st;
+    }
+
+    // log-scale line chart; lines = [{ v: [...], col }], xf(i) maps an index to [0, 1]; the part after `cursor` is faint
+    function logChart(ctx, box, lines, xf, cursor, title) {
+        var lo = Infinity, hi = -Infinity;
+        lines.forEach(function (L) { L.v.forEach(function (v) { if (v > 0 && isFinite(v)) { var l = Math.log10(v); lo = Math.min(lo, l); hi = Math.max(hi, l); } }); });
+        lo = Math.floor(lo); hi = Math.ceil(hi); if (hi - lo < 1) hi = lo + 1;
+        var step = Math.max(1, Math.ceil((hi - lo) / 4)), n = lines[0].v.length, e;
+        var px = function (f) { return box.x + f * box.w; }, py = function (l) { return box.y + (1 - (l - lo) / (hi - lo)) * box.h; };
+        var cf = Math.floor(cursor), cx = px(lerp(xf(cf), xf(Math.min(cf + 1, n - 1)), cursor - cf));
+        ctx.font = MONO; ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.lineWidth = 1;
+        for (e = hi; e >= lo; e -= step) {
+            ctx.strokeStyle = "rgba(128, 128, 128, 0.14)"; ctx.beginPath(); ctx.moveTo(box.x, py(e)); ctx.lineTo(box.x + box.w, py(e)); ctx.stroke();
+            ctx.fillStyle = COL.tick; ctx.fillText(e === 0 ? "1" : "1e" + e, box.x - 4, py(e));
+        }
+        ctx.strokeStyle = COL.base; ctx.beginPath(); ctx.moveTo(box.x, box.y + box.h); ctx.lineTo(box.x + box.w, box.y + box.h); ctx.stroke();
+        lines.forEach(function (L) {
+            [0.25, 1].forEach(function (alpha) {
+                ctx.globalAlpha = alpha; ctx.strokeStyle = L.col; ctx.lineWidth = 1.5; ctx.beginPath();
+                var started = false, i;
+                for (i = 0; i < L.v.length; i++) {
+                    if (alpha === 1 && i > cursor) break;
+                    if (!(L.v[i] > 0)) continue;
+                    var X = px(xf(i)), Y = py(Math.log10(L.v[i]));
+                    if (started) ctx.lineTo(X, Y); else { ctx.moveTo(X, Y); started = true; }
+                }
+                if (alpha === 1 && started && cf + 1 < L.v.length && L.v[cf] > 0 && L.v[cf + 1] > 0) {   // end the solid part exactly at the cursor
+                    ctx.lineTo(cx, py(lerp(Math.log10(L.v[cf]), Math.log10(L.v[cf + 1]), cursor - cf)));
+                }
+                ctx.stroke();
+            });
+            ctx.globalAlpha = 1;
+        });
+        ctx.strokeStyle = COL.neutral; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(cx, box.y); ctx.lineTo(cx, box.y + box.h); ctx.stroke(); ctx.setLineDash([]);
+        labels(ctx, box.x, box.y - 5, title, SANS, "bottom");
+    }
+
+    // play / pause button + scrub slider driving a time value t in [0, tMax]
+    function Player(root, rate, render) {
+        var btn = root.querySelector(".play"), slider = root.querySelector(".scrub"), self = this, raf = null, last = 0;
+        self.t = 0; self.tMax = 1; self.rate = rate;
+        function icon(playing) {
+            btn.dataset.playing = playing ? "true" : "false";
+            btn.querySelector("svg").innerHTML = playing
+                ? '<rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" />'
+                : '<polygon points="7,5 7,19 17,12" />';
+        }
+        function tick(ts) {
+            var dt = last ? Math.min(0.1, (ts - last) / 1000) : 0; last = ts;
+            self.set(self.t + dt * self.rate);
+            if (self.t >= self.tMax) { self.stop(); return; }
+            raf = requestAnimationFrame(tick);
+        }
+        self.set = function (t) { self.t = Math.max(0, Math.min(self.tMax, t)); slider.value = self.t; render(self.t); };
+        self.setMax = function (m) { self.tMax = m; slider.max = m; };
+        self.stop = function () { if (raf) cancelAnimationFrame(raf); raf = null; last = 0; icon(false); };
+        self.play = function () { if (raf) return; if (self.t >= self.tMax) self.set(0); icon(true); raf = requestAnimationFrame(tick); };
+        btn.addEventListener("click", function () { if (raf) self.stop(); else self.play(); });
+        slider.addEventListener("input", function () { self.stop(); self.set(parseFloat(slider.value)); });
+    }
+    function onFirstView(el, fn) {
+        if (!("IntersectionObserver" in window)) { fn(); return; }
+        var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: 0.35 });
+        io.observe(el);
+    }
+    function onResize(el, fn) {
+        if (window.ResizeObserver) new ResizeObserver(fn).observe(el);
+        else window.addEventListener("resize", fn);
+    }
+    function ready(fn) {
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { requestAnimationFrame(fn); });
+        else requestAnimationFrame(fn);
+    }
+
+    // ---- figure 1: one generation in slow motion, on the smallest circle around six points ----
+    var POINTS = [[0, 0], [2, 0.6], [4, 1.5], [6, 2.2], [1.2, 1.4], [5, 0.9]];
+    function circleRadius(c) {                            // the smallest circle centred at c that holds every point reaches the farthest one
+        return Math.max.apply(null, POINTS.map(function (p) { return Math.hypot(p[0] - c[0], p[1] - c[1]); }));
+    }
+    function ellipsePoints(m, sigma, C, n) {              // the 2-sigma ellipse of N(m, sigma^2 C) as n + 1 points, for the 3-D view
+        var e = eig2(C), a = 2 * sigma * Math.sqrt(Math.max(0, e.l1)), b = 2 * sigma * Math.sqrt(Math.max(0, e.l2)), pts = [], k;
+        for (k = 0; k <= n; k++) {
+            var q = 2 * Math.PI * k / n, u = a * Math.cos(q), v = b * Math.sin(q);
+            pts.push([m[0] + u * e.ux - v * e.uy, m[1] + u * e.uy + v * e.ux]);
+        }
+        return pts;
+    }
+    function stepDemo() {
+        var root = document.getElementById("cma-step");
+        if (!root) return;
+        var read = root.querySelector(".read"), cGauge = root.querySelector(".cma-gauge"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
+        var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
+        var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
+        while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
+        var H = full.H.slice(0, NG), P = full.P, run = { P: P, H: H };
+        var A = null, Gc = null, shown = "";
+        var W3 = P.w.map(function (w) { return w.toFixed(2); }).join(", ");
+        root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
+        root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
+        root.querySelector(".n-r").textContent = fn(OPT).toFixed(2);
+        root.querySelector(".n-gen").textContent = NG;
+
+        // Fixed framing for both views: full circles in 2D, the search distribution on the 3D surface.
+        var circleView, view = (function () {
+            var xs = [], ys = [];
+            function add(p) { xs.push(p[0]); ys.push(p[1]); }
+            function bounds() {
+                var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+                return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, half: Math.max(x1 - x0, y1 - y0) / 2 * 1.05 };
+            }
+            POINTS.forEach(add);
+            add([OPT[0] - fn(OPT), OPT[1] - fn(OPT)]); add([OPT[0] + fn(OPT), OPT[1] + fn(OPT)]);
+            H.forEach(function (h) {
+                h.X.forEach(add); add(h.m); add(h.m1);
+                add([h.m[0] + h.sigma * h.pc1[0], h.m[1] + h.sigma * h.pc1[1]]);
+                [[h.m, h.sigma, h.C], [h.m1, h.sigma1, h.C1]].forEach(function (q) {
+                    var rx = 2 * q[1] * Math.sqrt(q[2][0]), ry = 2 * q[1] * Math.sqrt(q[2][2]);
+                    add([q[0][0] - rx, q[0][1] - ry]); add([q[0][0] + rx, q[0][1] + ry]);
+                });
+            });
+            var surfaceView = bounds();
+            xs = []; ys = [];
+            H.forEach(function (h) {
+                h.X.concat([h.m, h.m1]).forEach(function (c) {
+                    var r = fn(c);
+                    add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
+                });
+            });
+            circleView = bounds();
+            return surfaceView;
+        })();
+        function phaseText(h, ph) {
+            if (ph === 0) return "<b>1. Sample.</b> Try " + P.lam + " centres, one at a time. Each circle reaches all six points.";
+            if (ph === 1) return "<b>2. Rank.</b> Compare the circles, smallest first. Smaller is better.";
+            if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres, shown one at a time. Their weights are " + W3 + ".";
+            if (ph === 3) return "<b>4. Move the mean.</b> Move toward the kept centres. The circle now follows the mean.";
+            if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search. The small box shows the new shape.";
+            var r = h.sigma1 / h.sigma;
+            return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.") + " The small box shows the change.";
+        }
+        function layout() { A = fit(cTop, 1); Gc = fit(cGauge, 1); }
+
+        // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
+        function sampleStyle(ph, e, r) {
+            var sel = r < P.mu, s = { rank: r, col: COL.neutral, rad: 3, alpha: 1, lab: ph >= 1 ? 1 : 0, under: ph === 1 };
+            if (ph === 1) { s.col = mix(COL.mean, "#d4d4d8", r / (P.lam - 1)); s.alpha = s.lab = e; }   // fade from gray (drawn under) to the rank color
+            if (ph >= 2) {                                // the best mu grow by weight and the rest fade
+                var q = ph === 2 ? e : 1;
+                s.col = sel ? COL.pick : COL.drop;
+                s.rad = sel ? lerp(3, 3 + 7 * Math.sqrt(P.w[r]), q) : 3;
+                s.alpha = s.lab = sel ? 1 : lerp(1, 0.45, q);
+            }
+            return s;
+        }
+        function circle(ctx, map, c, col, width) {        // the smallest circle centred at c
+            ctx.beginPath(); ctx.arc(map.x(c[0]), map.y(c[1]), fn(c) * map.s, 0, 2 * Math.PI);
+            ctx.strokeStyle = col; ctx.lineWidth = width; ctx.stroke();
+        }
+        function render(t) {
+            var g = Math.min(NG - 1, Math.floor(t / NP)), u = Math.min(NP, t - g * NP), ph = Math.min(NP - 1, Math.floor(u)), f = u - ph, h = H[g], i;
+            var map = viewMap(circleView, A.W, A.H), ctx = A.ctx, e = ease(clamp01(f));
+            var rank = []; h.order.forEach(function (idx, r) { rank[idx] = r; });
+            var nShow = ph === 0 ? Math.ceil(P.lam * clamp01((f - 0.05) / 0.7)) : P.lam, styles = [];
+            for (i = 0; i < nShow; i++) styles.push(sampleStyle(ph, e, rank[i]));
+            if (ph === 0) styles.forEach(function (st, k) { st.alpha = clamp01((P.lam * (f - 0.05) / 0.7 - k) / 0.6); });   // each new sample fades in
+            var X = h.X.slice(0, nShow);
+            if (ph === 0 && g > 0 && f < 0.2) {           // last generation's samples fade out instead of vanishing at once
+                var rp = []; H[g - 1].order.forEach(function (idx, r) { rp[idx] = r; });
+                H[g - 1].X.forEach(function (p, k) { var st = sampleStyle(5, 1, rp[k]); st.alpha *= 1 - f / 0.2; st.lab = 0; X.push(p); styles.push(st); });
+            }
+            ctx.clearRect(0, 0, A.W, A.H);
+
+            // distribution for this phase: the mean moves first, then the shape changes, then the size
+            var m = h.m, sigma = h.sigma, C = h.C, old = null;
+            if (ph === 3) m = lerp2(h.m, h.m1, e);
+            if (ph >= 4) m = h.m1;
+            if (ph === 4) { old = h.C; C = lerpC(h.C, h.C1, e); }
+            if (ph === 5) { old = h.C1; C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
+            // Show candidates in time, so only one enclosing circle is ever visible.
+            var centre = m, circleLabel = "Mean circle";
+            if (ph < 3) {
+                var count = ph === 2 ? P.mu : P.lam, candidate = Math.min(count - 1, Math.floor(f * count));
+                var idx = ph === 0 ? candidate : h.order[candidate];
+                centre = h.X[idx];
+                circleLabel = (ph === 0 ? "Candidate " : "Rank ") + (candidate + 1) + " of " + count;
+            }
+            circle(ctx, map, centre, COL.mean, 3);
+            POINTS.forEach(function (p) { dot(ctx, map, p, 5, COL.txt); });
+            dot(ctx, map, centre, 5, COL.mean, "#fff");
+
+            // the gauge beside the step text, the same insets as the full run: C's shape against the contours,
+            // cross-faded into the path that sets sigma while sigma is resized, and back while the next points appear
+            var gx = Gc.ctx, box = { x: 0, y: 0, s: Gc.W }, toPath = ph === 5 ? e : (ph === 0 && g > 0 && f < 0.25 ? 1 - f / 0.25 : 0);
+            gx.clearRect(0, 0, Gc.W, Gc.H);
+            if (toPath < 1) { gx.globalAlpha = 1 - toPath; drawShapeInset(gx, box, null, m, C); }   // f is a max of distances, not smooth, so it has no Hessian to compare
+            if (toPath > 0) { gx.globalAlpha = toPath; drawPathInset(gx, box, run, ph === 5 ? g : g - 1); }
+            gx.globalAlpha = 1;
+
+            read.textContent = circleLabel + " / radius " + fn(centre).toFixed(2);
+            root.cmaFrame = { X: X, styles: styles, m: m, trail: H.slice(0, g + 1).map(function (q) { return q.m; }).concat([m]),
+                              ell: ellipsePoints(m, sigma, C, 96), old: old ? ellipsePoints(m, h.sigma, old, 96) : null };
+            root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
+
+            var tag = g + ":" + ph;
+            if (tag !== shown) { text.innerHTML = phaseText(h, ph); shown = tag; }
+            label.textContent = "gen " + (g + 1) + " of " + NG + ", step " + (ph + 1) + " of " + NP;
+        }
+        root.cma3d = { fn: fn, view: view, tex: landscape(fn, view, 256, 256) };   // what the 3-D panel needs once
+        var player = new Player(root, 0.9, render);
+        player.setMax(NG * NP);
+        layout(); player.set(0);
+        onResize(cTop.parentNode, function () { layout(); render(player.t); });
+        if (!REDUCED) onFirstView(root, function () { player.play(); });
+    }
+
+    // ---- figure 2: the whole run on three functions, with the shape and path insets ----
+    function runDemo() {
+        var root = document.getElementById("cma-run");
+        if (!root) return;
+        var plot = root.querySelector(".cma-plot"), chart = root.querySelector(".cma-chart"), label = root.querySelector(".gen");
+        var FUN = {
+            ellipse:    { fn: rotatedEllipse(100, 30, 1, 1), view: { cx: 0, cy: 0.5, half: 3.5 }, m0: [-2.5, -1.5], s0: 1, opt: [1, 1], seed: 2 },
+            rosenbrock: { fn: rosenbrock, view: { cx: 0, cy: 1, half: 2 }, m0: [-1.2, 1], s0: 0.5, opt: [1, 1], seed: 3 },
+            rastrigin:  { fn: rastrigin, view: { cx: 0, cy: 0, half: 5.12 }, m0: [3.5, 3.5], s0: 2, opt: [0, 0], seed: 3 }
+        };
+        var cur = "ellipse", lam = 6, seed = FUN[cur].seed, run = null, bg = null, A = null, B = null;
+        var player = new Player(root, 14, render);
+
+        function layout() { A = fit(plot, 1); B = fit(chart, 1); bg = null; }
+        function rerun() { var F = FUN[cur]; run = record(F.fn, F.m0, F.s0, lam, seed, true, 600); player.setMax(run.H.length); }
+        function render(t) {
+            var F = FUN[cur], G = run.H.length;
+            if (!bg) bg = landscape(F.fn, F.view, A.W, A.H);
+            var st = drawRun(A.ctx, A.W, A.H, run, t, F.view, bg, F.opt);
+            var ctx = B.ctx, gap = 12, s = Math.floor((B.W - gap) / 2), L = 40, R = 10, bottom = 22, top = s + 30;
+            ctx.clearRect(0, 0, B.W, B.H);
+            drawShapeInset(ctx, { x: 0, y: 0, s: s }, F.fn, st.m, st.C);
+            drawPathInset(ctx, { x: s + gap, y: 0, s: s }, run, st.g);
+            logChart(ctx, { x: L, y: top, w: B.W - L - R, h: B.H - top - bottom }, [{ v: series(run, "f1", run.f0), col: COL.mean }], function (i) { return i / G; }, t, [["f(m)", COL.mean]]);
+            labels(ctx, L, B.H - bottom + 4, [["0", COL.tick]], MONO, "top");
+            ctx.textAlign = "right"; ctx.fillText(G + " generations", B.W - R, B.H - bottom + 4);
+            label.textContent = Math.min(G, Math.floor(t)) + " / " + G + ", seed " + seed;
+        }
+        function restart() { rerun(); player.stop(); player.set(0); player.play(); }
+        function press(attr, value) {
+            root.querySelectorAll("[" + attr + "]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute(attr) === String(value) ? "true" : "false"); });
+        }
+        root.querySelectorAll("[data-fn]").forEach(function (b) {
+            b.addEventListener("click", function () { cur = b.dataset.fn; seed = FUN[cur].seed; bg = null; press("data-fn", cur); restart(); });
+        });
+        root.querySelectorAll("[data-lam]").forEach(function (b) {
+            b.addEventListener("click", function () { lam = parseInt(b.dataset.lam, 10); press("data-lam", lam); restart(); });
+        });
+        root.querySelector(".reseed").addEventListener("click", function () { seed = 1 + Math.floor(Math.random() * 99999); restart(); });
+
+        layout(); rerun(); player.set(REDUCED ? player.tMax : 0);
+        onResize(plot.parentNode, function () { layout(); render(player.t); });
+        if (!REDUCED) onFirstView(root, function () { player.play(); });
+    }
+
+    // ---- figure 3: covariance adaptation on and off ----
+    function raceDemo() {
+        var root = document.getElementById("cma-race");
+        if (!root) return;
+        var fn = rotatedEllipse(1000, 45, 0, 0), view = { cx: -1.5, cy: -1.4, half: 3.2 }, opt = [0, 0];
+        var RA = record(fn, [-3, -2.6], 1, 6, 1, true, 5000), RB = record(fn, [-3, -2.6], 1, 6, 1, false, 5000);
+        var GA = RA.H.length, GB = RB.H.length, GM = Math.max(GA, GB), LOGM = Math.log10(GM + 1);
+        var vA = series(RA, "f1", RA.f0), vB = series(RB, "f1", RB.f0);
+        var cA = root.querySelector(".cma-a"), cB = root.querySelector(".cma-b"), cC = root.querySelector(".cma-chart"), label = root.querySelector(".gen");
+        root.querySelector(".n-cma").textContent = GA;
+        root.querySelector(".n-iso").textContent = GB.toLocaleString("en-US");
+        root.querySelector(".n-ratio").textContent = RA.H[GA - 1].ratio1.toFixed(1);
+        var A = null, B = null, K = null, bg = null;
+        function gOf(u) { return Math.pow(GM + 1, u / 1000) - 1; }   // the slider moves on a log scale of generations
+        function xf(i) { return Math.log10(i + 1) / LOGM; }
+        function layout() { A = fit(cA, 1); B = fit(cB, 1); K = fit(cC, 0.36); bg = landscape(fn, view, A.W, A.H); }
+        function render(u) {
+            var g = gOf(u);
+            drawRun(A.ctx, A.W, A.H, RA, Math.min(g, GA), view, bg, opt, g >= GA ? "converged at gen " + GA : "");
+            drawRun(B.ctx, B.W, B.H, RB, Math.min(g, GB), view, bg, opt, g >= GB ? "converged at gen " + GB.toLocaleString("en-US") : "");
+            var ctx = K.ctx, L = 40, R = 12, top = 20, bottom = 22, box = { x: L, y: top, w: K.W - L - R, h: K.H - top - bottom };
+            ctx.clearRect(0, 0, K.W, K.H);
+            logChart(ctx, box, [{ v: vB, col: COL.neutral }, { v: vA, col: COL.mean }], xf, g, [["f(m):", COL.txt], ["CMA-ES", COL.mean], ["C = I", COL.neutral]]);
+            ctx.font = MONO; ctx.fillStyle = COL.tick; ctx.textBaseline = "top"; ctx.textAlign = "center";
+            [1, 10, 100, 1000].forEach(function (t) { if (t <= GM) ctx.fillText(String(t), box.x + xf(t) * box.w, box.y + box.h + 4); });
+            ctx.font = SANS; ctx.fillStyle = COL.txt; ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillText("generation (log scale)", box.x + box.w, box.y - 5);
+            label.textContent = Math.floor(g).toLocaleString("en-US");
+        }
+        var player = new Player(root, 100, render);
+        player.setMax(1000);
+        layout(); player.set(REDUCED ? 1000 : 0);
+        onResize(cA.parentNode, function () { layout(); render(player.t); });
+        if (!REDUCED) onFirstView(root, function () { player.play(); });
+    }
+
+    ready(function () { stepDemo(); runDemo(); raceDemo(); });
+})();
+</script>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.151.3/build/three.module.js" } }
+</script>
+<script type="module">
+    // figure 1, the WebGL panel: f as a height field. It knows nothing of CMA-ES; it draws the frame the step figure publishes on its root.
+    import * as THREE from "three";
+    import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
+
+    const root = document.getElementById("cma-step"), box = root && root.querySelector(".cma-3d");
+    const NEUTRAL = new THREE.Color("#71717a");
+    let built = false, surf = null, toWorld, dots, mean, trail, ell, old;
+
+    function stage(el, aspect, draw) {                    // a WebGL view in el: orthographic camera, lights, drag to turn, resized with its box
+        let renderer;
+        try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+        catch (err) { el.textContent = "This view needs WebGL."; return null; }
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        el.appendChild(renderer.domElement);
+        const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1);
+        scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+        const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-1, 3, 2); scene.add(sun);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = false; controls.enablePan = false; controls.addEventListener("change", draw);
+        new ResizeObserver(() => { const w = el.clientWidth || 300; renderer.setSize(w, Math.round(w * aspect)); draw(); }).observe(el);
+        return { scene, camera, controls, render: () => renderer.render(scene, camera) };
+    }
+    function frustum(camera, halfW, halfH, near, far) { Object.assign(camera, { left: -halfW, right: halfW, top: halfH, bottom: -halfH, near, far }); camera.updateProjectionMatrix(); }
+    function paint(material, st) {                        // a sample's color and opacity in this phase, the same as in the plan
+        if (st.under) { material.color.copy(NEUTRAL).lerp(new THREE.Color(st.col), st.alpha); material.opacity = 1; }
+        else { material.color.set(st.col); material.opacity = st.alpha; }
+    }
+    function textSprite(scale, font) {                    // a label that faces the camera; set(text) redraws it only when the text changes
+        const c = document.createElement("canvas"); c.width = c.height = 64;
+        const tex = new THREE.CanvasTexture(c), sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+        let shown = null;
+        sp.scale.setScalar(scale);
+        sp.set = text => {
+            if (text === shown) return sp;
+            const g = c.getContext("2d"); g.clearRect(0, 0, 64, 64);
+            g.font = font; g.fillStyle = "#71717a"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 32, 34);
+            tex.needsUpdate = true; shown = text;
+            return sp;
+        };
+        return sp;
+    }
+
+    // ---- f as a height field ----
+
+    function line(color, opacity, cap) {                  // a polyline with room for cap points, refilled every frame
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(cap * 3), 3));
+        const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent: opacity < 1, opacity }));
+        l.frustumCulled = false; surf.scene.add(l);
+        return l;
+    }
+    function setLine(l, pts, dz) {
+        const a = l.geometry.attributes.position, n = Math.min(pts.length, a.count);
+        for (let i = 0; i < n; i++) { const v = toWorld(pts[i], dz); a.setXYZ(i, v.x, v.y, v.z); }
+        a.needsUpdate = true; l.geometry.setDrawRange(0, n);
+    }
+    function along(pts, k) {                              // k points per segment, so a path laid on the surface follows its slopes
+        const out = [];
+        for (let i = 0; i + 1 < pts.length; i++) for (let s = 0; s < k; s++) {
+            const a = s / k; out.push([pts[i][0] + (pts[i + 1][0] - pts[i][0]) * a, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * a]);
+        }
+        out.push(pts[pts.length - 1]);
+        return out;
+    }
+    function buildSurface() {
+        const { fn, view, tex } = root.cma3d, N = 120;
+        surf = stage(box, 1, drawSurface);
+        if (!surf) return;
+        const { scene, camera, controls } = surf;
+        const S = 1.55, az = 35 * Math.PI / 180, el = 40 * Math.PI / 180;  // S is the box's bounding radius about the target, so no turn clips it
+        frustum(camera, S, S, 0.1, 50);
+        camera.position.set(8 * Math.sin(az) * Math.cos(el), 0.4 + 8 * Math.sin(el), 8 * Math.cos(az) * Math.cos(el));
+        controls.target.set(0, 0.4, 0); controls.update();
+
+        // height = f scaled to [0, 1] over the view
+        const at = (i, j) => [view.cx + (2 * i / N - 1) * view.half, view.cy + (2 * j / N - 1) * view.half];
+        let lo = Infinity, hi = -Infinity;
+        for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) { const v = fn(at(i, j)); lo = Math.min(lo, v); hi = Math.max(hi, v); }
+        const height = p => (fn(p) - lo) / (hi - lo);
+        toWorld = (p, dz) => new THREE.Vector3((p[0] - view.cx) / view.half, height(p) + dz, -(p[1] - view.cy) / view.half);   // x right, y away, f up
+
+        const geo = new THREE.PlaneGeometry(2, 2, N, N), pos = geo.attributes.position, cols = [], low = new THREE.Color("#60a5fa"), high = new THREE.Color("#e4e4e7");
+        for (let k = 0; k < pos.count; k++) {
+            const z = height([view.cx + pos.getX(k) * view.half, view.cy + pos.getY(k) * view.half]), c = low.clone().lerp(high, z);
+            pos.setZ(k, z); cols.push(c.r, c.g, c.b);
+        }
+        geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));   // low ground blue, high ground pale
+        geo.rotateX(-Math.PI / 2); geo.computeVertexNormals();
+        scene.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(tex), vertexColors: true, side: THREE.DoubleSide })));   // the top view's contours, draped
+        const frame = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 1, 2)), new THREE.LineBasicMaterial({ color: 0xd4d4d8 }));
+        frame.position.y = 0.5; scene.add(frame);         // the box the surface lives in
+        [["x", 0, -0.05, 1.18], ["y", 1.18, -0.05, 0], ["f", -1, 1.1, 1]].forEach(([s, x, y, z]) => {   // axis names on the near edges, never hidden by the surface
+            const sp = textSprite(0.14, "italic 44px serif").set(s); sp.position.set(x, y, z); scene.add(sp);
+        });
+
+        const ball = new THREE.SphereGeometry(0.022, 16, 12);
+        dots = [];
+        for (let k = 0; k < 64; k++) { const d = new THREE.Mesh(ball, new THREE.MeshBasicMaterial({ transparent: true })); d.visible = false; scene.add(d); dots.push(d); }
+        mean = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), new THREE.MeshBasicMaterial({ color: "#1d4ed8" })); scene.add(mean);
+        trail = line("#1d4ed8", 0.55, 1024); ell = line("#3b82f6", 1, 128); old = line("#71717a", 1, 128);
+    }
+    function drawSurface() {
+        if (!old || !root.cmaFrame) return;               // old is the last thing buildSurface makes
+        const F = root.cmaFrame;
+        dots.forEach((d, k) => {
+            const st = F.styles[k];
+            d.visible = !!st;
+            if (!st) return;
+            d.position.copy(toWorld(F.X[k], 0.02)); d.scale.setScalar(1 + (st.rad - 3) / 5); paint(d.material, st);
+        });
+        mean.position.copy(toWorld(F.m, 0.03));
+        setLine(trail, along(F.trail, 8), 0.01); setLine(ell, F.ell, 0.01);
+        old.visible = !!F.old; if (F.old) setLine(old, F.old, 0.01);
+        surf.render();
+    }
+
+    if (box) {
+        root.addEventListener("cma-frame", () => { if (!built) { built = true; buildSurface(); } drawSurface(); });
+        if (root.cma3d) { built = true; buildSurface(); drawSurface(); }
+    }
+</script>
+
+<br><br>
+References:
+<ul>
+    <li><a href="https://arxiv.org/abs/1604.00772">Nikolaus Hansen, The CMA Evolution Strategy: A Tutorial</a></li>
+    <li><a href="https://doi.org/10.1162/106365601750190398">Nikolaus Hansen and Andreas Ostermeier, Completely Derandomized Self-Adaptation in Evolution Strategies</a></li>
+    <li><a href="https://doi.org/10.1109/CEC.2005.1554902">Anne Auger and Nikolaus Hansen, A Restart CMA Evolution Strategy With Increasing Population Size</a></li>
+    <li><a href="https://github.com/CMA-ES/pycma">pycma</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Smallest-circle_problem">Smallest-circle problem</a></li>
+</ul>
+
+<br><br>
