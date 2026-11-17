@@ -20,6 +20,7 @@ test('one circle follows each candidate and keeps the six points and controls', 
   expect(radii[2]).toBeCloseTo(Math.hypot(8, -1.8), 10);
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.addInitScript(() => {
     // Observe actual Canvas calls, rather than a second copy of the renderer.
     window.circleDrawing = { circles: [], dots: [], ellipses: 0, backgrounds: 0, labels: [] };
@@ -51,6 +52,11 @@ test('one circle follows each candidate and keeps the six points and controls', 
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  const panels = root.locator('.panels > .panel');
+  const left = await panels.nth(0).boundingBox();
+  const right = await panels.nth(1).boundingBox();
+  expect(Math.abs(left.y - right.y), 'desktop panels share one row').toBeLessThan(1);
+  expect(right.x).toBeGreaterThanOrEqual(left.x + left.width);
   const maximum = Number(await slider.getAttribute('max'));
   expect(maximum).toBeGreaterThan(6);
   const frames = await root.evaluate((el, maximum) => {
@@ -87,6 +93,12 @@ test('one circle follows each candidate and keeps the six points and controls', 
       circle.y - circle.r >= 0 && circle.y + circle.r <= frames.height,
     `frame ${index}: the whole circle must fit in the fixed view`);
   }
+  for (let i = 0; i < fixedPoints.length; i++) {
+    for (let j = i + 1; j < fixedPoints.length; j++) {
+      const a = fixedPoints[i], b = fixedPoints[j];
+      assert(Math.hypot(a.x - b.x, a.y - b.y) >= a.r + b.r, 'the six fixed points stay distinct');
+    }
+  }
   const firstCandidates = frames.frames.slice(0, 10).map((f) => JSON.stringify(f.circles[0]));
   expect(new Set(firstCandidates).size).toBe(6);
   expect(frames.finalFrame.X).toHaveLength(6);
@@ -102,5 +114,12 @@ test('one circle follows each candidate and keeps the six points and controls', 
   const forward = await page.evaluate(() => window.circleDrawing.circles);
   await slider.evaluate((input) => { input.value = '2'; input.dispatchEvent(new Event('input', { bubbles: true })); input.value = '0.5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
   expect(await page.evaluate(() => window.circleDrawing.circles)).toEqual(forward);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(async () => {
+    const top = await panels.nth(0).boundingBox();
+    const bottom = await panels.nth(1).boundingBox();
+    return bottom.y - (top.y + top.height);
+  }, { message: 'phone panels stack without overlapping' }).toBeGreaterThanOrEqual(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
   expect(errors).toEqual([]);
 });

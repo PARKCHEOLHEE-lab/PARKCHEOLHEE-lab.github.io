@@ -92,7 +92,7 @@ categories: note
             <canvas class="cma-gauge" aria-label="The search shape C, then the recent steps used to adjust the search size sigma."></canvas>
         </div>
         <div class="panels">
-            <div class="panel" style="flex-basis: 100%;"><div class="plabel read"></div><canvas class="cma-top" aria-label="Six fixed points and one enclosing circle at a time. Each candidate centre gives a different radius; a smaller circle is better."></canvas></div>
+            <div class="panel"><div class="plabel read"></div><canvas class="cma-top" aria-label="Six fixed points and one enclosing circle at a time. Each candidate centre gives a different radius; a smaller circle is better."></canvas></div>
             <div class="panel"><div class="plabel">\(f\) as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The radius f as a 3D surface over the centre, with the same samples and search ellipse lying on the surface."></div></div>
         </div>
         <figcaption>
@@ -676,8 +676,8 @@ categories: note
                 circleLabel = (ph === 0 ? "Candidate " : "Rank ") + (candidate + 1) + " of " + count;
             }
             circle(ctx, map, centre, COL.mean, 3);
-            POINTS.forEach(function (p) { dot(ctx, map, p, 5, COL.txt); });
-            dot(ctx, map, centre, 5, COL.mean, "#fff");
+            POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
+            dot(ctx, map, centre, 3.5, COL.mean, "#fff");
 
             // the gauge beside the step text, the same insets as the full run: C's shape against the contours,
             // cross-faded into the path that sets sigma while sigma is resized, and back while the next points appear
