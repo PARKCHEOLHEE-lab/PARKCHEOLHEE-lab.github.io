@@ -91,12 +91,13 @@ categories: note
             <div class="phase" aria-live="polite"></div>
             <canvas class="cma-gauge" aria-label="The search shape C, then the recent steps used to adjust the search size sigma."></canvas>
         </div>
+        <div class="plabel read"></div>
         <div class="panels">
-            <div class="panel"><div class="plabel read"></div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centres shown together. After ranking, the best circle is orange and the worst is gray. Each dashed radius connects its centre to a farthest fixed point. The cross is the mean."></canvas></div>
-            <div class="panel"><div class="plabel">\(f\) as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The radius f as a 3D surface over the centre, with the same samples and search ellipse lying on the surface."></div></div>
+            <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centres. Rank 1 is orange and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
+            <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same circle drawing on the ground, with each candidate lifted by its radius. Ranks 1 and 6 use the same markers and dashed height lines."></div></div>
         </div>
         <figcaption>
-            Black dots are fixed targets; hollow dots are candidate centres. Orange marks the best circle and gray the worst, with dashed lines for their radii. The cross moves to the weighted mean of the best three centres. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Both views share the same ground drawing. The radius of each circle becomes the height of its centre; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean, and the small box shows how the search distribution changes. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -348,7 +349,7 @@ categories: note
 
     // ---- drawing helpers ----
     var COL = { mean: "#1d4ed8", dist: "#3b82f6", distFill: "rgba(59, 130, 246, 0.08)", pick: "#3b82f6", drop: "#a1a1aa", neutral: "#71717a",
-                trail: "rgba(29, 78, 216, 0.55)", path: "#f59e0b", base: "#d4d4d8", tick: "#71717a", txt: "rgb(70, 70, 70)" };
+                trail: "rgba(29, 78, 216, 0.55)", path: "#f59e0b", base: "#d4d4d8", tick: "#71717a", txt: "rgb(70, 70, 70)", paper: "#fff" };
     var MONO = "10px ui-monospace, monospace", SANS = "11px -apple-system, sans-serif";
     var dpr = Math.max(1, window.devicePixelRatio || 1);
     var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -568,14 +569,6 @@ categories: note
     function circleRadius(c) {                            // the smallest circle centred at c that holds every point reaches the farthest one
         return Math.max.apply(null, POINTS.map(function (p) { return Math.hypot(p[0] - c[0], p[1] - c[1]); }));
     }
-    function ellipsePoints(m, sigma, C, n) {              // the 2-sigma ellipse of N(m, sigma^2 C) as n + 1 points, for the 3-D view
-        var e = eig2(C), a = 2 * sigma * Math.sqrt(Math.max(0, e.l1)), b = 2 * sigma * Math.sqrt(Math.max(0, e.l2)), pts = [], k;
-        for (k = 0; k <= n; k++) {
-            var q = 2 * Math.PI * k / n, u = a * Math.cos(q), v = b * Math.sin(q);
-            pts.push([m[0] + u * e.ux - v * e.uy, m[1] + u * e.uy + v * e.ux]);
-        }
-        return pts;
-    }
     function stepDemo() {
         var root = document.getElementById("cma-step");
         if (!root) return;
@@ -591,26 +584,14 @@ categories: note
         root.querySelector(".n-r").textContent = fn(OPT).toFixed(2);
         root.querySelector(".n-gen").textContent = NG;
 
-        // Fixed framing for both views: full circles in 2D, the search distribution on the 3D surface.
-        var circleView, view = (function () {
+        // One fixed x/y frame for the plan and the 3-D ground.
+        var circleView = (function () {
             var xs = [], ys = [];
             function add(p) { xs.push(p[0]); ys.push(p[1]); }
             function bounds() {
                 var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
                 return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, half: Math.max(x1 - x0, y1 - y0) / 2 * 1.05 };
             }
-            POINTS.forEach(add);
-            add([OPT[0] - fn(OPT), OPT[1] - fn(OPT)]); add([OPT[0] + fn(OPT), OPT[1] + fn(OPT)]);
-            H.forEach(function (h) {
-                h.X.forEach(add); add(h.m); add(h.m1);
-                add([h.m[0] + h.sigma * h.pc1[0], h.m[1] + h.sigma * h.pc1[1]]);
-                [[h.m, h.sigma, h.C], [h.m1, h.sigma1, h.C1]].forEach(function (q) {
-                    var rx = 2 * q[1] * Math.sqrt(q[2][0]), ry = 2 * q[1] * Math.sqrt(q[2][2]);
-                    add([q[0][0] - rx, q[0][1] - ry]); add([q[0][0] + rx, q[0][1] + ry]);
-                });
-            });
-            var surfaceView = bounds();
-            xs = []; ys = [];
             POINTS.forEach(add);
             H.forEach(function (h) {
                 h.X.forEach(add); add(h.m); add(h.m1);
@@ -619,8 +600,7 @@ categories: note
                     add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
                 });
             });
-            circleView = bounds();
-            return surfaceView;
+            return bounds();
         })();
         function phaseText(h, ph) {
             if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " candidate centres together, shown as hollow dots.";
@@ -635,15 +615,18 @@ categories: note
 
         // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
         function sampleStyle(ph, e, r) {
-            var sel = r < P.mu, s = { rank: r, col: COL.neutral, rad: 3, alpha: 1, lab: ph >= 1 ? 1 : 0, under: ph === 1 };
-            if (ph === 1) { s.col = mix(COL.mean, "#d4d4d8", r / (P.lam - 1)); s.alpha = s.lab = 1; }
+            var sel = r < P.mu, s = { rank: r, col: COL.neutral, rad: 3, alpha: 1,
+                filled: (ph >= 1 && r === 0) || (ph >= 2 && sel),
+                label: ph >= 1 && (r === 0 || r === P.lam - 1) ? String(r + 1) : "" };
+            if (ph === 1) s.col = mix(COL.mean, COL.base, r / (P.lam - 1));
             if (ph >= 2) {                                // the best mu grow by weight and the rest fade
                 var q = ph === 2 ? e : 1;
                 s.col = sel ? COL.pick : COL.drop;
                 s.rad = sel ? lerp(3, 3 + 7 * Math.sqrt(P.w[r]), q) : 3;
-                s.alpha = s.lab = sel ? 1 : lerp(1, 0.45, q);
+                s.alpha = sel ? 1 : lerp(1, 0.45, q);
             }
             if (ph >= 1 && r === 0) { s.col = COL.path; s.rad = Math.max(5, s.rad); }
+            if (ph >= 1 && r === P.lam - 1) { s.col = COL.neutral; s.alpha = 1; }
             return s;
         }
         function circle(ctx, map, c, col, width) {        // enclosing circle and its true radius to a farthest target
@@ -661,12 +644,12 @@ categories: note
             var X = h.X, styles = X.map(function (_, k) { return sampleStyle(ph, e, rank[k]); });
             ctx.clearRect(0, 0, A.W, A.H);
 
-            // distribution for this phase: the mean moves first, then the shape changes, then the size
-            var m = h.m, sigma = h.sigma, C = h.C, old = null;
+            // Mean movement is shared by both views; C and sigma are taught in the gauge.
+            var m = h.m, C = h.C;
             if (ph === 3) m = lerp2(h.m, h.m1, e);
             if (ph >= 4) m = h.m1;
-            if (ph === 4) { old = h.C; C = lerpC(h.C, h.C1, e); }
-            if (ph === 5) { old = h.C1; C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
+            if (ph === 4) C = lerpC(h.C, h.C1, e);
+            if (ph === 5) C = h.C1;
             // Compare the best and worst candidates after ranking; all six centres stay visible.
             var best = h.X[h.order[0]], worst = h.X[h.order[P.lam - 1]];
             if (ph >= 1) {
@@ -674,10 +657,11 @@ categories: note
                 circle(ctx, map, best, COL.path, 3);
             }
             POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
-            styles.forEach(function (st, k) {
-                var filled = (ph >= 1 && rank[k] === 0) || (ph >= 2 && rank[k] < P.mu);
+            h.order.slice().reverse().forEach(function (k) {
+                var st = styles[k];
                 ctx.globalAlpha = st.alpha;
-                dot(ctx, map, X[k], st.rad, filled ? st.col : "#fff", st.col);
+                dot(ctx, map, X[k], st.rad, st.filled ? st.col : COL.paper, st.col);
+                if (st.label) labels(ctx, map.x(X[k][0]) + st.rad + 3, map.y(X[k][1]) - st.rad - 2, [[st.label, st.col]], SANS, "bottom");
             });
             ctx.globalAlpha = 1;
             cross(ctx, map, m);
@@ -690,16 +674,15 @@ categories: note
             if (toPath > 0) { gx.globalAlpha = toPath; drawPathInset(gx, box, run, ph === 5 ? g : g - 1); }
             gx.globalAlpha = 1;
 
-            read.textContent = ph === 0 ? P.lam + " candidate centres / not ranked" : "Best r " + fn(best).toFixed(2) + " / worst r " + fn(worst).toFixed(2);
-            root.cmaFrame = { X: X, styles: styles, m: m, trail: H.slice(0, g + 1).map(function (q) { return q.m; }).concat([m]),
-                              ell: ellipsePoints(m, sigma, C, 96), old: old ? ellipsePoints(m, h.sigma, old, 96) : null };
+            read.textContent = ph === 0 ? P.lam + " candidate centres / not ranked" : "1: r " + fn(best).toFixed(2) + " / 6: r " + fn(worst).toFixed(2);
+            root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
             var tag = g + ":" + ph;
             if (tag !== shown) { text.innerHTML = phaseText(h, ph); shown = tag; }
             label.textContent = "gen " + (g + 1) + " of " + NG + ", step " + (ph + 1) + " of " + NP;
         }
-        root.cma3d = { fn: fn, view: view, tex: landscape(fn, view, 256, 256) };   // what the 3-D panel needs once
+        root.cma3d = { fn: fn, view: circleView, plan: cTop, colors: COL, font: SANS, dot: dot, labels: labels };
         var player = new Player(root, 0.9, render);
         player.setMax(NG * NP);
         layout(); player.set(0);
@@ -795,119 +778,136 @@ categories: note
 { "imports": { "three": "https://unpkg.com/three@0.151.3/build/three.module.js" } }
 </script>
 <script type="module">
-    // figure 1, the WebGL panel: f as a height field. It knows nothing of CMA-ES; it draws the frame the step figure publishes on its root.
+    // The plan is the common ground; its radius becomes height in the same unit.
     import * as THREE from "three";
     import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
 
     const root = document.getElementById("cma-step"), box = root && root.querySelector(".cma-3d");
-    const NEUTRAL = new THREE.Color("#71717a");
-    let built = false, surf = null, toWorld, dots, mean, trail, ell, old;
+    const identity = { x: v => v, y: v => v };
+    let built = false, ready = false, surf, cfg, ground, wire, toWorld;
+    const markers = [], axes = [], lifts = {};
 
-    function stage(el, aspect, draw) {                    // a WebGL view in el: orthographic camera, lights, drag to turn, resized with its box
+    function stage(el, aspect, draw) {
         let renderer;
         try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
         catch (err) { el.textContent = "This view needs WebGL."; return null; }
         renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         el.appendChild(renderer.domElement);
-        const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1);
-        scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-        const sun = new THREE.DirectionalLight(0xffffff, 0.75); sun.position.set(-1, 3, 2); scene.add(sun);
+        const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableZoom = false; controls.enablePan = false; controls.addEventListener("change", draw);
         new ResizeObserver(() => { const w = el.clientWidth || 300; renderer.setSize(w, Math.round(w * aspect)); draw(); }).observe(el);
-        return { scene, camera, controls, render: () => renderer.render(scene, camera) };
+        return { renderer, scene, camera, controls, render: () => renderer.render(scene, camera) };
     }
-    function frustum(camera, halfW, halfH, near, far) { Object.assign(camera, { left: -halfW, right: halfW, top: halfH, bottom: -halfH, near, far }); camera.updateProjectionMatrix(); }
-    function paint(material, st) {                        // a sample's color and opacity in this phase, the same as in the plan
-        if (st.under) { material.color.copy(NEUTRAL).lerp(new THREE.Color(st.col), st.alpha); material.opacity = 1; }
-        else { material.color.set(st.col); material.opacity = st.alpha; }
-    }
-    function textSprite(scale, font) {                    // a label that faces the camera; set(text) redraws it only when the text changes
-        const c = document.createElement("canvas"); c.width = c.height = 64;
-        const tex = new THREE.CanvasTexture(c), sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: false }));
+
+    function billboard(paint) {                         // one canvas/texture owner for both text and marker glyphs
+        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 128;
+        const texture = new THREE.CanvasTexture(canvas);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, depthWrite: false, toneMapped: false }));
+        sprite.frustumCulled = false;
         let shown = null;
-        sp.scale.setScalar(scale);
-        sp.set = text => {
-            if (text === shown) return sp;
-            const g = c.getContext("2d"); g.clearRect(0, 0, 64, 64);
-            g.font = font; g.fillStyle = "#71717a"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(text, 32, 34);
-            tex.needsUpdate = true; shown = text;
-            return sp;
+        sprite.paint = (key, value) => {
+            if (key === shown) return;
+            const g = canvas.getContext("2d");
+            g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 128, 128);
+            g.setTransform(2, 0, 0, 2, 0, 0); g.globalAlpha = 1;
+            paint(g, value);
+            texture.needsUpdate = true; shown = key;
         };
-        return sp;
+        return sprite;
     }
 
-    // ---- f as a height field ----
+    function line(color) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
+        const object = new THREE.Line(geometry, new THREE.LineDashedMaterial({ color, dashSize: 0.04, gapSize: 0.03, depthWrite: false }));
+        object.frustumCulled = false; object.renderOrder = 2;
+        surf.scene.add(object);
+        return object;
+    }
+    function setLine(object, points) {                   // actual world endpoints, including the zero-height ground
+        const a = object.geometry.getAttribute("position");
+        points.forEach((p, i) => a.setXYZ(i, p.x, p.y, p.z));
+        a.needsUpdate = true; object.geometry.setDrawRange(0, points.length);
+        object.computeLineDistances();
+    }
 
-    function line(color, opacity, cap) {                  // a polyline with room for cap points, refilled every frame
-        const g = new THREE.BufferGeometry();
-        g.setAttribute("position", new THREE.BufferAttribute(new Float32Array(cap * 3), 3));
-        const l = new THREE.Line(g, new THREE.LineBasicMaterial({ color, transparent: opacity < 1, opacity }));
-        l.frustumCulled = false; surf.scene.add(l);
-        return l;
-    }
-    function setLine(l, pts, dz) {
-        const a = l.geometry.attributes.position, n = Math.min(pts.length, a.count);
-        for (let i = 0; i < n; i++) { const v = toWorld(pts[i], dz); a.setXYZ(i, v.x, v.y, v.z); }
-        a.needsUpdate = true; l.geometry.setDrawRange(0, n);
-    }
-    function along(pts, k) {                              // k points per segment, so a path laid on the surface follows its slopes
-        const out = [];
-        for (let i = 0; i + 1 < pts.length; i++) for (let s = 0; s < k; s++) {
-            const a = s / k; out.push([pts[i][0] + (pts[i + 1][0] - pts[i][0]) * a, pts[i][1] + (pts[i + 1][1] - pts[i][1]) * a]);
-        }
-        out.push(pts[pts.length - 1]);
-        return out;
-    }
     function buildSurface() {
-        const { fn, view, tex } = root.cma3d, N = 120;
+        cfg = root.cma3d;
         surf = stage(box, 1, drawSurface);
         if (!surf) return;
-        const { scene, camera, controls } = surf;
-        const S = 1.55, az = 35 * Math.PI / 180, el = 40 * Math.PI / 180;  // S is the box's bounding radius about the target, so no turn clips it
-        frustum(camera, S, S, 0.1, 50);
-        camera.position.set(8 * Math.sin(az) * Math.cos(el), 0.4 + 8 * Math.sin(el), 8 * Math.cos(az) * Math.cos(el));
-        controls.target.set(0, 0.4, 0); controls.update();
+        const { scene, camera, controls } = surf, { fn, view, colors } = cfg;
+        toWorld = (p, height = fn(p) / view.half) => new THREE.Vector3((p[0] - view.cx) / view.half, height, -(p[1] - view.cy) / view.half);
 
-        // height = f scaled to [0, 1] over the view
-        const at = (i, j) => [view.cx + (2 * i / N - 1) * view.half, view.cy + (2 * j / N - 1) * view.half];
-        let lo = Infinity, hi = -Infinity;
-        for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) { const v = fn(at(i, j)); lo = Math.min(lo, v); hi = Math.max(hi, v); }
-        const height = p => (fn(p) - lo) / (hi - lo);
-        toWorld = (p, dz) => new THREE.Vector3((p[0] - view.cx) / view.half, height(p) + dz, -(p[1] - view.cy) / view.half);   // x right, y away, f up
+        const texture = new THREE.CanvasTexture(cfg.plan);
+        const plane = new THREE.PlaneGeometry(2, 2); plane.rotateX(-Math.PI / 2);
+        ground = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+        ground.name = "shared-plan"; scene.add(ground);
 
-        const geo = new THREE.PlaneGeometry(2, 2, N, N), pos = geo.attributes.position, cols = [], low = new THREE.Color("#60a5fa"), high = new THREE.Color("#e4e4e7");
-        for (let k = 0; k < pos.count; k++) {
-            const z = height([view.cx + pos.getX(k) * view.half, view.cy + pos.getY(k) * view.half]), c = low.clone().lerp(high, z);
-            pos.setZ(k, z); cols.push(c.r, c.g, c.b);
+        // A sparse smooth line grid keeps the ground drawing visible.
+        const vertices = [], N = 12, segments = 64;
+        let highest = 0;
+        const at = (fixed, t, direction) => toWorld([view.cx + (direction ? t : fixed) * view.half, view.cy + (direction ? fixed : t) * view.half]);
+        for (let direction = 0; direction < 2; direction++) for (let i = 0; i <= N; i++) for (let k = 0; k < segments; k++) {
+            const a = at(2 * i / N - 1, 2 * k / segments - 1, direction);
+            const b = at(2 * i / N - 1, 2 * (k + 1) / segments - 1, direction);
+            vertices.push(...a.toArray(), ...b.toArray()); highest = Math.max(highest, a.y, b.y);
         }
-        geo.setAttribute("color", new THREE.Float32BufferAttribute(cols, 3));   // low ground blue, high ground pale
-        geo.rotateX(-Math.PI / 2); geo.computeVertexNormals();
-        scene.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ map: new THREE.CanvasTexture(tex), vertexColors: true, side: THREE.DoubleSide })));   // the top view's contours, draped
-        const frame = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 1, 2)), new THREE.LineBasicMaterial({ color: 0xd4d4d8 }));
-        frame.position.y = 0.5; scene.add(frame);         // the box the surface lives in
-        [["x", 0, -0.05, 1.18], ["y", 1.18, -0.05, 0], ["f", -1, 1.1, 1]].forEach(([s, x, y, z]) => {   // axis names on the near edges, never hidden by the surface
-            const sp = textSprite(0.14, "italic 44px serif").set(s); sp.position.set(x, y, z); scene.add(sp);
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        wire = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: colors.neutral, transparent: true, opacity: 0.22, depthWrite: false }));
+        wire.name = "cost-grid"; wire.renderOrder = 1; scene.add(wire);
+
+        const S = Math.sqrt(2 + (highest / 2) ** 2) + 0.25, elevation = 40 * Math.PI / 180;
+        Object.assign(camera, { left: -S, right: S, top: S, bottom: -S });
+        camera.updateProjectionMatrix();
+        camera.position.set(0, highest / 2 + 8 * Math.sin(elevation), 8 * Math.cos(elevation));
+        controls.target.set(0, highest / 2, 0); controls.update();
+
+        const axisPoints = [-1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, highest, 1];
+        const axisGeometry = new THREE.BufferGeometry();
+        axisGeometry.setAttribute("position", new THREE.Float32BufferAttribute(axisPoints, 3));
+        scene.add(new THREE.LineSegments(axisGeometry, new THREE.LineBasicMaterial({ color: colors.base })));
+        [["x", 0, -0.08, 1.1], ["y", 1.1, -0.08, 0], ["r", -1.1, highest / 2, 1.1]].forEach(([text, x, y, z]) => {
+            const label = billboard((g, value) => {
+                g.font = cfg.font; g.fillStyle = colors.neutral; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(value, 32, 32);
+            });
+            label.paint(text, text); label.position.set(x, y, z); label.renderOrder = 6; scene.add(label); axes.push(label);
         });
 
-        const ball = new THREE.SphereGeometry(0.022, 16, 12);
-        dots = [];
-        for (let k = 0; k < 64; k++) { const d = new THREE.Mesh(ball, new THREE.MeshBasicMaterial({ transparent: true })); d.visible = false; scene.add(d); dots.push(d); }
-        mean = new THREE.Mesh(new THREE.SphereGeometry(0.03, 16, 12), new THREE.MeshBasicMaterial({ color: "#1d4ed8" })); scene.add(mean);
-        trail = line("#1d4ed8", 0.55, 1024); ell = line("#3b82f6", 1, 128); old = line("#71717a", 1, 128);
-    }
-    function drawSurface() {
-        if (!old || !root.cmaFrame) return;               // old is the last thing buildSurface makes
-        const F = root.cmaFrame;
-        dots.forEach((d, k) => {
-            const st = F.styles[k];
-            d.visible = !!st;
-            if (!st) return;
-            d.position.copy(toWorld(F.X[k], 0.02)); d.scale.setScalar(1 + (st.rad - 3) / 5); paint(d.material, st);
+        root.cmaFrame.X.forEach((_, k) => {
+            const marker = billboard((g, st) => {
+                cfg.dot(g, identity, [32, 32], st.rad, st.filled ? st.col : colors.paper, st.col);
+                if (st.label) cfg.labels(g, 32 + st.rad + 3, 32 - st.rad - 2, [[st.label, st.col]], cfg.font, "bottom");
+            });
+            marker.name = "candidate-" + k; scene.add(marker); markers.push(marker);
         });
-        mean.position.copy(toWorld(F.m, 0.03));
-        setLine(trail, along(F.trail, 8), 0.01); setLine(ell, F.ell, 0.01);
-        old.visible = !!F.old; if (F.old) setLine(old, F.old, 0.01);
+        lifts["1"] = line(colors.path); lifts["6"] = line(colors.neutral);
+        Object.entries(lifts).forEach(([rank, object]) => { object.name = "radius-" + rank; object.visible = false; });
+        if (new URLSearchParams(location.search).has("scene-debug")) root.cma3d.inspect = { ...surf, markers, lifts };
+        ready = true;
+    }
+
+    function drawSurface() {
+        if (!ready || !root.cmaFrame) return;
+        const F = root.cmaFrame, pixel = (surf.camera.right - surf.camera.left) / (box.clientWidth || 300);
+        ground.material.map.needsUpdate = true;
+        markers.forEach((object, k) => {
+            const st = F.styles[k];
+            object.position.copy(toWorld(F.X[k])); object.scale.setScalar(64 * pixel);
+            object.material.opacity = st.alpha;
+            object.renderOrder = st.label === "1" ? 5 : st.label === "6" ? 4 : 3;
+            object.paint(JSON.stringify([st.col, st.rad, st.filled, st.label]), st);
+        });
+        axes.forEach(object => object.scale.setScalar(64 * pixel));
+        Object.values(lifts).forEach(object => { object.visible = false; });
+        F.styles.forEach((st, k) => {
+            if (!st.label) return;
+            const object = lifts[st.label];
+            setLine(object, [toWorld(F.X[k], 0), toWorld(F.X[k])]);
+            object.material.dashSize = 4 * pixel; object.material.gapSize = 3 * pixel;
+            object.visible = true;
+        });
         surf.render();
     }
 

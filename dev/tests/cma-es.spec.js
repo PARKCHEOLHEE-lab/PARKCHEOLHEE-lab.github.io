@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('node:assert/strict');
 
-test('best and worst circles show their true dashed radii', async ({ page }) => {
+test('linked views share their ground, glyphs and true radius heights', async ({ page }) => {
   // Unit checks use the real inline function, without starting any demo.
   const source = fs.readFileSync(path.join(__dirname, '../../_posts/2026-08-23-cma-es.html'), 'utf8');
   const radii = await page.evaluate((html) => {
@@ -37,6 +37,8 @@ test('best and worst circles show their true dashed radii', async ({ page }) => 
     for (const method of ['clearRect', 'beginPath', 'arc', 'moveTo', 'lineTo', 'fill', 'stroke', 'ellipse', 'drawImage', 'fillText']) {
       const original = proto[method];
       proto[method] = function (...args) {
+        if (method === 'clearRect') this.canvas.drawnTexts = [];
+        if (method === 'fillText') (this.canvas.drawnTexts ||= []).push(String(args[0]));
         if (this.canvas.matches('#cma-step .cma-top')) {
           const drawing = window.circleDrawing;
           if (method === 'clearRect') {
@@ -77,7 +79,7 @@ test('best and worst circles show their true dashed radii', async ({ page }) => 
   });
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
-  await page.goto('/cma-es/');
+  await page.goto('/cma-es/?scene-debug');
   const root = page.locator('#cma-step');
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
@@ -127,12 +129,18 @@ test('best and worst circles show their true dashed radii', async ({ page }) => 
     assert.equal(drawing.dots.length, 12, `frame ${index}: six fixed points and six candidate centres`);
     assert.equal(drawing.ellipses, 0);
     assert.equal(drawing.backgrounds, 0);
-    assert.deepEqual(drawing.labels, []);
-    const points = drawing.dots.slice(0, 6), candidates = drawing.dots.slice(6);
+    assert.deepEqual([...drawing.labels].sort(), phase === 0 ? [] : ['1', '6'], 'shared rank labels identify the same two candidates');
+    const points = drawing.dots.slice(0, 6), drawnCandidates = drawing.dots.slice(6);
     if (!fixedPoints) fixedPoints = points;
     assert.deepEqual(points, fixedPoints);
     const scale = (points[3].x - points[0].x) / 6;
     const project = (p) => [points[0].x + p[0] * scale, points[0].y - p[1] * scale];
+    const candidates = frame.population.map((p) => {
+      const q = project(p);
+      const mark = drawnCandidates.find((c) => Math.hypot(c.x - q[0], c.y - q[1]) < 1e-7);
+      assert(mark, 'each candidate keeps its true position');
+      return mark;
+    });
     for (let k = 0; k < 6; k++) {
       const expected = project(frame.population[k]);
       assert(Math.hypot(candidates[k].x - expected[0], candidates[k].y - expected[1]) < 1e-7, 'candidate centres keep their true positions');
@@ -195,8 +203,101 @@ test('best and worst circles show their true dashed radii', async ({ page }) => 
   expect(meanDiffersFromBest).toBe(true);
   expect(frames.frames.slice(0, samplesPerPhase).map((f) => f.population)).toEqual(Array(samplesPerPhase).fill(frames.frames[0].population));
   expect(frames.finalFrame.X).toHaveLength(6);
-  expect(frames.finalFrame.ell).toHaveLength(97);
   await expect(root.locator('.gen')).toHaveText(/step 6 of 6/);
+
+  // These live checks use actual scene objects; the bulk 2D scan above cannot
+  // establish the 3D texture, coordinate mapping, glyphs or segment heights.
+  let lastTextureVersion = -1, lastRenderFrame = -1;
+  for (const time of [0, 1.5, 2.5, 3.5, 4.5, 5.5, 7.5, maximum]) {
+    await slider.evaluate((input, time) => { input.value = String(time); input.dispatchEvent(new Event('input', { bubbles: true })); }, time);
+    const state = await root.evaluate((el) => {
+      const s = el.cma3d.inspect, canvas = el.querySelector('.cma-top');
+      if (!s) return null;
+      s.scene.updateMatrixWorld(true);
+      let ground;
+      s.scene.traverse((o) => { if (o.isMesh && o.material.map?.image === canvas) ground = o; });
+      if (!ground) return { shared: false };
+      const positions = ground.geometry.getAttribute('position'), uv = ground.geometry.getAttribute('uv');
+      const world = (o, a, i) => o.localToWorld(o.position.clone().set(a.getX(i), a.getY(i), a.getZ(i))).toArray();
+      const corners = Array.from({ length: positions.count }, (_, i) => ({ uv: [uv.getX(i), uv.getY(i)], position: world(ground, positions, i) }));
+      const markers = s.markers.map((o) => {
+        const image = o.material.map.image, g = image.getContext('2d'), cx = image.width / 2;
+        const rgba = Array.from(g.getImageData(cx, cx, 1, 1).data);
+        const row = g.getImageData(cx, cx, cx, 1).data;
+        let radius = 0;
+        for (let i = 0; i < cx; i++) if (row[i * 4 + 3] > 20) radius = i;
+        return { position: o.getWorldPosition(o.position.clone()).toArray(), opacity: o.material.opacity, tint: o.material.color.getHexString(), rgba, texts: image.drawnTexts || [], radiusPx: radius / image.width * o.scale.x / (s.camera.right - s.camera.left) * s.renderer.domElement.clientWidth };
+      });
+      const lifts = Object.entries(s.lifts).filter(([, o]) => o.visible).map(([rank, o]) => {
+        const p = o.geometry.getAttribute('position'), d = o.geometry.getAttribute('lineDistance');
+        return { rank, positions: [world(o, p, 0), world(o, p, 1)], dashed: o.material.isLineDashedMaterial, distances: d ? Array.from(d.array).slice(0, 2) : [] };
+      });
+      const wire = s.scene.getObjectByName('cost-grid'), p = wire.geometry.getAttribute('position');
+      const wirePoints = Array.from({ length: 12 }, (_, i) => world(wire, p, Math.floor(i * (p.count - 1) / 11)));
+      let lights = 0, otherMeshes = 0;
+      s.scene.traverse((o) => { if (o.isLight) lights++; if (o.isMesh && o !== ground) otherMeshes++; });
+      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
+    });
+    expect(state?.shared, 'the actual 3D ground material shares the 2D canvas').toBe(true);
+    expect(state.orthographic).toBe(true);
+    expect(state.lights).toBe(0);
+    expect(state.otherMeshes).toBe(0);
+    expect(state.zoom).toBe(false);
+    expect(state.pan).toBe(false);
+    expect(state.textureVersion).toBeGreaterThan(lastTextureVersion);
+    expect(state.renderFrame).toBeGreaterThan(lastRenderFrame);
+    lastTextureVersion = state.textureVersion; lastRenderFrame = state.renderFrame;
+    const corner = (u, v) => state.corners.find((c) => c.uv[0] === u && c.uv[1] === v).position;
+    const a = corner(0, 0), b = corner(1, 0), c = corner(0, 1);
+    const onGround = (mark) => {
+      const u = mark.x / state.width, v = state.flipY ? 1 - mark.y / state.height : mark.y / state.height;
+      return a.map((value, axis) => value + u * (b[axis] - value) + v * (c[axis] - value));
+    };
+    const points = state.drawing.dots.slice(0, 6), marks = state.drawing.dots.slice(6);
+    const dataScale = (points[3].x - points[0].x) / 6;
+    const worldScale = Math.hypot(...a.map((v, i) => b[i] - v)) / state.width * dataScale;
+    const scores = state.frame.X.map((p) => Math.max(...targets.map((q) => Math.hypot(q[0] - p[0], q[1] - p[1]))));
+    const order = scores.map((_, k) => k).sort((a, b) => scores[a] - scores[b]);
+    const ranked = state.drawing.circles.length > 0;
+    expect(state.lifts).toHaveLength(ranked ? 2 : 0);
+    for (const [i, marker] of state.markers.entries()) {
+      const pixel = [points[0].x + state.frame.X[i][0] * dataScale, points[0].y - state.frame.X[i][1] * dataScale];
+      const mark = marks.find((m) => Math.hypot(m.x - pixel[0], m.y - pixel[1]) < 1e-7);
+      const base = onGround(mark), pos = marker.position;
+      assert(Math.hypot(pos[0] - base[0], pos[2] - base[2]) < 1e-6, 'the cost marker is above the same ground centre');
+      assert(Math.abs(pos[1] - base[1] - scores[i] * worldScale) < 1e-6, 'height is the radius in the shared unit, without minimum subtraction');
+      const rgb = [1, 3, 5].map((k) => parseInt(mark.fill.slice(k, k + 2), 16));
+      assert.deepEqual(marker.rgba.slice(0, 3), rgb, 'both views paint the same hollow/filled glyph colour');
+      assert.equal(marker.tint, 'ffffff', 'glyph colours are not tinted by the 3D material');
+      assert.equal(marker.opacity, mark.alpha);
+      assert(Math.abs(marker.radiusPx - mark.r - 0.5) <= 1, 'glyph sizes match in CSS pixels');
+      assert.deepEqual(marker.texts, ranked && (i === order[0] || i === order[5]) ? [i === order[0] ? '1' : '6'] : []);
+    }
+    for (const lift of state.lifts) {
+      const i = order[Number(lift.rank) - 1], marker = state.markers[i];
+      const start = lift.positions[0], end = lift.positions[1];
+      assert(Math.abs(start[1]) < 1e-6, 'height starts at the shared ground');
+      assert(Math.hypot(...end.map((v, k) => v - marker.position[k])) < 1e-6, 'height ends at the actual cost marker');
+      assert(Math.abs(Math.hypot(...end.map((v, k) => v - start[k])) - scores[i] * worldScale) < 1e-6, 'height equals the plan radius');
+      assert(lift.dashed && lift.distances.length === 2 && lift.distances[1] > 0, 'height uses an actual dashed line');
+    }
+    const origin = onGround(points[0]);
+    for (const p of state.wirePoints) {
+      const xy = [(p[0] - origin[0]) / worldScale, -(p[2] - origin[2]) / worldScale];
+      const radius = Math.max(...targets.map((q) => Math.hypot(q[0] - xy[0], q[1] - xy[1])));
+      assert(Math.abs(p[1] - radius * worldScale) < 1e-5, 'the actual line surface shows the same objective');
+    }
+  }
+
+  const view = root.locator('.cma-3d canvas');
+  await view.scrollIntoViewIfNeeded();
+  const beforeTurn = await root.evaluate((el) => el.cma3d.inspect.camera.quaternion.toArray());
+  const bounds = await view.boundingBox();
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(bounds.x + bounds.width / 2 + 30, bounds.y + bounds.height / 2 - 15, { steps: 5 });
+  await page.mouse.up();
+  expect(await root.evaluate((el) => el.cma3d.inspect.camera.quaternion.toArray())).not.toEqual(beforeTurn);
 
   // The existing button replays after the end; scrubbing pauses it.
   await button.click();
