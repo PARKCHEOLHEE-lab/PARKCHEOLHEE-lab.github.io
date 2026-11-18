@@ -21,8 +21,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     return {
       radii: [[0, 0], [3, 1.1], [-2, 4]].map((centre) => window.radiusForTest(centre)), palette: [...palette],
       generations: history.map((h) => h.X),
-      distributions: history.map(({ m, m1, C, C1, sigma, sigma1, pc1 }) => ({ m, m1, C, C1, sigma, sigma1, pc1 })),
-      weights: run.P.w, memoryRate: run.P.c1,
+      distributions: history.map(({ m, m1, C, C1, sigma, sigma1, pc1, ps1 }) => ({ m, m1, C, C1, sigma, sigma1, pc1, ps1 })),
+      weights: run.P.w, memoryRate: run.P.c1, pathBaseline: run.P.chiN,
     };
   }, source);
   expect(unit.radii[0]).toBeCloseTo(Math.hypot(6, 2.2), 10);
@@ -64,6 +64,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
           if (method === 'clearRect') {
             drawing.circles = []; drawing.radii = []; drawing.dots = []; drawing.crosses = []; drawing.ellipses = []; drawing.backgrounds = 0; drawing.labels = [];
             drawing.before = []; drawing.origins = []; drawing.arrows = [];
+            drawing.axes = [];
           }
           if (method === 'beginPath') { this.observedArc = null; this.observedEllipse = null; this.observedLines = []; this.observedPosition = null; }
           if (method === 'arc') this.observedArc = { x: args[0], y: args[1], r: args[2] };
@@ -92,7 +93,11 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
           }
           if (method === 'stroke' && !this.observedArc && this.observedLines.length === 2) {
             const [a, b] = this.observedLines[0];
-            (this.globalAlpha < 1 ? drawing.origins : drawing.crosses).push({ x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, dash: this.getLineDash() });
+            if (this.lineWidth === 1) {
+              drawing.axes.push(...this.observedLines);
+            } else {
+              (this.globalAlpha < 1 ? drawing.origins : drawing.crosses).push({ x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, dash: this.getLineDash() });
+            }
           }
           if (method === 'stroke' && !this.observedArc && this.observedLines.length === 1) {
             const [from, to] = this.observedLines[0];
@@ -278,7 +283,14 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     assert(Math.abs(shapeXY + factor * covariance[1]) < 1e-7, 'ellipse angle represents C with the drawing y-axis flipped');
     const gray = [1, 3, 5].map((i) => parseInt(guide.stroke.slice(i, i + 2), 16));
     assert(Math.max(...gray) - Math.min(...gray) <= 16 && Math.min(...gray) >= 32 && Math.max(...gray) <= 224, 'C shape is gray');
-    assert.equal(guide.width, 1);
+    assert.equal(guide.width, phase >= 4 ? 2 : 1);
+    assert.equal(drawing.axes.length, phase >= 4 ? 2 : 0, 'C and sigma show the two axes on the actual ellipse');
+    const spans = [[guide.rx * cos, guide.rx * sin], [-guide.ry * sin, guide.ry * cos]];
+    drawing.axes.forEach(([start, end], i) => {
+      assert(Math.hypot((start[0] + end[0]) / 2 - guide.x, (start[1] + end[1]) / 2 - guide.y) < 1e-7);
+      const dx = (end[0] - start[0]) / 2, dy = (end[1] - start[1]) / 2, [x, y] = spans[i];
+      assert(Math.min(Math.hypot(dx - x, dy - y), Math.hypot(dx + x, dy + y)) < 1e-7, 'axis follows the ellipse orientation and radius');
+    });
     assert.equal(guide.filled, false, 'the C guide has no fill');
     assert(guide.dash.length > 0 && guide.dash.every((v) => v > 0), 'C shape is dashed');
     const extentX = Math.sqrt(shapeXX), extentY = Math.sqrt(shapeYY);
@@ -314,12 +326,13 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       expectArrow(project(distribution.m), project(tip), '#f59e0b', 1.5);
     }
     if (phase === 5) {
-      const C = distribution.C1, major = (C[0] + C[2]) / 2 + Math.hypot((C[0] - C[2]) / 2, C[1]);
-      const oldRadius = 2 * distribution.sigma * Math.sqrt(major) * scale;
-      const direction = [Math.cos(guide.angle), Math.sin(guide.angle)];
-      const from = [guide.x + oldRadius * direction[0], guide.y + oldRadius * direction[1]];
-      const tip = [guide.x + guide.rx * direction[0], guide.y + guide.rx * direction[1]];
-      expectArrow(from, tip, '#f59e0b', 1.5);
+      const path = Math.hypot(...distribution.ps1) / unit.pathBaseline;
+      assert(frame.phase.includes(path.toFixed(2) + '× the random-step baseline'), 'sigma explains the actual path comparison');
+      if (path !== 1) assert(frame.phase.includes(path > 1 ? 'grow' : 'shrink'));
+      for (const [dx, dy] of spans) {
+        const factor = distribution.sigma / sigma;
+        expectArrow([guide.x + dx * factor, guide.y + dy * factor], [guide.x + dx, guide.y + dy], '#f59e0b', 1.5);
+      }
     }
     assert.equal(drawing.arrows.length, expectedArrows.length, 'only the directions relevant to this update are shown');
     expectedArrows.forEach((expected, i) => {

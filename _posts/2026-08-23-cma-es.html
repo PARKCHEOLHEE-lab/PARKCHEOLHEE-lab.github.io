@@ -339,10 +339,10 @@ categories: note
         ctx.fillStyle = fill; ctx.fill();
         if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
     }
-    function ellipse(ctx, map, m, sigma, C, dashed) {     // two standard deviations of N(m, sigma^2 C)
+    function ellipse(ctx, map, m, sigma, C, dashed, width = 1) {  // two standard deviations of N(m, sigma^2 C)
         var e = eig2(C), a = 2 * sigma * Math.sqrt(Math.max(0, e.l1)) * map.s, b = 2 * sigma * Math.sqrt(Math.max(0, e.l2)) * map.s;
         ctx.beginPath(); ctx.ellipse(map.x(m[0]), map.y(m[1]), a, b, -Math.atan2(e.uy, e.ux), 0, 2 * Math.PI);
-        if (dashed) { ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]); return; }
+        if (dashed) { ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = width; ctx.stroke(); ctx.setLineDash([]); return e; }
         ctx.fillStyle = COL.distFill; ctx.fill();
         ctx.strokeStyle = COL.dist; ctx.lineWidth = 1.5; ctx.stroke();
     }
@@ -559,9 +559,10 @@ categories: note
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
             if (ph === 2) return "<b>3. Select.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows carry more weight.";
             if (ph === 3) return "<b>4. Move the mean.</b> X moves toward the weighted center of those samples. Faint dashes show where the search shape started.";
-            if (ph === 4) return "<b>5. Reshape C.</b> C learns the blue sample directions and the amber recent direction. Faint dashes keep the old shape visible.";
-            var r = h.sigma1 / h.sigma;
-            return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "Recent steps agree: grow the spread." : "Recent steps cancel out: shrink the spread.") + " X and C stay fixed; the amber arrow shows the size change.";
+            if (ph === 4) return "<b>5. Reshape C.</b> The two axes show how the spread turns and stretches. The blue sample directions and amber recent direction guide this change.";
+            var pathRatio = Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN;
+            var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
+            return "<b>6. Resize \u03c3.</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
         }
         function layout() { A = fit(cTop, 1); bg = null; }
 
@@ -606,7 +607,23 @@ categories: note
                 ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, ph === 5 ? h.C1 : h.C, true);
                 ctx.restore();
             }
-            ellipse(ctx, map, m, sigma, C, true);
+            var axes = ellipse(ctx, map, m, sigma, C, true, ph >= 4 ? 2 : 1);
+            if (ph >= 4) {
+                var directions = [[axes.ux, axes.uy, axes.l1], [axes.uy, -axes.ux, axes.l2]];
+                var tips = directions.map(function (d) {
+                    var radius = 2 * sigma * Math.sqrt(d[2]);
+                    return [m[0] + radius * d[0], m[1] + radius * d[1]];
+                });
+                ctx.beginPath();
+                tips.forEach(function (tip) {
+                    ctx.moveTo(map.x(2 * m[0] - tip[0]), map.y(2 * m[1] - tip[1]));
+                    ctx.lineTo(map.x(tip[0]), map.y(tip[1]));
+                });
+                ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1; ctx.stroke();
+                if (ph === 5) tips.forEach(function (tip) {
+                    arrow(ctx, map, lerp2(m, tip, h.sigma / sigma), tip, COL.path, 1.5);
+                });
+            }
             if (ph >= 2 && ph <= 4) {
                 h.order.slice(0, P.mu).forEach(function (k, i) {
                     arrow(ctx, map, h.m, h.X[k], COL.pick, 0.75 + 2 * P.w[i]);
@@ -617,12 +634,6 @@ categories: note
                 // The covariance path's contribution, in the same units as the samples.
                 var memory = h.m.map(function (v, i) { return v + h.sigma * Math.sqrt(P.c1) * h.pc1[i]; });
                 arrow(ctx, map, h.m, memory, COL.path, 1.5);
-            }
-            if (ph === 5) {
-                var axis = eig2(h.C1), length = 2 * Math.sqrt(axis.l1);
-                var before = [h.m1[0] + length * h.sigma * axis.ux, h.m1[1] + length * h.sigma * axis.uy];
-                var after = [h.m1[0] + length * sigma * axis.ux, h.m1[1] + length * sigma * axis.uy];
-                arrow(ctx, map, before, after, COL.path, 1.5);
             }
             var best = h.X[h.order[0]];
             if (ph >= 1) {
