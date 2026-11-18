@@ -90,11 +90,11 @@ categories: note
         <div class="phase" aria-live="polite"></div>
         <div class="plabel read"></div>
         <div class="panels">
-            <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six small filled candidate centers on a pale contour background. Rank 1 is blue and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
-            <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same circle drawing on the ground, with each candidate lifted by its radius. Ranks 1 and 6 use the same markers and dashed height lines."></div></div>
+            <div class="panel"><div class="plabel">Best circle and search shape</div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centers. The best circle is blue with its true dashed radius. A gray dashed ellipse shows the current sampling spread around the mean."></canvas></div>
+            <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same ground drawing, with each candidate lifted by its radius. The best marker and dashed height line are blue. The gray dashed search shape stays on the ground."></div></div>
         </div>
         <figcaption>
-            Both views share the same ground drawing. Pale lines mark equal radii. The radius of each circle becomes the height of its center; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            The blue circle belongs to the best sample. Gray dashes show the sampling spread around X (the mean): \(C\) sets its shape and \(\sigma\) sets its size. Some samples can lie outside the dashed line. Pale lines mark equal radii in both views, and the right view uses radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -558,19 +558,21 @@ categories: note
             POINTS.forEach(add);
             H.forEach(function (h) {
                 h.X.forEach(add); add(h.m); add(h.m1);
-                [h.order[0], h.order[P.lam - 1]].forEach(function (k) {
-                    var c = h.X[k], r = fn(c);
-                    add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
+                var c = h.X[h.order[0]], r = fn(c);
+                add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
+                [[h.m, h.sigma, h.C], [h.m1, h.sigma, h.C], [h.m1, h.sigma, h.C1], [h.m1, h.sigma1, h.C1]].forEach(function (q) {
+                    var rx = 2 * q[1] * Math.sqrt(q[2][0]), ry = 2 * q[1] * Math.sqrt(q[2][2]);
+                    add([q[0][0] - rx, q[0][1] - ry]); add([q[0][0] + rx, q[0][1] + ry]);
                 });
             });
             return bounds();
         })();
         function phaseText(h, ph) {
             if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centers. The motion links one generation to the next.";
-            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue is best; gray is worst. Dashed lines show their radii.";
+            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
             if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centers (blue dots). Their weights are " + W3 + ".";
-            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centers. The two circles stay with their candidates.";
-            if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search.";
+            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross and search shape to the weighted mean. The best circle stays with its candidate.";
+            if (ph === 4) return "<b>5. Reshape C.</b> The gray dashed shape changes with C.";
             var r = h.sigma1 / h.sigma;
             return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.");
         }
@@ -579,13 +581,12 @@ categories: note
         // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
         function sampleStyle(ph, r) {
             var sel = r < P.mu, s = { rank: r, col: COL.drop, rad: 2.5, alpha: 1, filled: true,
-                label: ph >= 1 && (r === 0 || r === P.lam - 1) ? String(r + 1) : "" };
+                label: ph >= 1 && r === 0 ? "1" : "" };
             if (ph >= 2) {
                 s.col = sel ? COL.pick : COL.drop;
                 s.rad = sel ? 3 : 2.5;
             }
             if (ph >= 1 && r === 0) { s.col = COL.mean; s.rad = 3.5; }
-            if (ph >= 1 && r === P.lam - 1) s.col = COL.neutral;
             return s;
         }
         function circle(ctx, map, c, col, width) {        // enclosing circle and its true radius to a farthest target
@@ -607,14 +608,15 @@ categories: note
             if (!bg) bg = landscape(fn, circleView, A.W, A.H);
             ctx.drawImage(bg, 0, 0, A.W, A.H);
 
-            // Mean movement is shared by both views.
-            var m = h.m;
+            // Move the mean, change C, then change sigma in their separate phases.
+            var m = h.m, C = h.C, sigma = h.sigma;
             if (ph === 3) m = lerp2(h.m, h.m1, e);
             if (ph >= 4) m = h.m1;
-            // Compare the best and worst candidates after ranking; all six centers stay visible.
-            var best = h.X[h.order[0]], worst = h.X[h.order[P.lam - 1]];
+            if (ph === 4) C = lerpC(h.C, h.C1, e);
+            if (ph === 5) { C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
+            ellipse(ctx, map, m, sigma, C, true);
+            var best = h.X[h.order[0]];
             if (ph >= 1) {
-                circle(ctx, map, worst, COL.neutral, 1);
                 circle(ctx, map, best, COL.mean, 1.5);
             }
             POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
@@ -627,7 +629,7 @@ categories: note
             ctx.globalAlpha = 1;
             cross(ctx, map, m);
 
-            read.textContent = ph === 0 ? P.lam + " candidate centers / not ranked" : "1: r " + fn(best).toFixed(2) + " / 6: r " + fn(worst).toFixed(2);
+            read.textContent = (ph === 0 ? P.lam + " candidate centers / not ranked" : "Best r " + fn(best).toFixed(2)) + " / dashed: C shape, \u03c3 size";
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
@@ -837,7 +839,7 @@ categories: note
             });
             marker.name = "candidate-" + k; scene.add(marker); markers.push(marker);
         });
-        lifts["1"] = line(colors.mean); lifts["6"] = line(colors.neutral);
+        lifts["1"] = line(colors.mean);
         Object.entries(lifts).forEach(([rank, object]) => { object.name = "radius-" + rank; object.visible = false; });
         if (new URLSearchParams(location.search).has("scene-debug")) root.cma3d.inspect = { ...surf, markers, lifts };
         ready = true;
@@ -856,7 +858,7 @@ categories: note
             const st = F.styles[k];
             object.position.copy(toWorld(F.X[k])); object.scale.setScalar(64 * pixel);
             object.material.opacity = st.alpha;
-            object.renderOrder = st.label === "1" ? 5 : st.label === "6" ? 4 : 3;
+            object.renderOrder = st.label === "1" ? 5 : 3;
             object.paint(JSON.stringify([st.col, st.rad, st.filled, st.label]), st);
         });
         axes.forEach(object => object.scale.setScalar(64 * pixel));

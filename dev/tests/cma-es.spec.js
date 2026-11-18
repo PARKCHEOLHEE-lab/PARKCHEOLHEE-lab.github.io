@@ -17,9 +17,11 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     const image = window.landscapeForTest(([x]) => 10 ** x, { cx: 0, cy: 0, half: 1 }, 280, 280);
     const pixels = image.getContext('2d').getImageData(0, 0, image.width, image.height).data, palette = new Set();
     for (let i = 0; i < pixels.length; i += 4) palette.add(Array.from(pixels.slice(i, i + 4)).join(','));
+    const history = window.recordForTest(window.radiusForTest, [0.5, 3.5], 1, 6, 3, true, 600).H;
     return {
       radii: [[0, 0], [3, 1.1], [-2, 4]].map((centre) => window.radiusForTest(centre)), palette: [...palette],
-      generations: window.recordForTest(window.radiusForTest, [0.5, 3.5], 1, 6, 3, true, 600).H.map((h) => h.X),
+      generations: history.map((h) => h.X),
+      distributions: history.map(({ m, m1, C, C1, sigma, sigma1 }) => ({ m, m1, C, C1, sigma, sigma1 })),
     };
   }, source);
   expect(unit.radii[0]).toBeCloseTo(Math.hypot(6, 2.2), 10);
@@ -30,7 +32,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.addInitScript(() => {
     // Observe actual Canvas calls, rather than a second copy of the renderer.
-    window.circleDrawing = { circles: [], radii: [], dots: [], crosses: [], ellipses: 0, backgrounds: 0, labels: [] };
+    window.circleDrawing = { circles: [], radii: [], dots: [], crosses: [], ellipses: [], backgrounds: 0, labels: [] };
     window.referenceDrawing = { dots: [], widths: [] };
     window.circleScanEvents = 0;
     // Isolate the bulk 2D geometry checks from redundant GPU draws. Normal
@@ -59,10 +61,16 @@ test('linked views share their ground, glyphs and true radius heights', async ({
         if (this.canvas.matches('#cma-step .cma-top')) {
           const drawing = window.circleDrawing;
           if (method === 'clearRect') {
-            drawing.circles = []; drawing.radii = []; drawing.dots = []; drawing.crosses = []; drawing.ellipses = 0; drawing.backgrounds = 0; drawing.labels = [];
+            drawing.circles = []; drawing.radii = []; drawing.dots = []; drawing.crosses = []; drawing.ellipses = []; drawing.backgrounds = 0; drawing.labels = [];
           }
-          if (method === 'beginPath') { this.observedArc = null; this.observedLines = []; this.observedPosition = null; }
+          if (method === 'beginPath') { this.observedArc = null; this.observedEllipse = null; this.observedLines = []; this.observedPosition = null; }
           if (method === 'arc') this.observedArc = { x: args[0], y: args[1], r: args[2] };
+          if (method === 'ellipse') this.observedEllipse = { x: args[0], y: args[1], rx: args[2], ry: args[3], angle: args[4], filled: false };
+          if (method === 'fill' && this.observedEllipse) this.observedEllipse.filled = true;
+          if (method === 'stroke' && this.observedEllipse) {
+            Object.assign(this.observedEllipse, { stroke: this.strokeStyle, width: this.lineWidth, dash: this.getLineDash() });
+            drawing.ellipses.push(this.observedEllipse);
+          }
           if (method === 'moveTo') this.observedPosition = [args[0], args[1]];
           if (method === 'lineTo' && this.observedPosition) {
             const next = [args[0], args[1]];
@@ -87,7 +95,6 @@ test('linked views share their ground, glyphs and true radius heights', async ({
             const [from, to] = this.observedLines[0];
             drawing.radii.push({ from, to, stroke: this.strokeStyle, width: this.lineWidth, dash: this.getLineDash() });
           }
-          if (method === 'ellipse') drawing.ellipses++;
           if (method === 'drawImage') { drawing.backgrounds++; window.circleBackground = args[0]; }
           if (method === 'fillText') drawing.labels.push(args[0]);
         }
@@ -170,7 +177,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     assert(!frame.phase.includes('small box'), 'phase text does not refer to the removed box');
     const generation = Math.min(Math.floor(index / (6 * samplesPerPhase)), maximum / 6 - 1);
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
-    const progress = [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
+    const progress = index === frames.frames.length - 1 ? 1 : [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
     const targetSamples = unit.generations[generation];
     for (const [k, point] of frame.population.entries()) {
       const previous = generation > 0 && phase === 0 ? unit.generations[generation - 1][k] : targetSamples[k];
@@ -184,14 +191,34 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     assert.equal(frame.styles.length, 6);
     assert(frame.styles.every((style) => style.alpha > 0), `frame ${index}: no candidate is hidden`);
     assert.equal(drawing.dots.length, 12, `frame ${index}: six fixed points and six candidate centres`);
-    assert.equal(drawing.ellipses, 0);
+    assert.equal(drawing.ellipses.length, 1, 'the current search spread is drawn in every phase');
     assert.equal(drawing.backgrounds, 1, 'the reference contour background is drawn once');
-    assert.deepEqual([...drawing.labels].sort(), phase === 0 ? [] : ['1', '6'], 'shared rank labels identify the same two candidates');
+    assert.deepEqual(drawing.labels, phase === 0 ? [] : ['1'], 'only the best candidate has a rank label');
     const points = drawing.dots.slice(0, 6), drawnCandidates = drawing.dots.slice(6);
     if (!fixedPoints) fixedPoints = points;
     assert.deepEqual(points, fixedPoints);
     const scale = (points[3].x - points[0].x) / 6;
     const project = (p) => [points[0].x + p[0] * scale, points[0].y - p[1] * scale];
+    const distribution = unit.distributions[generation];
+    const mean = phase < 3 ? distribution.m : phase === 3 ? distribution.m.map((v, axis) => v + progress * (distribution.m1[axis] - v)) : distribution.m1;
+    const covariance = phase < 4 ? distribution.C : phase === 4 ? distribution.C.map((v, axis) => v + progress * (distribution.C1[axis] - v)) : distribution.C1;
+    const sigma = phase < 5 ? distribution.sigma : distribution.sigma * (distribution.sigma1 / distribution.sigma) ** progress;
+    const guide = drawing.ellipses[0], centre = project(mean);
+    assert(Math.hypot(guide.x - centre[0], guide.y - centre[1]) < 1e-7, 'C shape follows the pristine staged search mean');
+    assert(Math.hypot(frame.mean[0] - mean[0], frame.mean[1] - mean[1]) < 1e-10, 'X follows the same staged mean');
+    const cos = Math.cos(guide.angle), sin = Math.sin(guide.angle), a = guide.rx ** 2, b = guide.ry ** 2;
+    const shapeXX = a * cos ** 2 + b * sin ** 2, shapeYY = a * sin ** 2 + b * cos ** 2;
+    const shapeXY = (a - b) * cos * sin, factor = 4 * sigma ** 2 * scale ** 2;
+    assert(Math.abs(shapeXX - factor * covariance[0]) < 1e-7, 'ellipse width represents the actual C and sigma');
+    assert(Math.abs(shapeYY - factor * covariance[2]) < 1e-7, 'ellipse height represents the actual C and sigma');
+    assert(Math.abs(shapeXY + factor * covariance[1]) < 1e-7, 'ellipse angle represents C with the drawing y-axis flipped');
+    const gray = [1, 3, 5].map((i) => parseInt(guide.stroke.slice(i, i + 2), 16));
+    assert(Math.max(...gray) - Math.min(...gray) <= 16 && Math.min(...gray) >= 32 && Math.max(...gray) <= 224, 'C shape is gray');
+    assert.equal(guide.width, 1);
+    assert.equal(guide.filled, false, 'the C guide has no fill');
+    assert(guide.dash.length > 0 && guide.dash.every((v) => v > 0), 'C shape is dashed');
+    const extentX = Math.sqrt(shapeXX), extentY = Math.sqrt(shapeYY);
+    assert(guide.x - extentX >= 0 && guide.x + extentX <= frames.width && guide.y - extentY >= 0 && guide.y + extentY <= frames.height, 'the complete staged C shape fits the fixed view');
     const candidates = frame.population.map((p) => {
       const q = project(p);
       const mark = drawnCandidates.find((c) => Math.hypot(c.x - q[0], c.y - q[1]) < 1e-7);
@@ -216,7 +243,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       const rank = order.indexOf(k), candidate = candidates[k];
       const style = phase >= 1 && rank === 0 ? reference.best : phase >= 2 && rank < 3 ? reference.parent : reference.dropped;
       assert.equal(candidate.r, style.r, 'marker size matches the actual reference figure');
-      if (phase === 0 || rank !== 5) assert.equal(candidate.fill, style.fill, 'candidate colours match the actual reference figure');
+      assert.equal(candidate.fill, style.fill, 'candidate colours match the actual reference figure');
       assert.equal(candidate.alpha, 1, 'small filled points stay visible');
     }
     if (phase === 0) {
@@ -225,31 +252,26 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       assert.equal(new Set(frame.styles.map((s) => JSON.stringify([s.col, s.rad, s.alpha]))).size, 1, 'Sample does not disclose ranking');
       continue;
     }
-    assert.equal(drawing.circles.length, 2, `frame ${index}: compare the best and worst circles`);
-    assert.equal(drawing.radii.length, 2, 'each comparison circle has one radius segment');
+    assert.equal(drawing.circles.length, 1, `frame ${index}: only the best enclosing circle is shown`);
+    assert.equal(drawing.radii.length, 1, 'only the best circle has a radius segment');
     const best = candidates[order[0]];
     const circle = drawing.circles.find((c) => c.stroke === best.fill);
     assert(circle, 'the best marker and circle share their emphasis');
-    const worst = drawing.circles.find((c) => c !== circle);
     assert.equal(circle.width, reference.lineWidth, 'best circle uses the reference line weight');
-    assert.equal(worst.width, 1, 'worst circle uses a thin gray outline');
-    const gray = [1, 3, 5].map((i) => parseInt(worst.stroke.slice(i, i + 2), 16));
-    assert(Math.max(...gray) - Math.min(...gray) <= 16 && Math.min(...gray) >= 32 && Math.max(...gray) <= 224, 'the worst circle is gray');
-    for (const [shape, candidateIndex] of [[circle, order[0]], [worst, order[5]]]) {
-      const centre = candidates[candidateIndex];
-      assert.deepEqual([shape.x, shape.y], [centre.x, centre.y], 'comparison circle belongs to the independently ranked candidate');
-      assert(Math.abs(shape.r - scores[candidateIndex] * scale) < 1e-7, 'exact enclosing radius');
-      assert.deepEqual(shape.dash, [], 'circle outlines stay solid');
-      const radius = drawing.radii.find((r) => r.stroke === shape.stroke);
-      assert(radius && radius.dash.length > 0 && radius.dash.every((v) => v > 0), 'the radius is dashed');
-      assert.equal(radius.width, 1, 'radius lines stay thin');
-      assert(Math.hypot(radius.from[0] - shape.x, radius.from[1] - shape.y) < 1e-7, 'radius starts at the centre');
-      assert(points.some((p) => Math.hypot(radius.to[0] - p.x, radius.to[1] - p.y) < 1e-7), 'radius ends at a fixed target');
-      assert(Math.abs(Math.hypot(radius.to[0] - radius.from[0], radius.to[1] - radius.from[1]) - shape.r) < 1e-7, 'radius ends at a farthest target, with true radius length');
-      assert(shape.x - shape.r >= 0 && shape.x + shape.r <= frames.width &&
-        shape.y - shape.r >= 0 && shape.y + shape.r <= frames.height, 'both whole circles stay visible');
-    }
-    assert(frame.readout.includes(scores[order[0]].toFixed(2)) && frame.readout.includes(scores[order[5]].toFixed(2)), 'both displayed radius values match the circles');
+    assert.deepEqual([circle.x, circle.y], [best.x, best.y], 'circle belongs to the independently ranked best candidate');
+    assert(Math.abs(circle.r - scores[order[0]] * scale) < 1e-7, 'exact enclosing radius');
+    assert.deepEqual(circle.dash, [], 'circle outline stays solid');
+    const radius = drawing.radii[0];
+    assert.equal(radius.stroke, circle.stroke);
+    assert(radius.dash.length > 0 && radius.dash.every((v) => v > 0), 'the radius is dashed');
+    assert.equal(radius.width, 1, 'radius line stays thin');
+    assert(Math.hypot(radius.from[0] - circle.x, radius.from[1] - circle.y) < 1e-7, 'radius starts at the center');
+    assert(points.some((p) => Math.hypot(radius.to[0] - p.x, radius.to[1] - p.y) < 1e-7), 'radius ends at a fixed target');
+    assert(Math.abs(Math.hypot(radius.to[0] - radius.from[0], radius.to[1] - radius.from[1]) - circle.r) < 1e-7, 'radius ends at a farthest target, with true radius length');
+    assert(circle.x - circle.r >= 0 && circle.x + circle.r <= frames.width &&
+      circle.y - circle.r >= 0 && circle.y + circle.r <= frames.height, 'the whole best circle stays visible');
+    assert(frame.readout.includes(scores[order[0]].toFixed(2)), 'the displayed best radius matches the circle');
+    assert(!frame.readout.includes('6:'), 'the worst sample has no comparison readout');
     assert.equal(best.fill, circle.stroke, 'the best marker and circle share their emphasis');
     assert(candidates.every((c, k) => k === order[0] || c.fill !== best.fill), 'only the best has that filled colour');
     assert.equal(frame.styles[order[0]].col, circle.stroke, 'the 3D view highlights the same best candidate');
@@ -303,7 +325,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       const wirePoints = Array.from({ length: 12 }, (_, i) => world(wire, p, Math.floor(i * (p.count - 1) / 11)));
       let lights = 0, otherMeshes = 0;
       s.scene.traverse((o) => { if (o.isLight) lights++; if (o.isMesh && o !== ground) otherMeshes++; });
-      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
+      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, liftRanks: Object.keys(s.lifts), wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
     });
     expect(state?.shared, 'the actual 3D ground material shares the 2D canvas').toBe(true);
     if (time === 6.99) {
@@ -332,7 +354,8 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     const scores = state.frame.X.map((p) => Math.max(...targets.map((q) => Math.hypot(q[0] - p[0], q[1] - p[1]))));
     const order = scores.map((_, k) => k).sort((a, b) => scores[a] - scores[b]);
     const ranked = state.drawing.circles.length > 0;
-    expect(state.lifts).toHaveLength(ranked ? 2 : 0);
+    expect(state.liftRanks).toEqual(['1']);
+    expect(state.lifts).toHaveLength(ranked ? 1 : 0);
     for (const [i, marker] of state.markers.entries()) {
       const pixel = [points[0].x + state.frame.X[i][0] * dataScale, points[0].y - state.frame.X[i][1] * dataScale];
       const mark = marks.find((m) => Math.hypot(m.x - pixel[0], m.y - pixel[1]) < 1e-7);
@@ -344,7 +367,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       assert.equal(marker.tint, 'ffffff', 'glyph colours are not tinted by the 3D material');
       assert.equal(marker.opacity, mark.alpha);
       assert(Math.abs(marker.radiusPx - mark.r - 0.5) <= 1, 'glyph sizes match in CSS pixels');
-      assert.deepEqual(marker.texts, ranked && (i === order[0] || i === order[5]) ? [i === order[0] ? '1' : '6'] : []);
+      assert.deepEqual(marker.texts, ranked && i === order[0] ? ['1'] : []);
     }
     for (const lift of state.lifts) {
       const i = order[Number(lift.rank) - 1], marker = state.markers[i];
