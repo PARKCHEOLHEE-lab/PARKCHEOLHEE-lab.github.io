@@ -710,21 +710,23 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
   }
   const P = parameters[0];
   await expect(graph.locator('tbody tr')).toHaveCount(3);
+  await expect(graph.locator('.weight-intro .mjx-mfrac')).toBeVisible();
+  await expect(graph.locator('tbody .mjx-chtml')).toHaveCount(9);
   await expect(graph.locator('.weight-total')).toHaveText('1.967');
   await expect(graph.locator('.weight-worked')).toHaveText('1.253 / 1.967 ≈ 63.7%');
   await expect(graph.locator('.weight-dropped')).toHaveText('Ranks 4 to 6 get 0%.');
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
     const rows = await graph.locator('tbody tr').evaluateAll((rows) => rows.map((row) => ({
-      rank: row.cells[0].textContent.trim(), calculation: row.querySelector('.weight-calculation').textContent,
-      raw: row.querySelector('.weight-raw').textContent, share: row.querySelector('.weight-percent').textContent,
+      rank: row.cells[0].querySelector('script[type="math/tex"]').textContent.trim(),
+      calculation: row.querySelector('.weight-calculation script[type="math/tex"]').textContent.trim(),
+      share: row.querySelector('.weight-percent script[type="math/tex"]').textContent.trim(),
       fraction: row.querySelector('.weight-bar').getBoundingClientRect().width / row.querySelector('.weight-track').getBoundingClientRect().width,
     })));
     rows.forEach((row, i) => {
       expect(row.rank).toBe(String(i + 1));
-      expect(row.calculation).toBe('ln(3.5 / ' + (i + 1) + ')');
-      expect(row.raw).toBe(P.rawWeights[i].toFixed(3));
-      expect(row.share).toBe((P.w[i] * 100).toFixed(1) + '%');
+      expect(row.calculation).toBe(String.raw`\ln(3.5 / ${i + 1}) \approx ${P.rawWeights[i].toFixed(3)}`);
+      expect(row.share).toBe((P.w[i] * 100).toFixed(1) + String.raw`\%`);
       expect(row.fraction, 'bar length is the share of the full 100% track').toBeCloseTo(P.w[i], 3);
     });
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
