@@ -90,11 +90,11 @@ categories: note
         <div class="phase" aria-live="polite"></div>
         <div class="plabel read"></div>
         <div class="panels">
-            <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centres. Rank 1 is orange and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
+            <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six small filled candidate centres on a pale contour background. Rank 1 is blue and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
             <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same circle drawing on the ground, with each candidate lifted by its radius. Ranks 1 and 6 use the same markers and dashed height lines."></div></div>
         </div>
         <figcaption>
-            Both views share the same ground drawing. The radius of each circle becomes the height of its centre; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Both views share the same ground drawing. Pale lines mark equal radii. The radius of each circle becomes the height of its centre; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -328,11 +328,6 @@ categories: note
     function lerp2(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t)]; }
     function lerpC(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
     function geo(a, b, t) { return a * Math.pow(b / a, t); }
-    function mix(c1, c2, t) {                             // "#rrggbb" blend
-        var p = function (c, i) { return parseInt(c.slice(i, i + 2), 16); };
-        return "rgb(" + [1, 3, 5].map(function (i) { return Math.round(lerp(p(c1, i), p(c2, i), t)); }).join(", ") + ")";
-    }
-
     function fit(canvas, aspect) {                        // backing store follows the css width; height from the aspect
         var W = canvas.clientWidth || 300, H = Math.round(W * aspect);
         canvas.style.height = H + "px";
@@ -545,7 +540,7 @@ categories: note
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
         var H = full.H.slice(0, NG), P = full.P;
-        var A = null, shown = "";
+        var A = null, bg = null, shown = "";
         var W3 = P.w.map(function (w) { return w.toFixed(2); }).join(", ");
         root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
         root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
@@ -571,30 +566,26 @@ categories: note
             return bounds();
         })();
         function phaseText(h, ph) {
-            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " candidate centres together, shown as hollow dots.";
-            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Orange is best; gray is worst. Dashed lines show their radii.";
-            if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres (filled dots). Their weights are " + W3 + ".";
+            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " candidate centres together, shown as gray dots.";
+            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Blue is best; gray is worst. Dashed lines show their radii.";
+            if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres (blue dots). Their weights are " + W3 + ".";
             if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centres. The two circles stay with their candidates.";
             if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search.";
             var r = h.sigma1 / h.sigma;
             return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.");
         }
-        function layout() { A = fit(cTop, 1); }
+        function layout() { A = fit(cTop, 1); bg = null; }
 
         // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
-        function sampleStyle(ph, e, r) {
-            var sel = r < P.mu, s = { rank: r, col: COL.neutral, rad: 3, alpha: 1,
-                filled: (ph >= 1 && r === 0) || (ph >= 2 && sel),
+        function sampleStyle(ph, r) {
+            var sel = r < P.mu, s = { rank: r, col: COL.drop, rad: 2.5, alpha: 1, filled: true,
                 label: ph >= 1 && (r === 0 || r === P.lam - 1) ? String(r + 1) : "" };
-            if (ph === 1) s.col = mix(COL.mean, COL.base, r / (P.lam - 1));
-            if (ph >= 2) {                                // the best mu grow by weight and the rest fade
-                var q = ph === 2 ? e : 1;
+            if (ph >= 2) {
                 s.col = sel ? COL.pick : COL.drop;
-                s.rad = sel ? lerp(3, 3 + 7 * Math.sqrt(P.w[r]), q) : 3;
-                s.alpha = sel ? 1 : lerp(1, 0.45, q);
+                s.rad = sel ? 3 : 2.5;
             }
-            if (ph >= 1 && r === 0) { s.col = COL.path; s.rad = Math.max(5, s.rad); }
-            if (ph >= 1 && r === P.lam - 1) { s.col = COL.neutral; s.alpha = 1; }
+            if (ph >= 1 && r === 0) { s.col = COL.mean; s.rad = 3.5; }
+            if (ph >= 1 && r === P.lam - 1) s.col = COL.neutral;
             return s;
         }
         function circle(ctx, map, c, col, width) {        // enclosing circle and its true radius to a farthest target
@@ -609,8 +600,10 @@ categories: note
             var g = Math.min(NG - 1, Math.floor(t / NP)), u = Math.min(NP, t - g * NP), ph = Math.min(NP - 1, Math.floor(u)), f = u - ph, h = H[g];
             var map = viewMap(circleView, A.W, A.H), ctx = A.ctx, e = ease(clamp01(f));
             var rank = []; h.order.forEach(function (idx, r) { rank[idx] = r; });
-            var X = h.X, styles = X.map(function (_, k) { return sampleStyle(ph, e, rank[k]); });
+            var X = h.X, styles = X.map(function (_, k) { return sampleStyle(ph, rank[k]); });
             ctx.clearRect(0, 0, A.W, A.H);
+            if (!bg) bg = landscape(fn, circleView, A.W, A.H);
+            ctx.drawImage(bg, 0, 0, A.W, A.H);
 
             // Mean movement is shared by both views.
             var m = h.m;
@@ -619,8 +612,8 @@ categories: note
             // Compare the best and worst candidates after ranking; all six centres stay visible.
             var best = h.X[h.order[0]], worst = h.X[h.order[P.lam - 1]];
             if (ph >= 1) {
-                circle(ctx, map, worst, COL.neutral, 2);
-                circle(ctx, map, best, COL.path, 3);
+                circle(ctx, map, worst, COL.neutral, 1);
+                circle(ctx, map, best, COL.mean, 1.5);
             }
             POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
             h.order.slice().reverse().forEach(function (k) {
@@ -840,7 +833,7 @@ categories: note
             });
             marker.name = "candidate-" + k; scene.add(marker); markers.push(marker);
         });
-        lifts["1"] = line(colors.path); lifts["6"] = line(colors.neutral);
+        lifts["1"] = line(colors.mean); lifts["6"] = line(colors.neutral);
         Object.entries(lifts).forEach(([rank, object]) => { object.name = "radius-" + rank; object.visible = false; });
         if (new URLSearchParams(location.search).has("scene-debug")) root.cma3d.inspect = { ...surf, markers, lifts };
         ready = true;
