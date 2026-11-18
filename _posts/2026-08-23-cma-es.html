@@ -45,12 +45,12 @@ categories: note
         table.cma-table { width: 100%; border-collapse: collapse; border-radius: 0; box-shadow: none; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; font-family: MJXc-TeX-main-R, MJXc-TeX-main-Rw, serif; }
         table.cma-table td, table.cma-table th { text-align: left; }
         table.cma-table td:first-child { white-space: nowrap; }
-        table.cma-table th, table.cma-table td, table.cma-table tr:hover td, table.cma-table tr:nth-child(odd) td { box-shadow: none; background: none; padding: .35em .9em; }
+        table.cma-table th, table.cma-table td { box-shadow: none; padding: 0.4em 0.5em; }
+        table.cma-table tr:nth-child(odd) td { background: none; }
         table.cma-table th { font-family: MJXc-TeX-main-B, MJXc-TeX-main-Bx, MJXc-TeX-main-Bw, serif; font-weight: normal; color: inherit; border-bottom: 1px solid currentColor; }
         table.cma-table tr, table.cma-table tr:hover { background: none; }   /* the site shades the hovered row itself */
-        table.cma-table tr:nth-child(n+3) td { border-top: 1px solid rgba(128, 128, 128, .35); }
+        table.cma-table tbody tr + tr td { border-top: 1px solid rgba(128, 128, 128, .35); }
         table.cma-weight-table { table-layout: fixed; }
-        table.cma-weight-table th, table.cma-weight-table td, table.cma-weight-table tr:hover td { padding: 0.4em 0.5em; }
         table.cma-weight-table th:first-child { width: 3em; }
         .cma-demo .weight-calculation, .cma-demo .weight-raw { display: block; font-family: var(--mono); font-size: 0.8em; white-space: nowrap; }
         .cma-demo .weight-result { display: flex; align-items: center; gap: 0.5em; }
