@@ -39,6 +39,7 @@ categories: note
         #cma-step .shape-key { border-top: 1px dashed var(--shape); }
         #cma-step .before-key { opacity: 0.3; }
         #cma-step .direction-key { border-top-color: var(--history); }
+        #cma-step .selection-key { border-top-color: var(--selected); }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
         /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
@@ -107,10 +108,11 @@ categories: note
             <canvas class="cma-top" aria-hidden="true"></canvas>
             <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan; scroll or pinch to zoom. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
             <div class="cma-legend">
-                <div><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
-                <div><span class="legend-key shape-key" aria-hidden="true"></span><span>C shape, σ size</span></div>
-                <div class="update-before" hidden><span class="legend-key shape-key before-key" aria-hidden="true"></span><span>Before update</span></div>
+                <div class="objective-key"><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
+                <div class="update-before" hidden><span class="legend-key shape-key before-key" aria-hidden="true"></span><span class="before-label">Before update</span></div>
+                <div class="update-selection" hidden><span class="legend-key selection-key" aria-hidden="true"></span><span>Top 3 steps from old center</span></div>
                 <div class="update-direction" hidden><span class="legend-key direction-key" aria-hidden="true"></span><span class="direction-label"></span></div>
+                <div><span class="legend-key shape-key" aria-hidden="true"></span><span class="spread-label">C shape, σ size</span></div>
             </div>
         </div>
         <figcaption>
@@ -511,6 +513,7 @@ categories: note
         root.style.setProperty("--shape", COL.neutral);
         root.style.setProperty("--paper", COL.paper);
         root.style.setProperty("--history", COL.path);
+        root.style.setProperty("--selected", COL.pick);
         var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
@@ -559,7 +562,7 @@ categories: note
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
             if (ph === 2) return "<b>3. Select.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows carry more weight.";
             if (ph === 3) return "<b>4. Move the mean.</b> X moves toward the weighted center of those samples. Faint dashes show where the search shape started.";
-            if (ph === 4) return "<b>5. Reshape C.</b> The two axes show how the spread turns and stretches. The blue sample directions and amber recent direction guide this change.";
+            if (ph === 4) return "<b>5. Reshape C.</b> Keep most of the old spread. Add spread along each arrow’s line, in both directions. The darker outline shows the updated spread.";
             var pathRatio = Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN;
             var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
             return "<b>6. Resize \u03c3.</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
@@ -637,7 +640,10 @@ categories: note
             }
             var best = h.X[h.order[0]];
             if (ph >= 1) {
+                ctx.save();
+                if (ph === 4) ctx.globalAlpha = 0.2;
                 circle(ctx, map, best, COL.mean, 1.5);
+                ctx.restore();
             }
             POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
             h.order.slice().reverse().forEach(function (k) {
@@ -653,13 +659,21 @@ categories: note
 
             root.querySelector(".update-before").hidden = ph < 3;
             root.querySelector(".update-direction").hidden = ph < 4;
-            root.querySelector(".direction-label").textContent = ph === 4 ? "Recent direction" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
+            root.querySelector(".direction-label").textContent = ph === 4 ? "Recent center movement" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
             read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + fn(best).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
             var tag = g + ":" + ph;
-            if (tag !== shown) { text.innerHTML = phaseText(h, ph); shown = tag; }
+            if (tag !== shown) {
+                var reshaping = ph === 4;
+                text.innerHTML = phaseText(h, ph);
+                root.querySelector(".objective-key").hidden = reshaping;
+                root.querySelector(".update-selection").hidden = !reshaping;
+                root.querySelector(".before-label").textContent = reshaping ? "Old sampling spread" : "Before update";
+                root.querySelector(".spread-label").textContent = reshaping ? "Updated sampling spread" : "C shape, σ size";
+                shown = tag;
+            }
             label.textContent = "gen " + (g + 1) + " of " + NG + ", step " + (ph + 1) + " of " + NP;
         }
         root.cma3d = { fn: fn, view: circleView, plan: cTop, colors: COL, font: SANS, dot: dot, labels: labels };

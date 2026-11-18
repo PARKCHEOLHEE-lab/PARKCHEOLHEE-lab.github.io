@@ -84,6 +84,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
             this.observedArc.stroke = this.strokeStyle;
             this.observedArc.width = this.lineWidth;
             this.observedArc.dash = this.getLineDash();
+            this.observedArc.alpha = this.globalAlpha;
             if (this.observedArc.r > 12) drawing.circles.push(this.observedArc);
           }
           if (method === 'fill' && this.observedArc && this.observedArc.r <= 12) {
@@ -198,7 +199,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         slider.dispatchEvent(new Event('input', { bubbles: true }));
         fixedBackground = fixedBackground && window.circleBackground === background;
         frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
-          beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden })));
+          beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden,
+          legend: el.querySelector('.cma-legend').innerText })));
       }
     } finally {
       window.circleGeometryScan = false;
@@ -256,6 +258,12 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const guide = drawing.ellipses[0], centre = project(mean);
     assert.equal(frame.beforeVisible, phase >= 3, 'before-state legend appears only for mean, C and sigma updates');
     assert.equal(frame.directionVisible, phase >= 4, 'the amber direction is explained only in C and sigma updates');
+    if (phase === 4) {
+      assert(frame.phase.includes('along each arrow’s line, in both directions'), 'the frame teaches how the arrows change the spread');
+      assert.deepEqual(frame.legend.split('\n'), ['Old sampling spread', 'Top 3 steps from old center', 'Recent center movement', 'Updated sampling spread']);
+    } else {
+      assert(!frame.legend.includes('Top 3 steps from old center'), 'the extra key appears only while reshaping C');
+    }
     assert.equal(drawing.before.length, phase >= 3 ? 1 : 0, 'updates keep exactly one faint before-state outline');
     if (phase >= 3) {
       const before = drawing.before[0], oldMean = project(phase === 3 ? distribution.m : distribution.m1);
@@ -364,6 +372,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const best = candidates[order[0]];
     const circle = drawing.circles.find((c) => c.stroke === best.fill);
     assert(circle, 'the best marker and circle share their emphasis');
+    assert(phase === 4 ? circle.alpha > 0 && circle.alpha < 0.5 : circle.alpha === 1, 'the unrelated objective circle recedes only during the covariance update');
     assert.equal(circle.width, reference.lineWidth, 'best circle uses the reference line weight');
     assert.deepEqual([circle.x, circle.y], [best.x, best.y], 'circle belongs to the independently ranked best candidate');
     assert(Math.abs(circle.r - scores[order[0]] * scale) < 1e-7, 'exact enclosing radius');
