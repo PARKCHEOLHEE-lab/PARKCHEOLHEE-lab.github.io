@@ -710,7 +710,8 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
   }
   const P = parameters[0];
   await expect(graph.locator('tbody tr')).toHaveCount(3);
-  await expect(graph.locator('.weight-intro .mjx-mfrac')).toBeVisible();
+  await expect(graph.locator('.weight-intro .mjx-chtml')).toBeVisible();
+  expect(await graph.locator('.weight-intro script[type="math/tex"]').textContent()).toBe('3 + 0.5 = 3.5');
   await expect(graph.locator('tbody .mjx-chtml')).toHaveCount(9);
   await expect(graph.locator('.weight-total')).toHaveText('1.967');
   await expect(graph.locator('.weight-worked')).toHaveText('1.253 / 1.967 ≈ 63.7%');

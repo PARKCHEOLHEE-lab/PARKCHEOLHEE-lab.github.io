@@ -518,7 +518,7 @@ categories: note
         var H = full.H.slice(0, NG), P = full.P;
         var A = null, bg = null, shown = "";
         var weightChart = document.getElementById("cma-weights"), offset = (P.lam / 2 + 0.5).toFixed(1);
-        weightChart.querySelector(".weight-intro").textContent = "Keep the best " + P.mu + " of " + P.lam + " samples. Start with \\(\\frac{" + P.lam + "}{2} + 0.5 = " + offset + "\\).";
+        weightChart.querySelector(".weight-intro").textContent = "Keep the best " + P.mu + " of " + P.lam + " samples. Add 0.5 to the number you keep: \\(" + P.mu + " + 0.5 = " + offset + "\\).";
         weightChart.querySelector("tbody").innerHTML = P.w.map(function (w, i) {
             var rank = i + 1, percent = 100 * w;
             return '<tr><td>\\(' + rank + '\\)</td><td><span class="weight-calculation">\\(\\ln(' + offset + ' / ' + rank + ') \\approx ' + P.rawWeights[i].toFixed(3) + '\\)</span></td>' +
