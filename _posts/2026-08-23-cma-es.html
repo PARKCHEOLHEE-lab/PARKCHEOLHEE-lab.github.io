@@ -49,7 +49,6 @@ categories: note
         table.cma-table th { font-family: MJXc-TeX-main-B, MJXc-TeX-main-Bx, MJXc-TeX-main-Bw, serif; font-weight: normal; color: inherit; border-bottom: 1px solid currentColor; }
         table.cma-table tr, table.cma-table tr:hover { background: none; }   /* the site shades the hovered row itself */
         table.cma-table tr:nth-child(n+3) td { border-top: 1px solid rgba(128, 128, 128, .35); }
-        .cma-scroll { overflow-x: auto; }   /* a wide table scrolls by itself on a phone, not the page */
         table.cma-weight-table { table-layout: fixed; }
         table.cma-weight-table th, table.cma-weight-table td, table.cma-weight-table tr:hover td { padding: 0.4em 0.5em; }
         table.cma-weight-table th:first-child { width: 3em; }
@@ -132,23 +131,6 @@ categories: note
         <p>Total log score: <span class="weight-total"></span>. For rank 1: <span class="weight-worked"></span>.</p>
         <p class="weight-note"><span class="weight-dropped"></span> These weights depend on rank, not the gap between radii. Displayed values are rounded.</p>
     </div>
-    <br>
-    <li>
-        Genetic algorithm terms
-    </li>
-        <ul>
-            <li>
-                <div class="cma-scroll"><table class="cma-table">
-        <tr><th>Genetic algorithm</th><th>CMA-ES</th></tr>
-        <tr><td>Population size</td><td>\(\lambda\) samples per generation, by default \(4 + \lfloor 3 \ln n \rfloor\) (6 in the figures)</td></tr>
-        <tr><td>Fitness</td><td>Only the rank of \(f\), not its value</td></tr>
-        <tr><td>Selected parents</td><td>The best \(\mu = \lfloor \lambda / 2 \rfloor\) samples (3 in the figures)</td></tr>
-        <tr><td>Crossover</td><td>The weighted average of the parents, which becomes the new mean \(m\)</td></tr>
-        <tr><td>Mutation</td><td>Sampling from \(\mathcal{N}(m, \sigma^2 C)\), whose size \(\sigma\) and shape \(C\) are learned</td></tr>
-        <tr><td>Kept between generations</td><td>\(m\), \(\sigma\), \(C\), and running records of recent steps; each generation draws fresh samples</td></tr>
-    </table></div>
-            </li>
-        </ul>
     <br>
     <li>
         Many generations
