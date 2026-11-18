@@ -97,7 +97,7 @@ categories: note
         <div class="phase" aria-live="polite"></div>
         <div class="cma-view">
             <canvas class="cma-top" aria-hidden="true"></canvas>
-            <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
+            <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan; scroll or pinch to zoom. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
             <div class="cma-legend">
                 <div><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
                 <div><span class="legend-key shape-key" aria-hidden="true"></span><span>C shape, σ size</span></div>
@@ -709,11 +709,13 @@ categories: note
         catch (err) { el.textContent = "This view needs WebGL."; return null; }
         renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
         renderer.domElement.tabIndex = 0;
-        renderer.domElement.setAttribute("aria-label", "Circle search: drag to rotate, right drag or arrow keys to pan");
+        renderer.domElement.setAttribute("aria-label", "Circle search: drag to rotate, right drag or arrow keys to pan, scroll or pinch to zoom");
         el.appendChild(renderer.domElement);
         const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
+        camera.zoom = 1.2;
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableZoom = false; controls.enablePan = true;
+        controls.enableZoom = true; controls.enablePan = true;
+        controls.minZoom = 0.8; controls.maxZoom = 3;
         controls.listenToKeyEvents(renderer.domElement);
         controls.addEventListener("change", draw);
         new ResizeObserver(() => {

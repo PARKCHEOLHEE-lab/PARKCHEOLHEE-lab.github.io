@@ -409,7 +409,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         const row = g.getImageData(cx, cx, cx, 1).data;
         let radius = 0;
         for (let i = 0; i < cx; i++) if (row[i * 4 + 3] > 20) radius = i;
-        return { position: o.getWorldPosition(o.position.clone()).toArray(), opacity: o.material.opacity, tint: o.material.color.getHexString(), rgba, texts: image.drawnTexts || [], radiusPx: radius / image.width * o.scale.x / (s.camera.right - s.camera.left) * s.renderer.domElement.clientWidth };
+        return { position: o.getWorldPosition(o.position.clone()).toArray(), opacity: o.material.opacity, tint: o.material.color.getHexString(), rgba, texts: image.drawnTexts || [], radiusPx: radius / image.width * o.scale.x / (s.camera.right - s.camera.left) * s.renderer.domElement.clientWidth * s.camera.zoom };
       });
       const lifts = Object.entries(s.lifts).filter(([, o]) => o.visible).map(([rank, o]) => {
         const p = o.geometry.getAttribute('position'), d = o.geometry.getAttribute('lineDistance');
@@ -419,7 +419,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       const wirePoints = Array.from({ length: 12 }, (_, i) => world(wire, p, Math.floor(i * (p.count - 1) / 11)));
       let lights = 0, otherMeshes = 0;
       s.scene.traverse((o) => { if (o.isLight) lights++; if (o.isMesh && o !== ground) otherMeshes++; });
-      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, liftRanks: Object.keys(s.lifts), wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
+      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, liftRanks: Object.keys(s.lifts), wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, cameraZoom: s.camera.zoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
     });
     expect(state?.shared, 'the actual 3D ground material shares the 2D canvas').toBe(true);
     if (time === 6.99) {
@@ -431,7 +431,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     expect(state.orthographic).toBe(true);
     expect(state.lights).toBe(0);
     expect(state.otherMeshes).toBe(0);
-    expect(state.zoom).toBe(false);
+    expect(state.zoom).toBe(true);
     expect(state.pan).toBe(true);
     expect(state.textureVersion).toBeGreaterThan(lastTextureVersion);
     expect(state.renderFrame).toBeGreaterThan(lastRenderFrame);
@@ -460,7 +460,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       assert.deepEqual(marker.rgba.slice(0, 3), rgb, 'both views paint the same filled glyph colour');
       assert.equal(marker.tint, 'ffffff', 'glyph colours are not tinted by the 3D material');
       assert.equal(marker.opacity, mark.alpha);
-      assert(Math.abs(marker.radiusPx - mark.r - 0.5) <= 1, 'glyph sizes match in CSS pixels');
+      assert(Math.abs(marker.radiusPx / state.cameraZoom - mark.r - 0.5) <= 1, 'glyph sizes scale with camera zoom');
       assert.deepEqual(marker.texts, ranked && i === order[0] ? ['1'] : []);
     }
     for (const lift of state.lifts) {
@@ -510,8 +510,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await page.keyboard.press('ArrowRight');
   const afterKey = await cameraState();
   expect(afterKey.target, 'focused arrow key pans').not.toEqual(afterPan.target);
-  await page.mouse.wheel(0, 100);
-  expect((await cameraState()).zoom, 'zoom stays fixed').toBe(beforePan.zoom);
   expect((await layout()).legend).toEqual(beforeTurnLegend);
 
   // The existing button replays after the end; scrubbing pauses it.
@@ -636,4 +634,51 @@ test('covariance comparison section is removed', async ({ page }) => {
   await expect(page.getByText(/Why learn/)).toHaveCount(0);
   await expect(page.locator('#cma-step .cma-3d canvas')).toHaveCount(1);
   await expect(page.locator('#cma-run .cma-plot')).toBeVisible();
+});
+
+test('wheel zoom starts closer and stops at both limits', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto('/cma-es/?scene-debug');
+  const root = page.locator('#cma-step'), view = root.locator('.cma-3d canvas');
+  await expect(view).toHaveCount(1);
+  await view.scrollIntoViewIfNeeded();
+  const state = () => root.evaluate((el) => {
+    const { camera, controls, renderer } = el.cma3d.inspect;
+    const project = (x) => camera.position.clone().set(x, 0, 0).project(camera).x;
+    const legend = el.querySelector('.cma-legend').getBoundingClientRect(), box = renderer.domElement.getBoundingClientRect();
+    return { zoom: camera.zoom, enabled: controls.enableZoom, min: controls.minZoom, max: controls.maxZoom, renderFrame: renderer.info.render.frame,
+      span: Math.abs(project(1) - project(-1)) * box.width / 2, width: box.width,
+      position: camera.position.toArray(), target: controls.target.toArray(), quaternion: camera.quaternion.toArray(),
+      frame: el.cmaFrame, legend: [legend.x - box.x, legend.y - box.y] };
+  });
+  const initial = await state();
+  expect(initial.zoom, 'the initial camera is 20% closer, keeping axis labels in view').toBe(1.2);
+  expect(initial.enabled).toBe(true);
+  expect(initial.min).toBe(0.8);
+  expect(initial.max).toBe(3);
+  expect(initial.span, 'the actual projected floor is enlarged').toBeGreaterThan(initial.width * 0.6);
+  const box = await view.boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.wheel(0, -100);
+  await expect.poll(async () => (await state()).zoom).toBeGreaterThan(initial.zoom);
+  const closer = await state();
+  expect(closer.span / initial.span).toBeCloseTo(closer.zoom / initial.zoom, 6);
+  expect(closer.renderFrame, 'wheel zoom actually redraws the scene').toBeGreaterThan(initial.renderFrame);
+  for (const key of ['position', 'target', 'quaternion']) {
+    closer[key].forEach((v, i) => expect(v).toBeCloseTo(initial[key][i], 10));
+  }
+  expect(closer.frame).toEqual(initial.frame);
+  expect(closer.legend).toEqual(initial.legend);
+  for (let i = 0; i < 40; i++) await page.mouse.wheel(0, -100);
+  await expect.poll(async () => (await state()).zoom, { message: 'wheel input clamps at maximum zoom' }).toBe(3);
+  expect((await state()).span / initial.span).toBeCloseTo(3 / initial.zoom, 6);
+  for (let i = 0; i < 40; i++) await page.mouse.wheel(0, 100);
+  await expect.poll(async () => (await state()).zoom, { message: 'wheel input clamps at minimum zoom' }).toBe(0.8);
+  expect((await state()).span / initial.span).toBeCloseTo(0.8 / initial.zoom, 6);
+  await root.locator('.scrub').evaluate((e) => { e.value = '10.5'; e.dispatchEvent(new Event('input', { bubbles: true })); });
+  expect((await state()).zoom, 'scrubbing preserves the user zoom').toBe(0.8);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect.poll(async () => (await state()).width).toBeLessThan(390);
+  expect((await state()).zoom, 'resize preserves the user zoom').toBe(0.8);
 });
