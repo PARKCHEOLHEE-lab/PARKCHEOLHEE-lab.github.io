@@ -66,10 +66,10 @@ categories: note
     </li>
         <ul>
             <li>
-                Find the smallest circle that holds six points. Search for its centre \((x, y)\), so there are two parameters (\(n = 2\))
+                Find the smallest circle that holds six points. Search for its center \((x, y)\), so there are two parameters (\(n = 2\))
             </li>
             <li>
-                Once the centre is fixed, the circle only has to reach the farthest point, so its radius is
+                Once the center is fixed, the circle only has to reach the farthest point, so its radius is
                 <div class="latex-container">
                 \[
                     f(x, y) = \max_i \, \lVert (x, y) - p_i \rVert
@@ -90,11 +90,11 @@ categories: note
         <div class="phase" aria-live="polite"></div>
         <div class="plabel read"></div>
         <div class="panels">
-            <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six small filled candidate centres on a pale contour background. Rank 1 is blue and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
+            <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six small filled candidate centers on a pale contour background. Rank 1 is blue and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
             <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same circle drawing on the ground, with each candidate lifted by its radius. Ranks 1 and 6 use the same markers and dashed height lines."></div></div>
         </div>
         <figcaption>
-            Both views share the same ground drawing. Pale lines mark equal radii. The radius of each circle becomes the height of its centre; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Both views share the same ground drawing. Pale lines mark equal radii. The radius of each circle becomes the height of its center; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -529,7 +529,7 @@ categories: note
 
     // ---- figure 1: one generation in slow motion, on the smallest circle around six points ----
     var POINTS = [[0, 0], [2, 0.6], [4, 1.5], [6, 2.2], [1.2, 1.4], [5, 0.9]];
-    function circleRadius(c) {                            // the smallest circle centred at c that holds every point reaches the farthest one
+    function circleRadius(c) {                            // the smallest circle centered at c that holds every point reaches the farthest one
         return Math.max.apply(null, POINTS.map(function (p) { return Math.hypot(p[0] - c[0], p[1] - c[1]); }));
     }
     function stepDemo() {
@@ -566,10 +566,10 @@ categories: note
             return bounds();
         })();
         function phaseText(h, ph) {
-            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centres. The motion links one generation to the next.";
-            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Blue is best; gray is worst. Dashed lines show their radii.";
-            if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres (blue dots). Their weights are " + W3 + ".";
-            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centres. The two circles stay with their candidates.";
+            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centers. The motion links one generation to the next.";
+            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue is best; gray is worst. Dashed lines show their radii.";
+            if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centers (blue dots). Their weights are " + W3 + ".";
+            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centers. The two circles stay with their candidates.";
             if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search.";
             var r = h.sigma1 / h.sigma;
             return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.");
@@ -611,7 +611,7 @@ categories: note
             var m = h.m;
             if (ph === 3) m = lerp2(h.m, h.m1, e);
             if (ph >= 4) m = h.m1;
-            // Compare the best and worst candidates after ranking; all six centres stay visible.
+            // Compare the best and worst candidates after ranking; all six centers stay visible.
             var best = h.X[h.order[0]], worst = h.X[h.order[P.lam - 1]];
             if (ph >= 1) {
                 circle(ctx, map, worst, COL.neutral, 1);
@@ -627,7 +627,7 @@ categories: note
             ctx.globalAlpha = 1;
             cross(ctx, map, m);
 
-            read.textContent = ph === 0 ? P.lam + " candidate centres / not ranked" : "1: r " + fn(best).toFixed(2) + " / 6: r " + fn(worst).toFixed(2);
+            read.textContent = ph === 0 ? P.lam + " candidate centers / not ranked" : "1: r " + fn(best).toFixed(2) + " / 6: r " + fn(worst).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
