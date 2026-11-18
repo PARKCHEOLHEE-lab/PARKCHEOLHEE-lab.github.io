@@ -566,7 +566,7 @@ categories: note
             return bounds();
         })();
         function phaseText(h, ph) {
-            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " candidate centres together, shown as gray dots.";
+            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centres. The motion links one generation to the next.";
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Blue is best; gray is worst. Dashed lines show their radii.";
             if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres (blue dots). Their weights are " + W3 + ".";
             if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centres. The two circles stay with their candidates.";
@@ -600,7 +600,9 @@ categories: note
             var g = Math.min(NG - 1, Math.floor(t / NP)), u = Math.min(NP, t - g * NP), ph = Math.min(NP - 1, Math.floor(u)), f = u - ph, h = H[g];
             var map = viewMap(circleView, A.W, A.H), ctx = A.ctx, e = ease(clamp01(f));
             var rank = []; h.order.forEach(function (idx, r) { rank[idx] = r; });
-            var X = h.X, styles = X.map(function (_, k) { return sampleStyle(ph, rank[k]); });
+            var X = h.X;
+            if (ph === 0 && g > 0) X = h.X.map(function (p, k) { return lerp2(H[g - 1].X[k], p, e); });
+            var styles = X.map(function (_, k) { return sampleStyle(ph, rank[k]); });
             ctx.clearRect(0, 0, A.W, A.H);
             if (!bg) bg = landscape(fn, circleView, A.W, A.H);
             ctx.drawImage(bg, 0, 0, A.W, A.H);

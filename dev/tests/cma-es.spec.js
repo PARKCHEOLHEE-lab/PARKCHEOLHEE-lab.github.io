@@ -12,12 +12,15 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     const script = [...doc.scripts].find((s) => !s.type).textContent;
     const init = 'ready(function () { stepDemo(); runDemo(); raceDemo(); });';
     if (script.split(init).length !== 2) throw new Error('Expected one demo initialization');
-    (0, eval)(script.replace(init, 'window.radiusForTest = circleRadius; window.landscapeForTest = landscape;'));
+    (0, eval)(script.replace(init, 'window.radiusForTest = circleRadius; window.landscapeForTest = landscape; window.recordForTest = record;'));
     // A smooth function samples all bands; Fig 2's steep valley skips some.
     const image = window.landscapeForTest(([x]) => 10 ** x, { cx: 0, cy: 0, half: 1 }, 280, 280);
     const pixels = image.getContext('2d').getImageData(0, 0, image.width, image.height).data, palette = new Set();
     for (let i = 0; i < pixels.length; i += 4) palette.add(Array.from(pixels.slice(i, i + 4)).join(','));
-    return { radii: [[0, 0], [3, 1.1], [-2, 4]].map((centre) => window.radiusForTest(centre)), palette: [...palette] };
+    return {
+      radii: [[0, 0], [3, 1.1], [-2, 4]].map((centre) => window.radiusForTest(centre)), palette: [...palette],
+      generations: window.recordForTest(window.radiusForTest, [0.5, 3.5], 1, 6, 3, true, 600).H.map((h) => h.X),
+    };
   }, source);
   expect(unit.radii[0]).toBeCloseTo(Math.hypot(6, 2.2), 10);
   expect(unit.radii[1]).toBeCloseTo(Math.hypot(3, 1.1), 10);
@@ -106,8 +109,10 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     message: 'the fixed circle drawing has at least 25% more width at 1280px',
   }).toBeGreaterThanOrEqual(245 * 1.25);
   const panels = root.locator('.panels > .panel');
-  const left = await panels.nth(0).boundingBox();
-  const right = await panels.nth(1).boundingBox();
+  const [left, right] = await panels.evaluateAll((elements) => elements.map((el) => {
+    const { x, y, width } = el.getBoundingClientRect();
+    return { x, y, width };
+  }));
   expect(Math.abs(left.y - right.y), 'desktop panels share one row').toBeLessThan(1);
   expect(right.x).toBeGreaterThanOrEqual(left.x + left.width);
   const reference = await page.evaluate(() => ({
@@ -121,7 +126,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   expect(reference.dropped).toBeTruthy();
   const maximum = Number(await slider.getAttribute('max'));
   expect(maximum).toBeGreaterThan(6);
-  const samplesPerPhase = 2;
+  const samplesPerPhase = 4;
   const frames = await root.evaluate((el, { maximum, samplesPerPhase }) => {
     const slider = el.querySelector('.scrub');
     const frames = [];
@@ -129,8 +134,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     const background = window.circleBackground;
     let fixedBackground = true;
     el.addEventListener('cma-frame', () => liveEvents++);
-    // Start and midpoint of every phase, generation boundaries, and the final frame.
-    // Candidate circles stay fixed within a generation; the mean moves separately.
+    // Quarter steps cover Sample motion, every phase, and generation boundaries.
     window.circleGeometryScan = true;
     try {
       for (let tick = 0; tick <= maximum * samplesPerPhase; tick++) {
@@ -166,6 +170,16 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     assert(!frame.phase.includes('small box'), 'phase text does not refer to the removed box');
     const generation = Math.min(Math.floor(index / (6 * samplesPerPhase)), maximum / 6 - 1);
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
+    const progress = [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
+    const targetSamples = unit.generations[generation];
+    for (const [k, point] of frame.population.entries()) {
+      const previous = generation > 0 && phase === 0 ? unit.generations[generation - 1][k] : targetSamples[k];
+      const fraction = generation > 0 && phase === 0 ? progress : 1;
+      for (let axis = 0; axis < 2; axis++) {
+        const expected = previous[axis] + fraction * (targetSamples[k][axis] - previous[axis]);
+        assert(Math.abs(point[axis] - expected) < 1e-10, `frame ${index}: Sample connects previous positions to pristine new samples; Rank uses the actual samples`);
+      }
+    }
     assert.equal(frame.population.length, 6, `frame ${index}: all six current candidates arrive together`);
     assert.equal(frame.styles.length, 6);
     assert(frame.styles.every((style) => style.alpha > 0), `frame ${index}: no candidate is hidden`);
@@ -261,7 +275,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   // These live checks use actual scene objects; the bulk 2D scan above cannot
   // establish the 3D texture, coordinate mapping, glyphs or segment heights.
   let lastTextureVersion = -1, lastRenderFrame = -1;
-  for (const time of [0, 1.5, 2.5, 3.5, 4.5, 5.5, 7.5, maximum]) {
+  for (const time of [0, 1.5, 2.5, 3.5, 4.5, 5.5, 6, 6.25, 6.5, 6.75, 6.99, 7, 7.5, maximum]) {
     await slider.evaluate((input, time) => { input.value = String(time); input.dispatchEvent(new Event('input', { bubbles: true })); }, time);
     const state = await root.evaluate((el) => {
       const s = el.cma3d.inspect, canvas = el.querySelector('.cma-top');
@@ -292,6 +306,12 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
     });
     expect(state?.shared, 'the actual 3D ground material shares the 2D canvas').toBe(true);
+    if (time === 6.99) {
+      for (const [k, point] of state.frame.X.entries()) {
+        const from = unit.generations[0][k], to = unit.generations[1][k];
+        assert(Math.hypot(point[0] - to[0], point[1] - to[1]) < 0.001 * Math.hypot(to[0] - from[0], to[1] - from[1]), 'the last Sample slider step is within 0.1% of the new positions before Rank');
+      }
+    }
     expect(state.orthographic).toBe(true);
     expect(state.lights).toBe(0);
     expect(state.otherMeshes).toBe(0);
@@ -362,6 +382,34 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   const forward = await page.evaluate(() => window.circleDrawing.circles);
   await slider.evaluate((input) => { input.value = '2'; input.dispatchEvent(new Event('input', { bubbles: true })); input.value = '0.5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
   expect(await page.evaluate(() => window.circleDrawing.circles)).toEqual(forward);
+  await slider.evaluate((input) => { input.value = '6.5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  const midpoint = await root.evaluate((el) => el.cmaFrame.X);
+  await slider.evaluate((input) => { input.value = '19'; input.dispatchEvent(new Event('input', { bubbles: true })); input.value = '6.5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  expect(await root.evaluate((el) => el.cmaFrame.X), 'reverse scrubbing reproduces the same transition').toEqual(midpoint);
+  await slider.evaluate((input) => { input.value = '5.8'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  await root.evaluate((el) => {
+    window.samplePlayback = [];
+    window.samplePlaybackListener = () => window.samplePlayback.push({
+      time: Number(el.querySelector('.scrub').value), X: el.cmaFrame.X.map((p) => p.slice()),
+      sample: el.cmaFrame.styles.every((style) => !style.label),
+    });
+    el.addEventListener('cma-frame', window.samplePlaybackListener);
+  });
+  await button.click();
+  await expect.poll(async () => Number(await slider.inputValue())).toBeGreaterThan(7.05);
+  const playback = await root.evaluate((el) => {
+    el.removeEventListener('cma-frame', window.samplePlaybackListener);
+    return window.samplePlayback;
+  });
+  await slider.evaluate((input) => { input.value = '7.1'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  const firstSample = playback.find((frame) => frame.sample);
+  expect(firstSample).toBeTruthy();
+  expect(playback.some((frame) => frame.time < 6)).toBe(true);
+  expect(playback.some((frame) => frame.time > 6.4 && frame.time < 6.8)).toBe(true);
+  for (const [k, point] of firstSample.X.entries()) {
+    const from = unit.generations[0][k], to = unit.generations[1][k];
+    assert(Math.hypot(point[0] - from[0], point[1] - from[1]) < 0.05 * Math.hypot(to[0] - from[0], to[1] - from[1]), 'real playback crosses the generation boundary without replacing the dots at once');
+  }
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(async () => {
     const top = await panels.nth(0).boundingBox();
