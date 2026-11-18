@@ -186,6 +186,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const samplesPerPhase = 4;
   const frames = await root.evaluate((el, { maximum, samplesPerPhase }) => {
     const slider = el.querySelector('.scrub');
+    const comparison = el.querySelector('.spread-comparison');
     const frames = [];
     let liveEvents = 0;
     const background = window.circleBackground;
@@ -200,7 +201,15 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         fixedBackground = fixedBackground && window.circleBackground === background;
         frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
           beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden,
-          legend: el.querySelector('.cma-legend').innerText })));
+          legend: el.querySelector('.cma-legend').innerText,
+          comparison: comparison && !comparison.hidden ? {
+            note: comparison.querySelector('.comparison-note').textContent,
+            shapes: [...comparison.querySelectorAll('ellipse')].map((shape) => ({
+              rx: Number(shape.getAttribute('rx')),
+              ry: Number(shape.getAttribute('ry')),
+              angle: shape.transform.baseVal.getItem(0).angle * Math.PI / 180,
+            })),
+          } : null })));
       }
     } finally {
       window.circleGeometryScan = false;
@@ -256,6 +265,26 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const covariance = phase < 4 ? distribution.C : phase === 4 ? distribution.C.map((v, axis) => v + progress * (distribution.C1[axis] - v)) : distribution.C1;
     const sigma = phase < 5 ? distribution.sigma : distribution.sigma * (distribution.sigma1 / distribution.sigma) ** progress;
     const guide = drawing.ellipses[0], centre = project(mean);
+    assert.equal(Boolean(frame.comparison), phase >= 4, 'only C and sigma show endpoint comparisons');
+    if (frame.comparison) {
+      const { shapes, note } = frame.comparison;
+      assert.equal(shapes.length, 2);
+      const states = [[distribution.C, distribution.sigma], [distribution.C1, distribution.sigma], [distribution.C1, distribution.sigma1]];
+      const largest = ([a, b, c]) => (a + c) / 2 + Math.hypot((a - c) / 2, b);
+      const units = 27 / Math.max(...states.map(([C, s]) => s * Math.sqrt(largest(C))));
+      shapes.forEach(({ rx, ry, angle }, i) => {
+        const [C, size] = states[phase - 4 + i];
+        const a = Math.cos(angle), b = Math.sin(angle), x = rx ** 2, y = ry ** 2, s2 = (units * size) ** 2;
+        assert(Math.abs(x * a ** 2 + y * b ** 2 - s2 * C[0]) < 1e-3);
+        assert(Math.abs((x - y) * a * b + s2 * C[1]) < 1e-3);
+        assert(Math.abs(x * b ** 2 + y * a ** 2 - s2 * C[2]) < 1e-3, 'both phases display actual endpoints on the same scale');
+      });
+      if (phase === 4) {
+        assert(note.includes((shapes[0].rx / shapes[0].ry).toFixed(2) + ' → ' + (shapes[1].rx / shapes[1].ry).toFixed(2)));
+      } else {
+        assert(note.includes('Both axes ×' + (distribution.sigma1 / distribution.sigma).toFixed(2)));
+      }
+    }
     assert.equal(frame.beforeVisible, phase >= 3, 'before-state legend appears only for mean, C and sigma updates');
     assert.equal(frame.directionVisible, phase >= 4, 'the amber direction is explained only in C and sigma updates');
     if (phase === 4) {

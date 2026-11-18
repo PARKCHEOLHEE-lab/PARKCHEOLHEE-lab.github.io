@@ -40,6 +40,11 @@ categories: note
         #cma-step .before-key { opacity: 0.3; }
         #cma-step .direction-key { border-top-color: var(--history); }
         #cma-step .selection-key { border-top-color: var(--selected); }
+        #cma-step .spread-comparison { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 0.2em 0.5em; max-width: 22em; margin: 0 auto 1em; color: var(--td); text-align: center; font-size: 0.9em; }
+        #cma-step .spread-comparison[hidden] { display: none; }
+        #cma-step .comparison-side svg { display: block; width: 100%; max-width: 7em; margin: auto; fill: none; stroke: var(--shape); stroke-width: 2; stroke-dasharray: 4 3; }
+        #cma-step .comparison-after svg { fill: var(--r14); stroke: var(--circle); stroke-dasharray: none; }
+        #cma-step .comparison-note { grid-column: 1 / -1; margin: 0; font-weight: 600; }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
         /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
@@ -104,6 +109,18 @@ categories: note
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
         <div class="phase" aria-live="polite"></div>
+        <div class="spread-comparison" role="group" aria-label="Sampling ellipse before and after the update" hidden>
+            <div class="comparison-side">
+                <svg viewBox="0 0 88 60" aria-hidden="true"><ellipse cx="44" cy="30" /></svg>
+                Before
+            </div>
+            <span aria-hidden="true">→</span>
+            <div class="comparison-side comparison-after">
+                <svg viewBox="0 0 88 60" aria-hidden="true"><ellipse cx="44" cy="30" /></svg>
+                After
+            </div>
+            <p class="comparison-note"></p>
+        </div>
         <div class="cma-view">
             <canvas class="cma-top" aria-hidden="true"></canvas>
             <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan; scroll or pinch to zoom. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
@@ -515,6 +532,8 @@ categories: note
         root.style.setProperty("--history", COL.path);
         root.style.setProperty("--selected", COL.pick);
         var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
+        var comparison = root.querySelector(".spread-comparison"), comparisonEllipses = comparison.querySelectorAll("ellipse");
+        var comparisonNote = comparison.querySelector(".comparison-note");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
@@ -562,10 +581,27 @@ categories: note
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
             if (ph === 2) return "<b>3. Select.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows carry more weight.";
             if (ph === 3) return "<b>4. Move the mean.</b> X moves toward the weighted center of those samples. Faint dashes show where the search shape started.";
-            if (ph === 4) return "<b>5. Reshape C.</b> Keep most of the old spread. Add spread along each arrow’s line, in both directions. The darker outline shows the updated spread.";
+            if (ph === 4) return "<b>5. Change shape (C).</b> Keep most of the old spread. Add spread along each arrow’s line, in both directions.";
             var pathRatio = Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN;
             var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
-            return "<b>6. Resize \u03c3.</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
+            return "<b>6. Change size (\u03c3).</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
+        }
+        function showComparison(h, ph) {
+            comparison.hidden = ph < 4;
+            if (comparison.hidden) return;
+            var old = eig2(h.C), updated = eig2(h.C1);
+            // Fit all three snapshots with one scale so step 5's result is step 6's starting point.
+            var scale = 27 / Math.max(h.sigma * Math.sqrt(old.l1), Math.max(h.sigma, h.sigma1) * Math.sqrt(updated.l1));
+            comparisonEllipses.forEach(function (element, i) {
+                var shape = ph === 4 && i === 0 ? old : updated;
+                var size = ph === 5 && i === 1 ? h.sigma1 : h.sigma;
+                element.setAttribute("rx", scale * size * Math.sqrt(shape.l1));
+                element.setAttribute("ry", scale * size * Math.sqrt(shape.l2));
+                element.setAttribute("transform", "rotate(" + (-Math.atan2(shape.uy, shape.ux) * 180 / Math.PI) + " 44 30)");
+            });
+            comparisonNote.textContent = ph === 4
+                ? "Long axis ÷ short axis: " + Math.sqrt(old.l1 / old.l2).toFixed(2) + " → " + Math.sqrt(updated.l1 / updated.l2).toFixed(2)
+                : "Both axes ×" + (h.sigma1 / h.sigma).toFixed(2) + ". Same shape.";
         }
         function layout() { A = fit(cTop, 1); bg = null; }
 
@@ -668,6 +704,7 @@ categories: note
             if (tag !== shown) {
                 var reshaping = ph === 4;
                 text.innerHTML = phaseText(h, ph);
+                showComparison(h, ph);
                 root.querySelector(".objective-key").hidden = reshaping;
                 root.querySelector(".update-selection").hidden = !reshaping;
                 root.querySelector(".before-label").textContent = reshaping ? "Old sampling spread" : "Before update";
