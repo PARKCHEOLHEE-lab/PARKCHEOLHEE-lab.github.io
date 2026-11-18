@@ -201,35 +201,6 @@ categories: note
             Same start, seed, and \(\lambda = 6\); both stop at \(f(m) &lt; 10^{-10}\). CMA-ES takes <span class="n-cma">74</span> generations and ends with \(C\) at an axis ratio of <span class="n-ratio">36.9</span>, near the contours' \(\sqrt{1000} \approx 31.6\). Fixed \(C\) takes <span class="n-iso">2,167</span>.
         </figcaption>
     </div>
-    <br>
-    <li>
-        In practice
-    </li>
-        <ul>
-            <li>
-                Only a start \(m_0\) and a step size \(\sigma_0\) are chosen; the rest has defaults, such as \(\lambda = 4 + \lfloor 3 \ln n \rfloor\). Memory grows as \(n^2\)
-            </li>
-            <li>
-                The Python package <code>pycma</code> runs the same loop:
-
-<pre><code class="python">
-    import cma
-
-    def f(x):
-        return sum((i + 1) * xi**2 for i, xi in enumerate(x))
-
-    es = cma.CMAEvolutionStrategy(x0=[1.0] * 10, sigma0=0.5)
-    while not es.stop():
-        X = es.ask()                   # sample lambda candidates
-        es.tell(X, [f(x) for x in X])  # rank, update m, sigma, C
-    print(es.result.xbest)
-</code></pre>
-
-            </li>
-            <li>
-                The figures run a JavaScript port of <code>purecma.py</code> from <code>pycma</code>, with positive weights only
-            </li>
-        </ul>
 </ul>
 
 <script>
