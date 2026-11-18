@@ -23,6 +23,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       generations: history.map((h) => h.X),
       distributions: history.map(({ m, m1, C, C1, sigma, sigma1, pc1, ps1 }) => ({ m, m1, C, C1, sigma, sigma1, pc1, ps1 })),
       weights: run.P.w, memoryRate: run.P.c1, pathBaseline: run.P.chiN,
+      sampleRate: run.P.cmu, pathRate: run.P.cs, centerRate: run.P.cc, dimension: run.P.n,
     };
   }, source);
   expect(unit.radii[0]).toBeCloseTo(Math.hypot(6, 2.2), 10);
@@ -183,10 +184,11 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(initialLayout.shape.colour).toBe(await root.evaluate((el) => el.cma3d.colors.neutral));
   const maximum = Number(await slider.getAttribute('max'));
   expect(maximum).toBeGreaterThan(6);
+  await expect(root.locator('.spread-comparison, .cma-view svg')).toHaveCount(0);
   const samplesPerPhase = 4;
   const frames = await root.evaluate((el, { maximum, samplesPerPhase }) => {
     const slider = el.querySelector('.scrub');
-    const comparison = el.querySelector('.spread-comparison');
+    const sigmaGuide = el.querySelector('.sigma-guide');
     const frames = [];
     let liveEvents = 0;
     const background = window.circleBackground;
@@ -202,13 +204,10 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
           beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden,
           legend: el.querySelector('.cma-legend').innerText,
-          comparison: comparison && !comparison.hidden ? {
-            note: comparison.querySelector('.comparison-note').textContent,
-            shapes: [...comparison.querySelectorAll('ellipse')].map((shape) => ({
-              rx: Number(shape.getAttribute('rx')),
-              ry: Number(shape.getAttribute('ry')),
-              angle: shape.transform.baseVal.getItem(0).angle * Math.PI / 180,
-            })),
+          sigmaGuide: sigmaGuide && !sigmaGuide.hidden ? {
+            recent: sigmaGuide.querySelector('progress').value,
+            max: sigmaGuide.querySelector('progress').max,
+            baseline: parseFloat(sigmaGuide.querySelector('.sigma-baseline').style.left),
           } : null })));
       }
     } finally {
@@ -238,6 +237,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     assert(!frame.phase.includes('small box'), 'phase text does not refer to the removed box');
     const generation = Math.min(Math.floor(index / (6 * samplesPerPhase)), maximum / 6 - 1);
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
+    const historyStage = phase === 4 && index % samplesPerPhase >= 2;
     const progress = index === frames.frames.length - 1 ? 1 : [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
     const targetSamples = unit.generations[generation];
     for (const [k, point] of frame.population.entries()) {
@@ -262,48 +262,47 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const project = (p) => [points[0].x + p[0] * scale, points[0].y - p[1] * scale];
     const distribution = unit.distributions[generation];
     const mean = phase < 3 ? distribution.m : phase === 3 ? distribution.m.map((v, axis) => v + progress * (distribution.m1[axis] - v)) : distribution.m1;
-    const covariance = phase < 4 ? distribution.C : phase === 4 ? distribution.C.map((v, axis) => v + progress * (distribution.C1[axis] - v)) : distribution.C1;
+    const scores = frame.population.map((c) => Math.max(...targets.map((p) => Math.hypot(p[0] - c[0], p[1] - c[1]))));
+    const order = scores.map((_, k) => k).sort((a, b) => scores[a] - scores[b]);
+    let covariance = phase < 4 ? distribution.C : distribution.C1;
+    let beforeCovariance = phase === 5 ? distribution.C1 : distribution.C;
+    if (phase === 4) {
+      const { dimension: n, pathRate, centerRate, memoryRate, sampleRate, weights } = unit;
+      const pathLength2 = distribution.ps1.reduce((sum, v) => sum + v * v, 0);
+      const usePath = pathLength2 / n / (1 - (1 - pathRate) ** (2 * (generation + 1))) < 2 + 4 / (n + 1);
+      const retained = 1 - sampleRate - memoryRate * (usePath ? 1 : (1 - centerRate) ** 2);
+      const samplesOnly = distribution.C.map((v) => retained * v);
+      order.slice(0, weights.length).forEach((k, i) => {
+        const [dx, dy] = targetSamples[k].map((v, j) => (v - distribution.m[j]) / distribution.sigma);
+        [dx * dx, dx * dy, dy * dy].forEach((v, j) => { samplesOnly[j] += sampleRate * weights[i] * v; });
+      });
+      const from = historyStage ? samplesOnly : distribution.C;
+      beforeCovariance = from;
+      const to = historyStage ? distribution.C1 : samplesOnly;
+      const part = index % 2 === 0 ? 0 : 0.5;
+      covariance = from.map((v, j) => v + part * (to[j] - v));
+    }
     const sigma = phase < 5 ? distribution.sigma : distribution.sigma * (distribution.sigma1 / distribution.sigma) ** progress;
     const guide = drawing.ellipses[0], centre = project(mean);
-    assert.equal(Boolean(frame.comparison), phase >= 4, 'only C and sigma show endpoint comparisons');
-    if (frame.comparison) {
-      const { shapes, note } = frame.comparison;
-      assert.equal(shapes.length, 2);
-      const states = [[distribution.C, distribution.sigma], [distribution.C1, distribution.sigma], [distribution.C1, distribution.sigma1]];
-      const largest = ([a, b, c]) => (a + c) / 2 + Math.hypot((a - c) / 2, b);
-      const units = 27 / Math.max(...states.map(([C, s]) => s * Math.sqrt(largest(C))));
-      shapes.forEach(({ rx, ry, angle }, i) => {
-        const [C, size] = states[phase - 4 + i];
-        const a = Math.cos(angle), b = Math.sin(angle), x = rx ** 2, y = ry ** 2, s2 = (units * size) ** 2;
-        assert(Math.abs(x * a ** 2 + y * b ** 2 - s2 * C[0]) < 1e-3);
-        assert(Math.abs((x - y) * a * b + s2 * C[1]) < 1e-3);
-        assert(Math.abs(x * b ** 2 + y * a ** 2 - s2 * C[2]) < 1e-3, 'both phases display actual endpoints on the same scale');
-      });
-      if (phase === 4) {
-        assert(note.includes((shapes[0].rx / shapes[0].ry).toFixed(2) + ' → ' + (shapes[1].rx / shapes[1].ry).toFixed(2)));
-      } else {
-        assert(note.includes('Both axes ×' + (distribution.sigma1 / distribution.sigma).toFixed(2)));
-      }
-    }
+    assert.equal(Boolean(frame.sigmaGuide), phase === 5, 'sigma comparison lives in the plot legend');
     assert.equal(frame.beforeVisible, phase >= 3, 'before-state legend appears only for mean, C and sigma updates');
-    assert.equal(frame.directionVisible, phase >= 4, 'the amber direction is explained only in C and sigma updates');
+    assert.equal(frame.directionVisible, historyStage || phase === 5, 'the amber key appears when its contribution is active');
     if (phase === 4) {
-      assert(frame.phase.includes('along each arrow’s line, in both directions'), 'the frame teaches how the arrows change the spread');
-      assert.deepEqual(frame.legend.split('\n'), ['Old sampling spread', 'Top 3 steps from old center', 'Recent center movement', 'Updated sampling spread']);
+      const cause = historyStage ? 'Recent center moves' : 'Top 3 moves';
+      assert(frame.legend.includes(cause) && frame.phase.includes(historyStage ? 'orange' : 'blue'), 'the active cause is named and color-matched');
     } else {
-      assert(!frame.legend.includes('Top 3 steps from old center'), 'the extra key appears only while reshaping C');
+      assert(!frame.legend.includes('Top 3 moves'), 'the extra key appears only while reshaping C');
     }
     assert.equal(drawing.before.length, phase >= 3 ? 1 : 0, 'updates keep exactly one faint before-state outline');
     if (phase >= 3) {
       const before = drawing.before[0], oldMean = project(phase === 3 ? distribution.m : distribution.m1);
-      const oldC = phase === 5 ? distribution.C1 : distribution.C;
       assert(Math.hypot(before.x - oldMean[0], before.y - oldMean[1]) < 1e-7, 'before-outline is at the correct pre-update center');
       assert(before.alpha > 0 && before.alpha < guide.alpha, 'the previous state stays visible but quieter');
       const cos = Math.cos(before.angle), sin = Math.sin(before.angle), a = before.rx ** 2, b = before.ry ** 2;
       const factor = 4 * distribution.sigma ** 2 * scale ** 2;
-      assert(Math.abs(a * cos ** 2 + b * sin ** 2 - factor * oldC[0]) < 1e-7, 'before-outline preserves the old x spread');
-      assert(Math.abs(a * sin ** 2 + b * cos ** 2 - factor * oldC[2]) < 1e-7, 'before-outline preserves the old y spread');
-      assert(Math.abs((a - b) * cos * sin + factor * oldC[1]) < 1e-7, 'before-outline preserves the old direction');
+      assert(Math.abs(a * cos ** 2 + b * sin ** 2 - factor * beforeCovariance[0]) < 1e-7, 'before-outline preserves the x spread at the start of this part');
+      assert(Math.abs(a * sin ** 2 + b * cos ** 2 - factor * beforeCovariance[2]) < 1e-7, 'before-outline preserves the y spread at the start of this part');
+      assert(Math.abs((a - b) * cos * sin + factor * beforeCovariance[1]) < 1e-7, 'before-outline preserves the orientation at the start of this part');
     }
     assert.equal(drawing.origins.length, phase === 3 || phase === 4 ? 1 : 0, 'mean and C arrows retain the original sampling center');
     for (const origin of drawing.origins) {
@@ -348,22 +347,22 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     assert.deepEqual(drawing.crosses[0].dash, [], 'radius dashes must not leak into the mean cross');
     const expectedMean = project(frame.mean), cross = drawing.crosses[0];
     assert(Math.hypot(cross.x - expectedMean[0], cross.y - expectedMean[1]) < 1e-7, 'the cross follows the real mean');
-    const scores = frame.population.map((c) => Math.max(...targets.map((p) => Math.hypot(p[0] - c[0], p[1] - c[1]))));
-    const order = scores.map((_, k) => k).sort((a, b) => scores[a] - scores[b]);
     const expectedArrows = [];
     const expectArrow = (from, tip, colour, width) => {
       if (Math.hypot(tip[0] - from[0], tip[1] - from[1]) >= 1) expectedArrows.push({ from, tip, colour, width });
     };
-    if (phase >= 2 && phase <= 4) {
+    if (phase >= 2 && phase <= 4 && !historyStage) {
       for (let i = 0; i < 3; i++) expectArrow(project(distribution.m), project(frame.population[order[i]]), reference.parent.fill, 0.75 + 2 * unit.weights[i]);
     }
     if (phase === 3) expectArrow(project(distribution.m), project(mean), reference.best.fill, 2);
-    if (phase === 4) {
+    if (historyStage) {
       const tip = distribution.m.map((v, axis) => v + distribution.sigma * Math.sqrt(unit.memoryRate) * distribution.pc1[axis]);
       expectArrow(project(distribution.m), project(tip), '#f59e0b', 1.5);
     }
     if (phase === 5) {
       const path = Math.hypot(...distribution.ps1) / unit.pathBaseline;
+      assert(Math.abs(frame.sigmaGuide.recent - path) < 1e-12, 'the bar comes from the measured path length');
+      assert(Math.abs(frame.sigmaGuide.baseline * frame.sigmaGuide.max / 100 - 1) < 1e-6, 'the tick is the actual random-step threshold');
       assert(frame.phase.includes(path.toFixed(2) + '× the random-step baseline'), 'sigma explains the actual path comparison');
       if (path !== 1) assert(frame.phase.includes(path > 1 ? 'grow' : 'shrink'));
       for (const [dx, dy] of spans) {

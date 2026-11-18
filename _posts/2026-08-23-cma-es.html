@@ -40,11 +40,10 @@ categories: note
         #cma-step .before-key { opacity: 0.3; }
         #cma-step .direction-key { border-top-color: var(--history); }
         #cma-step .selection-key { border-top-color: var(--selected); }
-        #cma-step .spread-comparison { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 0.2em 0.5em; max-width: 22em; margin: 0 auto 1em; color: var(--td); text-align: center; font-size: 0.9em; }
-        #cma-step .spread-comparison[hidden] { display: none; }
-        #cma-step .comparison-side svg { display: block; width: 100%; max-width: 7em; margin: auto; fill: none; stroke: var(--shape); stroke-width: 2; stroke-dasharray: 4 3; }
-        #cma-step .comparison-after svg { fill: var(--r14); stroke: var(--circle); stroke-dasharray: none; }
-        #cma-step .comparison-note { grid-column: 1 / -1; margin: 0; font-weight: 600; }
+        #cma-step .cma-legend .sigma-guide { flex-direction: column; align-items: stretch; gap: 0.2em; }
+        #cma-step .sigma-track { position: relative; }
+        #cma-step .sigma-track progress { display: block; width: 100%; height: 0.8em; accent-color: var(--history); }
+        #cma-step .sigma-baseline { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--td); }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
         /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
@@ -109,27 +108,22 @@ categories: note
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
         <div class="phase" aria-live="polite"></div>
-        <div class="spread-comparison" role="group" aria-label="Sampling ellipse before and after the update" hidden>
-            <div class="comparison-side">
-                <svg viewBox="0 0 88 60" aria-hidden="true"><ellipse cx="44" cy="30" /></svg>
-                Before
-            </div>
-            <span aria-hidden="true">→</span>
-            <div class="comparison-side comparison-after">
-                <svg viewBox="0 0 88 60" aria-hidden="true"><ellipse cx="44" cy="30" /></svg>
-                After
-            </div>
-            <p class="comparison-note"></p>
-        </div>
         <div class="cma-view">
             <canvas class="cma-top" aria-hidden="true"></canvas>
             <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan; scroll or pinch to zoom. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
             <div class="cma-legend">
                 <div class="objective-key"><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
                 <div class="update-before" hidden><span class="legend-key shape-key before-key" aria-hidden="true"></span><span class="before-label">Before update</span></div>
-                <div class="update-selection" hidden><span class="legend-key selection-key" aria-hidden="true"></span><span>Top 3 steps from old center</span></div>
+                <div class="update-selection" hidden><span class="legend-key selection-key" aria-hidden="true"></span><span>Top 3 moves</span></div>
                 <div class="update-direction" hidden><span class="legend-key direction-key" aria-hidden="true"></span><span class="direction-label"></span></div>
                 <div><span class="legend-key shape-key" aria-hidden="true"></span><span class="spread-label">C shape, σ size</span></div>
+                <div class="sigma-guide" hidden>
+                    <span>Recent moves (tick = random)</span>
+                    <span class="sigma-track">
+                        <progress aria-label="Recent movement as a multiple of the random-step baseline"></progress>
+                        <span class="sigma-baseline" aria-hidden="true"></span>
+                    </span>
+                </div>
             </div>
         </div>
         <figcaption>
@@ -255,12 +249,14 @@ categories: note
         var ccn = Math.sqrt(P.cc * (2 - P.cc) * P.mueff) / S.sigma;
         S.pc = [(1 - P.cc) * S.pc[0] + ccn * hsig * y[0], (1 - P.cc) * S.pc[1] + ccn * hsig * y[1]];
         var c1a = P.c1 * (1 - (1 - hsig * hsig) * P.cc * (2 - P.cc)), f0 = 1 - c1a - P.cmu;
-        var C = [f0 * S.C[0] + P.c1 * S.pc[0] * S.pc[0], f0 * S.C[1] + P.c1 * S.pc[0] * S.pc[1], f0 * S.C[2] + P.c1 * S.pc[1] * S.pc[1]];
+        var memory = [P.c1 * S.pc[0] * S.pc[0], P.c1 * S.pc[0] * S.pc[1], P.c1 * S.pc[1] * S.pc[1]];
+        var C = S.C.map(function (v, i) { return f0 * v + memory[i]; });
         for (i = 0; i < P.mu; i++) {                      // rank-mu: weighted outer products of the selected steps
             k = order[i];
             var dx = X[k][0] - xold[0], dy = X[k][1] - xold[1], g = P.w[i] * P.cmu / (S.sigma * S.sigma);
             C[0] += g * dx * dx; C[1] += g * dx * dy; C[2] += g * dy * dy;
         }
+        S.CSamples = C.map(function (v, i) { return v - memory[i]; });
         S.C = C; S.m = m;
         S.sigma *= Math.exp(Math.min(1, P.cs / P.damps * (Math.sqrt(ps2) / P.chiN - 1)));
         return order;
@@ -288,7 +284,7 @@ categories: note
         for (var g = 0; g < maxGen; g++) {
             var m = S.m, sigma = S.sigma, C = S.C;
             var X = ask(S, P, randn), order = tell(S, P, X, X.map(fn)), e = eig2(S.C);
-            H.push({ m: m, sigma: sigma, C: C, X: X, order: order, m1: S.m, sigma1: S.sigma, C1: S.C, pc1: S.pc, ps1: S.ps, f1: fn(S.m), ratio1: Math.sqrt(e.l1 / e.l2) });
+            H.push({ m: m, sigma: sigma, C: C, X: X, order: order, m1: S.m, sigma1: S.sigma, C1: S.C, CSamples: S.CSamples, pc1: S.pc, ps1: S.ps, f1: fn(S.m), ratio1: Math.sqrt(e.l1 / e.l2) });
             if (H[g].f1 < 1e-10 || S.sigma * Math.sqrt(e.l1) < 1e-8) break;
         }
         return { P: P, H: H, f0: fn(m0), s0: s0 };
@@ -532,12 +528,14 @@ categories: note
         root.style.setProperty("--history", COL.path);
         root.style.setProperty("--selected", COL.pick);
         var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
-        var comparison = root.querySelector(".spread-comparison"), comparisonEllipses = comparison.querySelectorAll("ellipse");
-        var comparisonNote = comparison.querySelector(".comparison-note");
+        var sigmaGuide = root.querySelector(".sigma-guide"), sigmaBar = sigmaGuide.querySelector("progress");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
         var H = full.H.slice(0, NG), P = full.P;
+        var pathRatios = H.map(function (h) { return Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN; });
+        sigmaBar.max = Math.max(2, ...pathRatios);
+        sigmaGuide.querySelector(".sigma-baseline").style.left = (100 / sigmaBar.max) + "%";
         var A = null, bg = null, shown = "";
         var weightChart = document.getElementById("cma-weights"), offset = (P.lam / 2 + 0.5).toFixed(1);
         weightChart.querySelector(".weight-intro").textContent = "Keep the best " + P.mu + " of " + P.lam + " samples. Add 0.5 to the number you keep: \\(" + P.mu + " + 0.5 = " + offset + "\\).";
@@ -576,32 +574,16 @@ categories: note
             });
             return bounds();
         })();
-        function phaseText(h, ph) {
+        function phaseText(ph, historyStage, pathRatio) {
             if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centers. The motion links one generation to the next.";
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
             if (ph === 2) return "<b>3. Select.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows carry more weight.";
             if (ph === 3) return "<b>4. Move the mean.</b> X moves toward the weighted center of those samples. Faint dashes show where the search shape started.";
-            if (ph === 4) return "<b>5. Change shape (C).</b> Keep most of the old spread. Add spread along each arrow’s line, in both directions.";
-            var pathRatio = Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN;
+            if (ph === 4) return historyStage
+                ? "<b>5b. C: Add recent center moves.</b> The orange arrow combines moves from several rounds. Add spread in both directions along its line."
+                : "<b>5a. C: Learn from the top 3.</b> Keep most of the old spread. Each blue arrow points to a top sample and adds spread both ways along its line.";
             var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
             return "<b>6. Change size (\u03c3).</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
-        }
-        function showComparison(h, ph) {
-            comparison.hidden = ph < 4;
-            if (comparison.hidden) return;
-            var old = eig2(h.C), updated = eig2(h.C1);
-            // Fit all three snapshots with one scale so step 5's result is step 6's starting point.
-            var scale = 27 / Math.max(h.sigma * Math.sqrt(old.l1), Math.max(h.sigma, h.sigma1) * Math.sqrt(updated.l1));
-            comparisonEllipses.forEach(function (element, i) {
-                var shape = ph === 4 && i === 0 ? old : updated;
-                var size = ph === 5 && i === 1 ? h.sigma1 : h.sigma;
-                element.setAttribute("rx", scale * size * Math.sqrt(shape.l1));
-                element.setAttribute("ry", scale * size * Math.sqrt(shape.l2));
-                element.setAttribute("transform", "rotate(" + (-Math.atan2(shape.uy, shape.ux) * 180 / Math.PI) + " 44 30)");
-            });
-            comparisonNote.textContent = ph === 4
-                ? "Long axis ÷ short axis: " + Math.sqrt(old.l1 / old.l2).toFixed(2) + " → " + Math.sqrt(updated.l1 / updated.l2).toFixed(2)
-                : "Both axes ×" + (h.sigma1 / h.sigma).toFixed(2) + ". Same shape.";
         }
         function layout() { A = fit(cTop, 1); bg = null; }
 
@@ -626,6 +608,8 @@ categories: note
         }
         function render(t) {
             var g = Math.min(NG - 1, Math.floor(t / NP)), u = Math.min(NP, t - g * NP), ph = Math.min(NP - 1, Math.floor(u)), f = u - ph, h = H[g];
+            var historyStage = ph === 4 && f >= 0.5;
+            player.rate = ph >= 4 ? 0.35 : 0.9;
             var map = viewMap(circleView, A.W, A.H), ctx = A.ctx, e = ease(clamp01(f));
             var rank = []; h.order.forEach(function (idx, r) { rank[idx] = r; });
             var X = h.X;
@@ -639,11 +623,14 @@ categories: note
             var m = h.m, C = h.C, sigma = h.sigma;
             if (ph === 3) m = lerp2(h.m, h.m1, e);
             if (ph >= 4) m = h.m1;
-            if (ph === 4) C = lerpC(h.C, h.C1, e);
+            if (ph === 4) {
+                C = historyStage ? lerpC(h.CSamples, h.C1, ease(2 * f - 1)) : lerpC(h.C, h.CSamples, ease(2 * f));
+            }
             if (ph === 5) { C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
             if (ph >= 3) {
                 ctx.save(); ctx.globalAlpha = 0.3;
-                ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, ph === 5 ? h.C1 : h.C, true);
+                var beforeC = ph === 5 ? h.C1 : historyStage ? h.CSamples : h.C;
+                ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, beforeC, true);
                 ctx.restore();
             }
             var axes = ellipse(ctx, map, m, sigma, C, true, ph >= 4 ? 2 : 1);
@@ -663,13 +650,13 @@ categories: note
                     arrow(ctx, map, lerp2(m, tip, h.sigma / sigma), tip, COL.path, 1.5);
                 });
             }
-            if (ph >= 2 && ph <= 4) {
+            if (ph >= 2 && ph <= 4 && !historyStage) {
                 h.order.slice(0, P.mu).forEach(function (k, i) {
                     arrow(ctx, map, h.m, h.X[k], COL.pick, 0.75 + 2 * P.w[i]);
                 });
             }
             if (ph === 3) arrow(ctx, map, h.m, m, COL.mean, 2);
-            if (ph === 4) {
+            if (historyStage) {
                 // The covariance path's contribution, in the same units as the samples.
                 var memory = h.m.map(function (v, i) { return v + h.sigma * Math.sqrt(P.c1) * h.pc1[i]; });
                 arrow(ctx, map, h.m, memory, COL.path, 1.5);
@@ -694,20 +681,21 @@ categories: note
             cross(ctx, map, m);
 
             root.querySelector(".update-before").hidden = ph < 3;
-            root.querySelector(".update-direction").hidden = ph < 4;
-            root.querySelector(".direction-label").textContent = ph === 4 ? "Recent center movement" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
+            root.querySelector(".update-direction").hidden = !historyStage && ph !== 5;
+            root.querySelector(".direction-label").textContent = historyStage ? "Recent center moves" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
             read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + fn(best).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
-            var tag = g + ":" + ph;
+            var tag = g + ":" + ph + ":" + historyStage;
             if (tag !== shown) {
                 var reshaping = ph === 4;
-                text.innerHTML = phaseText(h, ph);
-                showComparison(h, ph);
+                text.innerHTML = phaseText(ph, historyStage, pathRatios[g]);
+                sigmaGuide.hidden = ph !== 5;
+                if (ph === 5) sigmaBar.value = pathRatios[g];
                 root.querySelector(".objective-key").hidden = reshaping;
-                root.querySelector(".update-selection").hidden = !reshaping;
-                root.querySelector(".before-label").textContent = reshaping ? "Old sampling spread" : "Before update";
+                root.querySelector(".update-selection").hidden = !reshaping || historyStage;
+                root.querySelector(".before-label").textContent = historyStage ? "After top 3 moves" : reshaping ? "Old sampling spread" : "Before update";
                 root.querySelector(".spread-label").textContent = reshaping ? "Updated sampling spread" : "C shape, σ size";
                 shown = tag;
             }
