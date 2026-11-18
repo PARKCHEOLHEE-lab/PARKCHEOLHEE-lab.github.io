@@ -36,7 +36,6 @@ categories: note
         #cma-step .cma-legend .read { font: inherit; }
         #cma-step .legend-key { width: 1.5em; border-top: 1.5px solid var(--circle); }
         #cma-step .shape-key { border-top: 1px dashed var(--shape); }
-        .cma-demo .plabel { font-size: 0.85em; color: var(--td); margin-bottom: 0.2em; }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
         /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
@@ -179,36 +178,7 @@ categories: note
             Blue points are the best \(\mu\) samples and gray points are dropped. Left inset: the shape of \(C\) (blue) against the contour lines at \(m\) (gray), both scaled to one size. Right inset: the recent steps of \(p_\sigma\) laid head to tail; ending outside the dashed circle, where random steps would end, makes \(\sigma\) grow, and ending inside makes it shrink. On Rastrigin, \(\lambda = 6\) found the global minimum in 6 of 40 seeds and \(\lambda = 24\) in 32.
         </figcaption>
     </div>
-    <br>
-    <li>
-        Why learn \(C\)
-    </li>
-        <ul>
-            <li>
-                <mark>Learning \(C\) matters most when the contours are long and thin</mark>
-            </li>
-            <li>
-                With \(C\) fixed to a circle, \(\sigma\) must stay small enough for the narrow direction, so the search crawls along the long one
-            </li>
-        </ul>
 
-    <div class="cma-demo" id="cma-race">
-        <div class="ctrls">
-            <button type="button" class="play" aria-label="play the race">
-                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
-            </button>
-            <input type="range" class="scrub" min="0" max="1000" value="0" step="1" aria-label="generation, log scale">
-            <span class="tval">gen <span class="gen">0</span></span>
-        </div>
-        <div class="panels">
-            <div class="panel"><div class="plabel">CMA-ES</div><canvas class="cma-a" aria-label="CMA-ES on an ill-conditioned rotated ellipse: the distribution aligns with the narrow valley and converges quickly."></canvas></div>
-            <div class="panel"><div class="plabel">\(C\) fixed to \(I\), only \(\sigma\) adapts</div><canvas class="cma-b" aria-label="The same algorithm with C fixed to the identity: the round distribution creeps along the narrow valley."></canvas></div>
-        </div>
-        <canvas class="cma-chart" aria-label="f at the mean over the generations on a log-log scale for both runs."></canvas>
-        <figcaption>
-            Same start, seed, and \(\lambda = 6\); both stop at \(f(m) &lt; 10^{-10}\). CMA-ES takes <span class="n-cma">74</span> generations and ends with \(C\) at an axis ratio of <span class="n-ratio">36.9</span>, near the contours' \(\sqrt{1000} \approx 31.6\). Fixed \(C\) takes <span class="n-iso">2,167</span>.
-        </figcaption>
-    </div>
 </ul>
 
 <script>
@@ -700,42 +670,7 @@ categories: note
         if (!REDUCED) onFirstView(root, function () { player.play(); });
     }
 
-    // ---- figure 3: covariance adaptation on and off ----
-    function raceDemo() {
-        var root = document.getElementById("cma-race");
-        if (!root) return;
-        var fn = rotatedEllipse(1000, 45, 0, 0), view = { cx: -1.5, cy: -1.4, half: 3.2 }, opt = [0, 0];
-        var RA = record(fn, [-3, -2.6], 1, 6, 1, true, 5000), RB = record(fn, [-3, -2.6], 1, 6, 1, false, 5000);
-        var GA = RA.H.length, GB = RB.H.length, GM = Math.max(GA, GB), LOGM = Math.log10(GM + 1);
-        var vA = series(RA, "f1", RA.f0), vB = series(RB, "f1", RB.f0);
-        var cA = root.querySelector(".cma-a"), cB = root.querySelector(".cma-b"), cC = root.querySelector(".cma-chart"), label = root.querySelector(".gen");
-        root.querySelector(".n-cma").textContent = GA;
-        root.querySelector(".n-iso").textContent = GB.toLocaleString("en-US");
-        root.querySelector(".n-ratio").textContent = RA.H[GA - 1].ratio1.toFixed(1);
-        var A = null, B = null, K = null, bg = null;
-        function gOf(u) { return Math.pow(GM + 1, u / 1000) - 1; }   // the slider moves on a log scale of generations
-        function xf(i) { return Math.log10(i + 1) / LOGM; }
-        function layout() { A = fit(cA, 1); B = fit(cB, 1); K = fit(cC, 0.36); bg = landscape(fn, view, A.W, A.H); }
-        function render(u) {
-            var g = gOf(u);
-            drawRun(A.ctx, A.W, A.H, RA, Math.min(g, GA), view, bg, opt, g >= GA ? "converged at gen " + GA : "");
-            drawRun(B.ctx, B.W, B.H, RB, Math.min(g, GB), view, bg, opt, g >= GB ? "converged at gen " + GB.toLocaleString("en-US") : "");
-            var ctx = K.ctx, L = 40, R = 12, top = 20, bottom = 22, box = { x: L, y: top, w: K.W - L - R, h: K.H - top - bottom };
-            ctx.clearRect(0, 0, K.W, K.H);
-            logChart(ctx, box, [{ v: vB, col: COL.neutral }, { v: vA, col: COL.mean }], xf, g, [["f(m):", COL.txt], ["CMA-ES", COL.mean], ["C = I", COL.neutral]]);
-            ctx.font = MONO; ctx.fillStyle = COL.tick; ctx.textBaseline = "top"; ctx.textAlign = "center";
-            [1, 10, 100, 1000].forEach(function (t) { if (t <= GM) ctx.fillText(String(t), box.x + xf(t) * box.w, box.y + box.h + 4); });
-            ctx.font = SANS; ctx.fillStyle = COL.txt; ctx.textAlign = "right"; ctx.textBaseline = "bottom"; ctx.fillText("generation (log scale)", box.x + box.w, box.y - 5);
-            label.textContent = Math.floor(g).toLocaleString("en-US");
-        }
-        var player = new Player(root, 100, render);
-        player.setMax(1000);
-        layout(); player.set(REDUCED ? 1000 : 0);
-        onResize(cA.parentNode, function () { layout(); render(player.t); });
-        if (!REDUCED) onFirstView(root, function () { player.play(); });
-    }
-
-    ready(function () { stepDemo(); runDemo(); raceDemo(); });
+    ready(function () { stepDemo(); runDemo(); });
 })();
 </script>
 

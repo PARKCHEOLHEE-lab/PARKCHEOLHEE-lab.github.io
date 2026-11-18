@@ -10,7 +10,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const unit = await page.evaluate((html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const script = [...doc.scripts].find((s) => !s.type).textContent;
-    const init = 'ready(function () { stepDemo(); runDemo(); raceDemo(); });';
+    const init = 'ready(function () { stepDemo(); runDemo(); });';
     if (script.split(init).length !== 2) throw new Error('Expected one demo initialization');
     (0, eval)(script.replace(init, 'window.radiusForTest = circleRadius; window.landscapeForTest = landscape; window.recordForTest = record;'));
     // A smooth function samples all bands; Fig 2's steep valley skips some.
@@ -568,4 +568,13 @@ test('compact viewport removes vertical space without shrinking geometry', async
     expect(size.planeHeight, 'the rectangular canvas must not flatten circles').toBeCloseTo(size.planeWidth, 3);
     expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
   }
+});
+
+test('covariance comparison section is removed', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/cma-es/');
+  await expect(page.locator('#cma-race')).toHaveCount(0);
+  await expect(page.getByText(/Why learn/)).toHaveCount(0);
+  await expect(page.locator('#cma-step .cma-3d canvas')).toHaveCount(1);
+  await expect(page.locator('#cma-run .cma-plot')).toBeVisible();
 });
