@@ -84,6 +84,12 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  await expect(root.locator('.cma-gauge')).toHaveCount(0);
+  await expect(root.locator('figcaption')).not.toContainText('small box');
+  // Before this change the circle canvas was 245px wide at this viewport.
+  await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
+    message: 'the fixed circle drawing has at least 25% more width at 1280px',
+  }).toBeGreaterThanOrEqual(245 * 1.25);
   const panels = root.locator('.panels > .panel');
   const left = await panels.nth(0).boundingBox();
   const right = await panels.nth(1).boundingBox();
@@ -104,7 +110,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       for (let tick = 0; tick <= maximum * samplesPerPhase; tick++) {
         slider.value = String(tick / samplesPerPhase);
         slider.dispatchEvent(new Event('input', { bubbles: true }));
-        frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent })));
+        frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent })));
       }
     } finally {
       window.circleGeometryScan = false;
@@ -121,6 +127,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   const targets = [[0, 0], [2, 0.6], [4, 1.5], [6, 2.2], [1.2, 1.4], [5, 0.9]];
   for (const [index, frame] of frames.frames.entries()) {
     const drawing = frame.drawing;
+    assert(!frame.phase.includes('small box'), 'phase text does not refer to the removed box');
     const generation = Math.min(Math.floor(index / (6 * samplesPerPhase)), maximum / 6 - 1);
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
     assert.equal(frame.population.length, 6, `frame ${index}: all six current candidates arrive together`);
@@ -314,6 +321,9 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     const bottom = await panels.nth(1).boundingBox();
     return bottom.y - (top.y + top.height);
   }, { message: 'phone panels stack without overlapping' }).toBeGreaterThanOrEqual(0);
+  await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
+    message: 'the phone circle drawing is wider than its previous 330px',
+  }).toBeGreaterThan(330);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
   expect(errors).toEqual([]);
 });

@@ -28,9 +28,9 @@ categories: note
         .cma-demo .cma-3d canvas { cursor: grab; }
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
-        .cma-demo .phase-row { display: flex; gap: 1em; align-items: flex-start; }
-        .cma-demo .phase-row .phase { flex: 1 1 auto; }
-        .cma-demo .phase-row .cma-gauge { flex: 0 0 9em; width: 9em; }
+        #cma-step { margin-inline: -1em; }
+        #cma-step .panel:first-child { flex: 3 1 18em; }
+        #cma-step .panel:last-child { flex: 2 1 12em; }
         .cma-demo .plabel { font-size: 0.85em; color: var(--td); margin-bottom: 0.2em; }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
@@ -87,17 +87,14 @@ categories: note
             <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="step within the generations">
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
-        <div class="phase-row">
-            <div class="phase" aria-live="polite"></div>
-            <canvas class="cma-gauge" aria-label="The search shape C, then the recent steps used to adjust the search size sigma."></canvas>
-        </div>
+        <div class="phase" aria-live="polite"></div>
         <div class="plabel read"></div>
         <div class="panels">
             <div class="panel"><div class="plabel">Circle radius, from above</div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centres. Rank 1 is orange and rank 6 is gray, with their true dashed radii. The cross is the mean."></canvas></div>
             <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same circle drawing on the ground, with each candidate lifted by its radius. Ranks 1 and 6 use the same markers and dashed height lines."></div></div>
         </div>
         <figcaption>
-            Both views share the same ground drawing. The radius of each circle becomes the height of its centre; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean, and the small box shows how the search distribution changes. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Both views share the same ground drawing. The radius of each circle becomes the height of its centre; ranks 1 and 6 keep the same colours and labels. The cross is the weighted mean. The target centre is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -572,12 +569,12 @@ categories: note
     function stepDemo() {
         var root = document.getElementById("cma-step");
         if (!root) return;
-        var read = root.querySelector(".read"), cGauge = root.querySelector(".cma-gauge"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
+        var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
-        var H = full.H.slice(0, NG), P = full.P, run = { P: P, H: H };
-        var A = null, Gc = null, shown = "";
+        var H = full.H.slice(0, NG), P = full.P;
+        var A = null, shown = "";
         var W3 = P.w.map(function (w) { return w.toFixed(2); }).join(", ");
         root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
         root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
@@ -607,11 +604,11 @@ categories: note
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centres. Orange is best; gray is worst. Dashed lines show their radii.";
             if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centres (filled dots). Their weights are " + W3 + ".";
             if (ph === 3) return "<b>4. Move the mean.</b> Move the cross to the weighted mean of the kept centres. The two circles stay with their candidates.";
-            if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search. The small box shows the new shape.";
+            if (ph === 4) return "<b>5. Reshape C.</b> Learn which directions to search.";
             var r = h.sigma1 / h.sigma;
-            return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.") + " The small box shows the change.";
+            return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.");
         }
-        function layout() { A = fit(cTop, 1); Gc = fit(cGauge, 1); }
+        function layout() { A = fit(cTop, 1); }
 
         // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
         function sampleStyle(ph, e, r) {
@@ -644,12 +641,10 @@ categories: note
             var X = h.X, styles = X.map(function (_, k) { return sampleStyle(ph, e, rank[k]); });
             ctx.clearRect(0, 0, A.W, A.H);
 
-            // Mean movement is shared by both views; C and sigma are taught in the gauge.
-            var m = h.m, C = h.C;
+            // Mean movement is shared by both views.
+            var m = h.m;
             if (ph === 3) m = lerp2(h.m, h.m1, e);
             if (ph >= 4) m = h.m1;
-            if (ph === 4) C = lerpC(h.C, h.C1, e);
-            if (ph === 5) C = h.C1;
             // Compare the best and worst candidates after ranking; all six centres stay visible.
             var best = h.X[h.order[0]], worst = h.X[h.order[P.lam - 1]];
             if (ph >= 1) {
@@ -665,14 +660,6 @@ categories: note
             });
             ctx.globalAlpha = 1;
             cross(ctx, map, m);
-
-            // the gauge beside the step text, the same insets as the full run: C's shape against the contours,
-            // cross-faded into the path that sets sigma while sigma is resized, and back while the next points appear
-            var gx = Gc.ctx, box = { x: 0, y: 0, s: Gc.W }, toPath = ph === 5 ? e : (ph === 0 && g > 0 && f < 0.25 ? 1 - f / 0.25 : 0);
-            gx.clearRect(0, 0, Gc.W, Gc.H);
-            if (toPath < 1) { gx.globalAlpha = 1 - toPath; drawShapeInset(gx, box, null, m, C); }   // f is a max of distances, not smooth, so it has no Hessian to compare
-            if (toPath > 0) { gx.globalAlpha = toPath; drawPathInset(gx, box, run, ph === 5 ? g : g - 1); }
-            gx.globalAlpha = 1;
 
             read.textContent = ph === 0 ? P.lam + " candidate centres / not ranked" : "1: r " + fn(best).toFixed(2) + " / 6: r " + fn(worst).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m };
