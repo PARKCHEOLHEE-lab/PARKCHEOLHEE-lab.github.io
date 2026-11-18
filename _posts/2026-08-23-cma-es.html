@@ -145,6 +145,41 @@ categories: note
         <p class="weight-note"><span class="weight-dropped"></span> These weights depend on rank, not the gap between radii. Displayed values are rounded.</p>
     </div>
     <br>
+    <li id="cma-updates">
+        How \(C\) and \(\sigma\) change
+        <ul>
+            <li>
+                <b>Step 5a: Start with the old shape and learn from the best samples.</b>
+                CMA-ES keeps most of the old \(C\). Each blue arrow runs from the old center to a selected sample.
+                Divide that step by \(\sigma\), then multiply its column vector by its row vector.
+                This gives a matrix that adds spread along the arrow's line, in both directions.
+                The rank weight controls how much each sample adds.
+            </li>
+            <li>
+                <b>Step 5b: Add the record of center moves.</b>
+                The orange arrow shows the direction of a running sum of center moves. Older moves gradually count less.
+                If this record is \(p_c=(2,1)\), its <i>outer product</i> (column times row) is
+                \[
+                    p_c p_c^\top =
+                    \begin{pmatrix}2\\1\end{pmatrix}
+                    \begin{pmatrix}2 & 1\end{pmatrix}
+                    =
+                    \begin{pmatrix}4 & 2\\2 & 1\end{pmatrix}.
+                \]
+                The diagonal adds to the horizontal and vertical spread. The off-diagonal \(2\) means the two coordinates tend to vary together.
+                CMA-ES adds a small multiple of this matrix to \(C\), which adds spread along the diagonal through \((2,1)\).
+                The center stays in place during this shape update.
+            </li>
+            <li>
+                <b>Step 6: Change the overall size.</b>
+                CMA-ES keeps a separate sum of recent center moves, measured in units of the current spread in each direction.
+                Moves that line up make the sum longer. Moves that turn back can cancel out.
+                The tick on the bar marks the expected length for random steps. A longer sum makes \(\sigma\) grow, and a shorter sum makes it shrink.
+                For example, near the end of generation 3, both axes grow by about \(1.30\) times. Their ratio and direction stay the same.
+            </li>
+        </ul>
+    </li>
+    <br>
     <li>
         Many generations
     </li>
