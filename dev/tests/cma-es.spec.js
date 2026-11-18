@@ -542,3 +542,30 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(await root.evaluate((el) => el.cma3d.inspect.renderer.info.memory.textures)).toBe(beforeResize.textures);
   expect(errors).toEqual([]);
 });
+
+test('compact viewport removes vertical space without shrinking geometry', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/cma-es/?scene-debug');
+  const root = page.locator('#cma-step');
+  await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect.poll(() => root.evaluate((el) => {
+      const canvas = el.querySelector('.cma-3d canvas');
+      return canvas.clientHeight / canvas.clientWidth;
+    }), { message: 'the viewport uses three quarters of its former square height' }).toBeCloseTo(0.75, 2);
+    const size = await root.evaluate((el) => {
+      const { camera, renderer } = el.cma3d.inspect;
+      const canvas = renderer.domElement, w = canvas.clientWidth, h = canvas.clientHeight;
+      const project = (x, z) => camera.position.clone().set(x, 0, z).project(camera);
+      const planeWidth = Math.abs(project(1, 0).x - project(-1, 0).x) * w / 2;
+      const planeHeight = Math.abs(project(0, 1).y - project(0, -1).y) * h / 2;
+      const box = el.querySelector('.cma-view').getBoundingClientRect();
+      const caption = el.querySelector('figcaption').getBoundingClientRect();
+      return { w, h, planeWidth, planeHeight, captionGap: caption.top - box.bottom };
+    });
+    expect(size.planeWidth, 'the floor retains its previous width, over half the viewport').toBeGreaterThan(size.w / 2);
+    expect(size.planeHeight, 'the rectangular canvas must not flatten circles').toBeCloseTo(size.planeWidth, 3);
+    expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
+  }
+});

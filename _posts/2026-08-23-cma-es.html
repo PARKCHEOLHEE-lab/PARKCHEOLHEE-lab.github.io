@@ -766,7 +766,13 @@ categories: note
         controls.enableZoom = false; controls.enablePan = true;
         controls.listenToKeyEvents(renderer.domElement);
         controls.addEventListener("change", draw);
-        new ResizeObserver(() => { const w = el.clientWidth || 300; renderer.setSize(w, Math.round(w * aspect)); draw(); }).observe(el);
+        new ResizeObserver(() => {
+            const w = el.clientWidth || 300, h = Math.round(w * aspect);
+            renderer.setSize(w, h);
+            const halfHeight = (camera.right - camera.left) * h / w / 2;
+            camera.top = halfHeight; camera.bottom = -halfHeight;
+            camera.updateProjectionMatrix(); draw();
+        }).observe(el);
         return { renderer, scene, camera, controls, render: () => renderer.render(scene, camera) };
     }
 
@@ -804,7 +810,7 @@ categories: note
 
     function buildSurface() {
         cfg = root.cma3d;
-        surf = stage(box, 1, drawSurface);
+        surf = stage(box, 0.75, drawSurface);
         if (!surf) return;
         const { scene, camera, controls } = surf, { fn, view, colors } = cfg;
         toWorld = (p, height = fn(p) / view.half) => new THREE.Vector3((p[0] - view.cx) / view.half, height, -(p[1] - view.cy) / view.half);
