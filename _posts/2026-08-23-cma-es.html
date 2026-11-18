@@ -738,6 +738,7 @@ categories: note
     const root = document.getElementById("cma-step"), box = root && root.querySelector(".cma-3d");
     const identity = { x: v => v, y: v => v };
     let built = false, ready = false, surf, cfg, ground, wire, toWorld;
+    let textureWidth = 0, textureHeight = 0;
     const markers = [], axes = [], lifts = {};
 
     function stage(el, aspect, draw) {
@@ -793,6 +794,7 @@ categories: note
         toWorld = (p, height = fn(p) / view.half) => new THREE.Vector3((p[0] - view.cx) / view.half, height, -(p[1] - view.cy) / view.half);
 
         const texture = new THREE.CanvasTexture(cfg.plan);
+        textureWidth = cfg.plan.width; textureHeight = cfg.plan.height;
         const plane = new THREE.PlaneGeometry(2, 2); plane.rotateX(-Math.PI / 2);
         ground = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
         ground.name = "shared-plan"; scene.add(ground);
@@ -844,6 +846,11 @@ categories: note
     function drawSurface() {
         if (!ready || !root.cmaFrame) return;
         const F = root.cmaFrame, pixel = (surf.camera.right - surf.camera.left) / (box.clientWidth || 300);
+        if (textureWidth !== cfg.plan.width || textureHeight !== cfg.plan.height) {
+            ground.material.map.dispose();
+            ground.material.map = new THREE.CanvasTexture(cfg.plan);
+            textureWidth = cfg.plan.width; textureHeight = cfg.plan.height;
+        }
         ground.material.map.needsUpdate = true;
         markers.forEach((object, k) => {
             const st = F.styles[k];

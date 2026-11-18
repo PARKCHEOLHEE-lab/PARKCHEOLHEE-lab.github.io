@@ -410,6 +410,13 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     const from = unit.generations[0][k], to = unit.generations[1][k];
     assert(Math.hypot(point[0] - from[0], point[1] - from[1]) < 0.05 * Math.hypot(to[0] - from[0], to[1] - from[1]), 'real playback crosses the generation boundary without replacing the dots at once');
   }
+  const beforeResize = await root.evaluate((el) => {
+    const s = el.cma3d.inspect, map = s.scene.getObjectByName('shared-plan').material.map;
+    window.floorDisposals = 0;
+    map.addEventListener('dispose', () => window.floorDisposals++);
+    return { id: map.uuid, error: s.renderer.getContext().getError(), textures: s.renderer.info.memory.textures };
+  });
+  expect(beforeResize.error).toBe(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(async () => {
     const top = await panels.nth(0).boundingBox();
@@ -426,5 +433,22 @@ test('linked views share their ground, glyphs and true radius heights', async ({
       el.cma3d.inspect.scene.getObjectByName('shared-plan').material.map.image === canvas;
   }), { message: 'the resized background and actual 3D ground use the current canvas' }).toBe(true);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+  await slider.evaluate((input) => { input.value = '6.5'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  const mobileMap = await root.evaluate((el) => {
+    const s = el.cma3d.inspect, map = s.scene.getObjectByName('shared-plan').material.map;
+    return { id: map.uuid, error: s.renderer.getContext().getError(), disposals: window.floorDisposals, textures: s.renderer.info.memory.textures };
+  });
+  expect(mobileMap.error, 'the resized floor image uploads successfully to the GPU').toBe(0);
+  expect(mobileMap.id).not.toBe(beforeResize.id);
+  expect(mobileMap.disposals, 'the previous ground texture is released').toBe(1);
+  expect(mobileMap.textures).toBe(beforeResize.textures);
+  await slider.evaluate((input) => { input.value = '6.75'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  expect(await root.evaluate((el) => el.cma3d.inspect.scene.getObjectByName('shared-plan').material.map.uuid), 'ordinary motion reuses its ground texture').toBe(mobileMap.id);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await expect.poll(() => root.evaluate((el) => el.cma3d.inspect.scene.getObjectByName('shared-plan').material.map.uuid), {
+    message: 'shrinking the backing canvas also replaces the ground texture',
+  }).not.toBe(mobileMap.id);
+  expect(await root.evaluate((el) => el.cma3d.inspect.renderer.getContext().getError())).toBe(0);
+  expect(await root.evaluate((el) => el.cma3d.inspect.renderer.info.memory.textures)).toBe(beforeResize.textures);
   expect(errors).toEqual([]);
 });
