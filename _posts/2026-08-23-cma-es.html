@@ -29,8 +29,13 @@ categories: note
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
         #cma-step { margin-inline: -1em; }
-        #cma-step .panel:first-child { flex: 3 1 18em; }
-        #cma-step .panel:last-child { flex: 2 1 12em; }
+        #cma-step .cma-view { position: relative; }
+        #cma-step .cma-top { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
+        #cma-step .cma-legend { position: absolute; top: 1em; left: 1em; padding: 0.4em 0.5em; background: var(--paper); font-family: var(--mono); font-size: 0.75em; pointer-events: none; }
+        #cma-step .cma-legend > div { display: flex; align-items: center; gap: 0.5em; }
+        #cma-step .cma-legend .read { font: inherit; }
+        #cma-step .legend-key { width: 1.5em; border-top: 1.5px solid var(--circle); }
+        #cma-step .shape-key { border-top: 1px dashed var(--shape); }
         .cma-demo .plabel { font-size: 0.85em; color: var(--td); margin-bottom: 0.2em; }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
@@ -88,13 +93,16 @@ categories: note
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
         <div class="phase" aria-live="polite"></div>
-        <div class="plabel read"></div>
-        <div class="panels">
-            <div class="panel"><div class="plabel">Best circle and search shape</div><canvas class="cma-top" aria-label="Six fixed black points and six candidate centers. The best circle is blue with its true dashed radius. A gray dashed ellipse shows the current sampling spread around the mean."></canvas></div>
-            <div class="panel"><div class="plabel">The same radius as height; drag to turn</div><div class="cma-3d" role="img" aria-label="The same ground drawing, with each candidate lifted by its radius. The best marker and dashed height line are blue. The gray dashed search shape stays on the ground."></div></div>
+        <div class="cma-view">
+            <canvas class="cma-top" aria-hidden="true"></canvas>
+            <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
+            <div class="cma-legend">
+                <div><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
+                <div><span class="legend-key shape-key" aria-hidden="true"></span><span>C shape, σ size</span></div>
+            </div>
         </div>
         <figcaption>
-            The blue circle belongs to the best sample. Gray dashes show the sampling spread around X (the mean): \(C\) sets its shape and \(\sigma\) sets its size. Some samples can lie outside the dashed line. Pale lines mark equal radii in both views, and the right view uses radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            The blue circle belongs to the best sample. Gray dashes show the sampling spread around X (the mean): \(C\) sets its shape and \(\sigma\) sets its size. Some samples can lie outside the dashed line. Pale lines mark equal radii; rotate the view to see radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
@@ -535,6 +543,9 @@ categories: note
     function stepDemo() {
         var root = document.getElementById("cma-step");
         if (!root) return;
+        root.style.setProperty("--circle", COL.mean);
+        root.style.setProperty("--shape", COL.neutral);
+        root.style.setProperty("--paper", COL.paper);
         var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
@@ -624,12 +635,11 @@ categories: note
                 var st = styles[k];
                 ctx.globalAlpha = st.alpha;
                 dot(ctx, map, X[k], st.rad, st.filled ? st.col : COL.paper, st.col);
-                if (st.label) labels(ctx, map.x(X[k][0]) + st.rad + 3, map.y(X[k][1]) - st.rad - 2, [[st.label, st.col]], SANS, "bottom");
             });
             ctx.globalAlpha = 1;
             cross(ctx, map, m);
 
-            read.textContent = (ph === 0 ? P.lam + " candidate centers / not ranked" : "Best r " + fn(best).toFixed(2)) + " / dashed: C shape, \u03c3 size";
+            read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + fn(best).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
@@ -748,10 +758,14 @@ categories: note
         try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
         catch (err) { el.textContent = "This view needs WebGL."; return null; }
         renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        renderer.domElement.tabIndex = 0;
+        renderer.domElement.setAttribute("aria-label", "Circle search: drag to rotate, right drag or arrow keys to pan");
         el.appendChild(renderer.domElement);
         const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
         const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableZoom = false; controls.enablePan = false; controls.addEventListener("change", draw);
+        controls.enableZoom = false; controls.enablePan = true;
+        controls.listenToKeyEvents(renderer.domElement);
+        controls.addEventListener("change", draw);
         new ResizeObserver(() => { const w = el.clientWidth || 300; renderer.setSize(w, Math.round(w * aspect)); draw(); }).observe(el);
         return { renderer, scene, camera, controls, render: () => renderer.render(scene, camera) };
     }
@@ -815,10 +829,10 @@ categories: note
         wire = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: colors.neutral, transparent: true, opacity: 0.22, depthWrite: false }));
         wire.name = "cost-grid"; wire.renderOrder = 1; scene.add(wire);
 
-        const S = Math.sqrt(2 + (highest / 2) ** 2) + 0.25, elevation = 40 * Math.PI / 180;
+        const S = Math.sqrt(2 + (highest / 2) ** 2) + 0.25;
         Object.assign(camera, { left: -S, right: S, top: S, bottom: -S });
         camera.updateProjectionMatrix();
-        camera.position.set(0, highest / 2 + 8 * Math.sin(elevation), 8 * Math.cos(elevation));
+        camera.position.set(0, highest / 2 + 8, 0);
         controls.target.set(0, highest / 2, 0); controls.update();
 
         const axisPoints = [-1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, highest, 1];

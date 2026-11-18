@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const assert = require('node:assert/strict');
 
-test('linked views share their ground, glyphs and true radius heights', async ({ page }) => {
+test('single top-down figure keeps geometry, legend and camera controls', async ({ page }) => {
   // Unit checks use the real inline function, without starting any demo.
   const source = fs.readFileSync(path.join(__dirname, '../../_posts/2026-08-23-cma-es.html'), 'utf8');
   const unit = await page.evaluate((html) => {
@@ -109,19 +109,52 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  await expect(root.locator('.panels, .plabel')).toHaveCount(0);
+  await expect(root.locator('canvas:visible')).toHaveCount(1);
+  await expect(root.locator('.cma-top')).toBeHidden();
+  await expect(root.locator('.cma-top')).toHaveAttribute('aria-hidden', 'true');
   await expect(root.locator('.cma-gauge')).toHaveCount(0);
   await expect(root.locator('figcaption')).not.toContainText('small box');
   // Before this change the circle canvas was 245px wide at this viewport.
   await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
     message: 'the fixed circle drawing has at least 25% more width at 1280px',
   }).toBeGreaterThanOrEqual(245 * 1.25);
-  const panels = root.locator('.panels > .panel');
-  const [left, right] = await panels.evaluateAll((elements) => elements.map((el) => {
-    const { x, y, width } = el.getBoundingClientRect();
-    return { x, y, width };
-  }));
-  expect(Math.abs(left.y - right.y), 'desktop panels share one row').toBeLessThan(1);
-  expect(right.x).toBeGreaterThanOrEqual(left.x + left.width);
+  const layout = () => root.evaluate((el) => {
+    const viewport = el.querySelector('.cma-view').getBoundingClientRect();
+    const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();
+    const legend = el.querySelector('.cma-legend'), rect = legend.getBoundingClientRect();
+    const style = (selector) => {
+      const css = getComputedStyle(legend.querySelector(selector));
+      const g = document.createElement('canvas').getContext('2d');
+      g.strokeStyle = css.borderTopColor;
+      return { colour: g.strokeStyle, line: css.borderTopStyle };
+    };
+    return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
+      producer: el.querySelector('.cma-top').clientWidth,
+      legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
+      height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
+      best: style('.best-key'), shape: style('.shape-key') };
+  });
+  const initialLayout = await layout();
+  expect(initialLayout.canvas).toBe(initialLayout.width);
+  expect(initialLayout.producer).toBe(initialLayout.canvas);
+  expect(Math.abs(initialLayout.viewport - initialLayout.canvas), 'renderer width rounds to whole CSS pixels').toBeLessThan(1);
+  expect(initialLayout.pointer).toBe('none');
+  expect(initialLayout.best.line).toBe('solid');
+  expect(initialLayout.shape.line).toBe('dashed');
+  expect(initialLayout.best.colour).not.toBe(initialLayout.shape.colour);
+  expect(initialLayout.legend.x).toBeGreaterThan(0);
+  expect(initialLayout.legend.y).toBeGreaterThan(0);
+  expect(initialLayout.legend.right).toBeLessThan(initialLayout.viewport);
+  expect(initialLayout.legend.bottom).toBeLessThan(initialLayout.height);
+  await expect(root.locator('.cma-legend')).toContainText('C shape, σ size');
+  const initialCamera = await root.evaluate((el) => {
+    const { camera } = el.cma3d.inspect;
+    const project = (z) => camera.position.clone().set(0, 0, z).project(camera).toArray();
+    return { direction: camera.getWorldDirection(camera.position.clone()).toArray(), origin: project(0), positiveY: project(-0.2) };
+  });
+  expect(initialCamera.direction[1], 'initial camera looks straight down').toBeLessThan(-0.99999);
+  expect(initialCamera.positiveY[1], 'data +y projects upward').toBeGreaterThan(initialCamera.origin[1]);
   const reference = await page.evaluate(() => ({
     best: window.referenceDrawing.dots.find((d) => d.r === 3.5),
     parent: window.referenceDrawing.dots.find((d) => d.r === 3),
@@ -131,6 +164,8 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   expect(reference.best).toBeTruthy();
   expect(reference.parent).toBeTruthy();
   expect(reference.dropped).toBeTruthy();
+  expect(initialLayout.best.colour).toBe(reference.best.fill);
+  expect(initialLayout.shape.colour).toBe(await root.evaluate((el) => el.cma3d.colors.neutral));
   const maximum = Number(await slider.getAttribute('max'));
   expect(maximum).toBeGreaterThan(6);
   const samplesPerPhase = 4;
@@ -193,7 +228,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     assert.equal(drawing.dots.length, 12, `frame ${index}: six fixed points and six candidate centres`);
     assert.equal(drawing.ellipses.length, 1, 'the current search spread is drawn in every phase');
     assert.equal(drawing.backgrounds, 1, 'the reference contour background is drawn once');
-    assert.deepEqual(drawing.labels, phase === 0 ? [] : ['1'], 'only the best candidate has a rank label');
+    assert.deepEqual(drawing.labels, [], 'only the elevated sprite paints the rank, avoiding duplicate labels in top view');
     const points = drawing.dots.slice(0, 6), drawnCandidates = drawing.dots.slice(6);
     if (!fixedPoints) fixedPoints = points;
     assert.deepEqual(points, fixedPoints);
@@ -338,7 +373,7 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     expect(state.lights).toBe(0);
     expect(state.otherMeshes).toBe(0);
     expect(state.zoom).toBe(false);
-    expect(state.pan).toBe(false);
+    expect(state.pan).toBe(true);
     expect(state.textureVersion).toBeGreaterThan(lastTextureVersion);
     expect(state.renderFrame).toBeGreaterThan(lastRenderFrame);
     lastTextureVersion = state.textureVersion; lastRenderFrame = state.renderFrame;
@@ -389,12 +424,36 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   const view = root.locator('.cma-3d canvas');
   await view.scrollIntoViewIfNeeded();
   const beforeTurn = await root.evaluate((el) => el.cma3d.inspect.camera.quaternion.toArray());
+  const beforeTurnLegend = (await layout()).legend;
   const bounds = await view.boundingBox();
   await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
   await page.mouse.down();
   await page.mouse.move(bounds.x + bounds.width / 2 + 30, bounds.y + bounds.height / 2 - 15, { steps: 5 });
   await page.mouse.up();
   expect(await root.evaluate((el) => el.cma3d.inspect.camera.quaternion.toArray())).not.toEqual(beforeTurn);
+  const cameraState = () => root.evaluate((el) => {
+    const { camera, controls } = el.cma3d.inspect;
+    return { position: camera.position.toArray(), target: controls.target.toArray(), quaternion: camera.quaternion.toArray(), zoom: camera.zoom, frame: el.cmaFrame };
+  });
+  const beforePan = await cameraState();
+  await page.mouse.down({ button: 'right' });
+  await page.mouse.move(bounds.x + bounds.width / 2 + 65, bounds.y + bounds.height / 2 + 10, { steps: 5 });
+  await page.mouse.up({ button: 'right' });
+  const afterPan = await cameraState();
+  expect(afterPan.target, 'right drag actually pans the camera target').not.toEqual(beforePan.target);
+  for (let axis = 0; axis < 3; axis++) {
+    expect(afterPan.position[axis] - beforePan.position[axis]).toBeCloseTo(afterPan.target[axis] - beforePan.target[axis], 10);
+  }
+  afterPan.quaternion.forEach((v, i) => expect(v).toBeCloseTo(beforePan.quaternion[i], 10));
+  expect(afterPan.zoom).toBe(beforePan.zoom);
+  expect(afterPan.frame).toEqual(beforePan.frame);
+  await view.focus();
+  await page.keyboard.press('ArrowRight');
+  const afterKey = await cameraState();
+  expect(afterKey.target, 'focused arrow key pans').not.toEqual(afterPan.target);
+  await page.mouse.wheel(0, 100);
+  expect((await cameraState()).zoom, 'zoom stays fixed').toBe(beforePan.zoom);
+  expect((await layout()).legend).toEqual(beforeTurnLegend);
 
   // The existing button replays after the end; scrubbing pauses it.
   await button.click();
@@ -425,6 +484,11 @@ test('linked views share their ground, glyphs and true radius heights', async ({
     return window.samplePlayback;
   });
   await slider.evaluate((input) => { input.value = '7.1'; input.dispatchEvent(new Event('input', { bubbles: true })); });
+  const afterPlayback = await cameraState();
+  expect(afterPlayback.position).toEqual(afterKey.position);
+  expect(afterPlayback.target).toEqual(afterKey.target);
+  expect(afterPlayback.quaternion).toEqual(afterKey.quaternion);
+  expect(afterPlayback.zoom).toBe(afterKey.zoom);
   const firstSample = playback.find((frame) => frame.sample);
   expect(firstSample).toBeTruthy();
   expect(playback.some((frame) => frame.time < 6)).toBe(true);
@@ -441,11 +505,14 @@ test('linked views share their ground, glyphs and true radius heights', async ({
   });
   expect(beforeResize.error).toBe(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(async () => {
-    const top = await panels.nth(0).boundingBox();
-    const bottom = await panels.nth(1).boundingBox();
-    return bottom.y - (top.y + top.height);
-  }, { message: 'phone panels stack without overlapping' }).toBeGreaterThanOrEqual(0);
+  await expect.poll(async () => (await layout()).canvas, { message: 'one full-width phone viewport' }).toBeLessThan(390);
+  const phoneLayout = await layout();
+  expect(phoneLayout.canvas).toBe(phoneLayout.width);
+  expect(phoneLayout.producer).toBe(phoneLayout.canvas);
+  expect(phoneLayout.legend.x / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.x / initialLayout.legendEm, 2);
+  expect(phoneLayout.legend.y / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.y / initialLayout.legendEm, 2);
+  expect(phoneLayout.legend.right).toBeLessThan(phoneLayout.viewport);
+  await expect(root.locator('canvas:visible')).toHaveCount(1);
   await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
     message: 'the phone circle drawing is wider than its previous 330px',
   }).toBeGreaterThan(330);
