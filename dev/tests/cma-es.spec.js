@@ -17,11 +17,12 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const image = window.landscapeForTest(([x]) => 10 ** x, { cx: 0, cy: 0, half: 1 }, 280, 280);
     const pixels = image.getContext('2d').getImageData(0, 0, image.width, image.height).data, palette = new Set();
     for (let i = 0; i < pixels.length; i += 4) palette.add(Array.from(pixels.slice(i, i + 4)).join(','));
-    const history = window.recordForTest(window.radiusForTest, [0.5, 3.5], 1, 6, 3, true, 600).H;
+    const run = window.recordForTest(window.radiusForTest, [0.5, 3.5], 1, 6, 3, true, 600), history = run.H;
     return {
       radii: [[0, 0], [3, 1.1], [-2, 4]].map((centre) => window.radiusForTest(centre)), palette: [...palette],
       generations: history.map((h) => h.X),
-      distributions: history.map(({ m, m1, C, C1, sigma, sigma1 }) => ({ m, m1, C, C1, sigma, sigma1 })),
+      distributions: history.map(({ m, m1, C, C1, sigma, sigma1, pc1 }) => ({ m, m1, C, C1, sigma, sigma1, pc1 })),
+      weights: run.P.w, memoryRate: run.P.c1,
     };
   }, source);
   expect(unit.radii[0]).toBeCloseTo(Math.hypot(6, 2.2), 10);
@@ -32,7 +33,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.addInitScript(() => {
     // Observe actual Canvas calls, rather than a second copy of the renderer.
-    window.circleDrawing = { circles: [], radii: [], dots: [], crosses: [], ellipses: [], backgrounds: 0, labels: [] };
+    window.circleDrawing = { circles: [], radii: [], dots: [], crosses: [], ellipses: [], backgrounds: 0, labels: [], before: [], origins: [], arrows: [] };
     window.referenceDrawing = { dots: [], widths: [] };
     window.circleScanEvents = 0;
     // Isolate the bulk 2D geometry checks from redundant GPU draws. Normal
@@ -62,14 +63,16 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
           const drawing = window.circleDrawing;
           if (method === 'clearRect') {
             drawing.circles = []; drawing.radii = []; drawing.dots = []; drawing.crosses = []; drawing.ellipses = []; drawing.backgrounds = 0; drawing.labels = [];
+            drawing.before = []; drawing.origins = []; drawing.arrows = [];
           }
           if (method === 'beginPath') { this.observedArc = null; this.observedEllipse = null; this.observedLines = []; this.observedPosition = null; }
           if (method === 'arc') this.observedArc = { x: args[0], y: args[1], r: args[2] };
           if (method === 'ellipse') this.observedEllipse = { x: args[0], y: args[1], rx: args[2], ry: args[3], angle: args[4], filled: false };
           if (method === 'fill' && this.observedEllipse) this.observedEllipse.filled = true;
           if (method === 'stroke' && this.observedEllipse) {
-            Object.assign(this.observedEllipse, { stroke: this.strokeStyle, width: this.lineWidth, dash: this.getLineDash() });
-            drawing.ellipses.push(this.observedEllipse);
+            Object.assign(this.observedEllipse, { stroke: this.strokeStyle, width: this.lineWidth, dash: this.getLineDash(), alpha: this.globalAlpha });
+            // Keep the live guide and the deliberately faint before-state separate.
+            (this.globalAlpha < 1 ? drawing.before : drawing.ellipses).push(this.observedEllipse);
           }
           if (method === 'moveTo') this.observedPosition = [args[0], args[1]];
           if (method === 'lineTo' && this.observedPosition) {
@@ -89,11 +92,15 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
           }
           if (method === 'stroke' && !this.observedArc && this.observedLines.length === 2) {
             const [a, b] = this.observedLines[0];
-            drawing.crosses.push({ x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, dash: this.getLineDash() });
+            (this.globalAlpha < 1 ? drawing.origins : drawing.crosses).push({ x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2, dash: this.getLineDash() });
           }
           if (method === 'stroke' && !this.observedArc && this.observedLines.length === 1) {
             const [from, to] = this.observedLines[0];
-            drawing.radii.push({ from, to, stroke: this.strokeStyle, width: this.lineWidth, dash: this.getLineDash() });
+            const segment = { from, to, stroke: this.strokeStyle, width: this.lineWidth, dash: this.getLineDash() };
+            (segment.dash.length ? drawing.radii : drawing.arrows).push(segment);
+          }
+          if (method === 'fill' && !this.observedArc && this.observedLines.length === 2 && drawing.arrows.length) {
+            drawing.arrows.at(-1).tip = this.observedLines[0][0];
           }
           if (method === 'drawImage') { drawing.backgrounds++; window.circleBackground = args[0]; }
           if (method === 'fillText') drawing.labels.push(args[0]);
@@ -109,6 +116,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  await expect(page.getByText('One generation as equations', { exact: true })).toHaveCount(0);
+  await expect(root.locator('.update-before')).toHaveCount(1);
   await expect(root.locator('.panels, .plabel')).toHaveCount(0);
   await expect(root.locator('canvas:visible')).toHaveCount(1);
   await expect(root.locator('.cma-top')).toBeHidden();
@@ -183,7 +192,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         slider.value = String(tick / samplesPerPhase);
         slider.dispatchEvent(new Event('input', { bubbles: true }));
         fixedBackground = fixedBackground && window.circleBackground === background;
-        frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent })));
+        frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
+          beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden })));
       }
     } finally {
       window.circleGeometryScan = false;
@@ -239,6 +249,25 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const covariance = phase < 4 ? distribution.C : phase === 4 ? distribution.C.map((v, axis) => v + progress * (distribution.C1[axis] - v)) : distribution.C1;
     const sigma = phase < 5 ? distribution.sigma : distribution.sigma * (distribution.sigma1 / distribution.sigma) ** progress;
     const guide = drawing.ellipses[0], centre = project(mean);
+    assert.equal(frame.beforeVisible, phase >= 3, 'before-state legend appears only for mean, C and sigma updates');
+    assert.equal(frame.directionVisible, phase >= 4, 'the amber direction is explained only in C and sigma updates');
+    assert.equal(drawing.before.length, phase >= 3 ? 1 : 0, 'updates keep exactly one faint before-state outline');
+    if (phase >= 3) {
+      const before = drawing.before[0], oldMean = project(phase === 3 ? distribution.m : distribution.m1);
+      const oldC = phase === 5 ? distribution.C1 : distribution.C;
+      assert(Math.hypot(before.x - oldMean[0], before.y - oldMean[1]) < 1e-7, 'before-outline is at the correct pre-update center');
+      assert(before.alpha > 0 && before.alpha < guide.alpha, 'the previous state stays visible but quieter');
+      const cos = Math.cos(before.angle), sin = Math.sin(before.angle), a = before.rx ** 2, b = before.ry ** 2;
+      const factor = 4 * distribution.sigma ** 2 * scale ** 2;
+      assert(Math.abs(a * cos ** 2 + b * sin ** 2 - factor * oldC[0]) < 1e-7, 'before-outline preserves the old x spread');
+      assert(Math.abs(a * sin ** 2 + b * cos ** 2 - factor * oldC[2]) < 1e-7, 'before-outline preserves the old y spread');
+      assert(Math.abs((a - b) * cos * sin + factor * oldC[1]) < 1e-7, 'before-outline preserves the old direction');
+    }
+    assert.equal(drawing.origins.length, phase === 3 || phase === 4 ? 1 : 0, 'mean and C arrows retain the original sampling center');
+    for (const origin of drawing.origins) {
+      const old = project(distribution.m);
+      assert(Math.hypot(origin.x - old[0], origin.y - old[1]) < 1e-7);
+    }
     assert(Math.hypot(guide.x - centre[0], guide.y - centre[1]) < 1e-7, 'C shape follows the pristine staged search mean');
     assert(Math.hypot(frame.mean[0] - mean[0], frame.mean[1] - mean[1]) < 1e-10, 'X follows the same staged mean');
     const cos = Math.cos(guide.angle), sin = Math.sin(guide.angle), a = guide.rx ** 2, b = guide.ry ** 2;
@@ -272,6 +301,36 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     assert(Math.hypot(cross.x - expectedMean[0], cross.y - expectedMean[1]) < 1e-7, 'the cross follows the real mean');
     const scores = frame.population.map((c) => Math.max(...targets.map((p) => Math.hypot(p[0] - c[0], p[1] - c[1]))));
     const order = scores.map((_, k) => k).sort((a, b) => scores[a] - scores[b]);
+    const expectedArrows = [];
+    const expectArrow = (from, tip, colour, width) => {
+      if (Math.hypot(tip[0] - from[0], tip[1] - from[1]) >= 1) expectedArrows.push({ from, tip, colour, width });
+    };
+    if (phase >= 2 && phase <= 4) {
+      for (let i = 0; i < 3; i++) expectArrow(project(distribution.m), project(frame.population[order[i]]), reference.parent.fill, 0.75 + 2 * unit.weights[i]);
+    }
+    if (phase === 3) expectArrow(project(distribution.m), project(mean), reference.best.fill, 2);
+    if (phase === 4) {
+      const tip = distribution.m.map((v, axis) => v + distribution.sigma * Math.sqrt(unit.memoryRate) * distribution.pc1[axis]);
+      expectArrow(project(distribution.m), project(tip), '#f59e0b', 1.5);
+    }
+    if (phase === 5) {
+      const C = distribution.C1, major = (C[0] + C[2]) / 2 + Math.hypot((C[0] - C[2]) / 2, C[1]);
+      const oldRadius = 2 * distribution.sigma * Math.sqrt(major) * scale;
+      const direction = [Math.cos(guide.angle), Math.sin(guide.angle)];
+      const from = [guide.x + oldRadius * direction[0], guide.y + oldRadius * direction[1]];
+      const tip = [guide.x + guide.rx * direction[0], guide.y + guide.rx * direction[1]];
+      expectArrow(from, tip, '#f59e0b', 1.5);
+    }
+    assert.equal(drawing.arrows.length, expectedArrows.length, 'only the directions relevant to this update are shown');
+    expectedArrows.forEach((expected, i) => {
+      const actual = drawing.arrows[i];
+      assert(actual.tip, 'direction strokes have real arrowheads');
+      assert(Math.hypot(actual.from[0] - expected.from[0], actual.from[1] - expected.from[1]) < 1e-7, 'arrows start at the actual sampling center or previous size');
+      assert(Math.hypot(actual.tip[0] - expected.tip[0], actual.tip[1] - expected.tip[1]) < 1e-7, 'arrows show actual selected steps, covariance memory, moving mean or sigma change');
+      assert.equal(actual.stroke, expected.colour);
+      assert(Math.abs(actual.width - expected.width) < 1e-6, 'selected directions carry their true weight ordering, allowing Canvas fractional-width rounding');
+      assert(actual.tip[0] >= 0 && actual.tip[0] <= frames.width && actual.tip[1] >= 0 && actual.tip[1] <= frames.height, 'explanation stays inside the fixed view');
+    });
     const filled = candidates.filter((c) => c.fill !== '#ffffff');
     assert.equal(filled.length, 6, 'all candidates use filled points, as in Fig 2 and Fig 3');
     for (let k = 0; k < candidates.length; k++) {

@@ -33,9 +33,12 @@ categories: note
         #cma-step .cma-top { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
         #cma-step .cma-legend { position: absolute; top: 1em; left: 1em; padding: 0.4em 0.5em; background: var(--paper); font-family: var(--mono); font-size: 0.75em; pointer-events: none; }
         #cma-step .cma-legend > div { display: flex; align-items: center; gap: 0.5em; }
+        #cma-step .cma-legend > div[hidden] { display: none; }
         #cma-step .cma-legend .read { font: inherit; }
         #cma-step .legend-key { width: 1.5em; border-top: 1.5px solid var(--circle); }
         #cma-step .shape-key { border-top: 1px dashed var(--shape); }
+        #cma-step .before-key { opacity: 0.3; }
+        #cma-step .direction-key { border-top-color: var(--history); }
         .cma-demo .phase { font-size: 0.9em; color: var(--td); min-height: 4.8em; margin: 0.5em 0; }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
         /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
@@ -98,36 +101,20 @@ categories: note
             <div class="cma-legend">
                 <div><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
                 <div><span class="legend-key shape-key" aria-hidden="true"></span><span>C shape, σ size</span></div>
+                <div class="update-before" hidden><span class="legend-key shape-key before-key" aria-hidden="true"></span><span>Before update</span></div>
+                <div class="update-direction" hidden><span class="legend-key direction-key" aria-hidden="true"></span><span class="direction-label"></span></div>
             </div>
         </div>
         <figcaption>
-            The blue circle belongs to the best sample. Gray dashes show the sampling spread around X (the mean): \(C\) sets its shape and \(\sigma\) sets its size. Some samples can lie outside the dashed line. Pale lines mark equal radii; rotate the view to see radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Blue arrows point to selected samples; thicker arrows carry more weight. Faint dashes show the spread before each update. Some samples can lie outside the dashed guide. Rotate to see radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
     </div>
     <br>
     <li>
-        One generation as equations
+        Genetic algorithm terms
     </li>
         <ul>
             <li>
-                The figure above runs these four updates:
-                <div class="latex-container">
-                \[
-                \begin{aligned}
-                    x_k &= m + \sigma\, y_k, \quad y_k \sim \mathcal{N}(0, C) \\
-                    m &\leftarrow \textstyle\sum_{i=1}^{\mu} w_i\, x_{i:\lambda} \\
-                    C &\leftarrow (1 - c_1 - c_\mu)\, C + c_1\, p_c p_c^\top + c_\mu \textstyle\sum_{i=1}^{\mu} w_i\, y_{i:\lambda} y_{i:\lambda}^\top \\
-                    \sigma &\leftarrow \sigma \exp\!\left( \tfrac{c_\sigma}{d_\sigma} \left( \tfrac{\| p_\sigma \|}{\mathbb{E} \| \mathcal{N}(0, I) \|} - 1 \right) \right)
-                \end{aligned}
-                \]
-                </div>
-            </li>
-            <li>
-                Here \(x_{i:\lambda}\) is the \(i\)-th best sample, \(y_{i:\lambda}\) its step from the old mean, and \(p_c, p_\sigma\) are decaying sums of recent mean steps. The rates \(c\) and weights \(w\) have defaults
-            </li>
-            <li>
-                In genetic-algorithm terms:
-                <br><br>
                 <div class="cma-scroll"><table class="cma-table">
         <tr><th>Genetic algorithm</th><th>CMA-ES</th></tr>
         <tr><td>Population size</td><td>\(\lambda\) samples per generation, by default \(4 + \lfloor 3 \ln n \rfloor\) (6 in the figures)</td></tr>
@@ -135,7 +122,7 @@ categories: note
         <tr><td>Selected parents</td><td>The best \(\mu = \lfloor \lambda / 2 \rfloor\) samples (3 in the figures)</td></tr>
         <tr><td>Crossover</td><td>The weighted average of the parents, which becomes the new mean \(m\)</td></tr>
         <tr><td>Mutation</td><td>Sampling from \(\mathcal{N}(m, \sigma^2 C)\), whose size \(\sigma\) and shape \(C\) are learned</td></tr>
-        <tr><td>Kept between generations</td><td>Only \(m\), \(\sigma\), and \(C\); the samples are dropped, not carried over</td></tr>
+        <tr><td>Kept between generations</td><td>\(m\), \(\sigma\), \(C\), and running records of recent steps; each generation draws fresh samples</td></tr>
     </table></div>
             </li>
         </ul>
@@ -516,13 +503,13 @@ categories: note
         root.style.setProperty("--circle", COL.mean);
         root.style.setProperty("--shape", COL.neutral);
         root.style.setProperty("--paper", COL.paper);
+        root.style.setProperty("--history", COL.path);
         var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
         var H = full.H.slice(0, NG), P = full.P;
         var A = null, bg = null, shown = "";
-        var W3 = P.w.map(function (w) { return w.toFixed(2); }).join(", ");
         root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
         root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
         root.querySelector(".n-r").textContent = fn(OPT).toFixed(2);
@@ -551,11 +538,11 @@ categories: note
         function phaseText(h, ph) {
             if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centers. The motion links one generation to the next.";
             if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
-            if (ph === 2) return "<b>3. Select.</b> Keep the best " + P.mu + " centers (blue dots). Their weights are " + W3 + ".";
-            if (ph === 3) return "<b>4. Move the mean.</b> Move the cross and search shape to the weighted mean. The best circle stays with its candidate.";
-            if (ph === 4) return "<b>5. Reshape C.</b> The gray dashed shape changes with C.";
+            if (ph === 2) return "<b>3. Select.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows carry more weight.";
+            if (ph === 3) return "<b>4. Move the mean.</b> X moves toward the weighted center of those samples. Faint dashes show where the search shape started.";
+            if (ph === 4) return "<b>5. Reshape C.</b> C learns the blue sample directions and the amber recent direction. Faint dashes keep the old shape visible.";
             var r = h.sigma1 / h.sigma;
-            return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "The recent steps agree: search more widely." : "The recent steps cancel out: search less widely.");
+            return "<b>6. Resize \u03c3.</b> " + (r > 1 ? "Recent steps agree: grow the spread." : "Recent steps cancel out: shrink the spread.") + " X and C stay fixed; the amber arrow shows the size change.";
         }
         function layout() { A = fit(cTop, 1); bg = null; }
 
@@ -595,7 +582,29 @@ categories: note
             if (ph >= 4) m = h.m1;
             if (ph === 4) C = lerpC(h.C, h.C1, e);
             if (ph === 5) { C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
+            if (ph >= 3) {
+                ctx.save(); ctx.globalAlpha = 0.3;
+                ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, ph === 5 ? h.C1 : h.C, true);
+                ctx.restore();
+            }
             ellipse(ctx, map, m, sigma, C, true);
+            if (ph >= 2 && ph <= 4) {
+                h.order.slice(0, P.mu).forEach(function (k, i) {
+                    arrow(ctx, map, h.m, h.X[k], COL.pick, 0.75 + 2 * P.w[i]);
+                });
+            }
+            if (ph === 3) arrow(ctx, map, h.m, m, COL.mean, 2);
+            if (ph === 4) {
+                // The covariance path's contribution, in the same units as the samples.
+                var memory = h.m.map(function (v, i) { return v + h.sigma * Math.sqrt(P.c1) * h.pc1[i]; });
+                arrow(ctx, map, h.m, memory, COL.path, 1.5);
+            }
+            if (ph === 5) {
+                var axis = eig2(h.C1), length = 2 * Math.sqrt(axis.l1);
+                var before = [h.m1[0] + length * h.sigma * axis.ux, h.m1[1] + length * h.sigma * axis.uy];
+                var after = [h.m1[0] + length * sigma * axis.ux, h.m1[1] + length * sigma * axis.uy];
+                arrow(ctx, map, before, after, COL.path, 1.5);
+            }
             var best = h.X[h.order[0]];
             if (ph >= 1) {
                 circle(ctx, map, best, COL.mean, 1.5);
@@ -607,8 +616,14 @@ categories: note
                 dot(ctx, map, X[k], st.rad, st.filled ? st.col : COL.paper, st.col);
             });
             ctx.globalAlpha = 1;
+            if (ph === 3 || ph === 4) {
+                ctx.save(); ctx.globalAlpha = 0.3; cross(ctx, map, h.m); ctx.restore();
+            }
             cross(ctx, map, m);
 
+            root.querySelector(".update-before").hidden = ph < 3;
+            root.querySelector(".update-direction").hidden = ph < 4;
+            root.querySelector(".direction-label").textContent = ph === 4 ? "Recent direction" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
             read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + fn(best).toFixed(2);
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
