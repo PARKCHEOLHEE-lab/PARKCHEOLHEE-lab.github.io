@@ -50,6 +50,15 @@ categories: note
         table.cma-table tr, table.cma-table tr:hover { background: none; }   /* the site shades the hovered row itself */
         table.cma-table tr:nth-child(n+3) td { border-top: 1px solid rgba(128, 128, 128, .35); }
         .cma-scroll { overflow-x: auto; }   /* a wide table scrolls by itself on a phone, not the page */
+        table.cma-weight-table { table-layout: fixed; }
+        table.cma-weight-table th, table.cma-weight-table td, table.cma-weight-table tr:hover td { padding: 0.4em 0.5em; }
+        table.cma-weight-table th:first-child { width: 3em; }
+        .cma-demo .weight-calculation, .cma-demo .weight-raw { display: block; font-family: var(--mono); font-size: 0.8em; white-space: nowrap; }
+        .cma-demo .weight-result { display: flex; align-items: center; gap: 0.5em; }
+        .cma-demo .weight-track { flex: 1; min-width: 0; height: 0.6em; background: var(--r14); }
+        .cma-demo .weight-bar { display: block; height: 100%; }
+        .cma-demo .weight-percent { flex: none; width: 3.5em; text-align: right; font-family: var(--mono); font-size: 0.8em; }
+        .cma-demo .weight-note { font-size: 0.85em; }
     </style>
 
 <ul>
@@ -108,6 +117,20 @@ categories: note
         <figcaption>
             Blue arrows point to selected samples; thicker arrows carry more weight. Faint dashes show the spread before each update. Some samples can lie outside the dashed guide. Rotate to see radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
         </figcaption>
+    </div>
+    <br>
+    <li>
+        How rank becomes weight
+    </li>
+    <div class="cma-demo" id="cma-weights">
+        <p class="weight-intro"></p>
+        <p>Take ln(starting value / rank), then divide each log score by the total. The bars show the resulting shares of 100%.</p>
+        <table class="cma-table cma-weight-table" aria-label="Rank, log score, and normalized weight for the three selected samples">
+            <thead><tr><th scope="col">Rank</th><th scope="col">Log score</th><th scope="col">Weight</th></tr></thead>
+            <tbody></tbody>
+        </table>
+        <p>Total log score: <span class="weight-total"></span>. For rank 1: <span class="weight-worked"></span>.</p>
+        <p class="weight-note"><span class="weight-dropped"></span> These weights depend on rank, not the gap between radii. Displayed values are rounded.</p>
     </div>
     <br>
     <li>
@@ -179,12 +202,14 @@ categories: note
     function cmaParams(lam) {
         var n = 2, mu = Math.floor(lam / 2), w = [], s = 0, s2 = 0, i;
         for (i = 0; i < mu; i++) { w.push(Math.log(lam / 2 + 0.5) - Math.log(i + 1)); s += w[i]; }
+        var rawWeights = w.slice();
         for (i = 0; i < mu; i++) { w[i] /= s; s2 += w[i] * w[i]; }
         var mueff = 1 / s2;
         var cs = (mueff + 2) / (n + mueff + 5);
         var c1 = 2 / ((n + 1.3) * (n + 1.3) + mueff);
         return {
             n: n, lam: lam, mu: mu, w: w, mueff: mueff, cs: cs, c1: c1,
+            rawWeights: rawWeights, weightTotal: s,
             cc: (4 + mueff / n) / (n + 4 + 2 * mueff / n),
             cmu: Math.min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((n + 2) * (n + 2) + mueff)),
             damps: 2 * mueff / lam + 0.3 + cs,
@@ -510,6 +535,14 @@ categories: note
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
         var H = full.H.slice(0, NG), P = full.P;
         var A = null, bg = null, shown = "";
+        var weightChart = document.getElementById("cma-weights"), offset = (P.lam / 2 + 0.5).toFixed(1);
+        weightChart.querySelector(".weight-intro").textContent = "Keep the best " + P.mu + " of " + P.lam + " samples. Start with " + P.lam + " / 2 + 0.5 = " + offset + ".";
+        weightChart.querySelector("tbody").innerHTML = P.w.map(function (w, i) {
+            return '<tr><td>' + (i + 1) + '</td><td><span class="weight-calculation">ln(' + offset + ' / ' + (i + 1) + ')</span><span class="weight-raw">' + P.rawWeights[i].toFixed(3) + '</span></td><td><div class="weight-result"><span class="weight-track" aria-hidden="true"><span class="weight-bar" style="width:' + (100 * w) + '%;background:' + (i === 0 ? COL.mean : COL.pick) + '"></span></span><span class="weight-percent">' + (100 * w).toFixed(1) + '%</span></div></td></tr>';
+        }).join("");
+        weightChart.querySelector(".weight-total").textContent = P.weightTotal.toFixed(3);
+        weightChart.querySelector(".weight-worked").textContent = P.rawWeights[0].toFixed(3) + " / " + P.weightTotal.toFixed(3) + " \u2248 " + (100 * P.w[0]).toFixed(1) + "%";
+        weightChart.querySelector(".weight-dropped").textContent = "Ranks " + (P.mu + 1) + " to " + P.lam + " get 0%.";
         root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
         root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
         root.querySelector(".n-r").textContent = fn(OPT).toFixed(2);

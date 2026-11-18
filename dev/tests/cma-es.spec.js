@@ -682,3 +682,54 @@ test('wheel zoom starts closer and stops at both limits', async ({ page }) => {
   await expect.poll(async () => (await state()).width).toBeLessThan(390);
   expect((await state()).zoom, 'resize preserves the user zoom').toBe(0.8);
 });
+
+test('rank weight calculation and bars use the optimizer weights', async ({ page }) => {
+  const source = fs.readFileSync(path.join(__dirname, '../../_posts/2026-08-23-cma-es.html'), 'utf8');
+  const parameters = await page.evaluate((html) => {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const script = [...doc.scripts].find((s) => !s.type).textContent;
+    const init = 'ready(function () { stepDemo(); runDemo(); });';
+    if (script.split(init).length !== 2) throw new Error('Expected one initialization');
+    (0, eval)(script.replace(init, 'window.weightParamsForTest = cmaParams;'));
+    return [6, 12, 24].map((n) => window.weightParamsForTest(n));
+  }, source);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/cma-es/');
+  const graph = page.locator('#cma-weights');
+  await expect(graph).toBeVisible();
+  for (const P of parameters) {
+    const raw = Array.from({ length: P.mu }, (_, i) => Math.log((P.lam + 1) / (2 * (i + 1))));
+    const total = raw.reduce((a, b) => a + b, 0);
+    expect(P.rawWeights).toHaveLength(P.mu);
+    expect(P.weightTotal).toBeCloseTo(total, 12);
+    raw.forEach((v, i) => {
+      expect(P.rawWeights[i]).toBeCloseTo(v, 12);
+      expect(P.w[i]).toBeCloseTo(v / total, 12);
+    });
+    expect(P.w.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12);
+  }
+  const P = parameters[0];
+  await expect(graph.locator('tbody tr')).toHaveCount(3);
+  await expect(graph.locator('.weight-total')).toHaveText('1.967');
+  await expect(graph.locator('.weight-worked')).toHaveText('1.253 / 1.967 ≈ 63.7%');
+  await expect(graph.locator('.weight-dropped')).toHaveText('Ranks 4 to 6 get 0%.');
+  for (const width of [1280, 390]) {
+    await page.setViewportSize({ width, height: 900 });
+    const rows = await graph.locator('tbody tr').evaluateAll((rows) => rows.map((row) => ({
+      rank: row.cells[0].textContent.trim(), calculation: row.querySelector('.weight-calculation').textContent,
+      raw: row.querySelector('.weight-raw').textContent, share: row.querySelector('.weight-percent').textContent,
+      fraction: row.querySelector('.weight-bar').getBoundingClientRect().width / row.querySelector('.weight-track').getBoundingClientRect().width,
+    })));
+    rows.forEach((row, i) => {
+      expect(row.rank).toBe(String(i + 1));
+      expect(row.calculation).toBe('ln(3.5 / ' + (i + 1) + ')');
+      expect(row.raw).toBe(P.rawWeights[i].toFixed(3));
+      expect(row.share).toBe((P.w[i] * 100).toFixed(1) + '%');
+      expect(row.fraction, 'bar length is the share of the full 100% track').toBeCloseTo(P.w[i], 3);
+    });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+  }
+  const before = await graph.locator('tbody').innerText();
+  await page.locator('#cma-step .scrub').evaluate((e) => { e.value = '14.5'; e.dispatchEvent(new Event('input', { bubbles: true })); });
+  expect(await graph.locator('tbody').innerText(), 'rank weights stay the same in another generation').toBe(before);
+});
