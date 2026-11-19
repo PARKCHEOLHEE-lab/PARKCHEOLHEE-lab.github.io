@@ -123,6 +123,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  const matrix = root.locator('.cma-covariance');
+  await expect(matrix.locator('.mjx-mtable')).toBeVisible();
+  expect((await root.locator('.phase').boundingBox()).height).toBeLessThan(2);
   await expect(page.getByText('One generation as equations', { exact: true })).toHaveCount(0);
   await expect(root.locator('.update-before')).toHaveCount(1);
   await expect(root.locator('.panels, .plabel')).toHaveCount(0);
@@ -138,6 +141,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const layout = () => root.evaluate((el) => {
     const viewport = el.querySelector('.cma-view').getBoundingClientRect();
     const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();
+    const matrix = el.querySelector('.cma-covariance').getBoundingClientRect();
     const legend = el.querySelector('.cma-legend'), rect = legend.getBoundingClientRect();
     const style = (selector) => {
       const css = getComputedStyle(legend.querySelector(selector));
@@ -146,13 +150,15 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       return { colour: g.strokeStyle, line: css.borderTopStyle };
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
+      matrixRight: matrix.left >= viewport.right, matrixBelow: matrix.top >= viewport.bottom,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
       best: style('.best-key'), shape: style('.shape-key') };
   });
   const initialLayout = await layout();
-  expect(initialLayout.canvas).toBe(initialLayout.width);
+  expect(initialLayout.matrixRight).toBe(true);
+  expect(initialLayout.canvas).toBeLessThan(initialLayout.width);
   expect(initialLayout.producer).toBe(initialLayout.canvas);
   expect(Math.abs(initialLayout.viewport - initialLayout.canvas), 'renderer width rounds to whole CSS pixels').toBeLessThan(1);
   expect(initialLayout.pointer).toBe('none');
@@ -437,6 +443,27 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(frames.frames.slice(0, samplesPerPhase).map((f) => f.population)).toEqual(Array(samplesPerPhase).fill(frames.frames[0].population));
   expect(frames.finalFrame.X).toHaveLength(6);
   await expect(root.locator('.gen')).toHaveText(/step 6 of 6/);
+  const matrixSource = matrix.locator('script[type="math/tex"]');
+  const checkMatrix = async (times) => {
+    await slider.evaluate((input, values) => {
+      for (const value of values) {
+        input.value = String(value);
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+    }, times);
+    const { drawing } = frames.frames[times.at(-1) * samplesPerPhase];
+    const { rx, ry, angle } = drawing.ellipses[0];
+    const scale = (drawing.dots[3].x - drawing.dots[0].x) / 6;
+    const a = Math.cos(angle), b = Math.sin(angle), x = rx ** 2, y = ry ** 2;
+    const format = (v) => (Math.round(v / (4 * scale ** 2) * 1000) / 1000).toFixed(3);
+    const values = [format(x * a ** 2 + y * b ** 2), format((y - x) * a * b), format(x * b ** 2 + y * a ** 2)];
+    await expect.poll(async () => (await matrixSource.textContent()).match(/-?\d+\.\d{3}/g))
+      .toEqual([values[0], values[1], values[1], values[2]]);
+  };
+  await checkMatrix([0]);
+  await checkMatrix([16.25]);
+  await checkMatrix([16.75]);
+  await checkMatrix([5.25, 23.75, 17.75]);
 
   // These live checks use actual scene objects; the bulk 2D scan above cannot
   // establish the 3D texture, coordinate mapping, glyphs or segment heights.
@@ -612,7 +639,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   });
   expect(beforeResize.error).toBe(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(async () => (await layout()).canvas, { message: 'one full-width phone viewport' }).toBeLessThan(390);
+  await expect.poll(async () => (await layout()).matrixBelow, { message: 'matrix stacks below the plot on a phone' }).toBe(true);
   const phoneLayout = await layout();
   expect(phoneLayout.canvas).toBe(phoneLayout.width);
   expect(phoneLayout.producer).toBe(phoneLayout.canvas);
@@ -667,7 +694,7 @@ test('compact viewport removes vertical space without shrinking geometry', async
       const project = (x, z) => camera.position.clone().set(x, 0, z).project(camera);
       const planeWidth = Math.abs(project(1, 0).x - project(-1, 0).x) * w / 2;
       const planeHeight = Math.abs(project(0, 1).y - project(0, -1).y) * h / 2;
-      const box = el.querySelector('.cma-view').getBoundingClientRect();
+      const box = el.querySelector('.cma-step-layout').getBoundingClientRect();
       const caption = el.querySelector('figcaption').getBoundingClientRect();
       return { w, h, planeWidth, planeHeight, captionGap: caption.top - box.bottom };
     });
