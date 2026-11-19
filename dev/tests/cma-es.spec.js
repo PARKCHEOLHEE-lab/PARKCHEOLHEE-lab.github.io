@@ -158,6 +158,15 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       best: style('.best-key'), shape: style('.shape-key') };
   });
   const initialLayout = await layout();
+  const legendPaint = await root.locator('.cma-legend').evaluate((legend) => {
+    const style = getComputedStyle(legend);
+    const ctx = document.createElement('canvas').getContext('2d');
+    ctx.fillStyle = style.backgroundColor;
+    ctx.fillRect(0, 0, 1, 1);
+    return { background: Array.from(ctx.getImageData(0, 0, 1, 1).data), opacity: style.opacity };
+  });
+  expect(legendPaint.background).toEqual([255, 255, 255, 204]);
+  expect(legendPaint.opacity).toBe('1');
   expect(initialLayout.matrixRight).toBe(true);
   expect(initialLayout.canvas).toBeLessThan(initialLayout.width);
   expect(initialLayout.producer).toBe(initialLayout.canvas);
