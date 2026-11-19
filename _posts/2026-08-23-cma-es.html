@@ -242,13 +242,13 @@ categories: note
                 </div>
                 <p>To decide how much \(S\) should affect the update to \(C\), start with the same three weights. Square them, add them, and divide 1 by the sum. The result, \(\mu_{\text{eff}}\), is the number of equally weighted samples that would give the same sum of squares.</p>
                 \[
-                    \mu_{\text{eff}} = \frac{1}{0.5^2+0.25^2+0.25^2} \approx 2.67
+                    \mu_{\text{eff}} = \frac{1}{\vphantom{\rule{0pt}{1.3em}}0.5^2+0.25^2+0.25^2} \approx 2.67
                 \]
                 <p>Each sample has two coordinates, so the number of variables \(n\) is 2. Put \(n=2\) and \(\mu_{\text{eff}}\approx2.67\) into the CMA-ES formulas. The first rate is for the center moves. The second is for the sample matrix \(S\).</p>
                 \[
                     \begin{aligned}
-                    c_1 &= \frac{2}{(2+1.3)^2+2.67} \approx 0.15 \\[0.5em]
-                    c_\mu &= \frac{2(2.67-2+1/2.67)}{(2+2)^2+2.67} \approx 0.11
+                    c_1 &= \frac{2}{\vphantom{\rule{0pt}{1.3em}}(2+1.3)^2+2.67} \approx 0.15 \\[0.5em]
+                    c_\mu &= \frac{2(2.67-2+1/2.67)}{\vphantom{\rule{0pt}{1.3em}}(2+2)^2+2.67} \approx 0.11
                     \end{aligned}
                 \]
                 <p>The sample rate is capped at \(1-c_1\). Here \(0.11\) is below that limit. Use the rounded rates for the rest of the example. Set aside \(0.15\) for the center moves and use \(0.11\) for \(S\). That leaves \(1-0.15-0.11=0.74\) for the old spread, \(C_{\text{old}}=I\).</p>
