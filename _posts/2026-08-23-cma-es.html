@@ -174,14 +174,14 @@ categories: note
         <ul>
             <li>
                 <b>Learn from the best samples</b><br>
-                Each blue arrow goes from the old center \(m_{\text{old}}\) to a top-three sample \(x_i\). Divide the arrow by the old step size \(\sigma\) to get \(y_i\).
+                Let \(s_i\) be the sample at rank \(i\), from 1 to 3. Each blue arrow goes from the old center \(m_{\text{old}}\) to \(s_i\). Divide that arrow by the old step size \(\sigma\) to get the displacement \(d_i\).
                 \[
-                    y_i = \frac{x_i - m_{\text{old}}}{\sigma}
+                    d_i = \frac{s_i - m_{\text{old}}}{\sigma}
                 \]
-                Turn each arrow into a matrix by multiplying the column \(y_i\) by its row \(y_i^\top\). Use the same rank weights \(w_i\) as in the center update.
+                Turn each arrow into a matrix by multiplying the column \(d_i\) by its row \(d_i^\top\). Use the same rank weights \(w_i\) as in the center update.
                 \[
                     \begin{aligned}
-                    S &= w_1 y_1 y_1^\top + w_2 y_2 y_2^\top + w_3 y_3 y_3^\top \\
+                    S &= w_1 d_1 d_1^\top + w_2 d_2 d_2^\top + w_3 d_3 d_3^\top \\
                     C_{\text{5a}} &= a C_{\text{old}} + c_\mu S
                     \end{aligned}
                 \]
