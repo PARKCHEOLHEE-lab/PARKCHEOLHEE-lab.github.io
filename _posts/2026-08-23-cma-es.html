@@ -170,45 +170,56 @@ categories: note
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
-        <p>Watch the dashed ellipse in Fig. 1. Step 5 changes its shape and angle through \(C\). Step 6 uses \(\sigma\) to make it bigger or smaller.</p>
+        <p>Go to round 3 in Fig. 1. The dashed ellipse shows how the search spreads. Updating \(C\) changes the spread by direction. Updating \(\sigma\) scales every direction by the same factor. The values below are rounded.</p>
         <ul>
             <li>
                 <b>Learn from the best samples</b><br>
-                Let \(s_i\) be the sample at rank \(i\), from 1 to 3. Each blue arrow goes from the old center \(m_{\text{old}}\) to \(s_i\). Divide that arrow by the old step size \(\sigma\) to get the displacement \(d_i\).
+                The old center is \(m_{\text{old}}\approx(1.885,3.147)\) and the old step size is \(\sigma\approx1.168\).
+                The best sample is \(s_1\approx(2.533,2.545)\). Its blue arrow goes right and down from the old center. Divide the arrow by \(\sigma\) to get \(d_1\), the move measured in units of the old step size.
                 \[
-                    d_i = \frac{s_i - m_{\text{old}}}{\sigma}
+                    d_1 = \frac{s_1 - m_{\text{old}}}{\sigma}
+                    \approx \begin{pmatrix}0.554\\-0.515\end{pmatrix}
                 \]
-                Turn each arrow into a matrix by multiplying the column \(d_i\) by its row \(d_i^\top\). Use the same rank weights \(w_i\) as in the center update.
+                Multiply each arrow column by its row to get a matrix. For the best sample, \(d_1d_1^\top\) has \(0.554^2\approx0.307\) at the top left and \(0.554(-0.515)\approx-0.286\) off the diagonal.
+                Do the same for ranks 2 and 3, then add the three matrices using the same rank weights \(w_i\) as in the center update.
                 \[
                     \begin{aligned}
                     S &= w_1 d_1 d_1^\top + w_2 d_2 d_2^\top + w_3 d_3 d_3^\top \\
-                    C_{\text{5a}} &= a C_{\text{old}} + c_\mu S
+                      &\approx \begin{pmatrix}0.774&-1.070\\-1.070&1.613\end{pmatrix}
                     \end{aligned}
                 \]
-                The factor \(a\) keeps a share of the old matrix. The factor \(c_\mu\) sets how much the three samples add.
-                For example, arrows \((2,0)^\top\) and \((-2,0)^\top\) each give \(4\) in the top-left entry and zero elsewhere. Both add left-to-right spread.
+                The negative entries off the diagonal add spread along the line from upper left to lower right. In step 5, the figure first keeps about \(79\%\) of \(C_{\text{old}}\) and adds about \(6\%\) of \(S\).
+                \[
+                    \begin{aligned}
+                    C_{\text{old}} &\approx \begin{pmatrix}1.017&-0.133\\-0.133&1.212\end{pmatrix} \\
+                    C_{\text{samples}} &\approx 0.787 C_{\text{old}} + 0.058 S \\
+                      &\approx \begin{pmatrix}0.846&-0.167\\-0.167&1.047\end{pmatrix}
+                    \end{aligned}
+                \]
             </li>
             <li>
                 <b>Learn from center moves</b><br>
-                The vector \(p_c\) stores the history of center moves and gives the orange arrow its direction. Add the center move from step 4 to update this history.
+                The same rank weights moved the center to \(m_{\text{new}}\approx(2.786,1.932)\) in step 4.
+                That move, divided by the old \(\sigma\), is about \((0.771,-1.040)\). The vector \(p_c\) keeps a running record of these moves and gives the orange arrow its direction.
+                In round 3, we keep about \(38\%\) of the old record and add \(1.320\) times the latest move.
                 \[
-                    p_{c,\text{new}}
-                    = (1-c_c)p_{c,\text{old}} + b\frac{m_{\text{new}}-m_{\text{old}}}{\sigma}
+                    \begin{aligned}
+                    p_{c,\text{new}} &\approx
+                        0.375\begin{pmatrix}1.294\\-1.218\end{pmatrix}
+                        + 1.320\begin{pmatrix}0.771\\-1.040\end{pmatrix} \\
+                    &\approx \begin{pmatrix}1.504\\-1.831\end{pmatrix}
+                    \end{aligned}
                 \]
-                The factor \(1-c_c\) fades the old history each round. The factor \(b\) sets how much of the latest move to add. It can be zero when the recent path is unusually long.
-                Use the same column-times-row rule for this one arrow. For example, if \(p_{c,\text{new}}=(2,1)^\top\), then
+                Multiply this arrow column by its row and scale the matrix by \(c_1\approx0.155\). Add it to \(C_{\text{samples}}\) to get the \(C\) that Fig. 1 shows at the end of step 5.
                 \[
-                    p_{c,\text{new}} p_{c,\text{new}}^\top =
-                    \begin{pmatrix}2\\1\end{pmatrix}
-                    \begin{pmatrix}2 & 1\end{pmatrix}
-                    =
-                    \begin{pmatrix}4 & 2\\2 & 1\end{pmatrix}.
+                    \begin{aligned}
+                    C_{\text{new}} &= C_{\text{samples}} + c_1 p_{c,\text{new}} p_{c,\text{new}}^\top \\
+                    &\approx C_{\text{samples}} +
+                        \begin{pmatrix}0.350&-0.426\\-0.426&0.519\end{pmatrix} \\
+                    &\approx \begin{pmatrix}1.196&-0.593\\-0.593&1.566\end{pmatrix}
+                    \end{aligned}
                 \]
-                Add this matrix to the result of 5a. The factor \(c_1\) sets how much this history adds.
-                \[
-                    C_{\text{new}} = C_{\text{5a}} + c_1 p_{c,\text{new}} p_{c,\text{new}}^\top
-                \]
-                In this example, the added spread runs along the line from lower left to upper right.
+                The center moves reinforce the same diagonal that the blue sample arrows picked out in this round.
             </li>
             <li>
                 <b>6. Change size (\(\sigma\))</b><br>
