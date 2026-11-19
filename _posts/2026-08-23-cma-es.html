@@ -30,7 +30,10 @@ categories: note
         #cma-step .cma-step-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; }
         #cma-step .cma-view { position: relative; flex: 1 1 22em; min-width: 0; }
         #cma-step .cma-covariance { flex: 0 0 14em; min-width: 0; max-width: 100%; text-align: center; }
-        #cma-step .covariance-math { display: inline-grid; grid-template-columns: auto auto auto; gap: 0.5em 0.3em; align-items: center; white-space: nowrap; font: 0.86em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+        #cma-step .covariance-math, #cma-step .best-score { white-space: nowrap; font: 0.86em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+        #cma-step .covariance-math { display: inline-grid; grid-template-columns: auto auto auto; gap: 0.5em 0.3em; align-items: center; }
+        #cma-step .best-score { display: grid; gap: 0.3em; margin-top: 1em; }
+        #cma-step .best-score[aria-hidden="true"] { visibility: hidden; }
         #cma-step .covariance-factors { display: flex; align-items: center; gap: 0.3em; }
         #cma-step .covariance-scale { width: 5ch; text-align: right; }
         #cma-step .covariance-result-equals { grid-column: 2; }
@@ -148,6 +151,11 @@ categories: note
                     <span data-value>0.000</span><span data-value>1.000</span>
                 </span>
             </span>
+            <div class="best-score" role="math" aria-hidden="true">
+                <span><i>f</i><span class="score-center">(0.00, 0.00)</span></span>
+                <span>= ‖<span class="score-center">(0.00, 0.00)</span> − <span class="score-target">(0.00, 0.00)</span>‖</span>
+                <span>≈ <span class="score-radius">0.00</span></span>
+            </div>
         </div>
         </div>
         <figcaption>
@@ -512,6 +520,7 @@ categories: note
         root.style.setProperty("--selected", COL.pick);
         var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
         var matrixValues = root.querySelectorAll(".covariance-math [data-value]");
+        var score = root.querySelector(".best-score"), scoreValues = score.querySelectorAll(".score-center, .score-target, .score-radius");
         var sigmaGuide = root.querySelector(".sigma-guide"), sigmaBar = sigmaGuide.querySelector("progress");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
@@ -590,8 +599,7 @@ categories: note
             if (ph >= 1 && r === 0) { s.col = COL.mean; s.rad = 3.5; }
             return s;
         }
-        function circle(ctx, map, c, col, width) {        // enclosing circle and its true radius to a farthest target
-            var r = fn(c), farthest = POINTS.find(function (p) { return Math.hypot(p[0] - c[0], p[1] - c[1]) === r; });
+        function circle(ctx, map, c, r, farthest, col, width) {        // enclosing circle and its true radius to a farthest target
             ctx.setLineDash([]);
             ctx.beginPath(); ctx.arc(map.x(c[0]), map.y(c[1]), r * map.s, 0, 2 * Math.PI);
             ctx.strokeStyle = col; ctx.lineWidth = width; ctx.stroke();
@@ -656,9 +664,11 @@ categories: note
             }
             var best = h.X[h.order[0]];
             if (ph >= 1) {
+                var radius = fn(best), radiusText = radius.toFixed(2);
+                var farthest = POINTS.find(function (p) { return Math.hypot(p[0] - best[0], p[1] - best[1]) === radius; });
                 ctx.save();
                 if (ph === 4) ctx.globalAlpha = 0.2;
-                circle(ctx, map, best, COL.mean, 1.5);
+                circle(ctx, map, best, radius, farthest, COL.mean, 1.5);
                 ctx.restore();
             }
             POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
@@ -676,7 +686,7 @@ categories: note
             root.querySelector(".update-before").hidden = ph < 3;
             root.querySelector(".update-direction").hidden = !historyStage && ph !== 5;
             root.querySelector(".direction-label").textContent = historyStage ? "Recent center moves" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
-            read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + fn(best).toFixed(2);
+            read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + radiusText;
             root.cmaFrame = { X: X, styles: styles, m: m };
             root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
 
@@ -684,6 +694,14 @@ categories: note
             if (tag !== shown) {
                 var reshaping = ph === 4;
                 text.innerHTML = phaseText(ph, historyStage, pathRatios[g]);
+                score.setAttribute("aria-hidden", String(ph === 0));
+                if (ph >= 1) {
+                    var [center, target] = [best, farthest].map(function (pair) {
+                        return "(" + pair.map(function (n) { return n.toFixed(2).replace("-", "−"); }).join(", ") + ")";
+                    });
+                    var terms = [center, center, target, radiusText];
+                    scoreValues.forEach(function (cell, i) { cell.firstChild.nodeValue = terms[i]; });
+                }
                 sigmaGuide.hidden = ph !== 5;
                 if (ph === 5) sigmaBar.value = pathRatios[g];
                 root.querySelector(".objective-key").hidden = reshaping;

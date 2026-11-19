@@ -699,6 +699,41 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(errors).toEqual([]);
 });
 
+test('best score follows the ranked sample', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/cma-es/');
+  const root = page.locator('#cma-step');
+  const slider = root.locator('.scrub');
+  const score = root.locator('.best-score');
+  const seek = (value) => slider.evaluate((el, t) => {
+    el.value = t;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+
+  await expect(root.locator('.read')).toContainText('not ranked');
+  await expect(score).toBeHidden();
+  for (const time of ['1', '17', await slider.getAttribute('max')]) {
+    await seek(time);
+    await expect(score).toBeVisible();
+    const { X } = await root.evaluate((el) => el.cmaFrame);
+    const targets = [[0, 0], [2, 0.6], [4, 1.5], [6, 2.2], [1.2, 1.4], [5, 0.9]];
+    const ranked = X.map((center) => {
+      const points = targets.map((point) => ({ point, distance: Math.hypot(point[0] - center[0], point[1] - center[1]) }));
+      return { center, ...points.sort((a, b) => b.distance - a.distance)[0] };
+    }).sort((a, b) => a.distance - b.distance);
+    const { center, point, distance } = ranked[0];
+    const format = (n) => n.toFixed(2).replace('-', '−');
+    const coordinates = (pair) => '(' + pair.map(format).join(', ') + ')';
+    await expect(score.locator('.score-center').first()).toHaveText(coordinates(center));
+    await expect(score.locator('.score-center').last()).toHaveText(coordinates(center));
+    await expect(score.locator('.score-target')).toHaveText(coordinates(point));
+    await expect(score.locator('.score-radius')).toHaveText(format(distance));
+    await expect(root.locator('.read')).toHaveText('Best r ' + format(distance));
+  }
+  await seek('48');
+  await expect(score).toBeHidden();
+});
+
 test('live covariance stays visible while playing', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/');
