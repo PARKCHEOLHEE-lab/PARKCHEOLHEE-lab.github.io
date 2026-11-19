@@ -124,7 +124,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
   const matrix = root.locator('.cma-covariance');
-  await expect(matrix.locator('.mjx-mtable').first()).toBeVisible();
+  await expect(matrix.locator('.covariance-matrix')).toHaveCount(2);
+  await expect(matrix.locator('.MathJax_CHTML')).toBeVisible();
   expect((await root.locator('.phase').boundingBox()).height).toBeLessThan(2);
   await expect(page.getByText('One generation as equations', { exact: true })).toHaveCount(0);
   await expect(root.locator('.update-before')).toHaveCount(1);
@@ -443,7 +444,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(frames.frames.slice(0, samplesPerPhase).map((f) => f.population)).toEqual(Array(samplesPerPhase).fill(frames.frames[0].population));
   expect(frames.finalFrame.X).toHaveLength(6);
   await expect(root.locator('.gen')).toHaveText(/step 6 of 6/);
-  const matrixSource = matrix.locator('script[type="math/tex"]');
+  const matrixValues = async () => (await matrix.locator('[data-value]').allTextContents()).map((v) => v.replace('−', '-'));
   let initialEquation;
   const checkMatrix = async (times) => {
     await slider.evaluate((input, values) => {
@@ -458,10 +459,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const a = Math.cos(angle), b = Math.sin(angle), x = rx ** 2, y = ry ** 2;
     const format = (v) => (Math.round(v / (4 * scale ** 2) * 1000) / 1000).toFixed(3);
     const values = [format(x * a ** 2 + y * b ** 2), format((y - x) * a * b), format(x * b ** 2 + y * a ** 2)];
-    await expect.poll(async () => (await matrixSource.textContent()).match(/-?\d+\.\d{3}/g)?.slice(-4))
+    await expect.poll(async () => (await matrixValues()).slice(-4))
       .toEqual([values[0], values[1], values[1], values[2]]);
-    await matrix.evaluate(() => new Promise((resolve) => window.MathJax.Hub.Queue(resolve)));
-    const equation = await matrix.locator('.MathJax_CHTML').boundingBox();
+    const equation = await matrix.locator('.covariance-math').boundingBox();
     const panel = await matrix.boundingBox();
     expect(equation.x).toBeGreaterThanOrEqual(panel.x - 0.5);
     expect(equation.x + equation.width).toBeLessThanOrEqual(panel.x + panel.width + 0.5);
@@ -477,7 +477,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const term = (v) => (Math.round(v * 1000) / 1000).toFixed(3);
     const C = [x * a ** 2 + y * b ** 2, (y - x) * a * b, x * b ** 2 + y * a ** 2]
       .map((v) => term(v / (4 * scale ** 2 * sigma2)));
-    expect((await matrixSource.textContent()).match(/-?\d+\.\d{3}/g))
+    expect(await matrixValues())
       .toEqual([term(sigma2), C[0], C[1], C[1], C[2], values[0], values[1], values[1], values[2]]);
   };
   await checkMatrix([0]);
@@ -695,6 +695,50 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(await root.evaluate((el) => el.cma3d.inspect.renderer.getContext().getError())).toBe(0);
   expect(await root.evaluate((el) => el.cma3d.inspect.renderer.info.memory.textures)).toBe(beforeResize.textures);
   expect(errors).toEqual([]);
+});
+
+test('live covariance stays visible while playing', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/cma-es/');
+  const root = page.locator('#cma-step');
+  const equation = root.locator('.covariance-math');
+  const slider = root.locator('.scrub');
+  await expect(equation.locator('.MathJax_CHTML').first()).toBeVisible();
+  await slider.evaluate((e) => { e.value = '16.05'; e.dispatchEvent(new Event('input', { bubbles: true })); });
+  await equation.evaluate((el) => new Promise((resolve) => {
+    window.MathJax.Hub.Queue(() => {
+      const observations = { removed: 0, frames: 0, blank: 0, values: new Set(), running: true };
+      window.covariancePlayback = observations;
+      observations.observer = new MutationObserver((records) => {
+        records.forEach((record) => {
+          observations.removed += [...record.removedNodes].filter((node) => node.nodeType === Node.ELEMENT_NODE).length;
+        });
+      });
+      observations.observer.observe(el, { childList: true, subtree: true });
+      function sample() {
+        if (!observations.running) return;
+        observations.frames++;
+        if (el.getBoundingClientRect().width === 0 || el.getBoundingClientRect().height === 0) observations.blank++;
+        observations.values.add(el.textContent);
+        requestAnimationFrame(sample);
+      }
+      requestAnimationFrame(sample);
+      resolve();
+    });
+  }));
+  await root.locator('.play').click();
+  await expect.poll(async () => Number(await slider.inputValue())).toBeGreaterThan(16.65);
+  await root.locator('.play').click();
+  const result = await equation.evaluate(() => {
+    const observed = window.covariancePlayback;
+    observed.running = false;
+    observed.observer.disconnect();
+    return { removed: observed.removed, blank: observed.blank, frames: observed.frames, differentValues: observed.values.size };
+  });
+  expect(result.frames).toBeGreaterThan(4);
+  expect(result.differentValues).toBeGreaterThan(1);
+  expect(result.removed, 'no equation elements are removed while the numbers change').toBe(0);
+  expect(result.blank, 'the equation is visible on every sampled frame').toBe(0);
 });
 
 test('compact viewport removes vertical space without shrinking geometry', async ({ page }) => {
