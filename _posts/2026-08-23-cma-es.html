@@ -170,17 +170,17 @@ categories: note
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
+        <p>Watch the dashed ellipse in Fig. 1. Step 5 changes its shape and angle through \(C\). Step 6 uses \(\sigma\) to make it bigger or smaller.</p>
         <ul>
             <li>
-                <b>Step 5a. Learn from the best samples.</b>
-                CMA-ES keeps most of the old \(C\). Each blue arrow shows a step from the old center to a sample we kept.
-                Divide both numbers in that step by \(\sigma\). Write the result as a column and as a row, then multiply them as shown below.
-                This adds spread along the arrow's line in both directions. Samples with higher weights add more for the same step.
+                <b>5a. Blue arrows show where good samples landed.</b>
+                If good samples lie to the left and right of the old center, try more points along that line.
+                Keep most of \(C\), then add a matrix for each blue arrow. Divide the arrow by \(\sigma\) first, use the rule below, and give higher ranks more weight.
             </li>
             <li>
-                <b>Step 5b. Learn from where the center has moved.</b>
-                The orange arrow combines center moves from several rounds. Older moves count less.
-                Suppose this sum is \(p_c=(2,1)\). Use the same column-times-row rule, called an <i>outer product</i>.
+                <b>5b. The orange arrow shows where the center has been moving.</b>
+                Add the recent center moves, with less weight on older moves. Say the result \(p_c\) points 2 right and 1 up.
+                Write it as a column and a row, then multiply them. This is called an <i>outer product</i>.
                 \[
                     p_c p_c^\top =
                     \begin{pmatrix}2\\1\end{pmatrix}
@@ -188,15 +188,14 @@ categories: note
                     =
                     \begin{pmatrix}4 & 2\\2 & 1\end{pmatrix}.
                 \]
-                The \(4\) and \(1\) add to the spread along \(x\) and \(y\). The two \(2\)s link the two axes. They add spread along the line that goes right 2 and up 1, as well as back along that same line.
-                CMA-ES adds only a small share of this matrix to \(C\). The center stays in place during this step.
+                Reversing the arrow gives the same matrix. Adding a little of it to \(C\) makes the next samples spread more along that diagonal in both directions.
             </li>
             <li>
-                <b>Step 6. Make the whole ellipse bigger or smaller.</b>
-                CMA-ES keeps another sum of recent center moves. It measures each move against the current spread in that direction.
-                Moves in the same direction add up. Moves that turn back can cancel out.
-                The mark on the bar shows how long the sum would be on average for random steps. If the sum is longer, \(\sigma\) grows. If it is shorter, \(\sigma\) shrinks.
-                In round 3, both axes end up about \(1.30\) times as long. The angle and the ratio of the two lengths stay the same.
+                <b>6. Make the whole ellipse bigger or smaller.</b>
+                For \(\sigma\), add the recent center moves after measuring them against the current spread.
+                Compare the length of the sum with the mark on the bar, which shows the average for random moves.
+                Past the mark, the ellipse grows. Short of it, the ellipse shrinks.
+                In round 3, both axes become about \(1.30\) times as long.
             </li>
         </ul>
     </li>
