@@ -761,8 +761,13 @@ test('score, center and covariance share one aligned display', async ({ page }) 
   const font = (el) => getComputedStyle(el).fontFamily;
   expect(await scoreGlyph.evaluate(font)).toBe(await objectiveGlyph.evaluate(font));
 
-  for (const width of [1280, 320]) {
+  for (const width of [1280, 1024, 390, 320]) {
     await page.setViewportSize({ width, height: 850 });
+    const fontSize = (el) => getComputedStyle(el).fontSize;
+    const bodySize = await objectiveGlyph.evaluate(fontSize);
+    expect(await scoreGlyph.evaluate(fontSize)).toBe(bodySize);
+    expect(await mean.locator('.mean-coordinates').evaluate(fontSize)).toBe(bodySize);
+    expect(await panel.locator('.covariance-matrix [data-value]').first().evaluate(fontSize)).toBe(bodySize);
     const scoreBox = await panel.locator('.best-score').boundingBox();
     const meanBox = await mean.boundingBox();
     const covarianceBox = await panel.locator('.covariance-math').boundingBox();

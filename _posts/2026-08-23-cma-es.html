@@ -27,10 +27,13 @@ categories: note
         #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
         #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
         #cma-step { margin-inline: -1em; }
+        @media (min-width: 75em) {
+            #cma-step { margin-inline-end: -5em; }
+        }
         #cma-step .cma-step-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; }
         #cma-step .cma-view { position: relative; flex: 1 1 22em; min-width: 0; }
-        #cma-step .cma-covariance { flex: 0 0 15em; min-width: 0; max-width: 100%; text-align: center; }
-        #cma-step .cma-equations { display: grid; grid-template-columns: minmax(5.8em, max-content) max-content 1fr; gap: 1em 0.3em; white-space: nowrap; font: 0.8em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+        #cma-step .cma-covariance { flex: 0 0 19em; min-width: 0; max-width: 100%; text-align: center; }
+        #cma-step .cma-equations { display: grid; grid-template-columns: minmax(5.8em, max-content) max-content 1fr; gap: 1em 0.3em; white-space: nowrap; font: 1em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
         #cma-step .cma-equations > [role="math"] { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; justify-items: start; row-gap: 0.5em; }
         #cma-step .cma-equations > [role="math"] > :first-child { justify-self: end; }
         #cma-step .equation-relation { grid-column: 2; justify-self: center; }
