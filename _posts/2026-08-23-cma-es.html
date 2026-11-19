@@ -150,17 +150,20 @@ categories: note
         </figcaption>
     </div>
     <br>
-    <li>
-        How much each rank counts
+    <li id="cma-weights">
+        How \(m\) is calculated
+        <ul>
+            <li class="weight-intro"></li>
+            <li>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight.</li>
+            <li>Multiply each of the three centers by its weight. Add the results to get the new center \(m\).</li>
+        </ul>
+        <div class="cma-demo">
+            <table class="cma-table cma-weight-table" aria-label="Rank, log score, and normalized weight for the three selected samples">
+                <thead><tr><th scope="col">Rank</th><th scope="col">Log score</th><th scope="col">Weight</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
     </li>
-    <div class="cma-demo" id="cma-weights">
-        <p class="weight-intro"></p>
-        <p>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight.</p>
-        <table class="cma-table cma-weight-table" aria-label="Rank, log score, and normalized weight for the three selected samples">
-            <thead><tr><th scope="col">Rank</th><th scope="col">Log score</th><th scope="col">Weight</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
