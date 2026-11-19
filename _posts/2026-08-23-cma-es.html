@@ -67,11 +67,11 @@ categories: note
 
 <ul>
     <li>
-        Finding a better answer using scores
+        Covariance Matrix Adaptation Evolution Strategy
     </li>
         <ul>
             <li>
-                <b>CMA-ES</b> (Covariance Matrix Adaptation Evolution Strategy) looks for an answer with a low score \(f\). It only needs to score each candidate. It can work without a gradient, which tells you how the score changes near a point.
+                <b>CMA-ES</b> only needs to score each candidate. It can work without a gradient, which tells you how the score changes near a point.
             </li>
             <li>
                 CMA-ES draws candidates from a normal distribution \(\mathcal{N}(m, \sigma^2 C)\). In each round (called a generation), it draws \(\lambda\) candidates and sorts them by score. It uses the best ones to choose where to look in the next round.
