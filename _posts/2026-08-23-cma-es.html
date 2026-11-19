@@ -107,6 +107,7 @@ categories: note
             <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="step within the generations">
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
+        <div class="phase-name tval" aria-hidden="true"></div>
         <div class="phase note-sr-only" aria-live="polite"></div>
         <div class="cma-step-layout">
         <div class="cma-view">
@@ -173,12 +174,14 @@ categories: note
         <p>Watch the dashed ellipse in Fig. 1. Step 5 changes its shape and angle through \(C\). Step 6 uses \(\sigma\) to make it bigger or smaller.</p>
         <ul>
             <li>
-                <b>5a. Blue arrows show where good samples landed.</b>
+                <b>5a. Learn from the best samples.</b>
+                Blue arrows show where good samples landed.
                 If good samples lie to the left and right of the old center, try more points along that line.
                 Keep most of \(C\), then add a matrix for each blue arrow. Divide the arrow by \(\sigma\) first, use the rule below, and give higher ranks more weight.
             </li>
             <li>
-                <b>5b. The orange arrow shows where the center has been moving.</b>
+                <b>5b. Learn from center moves.</b>
+                The orange arrow shows where the center has been moving.
                 Add the recent center moves, with less weight on older moves. Say the result \(p_c\) points 2 right and 1 up.
                 Write it as a column and a row, then multiply them. This is called an <i>outer product</i>.
                 \[
@@ -191,7 +194,7 @@ categories: note
                 Reversing the arrow gives the same matrix. Adding a little of it to \(C\) makes the next samples spread more along that diagonal in both directions.
             </li>
             <li>
-                <b>6. Make the whole ellipse bigger or smaller.</b>
+                <b>6. Change size (\(\sigma\)).</b>
                 For \(\sigma\), add the recent center moves after measuring them against the current spread.
                 Compare the length of the sum with the mark on the bar, which shows the average for random moves.
                 Past the mark, the ellipse grows. Short of it, the ellipse shrinks.
@@ -470,8 +473,8 @@ categories: note
             if (ph === 2) return "<b>3. Keep the best.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows give a sample more influence.";
             if (ph === 3) return "<b>4. Move the center.</b> Average the samples you kept. Give higher ranks more weight. Move X to that average.";
             if (ph === 4) return historyStage
-                ? "<b>5b. Change C using past moves.</b> The orange arrow combines recent center moves. Add spread along its line in both directions."
-                : "<b>5a. Change C using the top 3 samples.</b> Keep most of the old spread. Each blue arrow adds spread along its line in both directions.";
+                ? "<b>5b. Learn from center moves.</b> The orange arrow combines recent center moves. Add spread along its line in both directions."
+                : "<b>5a. Learn from the best samples.</b> Keep most of the old spread. Each blue arrow adds spread along its line in both directions.";
             var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
             return "<b>6. Change size (\u03c3).</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
         }
@@ -593,6 +596,7 @@ categories: note
             if (tag !== shown) {
                 var reshaping = ph === 4;
                 text.innerHTML = phaseText(ph, historyStage, pathRatios[g]);
+                root.querySelector(".phase-name").textContent = text.firstElementChild.textContent;
                 sigmaGuide.hidden = ph !== 5;
                 if (ph === 5) sigmaBar.value = pathRatios[g];
                 root.querySelector(".objective-key").hidden = reshaping;

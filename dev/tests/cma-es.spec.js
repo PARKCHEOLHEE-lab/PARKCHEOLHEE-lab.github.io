@@ -113,6 +113,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
+  const stepName = root.locator('.phase-name');
+  await expect(stepName).toBeVisible();
+  await expect(stepName).toHaveText('1. Draw samples.');
   const matrix = root.locator('.cma-covariance');
   await expect(matrix.locator('.covariance-matrix')).toHaveCount(2);
   await expect(matrix.locator('.MathJax_CHTML')).toBeVisible();
@@ -208,6 +211,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
           beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden,
           legend: el.querySelector('.cma-legend').innerText,
+          stepName: el.querySelector('.phase-name').innerText,
           sigmaGuide: sigmaGuide && !sigmaGuide.hidden ? {
             recent: sigmaGuide.querySelector('progress').value,
             max: sigmaGuide.querySelector('progress').max,
@@ -242,6 +246,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const generation = Math.min(Math.floor(index / (6 * samplesPerPhase)), maximum / 6 - 1);
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
     const historyStage = phase === 4 && index % samplesPerPhase >= 2;
+    const names = ['1. Draw samples.', '2. Rank the samples.', '3. Keep the best.', '4. Move the center.',
+      historyStage ? '5b. Learn from center moves.' : '5a. Learn from the best samples.', '6. Change size (σ).'];
+    assert.equal(frame.stepName, names[phase]);
     const progress = index === frames.frames.length - 1 ? 1 : [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
     const targetSamples = unit.generations[generation];
     for (const [k, point] of frame.population.entries()) {
