@@ -113,9 +113,11 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const slider = root.locator('.scrub');
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
-  const stepName = root.locator('.phase-name');
-  await expect(stepName).toBeVisible();
-  await expect(stepName).toHaveText('1. Draw samples');
+  await expect(root.locator('.phase-name')).toHaveCount(0);
+  await expect(page.locator('#cma-updates b').filter({ hasText: /Learn from/ })).toHaveText([
+    'Learn from the best samples',
+    'Learn from center moves',
+  ]);
   const matrix = root.locator('.cma-covariance');
   await expect(matrix.locator('.covariance-matrix')).toHaveCount(2);
   await expect(matrix.locator('.MathJax_CHTML')).toBeVisible();
@@ -136,10 +138,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const viewport = el.querySelector('.cma-view').getBoundingClientRect();
     const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();
     const matrix = el.querySelector('.cma-covariance').getBoundingClientRect();
-    const phase = el.querySelector('.phase-name'), generation = el.querySelector('.gen').getBoundingClientRect();
-    const phaseText = document.createRange();
-    phaseText.selectNodeContents(phase);
-    const phaseBox = phaseText.getBoundingClientRect();
     const legend = el.querySelector('.cma-legend'), rect = legend.getBoundingClientRect();
     const style = (selector) => {
       const css = getComputedStyle(legend.querySelector(selector));
@@ -149,15 +147,12 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
       matrixRight: matrix.left >= viewport.right, matrixBelow: matrix.top >= viewport.bottom,
-      phaseRightOffset: phaseBox.right - generation.right, phaseBelow: phaseBox.top >= generation.bottom,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
       best: style('.best-key'), shape: style('.shape-key') };
   });
   const initialLayout = await layout();
-  expect(initialLayout.phaseRightOffset).toBeCloseTo(0, 0);
-  expect(initialLayout.phaseBelow).toBe(true);
   const legendPaint = await root.locator('.cma-legend').evaluate((legend) => {
     const style = getComputedStyle(legend);
     const ctx = document.createElement('canvas').getContext('2d');
@@ -218,7 +213,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
           beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden,
           legend: el.querySelector('.cma-legend').innerText,
-          stepName: el.querySelector('.phase-name').innerText,
           sigmaGuide: sigmaGuide && !sigmaGuide.hidden ? {
             recent: sigmaGuide.querySelector('progress').value,
             max: sigmaGuide.querySelector('progress').max,
@@ -253,9 +247,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const generation = Math.min(Math.floor(index / (6 * samplesPerPhase)), maximum / 6 - 1);
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
     const historyStage = phase === 4 && index % samplesPerPhase >= 2;
-    const names = ['1. Draw samples', '2. Rank the samples', '3. Keep the best', '4. Move the center',
-      historyStage ? '5b. Learn from center moves' : '5a. Learn from the best samples', '6. Change size (σ)'];
-    assert.equal(frame.stepName, names[phase]);
     const progress = index === frames.frames.length - 1 ? 1 : [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
     const targetSamples = unit.generations[generation];
     for (const [k, point] of frame.population.entries()) {
@@ -672,8 +663,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(async () => (await layout()).matrixBelow, { message: 'matrix stacks below the plot on a phone' }).toBe(true);
   const phoneLayout = await layout();
-  expect(phoneLayout.phaseRightOffset).toBeCloseTo(0, 0);
-  expect(phoneLayout.phaseBelow).toBe(true);
   expect(phoneLayout.canvas).toBe(phoneLayout.width);
   expect(phoneLayout.producer).toBe(phoneLayout.canvas);
   expect(phoneLayout.legend.x / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.x / initialLayout.legendEm, 2);

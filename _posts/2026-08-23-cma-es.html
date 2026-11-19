@@ -22,7 +22,6 @@ categories: note
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
         #cma-step { margin-inline: -1em; }
-        #cma-step .phase-name { text-align: right; }
         #cma-step .cma-step-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; }
         #cma-step .cma-view { position: relative; flex: 1 1 22em; min-width: 0; }
         #cma-step .cma-covariance { flex: 0 0 14em; min-width: 0; max-width: 100%; text-align: center; }
@@ -108,7 +107,6 @@ categories: note
             <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="step within the generations">
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
-        <div class="phase-name tval" aria-hidden="true"></div>
         <div class="phase note-sr-only" aria-live="polite"></div>
         <div class="cma-step-layout">
         <div class="cma-view">
@@ -175,7 +173,7 @@ categories: note
         <p>Watch the dashed ellipse in Fig. 1. Step 5 changes its shape and angle through \(C\). Step 6 uses \(\sigma\) to make it bigger or smaller.</p>
         <ul>
             <li>
-                <b>5a. Learn from the best samples</b><br>
+                <b>Learn from the best samples</b><br>
                 Each blue arrow goes from the old center \(m_{\text{old}}\) to a top-three sample \(x_i\). Divide the arrow by the old step size \(\sigma\) to get \(y_i\).
                 \[
                     y_i = \frac{x_i - m_{\text{old}}}{\sigma}
@@ -191,7 +189,7 @@ categories: note
                 For example, arrows \((2,0)^\top\) and \((-2,0)^\top\) each give \(4\) in the top-left entry and zero elsewhere. Both add left-to-right spread.
             </li>
             <li>
-                <b>5b. Learn from center moves</b><br>
+                <b>Learn from center moves</b><br>
                 The vector \(p_c\) stores the history of center moves and gives the orange arrow its direction. Add the center move from step 4 to update this history.
                 \[
                     p_{c,\text{new}}
@@ -615,7 +613,6 @@ categories: note
             if (tag !== shown) {
                 var reshaping = ph === 4;
                 text.innerHTML = phaseText(ph, historyStage, pathRatios[g]);
-                root.querySelector(".phase-name").textContent = text.firstElementChild.textContent;
                 sigmaGuide.hidden = ph !== 5;
                 if (ph === 5) sigmaBar.value = pathRatios[g];
                 root.querySelector(".objective-key").hidden = reshaping;
