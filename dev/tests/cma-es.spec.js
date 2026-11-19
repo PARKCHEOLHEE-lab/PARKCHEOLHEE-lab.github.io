@@ -10,10 +10,10 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const unit = await page.evaluate((html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const script = [...doc.scripts].find((s) => !s.type).textContent;
-    const init = 'ready(function () { stepDemo(); runDemo(); });';
+    const init = 'ready(stepDemo);';
     if (script.split(init).length !== 2) throw new Error('Expected one demo initialization');
     (0, eval)(script.replace(init, 'window.radiusForTest = circleRadius; window.landscapeForTest = landscape; window.recordForTest = record;'));
-    // A smooth function samples all bands; Fig 2's steep valley skips some.
+    // A smooth function samples all colour bands.
     const image = window.landscapeForTest(([x]) => 10 ** x, { cx: 0, cy: 0, half: 1 }, 280, 280);
     const pixels = image.getContext('2d').getImageData(0, 0, image.width, image.height).data, palette = new Set();
     for (let i = 0; i < pixels.length; i += 4) palette.add(Array.from(pixels.slice(i, i + 4)).join(','));
@@ -35,7 +35,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await page.addInitScript(() => {
     // Observe actual Canvas calls, rather than a second copy of the renderer.
     window.circleDrawing = { circles: [], radii: [], dots: [], crosses: [], ellipses: [], backgrounds: 0, labels: [], before: [], origins: [], arrows: [] };
-    window.referenceDrawing = { dots: [], widths: [] };
     window.circleScanEvents = 0;
     // Isolate the bulk 2D geometry checks from redundant GPU draws. Normal
     // interactions before and after the scan use the real 3D consumer.
@@ -51,15 +50,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       proto[method] = function (...args) {
         if (method === 'clearRect') this.canvas.drawnTexts = [];
         if (method === 'fillText') (this.canvas.drawnTexts ||= []).push(String(args[0]));
-        if (this.canvas.matches('#cma-run .cma-plot')) {
-          const reference = window.referenceDrawing;
-          if (method === 'clearRect') { reference.dots = []; reference.widths = []; }
-          if (method === 'beginPath') { this.referenceArc = null; this.referenceEllipse = false; }
-          if (method === 'arc') this.referenceArc = { r: args[2] };
-          if (method === 'ellipse') this.referenceEllipse = true;
-          if (method === 'fill' && this.referenceArc) reference.dots.push({ ...this.referenceArc, fill: this.fillStyle });
-          if (method === 'stroke' && this.referenceEllipse) reference.widths.push(this.lineWidth);
-        }
         if (this.canvas.matches('#cma-step .cma-top')) {
           const drawing = window.circleDrawing;
           if (method === 'clearRect') {
@@ -187,15 +177,13 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   });
   expect(initialCamera.direction[1], 'initial camera looks straight down').toBeLessThan(-0.99999);
   expect(initialCamera.positiveY[1], 'data +y projects upward').toBeGreaterThan(initialCamera.origin[1]);
-  const reference = await page.evaluate(() => ({
-    best: window.referenceDrawing.dots.find((d) => d.r === 3.5),
-    parent: window.referenceDrawing.dots.find((d) => d.r === 3),
-    dropped: window.referenceDrawing.dots.find((d) => d.r === 2.5),
-    lineWidth: window.referenceDrawing.widths[0],
-  }));
-  expect(reference.best).toBeTruthy();
-  expect(reference.parent).toBeTruthy();
-  expect(reference.dropped).toBeTruthy();
+  // Fig. 1 keeps these visual values after removing the second demo.
+  const reference = {
+    best: { r: 3.5, fill: '#1d4ed8' },
+    parent: { r: 3, fill: '#3b82f6' },
+    dropped: { r: 2.5, fill: '#a1a1aa' },
+    lineWidth: 1.5,
+  };
   expect(initialLayout.best.colour).toBe(reference.best.fill);
   expect(initialLayout.shape.colour).toBe(await root.evaluate((el) => el.cma3d.colors.neutral));
   const maximum = Number(await slider.getAttribute('max'));
@@ -244,7 +232,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(frames.liveEvents).toBe(1);
   expect(frames.fixedBackground, 'the pale background stays fixed during playback').toBe(true);
   expect(frames.background.length, 'a real background has multiple contour bands').toBeGreaterThan(1);
-  expect(frames.background.every((colour) => unit.palette.includes(colour)), 'background uses the complete Fig 2/3 renderer palette').toBe(true);
+  expect(frames.background.every((colour) => unit.palette.includes(colour)), 'background uses the complete contour renderer palette').toBe(true);
   let fixedPoints;
   let meanDiffersFromBest = false;
   const targets = [[0, 0], [2, 0.6], [4, 1.5], [6, 2.2], [1.2, 1.4], [5, 0.9]];
@@ -397,11 +385,11 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       assert(actual.tip[0] >= 0 && actual.tip[0] <= frames.width && actual.tip[1] >= 0 && actual.tip[1] <= frames.height, 'explanation stays inside the fixed view');
     });
     const filled = candidates.filter((c) => c.fill !== '#ffffff');
-    assert.equal(filled.length, 6, 'all candidates use filled points, as in Fig 2 and Fig 3');
+    assert.equal(filled.length, 6, 'all candidates use filled points');
     for (let k = 0; k < candidates.length; k++) {
       const rank = order.indexOf(k), candidate = candidates[k];
       const style = phase >= 1 && rank === 0 ? reference.best : phase >= 2 && rank < 3 ? reference.parent : reference.dropped;
-      assert.equal(candidate.r, style.r, 'marker size matches the actual reference figure');
+      assert.equal(candidate.r, style.r, 'marker size matches the Fig. 1 style');
       assert.equal(candidate.fill, style.fill, 'candidate colours match the actual reference figure');
       assert.equal(candidate.alpha, 1, 'small filled points stay visible');
     }
@@ -777,13 +765,15 @@ test('compact viewport removes vertical space without shrinking geometry', async
   }
 });
 
-test('covariance comparison section is removed', async ({ page }) => {
+test('extra covariance demos are removed', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/');
   await expect(page.locator('#cma-race')).toHaveCount(0);
   await expect(page.getByText(/Why learn/)).toHaveCount(0);
+  await expect(page.getByText('Many generations', { exact: true })).toHaveCount(0);
+  await expect(page.locator('#cma-run')).toHaveCount(0);
   await expect(page.locator('#cma-step .cma-3d canvas')).toHaveCount(1);
-  await expect(page.locator('#cma-run .cma-plot')).toBeVisible();
+  await expect(page.locator('#cma-weights tbody tr')).toHaveCount(3);
 });
 
 test('wheel zoom starts closer and stops at both limits', async ({ page }) => {
@@ -838,7 +828,7 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
   const parameters = await page.evaluate((html) => {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const script = [...doc.scripts].find((s) => !s.type).textContent;
-    const init = 'ready(function () { stepDemo(); runDemo(); });';
+    const init = 'ready(stepDemo);';
     if (script.split(init).length !== 2) throw new Error('Expected one initialization');
     (0, eval)(script.replace(init, 'window.weightParamsForTest = cmaParams;'));
     return [6, 12, 24].map((n) => window.weightParamsForTest(n));

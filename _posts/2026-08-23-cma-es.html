@@ -11,20 +11,13 @@ categories: note
         .cma-demo { --link: #66a1ff; --r30: rgba(128, 128, 128, 0.30); --r14: rgba(128, 128, 128, 0.14); --td: rgb(70, 70, 70); --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: initial; margin: 1.4em 0; }
         .cma-demo .ctrls { display: flex; gap: 0.5em 1em; align-items: center; flex-wrap: wrap; margin: 0.5em 0; }
         .cma-demo .play { cursor: pointer; border: 1px solid var(--r30); background: transparent; color: inherit; border-radius: 4px; width: 1.9em; height: 1.9em; line-height: 1; font-size: 0.85em; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
-        .cma-demo .play:hover, .cma-demo .btn:hover, .cma-demo .seg button:hover { background: var(--r14); }
+        .cma-demo .play:hover { background: var(--r14); }
         .cma-demo .play[data-playing="true"] { border-color: var(--link); color: var(--link); }
         .cma-demo .play-icon { width: 1em; height: 1em; display: block; fill: currentColor; }
         .cma-demo .scrub { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 3px; background: var(--r30); flex: 1 1 auto; min-width: 36px; outline: none; }
         .cma-demo .scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--link); cursor: pointer; }
         .cma-demo .scrub::-moz-range-thumb { width: 14px; height: 14px; border: none; border-radius: 50%; background: var(--link); cursor: pointer; }
         .cma-demo .tval { font-family: var(--mono); font-size: 0.85em; color: var(--td); white-space: nowrap; }
-        .cma-demo .seg { display: inline-flex; border: 1px solid var(--r30); border-radius: 4px; overflow: hidden; }
-        .cma-demo .seg button, .cma-demo .btn { cursor: pointer; border: 0; background: transparent; color: inherit; font: inherit; font-size: 0.85em; padding: 0.2em 0.6em; }
-        .cma-demo .seg button + button { border-left: 1px solid var(--r30); }
-        .cma-demo .seg button[aria-pressed="true"] { color: var(--link); background: var(--r14); }
-        .cma-demo .btn { border: 1px solid var(--r30); border-radius: 4px; }
-        .cma-demo .panels { display: flex; flex-wrap: wrap; gap: 1em; }
-        .cma-demo .panel { flex: 1 1 15em; min-width: 0; }
         .cma-demo .cma-3d canvas { cursor: grab; }
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
@@ -205,46 +198,6 @@ categories: note
             </li>
         </ul>
     </li>
-    <br>
-    <li>
-        Many generations
-    </li>
-        <ul>
-            <li>
-                On a smooth bowl, \(C\) can learn to stretch along the lines that connect points with the same score. These are called contour lines. As the search runs, \(\sigma\) changes the overall spread based on the recent moves.
-            </li>
-        </ul>
-
-    <div class="cma-demo" id="cma-run">
-        <div class="ctrls">
-            <button type="button" class="play" aria-label="play the run">
-                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
-            </button>
-            <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="generation">
-            <span class="tval">gen <span class="gen">0</span></span>
-        </div>
-        <div class="ctrls">
-            <span class="seg" role="group" aria-label="objective function">
-                <button type="button" data-fn="ellipse" aria-pressed="true">rotated ellipse</button>
-                <button type="button" data-fn="rosenbrock" aria-pressed="false">Rosenbrock</button>
-                <button type="button" data-fn="rastrigin" aria-pressed="false">Rastrigin</button>
-            </span>
-            <span class="seg" role="group" aria-label="population size">
-                <button type="button" data-lam="6" aria-pressed="true">&lambda; = 6</button>
-                <button type="button" data-lam="12" aria-pressed="false">12</button>
-                <button type="button" data-lam="24" aria-pressed="false">24</button>
-            </span>
-            <button type="button" class="btn reseed">new seed</button>
-        </div>
-        <div class="panels">
-            <div class="panel"><canvas class="cma-plot" aria-label="Sample points, the search ellipse, and the path of its center. Blue marks the best samples."></canvas></div>
-            <div class="panel"><canvas class="cma-chart" aria-label="Three charts showing the shape of C, the length of recent moves compared with random steps, and the score at the center over time."></canvas></div>
-        </div>
-        <figcaption>
-            Blue points show the best \(\mu\) samples, and gray points show the rest. The small chart on the left shows \(C\) in blue and the contour shape near the center in gray. Both have the same long axis length so you can compare their shapes. The chart on the right joins the recent moves end to end. If their path ends outside the dashed circle, \(\sigma\) grows. If it ends inside, \(\sigma\) shrinks. On Rastrigin, using 6 samples per round found the lowest possible score in 6 of 40 runs. Using 24 samples found it in 32 of 40 runs.
-        </figcaption>
-    </div>
-
 </ul>
 
 <script>
@@ -323,20 +276,6 @@ categories: note
         return order;
     }
 
-    // ---- objectives ----
-    function rotatedEllipse(k, deg, cx, cy) {
-        var t = deg * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
-        return function (x) { var u = c * (x[0] - cx) + s * (x[1] - cy), v = -s * (x[0] - cx) + c * (x[1] - cy); return u * u + k * v * v; };
-    }
-    function rosenbrock(x) { var a = 1 - x[0], b = x[1] - x[0] * x[0]; return a * a + 100 * b * b; }
-    function rastrigin(x) { return 20 + x[0] * x[0] - 10 * Math.cos(2 * Math.PI * x[0]) + x[1] * x[1] - 10 * Math.cos(2 * Math.PI * x[1]); }
-    function hessian(fn, p, h) {                          // lazy: central differences; accurate enough for these smooth 2-D test functions
-        var x = p[0], y = p[1], f0 = fn(p);
-        return [(fn([x + h, y]) - 2 * f0 + fn([x - h, y])) / (h * h),
-                (fn([x + h, y + h]) - fn([x + h, y - h]) - fn([x - h, y + h]) + fn([x - h, y - h])) / (4 * h * h),
-                (fn([x, y + h]) - 2 * f0 + fn([x, y - h])) / (h * h)];
-    }
-
     // run and keep every generation: the distribution before (m, sigma, C), the samples, and the state after
     function record(fn, m0, s0, lam, seed, adaptC, maxGen) {
         var P = cmaParams(lam);
@@ -350,23 +289,10 @@ categories: note
         }
         return { P: P, H: H, f0: fn(m0), s0: s0 };
     }
-    function series(run, key, first) { return [first].concat(run.H.map(function (h) { return h[key]; })); }
-    function pathChain(run, g, K) {                       // p_sigma after generation g, as its last K terms laid head to tail
-        var H = run.H, q = 1 - run.P.cs, k0 = Math.max(0, g - K + 1);
-        function before(k) { return k > 0 ? H[k - 1].ps1 : [0, 0]; }
-        var w = Math.pow(q, g - k0 + 1), p = [w * before(k0)[0], w * before(k0)[1]], pts = [p];   // older terms, already faded
-        for (var k = k0; k <= g; k++) {                   // term k = ps_k - q ps_(k-1), faded by q^(g-k)
-            var a = before(k), b = H[k].ps1, d = Math.pow(q, g - k);
-            p = [p[0] + d * (b[0] - q * a[0]), p[1] + d * (b[1] - q * a[1])];
-            pts.push(p);
-        }
-        return pts;
-    }
-
     // ---- drawing helpers ----
-    var COL = { mean: "#1d4ed8", dist: "#3b82f6", distFill: "rgba(59, 130, 246, 0.08)", pick: "#3b82f6", drop: "#a1a1aa", neutral: "#71717a",
-                trail: "rgba(29, 78, 216, 0.55)", path: "#f59e0b", base: "#d4d4d8", tick: "#71717a", txt: "rgb(70, 70, 70)", paper: "#fff" };
-    var MONO = "10px ui-monospace, monospace", SANS = "11px -apple-system, sans-serif";
+    var COL = { mean: "#1d4ed8", pick: "#3b82f6", drop: "#a1a1aa", neutral: "#71717a",
+                path: "#f59e0b", base: "#d4d4d8", txt: "rgb(70, 70, 70)", paper: "#fff" };
+    var SANS = "11px -apple-system, sans-serif";
     var dpr = Math.max(1, window.devicePixelRatio || 1);
     var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
 
@@ -415,12 +341,11 @@ categories: note
         ctx.fillStyle = fill; ctx.fill();
         if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
     }
-    function ellipse(ctx, map, m, sigma, C, dashed, width = 1) {  // two standard deviations of N(m, sigma^2 C)
+    function ellipse(ctx, map, m, sigma, C, width = 1) {  // two standard deviations of N(m, sigma^2 C)
         var e = eig2(C), a = 2 * sigma * Math.sqrt(Math.max(0, e.l1)) * map.s, b = 2 * sigma * Math.sqrt(Math.max(0, e.l2)) * map.s;
         ctx.beginPath(); ctx.ellipse(map.x(m[0]), map.y(m[1]), a, b, -Math.atan2(e.uy, e.ux), 0, 2 * Math.PI);
-        if (dashed) { ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = width; ctx.stroke(); ctx.setLineDash([]); return e; }
-        ctx.fillStyle = COL.distFill; ctx.fill();
-        ctx.strokeStyle = COL.dist; ctx.lineWidth = 1.5; ctx.stroke();
+        ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = width; ctx.stroke(); ctx.setLineDash([]);
+        return e;
     }
     function arrow(ctx, map, p, q, col, width) {
         var x0 = map.x(p[0]), y0 = map.y(p[1]), x1 = map.x(q[0]), y1 = map.y(q[1]), a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0);
@@ -441,101 +366,6 @@ categories: note
     function labels(ctx, x, y, segs, font, baseline) {   // colored text runs from (x, y)
         ctx.font = font; ctx.textAlign = "left"; ctx.textBaseline = baseline;
         segs.forEach(function (seg) { ctx.fillStyle = seg[1]; ctx.fillText(seg[0], x, y); x += ctx.measureText(seg[0]).width + 8; });
-    }
-
-    // ---- insets: the two ideas the formulas hide ----
-    function insetFrame(ctx, box, title) {
-        ctx.fillStyle = "rgba(255, 255, 255, 0.92)"; ctx.fillRect(box.x, box.y, box.s, box.s);
-        ctx.strokeStyle = "rgba(128, 128, 128, 0.3)"; ctx.lineWidth = 1; ctx.strokeRect(box.x + 0.5, box.y + 0.5, box.s - 1, box.s - 1);
-        labels(ctx, box.x + 6, box.y + 5, title, SANS, "top");
-    }
-    function unitEllipse(ctx, cx, cy, R, C) {            // the ellipse of C scaled so its long semi-axis is R; returns its axis ratio
-        var e = eig2(C), r = Math.sqrt(Math.max(0, e.l2) / e.l1);
-        ctx.beginPath(); ctx.ellipse(cx, cy, R, R * r, -Math.atan2(e.uy, e.ux), 0, 2 * Math.PI);
-        return 1 / r;
-    }
-    function drawShapeInset(ctx, box, fn, m, C) {        // shape of C against the shape of the contour lines at m (the inverse Hessian); fn null draws C alone
-        insetFrame(ctx, box, fn ? [["shape of C", COL.dist], ["contours", COL.neutral]] : [["shape of C", COL.dist]]);
-        var cx = box.x + box.s / 2, cy = box.y + box.s / 2, R = box.s * 0.34, Hm = fn ? hessian(fn, m, 1e-3) : null, det = Hm ? Hm[0] * Hm[2] - Hm[1] * Hm[1] : 0, rows = [];
-        if (Hm && Hm[0] > 0 && det > 0) {
-            var rc = unitEllipse(ctx, cx, cy, R, [Hm[2] / det, -Hm[1] / det, Hm[0] / det]);
-            ctx.setLineDash([4, 3]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1.2; ctx.stroke(); ctx.setLineDash([]);
-            rows.push(["contours " + rc.toFixed(1) + " : 1", COL.neutral]);
-        } else if (Hm) rows.push(["contours: not elliptic here", COL.neutral]);
-        var r = unitEllipse(ctx, cx, cy, R, C);
-        ctx.fillStyle = COL.distFill; ctx.fill(); ctx.strokeStyle = COL.dist; ctx.lineWidth = 1.5; ctx.stroke();
-        rows.unshift(["C " + r.toFixed(1) + " : 1", COL.dist]);
-        rows.forEach(function (seg, i) { labels(ctx, box.x + 6, box.y + box.s - 5 - 12 * (rows.length - 1 - i), [seg], MONO, "bottom"); });
-    }
-    function drawPathInset(ctx, box, run, g) {           // p_sigma as recent steps head to tail, against where random steps would end
-        var h = run.H[g], ratio = h.sigma1 / h.sigma, col = ratio > 1 ? COL.path : COL.dist;
-        insetFrame(ctx, box, [["path p\u03c3", COL.txt], ["random", COL.neutral]]);
-        var cx = box.x + box.s / 2, cy = box.y + box.s / 2, R = box.s * 0.25, k = R / run.P.chiN;
-        var map = { x: function (x) { return cx + x * k; }, y: function (y) { return cy - y * k; } }, pts = pathChain(run, g, 6), i;
-        ctx.save(); ctx.beginPath(); ctx.rect(box.x, box.y + 18, box.s, box.s - 40); ctx.clip();
-        ctx.setLineDash([4, 3]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2 * Math.PI); ctx.stroke(); ctx.setLineDash([]);
-        dot(ctx, map, [0, 0], 2, COL.txt);
-        var a0 = ctx.globalAlpha;                         // the caller's fade; older steps are fainter on top of it
-        for (i = 1; i < pts.length; i++) { ctx.globalAlpha = a0 * (0.3 + 0.7 * i / (pts.length - 1)); arrow(ctx, map, pts[i - 1], pts[i], col, 1.5); }
-        ctx.restore();
-        labels(ctx, box.x + 6, box.y + box.s - 5, [[(ratio > 1 ? "\u03c3 grows \u00d7" : "\u03c3 shrinks \u00d7") + ratio.toFixed(2), col]], MONO, "bottom");
-    }
-
-    // distribution at continuous time t in [0, G]: generation floor(t), blended toward its updated state
-    function stateAt(run, t) {
-        var G = run.H.length, g = Math.min(G - 1, Math.floor(Math.max(0, t))), a = clamp01(t - g), h = run.H[g];
-        return { g: g, h: h, m: lerp2(h.m, h.m1, a), sigma: geo(h.sigma, h.sigma1, a), C: lerpC(h.C, h.C1, a) };
-    }
-    function drawRun(ctx, W, H, run, t, view, bg, opt, note) {
-        var map = viewMap(view, W, H), st = stateAt(run, t), P = run.P, h = st.h, i;
-        ctx.clearRect(0, 0, W, H);
-        if (bg) ctx.drawImage(bg, 0, 0, W, H);
-        cross(ctx, map, opt);
-        ctx.strokeStyle = COL.trail; ctx.lineWidth = 1.2; ctx.beginPath();
-        ctx.moveTo(map.x(run.H[0].m[0]), map.y(run.H[0].m[1]));
-        for (i = 1; i <= st.g; i++) ctx.lineTo(map.x(run.H[i].m[0]), map.y(run.H[i].m[1]));
-        ctx.lineTo(map.x(st.m[0]), map.y(st.m[1])); ctx.stroke();
-        ellipse(ctx, map, st.m, st.sigma, st.C);
-        for (i = P.mu; i < P.lam; i++) dot(ctx, map, h.X[h.order[i]], 2.5, COL.drop);
-        for (i = 0; i < P.mu; i++) dot(ctx, map, h.X[h.order[i]], 3, COL.pick);
-        dot(ctx, map, st.m, 3.5, COL.mean, "#fff");
-        if (note) labels(ctx, 8, 8, [[note, COL.txt]], SANS, "top");
-        return st;
-    }
-
-    // log-scale line chart; lines = [{ v: [...], col }], xf(i) maps an index to [0, 1]; the part after `cursor` is faint
-    function logChart(ctx, box, lines, xf, cursor, title) {
-        var lo = Infinity, hi = -Infinity;
-        lines.forEach(function (L) { L.v.forEach(function (v) { if (v > 0 && isFinite(v)) { var l = Math.log10(v); lo = Math.min(lo, l); hi = Math.max(hi, l); } }); });
-        lo = Math.floor(lo); hi = Math.ceil(hi); if (hi - lo < 1) hi = lo + 1;
-        var step = Math.max(1, Math.ceil((hi - lo) / 4)), n = lines[0].v.length, e;
-        var px = function (f) { return box.x + f * box.w; }, py = function (l) { return box.y + (1 - (l - lo) / (hi - lo)) * box.h; };
-        var cf = Math.floor(cursor), cx = px(lerp(xf(cf), xf(Math.min(cf + 1, n - 1)), cursor - cf));
-        ctx.font = MONO; ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.lineWidth = 1;
-        for (e = hi; e >= lo; e -= step) {
-            ctx.strokeStyle = "rgba(128, 128, 128, 0.14)"; ctx.beginPath(); ctx.moveTo(box.x, py(e)); ctx.lineTo(box.x + box.w, py(e)); ctx.stroke();
-            ctx.fillStyle = COL.tick; ctx.fillText(e === 0 ? "1" : "1e" + e, box.x - 4, py(e));
-        }
-        ctx.strokeStyle = COL.base; ctx.beginPath(); ctx.moveTo(box.x, box.y + box.h); ctx.lineTo(box.x + box.w, box.y + box.h); ctx.stroke();
-        lines.forEach(function (L) {
-            [0.25, 1].forEach(function (alpha) {
-                ctx.globalAlpha = alpha; ctx.strokeStyle = L.col; ctx.lineWidth = 1.5; ctx.beginPath();
-                var started = false, i;
-                for (i = 0; i < L.v.length; i++) {
-                    if (alpha === 1 && i > cursor) break;
-                    if (!(L.v[i] > 0)) continue;
-                    var X = px(xf(i)), Y = py(Math.log10(L.v[i]));
-                    if (started) ctx.lineTo(X, Y); else { ctx.moveTo(X, Y); started = true; }
-                }
-                if (alpha === 1 && started && cf + 1 < L.v.length && L.v[cf] > 0 && L.v[cf + 1] > 0) {   // end the solid part exactly at the cursor
-                    ctx.lineTo(cx, py(lerp(Math.log10(L.v[cf]), Math.log10(L.v[cf + 1]), cursor - cf)));
-                }
-                ctx.stroke();
-            });
-            ctx.globalAlpha = 1;
-        });
-        ctx.strokeStyle = COL.neutral; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(cx, box.y); ctx.lineTo(cx, box.y + box.h); ctx.stroke(); ctx.setLineDash([]);
-        labels(ctx, box.x, box.y - 5, title, SANS, "bottom");
     }
 
     // play / pause button + scrub slider driving a time value t in [0, tMax]
@@ -704,10 +534,10 @@ categories: note
             if (ph >= 3) {
                 ctx.save(); ctx.globalAlpha = 0.3;
                 var beforeC = ph === 5 ? h.C1 : historyStage ? h.CSamples : h.C;
-                ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, beforeC, true);
+                ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, beforeC);
                 ctx.restore();
             }
-            var axes = ellipse(ctx, map, m, sigma, C, true, ph >= 4 ? 2 : 1);
+            var axes = ellipse(ctx, map, m, sigma, C, ph >= 4 ? 2 : 1);
             if (ph >= 4) {
                 var directions = [[axes.ux, axes.uy, axes.l1], [axes.uy, -axes.ux, axes.l2]];
                 var tips = directions.map(function (d) {
@@ -783,52 +613,7 @@ categories: note
         if (!REDUCED) onFirstView(root, function () { player.play(); });
     }
 
-    // ---- figure 2: the whole run on three functions, with the shape and path insets ----
-    function runDemo() {
-        var root = document.getElementById("cma-run");
-        if (!root) return;
-        var plot = root.querySelector(".cma-plot"), chart = root.querySelector(".cma-chart"), label = root.querySelector(".gen");
-        var FUN = {
-            ellipse:    { fn: rotatedEllipse(100, 30, 1, 1), view: { cx: 0, cy: 0.5, half: 3.5 }, m0: [-2.5, -1.5], s0: 1, opt: [1, 1], seed: 2 },
-            rosenbrock: { fn: rosenbrock, view: { cx: 0, cy: 1, half: 2 }, m0: [-1.2, 1], s0: 0.5, opt: [1, 1], seed: 3 },
-            rastrigin:  { fn: rastrigin, view: { cx: 0, cy: 0, half: 5.12 }, m0: [3.5, 3.5], s0: 2, opt: [0, 0], seed: 3 }
-        };
-        var cur = "ellipse", lam = 6, seed = FUN[cur].seed, run = null, bg = null, A = null, B = null;
-        var player = new Player(root, 14, render);
-
-        function layout() { A = fit(plot, 1); B = fit(chart, 1); bg = null; }
-        function rerun() { var F = FUN[cur]; run = record(F.fn, F.m0, F.s0, lam, seed, true, 600); player.setMax(run.H.length); }
-        function render(t) {
-            var F = FUN[cur], G = run.H.length;
-            if (!bg) bg = landscape(F.fn, F.view, A.W, A.H);
-            var st = drawRun(A.ctx, A.W, A.H, run, t, F.view, bg, F.opt);
-            var ctx = B.ctx, gap = 12, s = Math.floor((B.W - gap) / 2), L = 40, R = 10, bottom = 22, top = s + 30;
-            ctx.clearRect(0, 0, B.W, B.H);
-            drawShapeInset(ctx, { x: 0, y: 0, s: s }, F.fn, st.m, st.C);
-            drawPathInset(ctx, { x: s + gap, y: 0, s: s }, run, st.g);
-            logChart(ctx, { x: L, y: top, w: B.W - L - R, h: B.H - top - bottom }, [{ v: series(run, "f1", run.f0), col: COL.mean }], function (i) { return i / G; }, t, [["f(m)", COL.mean]]);
-            labels(ctx, L, B.H - bottom + 4, [["0", COL.tick]], MONO, "top");
-            ctx.textAlign = "right"; ctx.fillText(G + " generations", B.W - R, B.H - bottom + 4);
-            label.textContent = Math.min(G, Math.floor(t)) + " / " + G + ", seed " + seed;
-        }
-        function restart() { rerun(); player.stop(); player.set(0); player.play(); }
-        function press(attr, value) {
-            root.querySelectorAll("[" + attr + "]").forEach(function (b) { b.setAttribute("aria-pressed", b.getAttribute(attr) === String(value) ? "true" : "false"); });
-        }
-        root.querySelectorAll("[data-fn]").forEach(function (b) {
-            b.addEventListener("click", function () { cur = b.dataset.fn; seed = FUN[cur].seed; bg = null; press("data-fn", cur); restart(); });
-        });
-        root.querySelectorAll("[data-lam]").forEach(function (b) {
-            b.addEventListener("click", function () { lam = parseInt(b.dataset.lam, 10); press("data-lam", lam); restart(); });
-        });
-        root.querySelector(".reseed").addEventListener("click", function () { seed = 1 + Math.floor(Math.random() * 99999); restart(); });
-
-        layout(); rerun(); player.set(REDUCED ? player.tMax : 0);
-        onResize(plot.parentNode, function () { layout(); render(player.t); });
-        if (!REDUCED) onFirstView(root, function () { player.play(); });
-    }
-
-    ready(function () { stepDemo(); runDemo(); });
+    ready(stepDemo);
 })();
 </script>
 
