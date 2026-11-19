@@ -64,7 +64,6 @@ categories: note
         .cma-demo .weight-track { flex: 1; min-width: 0; height: 0.6em; background: var(--r14); }
         .cma-demo .weight-bar { display: block; height: 100%; }
         .cma-demo .weight-percent { flex: none; width: 3.5em; text-align: right; font-size: 0.85em; }
-        .cma-demo .weight-note { font-size: 0.85em; }
     </style>
 
 <ul>
@@ -156,13 +155,11 @@ categories: note
     </li>
     <div class="cma-demo" id="cma-weights">
         <p class="weight-intro"></p>
-        <p>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight. The bars show how much each sample counts out of 100%.</p>
+        <p>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight.</p>
         <table class="cma-table cma-weight-table" aria-label="Rank, log score, and normalized weight for the three selected samples">
             <thead><tr><th scope="col">Rank</th><th scope="col">Log score</th><th scope="col">Weight</th></tr></thead>
             <tbody></tbody>
         </table>
-        <p>Total log score: <span class="weight-total"></span>. For rank 1: <span class="weight-worked"></span>.</p>
-        <p class="weight-note"><span class="weight-dropped"></span> A sample's place in the ranking sets its weight. The same weights apply even if the gap between the radii changes. The table shows rounded values.</p>
     </div>
     <br>
     <li id="cma-updates">
@@ -217,7 +214,7 @@ categories: note
         var c1 = 2 / ((n + 1.3) * (n + 1.3) + mueff);
         return {
             n: n, lam: lam, mu: mu, w: w, mueff: mueff, cs: cs, c1: c1,
-            rawWeights: rawWeights, weightTotal: s,
+            rawWeights: rawWeights,
             cc: (4 + mueff / n) / (n + 4 + 2 * mueff / n),
             cmu: Math.min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((n + 2) * (n + 2) + mueff)),
             damps: 2 * mueff / lam + 0.3 + cs,
@@ -437,9 +434,6 @@ categories: note
                 '<span class="weight-percent">\\(' + percent.toFixed(1) + '\\%\\)</span></div></td></tr>';
         }).join("");
         window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, weightChart]);
-        weightChart.querySelector(".weight-total").textContent = P.weightTotal.toFixed(3);
-        weightChart.querySelector(".weight-worked").textContent = P.rawWeights[0].toFixed(3) + " / " + P.weightTotal.toFixed(3) + " \u2248 " + (100 * P.w[0]).toFixed(1) + "%";
-        weightChart.querySelector(".weight-dropped").textContent = "Ranks " + (P.mu + 1) + " to " + P.lam + " get 0%.";
         root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
         root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
         root.querySelector(".n-r").textContent = fn(OPT).toFixed(2);

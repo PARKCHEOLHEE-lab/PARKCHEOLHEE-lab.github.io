@@ -841,7 +841,6 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
     const raw = Array.from({ length: P.mu }, (_, i) => Math.log((P.lam + 1) / (2 * (i + 1))));
     const total = raw.reduce((a, b) => a + b, 0);
     expect(P.rawWeights).toHaveLength(P.mu);
-    expect(P.weightTotal).toBeCloseTo(total, 12);
     raw.forEach((v, i) => {
       expect(P.rawWeights[i]).toBeCloseTo(v, 12);
       expect(P.w[i]).toBeCloseTo(v / total, 12);
@@ -853,9 +852,7 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
   await expect(graph.locator('.weight-intro .mjx-chtml')).toBeVisible();
   expect(await graph.locator('.weight-intro script[type="math/tex"]').textContent()).toBe('3 + 0.5 = 3.5');
   await expect(graph.locator('tbody .mjx-chtml')).toHaveCount(9);
-  await expect(graph.locator('.weight-total')).toHaveText('1.967');
-  await expect(graph.locator('.weight-worked')).toHaveText('1.253 / 1.967 ≈ 63.7%');
-  await expect(graph.locator('.weight-dropped')).toHaveText('Ranks 4 to 6 get 0%.');
+  await expect(graph).not.toContainText(/The bars show how much|Total log score|For rank 1|Ranks 4 to 6 get 0%|The table shows rounded values/);
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
     const rows = await graph.locator('tbody tr').evaluateAll((rows) => rows.map((row) => ({
