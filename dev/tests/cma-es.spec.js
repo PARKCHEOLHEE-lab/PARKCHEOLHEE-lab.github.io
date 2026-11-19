@@ -254,7 +254,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const phase = Math.min(5, Math.floor(index / samplesPerPhase - generation * 6));
     const historyStage = phase === 4 && index % samplesPerPhase >= 2;
     const names = ['1. Draw samples.', '2. Rank the samples.', '3. Keep the best.', '4. Move the center.',
-      historyStage ? '5b. Learn from center moves.' : '5a. Learn from the best samples.', '6. Change size (σ).'];
+      historyStage ? '5b. Learn from center moves.' : '5a. Learn from the best samples.', '6. Change size (σ)'];
     assert.equal(frame.stepName, names[phase]);
     const progress = index === frames.frames.length - 1 ? 1 : [0, 0.125, 0.5, 0.875][index % samplesPerPhase];
     const targetSamples = unit.generations[generation];

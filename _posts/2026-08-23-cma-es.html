@@ -477,7 +477,7 @@ categories: note
                 ? "<b>5b. Learn from center moves.</b> The orange arrow combines recent center moves. Add spread along its line in both directions."
                 : "<b>5a. Learn from the best samples.</b> Keep most of the old spread. Each blue arrow adds spread along its line in both directions.";
             var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
-            return "<b>6. Change size (\u03c3).</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
+            return "<b>6. Change size (\u03c3)</b>. The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
         }
         function layout() { A = fit(cTop, 1); bg = null; }
 
