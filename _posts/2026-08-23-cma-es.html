@@ -240,7 +240,8 @@ categories: note
                         <figcaption>Opposite arrows both add horizontal spread</figcaption>
                     </figure>
                 </div>
-                The samples add more spread left to right than up and down. Start with equal spread in both directions, \(C_{\text{old}}=I\). Use weights of \(0.5\) for \(I\) and \(0.25\) for \(S\).
+                Start with equal spread in both directions, \(C_{\text{old}}=I\). For this example, choose two simple update rates. Use \(0.25\) for the sample matrix \(S\) and \(0.25\) for the center-move matrix we will add next. That leaves \(1-0.25-0.25=0.5\) for \(C_{\text{old}}\).
+                Apply the sample part now. The effect of the center moves comes in the next step.
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the sample update">
                     <div class="cma-explain-math">\[
                         C_{\text{samples}} = 0.5 I + 0.25 S
@@ -257,6 +258,23 @@ categories: note
                         <figcaption>After the samples, the ellipse is wider and shorter</figcaption>
                     </figure>
                 </div>
+                <details>
+                    <summary>How Fig. 1 sets the update rates</summary>
+                    <p>Fig. 1 uses the default CMA-ES rates. First, square and add the rank weights from the table above. Take the reciprocal to get the effective number of samples \(\mu_{\text{eff}}\). This measures how many equally weighted samples would have the same total squared weight.</p>
+                    \[
+                        \mu_{\text{eff}}=\frac{1}{w_1^2+w_2^2+w_3^2}
+                        \approx 2.03
+                    \]
+                    <p>Use \(n=2\) because each candidate is a point \((x,y)\). Put \(n\) and \(\mu_{\text{eff}}\) into the two rate formulas.</p>
+                    \[
+                        \begin{aligned}
+                        c_1 &= \frac{2}{(n+1.3)^2+\mu_{\text{eff}}} \approx 0.155 \\[0.5em]
+                        c_\mu &= \frac{2(\mu_{\text{eff}}-2+1/\mu_{\text{eff}})}
+                            {(n+2)^2+\mu_{\text{eff}}} \approx 0.058
+                        \end{aligned}
+                    \]
+                    <p>The center-move matrix uses \(c_1\). The sample matrix uses \(c_\mu\), capped at \(1-c_1\). In round 3, both updates use their full rates, leaving \(1-0.155-0.058\approx0.787\) for the old \(C\).</p>
+                </details>
             </li>
             <li>
                 <b>Learn from center moves</b><br>
@@ -267,7 +285,7 @@ categories: note
                     + \begin{pmatrix}0.5\\0.5\end{pmatrix}
                     = \begin{pmatrix}1\\1\end{pmatrix}
                 \]
-                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Multiply that matrix by \(0.25\) and add it to the result from the blue arrows.
+                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Use the center-move rate of \(0.25\) from above, then add this weighted matrix to \(C_{\text{samples}}\).
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the center move update">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
