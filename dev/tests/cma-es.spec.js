@@ -124,7 +124,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const button = root.locator('.play');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
   const matrix = root.locator('.cma-covariance');
-  await expect(matrix.locator('.mjx-mtable')).toBeVisible();
+  await expect(matrix.locator('.mjx-mtable').first()).toBeVisible();
   expect((await root.locator('.phase').boundingBox()).height).toBeLessThan(2);
   await expect(page.getByText('One generation as equations', { exact: true })).toHaveCount(0);
   await expect(root.locator('.update-before')).toHaveCount(1);
@@ -444,6 +444,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(frames.finalFrame.X).toHaveLength(6);
   await expect(root.locator('.gen')).toHaveText(/step 6 of 6/);
   const matrixSource = matrix.locator('script[type="math/tex"]');
+  let initialEquation;
   const checkMatrix = async (times) => {
     await slider.evaluate((input, values) => {
       for (const value of values) {
@@ -457,8 +458,27 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const a = Math.cos(angle), b = Math.sin(angle), x = rx ** 2, y = ry ** 2;
     const format = (v) => (Math.round(v / (4 * scale ** 2) * 1000) / 1000).toFixed(3);
     const values = [format(x * a ** 2 + y * b ** 2), format((y - x) * a * b), format(x * b ** 2 + y * a ** 2)];
-    await expect.poll(async () => (await matrixSource.textContent()).match(/-?\d+\.\d{3}/g))
+    await expect.poll(async () => (await matrixSource.textContent()).match(/-?\d+\.\d{3}/g)?.slice(-4))
       .toEqual([values[0], values[1], values[1], values[2]]);
+    await matrix.evaluate(() => new Promise((resolve) => window.MathJax.Hub.Queue(resolve)));
+    const equation = await matrix.locator('.MathJax_CHTML').boundingBox();
+    const panel = await matrix.boundingBox();
+    expect(equation.x).toBeGreaterThanOrEqual(panel.x - 0.5);
+    expect(equation.x + equation.width).toBeLessThanOrEqual(panel.x + panel.width + 0.5);
+    initialEquation ||= equation;
+    for (const dimension of ['x', 'width', 'height']) {
+      expect(equation[dimension], 'the LaTeX equation holds its size and position when signs change').toBeCloseTo(initialEquation[dimension], 1);
+    }
+    const time = times.at(-1), generation = Math.floor(time / 6);
+    const distribution = unit.distributions[generation];
+    const f = Math.max(0, time - generation * 6 - 5);
+    const fraction = f <= 0.5 ? 2 * f ** 2 : 1 - 2 * (1 - f) ** 2;
+    const sigma2 = (distribution.sigma * (distribution.sigma1 / distribution.sigma) ** fraction) ** 2;
+    const term = (v) => (Math.round(v * 1000) / 1000).toFixed(3);
+    const C = [x * a ** 2 + y * b ** 2, (y - x) * a * b, x * b ** 2 + y * a ** 2]
+      .map((v) => term(v / (4 * scale ** 2 * sigma2)));
+    expect((await matrixSource.textContent()).match(/-?\d+\.\d{3}/g))
+      .toEqual([term(sigma2), C[0], C[1], C[1], C[2], values[0], values[1], values[1], values[2]]);
   };
   await checkMatrix([0]);
   await checkMatrix([16.25]);

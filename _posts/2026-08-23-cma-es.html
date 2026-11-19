@@ -31,8 +31,8 @@ categories: note
         #cma-step { margin-inline: -1em; }
         #cma-step .cma-step-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; }
         #cma-step .cma-view { position: relative; flex: 1 1 22em; min-width: 0; }
-        #cma-step .cma-covariance { flex: 0 0 11em; min-width: 0; max-width: 100%; text-align: center; }
-        #cma-step .covariance-math { font-size: 0.9em; }
+        #cma-step .cma-covariance { flex: 0 0 14em; min-width: 0; max-width: 100%; text-align: center; }
+        #cma-step .covariance-math { font-size: 0.86em; }
         #cma-step .cma-covariance small { display: block; margin-top: 0.4em; color: var(--td); }
         #cma-step .cma-top { position: absolute; inset: 0; visibility: hidden; pointer-events: none; }
         #cma-step .cma-legend { position: absolute; top: 1em; left: 1em; padding: 0.4em 0.5em; background: var(--paper); font-family: var(--mono); font-size: 0.75em; pointer-events: none; }
@@ -131,7 +131,7 @@ categories: note
             </div>
         </div>
         <div class="cma-covariance">
-            <span class="covariance-math">\(\sigma^2 C = \begin{pmatrix}1.000 & 0.000 \\ 0.000 & 1.000\end{pmatrix}\)</span>
+            <span class="covariance-math">\(\sigma^2 C\)</span>
             <small>Rounded to 3 decimal places</small>
         </div>
         </div>
@@ -646,6 +646,15 @@ categories: note
                 if (hub.getAllJax(matrix).length) queueMatrix();
             });
         }
+        function matrixTex(values) {
+            var entries = values.map(function (v) {
+                var rounded = Math.round(v * 1000) / 1000;
+                // Hold the minus sign's space even when the entry is positive.
+                return (rounded < 0 ? "-" : "\\phantom{-}") + Math.abs(rounded).toFixed(3);
+            });
+            return "\\begin{bmatrix}" + entries[0] + " & " + entries[1] +
+                " \\\\ " + entries[1] + " & " + entries[2] + "\\end{bmatrix}";
+        }
         window.addEventListener("load", queueMatrix, { once: true });
 
         // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
@@ -688,9 +697,9 @@ categories: note
                 C = historyStage ? lerpC(h.CSamples, h.C1, ease(2 * f - 1)) : lerpC(h.C, h.CSamples, ease(2 * f));
             }
             if (ph === 5) { C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
-            var values = C.map(function (v) { return (Math.round(sigma * sigma * v * 1000) / 1000).toFixed(3); });
-            pendingMatrix = "\\sigma^2 C = \\begin{pmatrix}" + values[0] + " & " + values[1] +
-                " \\\\ " + values[1] + " & " + values[2] + "\\end{pmatrix}";
+            var sigma2 = sigma * sigma;
+            pendingMatrix = "\\begin{aligned}\\sigma^2 C &= " + sigma2.toFixed(3) + " \\times " +
+                matrixTex(C) + " \\\\ &= " + matrixTex(C.map(function (v) { return sigma2 * v; })) + "\\end{aligned}";
             queueMatrix();
             if (ph >= 3) {
                 ctx.save(); ctx.globalAlpha = 0.3;
