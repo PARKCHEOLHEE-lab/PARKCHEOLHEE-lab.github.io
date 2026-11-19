@@ -67,17 +67,17 @@ categories: note
 
 <ul>
     <li>
-        Optimizing without a gradient
+        Finding a better answer using scores
     </li>
         <ul>
             <li>
-                <b>CMA-ES</b> (Covariance Matrix Adaptation Evolution Strategy) minimizes a function \(f\) from its values alone, so it needs no gradient
+                <b>CMA-ES</b> (Covariance Matrix Adaptation Evolution Strategy) looks for an answer with a low score \(f\). It only needs to score each candidate. It can work without a gradient, which tells you how the score changes near a point.
             </li>
             <li>
-                It keeps a normal distribution \(\mathcal{N}(m, \sigma^2 C)\). Every generation samples \(\lambda\) points from it, ranks them by \(f\), and moves the distribution toward the best ones
+                CMA-ES draws candidates from a normal distribution \(\mathcal{N}(m, \sigma^2 C)\). In each round (called a generation), it draws \(\lambda\) candidates and sorts them by score. It uses the best ones to choose where to look in the next round.
             </li>
             <li>
-                <mark>The mean \(m\) says where to search, the step size \(\sigma\) how far, and the covariance \(C\) in which shape</mark>
+                <mark>The mean \(m\) is the center. The step size \(\sigma\) sets the overall spread. The matrix \(C\) sets how the search stretches in different directions.</mark>
             </li>
         </ul>
     <br>
@@ -86,16 +86,16 @@ categories: note
     </li>
         <ul>
             <li>
-                Find the smallest circle that holds six points. Search for its center \((x, y)\), so there are two parameters (\(n = 2\))
+                Find the smallest circle that holds six points. Each candidate gives a possible center \((x, y)\), so the search has two variables (\(n = 2\)).
             </li>
             <li>
-                Once the center is fixed, the circle only has to reach the farthest point, so its radius is
+                For each center, find the distance to the farthest point. That distance is the radius and the score \(f\).
                 <div class="latex-container">
                 \[
                     f(x, y) = \max_i \, \lVert (x, y) - p_i \rVert
                 \]
                 </div>
-                A smaller \(f\) is a smaller circle
+                A lower score means a smaller circle.
             </li>
         </ul>
 
@@ -127,38 +127,37 @@ categories: note
             </div>
         </div>
         <figcaption>
-            Blue arrows point to selected samples; thicker arrows carry more weight. Faint dashes show the spread before each update. Some samples can lie outside the dashed guide. Rotate to see radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), with radius <span class="n-r">3.20</span> (<span class="n-gen">9</span> generations shown).
+            Blue arrows point to the samples we keep. Thicker arrows have more influence. Light dashes show the spread before each update. Some samples can fall outside those dashes. Turn the view to see the radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and its radius is <span class="n-r">3.20</span>. The figure shows <span class="n-gen">9</span> rounds.
         </figcaption>
     </div>
     <br>
     <li>
-        How rank becomes weight
+        How much each rank counts
     </li>
     <div class="cma-demo" id="cma-weights">
         <p class="weight-intro"></p>
-        <p>Take \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\), then divide each log score by the total. The bars show the resulting shares of 100%.</p>
+        <p>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight. The bars show how much each sample counts out of 100%.</p>
         <table class="cma-table cma-weight-table" aria-label="Rank, log score, and normalized weight for the three selected samples">
             <thead><tr><th scope="col">Rank</th><th scope="col">Log score</th><th scope="col">Weight</th></tr></thead>
             <tbody></tbody>
         </table>
         <p>Total log score: <span class="weight-total"></span>. For rank 1: <span class="weight-worked"></span>.</p>
-        <p class="weight-note"><span class="weight-dropped"></span> These weights depend on rank, not the gap between radii. Displayed values are rounded.</p>
+        <p class="weight-note"><span class="weight-dropped"></span> A sample's place in the ranking sets its weight. The same weights apply even if the gap between the radii changes. The table shows rounded values.</p>
     </div>
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
         <ul>
             <li>
-                <b>Step 5a: Start with the old shape and learn from the best samples.</b>
-                CMA-ES keeps most of the old \(C\). Each blue arrow runs from the old center to a selected sample.
-                Divide that step by \(\sigma\), then multiply its column vector by its row vector.
-                This gives a matrix that adds spread along the arrow's line, in both directions.
-                The rank weight controls how much each sample adds.
+                <b>Step 5a. Learn from the best samples.</b>
+                CMA-ES keeps most of the old \(C\). Each blue arrow shows a step from the old center to a sample we kept.
+                Divide both numbers in that step by \(\sigma\). Write the result as a column and as a row, then multiply them as shown below.
+                This adds spread along the arrow's line in both directions. Samples with higher weights add more for the same step.
             </li>
             <li>
-                <b>Step 5b: Add the record of center moves.</b>
-                The orange arrow shows the direction of a running sum of center moves. Older moves gradually count less.
-                If this record is \(p_c=(2,1)\), its <i>outer product</i> (column times row) is
+                <b>Step 5b. Learn from where the center has moved.</b>
+                The orange arrow combines center moves from several rounds. Older moves count less.
+                Suppose this sum is \(p_c=(2,1)\). Use the same column-times-row rule, called an <i>outer product</i>.
                 \[
                     p_c p_c^\top =
                     \begin{pmatrix}2\\1\end{pmatrix}
@@ -166,16 +165,15 @@ categories: note
                     =
                     \begin{pmatrix}4 & 2\\2 & 1\end{pmatrix}.
                 \]
-                The diagonal adds to the horizontal and vertical spread. The off-diagonal \(2\) means the two coordinates tend to vary together.
-                CMA-ES adds a small multiple of this matrix to \(C\), which adds spread along the diagonal through \((2,1)\).
-                The center stays in place during this shape update.
+                The \(4\) and \(1\) add to the spread along \(x\) and \(y\). The two \(2\)s link the two axes. They add spread along the line that goes right 2 and up 1, as well as back along that same line.
+                CMA-ES adds only a small share of this matrix to \(C\). The center stays in place during this step.
             </li>
             <li>
-                <b>Step 6: Change the overall size.</b>
-                CMA-ES keeps a separate sum of recent center moves, measured in units of the current spread in each direction.
-                Moves that line up make the sum longer. Moves that turn back can cancel out.
-                The tick on the bar marks the expected length for random steps. A longer sum makes \(\sigma\) grow, and a shorter sum makes it shrink.
-                For example, near the end of generation 3, both axes grow by about \(1.30\) times. Their ratio and direction stay the same.
+                <b>Step 6. Make the whole ellipse bigger or smaller.</b>
+                CMA-ES keeps another sum of recent center moves. It measures each move against the current spread in that direction.
+                Moves in the same direction add up. Moves that turn back can cancel out.
+                The mark on the bar shows how long the sum would be on average for random steps. If the sum is longer, \(\sigma\) grows. If it is shorter, \(\sigma\) shrinks.
+                In round 3, both axes end up about \(1.30\) times as long. The angle and the ratio of the two lengths stay the same.
             </li>
         </ul>
     </li>
@@ -185,7 +183,7 @@ categories: note
     </li>
         <ul>
             <li>
-                Over many generations, \(C\) takes the shape of the contour lines, and \(\sigma\) follows whether recent steps agree
+                On a smooth bowl, \(C\) can learn to stretch along the lines that connect points with the same score. These are called contour lines. As the search runs, \(\sigma\) changes the overall spread based on the recent moves.
             </li>
         </ul>
 
@@ -211,11 +209,11 @@ categories: note
             <button type="button" class="btn reseed">new seed</button>
         </div>
         <div class="panels">
-            <div class="panel"><canvas class="cma-plot" aria-label="CMA-ES on a 2D function: the samples of one generation, the best ones highlighted, the search distribution drawn as an ellipse, and the path of its mean."></canvas></div>
-            <div class="panel"><canvas class="cma-chart" aria-label="Two insets and a chart: the shape of C next to the shape of the contour lines, the path p sigma against the length random steps would give, and f at the mean over the generations."></canvas></div>
+            <div class="panel"><canvas class="cma-plot" aria-label="Sample points, the search ellipse, and the path of its center. Blue marks the best samples."></canvas></div>
+            <div class="panel"><canvas class="cma-chart" aria-label="Three charts showing the shape of C, the length of recent moves compared with random steps, and the score at the center over time."></canvas></div>
         </div>
         <figcaption>
-            Blue points are the best \(\mu\) samples and gray points are dropped. Left inset: the shape of \(C\) (blue) against the contour lines at \(m\) (gray), both scaled to one size. Right inset: the recent steps of \(p_\sigma\) laid head to tail; ending outside the dashed circle, where random steps would end, makes \(\sigma\) grow, and ending inside makes it shrink. On Rastrigin, \(\lambda = 6\) found the global minimum in 6 of 40 seeds and \(\lambda = 24\) in 32.
+            Blue points show the best \(\mu\) samples, and gray points show the rest. The small chart on the left shows \(C\) in blue and the contour shape near the center in gray. Both have the same long axis length so you can compare their shapes. The chart on the right joins the recent moves end to end. If their path ends outside the dashed circle, \(\sigma\) grows. If it ends inside, \(\sigma\) shrinks. On Rastrigin, using 6 samples per round found the lowest possible score in 6 of 40 runs. Using 24 samples found it in 32 of 40 runs.
         </figcaption>
     </div>
 
@@ -610,13 +608,13 @@ categories: note
             return bounds();
         })();
         function phaseText(ph, historyStage, pathRatio) {
-            if (ph === 0) return "<b>1. Sample.</b> Draw " + P.lam + " new candidate centers. The motion links one generation to the next.";
-            if (ph === 1) return "<b>2. Rank.</b> Evaluate all " + P.lam + " centers. Blue marks the best circle. Gray dashes show the search spread.";
-            if (ph === 2) return "<b>3. Select.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows carry more weight.";
-            if (ph === 3) return "<b>4. Move the mean.</b> X moves toward the weighted center of those samples. Faint dashes show where the search shape started.";
+            if (ph === 0) return "<b>1. Draw samples.</b> Pick " + P.lam + " new possible centers. Watch the points change from one round to the next.";
+            if (ph === 1) return "<b>2. Rank the samples.</b> Find the radius for each center. The blue circle has the smallest radius. Gray dashes show the search spread.";
+            if (ph === 2) return "<b>3. Keep the best.</b> Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows give a sample more influence.";
+            if (ph === 3) return "<b>4. Move the center.</b> Average the samples you kept. Give higher ranks more weight. Move X to that average.";
             if (ph === 4) return historyStage
-                ? "<b>5b. C: Add recent center moves.</b> The orange arrow combines moves from several rounds. Add spread in both directions along its line."
-                : "<b>5a. C: Learn from the top 3.</b> Keep most of the old spread. Each blue arrow points to a top sample and adds spread both ways along its line.";
+                ? "<b>5b. Change C using past moves.</b> The orange arrow combines recent center moves. Add spread along its line in both directions."
+                : "<b>5a. Change C using the top 3 samples.</b> Keep most of the old spread. Each blue arrow adds spread along its line in both directions.";
             var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
             return "<b>6. Change size (\u03c3).</b> The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
         }
