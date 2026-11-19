@@ -21,6 +21,11 @@ categories: note
         .cma-demo .cma-3d canvas { cursor: grab; }
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
+        #cma-updates .cma-explain { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; margin-block: 1em; }
+        #cma-updates .cma-explain-math { min-width: 0; max-width: 100%; }
+        #cma-updates .cma-explain figure { flex: 0 1 10em; margin: 0; text-align: center; }
+        #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
+        #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
         #cma-step { margin-inline: -1em; }
         #cma-step .cma-step-layout { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; }
         #cma-step .cma-view { position: relative; flex: 1 1 22em; min-width: 0; }
@@ -181,17 +186,44 @@ categories: note
                     = \begin{pmatrix}2\\0\end{pmatrix}
                 \]
                 To turn an arrow into a matrix, multiply its column by its row. For \(d_1\), the top-left entry is \(2^2=4\), and the other entries are zero. The leftward arrow \(d_3\) gives the same matrix. The upward arrow \(d_2\) puts its \(4\) in the bottom-right entry.
-                \[
+                <div class="cma-explain">
+                    <div class="cma-explain-math">\[
                     \begin{aligned}
                     S &= \tfrac12 d_1 d_1^\top + \tfrac14 d_2 d_2^\top + \tfrac14 d_3 d_3^\top \\
                       &= \begin{pmatrix}3&0\\0&1\end{pmatrix}
                     \end{aligned}
-                \]
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-sample-arrows-title">
+                            <title id="cma-sample-arrows-title">From the old center, sample 1 is two units right, sample 2 is two units up, and sample 3 is two units left</title>
+                            <path d="M16 70H144 M80 12V91" fill="none" stroke="currentColor" opacity=".2"/>
+                            <path d="M80 70H125 M119 66L125 70L119 74" fill="none" stroke="royalblue" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M80 70H35 M41 66L35 70L41 74 M80 70V25 M76 31L80 25L84 31" fill="none" stroke="royalblue" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="80" cy="70" r="3" fill="currentColor"/>
+                            <g fill="currentColor" text-anchor="middle" font-size="12">
+                                <text x="125" y="91">½</text><text x="35" y="91">¼</text><text x="100" y="29">¼</text>
+                            </g>
+                        </svg>
+                        <figcaption>Opposite arrows both add horizontal spread</figcaption>
+                    </figure>
+                </div>
                 The samples add more spread left to right than up and down. Start with equal spread in both directions, \(C_{\text{old}}=I\). Keep half of that matrix and add a quarter of \(S\).
-                \[
-                    C_{\text{samples}} = \tfrac12 I + \tfrac14 S
-                    = \begin{pmatrix}\tfrac54&0\\0&\tfrac34\end{pmatrix}
-                \]
+                <div class="cma-explain">
+                    <div class="cma-explain-math">\[
+                        C_{\text{samples}} = \tfrac12 I + \tfrac14 S
+                        = \begin{pmatrix}\tfrac54&0\\0&\tfrac34\end{pmatrix}
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-sample-spread-title">
+                            <title id="cma-sample-spread-title">The dashed circle becomes a solid ellipse that is wider and shorter</title>
+                            <path d="M17 52H143 M80 7V97" fill="none" stroke="currentColor" opacity=".2"/>
+                            <circle cx="80" cy="52" r="36" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                            <ellipse cx="80" cy="52" rx="40.25" ry="31.18" fill="none" stroke="royalblue" stroke-width="2"/>
+                            <circle cx="80" cy="52" r="2" fill="currentColor"/>
+                        </svg>
+                        <figcaption>After the samples, the ellipse is wider and shorter</figcaption>
+                    </figure>
+                </div>
             </li>
             <li>
                 <b>Learn from center moves</b><br>
@@ -203,20 +235,49 @@ categories: note
                     = \begin{pmatrix}1\\1\end{pmatrix}
                 \]
                 The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Add a quarter of that matrix to the result from the blue arrows.
-                \[
+                <div class="cma-explain">
+                    <div class="cma-explain-math">\[
                     \begin{aligned}
                     C_{\text{new}} &= C_{\text{samples}} + \tfrac14
                         \begin{pmatrix}1&1\\1&1\end{pmatrix} \\
                     &= \begin{pmatrix}\tfrac32&\tfrac14\\\tfrac14&1\end{pmatrix}
                     \end{aligned}
-                \]
-                This extra spread runs along the line from lower left to upper right.
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-path-spread-title">
+                            <title id="cma-path-spread-title">The dashed horizontal ellipse becomes a solid tilted ellipse after adding the center-move record</title>
+                            <path d="M17 52H143 M80 7V97" fill="none" stroke="currentColor" opacity=".2"/>
+                            <ellipse cx="80" cy="52" rx="40.25" ry="31.18" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                            <ellipse cx="80" cy="52" rx="45.59" ry="34.09" transform="rotate(-22.5 80 52)" fill="none" stroke="royalblue" stroke-width="2"/>
+                            <path d="M80 52L105 27 M98 28L105 27L104 34" fill="none" stroke="darkorange" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="80" cy="52" r="2" fill="currentColor"/>
+                        </svg>
+                        <figcaption>The move record adds spread along the orange arrow’s line</figcaption>
+                    </figure>
+                </div>
             </li>
             <li>
                 <b>Change size (\(\sigma\))</b><br>
                 For \(\sigma\), add the recent center moves after measuring them against the current spread.
                 Compare the length of the sum with the mark on the bar, which shows the average for random moves.
                 Past the mark, the ellipse grows. Short of it, the ellipse shrinks.
+                <div class="cma-explain">
+                    <div class="cma-explain-math">\[
+                        \sigma_{\text{new}} = \tfrac32 \sigma_{\text{old}}
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 -12 160 129" role="img" aria-labelledby="cma-size-spread-title">
+                            <title id="cma-size-spread-title">The solid ellipse has the same tilt as the dashed ellipse, and each axis is one and a half times as long</title>
+                            <path d="M7 52H153 M80 -5V109" fill="none" stroke="currentColor" opacity=".2"/>
+                            <g transform="rotate(-22.5 80 52)" fill="none">
+                                <ellipse cx="80" cy="52" rx="45.59" ry="34.09" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                                <ellipse cx="80" cy="52" rx="68.385" ry="51.135" stroke="royalblue" stroke-width="2"/>
+                            </g>
+                            <circle cx="80" cy="52" r="2" fill="currentColor"/>
+                        </svg>
+                        <figcaption>Both axes grow by the same ratio</figcaption>
+                    </figure>
+                </div>
             </li>
         </ul>
     </li>
