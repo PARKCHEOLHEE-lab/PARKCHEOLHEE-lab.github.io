@@ -240,66 +240,59 @@ categories: note
                         <figcaption>Opposite arrows both add horizontal spread</figcaption>
                     </figure>
                 </div>
-                Start with equal spread in both directions, \(C_{\text{old}}=I\). For this example, choose two simple update rates. Use \(0.25\) for the sample matrix \(S\) and \(0.25\) for the center-move matrix we will add next. That leaves \(1-0.25-0.25=0.5\) for \(C_{\text{old}}\).
-                Apply the sample part now. The effect of the center moves comes in the next step.
+                <p>To decide how much of \(S\) to add, start with the same three weights. Square them, add them, and divide 1 by the sum. The result, \(\mu_{\text{eff}}\), is the number of equally weighted samples that would give the same sum of squares.</p>
+                \[
+                    \mu_{\text{eff}} = \frac{1}{0.5^2+0.25^2+0.25^2} \approx 2.67
+                \]
+                <p>Each sample has two coordinates, so the number of variables \(n\) is 2. Put \(n=2\) and \(\mu_{\text{eff}}\approx2.67\) into the CMA-ES formulas. The first rate is for the center moves. The second is for the sample matrix \(S\).</p>
+                \[
+                    \begin{aligned}
+                    c_1 &= \frac{2}{(2+1.3)^2+2.67} \approx 0.15 \\[0.5em]
+                    c_\mu &= \frac{2(2.67-2+1/2.67)}{(2+2)^2+2.67} \approx 0.11
+                    \end{aligned}
+                \]
+                <p>The sample rate is capped at \(1-c_1\). Here \(0.11\) is below that limit. Use the rounded rates for the rest of the example. Set aside \(0.15\) for the center moves and use \(0.11\) for \(S\). That leaves \(1-0.15-0.11=0.74\) for the old spread, \(C_{\text{old}}=I\).</p>
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the sample update">
                     <div class="cma-explain-math">\[
-                        C_{\text{samples}} = 0.5 I + 0.25 S
-                        = \begin{pmatrix}1.25&0\\0&0.75\end{pmatrix}
+                        C_{\text{samples}} = 0.74 I + 0.11 S
+                        = \begin{pmatrix}1.07&0\\0&0.85\end{pmatrix}
                     \]</div>
                     <figure>
                         <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-sample-spread-title">
                             <title id="cma-sample-spread-title">The dashed circle becomes a solid ellipse that is wider and shorter</title>
                             <path d="M17 52H143 M80 7V97" fill="none" stroke="currentColor" opacity=".2"/>
                             <circle cx="80" cy="52" r="36" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
-                            <ellipse cx="80" cy="52" rx="40.25" ry="31.18" fill="none" stroke="royalblue" stroke-width="2"/>
+                            <ellipse cx="80" cy="52" rx="37.24" ry="33.19" fill="none" stroke="royalblue" stroke-width="2"/>
                             <circle cx="80" cy="52" r="2" fill="currentColor"/>
                         </svg>
                         <figcaption>After the samples, the ellipse is wider and shorter</figcaption>
                     </figure>
                 </div>
-                <details>
-                    <summary>How Fig. 1 sets the update rates</summary>
-                    <p>Fig. 1 uses the default CMA-ES rates. First, square and add the rank weights from the table above. Take the reciprocal to get the effective number of samples \(\mu_{\text{eff}}\). This measures how many equally weighted samples would have the same total squared weight.</p>
-                    \[
-                        \mu_{\text{eff}}=\frac{1}{w_1^2+w_2^2+w_3^2}
-                        \approx 2.03
-                    \]
-                    <p>Use \(n=2\) because each candidate is a point \((x,y)\). Put \(n\) and \(\mu_{\text{eff}}\) into the two rate formulas.</p>
-                    \[
-                        \begin{aligned}
-                        c_1 &= \frac{2}{(n+1.3)^2+\mu_{\text{eff}}} \approx 0.155 \\[0.5em]
-                        c_\mu &= \frac{2(\mu_{\text{eff}}-2+1/\mu_{\text{eff}})}
-                            {(n+2)^2+\mu_{\text{eff}}} \approx 0.058
-                        \end{aligned}
-                    \]
-                    <p>The center-move matrix uses \(c_1\). The sample matrix uses \(c_\mu\), capped at \(1-c_1\). In round 3, both updates use their full rates, leaving \(1-0.155-0.058\approx0.787\) for the old \(C\).</p>
-                </details>
             </li>
             <li>
                 <b>Learn from center moves</b><br>
                 The weighted average of those three samples moves the center from \((0,0)\) to \((0.5,0.5)\). Since \(\sigma=1\), the move in units of \(\sigma\) is also \((0.5,0.5)\).
-                The vector \(p_c\) keeps a running record of these moves. Suppose the old record is \((1,1)\). Multiply it by \(0.5\) and add the latest move.
+                The vector \(p_c\) keeps a running record of these moves. For this part of the example, start with a record of \((1,1)\). Keep half of that record and add the latest move.
                 \[
                     p_{c,\text{new}} = 0.5\begin{pmatrix}1\\1\end{pmatrix}
                     + \begin{pmatrix}0.5\\0.5\end{pmatrix}
                     = \begin{pmatrix}1\\1\end{pmatrix}
                 \]
-                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Use the center-move rate of \(0.25\) from above, then add this weighted matrix to \(C_{\text{samples}}\).
+                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Use the center-move rate of \(0.15\) from above, then add this weighted matrix to \(C_{\text{samples}}\).
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the center move update">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
-                    C_{\text{new}} &= C_{\text{samples}} + 0.25
+                    C_{\text{new}} &= C_{\text{samples}} + 0.15
                         \begin{pmatrix}1&1\\1&1\end{pmatrix} \\
-                    &= \begin{pmatrix}1.5&0.25\\0.25&1\end{pmatrix}
+                    &= \begin{pmatrix}1.22&0.15\\0.15&1\end{pmatrix}
                     \end{aligned}
                     \]</div>
                     <figure>
                         <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-path-spread-title">
                             <title id="cma-path-spread-title">The dashed horizontal ellipse becomes a solid tilted ellipse after adding the center-move record</title>
                             <path d="M17 52H143 M80 7V97" fill="none" stroke="currentColor" opacity=".2"/>
-                            <ellipse cx="80" cy="52" rx="40.25" ry="31.18" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
-                            <ellipse cx="80" cy="52" rx="45.59" ry="34.09" transform="rotate(-22.5 80 52)" fill="none" stroke="royalblue" stroke-width="2"/>
+                            <ellipse cx="80" cy="52" rx="37.24" ry="33.19" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                            <ellipse cx="80" cy="52" rx="40.98" ry="34.60" transform="rotate(-26.87 80 52)" fill="none" stroke="royalblue" stroke-width="2"/>
                             <path d="M80 52L105 27 M98 28L105 27L104 34" fill="none" stroke="darkorange" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             <circle cx="80" cy="52" r="2" fill="currentColor"/>
                         </svg>
@@ -320,9 +313,9 @@ categories: note
                         <svg viewBox="0 -12 160 129" role="img" aria-labelledby="cma-size-spread-title">
                             <title id="cma-size-spread-title">The solid ellipse has the same tilt as the dashed ellipse, and each axis is 1.5 times as long</title>
                             <path d="M7 52H153 M80 -5V109" fill="none" stroke="currentColor" opacity=".2"/>
-                            <g transform="rotate(-22.5 80 52)" fill="none">
-                                <ellipse cx="80" cy="52" rx="45.59" ry="34.09" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
-                                <ellipse cx="80" cy="52" rx="68.385" ry="51.135" stroke="royalblue" stroke-width="2"/>
+                            <g transform="rotate(-26.87 80 52)" fill="none">
+                                <ellipse cx="80" cy="52" rx="40.98" ry="34.60" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                                <ellipse cx="80" cy="52" rx="61.47" ry="51.9" stroke="royalblue" stroke-width="2"/>
                             </g>
                             <circle cx="80" cy="52" r="2" fill="currentColor"/>
                         </svg>
