@@ -120,7 +120,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   ]);
   const matrix = root.locator('.cma-covariance');
   await expect(matrix.locator('.covariance-matrix')).toHaveCount(2);
-  await expect(matrix.locator('.MathJax_CHTML')).toBeVisible();
+  await expect(matrix.locator('.covariance-math .MathJax_CHTML')).toBeVisible();
   expect((await root.locator('.phase').boundingBox()).height).toBeLessThan(2);
   await expect(page.getByText('One generation as equations', { exact: true })).toHaveCount(0);
   await expect(root.locator('.update-before')).toHaveCount(1);
@@ -732,6 +732,46 @@ test('best score follows the ranked sample', async ({ page }) => {
   }
   await seek('48');
   await expect(score).toBeHidden();
+});
+
+test('best score shares the covariance alignment', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/cma-es/');
+  const root = page.locator('#cma-step');
+  const panel = root.locator('.cma-covariance');
+  const slider = root.locator('.scrub');
+  await expect(root.locator('.read')).toContainText('not ranked');
+  const seek = (value) => slider.evaluate((el, time) => {
+    el.value = time;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  }, value);
+  await seek('16.4');
+  const scoreGlyph = panel.locator('.best-score .mjx-mi .mjx-char');
+  const objectiveGlyph = page.locator('.latex-container .MJXc-display .mjx-mi .mjx-char').filter({ hasText: /^f$/ }).first();
+  await expect(scoreGlyph).toHaveText('f');
+  const font = (el) => getComputedStyle(el).fontFamily;
+  expect(await scoreGlyph.evaluate(font)).toBe(await objectiveGlyph.evaluate(font));
+
+  for (const width of [1280, 320]) {
+    await page.setViewportSize({ width, height: 850 });
+    const operators = panel.getByText(/^(=|≈)$/);
+    await expect(operators).toHaveCount(4);
+    const operatorCenters = () => operators.evaluateAll((nodes) => nodes.map((node) => {
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const { x, width } = range.getBoundingClientRect();
+      return x + width / 2;
+    }));
+    await seek('16.4');
+    const [reference] = await operatorCenters();
+    for (const time of ['16.4', '31']) {
+      await seek(time);
+      for (const center of await operatorCenters()) expect(Math.abs(center - reference)).toBeLessThan(1);
+      const leftSide = await panel.locator('.best-score .score-center').first().boundingBox();
+      expect(leftSide.x + leftSide.width).toBeLessThan(reference);
+      expect(await panel.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(1);
+    }
+  }
 });
 
 test('live covariance stays visible while playing', async ({ page }) => {
