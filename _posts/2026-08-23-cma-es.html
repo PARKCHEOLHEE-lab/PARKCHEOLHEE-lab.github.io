@@ -176,23 +176,41 @@ categories: note
         <ul>
             <li>
                 <b>5a. Learn from the best samples</b><br>
-                Blue arrows show where good samples landed.
-                If good samples lie to the left and right of the old center, try more points along that line.
-                Keep most of \(C\), then add a matrix for each blue arrow. Divide the arrow by \(\sigma\) first, use the rule below, and give higher ranks more weight.
+                Each blue arrow goes from the old center \(m_{\text{old}}\) to a top-three sample \(x_i\). Divide the arrow by the old step size \(\sigma\) to get \(y_i\).
+                \[
+                    y_i = \frac{x_i - m_{\text{old}}}{\sigma}
+                \]
+                Turn each arrow into a matrix by multiplying the column \(y_i\) by its row \(y_i^\top\). Use the same rank weights \(w_i\) as in the center update.
+                \[
+                    \begin{aligned}
+                    S &= w_1 y_1 y_1^\top + w_2 y_2 y_2^\top + w_3 y_3 y_3^\top \\
+                    C_{\text{5a}} &= a C_{\text{old}} + c_\mu S
+                    \end{aligned}
+                \]
+                The factor \(a\) keeps a share of the old matrix. The factor \(c_\mu\) sets how much the three samples add.
+                For example, arrows \((2,0)^\top\) and \((-2,0)^\top\) each give \(4\) in the top-left entry and zero elsewhere. Both add left-to-right spread.
             </li>
             <li>
                 <b>5b. Learn from center moves</b><br>
-                The orange arrow shows where the center has been moving.
-                Add the recent center moves, with less weight on older moves. Say the result \(p_c\) points 2 right and 1 up.
-                Write it as a column and a row, then multiply them. This is called an <i>outer product</i>.
+                The vector \(p_c\) stores the history of center moves and gives the orange arrow its direction. Add the center move from step 4 to update this history.
                 \[
-                    p_c p_c^\top =
+                    p_{c,\text{new}}
+                    = (1-c_c)p_{c,\text{old}} + b\frac{m_{\text{new}}-m_{\text{old}}}{\sigma}
+                \]
+                The factor \(1-c_c\) fades the old history each round. The factor \(b\) sets how much of the latest move to add. It can be zero when the recent path is unusually long.
+                Use the same column-times-row rule for this one arrow. For example, if \(p_{c,\text{new}}=(2,1)^\top\), then
+                \[
+                    p_{c,\text{new}} p_{c,\text{new}}^\top =
                     \begin{pmatrix}2\\1\end{pmatrix}
                     \begin{pmatrix}2 & 1\end{pmatrix}
                     =
                     \begin{pmatrix}4 & 2\\2 & 1\end{pmatrix}.
                 \]
-                Reversing the arrow gives the same matrix. Adding a little of it to \(C\) makes the next samples spread more along that diagonal in both directions.
+                Add this matrix to the result of 5a. The factor \(c_1\) sets how much this history adds.
+                \[
+                    C_{\text{new}} = C_{\text{5a}} + c_1 p_{c,\text{new}} p_{c,\text{new}}^\top
+                \]
+                In this example, the added spread runs along the line from lower left to upper right.
             </li>
             <li>
                 <b>6. Change size (\(\sigma\))</b><br>
