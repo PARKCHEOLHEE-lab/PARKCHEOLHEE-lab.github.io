@@ -180,10 +180,16 @@ categories: note
             <li>
                 <b>Learn from the best samples</b><br>
                 Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). The three best samples, in rank order, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(0.5\), \(0.25\), and \(0.25\).
-                Each blue arrow goes from the old center to a sample. Divide it by \(\sigma\) to get \(d_i\). The first arrow points two units to the right.
+                Each blue arrow goes from the old center to a sample. Divide it by \(\sigma\) to get \(d_i\).
                 \[
-                    d_1 = \frac{s_1 - m_{\text{old}}}{\sigma}
-                    = \begin{pmatrix}2\\0\end{pmatrix}
+                    \begin{aligned}
+                    d_1 &= \frac{s_1 - m_{\text{old}}}{\sigma}
+                        = \frac{(2,0)-(0,0)}{1} = \begin{pmatrix}2\\0\end{pmatrix} \\
+                    d_2 &= \frac{s_2 - m_{\text{old}}}{\sigma}
+                        = \frac{(0,2)-(0,0)}{1} = \begin{pmatrix}0\\2\end{pmatrix} \\
+                    d_3 &= \frac{s_3 - m_{\text{old}}}{\sigma}
+                        = \frac{(-2,0)-(0,0)}{1} = \begin{pmatrix}-2\\0\end{pmatrix}
+                    \end{aligned}
                 \]
                 To turn an arrow into a matrix, multiply its column by its row. For \(d_1\), the top-left entry is \(2^2=4\), and the other entries are zero. The leftward arrow \(d_3\) gives the same matrix. The upward arrow \(d_2\) puts its \(4\) in the bottom-right entry.
                 <div class="cma-explain">
