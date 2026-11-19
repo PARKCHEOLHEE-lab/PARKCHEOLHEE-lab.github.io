@@ -46,7 +46,7 @@ same shape; do not introduce a non-fluid `px`-only size.
 | `$bg-subtle` | `#f7f7f8` | Chat bubble + code block background |
 | `$divider` | `#e5e5e6` | Horizontal rule, hairline divider |
 | `$link-chat` | `#4b83ec` | Link inside chat bubbles |
-| `$skeleton` | `#ececec` | Skeleton placeholder (the comments' loading state) |
+| `$skeleton` | `#ececec` | Skeleton placeholder (the comments' and content images' loading state) |
 
 For tinted overlays (borders, hover states, disabled text) use the existing
 `reduce($percent)` function — it returns `rgba(mix($dark, $light), $percent / 100)`,
