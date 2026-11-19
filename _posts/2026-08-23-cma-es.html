@@ -179,7 +179,7 @@ categories: note
         <ul>
             <li>
                 <b>Learn from the best samples</b><br>
-                Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). The three best samples, in rank order, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(\tfrac12\), \(\tfrac14\), and \(\tfrac14\).
+                Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). The three best samples, in rank order, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(0.5\), \(0.25\), and \(0.25\).
                 Each blue arrow goes from the old center to a sample. Divide it by \(\sigma\) to get \(d_i\). The first arrow points two units to the right.
                 \[
                     d_1 = \frac{s_1 - m_{\text{old}}}{\sigma}
@@ -189,7 +189,7 @@ categories: note
                 <div class="cma-explain">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
-                    S &= \tfrac12 d_1 d_1^\top + \tfrac14 d_2 d_2^\top + \tfrac14 d_3 d_3^\top \\
+                    S &= 0.5 d_1 d_1^\top + 0.25 d_2 d_2^\top + 0.25 d_3 d_3^\top \\
                       &= \begin{pmatrix}3&0\\0&1\end{pmatrix}
                     \end{aligned}
                     \]</div>
@@ -201,16 +201,16 @@ categories: note
                             <path d="M80 70H35 M41 66L35 70L41 74 M80 70V25 M76 31L80 25L84 31" fill="none" stroke="royalblue" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                             <circle cx="80" cy="70" r="3" fill="currentColor"/>
                             <g fill="currentColor" text-anchor="middle" font-size="12">
-                                <text x="125" y="91">½</text><text x="35" y="91">¼</text><text x="100" y="29">¼</text>
+                                <text x="125" y="91">0.5</text><text x="35" y="91">0.25</text><text x="100" y="29">0.25</text>
                             </g>
                         </svg>
                         <figcaption>Opposite arrows both add horizontal spread</figcaption>
                     </figure>
                 </div>
-                The samples add more spread left to right than up and down. Start with equal spread in both directions, \(C_{\text{old}}=I\). Keep half of that matrix and add a quarter of \(S\).
+                The samples add more spread left to right than up and down. Start with equal spread in both directions, \(C_{\text{old}}=I\). Use weights of \(0.5\) for \(I\) and \(0.25\) for \(S\).
                 <div class="cma-explain">
                     <div class="cma-explain-math">\[
-                        C_{\text{samples}} = \tfrac12 I + \tfrac14 S
+                        C_{\text{samples}} = 0.5 I + 0.25 S
                         = \begin{pmatrix}\tfrac54&0\\0&\tfrac34\end{pmatrix}
                     \]</div>
                     <figure>
@@ -228,17 +228,17 @@ categories: note
             <li>
                 <b>Learn from center moves</b><br>
                 The weighted average of those three samples moves the center from \((0,0)\) to \((\tfrac12,\tfrac12)\). Since \(\sigma=1\), the move in units of \(\sigma\) is also \((\tfrac12,\tfrac12)\).
-                The vector \(p_c\) keeps a running record of these moves. Suppose the old record is \((1,1)\). Keep half of it and add the latest move.
+                The vector \(p_c\) keeps a running record of these moves. Suppose the old record is \((1,1)\). Multiply it by \(0.5\) and add the latest move.
                 \[
-                    p_{c,\text{new}} = \tfrac12\begin{pmatrix}1\\1\end{pmatrix}
+                    p_{c,\text{new}} = 0.5\begin{pmatrix}1\\1\end{pmatrix}
                     + \begin{pmatrix}\tfrac12\\\tfrac12\end{pmatrix}
                     = \begin{pmatrix}1\\1\end{pmatrix}
                 \]
-                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Add a quarter of that matrix to the result from the blue arrows.
+                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Multiply that matrix by \(0.25\) and add it to the result from the blue arrows.
                 <div class="cma-explain">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
-                    C_{\text{new}} &= C_{\text{samples}} + \tfrac14
+                    C_{\text{new}} &= C_{\text{samples}} + 0.25
                         \begin{pmatrix}1&1\\1&1\end{pmatrix} \\
                     &= \begin{pmatrix}\tfrac32&\tfrac14\\\tfrac14&1\end{pmatrix}
                     \end{aligned}
