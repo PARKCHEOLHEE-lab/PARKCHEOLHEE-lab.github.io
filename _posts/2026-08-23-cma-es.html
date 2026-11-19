@@ -153,7 +153,11 @@ categories: note
     <li id="cma-weights">
         How \(m\) is calculated
         <ul>
-            <li class="weight-intro"></li>
+            <li>
+                <span class="weight-intro"></span>
+                A starting value of 3 would give the third sample a log score of \(\ln(3/3)=0\), so it would have zero weight.
+                Adding 0.5 puts the starting value between ranks 3 and 4, so all three samples we keep get a positive weight.
+            </li>
             <li>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight.</li>
             <li>Multiply each of the three centers by its weight. Add the results to get the new center \(m\).</li>
         </ul>
