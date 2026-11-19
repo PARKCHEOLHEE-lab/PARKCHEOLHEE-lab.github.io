@@ -734,17 +734,26 @@ test('best score follows the ranked sample', async ({ page }) => {
   await expect(score).toBeHidden();
 });
 
-test('best score shares the covariance alignment', async ({ page }) => {
+test('score, center and covariance share one aligned display', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/');
   const root = page.locator('#cma-step');
   const panel = root.locator('.cma-covariance');
   const slider = root.locator('.scrub');
+  const mean = panel.locator('.mean-math');
   await expect(root.locator('.read')).toContainText('not ranked');
+  await expect(mean).toBeVisible();
+  await expect(mean.locator('.mean-coordinates')).toHaveText('(0.50, 3.50)');
   const seek = (value) => slider.evaluate((el, time) => {
     el.value = time;
     el.dispatchEvent(new Event('input', { bubbles: true }));
   }, value);
+  for (const time of ['3.25', '3.75', '4', '31']) {
+    await seek(time);
+    const center = await root.evaluate((el) => el.cmaFrame.m);
+    const coordinates = center.map((n) => n.toFixed(2).replace('-', '−')).join(', ');
+    await expect(mean.locator('.mean-coordinates')).toHaveText('(' + coordinates + ')');
+  }
   await seek('16.4');
   const scoreGlyph = panel.locator('.best-score .mjx-mi .mjx-char');
   const objectiveGlyph = page.locator('.latex-container .MJXc-display .mjx-mi .mjx-char').filter({ hasText: /^f$/ }).first();
@@ -754,8 +763,13 @@ test('best score shares the covariance alignment', async ({ page }) => {
 
   for (const width of [1280, 320]) {
     await page.setViewportSize({ width, height: 850 });
+    const scoreBox = await panel.locator('.best-score').boundingBox();
+    const meanBox = await mean.boundingBox();
+    const covarianceBox = await panel.locator('.covariance-math').boundingBox();
+    expect(scoreBox.y + scoreBox.height).toBeLessThan(meanBox.y);
+    expect(meanBox.y + meanBox.height).toBeLessThan(covarianceBox.y);
     const operators = panel.getByText(/^(=|≈)$/);
-    await expect(operators).toHaveCount(4);
+    await expect(operators).toHaveCount(5);
     const operatorCenters = () => operators.evaluateAll((nodes) => nodes.map((node) => {
       const range = document.createRange();
       range.selectNodeContents(node);
