@@ -136,6 +136,10 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const viewport = el.querySelector('.cma-view').getBoundingClientRect();
     const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();
     const matrix = el.querySelector('.cma-covariance').getBoundingClientRect();
+    const phase = el.querySelector('.phase-name'), generation = el.querySelector('.gen').getBoundingClientRect();
+    const phaseText = document.createRange();
+    phaseText.selectNodeContents(phase);
+    const phaseBox = phaseText.getBoundingClientRect();
     const legend = el.querySelector('.cma-legend'), rect = legend.getBoundingClientRect();
     const style = (selector) => {
       const css = getComputedStyle(legend.querySelector(selector));
@@ -145,12 +149,15 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
       matrixRight: matrix.left >= viewport.right, matrixBelow: matrix.top >= viewport.bottom,
+      phaseRightOffset: phaseBox.right - generation.right, phaseBelow: phaseBox.top >= generation.bottom,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
       best: style('.best-key'), shape: style('.shape-key') };
   });
   const initialLayout = await layout();
+  expect(initialLayout.phaseRightOffset).toBeCloseTo(0, 0);
+  expect(initialLayout.phaseBelow).toBe(true);
   const legendPaint = await root.locator('.cma-legend').evaluate((legend) => {
     const style = getComputedStyle(legend);
     const ctx = document.createElement('canvas').getContext('2d');
@@ -665,6 +672,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(async () => (await layout()).matrixBelow, { message: 'matrix stacks below the plot on a phone' }).toBe(true);
   const phoneLayout = await layout();
+  expect(phoneLayout.phaseRightOffset).toBeCloseTo(0, 0);
+  expect(phoneLayout.phaseBelow).toBe(true);
   expect(phoneLayout.canvas).toBe(phoneLayout.width);
   expect(phoneLayout.producer).toBe(phoneLayout.canvas);
   expect(phoneLayout.legend.x / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.x / initialLayout.legendEm, 2);
