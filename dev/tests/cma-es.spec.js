@@ -793,6 +793,44 @@ test('score, center and covariance share one aligned display', async ({ page }) 
   }
 });
 
+test('equation figures stay beside their math when scrolled', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 850 });
+  await page.goto('/cma-es/#cma-updates');
+  const pairs = page.locator('#cma-updates .cma-explain');
+  await expect(pairs).toHaveCount(4);
+  await expect(pairs.last().locator('.MJXc-display')).toBeVisible();
+
+  for (const width of [390, 320, 1280]) {
+    await page.setViewportSize({ width, height: 850 });
+    const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const layouts = await pairs.evaluateAll((rows) => rows.map((row) => {
+      row.scrollLeft = 0;
+      const bounds = row.getBoundingClientRect();
+      const math = row.querySelector('.cma-explain-math').getBoundingClientRect();
+      const figure = row.querySelector('figure');
+      const before = figure.getBoundingClientRect();
+      const overflow = row.scrollWidth - row.clientWidth;
+      row.scrollLeft = overflow;
+      return {
+        beside: before.left >= math.right && before.top < math.bottom && before.bottom > math.top,
+        startVisible: math.left >= bounds.left - 1,
+        endVisible: figure.getBoundingClientRect().right <= bounds.right + 1,
+        overflow,
+        scrolled: row.scrollLeft,
+      };
+    }));
+    for (const layout of layouts) {
+      expect(layout.beside).toBe(true);
+      expect(layout.startVisible).toBe(true);
+      expect(layout.endVisible).toBe(true);
+      expect(layout.scrolled).toBe(layout.overflow);
+    }
+    if (width === 1280) expect(layouts.every((layout) => layout.overflow === 0)).toBe(true);
+    else expect(layouts[0].overflow).toBeGreaterThan(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(pageWidth);
+  }
+});
+
 test('live covariance stays visible while playing', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/');

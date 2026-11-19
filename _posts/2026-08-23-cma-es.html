@@ -21,9 +21,9 @@ categories: note
         .cma-demo .cma-3d canvas { cursor: grab; }
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
-        #cma-updates .cma-explain { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0.5em 1em; margin-block: 1em; }
-        #cma-updates .cma-explain-math { min-width: 0; max-width: 100%; }
-        #cma-updates .cma-explain figure { flex: 0 1 10em; margin: 0; text-align: center; }
+        #cma-updates .cma-explain { display: flex; align-items: center; justify-content: safe center; gap: 1em; margin-block: 1em; }
+        #cma-updates .cma-explain-math { flex: none; }
+        #cma-updates .cma-explain figure { flex: 0 0 10em; margin: 0; text-align: center; }
         #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
         #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
         #cma-step { margin-inline: -1em; }
@@ -213,7 +213,7 @@ categories: note
                 \]
                 To turn an arrow into a matrix, multiply its column by its row. For \(d_1\), the top-left entry is \(2^2=4\), and the other entries are zero. The leftward arrow \(d_3\) gives the same matrix. The upward arrow \(d_2\) puts its \(4\) in the bottom-right entry.
                 In Fig. 2, each arrow is scaled by \(\sqrt{w_i}\). The column and the row each get that factor, so their product gets the weight \(w_i\).
-                <div class="cma-explain">
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Weighted sample arrows and equation">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
                     S &= 0.5 d_1 d_1^\top + 0.25 d_2 d_2^\top + 0.25 d_3 d_3^\top \\[0.5em]
@@ -241,7 +241,7 @@ categories: note
                     </figure>
                 </div>
                 The samples add more spread left to right than up and down. Start with equal spread in both directions, \(C_{\text{old}}=I\). Use weights of \(0.5\) for \(I\) and \(0.25\) for \(S\).
-                <div class="cma-explain">
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the sample update">
                     <div class="cma-explain-math">\[
                         C_{\text{samples}} = 0.5 I + 0.25 S
                         = \begin{pmatrix}1.25&0\\0&0.75\end{pmatrix}
@@ -268,7 +268,7 @@ categories: note
                     = \begin{pmatrix}1\\1\end{pmatrix}
                 \]
                 The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Multiply that matrix by \(0.25\) and add it to the result from the blue arrows.
-                <div class="cma-explain">
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the center move update">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
                     C_{\text{new}} &= C_{\text{samples}} + 0.25
@@ -294,7 +294,7 @@ categories: note
                 For \(\sigma\), add the recent center moves after measuring them against the current spread.
                 Compare the length of the sum with the mark on the bar, which shows the average for random moves.
                 Past the mark, the ellipse grows. Short of it, the ellipse shrinks.
-                <div class="cma-explain">
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the size update">
                     <div class="cma-explain-math">\[
                         \sigma_{\text{new}} = 1.5 \sigma_{\text{old}}
                     \]</div>
