@@ -170,63 +170,53 @@ categories: note
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
-        <p>Go to round 3 in Fig. 1. The dashed ellipse shows how the search spreads. Updating \(C\) changes the spread by direction. Updating \(\sigma\) scales every direction by the same factor. The values below are rounded.</p>
+        <p>In Fig. 1, the dashed ellipse shows how the search spreads. Updating \(C\) changes the spread by direction. Updating \(\sigma\) scales every direction by the same factor. The example below uses simple numbers for both updates to \(C\).</p>
         <ul>
             <li>
                 <b>Learn from the best samples</b><br>
-                The old center is \(m_{\text{old}}\approx(1.885,3.147)\) and the old step size is \(\sigma\approx1.168\).
-                The best sample is \(s_1\approx(2.533,2.545)\). Its blue arrow goes right and down from the old center. Divide the arrow by \(\sigma\) to get \(d_1\), the move measured in units of the old step size.
+                Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). The three best samples, in rank order, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(\tfrac12\), \(\tfrac14\), and \(\tfrac14\).
+                Each blue arrow goes from the old center to a sample. Divide it by \(\sigma\) to get \(d_i\). The first arrow points two units to the right.
                 \[
                     d_1 = \frac{s_1 - m_{\text{old}}}{\sigma}
-                    \approx \begin{pmatrix}0.554\\-0.515\end{pmatrix}
+                    = \begin{pmatrix}2\\0\end{pmatrix}
                 \]
-                Multiply each arrow column by its row to get a matrix. For the best sample, \(d_1d_1^\top\) has \(0.554^2\approx0.307\) at the top left and \(0.554(-0.515)\approx-0.286\) off the diagonal.
-                Do the same for ranks 2 and 3, then add the three matrices using the same rank weights \(w_i\) as in the center update.
+                To turn an arrow into a matrix, multiply its column by its row. For \(d_1\), the top-left entry is \(2^2=4\), and the other entries are zero. The leftward arrow \(d_3\) gives the same matrix. The upward arrow \(d_2\) puts its \(4\) in the bottom-right entry.
                 \[
                     \begin{aligned}
-                    S &= w_1 d_1 d_1^\top + w_2 d_2 d_2^\top + w_3 d_3 d_3^\top \\
-                      &\approx \begin{pmatrix}0.774&-1.070\\-1.070&1.613\end{pmatrix}
+                    S &= \tfrac12 d_1 d_1^\top + \tfrac14 d_2 d_2^\top + \tfrac14 d_3 d_3^\top \\
+                      &= \begin{pmatrix}3&0\\0&1\end{pmatrix}
                     \end{aligned}
                 \]
-                The negative entries off the diagonal add spread along the line from upper left to lower right. In step 5, the figure first keeps about \(79\%\) of \(C_{\text{old}}\) and adds about \(6\%\) of \(S\).
+                The samples add more spread left to right than up and down. Start with equal spread in both directions, \(C_{\text{old}}=I\). Keep half of that matrix and add a quarter of \(S\).
                 \[
-                    \begin{aligned}
-                    C_{\text{old}} &\approx \begin{pmatrix}1.017&-0.133\\-0.133&1.212\end{pmatrix} \\
-                    C_{\text{samples}} &\approx 0.787 C_{\text{old}} + 0.058 S \\
-                      &\approx \begin{pmatrix}0.846&-0.167\\-0.167&1.047\end{pmatrix}
-                    \end{aligned}
+                    C_{\text{samples}} = \tfrac12 I + \tfrac14 S
+                    = \begin{pmatrix}\tfrac54&0\\0&\tfrac34\end{pmatrix}
                 \]
             </li>
             <li>
                 <b>Learn from center moves</b><br>
-                The same rank weights moved the center to \(m_{\text{new}}\approx(2.786,1.932)\) in step 4.
-                That move, divided by the old \(\sigma\), is about \((0.771,-1.040)\). The vector \(p_c\) keeps a running record of these moves and gives the orange arrow its direction.
-                In round 3, we keep about \(38\%\) of the old record and add \(1.320\) times the latest move.
+                The weighted average of those three samples moves the center from \((0,0)\) to \((\tfrac12,\tfrac12)\). Since \(\sigma=1\), the move in units of \(\sigma\) is also \((\tfrac12,\tfrac12)\).
+                The vector \(p_c\) keeps a running record of these moves. Suppose the old record is \((1,1)\). Keep half of it and add the latest move.
+                \[
+                    p_{c,\text{new}} = \tfrac12\begin{pmatrix}1\\1\end{pmatrix}
+                    + \begin{pmatrix}\tfrac12\\\tfrac12\end{pmatrix}
+                    = \begin{pmatrix}1\\1\end{pmatrix}
+                \]
+                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Add a quarter of that matrix to the result from the blue arrows.
                 \[
                     \begin{aligned}
-                    p_{c,\text{new}} &\approx
-                        0.375\begin{pmatrix}1.294\\-1.218\end{pmatrix}
-                        + 1.320\begin{pmatrix}0.771\\-1.040\end{pmatrix} \\
-                    &\approx \begin{pmatrix}1.504\\-1.831\end{pmatrix}
+                    C_{\text{new}} &= C_{\text{samples}} + \tfrac14
+                        \begin{pmatrix}1&1\\1&1\end{pmatrix} \\
+                    &= \begin{pmatrix}\tfrac32&\tfrac14\\\tfrac14&1\end{pmatrix}
                     \end{aligned}
                 \]
-                Multiply this arrow column by its row and scale the matrix by \(c_1\approx0.155\). Add it to \(C_{\text{samples}}\) to get the \(C\) that Fig. 1 shows at the end of step 5.
-                \[
-                    \begin{aligned}
-                    C_{\text{new}} &= C_{\text{samples}} + c_1 p_{c,\text{new}} p_{c,\text{new}}^\top \\
-                    &\approx C_{\text{samples}} +
-                        \begin{pmatrix}0.350&-0.426\\-0.426&0.519\end{pmatrix} \\
-                    &\approx \begin{pmatrix}1.196&-0.593\\-0.593&1.566\end{pmatrix}
-                    \end{aligned}
-                \]
-                The center moves reinforce the same diagonal that the blue sample arrows picked out in this round.
+                This extra spread runs along the line from lower left to upper right.
             </li>
             <li>
                 <b>6. Change size (\(\sigma\))</b><br>
                 For \(\sigma\), add the recent center moves after measuring them against the current spread.
                 Compare the length of the sum with the mark on the bar, which shows the average for random moves.
                 Past the mark, the ellipse grows. Short of it, the ellipse shrinks.
-                In round 3, both axes become about \(1.30\) times as long.
             </li>
         </ul>
     </li>
