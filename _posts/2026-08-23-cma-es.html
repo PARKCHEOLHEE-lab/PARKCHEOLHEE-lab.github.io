@@ -197,7 +197,7 @@ categories: note
             <li>
                 <b>Learn from the best samples</b><br>
                 Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). The three best samples, in rank order, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(0.5\), \(0.25\), and \(0.25\).
-                Each blue arrow goes from the old center to a sample. Divide it by \(\sigma\) to get \(d_i\). Here \(\sigma=1\), so the division leaves the arrow as it is.
+                Take the arrow from the old center to each sample and divide it by \(\sigma\) to get \(d_i\). Here \(\sigma=1\), so the division leaves the arrow as it is.
                 \[
                     \begin{aligned}
                     d_1 &= \frac{s_1 - m_{\text{old}}}{\sigma}
@@ -209,6 +209,7 @@ categories: note
                     \end{aligned}
                 \]
                 To turn an arrow into a matrix, multiply its column by its row. For \(d_1\), the top-left entry is \(2^2=4\), and the other entries are zero. The leftward arrow \(d_3\) gives the same matrix. The upward arrow \(d_2\) puts its \(4\) in the bottom-right entry.
+                In Fig. 2, each arrow is scaled by \(\sqrt{w_i}\). The column and the row each get that factor, so their product gets the weight \(w_i\).
                 <div class="cma-explain">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
@@ -221,13 +222,16 @@ categories: note
                     \]</div>
                     <figure>
                         <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-sample-arrows-title">
-                            <title id="cma-sample-arrows-title">From the old center, sample 1 is two units right, sample 2 is two units up, and sample 3 is two units left</title>
+                            <title id="cma-sample-arrows-title">The weight 0.5 gives a longer rightward arrow. The weight 0.25 gives two shorter arrows of equal length, one leftward and one upward.</title>
                             <path d="M16 70H144 M80 12V91" fill="none" stroke="currentColor" opacity=".2"/>
-                            <path d="M80 70H125 M119 66L125 70L119 74" fill="none" stroke="royalblue" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M80 70H35 M41 66L35 70L41 74 M80 70V25 M76 31L80 25L84 31" fill="none" stroke="royalblue" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <g fill="none" stroke="royalblue" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M80 70H130.91 M124.91 66L130.91 70L124.91 74"/>
+                                <path d="M80 70H44 M50 66L44 70L50 74"/>
+                                <path d="M80 70V34 M76 40L80 34L84 40"/>
+                            </g>
                             <circle cx="80" cy="70" r="3" fill="currentColor"/>
                             <g fill="currentColor" text-anchor="middle" font-size="12">
-                                <text x="125" y="91">0.5</text><text x="35" y="91">0.25</text><text x="100" y="29">0.25</text>
+                                <text x="130.91" y="91">0.5</text><text x="44" y="91">0.25</text><text x="100" y="38">0.25</text>
                             </g>
                         </svg>
                         <figcaption>Opposite arrows both add horizontal spread</figcaption>
