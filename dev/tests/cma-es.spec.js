@@ -148,7 +148,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
       matrixRight: matrix.left >= viewport.right && matrix.top < viewport.bottom && matrix.bottom > viewport.top,
-      gap: matrix.left - viewport.right,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
@@ -165,9 +164,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(legendPaint.background).toEqual([255, 255, 255, 204]);
   expect(legendPaint.opacity).toBe('1');
   expect(initialLayout.matrixRight).toBe(true);
-  expect(initialLayout.gap).toBeLessThan(4);
-  expect(initialLayout.canvas).toBeGreaterThan(230);
-  expect(initialLayout.canvas).toBeLessThan(245);
+  expect(initialLayout.canvas, 'the desktop canvas uses its pre-compaction width').toBeGreaterThanOrEqual(245 * 1.25);
+  expect(initialLayout.canvas).toBeLessThan(initialLayout.width);
   expect(initialLayout.producer).toBe(initialLayout.canvas);
   expect(Math.abs(initialLayout.viewport - initialLayout.canvas), 'renderer width rounds to whole CSS pixels').toBeLessThan(1);
   expect(initialLayout.pointer).toBe('none');
@@ -673,15 +671,13 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect.poll(async () => (await layout()).matrixRight, { message: 'equations stay beside the plot on a phone' }).toBe(true);
   const phoneLayout = await layout();
-  expect(phoneLayout.canvas).toBeGreaterThan(195);
-  expect(phoneLayout.canvas).toBeLessThan(210);
+  expect(phoneLayout.canvas, 'the canvas fills the article width on phones').toBe(phoneLayout.width);
   expect(phoneLayout.producer).toBe(phoneLayout.canvas);
   expect(phoneLayout.legend.x / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.x / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.y / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.y / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.right).toBeLessThan(phoneLayout.viewport);
   const scroller = root.getByRole('region', { name: 'Circle demo and live equations' });
   await expect(scroller.getByText('Scroll right for the equations')).toHaveCount(0);
-  expect(await scroller.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThan(105);
   await scroller.press('ArrowRight');
   await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
   const equationsFit = await scroller.evaluate((el) => {
@@ -693,6 +689,27 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     return visible;
   });
   expect(equationsFit).toBe(true);
+  const touch = await page.context().newCDPSession(page);
+  await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true });
+  const start = await scroller.evaluate(async (el) => {
+    await document.fonts.ready;
+    el.scrollIntoView({ block: 'center', behavior: 'instant' });
+    const { left, bottom } = el.getBoundingClientRect();
+    return { x: Math.round(left + el.clientWidth * 0.85), y: Math.round(bottom - 6) };
+  });
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] });
+  for (const distance of [40, 80, 120, 160, 200, 240, 280]) {
+    await touch.send('Input.dispatchTouchEvent', {
+      type: 'touchMove', touchPoints: [{ x: start.x - distance, y: start.y }],
+    });
+  }
+  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await expect.poll(() => scroller.evaluate((el) => el.scrollWidth - el.clientWidth - el.scrollLeft), {
+    message: 'a swipe below the full-width canvas reaches the equations',
+  }).toBeLessThanOrEqual(1);
+  await scroller.evaluate((el) => { el.scrollLeft = 0; });
+  await touch.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  await touch.detach();
   await expect(root.locator('canvas:visible')).toHaveCount(1);
   await expect.poll(() => root.evaluate((el) => {
     const canvas = el.querySelector('.cma-top'), image = window.circleBackground;
@@ -788,23 +805,16 @@ test('score, center and covariance share one aligned display', async ({ page }) 
 
   for (const width of [1280, 1024, 390, 320]) {
     await page.setViewportSize({ width, height: 850 });
-    const fontSize = (el) => parseFloat(getComputedStyle(el).fontSize);
+    const fontSize = (el) => getComputedStyle(el).fontSize;
     const bodySize = await objectiveGlyph.evaluate(fontSize);
-    const figureSize = bodySize * 0.85;
-    expect(await scoreGlyph.evaluate(fontSize)).toBeCloseTo(figureSize, 2);
+    expect(await scoreGlyph.evaluate(fontSize)).toBe(bodySize);
     const glyphMetrics = (nodes) => nodes.map((node) => {
       const style = getComputedStyle(node);
-      return { family: style.fontFamily, size: parseFloat(style.fontSize), width: node.getBoundingClientRect().width };
+      return [style.fontFamily, style.fontSize, node.getBoundingClientRect().width];
     });
-    const bodyNorms = await objectiveNorms.evaluateAll(glyphMetrics);
-    const figureNorms = await scoreNorms.evaluateAll(glyphMetrics);
-    for (const [index, norm] of figureNorms.entries()) {
-      expect(norm.family).toBe(bodyNorms[index].family);
-      expect(norm.size).toBeCloseTo(figureSize, 2);
-      expect(norm.width / bodyNorms[index].width).toBeCloseTo(0.85, 2);
-    }
-    expect(await mean.locator('.mean-coordinates').evaluate(fontSize)).toBeCloseTo(figureSize, 2);
-    expect(await panel.locator('.covariance-matrix [data-value]').first().evaluate(fontSize)).toBeCloseTo(figureSize, 2);
+    expect(await scoreNorms.evaluateAll(glyphMetrics)).toEqual(await objectiveNorms.evaluateAll(glyphMetrics));
+    expect(await mean.locator('.mean-coordinates').evaluate(fontSize)).toBe(bodySize);
+    expect(await panel.locator('.covariance-matrix [data-value]').first().evaluate(fontSize)).toBe(bodySize);
     const scoreBox = await panel.locator('.best-score').boundingBox();
     const meanBox = await mean.boundingBox();
     const covarianceBox = await panel.locator('.covariance-math').boundingBox();
@@ -974,7 +984,7 @@ test('compact viewport removes vertical space without shrinking geometry', async
     expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
     await expect.poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight)).toBe(0);
     const widthOverflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);
-    if (width >= 1280) expect(widthOverflow).toBe(0);
+    if (width === 1920) expect(widthOverflow).toBe(0);
     else expect(widthOverflow).toBeGreaterThan(0);
   }
   const thumbColor = () => scroller.evaluate((el) => getComputedStyle(el, '::-webkit-scrollbar-thumb').borderTopColor);

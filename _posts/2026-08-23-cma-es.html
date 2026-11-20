@@ -29,13 +29,17 @@ categories: note
         #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
         #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
         #cma-step { container-type: inline-size; }
-        #cma-step .cma-step-layout { display: flex; align-items: center; gap: 0.2em; }
-        #cma-step .cma-view { position: relative; flex: 1 0 17em; min-width: 0; }
+        #cma-step .cma-step-layout { display: flex; align-items: center; gap: 1em; }
+        #cma-step .cma-view { position: relative; flex: 1 0 22.5em; min-width: 0; }
         #cma-step .cma-covariance { flex: 0 0 19em; min-width: 0; max-width: 100%; text-align: center; }
-        @container (width < 36.2em) {
+        @container (width < 42.5em) {
             #cma-step .cma-step-layout { padding-block-end: 1em; }
         }
-        #cma-step .cma-equations { display: grid; grid-template-columns: minmax(5.8em, max-content) max-content 1fr; gap: 1em 0.3em; white-space: nowrap; font: 0.85em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+        @container (width < 36em) {
+            #cma-step .cma-step-layout { padding-block-end: 2em; }
+            #cma-step .cma-view { flex-basis: 100%; }
+        }
+        #cma-step .cma-equations { display: grid; grid-template-columns: minmax(5.8em, max-content) max-content 1fr; gap: 1em 0.3em; white-space: nowrap; font: 1em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
         #cma-step .cma-equations > [role="math"] { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; justify-items: start; row-gap: 0.5em; }
         #cma-step .cma-equations > [role="math"] > :first-child { justify-self: end; }
         #cma-step .equation-relation { grid-column: 2; justify-self: center; }
