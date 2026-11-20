@@ -667,7 +667,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(phoneLayout.legend.y / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.y / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.right).toBeLessThan(phoneLayout.viewport);
   const scroller = root.getByRole('region', { name: 'Circle demo and live equations' });
-  await expect(scroller.getByText('Swipe here to see the equations')).toBeVisible();
+  await expect(scroller.getByText('Scroll right for the equations')).toBeVisible();
   await scroller.press('ArrowRight');
   await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
   const equationsFit = await scroller.evaluate((el) => {
@@ -923,8 +923,20 @@ test('compact viewport removes vertical space without shrinking geometry', async
   const root = page.locator('#cma-step');
   const scroller = root.locator('.cma-step-layout');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
-  for (const width of [1280, 390]) {
+  for (const width of [1920, 1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
+    const insideTextColumn = await root.evaluate((el) => {
+      const parent = el.parentElement;
+      const column = parent.getBoundingClientRect();
+      const style = getComputedStyle(parent);
+      const left = column.left + parseFloat(style.paddingLeft);
+      const right = column.right - parseFloat(style.paddingRight);
+      return [...el.querySelectorAll('.ctrls, .cma-step-layout, figcaption')].every((part) => {
+        const bounds = part.getBoundingClientRect();
+        return bounds.left >= left - 1 && bounds.right <= right + 1;
+      });
+    });
+    expect(insideTextColumn).toBe(true);
     await expect.poll(() => root.evaluate((el) => {
       const canvas = el.querySelector('.cma-3d canvas');
       return canvas.clientHeight / canvas.clientWidth;
@@ -944,7 +956,7 @@ test('compact viewport removes vertical space without shrinking geometry', async
     expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
     await expect.poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight)).toBe(0);
     const widthOverflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);
-    if (width === 1280) expect(widthOverflow).toBe(0);
+    if (width === 1920) expect(widthOverflow).toBe(0);
     else expect(widthOverflow).toBeGreaterThan(0);
   }
   const thumbColor = () => scroller.evaluate((el) => getComputedStyle(el, '::-webkit-scrollbar-thumb').borderTopColor);
