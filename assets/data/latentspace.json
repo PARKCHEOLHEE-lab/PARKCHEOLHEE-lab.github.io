@@ -303,7 +303,7 @@
       "mass-generator",
       "mass-test",
       "conditional-gan",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "gan",
       "reading-list"
     ],
@@ -1587,8 +1587,8 @@
   },
   {
     "title": "Free-form Floor Plan Design using Differentiable Voronoi Diagram",
-    "slug": "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
-    "url": "/free-form-floor-plan-design-using-differentiable-voronoi-diagram/",
+    "slug": "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
+    "url": "/free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper/",
     "category": "note",
     "label": "Brain",
     "connected": [
@@ -1662,7 +1662,7 @@
       "regression-model",
       "mathematics-for-machine-learning",
       "gradient-penalty",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram"
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper"
     ],
     "x": 0.5622,
     "y": 0.4355
@@ -1709,7 +1709,7 @@
       "office-layout-generation-agents",
       "apartment",
       "wave-function-collapse",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "discrete-voronoi",
       "k-rooms-clusters",
       "polygon-segmentation",
@@ -1896,7 +1896,7 @@
       "message-passing",
       "gan",
       "gnn",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "gradient-penalty",
       "exploring-generative-3d-shapes-using-autoencoder-networks"
     ],
@@ -2026,7 +2026,7 @@
     "label": "Note",
     "connected": [
       "gumbel-softmax",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "floor-plan-generation-with-voronoi-diagram",
       "half-plane-clipping",
       "wave-function-collapse"
@@ -2408,7 +2408,7 @@
       "office-layout-generation-agents",
       "floor-plan-generation-with-voronoi-diagram",
       "building-gan",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "intersection-over-union-iou",
       "behavior-aware-anthropometric-scene-generation-for-human-usable-3d-layouts"
     ],
@@ -2555,7 +2555,7 @@
       "voxels-to-graph",
       "building-gan",
       "floor-plan-generation-with-voronoi-diagram",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "office-layout-generation-agents",
       "discrete-voronoi",
       "quadtree",
@@ -2798,7 +2798,7 @@
     "connected": [
       "layout-vlm",
       "office-layout-generation-agents",
-      "free-form-floor-plan-design-using-differentiable-voronoi-diagram",
+      "free-form-floor-plan-design-using-differentiable-voronoi-diagram-paper",
       "floor-plan-generation-with-voronoi-diagram",
       "building-gan",
       "image-to-3d-scene",
