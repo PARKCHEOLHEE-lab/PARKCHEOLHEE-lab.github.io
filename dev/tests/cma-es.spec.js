@@ -988,7 +988,15 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/');
   const graph = page.locator('#cma-weights');
+  const updates = page.locator('#cma-updates');
+  const toggle = page.locator('summary').filter({ hasText: /^How it evolves$/ });
+  await expect(toggle).toBeVisible();
+  await expect(page.locator('#cma-step')).toBeVisible();
+  await expect(graph).toBeHidden();
+  await expect(updates).toBeHidden();
+  await toggle.press('Enter');
   await expect(graph).toBeVisible();
+  await expect(updates.locator('.MJXc-display').first()).toBeVisible();
   for (const P of parameters) {
     const raw = Array.from({ length: P.mu }, (_, i) => Math.log((P.lam + 1) / (2 * (i + 1))));
     const total = raw.reduce((a, b) => a + b, 0);

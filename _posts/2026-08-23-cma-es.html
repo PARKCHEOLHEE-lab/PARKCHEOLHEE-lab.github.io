@@ -21,6 +21,7 @@ categories: note
         .cma-demo .cma-3d canvas { cursor: grab; }
         .cma-demo .cma-3d canvas:active { cursor: grabbing; }
         .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
+        #cma-evolution > summary { cursor: pointer; }
         #cma-updates .cma-explain { display: flex; align-items: center; justify-content: safe center; gap: 1em; margin-block: 1em; }
         #cma-updates .cma-explain-math { flex: none; }
         #cma-updates .cma-explain figure { flex: 0 0 10em; margin: 0; text-align: center; }
@@ -169,7 +170,11 @@ categories: note
             Blue arrows point to the samples we keep. Thicker arrows have more influence. Light dashes show the spread before each update. Some samples can fall outside those dashes. Turn the view to see the radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and its radius is <span class="n-r">3.20</span>. The figure shows <span class="n-gen">9</span> rounds.
         </figcaption>
     </div>
-    <br>
+</ul>
+
+<details id="cma-evolution">
+<summary>How it evolves</summary>
+<ul>
     <li id="cma-weights">
         How \(m\) is calculated
         <ul>
@@ -335,6 +340,7 @@ categories: note
         </ul>
     </li>
 </ul>
+</details>
 
 <script>
 (function () {
