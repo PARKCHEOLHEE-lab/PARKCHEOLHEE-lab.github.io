@@ -850,6 +850,29 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
   }
 });
 
+test('standalone equations scroll only where needed', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 850 });
+  await page.goto('/cma-es/#cma-updates');
+  const formula = page.locator('#cma-updates .MJXc-display').filter({ hasText: /min/ });
+  await expect(formula).toBeVisible();
+  await expect.poll(() => formula.evaluate((el) => el.scrollHeight - el.clientHeight)).toBe(0);
+
+  await formula.evaluate((el) => { el.style.maxWidth = '8em'; });
+  const thumbColor = () => formula.evaluate((el) => getComputedStyle(el, '::-webkit-scrollbar-thumb').borderTopColor);
+  await page.mouse.move(0, 0);
+  await expect.poll(thumbColor).toBe('rgba(0, 0, 0, 0)');
+  await formula.hover();
+  await expect.poll(thumbColor).not.toBe('rgba(0, 0, 0, 0)');
+  const scroll = await formula.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth;
+    return { moved: el.scrollLeft, max: el.scrollWidth - el.clientWidth };
+  });
+  expect(scroll.moved).toBeGreaterThan(0);
+  expect(scroll.moved).toBe(scroll.max);
+  await page.mouse.move(0, 0);
+  await expect.poll(thumbColor).toBe('rgba(0, 0, 0, 0)');
+});
+
 test('live covariance stays visible while playing', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/');
