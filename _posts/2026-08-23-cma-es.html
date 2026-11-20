@@ -167,7 +167,7 @@ categories: note
         </div>
         </div>
         <figcaption>
-            Blue arrows point to the samples we keep. Thicker arrows show larger weights. The light dashed outline shows the spread before an update. Some samples can fall outside it. Turn the view to see the radius as a height. The smallest circle has its center at (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and a radius of <span class="n-r">3.20</span>. The figure shows <span class="n-gen">9</span> rounds.
+            Blue arrows point to the samples we keep. Thicker arrows show larger weights. The pale blue line shows where the search center has been. The light dashed outline shows the spread before an update. Some samples can fall outside it. Turn the view to see the radius as a height. The smallest circle has its center at (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and a radius of <span class="n-r">3.20</span>. The figure shows <span class="n-gen">9</span> rounds.
         </figcaption>
     </div>
 </ul>
@@ -674,6 +674,22 @@ categories: note
             var meanCoordinates = formatCoordinates(m);
             if (meanValue.nodeValue !== meanCoordinates) meanValue.nodeValue = meanCoordinates;
             showMatrix(sigma, C);
+            var moved = m[0] !== h.m[0] || m[1] !== h.m[1];
+            if (g > 0 || moved) {
+                ctx.save();
+                ctx.globalAlpha = 0.55;
+                ctx.strokeStyle = COL.mean;
+                ctx.lineWidth = 1.5;
+                ctx.lineJoin = "round";
+                ctx.beginPath();
+                ctx.moveTo(map.x(H[0].m[0]), map.y(H[0].m[1]));
+                for (var i = 1; i <= g; i++) {
+                    ctx.lineTo(map.x(H[i].m[0]), map.y(H[i].m[1]));
+                }
+                if (moved) ctx.lineTo(map.x(m[0]), map.y(m[1]));
+                ctx.stroke();
+                ctx.restore();
+            }
             if (ph >= 3) {
                 ctx.save(); ctx.globalAlpha = 0.3;
                 var beforeC = ph === 5 ? h.C1 : historyStage ? h.CSamples : h.C;

@@ -55,7 +55,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
           if (method === 'clearRect') {
             drawing.circles = []; drawing.radii = []; drawing.dots = []; drawing.crosses = []; drawing.ellipses = []; drawing.backgrounds = 0; drawing.labels = [];
             drawing.before = []; drawing.origins = []; drawing.arrows = [];
-            drawing.axes = [];
+            drawing.axes = []; drawing.centerTrail = [];
           }
           if (method === 'beginPath') { this.observedArc = null; this.observedEllipse = null; this.observedLines = []; this.observedPosition = null; }
           if (method === 'arc') this.observedArc = { x: args[0], y: args[1], r: args[2] };
@@ -82,6 +82,10 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
             this.observedArc.fill = this.fillStyle;
             this.observedArc.alpha = this.globalAlpha;
             drawing.dots.push(this.observedArc);
+          }
+          if (method === 'stroke' && this.strokeStyle === '#1d4ed8' && this.globalAlpha === 0.55) {
+            drawing.centerTrail = this.observedLines;
+            return original.apply(this, args);
           }
           if (method === 'stroke' && !this.observedArc && this.observedLines.length === 2) {
             const [a, b] = this.observedLines[0];
@@ -268,6 +272,14 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     const project = (p) => [points[0].x + p[0] * scale, points[0].y - p[1] * scale];
     const distribution = unit.distributions[generation];
     const mean = phase < 3 ? distribution.m : phase === 3 ? distribution.m.map((v, axis) => v + progress * (distribution.m1[axis] - v)) : distribution.m1;
+    const visited = unit.distributions.slice(0, generation + 1).map((entry) => entry.m);
+    if (mean.some((v, axis) => v !== distribution.m[axis])) visited.push(mean);
+    assert.equal(drawing.centerTrail.length, visited.length - 1, 'only the center moves through this frame are drawn');
+    drawing.centerTrail.forEach(([from, to], i) => {
+      const [a, b] = [visited[i], visited[i + 1]].map(project);
+      assert(Math.hypot(from[0] - a[0], from[1] - a[1]) < 1e-7);
+      assert(Math.hypot(to[0] - b[0], to[1] - b[1]) < 1e-7);
+    });
     const scores = frame.population.map((c) => Math.max(...targets.map((p) => Math.hypot(p[0] - c[0], p[1] - c[1]))));
     const order = scores.map((_, k) => k).sort((a, b) => scores[a] - scores[b]);
     let covariance = phase < 4 ? distribution.C : distribution.C1;
@@ -479,6 +491,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       .toEqual([term(sigma2), C[0], C[1], C[1], C[2], values[0], values[1], values[1], values[2]]);
   };
   await checkMatrix([0]);
+  expect(await root.evaluate(() => window.circleDrawing.centerTrail)).toEqual([]);
   await checkMatrix([16.25]);
   await checkMatrix([16.75]);
   await checkMatrix([5.25, 23.75, 17.75]);
