@@ -55,10 +55,6 @@ categories: note
         #cma-step .before-key { opacity: 0.3; }
         #cma-step .direction-key { border-top-color: var(--history); }
         #cma-step .selection-key { border-top-color: var(--selected); }
-        #cma-step .cma-legend .sigma-guide { flex-direction: column; align-items: stretch; gap: 0.2em; }
-        #cma-step .sigma-track { position: relative; }
-        #cma-step .sigma-track progress { display: block; width: 100%; height: 0.8em; accent-color: var(--history); }
-        #cma-step .sigma-baseline { position: absolute; top: 0; bottom: 0; border-left: 2px solid var(--td); }
         .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
         /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
         table.cma-table { width: 100%; border-collapse: collapse; border-radius: 0; box-shadow: none; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; font-family: MJXc-TeX-main-R, MJXc-TeX-main-Rw, serif; }
@@ -130,13 +126,6 @@ categories: note
                 <div class="update-selection" hidden><span class="legend-key selection-key" aria-hidden="true"></span><span>Top 3 moves</span></div>
                 <div class="update-direction" hidden><span class="legend-key direction-key" aria-hidden="true"></span><span class="direction-label"></span></div>
                 <div><span class="legend-key shape-key" aria-hidden="true"></span><span class="spread-label">C shape, σ size</span></div>
-                <div class="sigma-guide" hidden>
-                    <span>Recent moves (tick = random)</span>
-                    <span class="sigma-track">
-                        <progress aria-label="Recent movement as a multiple of the random-step baseline"></progress>
-                        <span class="sigma-baseline" aria-hidden="true"></span>
-                    </span>
-                </div>
             </div>
         </div>
         <div class="cma-covariance">
@@ -303,8 +292,8 @@ categories: note
             <li>
                 <b>Change size (\(\sigma\))</b><br>
                 For \(\sigma\), add the recent center moves after measuring them against the current spread.
-                Compare the length of the sum with the mark on the bar, which shows the average for random moves.
-                Past the mark, the ellipse grows. Short of it, the ellipse shrinks.
+                Compare the length of that sum with the average length for random moves.
+                If the sum is longer, the ellipse grows. If it is shorter, the ellipse shrinks.
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the size update">
                     <div class="cma-explain-math">\[
                         \sigma_{\text{new}} = 1.5 \sigma_{\text{old}}
@@ -549,14 +538,11 @@ categories: note
         var matrixValues = root.querySelectorAll(".covariance-math [data-value]");
         var score = root.querySelector(".best-score"), scoreValues = score.querySelectorAll(".score-center, .score-target, .score-radius");
         var meanValue = root.querySelector(".mean-coordinates").firstChild;
-        var sigmaGuide = root.querySelector(".sigma-guide"), sigmaBar = sigmaGuide.querySelector("progress");
         var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
         var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
         while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
         var H = full.H.slice(0, NG), P = full.P;
         var pathRatios = H.map(function (h) { return Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN; });
-        sigmaBar.max = Math.max(2, ...pathRatios);
-        sigmaGuide.querySelector(".sigma-baseline").style.left = (100 / sigmaBar.max) + "%";
         var A = null, bg = null, shown = "";
         var weightChart = document.getElementById("cma-weights"), offset = (P.lam / 2 + 0.5).toFixed(1);
         weightChart.querySelector(".weight-intro").textContent = "Keep the best " + P.mu + " of " + P.lam + " samples. Add 0.5 to the number you keep: \\(" + P.mu + " + 0.5 = " + offset + "\\).";
@@ -734,8 +720,6 @@ categories: note
                     var terms = [center, center, target, radiusText];
                     scoreValues.forEach(function (cell, i) { cell.firstChild.nodeValue = terms[i]; });
                 }
-                sigmaGuide.hidden = ph !== 5;
-                if (ph === 5) sigmaBar.value = pathRatios[g];
                 root.querySelector(".objective-key").hidden = reshaping;
                 root.querySelector(".update-selection").hidden = !reshaping || historyStage;
                 root.querySelector(".before-label").textContent = historyStage ? "After top 3 moves" : reshaping ? "Old sampling spread" : "Before update";

@@ -129,6 +129,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await expect(root.locator('.cma-top')).toBeHidden();
   await expect(root.locator('.cma-top')).toHaveAttribute('aria-hidden', 'true');
   await expect(root.locator('.cma-gauge')).toHaveCount(0);
+  await expect(root.locator('.cma-legend progress')).toHaveCount(0);
   await expect(root.locator('figcaption')).not.toContainText('small box');
   // Before this change the circle canvas was 245px wide at this viewport.
   await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
@@ -197,7 +198,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const samplesPerPhase = 4;
   const frames = await root.evaluate((el, { maximum, samplesPerPhase }) => {
     const slider = el.querySelector('.scrub');
-    const sigmaGuide = el.querySelector('.sigma-guide');
     const frames = [];
     let liveEvents = 0;
     const background = window.circleBackground;
@@ -212,12 +212,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
         fixedBackground = fixedBackground && window.circleBackground === background;
         frames.push(JSON.parse(JSON.stringify({ drawing: window.circleDrawing, population: el.cmaFrame.X, styles: el.cmaFrame.styles, mean: el.cmaFrame.m, readout: el.querySelector('.read').textContent, phase: el.querySelector('.phase').textContent,
           beforeVisible: !el.querySelector('.update-before').hidden, directionVisible: !el.querySelector('.update-direction').hidden,
-          legend: el.querySelector('.cma-legend').innerText,
-          sigmaGuide: sigmaGuide && !sigmaGuide.hidden ? {
-            recent: sigmaGuide.querySelector('progress').value,
-            max: sigmaGuide.querySelector('progress').max,
-            baseline: parseFloat(sigmaGuide.querySelector('.sigma-baseline').style.left),
-          } : null })));
+          legend: el.querySelector('.cma-legend').innerText })));
       }
     } finally {
       window.circleGeometryScan = false;
@@ -293,7 +288,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     }
     const sigma = phase < 5 ? distribution.sigma : distribution.sigma * (distribution.sigma1 / distribution.sigma) ** progress;
     const guide = drawing.ellipses[0], centre = project(mean);
-    assert.equal(Boolean(frame.sigmaGuide), phase === 5, 'sigma comparison lives in the plot legend');
+    assert(!frame.legend.includes('tick = random'), 'the recent-moves bar label is absent');
     assert.equal(frame.beforeVisible, phase >= 3, 'before-state legend appears only for mean, C and sigma updates');
     assert.equal(frame.directionVisible, historyStage || phase === 5, 'the amber key appears when its contribution is active');
     if (phase === 4) {
@@ -370,8 +365,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     }
     if (phase === 5) {
       const path = Math.hypot(...distribution.ps1) / unit.pathBaseline;
-      assert(Math.abs(frame.sigmaGuide.recent - path) < 1e-12, 'the bar comes from the measured path length');
-      assert(Math.abs(frame.sigmaGuide.baseline * frame.sigmaGuide.max / 100 - 1) < 1e-6, 'the tick is the actual random-step threshold');
+      assert(frame.legend.includes('Size ×' + (sigma / distribution.sigma).toFixed(2)), 'the legend still shows the current size change');
       assert(frame.phase.includes(path.toFixed(2) + '× the random-step baseline'), 'sigma explains the actual path comparison');
       if (path !== 1) assert(frame.phase.includes(path > 1 ? 'grow' : 'shrink'));
       for (const [dx, dy] of spans) {
