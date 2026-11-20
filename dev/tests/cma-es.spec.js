@@ -226,7 +226,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       for (let i = 0; i < pixels.length; i += 4) colours.add(Array.from(pixels.slice(i, i + 4)).join(','));
       return [...colours];
     };
-    return { frames, events: window.circleScanEvents, liveEvents, finalFrame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight, fixedBackground, background: palette(background) };
+    const width = canvas.clientWidth;
+    const height = width * canvas.height / canvas.width;
+    return { frames, events: window.circleScanEvents, liveEvents, finalFrame: el.cmaFrame, width, height, fixedBackground, background: palette(background) };
   }, { maximum, samplesPerPhase });
   expect(frames.events).toBe(frames.frames.length);
   expect(frames.liveEvents).toBe(1);
@@ -512,7 +514,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       const wirePoints = Array.from({ length: 12 }, (_, i) => world(wire, p, Math.floor(i * (p.count - 1) / 11)));
       let lights = 0, otherMeshes = 0;
       s.scene.traverse((o) => { if (o.isLight) lights++; if (o.isMesh && o !== ground) otherMeshes++; });
-      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, liftRanks: Object.keys(s.lifts), wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, cameraZoom: s.camera.zoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width: canvas.clientWidth, height: canvas.clientHeight };
+      const width = canvas.clientWidth;
+      const height = width * canvas.height / canvas.width;
+      return { shared: true, corners, flipY: ground.material.map.flipY, textureVersion: ground.material.map.version, renderFrame: s.renderer.info.render.frame, markers, lifts, liftRanks: Object.keys(s.lifts), wirePoints, lights, otherMeshes, orthographic: s.camera.isOrthographicCamera, zoom: s.controls.enableZoom, cameraZoom: s.camera.zoom, pan: s.controls.enablePan, drawing: window.circleDrawing, frame: el.cmaFrame, width, height };
     });
     expect(state?.shared, 'the actual 3D ground material shares the 2D canvas').toBe(true);
     if (time === 6.99) {
@@ -894,6 +898,7 @@ test('compact viewport removes vertical space without shrinking geometry', async
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/?scene-debug');
   const root = page.locator('#cma-step');
+  const scroller = root.locator('.cma-step-layout');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
   for (const width of [1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
@@ -914,7 +919,18 @@ test('compact viewport removes vertical space without shrinking geometry', async
     expect(size.planeWidth, 'the floor retains its previous width, over half the viewport').toBeGreaterThan(size.w / 2);
     expect(size.planeHeight, 'the rectangular canvas must not flatten circles').toBeCloseTo(size.planeWidth, 3);
     expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
+    await expect.poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight)).toBe(0);
+    const widthOverflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);
+    if (width === 1280) expect(widthOverflow).toBe(0);
+    else expect(widthOverflow).toBeGreaterThan(0);
   }
+  const thumbColor = () => scroller.evaluate((el) => getComputedStyle(el, '::-webkit-scrollbar-thumb').borderTopColor);
+  await page.mouse.move(0, 0);
+  await expect.poll(thumbColor).toBe('rgba(0, 0, 0, 0)');
+  await scroller.hover();
+  await expect.poll(thumbColor).not.toBe('rgba(0, 0, 0, 0)');
+  await page.mouse.move(0, 0);
+  await expect.poll(thumbColor).toBe('rgba(0, 0, 0, 0)');
 });
 
 test('extra covariance demos are removed', async ({ page }) => {
