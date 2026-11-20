@@ -26,6 +26,7 @@ categories: note
         #cma-updates .cma-explain { display: flex; align-items: center; justify-content: safe center; gap: 1em; margin-block: 1em; }
         #cma-updates .cma-explain-math { flex: none; }
         #cma-updates .cma-explain figure { flex: 0 0 10em; margin: 0; text-align: center; }
+        #cma-step-size .cma-explain > figure { flex-basis: 16em; }
         #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
         #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
         #cma-step { container-type: inline-size; }
@@ -111,6 +112,7 @@ categories: note
                 \]
                 </div>
             </li>
+            <li>Thicker blue arrows give the chosen samples more weight. The red line traces the center.</li>
         </ul>
 
     <div class="cma-demo" id="cma-step">
@@ -166,7 +168,7 @@ categories: note
         </div>
         </div>
         <figcaption>
-            The search runs for <span class="n-gen">9</span> rounds. Blue arrows mark the samples we keep. Thicker arrows mean more weight. The red line traces the search center. Samples can fall outside the dashed outline. The smallest circle has center (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and radius <span class="n-r">3.20</span>.
+            <span class="n-gen">9</span> rounds. Minimum at (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), r = <span class="n-r">3.20</span>
         </figcaption>
     </div>
 </ul>
@@ -194,7 +196,7 @@ categories: note
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
-        <p>The dashed ellipse in Fig. 1 shows where CMA-ES is likely to draw more samples. Changing \(C\) can stretch or turn the ellipse. Changing \(\sigma\) makes the whole ellipse bigger or smaller. Both axes change by the same factor. The next example uses simple numbers to show how \(C\) changes.</p>
+        <p>The dashed ellipse in Fig. 1 shows where CMA-ES is likely to draw more samples. Samples can fall outside it. Changing \(C\) can stretch or turn the ellipse. Changing \(\sigma\) makes the whole ellipse bigger or smaller. Both axes change by the same factor. The next example uses simple numbers to show how \(C\) changes.</p>
         <ul>
             <li>
                 <b>Learn from the best samples</b><br>
@@ -236,7 +238,7 @@ categories: note
                                 <text x="130.91" y="91">0.5</text><text x="44" y="91">0.25</text><text x="100" y="38">0.25</text>
                             </g>
                         </svg>
-                        <figcaption>Opposite arrows both add horizontal spread</figcaption>
+                        <figcaption>Weighted samples</figcaption>
                     </figure>
                 </div>
                 <p>To decide how much \(S\) should affect \(C\), start with the same three weights \(w_1,w_2,w_3\). Square each weight. Add the squares, then divide 1 by the total. This gives the effective sample count \(\mu_{\text{eff}}\). With equal weights, it would be 3. Here the best sample counts more, so the result is about 2.67.</p>
@@ -278,7 +280,7 @@ categories: note
                             <ellipse cx="80" cy="52" rx="37.24" ry="33.19" fill="none" stroke="royalblue" stroke-width="2"/>
                             <circle cx="80" cy="52" r="2" fill="currentColor"/>
                         </svg>
-                        <figcaption>After the samples, the ellipse is wider and shorter</figcaption>
+                        <figcaption>Wider and shorter</figcaption>
                     </figure>
                 </div>
             </li>
@@ -309,15 +311,15 @@ categories: note
                             <path d="M80 52L105 27 M98 28L105 27L104 34" fill="none" stroke="darkorange" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                             <circle cx="80" cy="52" r="2" fill="currentColor"/>
                         </svg>
-                        <figcaption>The move record adds spread along the orange arrow’s line</figcaption>
+                        <figcaption>Tilt from moves</figcaption>
                     </figure>
                 </div>
             </li>
             <li id="cma-step-size">
                 <b>Change size (\(\sigma\))</b>
                 <p>CMA-ES keeps an arrow for recent center moves. Each round, it keeps part of the old arrow and adds the latest move, scaled to the old sampling spread. Moves in the same direction add up. Moves in opposite directions partly cancel.</p>
-                <p>In Fig. 5, the older moves contribute 1.034 units to the right. The latest move adds 1.398 units to the right or left. The combined arrow has length \(L\approx 2.43\) or \(L\approx 0.36\).</p>
-                <p>Divide \(L\) by 1.25, the average path length for random moves in 2D. The resulting ratio \(r\) tells us how to change \(\sigma\). When \(r\) is above 1, \(\sigma\) grows. When it is below 1, \(\sigma\) shrinks. At 1 it stays the same. This example uses an update rate of 0.289.</p>
+                <p>In Fig. 5, the old moves (blue) add 1.034 units to the right. The latest move (orange) adds 1.398 to the right or left. The combined arrow has length \(L\approx 2.43\) or \(L\approx 0.36\).</p>
+                <p>Divide \(L\) by 1.25, the average path length for random moves in 2D. The resulting ratio \(r\) tells us how to change \(\sigma\). When \(r\) is above 1, \(\sigma\) grows. When it is below 1, \(\sigma\) shrinks. At 1 it stays the same. This example uses an update rate of 0.289. The dashed circles show the old size.</p>
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Step-size equation and example">
                     <div class="cma-explain-math">\[
                         \begin{aligned}
@@ -328,33 +330,31 @@ categories: note
                         \end{aligned}
                     \]</div>
                     <figure>
-                        <svg viewBox="0 0 160 117" role="img" aria-labelledby="cma-size-title" aria-describedby="cma-size-desc">
+                        <svg viewBox="0 0 160 123" role="img" aria-labelledby="cma-size-title" aria-describedby="cma-size-desc">
                             <title id="cma-size-title">How center moves change the sampling size</title>
                             <desc id="cma-size-desc">Moves in the same direction give a path length of 2.43 and grow sigma by a factor of 1.31. Moving back gives a path length of 0.36 and shrinks sigma by a factor of 0.81.</desc>
-                            <path d="M101 25H153 M127 1V49 M101 83H153 M127 62V104" fill="none" stroke="currentColor" opacity=".2"/>
+                            <path d="M101 25H153 M127 1V49 M101 89H153 M127 68V110" fill="none" stroke="currentColor" opacity=".2"/>
                             <g fill="currentColor" font-size="12">
-                                <text x="6" y="17">Same direction</text>
-                                <text x="6" y="76">Turns back</text>
-                                <text x="127" y="56" text-anchor="middle">σ × 1.31</text>
-                                <text x="127" y="113" text-anchor="middle">σ × 0.81</text>
+                                <text x="127" y="61" text-anchor="middle">σ × 1.31</text>
+                                <text x="127" y="119" text-anchor="middle">σ × 0.81</text>
                             </g>
                             <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M19 32H47 M42 29L47 32L42 35 M19 86H47 M42 83L47 86L42 89" stroke="royalblue"/>
-                                <path d="M47 32H85 M80 29L85 32L80 35 M47 97H9 M14 94L9 97L14 100" stroke="darkorange"/>
+                                <path d="M19 25H47 M42 22L47 25L42 28 M19 83H47 M42 80L47 83L42 86" stroke="royalblue"/>
+                                <path d="M47 25H85 M80 22L85 25L80 28 M47 95H9 M14 92L9 95L14 98" stroke="darkorange"/>
                             </g>
-                            <path d="M47 90V97" stroke="currentColor" opacity=".4"/>
+                            <path d="M47 87V95" stroke="currentColor" opacity=".4"/>
                             <g fill="none" stroke="currentColor" opacity=".6" stroke-dasharray="4 3">
                                 <circle cx="127" cy="25" r="18"/>
-                                <circle cx="127" cy="83" r="18"/>
+                                <circle cx="127" cy="89" r="18"/>
                             </g>
                             <g fill="none" stroke="royalblue" stroke-width="2">
                                 <circle cx="127" cy="25" r="23.58"/>
-                                <circle cx="127" cy="83" r="14.58"/>
+                                <circle cx="127" cy="89" r="14.58"/>
                             </g>
                             <circle cx="127" cy="25" r="2" fill="currentColor"/>
-                            <circle cx="127" cy="83" r="2" fill="currentColor"/>
+                            <circle cx="127" cy="89" r="2" fill="currentColor"/>
                         </svg>
-                        <figcaption>Blue shows the old moves. Orange shows the latest move. Dashed circles show the old size.</figcaption>
+                        <figcaption>Same direction / turns back</figcaption>
                     </figure>
                 </div>
             </li>

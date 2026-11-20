@@ -852,10 +852,20 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
   await expect(sizeFigure).toBeVisible();
   await expect(sizeFigure).toContainText('σ × 1.31');
   await expect(sizeFigure).toContainText('σ × 0.81');
+  await expect(stepSize.locator('figcaption')).toContainText('Same direction / turns back');
+  await expect(sizeFigure.locator('text').filter({ hasText: /same direction|turns back/i })).toHaveCount(0);
+  const captions = page.locator('#cma-step figcaption, #cma-updates figcaption');
+  await expect(captions).toHaveCount(5);
 
   for (const width of [390, 320, 1280]) {
     await page.setViewportSize({ width, height: 850 });
     const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const captionsFit = await captions.evaluateAll((items) => items.every((caption) => {
+      const lineHeight = parseFloat(getComputedStyle(caption).lineHeight);
+      return caption.getBoundingClientRect().height <= lineHeight + 1 &&
+        caption.scrollWidth <= caption.clientWidth + 1;
+    }));
+    expect(captionsFit, 'each caption fits on one line').toBe(true);
     const layouts = await pairs.evaluateAll((rows) => rows.map((row) => {
       row.scrollLeft = 0;
       const bounds = row.getBoundingClientRect();
@@ -866,6 +876,7 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
       row.scrollLeft = overflow;
       return {
         beside: before.left >= math.right && before.top < math.bottom && before.bottom > math.top,
+        figureWidth: before.width,
         startVisible: math.left >= bounds.left - 1,
         endVisible: figure.getBoundingClientRect().right <= bounds.right + 1,
         overflow,
@@ -878,6 +889,7 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
       expect(layout.endVisible).toBe(true);
       expect(layout.scrolled).toBe(layout.overflow);
     }
+    expect(layouts[3].figureWidth).toBeGreaterThanOrEqual(layouts[2].figureWidth * 1.5);
     if (width === 1280) expect(layouts.every((layout) => layout.overflow === 0)).toBe(true);
     else expect(layouts[0].overflow).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(pageWidth);
