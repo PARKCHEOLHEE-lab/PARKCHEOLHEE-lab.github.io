@@ -313,28 +313,89 @@ categories: note
                     </figure>
                 </div>
             </li>
-            <li>
-                <b>Change size (\(\sigma\))</b><br>
-                To update \(\sigma\), measure the recent center moves in units of the current spread, then add them up.
-                Compare the length of the result with the average length you would expect from random moves.
-                If the result is longer, the ellipse grows. If it is shorter, the ellipse shrinks.
-                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the size update">
-                    <div class="cma-explain-math">\[
-                        \sigma_{\text{new}} = 1.5 \sigma_{\text{old}}
-                    \]</div>
-                    <figure>
-                        <svg viewBox="0 -12 160 129" role="img" aria-labelledby="cma-size-spread-title">
-                            <title id="cma-size-spread-title">The solid ellipse has the same tilt as the dashed ellipse, and each axis is 1.5 times as long</title>
-                            <path d="M7 52H153 M80 -5V109" fill="none" stroke="currentColor" opacity=".2"/>
-                            <g transform="rotate(-26.87 80 52)" fill="none">
-                                <ellipse cx="80" cy="52" rx="40.98" ry="34.60" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
-                                <ellipse cx="80" cy="52" rx="61.47" ry="51.9" stroke="royalblue" stroke-width="2"/>
-                            </g>
-                            <circle cx="80" cy="52" r="2" fill="currentColor"/>
-                        </svg>
-                        <figcaption>Both axes grow by the same ratio</figcaption>
-                    </figure>
+            <li id="cma-step-size">
+                <b>Change size (\(\sigma\))</b>
+                <p>When the center keeps moving in one direction, larger steps can cover the same distance in fewer rounds. When it keeps turning back, the moves partly cancel. Smaller steps let CMA-ES search the same area more closely.</p>
+                <figure>
+                    <svg viewBox="0 0 320 204" width="100%" role="img" aria-labelledby="cma-size-title" aria-describedby="cma-size-desc">
+                        <title id="cma-size-title">How center moves change the sampling size</title>
+                        <desc id="cma-size-desc">In the first row, the arrows add up to a path length of 2.43, so sigma grows by a factor of 1.31. In the second row, the arrows partly cancel. The path length is 0.36, so sigma shrinks by a factor of 0.81.</desc>
+                        <path d="M12 102H308" stroke="currentColor" opacity=".2"/>
+                        <g fill="currentColor" font-size="15">
+                            <text x="12" y="22">Same direction</text>
+                            <text x="12" y="82">Path length 2.43</text>
+                            <text x="12" y="123">Reverse direction</text>
+                            <text x="12" y="183">Path length 0.36</text>
+                            <text x="260" y="92" text-anchor="middle">σ × 1.31</text>
+                            <text x="260" y="193" text-anchor="middle">σ × 0.81</text>
+                        </g>
+                        <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M37 49H89 M83 45L89 49L83 53 M37 143H89 M83 139L89 143L83 147" stroke="royalblue"/>
+                            <path d="M89 49H159 M153 45L159 49L153 53 M89 155H19 M25 151L19 155L25 159" stroke="darkorange"/>
+                            <path d="M197 49H217 M212 45L217 49L212 53 M197 146H217 M212 142L217 146L212 150" stroke="currentColor" opacity=".6"/>
+                        </g>
+                        <path d="M89 149V155" stroke="currentColor" opacity=".4"/>
+                        <g fill="none" stroke="currentColor" opacity=".6" stroke-dasharray="4 3">
+                            <circle cx="260" cy="49" r="22"/>
+                            <circle cx="260" cy="146" r="22"/>
+                        </g>
+                        <g fill="none" stroke="royalblue" stroke-width="2">
+                            <circle cx="260" cy="49" r="28.82"/>
+                            <circle cx="260" cy="146" r="17.82"/>
+                        </g>
+                    </svg>
+                    <figcaption>Blue shows what we keep from older moves. Orange shows the scaled latest move. The dashed circle shows the old size.</figcaption>
+                </figure>
+                <p><b>1. Measure the latest center move.</b> Subtract the old center from the new one. Divide by \(\sigma_{\text{old}}\) to remove the overall size. Then use \(C_{\text{old}}^{-1/2}\) to remove the extra stretch in each direction. The result \(u\) measures the move in units of the old sampling spread.</p>
+                <div class="latex-container">
+                \[
+                    u=C_{\text{old}}^{-1/2}
+                    \frac{m_{\text{new}}-m_{\text{old}}}{\sigma_{\text{old}}}
+                \]
                 </div>
+                <p><b>2. Add it to the record of moves.</b> Start with \(p_\sigma=0\) in the first round. Each round, keep a share of the old record and add the latest move. The rate \(c_\sigma\) controls how quickly older moves fade. The factor \(b\) accounts for two things that make the path smaller: averaging samples and keeping only part of the old record. Use the same example weights as above, so \(\mu_{\text{eff}}\approx 2.67\) and \(n=2\).</p>
+                <div class="latex-container">
+                \[
+                    \begin{aligned}
+                    p_{\sigma,\text{new}} &= (1-c_\sigma)p_{\sigma,\text{old}} + b\,u \\[0.5em]
+                    c_\sigma &= \frac{\mu_{\text{eff}}+2}{n+\mu_{\text{eff}}+5}
+                        \approx 0.483 \\[0.5em]
+                    b &= \sqrt{c_\sigma(2-c_\sigma)\mu_{\text{eff}}}
+                        \approx 1.398
+                    \end{aligned}
+                \]
+                </div>
+                <p>For the two moves in Fig. 5, take \(C_{\text{old}}=I\), \(\sigma_{\text{old}}=1\), and an old record of \((2,0)\). A center move of one unit right or left then gives \(u=(1,0)\) or \(u=(-1,0)\).</p>
+                <div class="latex-container">
+                \[
+                    \begin{aligned}
+                    \text{Same direction:}\quad &(1-c_\sigma)(2,0)+b(1,0)
+                        \approx (2.43,0) \\[0.5em]
+                    \text{Reverse direction:}\quad &(1-c_\sigma)(2,0)+b(-1,0)
+                        \approx (-0.36,0)
+                    \end{aligned}
+                \]
+                </div>
+                <p><b>3. Compare the length with random moves.</b> The baseline \(\chi_2\approx1.25\) is the average distance from the origin to a point drawn from a standard 2-D normal distribution. After the scaling above, this is the reference length for a path with independent random moves. Divide the new path length by that baseline to get \(r\).</p>
+                <div class="latex-container">
+                \[
+                    r = \frac{\lVert p_{\sigma,\text{new}}\rVert}{\chi_2}
+                    \qquad
+                    \sigma_{\text{new}}=\sigma_{\text{old}}\,\exp\!\bigl(k(r-1)\bigr)
+                \]
+                </div>
+                <p>The multiplier \(\exp(z)=e^z\) is always positive. When \(r=1\), the multiplier is \(\exp(0)=1\). Above 1, the exponent is positive and the spread grows. Below 1, the exponent is negative and the spread shrinks. The rate \(k\) controls how strongly \(\sigma\) reacts. The demo sets \(k=c_\sigma/d_\sigma\), where \(d_\sigma=2\mu_{\text{eff}}/\lambda+0.3+c_\sigma\) and \(\lambda=6\) is the number of samples per round. Here \(k\approx0.289\).</p>
+                <div class="latex-container">
+                \[
+                    \begin{aligned}
+                    \text{Same direction:}\quad r &\approx 2.43/1.25 \approx 1.94,
+                        & \exp\!\bigl(0.289(1.94-1)\bigr) &\approx 1.31 \\[0.5em]
+                    \text{Reverse direction:}\quad r &\approx 0.36/1.25 \approx 0.29,
+                        & \exp\!\bigl(0.289(0.29-1)\bigr) &\approx 0.81
+                    \end{aligned}
+                \]
+                </div>
+                <p>The multiplier changes both axes by the same factor, so the ellipse keeps its shape and tilt. The demo caps the exponent at 1 to limit growth in one round. See <a href="https://arxiv.org/abs/1604.00772">Hansen’s CMA-ES tutorial</a>, section 4.</p>
             </li>
         </ul>
     </li>

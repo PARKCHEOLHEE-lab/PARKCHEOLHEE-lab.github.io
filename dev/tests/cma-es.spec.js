@@ -844,12 +844,24 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
   await page.setViewportSize({ width: 390, height: 850 });
   await page.goto('/cma-es/#cma-updates');
   const pairs = page.locator('#cma-updates .cma-explain');
-  await expect(pairs).toHaveCount(4);
+  await expect(pairs).toHaveCount(3);
   await expect(pairs.last().locator('.MJXc-display')).toBeVisible();
+  const stepSize = page.locator('#cma-step-size');
+  const sizeFigure = stepSize.getByRole('img', { name: 'How center moves change the sampling size' });
+  await expect(sizeFigure).toBeVisible();
+  await expect(sizeFigure).toContainText('Path length 2.43');
+  await expect(sizeFigure).toContainText('Path length 0.36');
+  await expect(sizeFigure).toContainText('σ × 1.31');
+  await expect(sizeFigure).toContainText('σ × 0.81');
 
   for (const width of [390, 320, 1280]) {
     await page.setViewportSize({ width, height: 850 });
     const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+    const diagramFits = await sizeFigure.evaluate((diagram) => {
+      const bounds = diagram.getBoundingClientRect();
+      return bounds.left >= 0 && bounds.right <= document.documentElement.clientWidth;
+    });
+    expect(diagramFits).toBe(true);
     const layouts = await pairs.evaluateAll((rows) => rows.map((row) => {
       row.scrollLeft = 0;
       const bounds = row.getBoundingClientRect();
