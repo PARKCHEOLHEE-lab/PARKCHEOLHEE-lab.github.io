@@ -1007,6 +1007,12 @@ test('rank weight calculation and bars use the optimizer weights', async ({ page
   const updates = page.locator('#cma-updates');
   const toggle = page.locator('summary').filter({ hasText: /^How it evolves$/ });
   await expect(toggle).toBeVisible();
+  const labelGap = await toggle.evaluate((el) => {
+    if (!el.firstElementChild) return 0;
+    const style = getComputedStyle(el.firstElementChild);
+    return parseFloat(style.marginInlineStart) / parseFloat(style.fontSize);
+  });
+  expect(labelGap).toBeCloseTo(0.4);
   await expect(page.locator('#cma-step')).toBeVisible();
   await expect(graph).toBeHidden();
   await expect(updates).toBeHidden();
