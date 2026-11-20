@@ -87,10 +87,10 @@ categories: note
     </li>
         <ul>
             <li>
-                <b>CMA-ES</b> only needs to score each candidate. It can work without a gradient, which tells you how the score changes near a point.
+                <b>CMA-ES</b> only needs a score for each possible answer, called a candidate. It can work without a gradient, which tells you how the score changes near a point.
             </li>
             <li>
-                CMA-ES draws candidates from a normal distribution \(\mathcal{N}(m, \sigma^2 C)\). In each round (called a generation), it draws \(\lambda\) candidates and sorts them by score. It uses the best ones to choose where to look in the next round.
+                CMA-ES uses a normal distribution \(\mathcal{N}(m, \sigma^2 C)\) to draw candidates. This puts more candidates near the center. In each round, called a generation, it draws \(\lambda\) candidates and ranks them by score. The best candidates guide the next round.
             </li>
             <li>
                 The mean \(m\) is the center. The step size \(\sigma\) sets the overall spread. The matrix \(C\) sets how the search stretches in different directions.
@@ -102,10 +102,10 @@ categories: note
     </li>
         <ul>
             <li>
-                Find the smallest circle that holds six points. Each candidate gives a possible center \((x, y)\), so the search has two variables (\(n = 2\)).
+                Find the smallest circle that holds six points. Each candidate gives a possible center \((x, y)\). You choose two numbers, so \(n = 2\).
             </li>
             <li>
-                For each center, find the distance to the farthest point. That distance is the radius and the score \(f\).
+                Each \(p_i\) is one of the six points. From a given center, find the distance to the farthest point. That distance is both the radius and the score \(f\).
                 <div class="latex-container">
                 \[
                     f(x, y) = \max_i \, \lVert (x, y) - p_i \rVert
@@ -168,7 +168,7 @@ categories: note
         </div>
         </div>
         <figcaption>
-            Blue arrows point to the samples we keep. Thicker arrows have more influence. Light dashes show the spread before each update. Some samples can fall outside those dashes. Turn the view to see the radius as height. The target center is (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and its radius is <span class="n-r">3.20</span>. The figure shows <span class="n-gen">9</span> rounds.
+            Blue arrows point to the samples we keep. Thicker arrows show larger weights. The light dashed outline shows the spread before an update. Some samples can fall outside it. Turn the view to see the radius as a height. The smallest circle has its center at (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>) and a radius of <span class="n-r">3.20</span>. The figure shows <span class="n-gen">9</span> rounds.
         </figcaption>
     </div>
 </ul>
@@ -181,7 +181,7 @@ categories: note
         <ul>
             <li>
                 <span class="weight-intro"></span>
-                Without the extra 0.5, the starting value equals rank 3, so the ratio is 1 and \(\ln(1)=0\).
+                Without the extra 0.5, both the starting value and rank 3 would be 3. Dividing them gives 1, and \(\ln(1)=0\). The third sample would get zero weight.
             </li>
             <li>Use \(\ln\!\left(\frac{\text{starting value}}{\text{rank}}\right)\) to get a log score for each rank. Add up the log scores. Then divide each score by that sum to get its weight.</li>
             <li>Multiply each of the three centers by its weight. Add the results to get the new center \(m\).</li>
@@ -196,12 +196,12 @@ categories: note
     <br>
     <li id="cma-updates">
         How \(C\) and \(\sigma\) change
-        <p>In Fig. 1, the dashed ellipse shows how the search spreads. Updating \(C\) changes the spread by direction. Updating \(\sigma\) scales every direction by the same factor. The example below uses simple numbers for both updates to \(C\).</p>
+        <p>The dashed ellipse in Fig. 1 shows where CMA-ES is likely to draw more samples. Changing \(C\) can stretch or turn the ellipse. Changing \(\sigma\) makes the whole ellipse bigger or smaller. Both axes change by the same factor. The next example uses simple numbers to show how \(C\) changes.</p>
         <ul>
             <li>
                 <b>Learn from the best samples</b><br>
-                Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). The three best samples, in rank order, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(0.5\), \(0.25\), and \(0.25\).
-                Take the arrow from the old center to each sample and divide it by \(\sigma\) to get \(d_i\). Here \(\sigma=1\), so the division leaves the arrow as it is.
+                Start at \(m_{\text{old}}=(0,0)\) with \(\sigma=1\). From best to third best, the samples are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). Give them weights of \(0.5\), \(0.25\), and \(0.25\).
+                For each sample, draw an arrow from the old center to that sample. Divide its two numbers by \(\sigma\) to get \(d_i\). Here \(\sigma=1\), so the arrow stays the same.
                 \[
                     \begin{aligned}
                     d_1 &= \frac{s_1 - m_{\text{old}}}{\sigma}
@@ -212,8 +212,8 @@ categories: note
                         = (-2,0)-(0,0) = \begin{pmatrix}-2\\0\end{pmatrix}
                     \end{aligned}
                 \]
-                To turn an arrow into a matrix, multiply its column by its row. For \(d_1\), the top-left entry is \(2^2=4\), and the other entries are zero. The leftward arrow \(d_3\) gives the same matrix. The upward arrow \(d_2\) puts its \(4\) in the bottom-right entry.
-                In Fig. 2, each arrow is scaled by \(\sqrt{w_i}\). The column and the row each get that factor, so their product gets the weight \(w_i\).
+                Write the arrow's numbers as a column and as a row. Multiply the column by the row to get a matrix. For \(d_1\), the top-left number is \(2^2=4\), and the rest are zero. The arrow pointing left, \(d_3\), gives the same matrix. The arrow pointing up, \(d_2\), puts its \(4\) at the bottom right.
+                Fig. 2 multiplies each arrow's length by \(\sqrt{w_i}\). The column and row each get one copy of \(\sqrt{w_i}\). The two square roots multiply to \(w_i\), so the matrix gets the right weight.
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Weighted sample arrows and equation">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
@@ -241,14 +241,14 @@ categories: note
                         <figcaption>Opposite arrows both add horizontal spread</figcaption>
                     </figure>
                 </div>
-                <p>To decide how much \(S\) should affect the update to \(C\), start with the same three weights \(w_1,w_2,w_3\). Square them, add them, and divide 1 by the sum. The result, \(\mu_{\text{eff}}\), is the number of equally weighted samples that would give the same sum of squares.</p>
+                <p>To decide how much \(S\) should affect \(C\), start with the same three weights \(w_1,w_2,w_3\). Square each weight. Add the squares, then divide 1 by the total. This gives the effective sample count \(\mu_{\text{eff}}\). With equal weights, it would be 3. Here the best sample counts more, so the result is about 2.67.</p>
                 \[
                     \begin{aligned}
                     \mu_{\text{eff}} &= \frac{1}{\vphantom{\rule{0pt}{1.3em}}w_1^2+w_2^2+w_3^2} \\[0.5em]
                     &= \frac{1}{\vphantom{\rule{0pt}{1.3em}}0.5^2+0.25^2+0.25^2} \approx 2.67
                     \end{aligned}
                 \]
-                <p>CMA-ES uses the number of variables \(n\) and the effective sample count \(\mu_{\text{eff}}\) to set two rates. The rate \(c_1\) controls how much the center moves affect \(C\). The rate \(c_\mu\) controls how much the sample matrix \(S\) affects \(C\).</p>
+                <p>The formulas below use two numbers. The first is \(n\), the number of values we choose. The second is \(\mu_{\text{eff}}\), the count we just found. The rate \(c_1\) sets how much the record of center moves affects \(C\). The rate \(c_\mu\) sets how much \(S\) affects \(C\).</p>
                 \[
                     \begin{aligned}
                     c_1 &= \frac{2}{\vphantom{\rule{0pt}{1.3em}}(n+1.3)^2+\mu_{\text{eff}}} \\[0.5em]
@@ -259,14 +259,14 @@ categories: note
                     \right)
                     \end{aligned}
                 \]
-                <p>In this example, we choose the two center coordinates \(x\) and \(y\), so \(n=2\). Replace \(n\) with \(2\) and \(\mu_{\text{eff}}\) with \(2.67\). For \(c_\mu\), take the smaller of the two values. The limit \(1-c_1\) is about \(0.85\), so the fraction gives the rate here.</p>
+                <p>We choose \(x\) and \(y\), so use 2 for \(n\). Use 2.67 for \(\mu_{\text{eff}}\). In the \(c_\mu\) formula, \(\min\) means take the smaller value. Here the fraction gives \(0.11\), which is below the limit \(1-c_1\approx0.85\).</p>
                 \[
                     \begin{aligned}
                     c_1 &= \frac{2}{\vphantom{\rule{0pt}{1.3em}}(2+1.3)^2+2.67} \approx 0.15 \\[0.5em]
                     c_\mu &= \frac{2(2.67-2+1/2.67)}{\vphantom{\rule{0pt}{1.3em}}(2+2)^2+2.67} \approx 0.11
                     \end{aligned}
                 \]
-                <p>Use the rounded rates for the rest of the example. Set aside \(0.15\) for the center moves and use \(0.11\) for \(S\). That leaves \(1-0.15-0.11=0.74\) for the old spread, \(C_{\text{old}}=I\).</p>
+                <p>Use the rates shown to two decimal places. Save \(0.15\) for the center moves and use \(0.11\) for \(S\). The old spread \(C_{\text{old}}=I\) gets the rest, \(1-0.15-0.11=0.74\).</p>
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the sample update">
                     <div class="cma-explain-math">\[
                         C_{\text{samples}} = 0.74 I + 0.11 S
@@ -286,14 +286,14 @@ categories: note
             </li>
             <li>
                 <b>Learn from center moves</b><br>
-                The weighted average of those three samples moves the center from \((0,0)\) to \((0.5,0.5)\). Since \(\sigma=1\), the move in units of \(\sigma\) is also \((0.5,0.5)\).
-                The vector \(p_c\) keeps a running record of these moves. For this part of the example, start with a record of \((1,1)\). Keep half of that record and add the latest move.
+                Use the three weights to average the sample positions. The center moves from \((0,0)\) to \((0.5,0.5)\). Dividing this move by \(\sigma=1\) gives the same pair.
+                The vector \(p_c\) keeps a record of the center moves. In this example, start with \((1,1)\) for the old record. Keep half of it and add the latest move.
                 \[
                     p_{c,\text{new}} = 0.5\begin{pmatrix}1\\1\end{pmatrix}
                     + \begin{pmatrix}0.5\\0.5\end{pmatrix}
                     = \begin{pmatrix}1\\1\end{pmatrix}
                 \]
-                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Use the center-move rate of \(0.15\) from above, then add this weighted matrix to \(C_{\text{samples}}\).
+                The orange arrow points up and right. Multiply its column by its row to get a matrix of ones. Multiply the matrix by \(0.15\), the rate we found above. Add it to \(C_{\text{samples}}\).
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the center move update">
                     <div class="cma-explain-math">\[
                     \begin{aligned}
@@ -317,9 +317,9 @@ categories: note
             </li>
             <li>
                 <b>Change size (\(\sigma\))</b><br>
-                For \(\sigma\), add the recent center moves after measuring them against the current spread.
-                Compare the length of that sum with the average length for random moves.
-                If the sum is longer, the ellipse grows. If it is shorter, the ellipse shrinks.
+                To update \(\sigma\), measure the recent center moves in units of the current spread, then add them up.
+                Compare the length of the result with the average length you would expect from random moves.
+                If the result is longer, the ellipse grows. If it is shorter, the ellipse shrinks.
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the size update">
                     <div class="cma-explain-math">\[
                         \sigma_{\text{new}} = 1.5 \sigma_{\text{old}}
