@@ -147,7 +147,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       return { colour: g.strokeStyle, line: css.borderTopStyle };
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
-      matrixRight: matrix.left >= viewport.right, matrixBelow: matrix.top >= viewport.bottom,
+      matrixRight: matrix.left >= viewport.right && matrix.top < viewport.bottom && matrix.bottom > viewport.top,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
@@ -655,13 +655,26 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   });
   expect(beforeResize.error).toBe(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(async () => (await layout()).matrixBelow, { message: 'matrix stacks below the plot on a phone' }).toBe(true);
+  await expect.poll(async () => (await layout()).matrixRight, { message: 'equations stay beside the plot on a phone' }).toBe(true);
   const phoneLayout = await layout();
   expect(phoneLayout.canvas).toBe(phoneLayout.width);
   expect(phoneLayout.producer).toBe(phoneLayout.canvas);
   expect(phoneLayout.legend.x / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.x / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.y / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.y / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.right).toBeLessThan(phoneLayout.viewport);
+  const scroller = root.getByRole('region', { name: 'Circle demo and live equations' });
+  await expect(scroller.getByText('Swipe here to see the equations')).toBeVisible();
+  await scroller.press('ArrowRight');
+  await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  const equationsFit = await scroller.evaluate((el) => {
+    el.scrollLeft = el.scrollWidth;
+    const row = el.getBoundingClientRect();
+    const equations = el.querySelector('.cma-equations').getBoundingClientRect();
+    const visible = equations.left >= row.left - 1 && equations.right <= row.right + 1;
+    el.scrollLeft = 0;
+    return visible;
+  });
+  expect(equationsFit).toBe(true);
   await expect(root.locator('canvas:visible')).toHaveCount(1);
   await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
     message: 'the phone circle drawing is wider than its previous 330px',
