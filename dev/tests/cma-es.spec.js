@@ -754,12 +754,20 @@ test('score, center and covariance share one aligned display', async ({ page }) 
   await expect(scoreGlyph).toHaveText('f');
   const font = (el) => getComputedStyle(el).fontFamily;
   expect(await scoreGlyph.evaluate(font)).toBe(await objectiveGlyph.evaluate(font));
+  const scoreNorms = panel.locator('.best-score .mjx-mo .mjx-char').filter({ hasText: /^∥$/ });
+  const objectiveNorms = page.locator('.latex-container .MJXc-display').first().locator('.mjx-mo .mjx-char').filter({ hasText: /^∥$/ });
+  await expect(scoreNorms).toHaveText(['∥', '∥']);
 
   for (const width of [1280, 1024, 390, 320]) {
     await page.setViewportSize({ width, height: 850 });
     const fontSize = (el) => getComputedStyle(el).fontSize;
     const bodySize = await objectiveGlyph.evaluate(fontSize);
     expect(await scoreGlyph.evaluate(fontSize)).toBe(bodySize);
+    const glyphMetrics = (nodes) => nodes.map((node) => {
+      const style = getComputedStyle(node);
+      return [style.fontFamily, style.fontSize, node.getBoundingClientRect().width];
+    });
+    expect(await scoreNorms.evaluateAll(glyphMetrics)).toEqual(await objectiveNorms.evaluateAll(glyphMetrics));
     expect(await mean.locator('.mean-coordinates').evaluate(fontSize)).toBe(bodySize);
     expect(await panel.locator('.covariance-matrix [data-value]').first().evaluate(fontSize)).toBe(bodySize);
     const scoreBox = await panel.locator('.best-score').boundingBox();
