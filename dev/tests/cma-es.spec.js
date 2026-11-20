@@ -680,7 +680,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(phoneLayout.legend.y / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.y / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.right).toBeLessThan(phoneLayout.viewport);
   const scroller = root.getByRole('region', { name: 'Circle demo and live equations' });
-  await expect(scroller.getByText('Scroll right for the equations')).toBeVisible();
+  await expect(scroller.getByText('Scroll right for the equations')).toHaveCount(0);
   expect(await scroller.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThan(105);
   await scroller.press('ArrowRight');
   await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
@@ -788,16 +788,23 @@ test('score, center and covariance share one aligned display', async ({ page }) 
 
   for (const width of [1280, 1024, 390, 320]) {
     await page.setViewportSize({ width, height: 850 });
-    const fontSize = (el) => getComputedStyle(el).fontSize;
+    const fontSize = (el) => parseFloat(getComputedStyle(el).fontSize);
     const bodySize = await objectiveGlyph.evaluate(fontSize);
-    expect(await scoreGlyph.evaluate(fontSize)).toBe(bodySize);
+    const figureSize = bodySize * 0.85;
+    expect(await scoreGlyph.evaluate(fontSize)).toBeCloseTo(figureSize, 2);
     const glyphMetrics = (nodes) => nodes.map((node) => {
       const style = getComputedStyle(node);
-      return [style.fontFamily, style.fontSize, node.getBoundingClientRect().width];
+      return { family: style.fontFamily, size: parseFloat(style.fontSize), width: node.getBoundingClientRect().width };
     });
-    expect(await scoreNorms.evaluateAll(glyphMetrics)).toEqual(await objectiveNorms.evaluateAll(glyphMetrics));
-    expect(await mean.locator('.mean-coordinates').evaluate(fontSize)).toBe(bodySize);
-    expect(await panel.locator('.covariance-matrix [data-value]').first().evaluate(fontSize)).toBe(bodySize);
+    const bodyNorms = await objectiveNorms.evaluateAll(glyphMetrics);
+    const figureNorms = await scoreNorms.evaluateAll(glyphMetrics);
+    for (const [index, norm] of figureNorms.entries()) {
+      expect(norm.family).toBe(bodyNorms[index].family);
+      expect(norm.size).toBeCloseTo(figureSize, 2);
+      expect(norm.width / bodyNorms[index].width).toBeCloseTo(0.85, 2);
+    }
+    expect(await mean.locator('.mean-coordinates').evaluate(fontSize)).toBeCloseTo(figureSize, 2);
+    expect(await panel.locator('.covariance-matrix [data-value]').first().evaluate(fontSize)).toBeCloseTo(figureSize, 2);
     const scoreBox = await panel.locator('.best-score').boundingBox();
     const meanBox = await mean.boundingBox();
     const covarianceBox = await panel.locator('.covariance-math').boundingBox();
