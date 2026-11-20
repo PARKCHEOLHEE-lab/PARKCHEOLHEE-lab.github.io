@@ -83,7 +83,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
             this.observedArc.alpha = this.globalAlpha;
             drawing.dots.push(this.observedArc);
           }
-          if (method === 'stroke' && this.strokeStyle === '#1d4ed8' && this.globalAlpha === 0.55) {
+          if (method === 'stroke' && this.strokeStyle === '#b91c1c' && this.globalAlpha === 0.55) {
             drawing.centerTrail = this.observedLines;
             return original.apply(this, args);
           }
@@ -135,10 +135,6 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await expect(root.locator('.cma-gauge')).toHaveCount(0);
   await expect(root.locator('.cma-legend progress')).toHaveCount(0);
   await expect(root.locator('figcaption')).not.toContainText('small box');
-  // Before this change the circle canvas was 245px wide at this viewport.
-  await expect.poll(() => root.locator('.cma-top').evaluate((canvas) => canvas.clientWidth), {
-    message: 'the fixed circle drawing has at least 25% more width at 1280px',
-  }).toBeGreaterThanOrEqual(245 * 1.25);
   const layout = () => root.evaluate((el) => {
     const viewport = el.querySelector('.cma-view').getBoundingClientRect();
     const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();
@@ -152,6 +148,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
       matrixRight: matrix.left >= viewport.right && matrix.top < viewport.bottom && matrix.bottom > viewport.top,
+      gap: matrix.left - viewport.right,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
@@ -168,7 +165,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(legendPaint.background).toEqual([255, 255, 255, 204]);
   expect(legendPaint.opacity).toBe('1');
   expect(initialLayout.matrixRight).toBe(true);
-  expect(initialLayout.canvas).toBeLessThan(initialLayout.width);
+  expect(initialLayout.gap).toBeLessThan(4);
+  expect(initialLayout.canvas).toBeGreaterThan(230);
+  expect(initialLayout.canvas).toBeLessThan(245);
   expect(initialLayout.producer).toBe(initialLayout.canvas);
   expect(Math.abs(initialLayout.viewport - initialLayout.canvas), 'renderer width rounds to whole CSS pixels').toBeLessThan(1);
   expect(initialLayout.pointer).toBe('none');
@@ -969,7 +968,7 @@ test('compact viewport removes vertical space without shrinking geometry', async
     expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
     await expect.poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight)).toBe(0);
     const widthOverflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);
-    if (width === 1920) expect(widthOverflow).toBe(0);
+    if (width >= 1280) expect(widthOverflow).toBe(0);
     else expect(widthOverflow).toBeGreaterThan(0);
   }
   const thumbColor = () => scroller.evaluate((el) => getComputedStyle(el, '::-webkit-scrollbar-thumb').borderTopColor);
