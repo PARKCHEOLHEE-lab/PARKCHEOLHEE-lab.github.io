@@ -979,13 +979,14 @@ test('compact viewport removes vertical space without shrinking geometry', async
       const project = (x, z) => camera.position.clone().set(x, 0, z).project(camera);
       const planeWidth = Math.abs(project(1, 0).x - project(-1, 0).x) * w / 2;
       const planeHeight = Math.abs(project(0, 1).y - project(0, -1).y) * h / 2;
-      const box = el.querySelector('.cma-view').getBoundingClientRect();
+      const equations = el.querySelector('.cma-covariance').getBoundingClientRect();
       const caption = el.querySelector('figcaption').getBoundingClientRect();
-      return { w, h, planeWidth, planeHeight, captionGap: caption.top - box.bottom };
+      return { w, h, planeWidth, planeHeight, captionGap: caption.top - equations.bottom };
     });
     expect(size.planeWidth, 'the floor retains its previous width, over half the viewport').toBeGreaterThan(size.w / 2);
     expect(size.planeHeight, 'the rectangular canvas must not flatten circles').toBeCloseTo(size.planeWidth, 3);
-    expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
+    expect(size.captionGap, 'the caption follows the equations').toBeGreaterThanOrEqual(0);
+    expect(size.captionGap, 'the caption stays close to the equations').toBeLessThan(20);
   }
 });
 
