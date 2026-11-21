@@ -294,6 +294,7 @@ hr
 
 .latex-container
   overflow: auto
+  @include hover-scrollbar
 
 // Pseudocode/algorithm box: full-width horizontal rules at every section
 // boundary. MathJax v2 CHTML draws \hline only as wide as the array content,
@@ -339,7 +340,8 @@ hr
 .MathJax_Display
   max-width: 100%
   overflow-x: auto
-  padding-block: 0.4em
+  padding-block: 0.4em 0.5em
+  @include hover-scrollbar
 
 // --- Global styles (moved from default.html inline <style>) ---
 

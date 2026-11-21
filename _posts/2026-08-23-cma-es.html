@@ -1,0 +1,964 @@
+---
+title: "CMA-ES"
+layout: post
+related:
+  - office-layout-generation-agents
+  - traveling-salesman-problem
+  - pca
+  - theater-sightlines
+  - tower-crane-arrangement
+  - optimizers
+  - numerical-differentitation-for-autograd
+categories: note
+---
+
+<br>
+
+    <style>
+        .cma-demo { --link: #66a1ff; --r30: rgba(128, 128, 128, 0.30); --r14: rgba(128, 128, 128, 0.14); --td: rgb(70, 70, 70); --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: initial; margin: 1.4em 0; }
+        .cma-demo .ctrls { display: flex; gap: 0.5em 1em; align-items: center; flex-wrap: wrap; margin: 0.5em 0; }
+        .cma-demo .play { cursor: pointer; border: 1px solid var(--r30); background: transparent; color: inherit; border-radius: 4px; width: 1.9em; height: 1.9em; line-height: 1; font-size: 0.85em; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .cma-demo .play:hover { background: var(--r14); }
+        .cma-demo .play[data-playing="true"] { border-color: var(--link); color: var(--link); }
+        .cma-demo .play-icon { width: 1em; height: 1em; display: block; fill: currentColor; }
+        .cma-demo .scrub { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 3px; background: var(--r30); flex: 1 1 auto; min-width: 36px; outline: none; }
+        .cma-demo .scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--link); cursor: pointer; }
+        .cma-demo .scrub::-moz-range-thumb { width: 14px; height: 14px; border: none; border-radius: 50%; background: var(--link); cursor: pointer; }
+        .cma-demo .tval { font-family: var(--mono); font-size: 0.85em; color: var(--td); white-space: nowrap; }
+        .cma-demo .cma-3d canvas { cursor: grab; }
+        .cma-demo .cma-3d canvas:active { cursor: grabbing; }
+        .cma-demo .read { font-family: var(--mono); font-size: 0.75em; }
+        #cma-evolution > summary { cursor: pointer; }
+        #cma-evolution > summary > span { margin-inline-start: 0.4em; }
+        #cma-updates .cma-explain { display: flex; align-items: center; justify-content: safe center; gap: 1em; margin-block: 1em; }
+        #cma-updates .cma-explain-math { flex: none; }
+        #cma-updates .cma-explain figure { flex: 0 0 10em; margin: 0; text-align: center; }
+        #cma-step-size .cma-explain > figure { flex-basis: 12em; }
+        #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
+        #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
+        #cma-step .cma-view { position: relative; max-width: 28em; margin-inline: auto; }
+        #cma-step .cma-covariance { display: grid; grid-template-columns: 19em; justify-content: safe center; margin-block-start: 1em; overflow-x: auto; }
+        #cma-step .cma-equations { display: grid; grid-template-columns: minmax(5.8em, max-content) max-content 1fr; gap: 1em 0.3em; white-space: nowrap; font: 1em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
+        #cma-step .cma-equations > [role="math"] { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; justify-items: start; row-gap: 0.5em; }
+        #cma-step .cma-equations > [role="math"] > :first-child { justify-self: end; }
+        #cma-step .equation-relation { grid-column: 2; justify-self: center; }
+        #cma-step .cma-equations > .best-score { row-gap: 0.3em; }
+        #cma-step .best-score[aria-hidden="true"] { visibility: hidden; }
+        #cma-step .covariance-factors { display: flex; align-items: center; gap: 0.3em; }
+        #cma-step .covariance-scale { width: 4.75ch; text-align: right; }
+        #cma-step .covariance-matrix { position: relative; display: grid; grid-template-columns: repeat(2, 6ch); column-gap: 0.5em; justify-self: start; padding-inline: 0.4em; border-inline: 1px solid currentColor; line-height: 1.3; text-align: right; }
+        #cma-step .covariance-matrix::before, #cma-step .covariance-matrix::after { content: ""; position: absolute; inset-block: 0; width: 0.25em; border-block: 1px solid currentColor; }
+        #cma-step .covariance-matrix::before { left: 0; }
+        #cma-step .covariance-matrix::after { right: 0; }
+        #cma-step .cma-top { position: absolute; inset: 0; max-height: 100%; visibility: hidden; pointer-events: none; }
+        #cma-step .cma-legend { position: absolute; top: 1em; left: 1em; padding: 0.4em 0.5em; background: color-mix(in srgb, var(--paper) 80%, transparent); font-family: var(--mono); font-size: 0.75em; pointer-events: none; }
+        #cma-step .cma-legend > div { display: flex; align-items: center; gap: 0.5em; }
+        #cma-step .cma-legend > div[hidden] { display: none; }
+        #cma-step .cma-legend .read { font: inherit; }
+        #cma-step .legend-key { width: 1.5em; border-top: 1.5px solid var(--circle); }
+        #cma-step .shape-key { border-top: 1px dashed var(--shape); }
+        #cma-step .before-key { opacity: 0.3; }
+        #cma-step .direction-key { border-top-color: var(--history); }
+        #cma-step .selection-key { border-top-color: var(--selected); }
+        .cma-demo canvas { display: block; width: 100%; height: auto; padding: 0; }   /* kill the blog's global canvas padding (basic.sass) */
+        /* paper-style table, copied from the nature-vs-nurture post (table.nvn): rules instead of shading, the LaTeX font, no hover */
+        table.cma-table { width: 100%; border-collapse: collapse; border-radius: 0; box-shadow: none; border-top: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; font-family: MJXc-TeX-main-R, MJXc-TeX-main-Rw, serif; }
+        table.cma-table td, table.cma-table th { text-align: left; }
+        table.cma-table td:first-child { white-space: nowrap; }
+        table.cma-table th, table.cma-table td { box-shadow: none; padding: 0.4em 0.5em; }
+        table.cma-table tr:nth-child(odd) td { background: none; }
+        table.cma-table th { font-family: MJXc-TeX-main-B, MJXc-TeX-main-Bx, MJXc-TeX-main-Bw, serif; font-weight: normal; color: inherit; border-bottom: 1px solid currentColor; }
+        table.cma-table tr, table.cma-table tr:hover { background: none; }   /* the site shades the hovered row itself */
+        table.cma-table tbody tr + tr td { border-top: 1px solid rgba(128, 128, 128, .35); }
+        table.cma-weight-table { table-layout: fixed; }
+        table.cma-weight-table th:first-child { width: 3em; }
+        .cma-demo .weight-calculation { font-size: 0.85em; white-space: nowrap; }
+        .cma-demo .weight-result { display: flex; align-items: center; gap: 0.5em; }
+        .cma-demo .weight-track { flex: 1; min-width: 0; height: 0.6em; background: var(--r14); }
+        .cma-demo .weight-bar { display: block; height: 100%; }
+        .cma-demo .weight-percent { flex: none; width: 3.5em; text-align: right; font-size: 0.85em; }
+    </style>
+
+<ul>
+    <li>
+        Covariance Matrix Adaptation Evolution Strategy
+    </li>
+        <ul>
+            <li>
+                <b>CMA-ES</b> only needs a score for each candidate answer, and it looks for the lowest score. It does not need a gradient, the slope that shows which way the score goes down.
+            </li>
+            <li>
+                It draws candidates, called samples, at random from a normal distribution \(\mathcal{N}(m, \sigma^2 C)\), so most of them land near the center. Each round, called a generation, it draws \(\lambda\) samples, ranks them by score, and uses the best ones to set up the next round.
+            </li>
+            <li>
+                \(m\) is the center of the search. The step size \(\sigma\) sets how far the samples spread. The matrix \(C\) sets the shape: which directions spread more.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Example: the smallest circle containing all points
+    </li>
+        <ul>
+            <li>
+                Find the smallest circle that contains six points. Each sample is a possible center \((x, y)\), so there are two numbers to find: \(n = 2\).
+            </li>
+            <li>
+                From a center \((x, y)\), the circle must reach the farthest of the six points \(p_i\). So the distance to that farthest point is the radius, and it is also the score \(f\).
+                <div class="latex-container">
+                \[
+                    f(x, y) = \max_i \, \lVert (x, y) - p_i \rVert
+                \]
+                </div>
+            </li>
+            <li>In Fig. 1, blue arrows point to the samples we keep, and a thicker arrow means more weight. The red line is the path of the center.</li>
+        </ul>
+
+    <div class="cma-demo" id="cma-step">
+        <div class="ctrls">
+            <button type="button" class="play" aria-label="play the generations step by step">
+                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" min="0" max="1" value="0" step="0.01" aria-label="step within the generations">
+            <span class="tval"><span class="gen">gen 1, step 1</span></span>
+        </div>
+        <div class="phase note-sr-only" aria-live="polite"></div>
+        <div class="cma-view">
+            <canvas class="cma-top" aria-hidden="true"></canvas>
+            <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan; scroll or pinch to zoom. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
+            <div class="cma-legend">
+                <div class="objective-key"><span class="legend-key best-key" aria-hidden="true"></span><span class="read"></span></div>
+                <div class="update-before" hidden><span class="legend-key shape-key before-key" aria-hidden="true"></span><span class="before-label">Before update</span></div>
+                <div class="update-selection" hidden><span class="legend-key selection-key" aria-hidden="true"></span><span>Top 3 moves</span></div>
+                <div class="update-direction" hidden><span class="legend-key direction-key" aria-hidden="true"></span><span class="direction-label"></span></div>
+                <div><span class="legend-key shape-key" aria-hidden="true"></span><span class="spread-label">C shape, σ size</span></div>
+            </div>
+        </div>
+        <div class="cma-covariance" tabindex="0" role="region" aria-label="Live CMA-ES equations">
+            <div class="cma-equations">
+                <div class="best-score" role="math" aria-hidden="true">
+                    <span>\(f\)<span class="score-center">(0.00, 0.00)</span></span>
+                    <span class="equation-relation">=</span>
+                    <span>\(\lVert\)<span class="score-center">(0.00, 0.00)</span> − <span class="score-target">(0.00, 0.00)</span>\(\rVert\)</span>
+                    <span class="equation-relation">≈</span>
+                    <span class="score-radius">0.00</span>
+                </div>
+                <div class="mean-math" role="math">
+                    <span>\(m\)</span><span class="equation-relation">=</span>
+                    <span class="mean-coordinates">(0.50, 3.50)</span>
+                </div>
+                <span class="covariance-math" role="math">
+                    <span>\(\sigma^2 C\)</span><span class="equation-relation">=</span>
+                    <span class="covariance-factors">
+                        <span class="covariance-scale" data-value>1.000</span><span>×</span>
+                        <span class="covariance-matrix">
+                            <span data-value>1.000</span><span data-value>0.000</span>
+                            <span data-value>0.000</span><span data-value>1.000</span>
+                        </span>
+                    </span>
+                    <span class="equation-relation">=</span>
+                    <span class="covariance-matrix">
+                        <span data-value>1.000</span><span data-value>0.000</span>
+                        <span data-value>0.000</span><span data-value>1.000</span>
+                    </span>
+                </span>
+            </div>
+        </div>
+        <figcaption>The smallest circle containing all points</figcaption>
+    </div>
+</ul>
+
+<details id="cma-evolution">
+<summary><span>How it evolves</span></summary>
+<ul>
+    <li id="cma-weights">
+        How \(m\) is calculated
+        <ul>
+            <li>
+                <span class="weight-intro"></span>
+                Without the 0.5, rank 3 would get \(\ln(3/3)=0\), so it would get no weight.
+            </li>
+            <li>Give each rank a log score, \(\ln\!\left(\frac{3.5}{\text{rank}}\right)\). Divide each log score by the sum of all three, so the weights add up to 1.</li>
+            <li>Multiply each kept sample by its weight and add them up. The result is the new center \(m\).</li>
+        </ul>
+        <div class="cma-demo">
+            <table class="cma-table cma-weight-table" aria-label="Rank, log score, and normalized weight for the three selected samples">
+                <thead><tr><th scope="col">Rank</th><th scope="col">Log score</th><th scope="col">Weight</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </li>
+    <br>
+    <li id="cma-updates">
+        How \(C\) and \(\sigma\) change
+        <p>The dashed ellipse in Fig. 1 shows where most samples land. A few can land outside it. \(C\) can stretch or turn the ellipse. \(\sigma\) only scales it, so the ellipse gets bigger or smaller but keeps its shape. The example below uses simple numbers to show how \(C\) changes.</p>
+        <ul>
+            <li>
+                <b>Learn from the best samples</b><br>
+                Say the old center is \(m_{\text{old}}=(0,0)\) and \(\sigma=1\). The three best samples, from best to third, are \(s_1=(2,0)\), \(s_2=(0,2)\), and \(s_3=(-2,0)\). To keep the numbers easy, give them weights of \(0.5\), \(0.25\), and \(0.25\).
+                Draw an arrow from the old center to each sample, then divide it by \(\sigma\) to get \(d_i\). Since \(\sigma=1\), the arrows do not change.
+                \[
+                    \begin{aligned}
+                    d_1 &= \frac{s_1 - m_{\text{old}}}{\sigma}
+                        = (2,0)-(0,0) = \begin{pmatrix}2\\0\end{pmatrix} \\[0.5em]
+                    d_2 &= \frac{s_2 - m_{\text{old}}}{\sigma}
+                        = (0,2)-(0,0) = \begin{pmatrix}0\\2\end{pmatrix} \\[0.5em]
+                    d_3 &= \frac{s_3 - m_{\text{old}}}{\sigma}
+                        = (-2,0)-(0,0) = \begin{pmatrix}-2\\0\end{pmatrix}
+                    \end{aligned}
+                \]
+                To turn an arrow into a spread, multiply it as a column by itself as a row, \(d_i d_i^\top\). The result is a 2×2 matrix that spreads along the arrow's line. For \(d_1=(2,0)\), the top-left number is \(2^2=4\) and the rest are zero, so it spreads only sideways. \(d_3\) points left but gives the same matrix, because \((-2)^2=4\). \(d_2\) points up, so its \(4\) goes to the bottom right.
+                In Fig. 2, each arrow is drawn \(\sqrt{w_i}\) times as long. The column and the row each carry one \(\sqrt{w_i}\), and \(\sqrt{w_i}\times\sqrt{w_i}=w_i\), so each matrix gets its weight.
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Weighted sample arrows and equation">
+                    <div class="cma-explain-math">\[
+                    \begin{aligned}
+                    S &= 0.5 d_1 d_1^\top + 0.25 d_2 d_2^\top + 0.25 d_3 d_3^\top \\[0.5em]
+                      &= \begin{pmatrix}2&0\\0&0\end{pmatrix}
+                         + \begin{pmatrix}0&0\\0&1\end{pmatrix}
+                         + \begin{pmatrix}1&0\\0&0\end{pmatrix} \\[0.5em]
+                      &= \begin{pmatrix}3&0\\0&1\end{pmatrix}
+                    \end{aligned}
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-sample-arrows-title">
+                            <title id="cma-sample-arrows-title">The weight 0.5 gives a longer rightward arrow. The weight 0.25 gives two shorter arrows of equal length, one leftward and one upward.</title>
+                            <path d="M16 70H144 M80 12V91" fill="none" stroke="currentColor" opacity=".2"/>
+                            <g fill="none" stroke="royalblue" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M80 70H130.91 M124.91 66L130.91 70L124.91 74"/>
+                                <path d="M80 70H44 M50 66L44 70L50 74"/>
+                                <path d="M80 70V34 M76 40L80 34L84 40"/>
+                            </g>
+                            <circle cx="80" cy="70" r="3" fill="currentColor"/>
+                            <g fill="currentColor" text-anchor="middle" font-size="12">
+                                <text x="130.91" y="91">0.5</text><text x="44" y="91">0.25</text><text x="100" y="38">0.25</text>
+                            </g>
+                        </svg>
+                        <figcaption>Weighted samples</figcaption>
+                    </figure>
+                </div>
+                <p>How much should \(S\) affect \(C\)? That depends on how many samples really count, called the effective sample count \(\mu_{\text{eff}}\). It is 1 divided by the sum of the squared weights. With three equal weights it would be exactly 3. Here the best sample counts more, so it is about 2.67.</p>
+                \[
+                    \begin{aligned}
+                    \mu_{\text{eff}} &= \frac{1}{\vphantom{\rule{0pt}{1.3em}}w_1^2+w_2^2+w_3^2} \\[0.5em]
+                    &= \frac{1}{\vphantom{\rule{0pt}{1.3em}}0.5^2+0.25^2+0.25^2} \approx 2.67
+                    \end{aligned}
+                \]
+                <p>CMA-ES sets two rates with the default formulas below. They use \(n\), the number of values we choose, and \(\mu_{\text{eff}}\). \(c_\mu\) sets how much \(S\) affects \(C\). \(c_1\) sets how much the record of center moves affects \(C\). That record comes in the next step.</p>
+                \[
+                    \begin{aligned}
+                    c_1 &= \frac{2}{\vphantom{\rule{0pt}{1.3em}}(n+1.3)^2+\mu_{\text{eff}}} \\[0.5em]
+                    c_\mu &= \min\left(
+                        1-c_1,\,
+                        \frac{2(\mu_{\text{eff}}-2+1/\mu_{\text{eff}})}
+                        {\vphantom{\rule{0pt}{1.3em}}(n+2)^2+\mu_{\text{eff}}}
+                    \right)
+                    \end{aligned}
+                \]
+                <p>Put in \(n=2\) and \(\mu_{\text{eff}}=2.67\). \(\min\) takes the smaller of its two values. The fraction gives \(0.11\), which is smaller than \(1-c_1\approx0.85\), so \(c_\mu=0.11\).</p>
+                \[
+                    \begin{aligned}
+                    c_1 &= \frac{2}{\vphantom{\rule{0pt}{1.3em}}(2+1.3)^2+2.67} \approx 0.15 \\[0.5em]
+                    c_\mu &= \frac{2(2.67-2+1/2.67)}{\vphantom{\rule{0pt}{1.3em}}(2+2)^2+2.67} \approx 0.11
+                    \end{aligned}
+                \]
+                <p>Round the rates to two decimal places. \(S\) gets \(0.11\), and \(0.15\) is kept for the center moves in the next step. The old spread \(C_{\text{old}}=I\), the circle we start with, keeps the rest: \(1-0.15-0.11=0.74\).</p>
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the sample update">
+                    <div class="cma-explain-math">\[
+                        C_{\text{samples}} = 0.74 I + 0.11 S
+                        = \begin{pmatrix}1.07&0\\0&0.85\end{pmatrix}
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-sample-spread-title">
+                            <title id="cma-sample-spread-title">The dashed circle becomes a solid ellipse that is wider and shorter</title>
+                            <path d="M17 52H143 M80 7V97" fill="none" stroke="currentColor" opacity=".2"/>
+                            <circle cx="80" cy="52" r="36" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                            <ellipse cx="80" cy="52" rx="37.24" ry="33.19" fill="none" stroke="royalblue" stroke-width="2"/>
+                            <circle cx="80" cy="52" r="2" fill="currentColor"/>
+                        </svg>
+                        <figcaption>Wider and shorter</figcaption>
+                    </figure>
+                </div>
+            </li>
+            <li>
+                <b>Learn from center moves</b><br>
+                The weighted average of the three samples is the new center, so the center moves from \((0,0)\) to \((0.5,0.5)\). Dividing by \(\sigma=1\) leaves this move the same.
+                CMA-ES keeps a running record of center moves, the vector \(p_c\). In this example, the old record is \((1,1)\). Keep half of it and add the latest move.
+                \[
+                    p_{c,\text{new}} = 0.5\begin{pmatrix}1\\1\end{pmatrix}
+                    + \begin{pmatrix}0.5\\0.5\end{pmatrix}
+                    = \begin{pmatrix}1\\1\end{pmatrix}
+                \]
+                \(p_c\), the orange arrow, points up and right. As before, column times row gives a matrix, here all ones. Multiply it by \(c_1=0.15\) and add it to \(C_{\text{samples}}\). This tilts the ellipse toward the way the center keeps moving.
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Spread after the center move update">
+                    <div class="cma-explain-math">\[
+                    \begin{aligned}
+                    C_{\text{new}} &= C_{\text{samples}} + 0.15
+                        \begin{pmatrix}1&1\\1&1\end{pmatrix} \\
+                    &= \begin{pmatrix}1.22&0.15\\0.15&1\end{pmatrix}
+                    \end{aligned}
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 160 105" role="img" aria-labelledby="cma-path-spread-title">
+                            <title id="cma-path-spread-title">The dashed horizontal ellipse becomes a solid tilted ellipse after adding the center-move record</title>
+                            <path d="M17 52H143 M80 7V97" fill="none" stroke="currentColor" opacity=".2"/>
+                            <ellipse cx="80" cy="52" rx="37.24" ry="33.19" fill="none" stroke="currentColor" stroke-dasharray="4 3" opacity=".6"/>
+                            <ellipse cx="80" cy="52" rx="40.98" ry="34.60" transform="rotate(-26.87 80 52)" fill="none" stroke="royalblue" stroke-width="2"/>
+                            <path d="M80 52L105 27 M98 28L105 27L104 34" fill="none" stroke="darkorange" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="80" cy="52" r="2" fill="currentColor"/>
+                        </svg>
+                        <figcaption>Tilt from moves</figcaption>
+                    </figure>
+                </div>
+            </li>
+            <li id="cma-step-size">
+                <b>Change size (\(\sigma\))</b>
+                <p>For \(\sigma\), CMA-ES keeps a second record of center moves. Each round, it keeps part of the old record and adds the latest move, measured against the old spread. Moves in the same direction add up. Moves that turn back partly cancel.</p>
+                <p>In Fig. 5, the old record (blue) is 1.034 long and points right. The latest move (orange) is 1.398 long. If it also points right, the total length is \(L\approx 2.43\) (top). If it points left, \(L\approx 0.36\) (bottom).</p>
+                <p>Compare \(L\) with 1.25, the length we would expect if the moves were random in 2D: \(r = L/1.25\). If \(r\) is above 1, the center keeps going one way, so the steps are too small and \(\sigma\) grows. If \(r\) is below 1, the moves cancel, so the steps are too big and \(\sigma\) shrinks. This example uses an update rate of 0.289. The dashed circles show the old size.</p>
+                <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Step-size equation and example">
+                    <div class="cma-explain-math">\[
+                        \begin{aligned}
+                        r &= L/1.25 \\[0.5em]
+                        \sigma_{\text{new}} &= \sigma_{\text{old}}\,e^{0.289(r-1)} \\[0.5em]
+                        L=2.43 &\;\Rightarrow\; \sigma_{\text{new}}\approx 1.31\sigma_{\text{old}} \\
+                        L=0.36 &\;\Rightarrow\; \sigma_{\text{new}}\approx 0.81\sigma_{\text{old}}
+                        \end{aligned}
+                    \]</div>
+                    <figure>
+                        <svg viewBox="0 0 192 146" role="img" aria-labelledby="cma-size-title" aria-describedby="cma-size-desc">
+                            <title id="cma-size-title">How center moves change the sampling size</title>
+                            <desc id="cma-size-desc">Moves in the same direction give a path length of 2.43 and grow sigma by a factor of 1.31. Moving back gives a path length of 0.36 and shrinks sigma by a factor of 0.81.</desc>
+                            <path d="M106 37H184 M145 1V73 M106 113H184 M145 84V142" fill="none" stroke="currentColor" opacity=".2"/>
+                            <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 37H50 M44 33L50 37L44 41 M21 107H50 M44 103L50 107L44 111" stroke="royalblue"/>
+                                <path d="M50 37H89 M83 33L89 37L83 41 M50 119H11 M17 115L11 119L17 123" stroke="darkorange"/>
+                            </g>
+                            <path d="M50 112V119" stroke="currentColor" opacity=".4"/>
+                            <g fill="none" stroke="currentColor" opacity=".6" stroke-dasharray="4 3">
+                                <circle cx="145" cy="37" r="26"/>
+                                <circle cx="145" cy="113" r="26"/>
+                            </g>
+                            <g fill="none" stroke="royalblue" stroke-width="2">
+                                <circle cx="145" cy="37" r="34.06"/>
+                                <circle cx="145" cy="113" r="21.06"/>
+                            </g>
+                            <circle cx="145" cy="37" r="2" fill="currentColor"/>
+                            <circle cx="145" cy="113" r="2" fill="currentColor"/>
+                        </svg>
+                        <figcaption>σ × 1.31 / σ × 0.81</figcaption>
+                    </figure>
+                </div>
+            </li>
+        </ul>
+    </li>
+</ul>
+</details>
+
+<script>
+(function () {
+    // ---- 2-D CMA-ES core: a line-by-line port of pycma's purecma.py (ask / tell), positive weights ----
+    function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+    function gaussian(seed) {
+        var rand = mulberry32(seed);
+        return function () { var u = 0, v = 0; while (u === 0) u = rand(); while (v === 0) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    }
+    function cmaParams(lam) {
+        var n = 2, mu = Math.floor(lam / 2), w = [], s = 0, s2 = 0, i;
+        for (i = 0; i < mu; i++) { w.push(Math.log(lam / 2 + 0.5) - Math.log(i + 1)); s += w[i]; }
+        var rawWeights = w.slice();
+        for (i = 0; i < mu; i++) { w[i] /= s; s2 += w[i] * w[i]; }
+        var mueff = 1 / s2;
+        var cs = (mueff + 2) / (n + mueff + 5);
+        var c1 = 2 / ((n + 1.3) * (n + 1.3) + mueff);
+        return {
+            n: n, lam: lam, mu: mu, w: w, mueff: mueff, cs: cs, c1: c1,
+            rawWeights: rawWeights,
+            cc: (4 + mueff / n) / (n + 4 + 2 * mueff / n),
+            cmu: Math.min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((n + 2) * (n + 2) + mueff)),
+            damps: 2 * mueff / lam + 0.3 + cs,
+            chiN: Math.sqrt(n) * (1 - 1 / (4 * n) + 1 / (21 * n * n))
+        };
+    }
+    function eig2(C) {                                    // C = [a, b, c] = [[a, b], [b, c]]
+        var a = C[0], b = C[1], c = C[2];
+        var h = (a + c) / 2, d = Math.sqrt((a - c) * (a - c) / 4 + b * b), l1 = h + d, l2 = h - d;
+        var ux = a >= c ? l1 - c : b, uy = a >= c ? b : l1 - a;
+        var nn = Math.sqrt(ux * ux + uy * uy);
+        if (nn === 0) { ux = 1; uy = 0; } else { ux /= nn; uy /= nn; }
+        return { l1: l1, l2: l2, ux: ux, uy: uy };       // major axis u = (ux, uy), minor axis (-uy, ux)
+    }
+    function invSqrt(e) {                                 // C^(-1/2) = B D^(-1) B^T
+        var i1 = 1 / Math.sqrt(e.l1), i2 = 1 / Math.sqrt(e.l2);
+        return [e.ux * e.ux * i1 + e.uy * e.uy * i2, e.ux * e.uy * (i1 - i2), e.uy * e.uy * i1 + e.ux * e.ux * i2];
+    }
+    function newState(m0, sigma0) {
+        return { m: m0.slice(), sigma: sigma0, C: [1, 0, 1], pc: [0, 0], ps: [0, 0], evals: 0, inv: [1, 0, 1] };
+    }
+    function ask(S, P, randn) {                           // x = m + sigma * B D z
+        var e = eig2(S.C), s1 = Math.sqrt(e.l1), s2 = Math.sqrt(e.l2), X = [];
+        S.inv = invSqrt(e);
+        for (var k = 0; k < P.lam; k++) {
+            var z1 = s1 * randn(), z2 = s2 * randn();
+            X.push([S.m[0] + S.sigma * (e.ux * z1 - e.uy * z2), S.m[1] + S.sigma * (e.uy * z1 + e.ux * z2)]);
+        }
+        return X;
+    }
+    function tell(S, P, X, F) {
+        S.evals += X.length;
+        var order = F.map(function (_, i) { return i; }).sort(function (i, j) { return F[i] - F[j]; });
+        var xold = S.m, m = [0, 0], i, k;
+        for (i = 0; i < P.mu; i++) { m[0] += P.w[i] * X[order[i]][0]; m[1] += P.w[i] * X[order[i]][1]; }
+        var y = [m[0] - xold[0], m[1] - xold[1]], I = S.inv;
+        var z = [I[0] * y[0] + I[1] * y[1], I[1] * y[0] + I[2] * y[1]];
+        var csn = Math.sqrt(P.cs * (2 - P.cs) * P.mueff) / S.sigma;
+        S.ps = [(1 - P.cs) * S.ps[0] + csn * z[0], (1 - P.cs) * S.ps[1] + csn * z[1]];
+        var ps2 = S.ps[0] * S.ps[0] + S.ps[1] * S.ps[1];
+        var hsig = ps2 / P.n / (1 - Math.pow(1 - P.cs, 2 * S.evals / P.lam)) < 2 + 4 / (P.n + 1) ? 1 : 0;
+        var ccn = Math.sqrt(P.cc * (2 - P.cc) * P.mueff) / S.sigma;
+        S.pc = [(1 - P.cc) * S.pc[0] + ccn * hsig * y[0], (1 - P.cc) * S.pc[1] + ccn * hsig * y[1]];
+        var c1a = P.c1 * (1 - (1 - hsig * hsig) * P.cc * (2 - P.cc)), f0 = 1 - c1a - P.cmu;
+        var memory = [P.c1 * S.pc[0] * S.pc[0], P.c1 * S.pc[0] * S.pc[1], P.c1 * S.pc[1] * S.pc[1]];
+        var C = S.C.map(function (v, i) { return f0 * v + memory[i]; });
+        for (i = 0; i < P.mu; i++) {                      // rank-mu: weighted outer products of the selected steps
+            k = order[i];
+            var dx = X[k][0] - xold[0], dy = X[k][1] - xold[1], g = P.w[i] * P.cmu / (S.sigma * S.sigma);
+            C[0] += g * dx * dx; C[1] += g * dx * dy; C[2] += g * dy * dy;
+        }
+        S.CSamples = C.map(function (v, i) { return v - memory[i]; });
+        S.C = C; S.m = m;
+        S.sigma *= Math.exp(Math.min(1, P.cs / P.damps * (Math.sqrt(ps2) / P.chiN - 1)));
+        return order;
+    }
+
+    // run and keep every generation: the distribution before (m, sigma, C), the samples, and the state after
+    function record(fn, m0, s0, lam, seed, adaptC, maxGen) {
+        var P = cmaParams(lam);
+        if (!adaptC) { P.c1 = 0; P.cmu = 0; }
+        var S = newState(m0, s0), randn = gaussian(seed), H = [];
+        for (var g = 0; g < maxGen; g++) {
+            var m = S.m, sigma = S.sigma, C = S.C;
+            var X = ask(S, P, randn), order = tell(S, P, X, X.map(fn)), e = eig2(S.C);
+            H.push({ m: m, sigma: sigma, C: C, X: X, order: order, m1: S.m, sigma1: S.sigma, C1: S.C, CSamples: S.CSamples, pc1: S.pc, ps1: S.ps, f1: fn(S.m), ratio1: Math.sqrt(e.l1 / e.l2) });
+            if (H[g].f1 < 1e-10 || S.sigma * Math.sqrt(e.l1) < 1e-8) break;
+        }
+        return { P: P, H: H, f0: fn(m0), s0: s0 };
+    }
+    // ---- drawing helpers ----
+    var COL = { mean: "#1d4ed8", pick: "#3b82f6", drop: "#a1a1aa", neutral: "#71717a",
+                path: "#f59e0b", trail: "#b91c1c", base: "#d4d4d8", txt: "rgb(70, 70, 70)", paper: "#fff" };
+    var SANS = "11px -apple-system, sans-serif";
+    var dpr = Math.max(1, window.devicePixelRatio || 1);
+    var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+    function ease(x) { return x < 0.5 ? 2 * x * x : 1 - 2 * (1 - x) * (1 - x); }
+    function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function lerp2(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t)]; }
+    function lerpC(a, b, t) { return [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)]; }
+    function geo(a, b, t) { return a * Math.pow(b / a, t); }
+    function fit(canvas, aspect) {                        // backing store follows the css width; height from the aspect
+        var W = canvas.clientWidth || 300, H = Math.round(W * aspect);
+        canvas.style.height = H + "px";
+        canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+        var ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return { ctx: ctx, W: W, H: H };
+    }
+    function viewMap(view, W, H) {                        // view = { cx, cy, half }, y axis up
+        var s = Math.min(W, H) / (2 * view.half);
+        return { s: s, x: function (x) { return W / 2 + (x - view.cx) * s; }, y: function (y) { return H / 2 - (y - view.cy) * s; } };
+    }
+    function landscape(fn, view, W, H) {                  // banded log10 contours of f
+        var w = Math.round(W * dpr), h = Math.round(H * dpr), off = document.createElement("canvas");
+        off.width = w; off.height = h;
+        var oc = off.getContext("2d"), img = oc.createImageData(w, h), d = img.data;
+        var s = Math.min(w, h) / (2 * view.half), L = new Float64Array(w * h), lo = Infinity, hi = -Infinity, i, j, k;
+        for (j = 0; j < h; j++) for (i = 0; i < w; i++) {
+            var v = Math.log(fn([view.cx + (i + 0.5 - w / 2) / s, view.cy - (j + 0.5 - h / 2) / s]) + 1e-300) / Math.LN10;
+            L[j * w + i] = v; if (v < lo) lo = v; if (v > hi) hi = v;
+        }
+        lo = Math.max(lo, hi - 6);
+        var NB = 14, step = (hi - lo) / NB || 1, B = new Int16Array(w * h);
+        for (k = 0; k < w * h; k++) B[k] = Math.min(NB - 1, Math.floor((Math.max(L[k], lo) - lo) / step));
+        for (j = 0; j < h; j++) for (i = 0; i < w; i++) {
+            k = j * w + i;
+            var b = B[k], edge = (i + 1 < w && B[k + 1] !== b) || (j + 1 < h && B[k + w] !== b), t = b / (NB - 1);
+            d[4 * k] = edge ? 196 : Math.round(lerp(232, 255, t));
+            d[4 * k + 1] = edge ? 203 : Math.round(lerp(238, 255, t));
+            d[4 * k + 2] = edge ? 214 : Math.round(lerp(248, 255, t));
+            d[4 * k + 3] = 255;
+        }
+        oc.putImageData(img, 0, 0);
+        return off;
+    }
+    function dot(ctx, map, p, r, fill, stroke) {
+        ctx.beginPath(); ctx.arc(map.x(p[0]), map.y(p[1]), r, 0, 2 * Math.PI);
+        ctx.fillStyle = fill; ctx.fill();
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+    }
+    function ellipse(ctx, map, m, sigma, C, width = 1) {  // two standard deviations of N(m, sigma^2 C)
+        var e = eig2(C), a = 2 * sigma * Math.sqrt(Math.max(0, e.l1)) * map.s, b = 2 * sigma * Math.sqrt(Math.max(0, e.l2)) * map.s;
+        ctx.beginPath(); ctx.ellipse(map.x(m[0]), map.y(m[1]), a, b, -Math.atan2(e.uy, e.ux), 0, 2 * Math.PI);
+        ctx.setLineDash([4, 4]); ctx.strokeStyle = COL.neutral; ctx.lineWidth = width; ctx.stroke(); ctx.setLineDash([]);
+        return e;
+    }
+    function arrow(ctx, map, p, q, col, width) {
+        var x0 = map.x(p[0]), y0 = map.y(p[1]), x1 = map.x(q[0]), y1 = map.y(q[1]), a = Math.atan2(y1 - y0, x1 - x0), L = Math.hypot(x1 - x0, y1 - y0);
+        if (L < 1) return;
+        var hd = Math.min(8, L / 2);
+        ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1 - hd * 0.7 * Math.cos(a), y1 - hd * 0.7 * Math.sin(a)); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x1, y1);
+        ctx.lineTo(x1 - hd * Math.cos(a - 0.4), y1 - hd * Math.sin(a - 0.4));
+        ctx.lineTo(x1 - hd * Math.cos(a + 0.4), y1 - hd * Math.sin(a + 0.4));
+        ctx.closePath(); ctx.fill();
+    }
+    function cross(ctx, map, p) {
+        var x = map.x(p[0]), y = map.y(p[1]);
+        ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(x - 4, y - 4); ctx.lineTo(x + 4, y + 4); ctx.moveTo(x - 4, y + 4); ctx.lineTo(x + 4, y - 4); ctx.stroke();
+    }
+    function labels(ctx, x, y, segs, font, baseline) {   // colored text runs from (x, y)
+        ctx.font = font; ctx.textAlign = "left"; ctx.textBaseline = baseline;
+        segs.forEach(function (seg) { ctx.fillStyle = seg[1]; ctx.fillText(seg[0], x, y); x += ctx.measureText(seg[0]).width + 8; });
+    }
+
+    // play / pause button + scrub slider driving a time value t in [0, tMax]
+    function Player(root, rate, render) {
+        var btn = root.querySelector(".play"), slider = root.querySelector(".scrub"), self = this, raf = null, last = 0;
+        self.t = 0; self.tMax = 1; self.rate = rate;
+        function icon(playing) {
+            btn.dataset.playing = playing ? "true" : "false";
+            btn.querySelector("svg").innerHTML = playing
+                ? '<rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" />'
+                : '<polygon points="7,5 7,19 17,12" />';
+        }
+        function tick(ts) {
+            var dt = last ? Math.min(0.1, (ts - last) / 1000) : 0; last = ts;
+            self.set(self.t + dt * self.rate);
+            if (self.t >= self.tMax) { self.stop(); return; }
+            raf = requestAnimationFrame(tick);
+        }
+        self.set = function (t) { self.t = Math.max(0, Math.min(self.tMax, t)); slider.value = self.t; render(self.t); };
+        self.setMax = function (m) { self.tMax = m; slider.max = m; };
+        self.stop = function () { if (raf) cancelAnimationFrame(raf); raf = null; last = 0; icon(false); };
+        self.play = function () { if (raf) return; if (self.t >= self.tMax) self.set(0); icon(true); raf = requestAnimationFrame(tick); };
+        btn.addEventListener("click", function () { if (raf) self.stop(); else self.play(); });
+        slider.addEventListener("input", function () { self.stop(); self.set(parseFloat(slider.value)); });
+    }
+    function onFirstView(el, fn) {
+        if (!("IntersectionObserver" in window)) { fn(); return; }
+        var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: 0.35 });
+        io.observe(el);
+    }
+    function onResize(el, fn) {
+        if (window.ResizeObserver) new ResizeObserver(fn).observe(el);
+        else window.addEventListener("resize", fn);
+    }
+    function ready(fn) {
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { requestAnimationFrame(fn); });
+        else requestAnimationFrame(fn);
+    }
+
+    // ---- figure 1: one generation in slow motion, on the smallest circle around six points ----
+    var POINTS = [[0, 0], [2, 0.6], [4, 1.5], [6, 2.2], [1.2, 1.4], [5, 0.9]];
+    function circleRadius(c) {                            // the smallest circle centered at c that holds every point reaches the farthest one
+        return Math.max.apply(null, POINTS.map(function (p) { return Math.hypot(p[0] - c[0], p[1] - c[1]); }));
+    }
+    function stepDemo() {
+        var root = document.getElementById("cma-step");
+        if (!root) return;
+        root.style.setProperty("--circle", COL.mean);
+        root.style.setProperty("--shape", COL.neutral);
+        root.style.setProperty("--paper", COL.paper);
+        root.style.setProperty("--history", COL.path);
+        root.style.setProperty("--selected", COL.pick);
+        var read = root.querySelector(".read"), cTop = root.querySelector(".cma-top"), text = root.querySelector(".phase"), label = root.querySelector(".gen");
+        var matrixValues = root.querySelectorAll(".covariance-math [data-value]");
+        var score = root.querySelector(".best-score"), scoreValues = score.querySelectorAll(".score-center, .score-target, .score-radius");
+        var meanValue = root.querySelector(".mean-coordinates").firstChild;
+        var fn = circleRadius, m0 = [0.5, 3.5], s0 = 1, seed = 3, NP = 6;
+        var full = record(fn, m0, s0, 6, seed, true, 600), OPT = full.H[full.H.length - 1].m1, NG = 1;   // where this run settles
+        while (NG < full.H.length && Math.hypot(full.H[NG - 1].m1[0] - OPT[0], full.H[NG - 1].m1[1] - OPT[1]) >= 0.1) NG++;   // show it until the mean is within 0.1
+        var H = full.H.slice(0, NG), P = full.P;
+        var pathRatios = H.map(function (h) { return Math.hypot(h.ps1[0], h.ps1[1]) / P.chiN; });
+        var A = null, bg = null, shown = "";
+        var weightChart = document.getElementById("cma-weights"), offset = (P.lam / 2 + 0.5).toFixed(1);
+        weightChart.querySelector(".weight-intro").textContent = "Keep the best " + P.mu + " of " + P.lam + " samples. Add 0.5 to the number you keep: \\(" + P.mu + " + 0.5 = " + offset + "\\).";
+        weightChart.querySelector("tbody").innerHTML = P.w.map(function (w, i) {
+            var rank = i + 1, percent = 100 * w;
+            return '<tr><td>\\(' + rank + '\\)</td><td><span class="weight-calculation">\\(\\ln(' + offset + ' / ' + rank + ') \\approx ' + P.rawWeights[i].toFixed(3) + '\\)</span></td>' +
+                '<td><div class="weight-result"><span class="weight-track" aria-hidden="true"><span class="weight-bar" style="width:' + percent + '%;background:' + (i === 0 ? COL.mean : COL.pick) + '"></span></span>' +
+                '<span class="weight-percent">\\(' + percent.toFixed(1) + '\\%\\)</span></div></td></tr>';
+        }).join("");
+        window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, weightChart]);
+
+        // One fixed x/y frame for the plan and the 3-D ground.
+        var circleView = (function () {
+            var xs = [], ys = [];
+            function add(p) { xs.push(p[0]); ys.push(p[1]); }
+            function bounds() {
+                var x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs), y0 = Math.min.apply(null, ys), y1 = Math.max.apply(null, ys);
+                return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, half: Math.max(x1 - x0, y1 - y0) / 2 * 1.05 };
+            }
+            POINTS.forEach(add);
+            H.forEach(function (h) {
+                h.X.forEach(add); add(h.m); add(h.m1);
+                var c = h.X[h.order[0]], r = fn(c);
+                add([c[0] - r, c[1] - r]); add([c[0] + r, c[1] + r]);
+                [[h.m, h.sigma, h.C], [h.m1, h.sigma, h.C], [h.m1, h.sigma, h.C1], [h.m1, h.sigma1, h.C1]].forEach(function (q) {
+                    var rx = 2 * q[1] * Math.sqrt(q[2][0]), ry = 2 * q[1] * Math.sqrt(q[2][2]);
+                    add([q[0][0] - rx, q[0][1] - ry]); add([q[0][0] + rx, q[0][1] + ry]);
+                });
+            });
+            return bounds();
+        })();
+        function phaseText(ph, historyStage, pathRatio) {
+            if (ph === 0) return "<b>1. Draw samples</b>. Pick " + P.lam + " new possible centers. Watch the points change from one round to the next.";
+            if (ph === 1) return "<b>2. Rank the samples</b>. Find the radius for each center. The blue circle has the smallest radius. Gray dashes show the search spread.";
+            if (ph === 2) return "<b>3. Keep the best</b>. Blue arrows point from X to the best " + P.mu + " samples. Thicker arrows give a sample more influence.";
+            if (ph === 3) return "<b>4. Move the center</b>. Average the samples you kept. Give higher ranks more weight. Move X to that average.";
+            if (ph === 4) return historyStage
+                ? "<b>5b. Learn from center moves</b>. The orange arrow combines recent center moves. Add spread along its line in both directions."
+                : "<b>5a. Learn from the best samples</b>. Keep most of the old spread. Each blue arrow adds spread along its line in both directions.";
+            var change = pathRatio > 1 ? "grow both axes by the same factor." : pathRatio < 1 ? "shrink both axes by the same factor." : "keep both axes the same size.";
+            return "<b>6. Change size (\u03c3)</b>. The recent path is " + pathRatio.toFixed(2) + "\u00d7 the random-step baseline: " + change;
+        }
+        function layout() { A = fit(cTop, 1); bg = null; }
+
+        function formatCoordinates(pair) {
+            return "(" + pair.map(function (n) { return n.toFixed(2).replace("-", "−"); }).join(", ") + ")";
+        }
+
+        function showMatrix(sigma, C) {
+            var sigma2 = sigma * sigma;
+            var [a, b, d] = C;
+            var values = [sigma2, a, b, b, d, sigma2 * a, sigma2 * b, sigma2 * b, sigma2 * d];
+            // Keep both rows in the DOM throughout playback. Only the digits change.
+            matrixValues.forEach(function (cell, i) {
+                var value = (Math.round(values[i] * 1000) / 1000).toFixed(3).replace("-", "−");
+                if (cell.firstChild.nodeValue !== value) cell.firstChild.nodeValue = value;
+            });
+        }
+
+        // how sample k looks in phase ph; the plan and the 3-D view both draw it the same way
+        function sampleStyle(ph, r) {
+            var sel = r < P.mu, s = { rank: r, col: COL.drop, rad: 2.5, alpha: 1, filled: true,
+                label: ph >= 1 && r === 0 ? "1" : "" };
+            if (ph >= 2) {
+                s.col = sel ? COL.pick : COL.drop;
+                s.rad = sel ? 3 : 2.5;
+            }
+            if (ph >= 1 && r === 0) { s.col = COL.mean; s.rad = 3.5; }
+            return s;
+        }
+        function circle(ctx, map, c, r, farthest, col, width) {        // enclosing circle and its true radius to a farthest target
+            ctx.setLineDash([]);
+            ctx.beginPath(); ctx.arc(map.x(c[0]), map.y(c[1]), r * map.s, 0, 2 * Math.PI);
+            ctx.strokeStyle = col; ctx.lineWidth = width; ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(map.x(c[0]), map.y(c[1])); ctx.lineTo(map.x(farthest[0]), map.y(farthest[1]));
+            ctx.setLineDash([4, 3]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+        }
+        function render(t) {
+            var g = Math.min(NG - 1, Math.floor(t / NP)), u = Math.min(NP, t - g * NP), ph = Math.min(NP - 1, Math.floor(u)), f = u - ph, h = H[g];
+            var historyStage = ph === 4 && f >= 0.5;
+            player.rate = ph >= 4 ? 0.35 : 0.9;
+            var map = viewMap(circleView, A.W, A.H), ctx = A.ctx, e = ease(clamp01(f));
+            var rank = []; h.order.forEach(function (idx, r) { rank[idx] = r; });
+            var X = h.X;
+            if (ph === 0 && g > 0) X = h.X.map(function (p, k) { return lerp2(H[g - 1].X[k], p, e); });
+            var styles = X.map(function (_, k) { return sampleStyle(ph, rank[k]); });
+            ctx.clearRect(0, 0, A.W, A.H);
+            if (!bg) bg = landscape(fn, circleView, A.W, A.H);
+            ctx.drawImage(bg, 0, 0, A.W, A.H);
+
+            // Move the mean, change C, then change sigma in their separate phases.
+            var m = h.m, C = h.C, sigma = h.sigma;
+            if (ph === 3) m = lerp2(h.m, h.m1, e);
+            if (ph >= 4) m = h.m1;
+            if (ph === 4) {
+                C = historyStage ? lerpC(h.CSamples, h.C1, ease(2 * f - 1)) : lerpC(h.C, h.CSamples, ease(2 * f));
+            }
+            if (ph === 5) { C = h.C1; sigma = geo(h.sigma, h.sigma1, e); }
+            var meanCoordinates = formatCoordinates(m);
+            if (meanValue.nodeValue !== meanCoordinates) meanValue.nodeValue = meanCoordinates;
+            showMatrix(sigma, C);
+            var moved = m[0] !== h.m[0] || m[1] !== h.m[1];
+            if (g > 0 || moved) {
+                ctx.save();
+                ctx.globalAlpha = 0.55;
+                ctx.strokeStyle = COL.trail;
+                ctx.lineWidth = 1.5;
+                ctx.lineJoin = "round";
+                ctx.beginPath();
+                ctx.moveTo(map.x(H[0].m[0]), map.y(H[0].m[1]));
+                for (var i = 1; i <= g; i++) {
+                    ctx.lineTo(map.x(H[i].m[0]), map.y(H[i].m[1]));
+                }
+                if (moved) ctx.lineTo(map.x(m[0]), map.y(m[1]));
+                ctx.stroke();
+                ctx.restore();
+            }
+            if (ph >= 3) {
+                ctx.save(); ctx.globalAlpha = 0.3;
+                var beforeC = ph === 5 ? h.C1 : historyStage ? h.CSamples : h.C;
+                ellipse(ctx, map, ph === 3 ? h.m : h.m1, h.sigma, beforeC);
+                ctx.restore();
+            }
+            var axes = ellipse(ctx, map, m, sigma, C, ph >= 4 ? 2 : 1);
+            if (ph >= 4) {
+                var directions = [[axes.ux, axes.uy, axes.l1], [axes.uy, -axes.ux, axes.l2]];
+                var tips = directions.map(function (d) {
+                    var radius = 2 * sigma * Math.sqrt(d[2]);
+                    return [m[0] + radius * d[0], m[1] + radius * d[1]];
+                });
+                ctx.beginPath();
+                tips.forEach(function (tip) {
+                    ctx.moveTo(map.x(2 * m[0] - tip[0]), map.y(2 * m[1] - tip[1]));
+                    ctx.lineTo(map.x(tip[0]), map.y(tip[1]));
+                });
+                ctx.strokeStyle = COL.neutral; ctx.lineWidth = 1; ctx.stroke();
+                if (ph === 5) tips.forEach(function (tip) {
+                    arrow(ctx, map, lerp2(m, tip, h.sigma / sigma), tip, COL.path, 1.5);
+                });
+            }
+            if (ph >= 2 && ph <= 4 && !historyStage) {
+                h.order.slice(0, P.mu).forEach(function (k, i) {
+                    arrow(ctx, map, h.m, h.X[k], COL.pick, 0.75 + 2 * P.w[i]);
+                });
+            }
+            if (ph === 3) arrow(ctx, map, h.m, m, COL.mean, 2);
+            if (historyStage) {
+                // The covariance path's contribution, in the same units as the samples.
+                var memory = h.m.map(function (v, i) { return v + h.sigma * Math.sqrt(P.c1) * h.pc1[i]; });
+                arrow(ctx, map, h.m, memory, COL.path, 1.5);
+            }
+            var best = h.X[h.order[0]];
+            if (ph >= 1) {
+                var radius = fn(best), radiusText = radius.toFixed(2);
+                var farthest = POINTS.find(function (p) { return Math.hypot(p[0] - best[0], p[1] - best[1]) === radius; });
+                ctx.save();
+                if (ph === 4) ctx.globalAlpha = 0.2;
+                circle(ctx, map, best, radius, farthest, COL.mean, 1.5);
+                ctx.restore();
+            }
+            POINTS.forEach(function (p) { dot(ctx, map, p, 3, COL.txt); });
+            h.order.slice().reverse().forEach(function (k) {
+                var st = styles[k];
+                ctx.globalAlpha = st.alpha;
+                dot(ctx, map, X[k], st.rad, st.filled ? st.col : COL.paper, st.col);
+            });
+            ctx.globalAlpha = 1;
+            if (ph === 3 || ph === 4) {
+                ctx.save(); ctx.globalAlpha = 0.3; cross(ctx, map, h.m); ctx.restore();
+            }
+            cross(ctx, map, m);
+
+            root.querySelector(".update-before").hidden = ph < 3;
+            root.querySelector(".update-direction").hidden = !historyStage && ph !== 5;
+            root.querySelector(".direction-label").textContent = historyStage ? "Recent center moves" : "Size \u00d7" + (sigma / h.sigma).toFixed(2);
+            read.textContent = ph === 0 ? P.lam + " centers / not ranked" : "Best r " + radiusText;
+            root.cmaFrame = { X: X, styles: styles, m: m };
+            root.dispatchEvent(new Event("cma-frame"));   // the 3-D panel redraws from this frame
+
+            var tag = g + ":" + ph + ":" + historyStage;
+            if (tag !== shown) {
+                var reshaping = ph === 4;
+                text.innerHTML = phaseText(ph, historyStage, pathRatios[g]);
+                score.setAttribute("aria-hidden", String(ph === 0));
+                if (ph >= 1) {
+                    var [center, target] = [best, farthest].map(formatCoordinates);
+                    var terms = [center, center, target, radiusText];
+                    scoreValues.forEach(function (cell, i) { cell.firstChild.nodeValue = terms[i]; });
+                }
+                root.querySelector(".objective-key").hidden = reshaping;
+                root.querySelector(".update-selection").hidden = !reshaping || historyStage;
+                root.querySelector(".before-label").textContent = historyStage ? "After top 3 moves" : reshaping ? "Old sampling spread" : "Before update";
+                root.querySelector(".spread-label").textContent = reshaping ? "Updated sampling spread" : "C shape, σ size";
+                shown = tag;
+            }
+            label.textContent = "gen " + (g + 1) + " of " + NG + ", step " + (ph + 1) + " of " + NP;
+        }
+        root.cma3d = { fn: fn, view: circleView, plan: cTop, colors: COL, font: SANS, dot: dot, labels: labels };
+        var player = new Player(root, 0.9, render);
+        player.setMax(NG * NP);
+        layout(); player.set(0);
+        onResize(cTop.parentNode, function () { layout(); render(player.t); });
+        if (!REDUCED) onFirstView(root, function () { player.play(); });
+    }
+
+    ready(stepDemo);
+})();
+</script>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.151.3/build/three.module.js" } }
+</script>
+<script type="module">
+    // The plan is the common ground; its radius becomes height in the same unit.
+    import * as THREE from "three";
+    import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
+
+    const root = document.getElementById("cma-step"), box = root && root.querySelector(".cma-3d");
+    const identity = { x: v => v, y: v => v };
+    let built = false, ready = false, surf, cfg, ground, wire, toWorld;
+    let textureWidth = 0, textureHeight = 0;
+    const markers = [], axes = [], lifts = {};
+
+    function stage(el, aspect, draw) {
+        let renderer;
+        try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+        catch (err) { el.textContent = "This view needs WebGL."; return null; }
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        renderer.domElement.tabIndex = 0;
+        renderer.domElement.setAttribute("aria-label", "Circle search: drag to rotate, right drag or arrow keys to pan, scroll or pinch to zoom");
+        el.appendChild(renderer.domElement);
+        const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 50);
+        camera.zoom = 1.2;
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.enableZoom = true; controls.enablePan = true;
+        controls.minZoom = 0.8; controls.maxZoom = 3;
+        controls.listenToKeyEvents(renderer.domElement);
+        controls.addEventListener("change", draw);
+        new ResizeObserver(() => {
+            const w = el.clientWidth || 300, h = Math.round(w * aspect);
+            renderer.setSize(w, h);
+            const halfHeight = (camera.right - camera.left) * h / w / 2;
+            camera.top = halfHeight; camera.bottom = -halfHeight;
+            camera.updateProjectionMatrix(); draw();
+        }).observe(el);
+        return { renderer, scene, camera, controls, render: () => renderer.render(scene, camera) };
+    }
+
+    function billboard(paint) {                         // one canvas/texture owner for both text and marker glyphs
+        const canvas = document.createElement("canvas"); canvas.width = canvas.height = 128;
+        const texture = new THREE.CanvasTexture(canvas);
+        const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, depthTest: false, depthWrite: false, toneMapped: false }));
+        sprite.frustumCulled = false;
+        let shown = null;
+        sprite.paint = (key, value) => {
+            if (key === shown) return;
+            const g = canvas.getContext("2d");
+            g.setTransform(1, 0, 0, 1, 0, 0); g.clearRect(0, 0, 128, 128);
+            g.setTransform(2, 0, 0, 2, 0, 0); g.globalAlpha = 1;
+            paint(g, value);
+            texture.needsUpdate = true; shown = key;
+        };
+        return sprite;
+    }
+
+    function line(color) {
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(6), 3));
+        const object = new THREE.Line(geometry, new THREE.LineDashedMaterial({ color, dashSize: 0.04, gapSize: 0.03, depthWrite: false }));
+        object.frustumCulled = false; object.renderOrder = 2;
+        surf.scene.add(object);
+        return object;
+    }
+    function setLine(object, points) {                   // actual world endpoints, including the zero-height ground
+        const a = object.geometry.getAttribute("position");
+        points.forEach((p, i) => a.setXYZ(i, p.x, p.y, p.z));
+        a.needsUpdate = true; object.geometry.setDrawRange(0, points.length);
+        object.computeLineDistances();
+    }
+
+    function buildSurface() {
+        cfg = root.cma3d;
+        surf = stage(box, 0.75, drawSurface);
+        if (!surf) return;
+        const { scene, camera, controls } = surf, { fn, view, colors } = cfg;
+        toWorld = (p, height = fn(p) / view.half) => new THREE.Vector3((p[0] - view.cx) / view.half, height, -(p[1] - view.cy) / view.half);
+
+        const texture = new THREE.CanvasTexture(cfg.plan);
+        textureWidth = cfg.plan.width; textureHeight = cfg.plan.height;
+        const plane = new THREE.PlaneGeometry(2, 2); plane.rotateX(-Math.PI / 2);
+        ground = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false, toneMapped: false }));
+        ground.name = "shared-plan"; scene.add(ground);
+
+        // A sparse smooth line grid keeps the ground drawing visible.
+        const vertices = [], N = 12, segments = 64;
+        let highest = 0;
+        const at = (fixed, t, direction) => toWorld([view.cx + (direction ? t : fixed) * view.half, view.cy + (direction ? fixed : t) * view.half]);
+        for (let direction = 0; direction < 2; direction++) for (let i = 0; i <= N; i++) for (let k = 0; k < segments; k++) {
+            const a = at(2 * i / N - 1, 2 * k / segments - 1, direction);
+            const b = at(2 * i / N - 1, 2 * (k + 1) / segments - 1, direction);
+            vertices.push(...a.toArray(), ...b.toArray()); highest = Math.max(highest, a.y, b.y);
+        }
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        wire = new THREE.LineSegments(geometry, new THREE.LineBasicMaterial({ color: colors.neutral, transparent: true, opacity: 0.22, depthWrite: false }));
+        wire.name = "cost-grid"; wire.renderOrder = 1; scene.add(wire);
+
+        const S = Math.sqrt(2 + (highest / 2) ** 2) + 0.25;
+        Object.assign(camera, { left: -S, right: S, top: S, bottom: -S });
+        camera.updateProjectionMatrix();
+        camera.position.set(0, highest / 2 + 8, 0);
+        controls.target.set(0, highest / 2, 0); controls.update();
+
+        const axisPoints = [-1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, highest, 1];
+        const axisGeometry = new THREE.BufferGeometry();
+        axisGeometry.setAttribute("position", new THREE.Float32BufferAttribute(axisPoints, 3));
+        scene.add(new THREE.LineSegments(axisGeometry, new THREE.LineBasicMaterial({ color: colors.base })));
+        [["x", 0, -0.08, 1.1], ["y", 1.1, -0.08, 0], ["r", -1.1, highest / 2, 1.1]].forEach(([text, x, y, z]) => {
+            const label = billboard((g, value) => {
+                g.font = cfg.font; g.fillStyle = colors.neutral; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(value, 32, 32);
+            });
+            label.paint(text, text); label.position.set(x, y, z); label.renderOrder = 6; scene.add(label); axes.push(label);
+        });
+
+        root.cmaFrame.X.forEach((_, k) => {
+            const marker = billboard((g, st) => {
+                cfg.dot(g, identity, [32, 32], st.rad, st.filled ? st.col : colors.paper, st.col);
+                if (st.label) cfg.labels(g, 32 + st.rad + 3, 32 - st.rad - 2, [[st.label, st.col]], cfg.font, "bottom");
+            });
+            marker.name = "candidate-" + k; scene.add(marker); markers.push(marker);
+        });
+        lifts["1"] = line(colors.mean);
+        Object.entries(lifts).forEach(([rank, object]) => { object.name = "radius-" + rank; object.visible = false; });
+        if (new URLSearchParams(location.search).has("scene-debug")) root.cma3d.inspect = { ...surf, markers, lifts };
+        ready = true;
+    }
+
+    function drawSurface() {
+        if (!ready || !root.cmaFrame) return;
+        const F = root.cmaFrame, pixel = (surf.camera.right - surf.camera.left) / (box.clientWidth || 300);
+        if (textureWidth !== cfg.plan.width || textureHeight !== cfg.plan.height) {
+            ground.material.map.dispose();
+            ground.material.map = new THREE.CanvasTexture(cfg.plan);
+            textureWidth = cfg.plan.width; textureHeight = cfg.plan.height;
+        }
+        ground.material.map.needsUpdate = true;
+        markers.forEach((object, k) => {
+            const st = F.styles[k];
+            object.position.copy(toWorld(F.X[k])); object.scale.setScalar(64 * pixel);
+            object.material.opacity = st.alpha;
+            object.renderOrder = st.label === "1" ? 5 : 3;
+            object.paint(JSON.stringify([st.col, st.rad, st.filled, st.label]), st);
+        });
+        axes.forEach(object => object.scale.setScalar(64 * pixel));
+        Object.values(lifts).forEach(object => { object.visible = false; });
+        F.styles.forEach((st, k) => {
+            if (!st.label) return;
+            const object = lifts[st.label];
+            setLine(object, [toWorld(F.X[k], 0), toWorld(F.X[k])]);
+            object.material.dashSize = 4 * pixel; object.material.gapSize = 3 * pixel;
+            object.visible = true;
+        });
+        surf.render();
+    }
+
+    if (box) {
+        root.addEventListener("cma-frame", () => { if (!built) { built = true; buildSurface(); } drawSurface(); });
+        if (root.cma3d) { built = true; buildSurface(); drawSurface(); }
+    }
+</script>
+
+<br><br>
+References:
+<ul>
+    <li><a href="https://arxiv.org/abs/1604.00772">Nikolaus Hansen, The CMA Evolution Strategy: A Tutorial</a></li>
+    <li><a href="https://doi.org/10.1162/106365601750190398">Nikolaus Hansen and Andreas Ostermeier, Completely Derandomized Self-Adaptation in Evolution Strategies</a></li>
+    <li><a href="https://doi.org/10.1109/CEC.2005.1554902">Anne Auger and Nikolaus Hansen, A Restart CMA Evolution Strategy With Increasing Population Size</a></li>
+    <li><a href="https://github.com/CMA-ES/pycma">pycma</a></li>
+    <li><a href="https://en.wikipedia.org/wiki/Smallest-circle_problem">Smallest-circle problem</a></li>
+</ul>
+
+<br><br>
