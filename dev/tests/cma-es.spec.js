@@ -852,7 +852,7 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
   await expect(sizeFigure).toBeVisible();
   await expect(sizeFigure).toContainText('σ × 1.31');
   await expect(sizeFigure).toContainText('σ × 0.81');
-  await expect(stepSize.locator('figcaption')).toContainText('Same direction / turns back');
+  await expect(stepSize.locator('figcaption')).toContainText('Same way / turns back');
   await expect(sizeFigure.locator('text').filter({ hasText: /same direction|turns back/i })).toHaveCount(0);
   const captions = page.locator('#cma-step figcaption, #cma-updates figcaption');
   await expect(captions).toHaveCount(5);
@@ -872,11 +872,21 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
       const math = row.querySelector('.cma-explain-math').getBoundingClientRect();
       const figure = row.querySelector('figure');
       const before = figure.getBoundingClientRect();
+      const svg = figure.querySelector('svg');
+      const scale = svg.getScreenCTM().a;
+      const stroke = (selector) => {
+        const shape = svg.querySelector(selector);
+        return shape && parseFloat(getComputedStyle(shape).strokeWidth) * scale;
+      };
       const overflow = row.scrollWidth - row.clientWidth;
       row.scrollLeft = overflow;
       return {
         beside: before.left >= math.right && before.top < math.bottom && before.bottom > math.top,
         figureWidth: before.width,
+        scale,
+        outline: stroke('ellipse[stroke="royalblue"], g[stroke="royalblue"] > circle'),
+        orange: stroke('path[stroke="darkorange"]'),
+        dot: svg.querySelector('circle[fill="currentColor"]').r.baseVal.value * scale,
         startVisible: math.left >= bounds.left - 1,
         endVisible: figure.getBoundingClientRect().right <= bounds.right + 1,
         overflow,
@@ -889,7 +899,12 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
       expect(layout.endVisible).toBe(true);
       expect(layout.scrolled).toBe(layout.overflow);
     }
-    expect(layouts[3].figureWidth).toBeGreaterThanOrEqual(layouts[2].figureWidth * 1.5);
+    const [, , centerMoves, stepSize] = layouts;
+    expect(stepSize.scale).toBeCloseTo(centerMoves.scale, 3);
+    expect(stepSize.outline).toBeCloseTo(centerMoves.outline, 3);
+    expect(stepSize.orange).toBeCloseTo(centerMoves.orange, 3);
+    expect(stepSize.dot).toBeCloseTo(centerMoves.dot, 3);
+    expect(stepSize.figureWidth / centerMoves.figureWidth).toBeCloseTo(1.2, 2);
     if (width === 1280) expect(layouts.every((layout) => layout.overflow === 0)).toBe(true);
     else expect(layouts[0].overflow).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(pageWidth);
