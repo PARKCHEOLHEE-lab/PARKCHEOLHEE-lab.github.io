@@ -29,17 +29,8 @@ categories: note
         #cma-step-size .cma-explain > figure { flex-basis: 12em; }
         #cma-updates .cma-explain svg { display: block; width: 100%; height: auto; }
         #cma-updates .cma-explain figcaption { margin-top: 0.4em; }
-        #cma-step { container-type: inline-size; }
-        #cma-step .cma-step-layout { display: flex; align-items: center; gap: 1em; }
-        #cma-step .cma-view { position: relative; flex: 1 0 22.5em; min-width: 0; }
-        #cma-step .cma-covariance { flex: 0 0 19em; min-width: 0; max-width: 100%; text-align: center; }
-        @container (width < 42.5em) {
-            #cma-step .cma-step-layout { padding-block-end: 1em; }
-        }
-        @container (width < 36em) {
-            #cma-step .cma-step-layout { padding-block-end: 2em; }
-            #cma-step .cma-view { flex-basis: 100%; }
-        }
+        #cma-step .cma-view { position: relative; max-width: 28em; margin-inline: auto; }
+        #cma-step .cma-covariance { display: grid; grid-template-columns: 19em; justify-content: safe center; margin-block-start: 1em; overflow-x: auto; }
         #cma-step .cma-equations { display: grid; grid-template-columns: minmax(5.8em, max-content) max-content 1fr; gap: 1em 0.3em; white-space: nowrap; font: 1em MJXc-TeX-main-R, "Times New Roman", serif; font-variant-numeric: tabular-nums; }
         #cma-step .cma-equations > [role="math"] { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; justify-items: start; row-gap: 0.5em; }
         #cma-step .cma-equations > [role="math"] > :first-child { justify-self: end; }
@@ -124,7 +115,6 @@ categories: note
             <span class="tval"><span class="gen">gen 1, step 1</span></span>
         </div>
         <div class="phase note-sr-only" aria-live="polite"></div>
-        <div class="latex-container cma-step-layout" tabindex="0" role="region" aria-label="Circle demo and live equations">
         <div class="cma-view">
             <canvas class="cma-top" aria-hidden="true"></canvas>
             <div class="cma-3d" role="group" aria-label="Six candidate centers above the circle drawing, initially viewed from the top. Left drag to rotate; right drag or focused arrow keys to pan; scroll or pinch to zoom. Blue marks the best circle and its radius height. Gray dashes show the sampling spread."></div>
@@ -136,7 +126,8 @@ categories: note
                 <div><span class="legend-key shape-key" aria-hidden="true"></span><span class="spread-label">C shape, σ size</span></div>
             </div>
         </div>
-        <div class="cma-covariance">
+        <figcaption>The smallest circle containing all points</figcaption>
+        <div class="cma-covariance" tabindex="0" role="region" aria-label="Live CMA-ES equations">
             <div class="cma-equations">
                 <div class="best-score" role="math" aria-hidden="true">
                     <span>\(f\)<span class="score-center">(0.00, 0.00)</span></span>
@@ -166,8 +157,6 @@ categories: note
                 </span>
             </div>
         </div>
-        </div>
-        <figcaption>The smallest circle containing all points</figcaption>
     </div>
 </ul>
 

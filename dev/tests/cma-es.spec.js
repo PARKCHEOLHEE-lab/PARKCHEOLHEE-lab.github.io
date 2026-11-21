@@ -138,7 +138,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   const layout = () => root.evaluate((el) => {
     const viewport = el.querySelector('.cma-view').getBoundingClientRect();
     const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();
-    const matrix = el.querySelector('.cma-covariance').getBoundingClientRect();
+    const panel = el.querySelector('.cma-covariance');
+    const matrix = panel.getBoundingClientRect();
     const legend = el.querySelector('.cma-legend'), rect = legend.getBoundingClientRect();
     const style = (selector) => {
       const css = getComputedStyle(legend.querySelector(selector));
@@ -147,7 +148,8 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
       return { colour: g.strokeStyle, line: css.borderTopStyle };
     };
     return { width: el.clientWidth, viewport: viewport.width, canvas: canvas.width,
-      matrixRight: matrix.left >= viewport.right && matrix.top < viewport.bottom && matrix.bottom > viewport.top,
+      equationsBelow: matrix.top >= viewport.bottom,
+      equationsOverflow: panel.scrollWidth - panel.clientWidth,
       producer: el.querySelector('.cma-top').clientWidth,
       legend: { x: rect.x - viewport.x, y: rect.y - viewport.y, right: rect.right - viewport.x, bottom: rect.bottom - viewport.y },
       height: viewport.height, legendEm: parseFloat(getComputedStyle(legend).fontSize), pointer: getComputedStyle(legend).pointerEvents,
@@ -163,7 +165,9 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   });
   expect(legendPaint.background).toEqual([255, 255, 255, 204]);
   expect(legendPaint.opacity).toBe('1');
-  expect(initialLayout.matrixRight).toBe(true);
+  expect(initialLayout.equationsBelow).toBe(true);
+  expect(initialLayout.equationsOverflow).toBeLessThanOrEqual(1);
+  await expect(root.locator('.latex-container')).toHaveCount(0);
   expect(initialLayout.canvas, 'the desktop canvas uses its pre-compaction width').toBeGreaterThanOrEqual(245 * 1.25);
   expect(initialLayout.canvas).toBeLessThan(initialLayout.width);
   expect(initialLayout.producer).toBe(initialLayout.canvas);
@@ -669,47 +673,17 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   });
   expect(beforeResize.error).toBe(0);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect.poll(async () => (await layout()).matrixRight, { message: 'equations stay beside the plot on a phone' }).toBe(true);
+  await expect.poll(async () => {
+    const { canvas, width } = await layout();
+    return Math.abs(canvas - width);
+  }, { message: 'the canvas fills the article width on phones within one CSS pixel' }).toBeLessThanOrEqual(1);
   const phoneLayout = await layout();
-  expect(phoneLayout.canvas, 'the canvas fills the article width on phones').toBe(phoneLayout.width);
+  expect(phoneLayout.equationsBelow).toBe(true);
+  expect(phoneLayout.equationsOverflow).toBeLessThanOrEqual(1);
   expect(phoneLayout.producer).toBe(phoneLayout.canvas);
   expect(phoneLayout.legend.x / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.x / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.y / phoneLayout.legendEm).toBeCloseTo(initialLayout.legend.y / initialLayout.legendEm, 2);
   expect(phoneLayout.legend.right).toBeLessThan(phoneLayout.viewport);
-  const scroller = root.getByRole('region', { name: 'Circle demo and live equations' });
-  await expect(scroller.getByText('Scroll right for the equations')).toHaveCount(0);
-  await scroller.press('ArrowRight');
-  await expect.poll(() => scroller.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
-  const equationsFit = await scroller.evaluate((el) => {
-    el.scrollLeft = el.scrollWidth;
-    const row = el.getBoundingClientRect();
-    const equations = el.querySelector('.cma-equations').getBoundingClientRect();
-    const visible = equations.left >= row.left - 1 && equations.right <= row.right + 1;
-    el.scrollLeft = 0;
-    return visible;
-  });
-  expect(equationsFit).toBe(true);
-  const touch = await page.context().newCDPSession(page);
-  await touch.send('Emulation.setTouchEmulationEnabled', { enabled: true });
-  const start = await scroller.evaluate(async (el) => {
-    await document.fonts.ready;
-    el.scrollIntoView({ block: 'center', behavior: 'instant' });
-    const { left, bottom } = el.getBoundingClientRect();
-    return { x: Math.round(left + el.clientWidth * 0.85), y: Math.round(bottom - 6) };
-  });
-  await touch.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] });
-  for (const distance of [40, 80, 120, 160, 200, 240, 280]) {
-    await touch.send('Input.dispatchTouchEvent', {
-      type: 'touchMove', touchPoints: [{ x: start.x - distance, y: start.y }],
-    });
-  }
-  await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await expect.poll(() => scroller.evaluate((el) => el.scrollWidth - el.clientWidth - el.scrollLeft), {
-    message: 'a swipe below the full-width canvas reaches the equations',
-  }).toBeLessThanOrEqual(1);
-  await scroller.evaluate((el) => { el.scrollLeft = 0; });
-  await touch.send('Emulation.setTouchEmulationEnabled', { enabled: false });
-  await touch.detach();
   await expect(root.locator('canvas:visible')).toHaveCount(1);
   await expect.poll(() => root.evaluate((el) => {
     const canvas = el.querySelector('.cma-top'), image = window.circleBackground;
@@ -731,7 +705,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   expect(await root.evaluate((el) => el.cma3d.inspect.scene.getObjectByName('shared-plan').material.map.uuid), 'ordinary motion reuses its ground texture').toBe(mobileMap.id);
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect.poll(() => root.evaluate((el) => el.cma3d.inspect.scene.getObjectByName('shared-plan').material.map.uuid), {
-    message: 'shrinking the backing canvas also replaces the ground texture',
+    message: 'resizing the backing canvas also replaces the ground texture',
   }).not.toBe(mobileMap.id);
   expect(await root.evaluate((el) => el.cma3d.inspect.renderer.getContext().getError())).toBe(0);
   expect(await root.evaluate((el) => el.cma3d.inspect.renderer.info.memory.textures)).toBe(beforeResize.textures);
@@ -980,7 +954,6 @@ test('compact viewport removes vertical space without shrinking geometry', async
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/cma-es/?scene-debug');
   const root = page.locator('#cma-step');
-  const scroller = root.locator('.cma-step-layout');
   await expect(root.locator('.cma-3d canvas')).toHaveCount(1);
   for (const width of [1920, 1280, 390]) {
     await page.setViewportSize({ width, height: 900 });
@@ -990,7 +963,7 @@ test('compact viewport removes vertical space without shrinking geometry', async
       const style = getComputedStyle(parent);
       const left = column.left + parseFloat(style.paddingLeft);
       const right = column.right - parseFloat(style.paddingRight);
-      return [...el.querySelectorAll('.ctrls, .cma-step-layout, figcaption')].every((part) => {
+      return [...el.querySelectorAll('.ctrls, .cma-view, .cma-covariance, figcaption')].every((part) => {
         const bounds = part.getBoundingClientRect();
         return bounds.left >= left - 1 && bounds.right <= right + 1;
       });
@@ -1006,25 +979,14 @@ test('compact viewport removes vertical space without shrinking geometry', async
       const project = (x, z) => camera.position.clone().set(x, 0, z).project(camera);
       const planeWidth = Math.abs(project(1, 0).x - project(-1, 0).x) * w / 2;
       const planeHeight = Math.abs(project(0, 1).y - project(0, -1).y) * h / 2;
-      const box = el.querySelector('.cma-step-layout').getBoundingClientRect();
+      const box = el.querySelector('.cma-view').getBoundingClientRect();
       const caption = el.querySelector('figcaption').getBoundingClientRect();
       return { w, h, planeWidth, planeHeight, captionGap: caption.top - box.bottom };
     });
     expect(size.planeWidth, 'the floor retains its previous width, over half the viewport').toBeGreaterThan(size.w / 2);
     expect(size.planeHeight, 'the rectangular canvas must not flatten circles').toBeCloseTo(size.planeWidth, 3);
     expect(size.captionGap, 'the caption follows the shorter viewport').toBeLessThan(20);
-    await expect.poll(() => scroller.evaluate((el) => el.scrollHeight - el.clientHeight)).toBe(0);
-    const widthOverflow = await scroller.evaluate((el) => el.scrollWidth - el.clientWidth);
-    if (width === 1920) expect(widthOverflow).toBe(0);
-    else expect(widthOverflow).toBeGreaterThan(0);
   }
-  const thumbColor = () => scroller.evaluate((el) => getComputedStyle(el, '::-webkit-scrollbar-thumb').borderTopColor);
-  await page.mouse.move(0, 0);
-  await expect.poll(thumbColor).toBe('rgba(0, 0, 0, 0)');
-  await scroller.hover();
-  await expect.poll(thumbColor).not.toBe('rgba(0, 0, 0, 0)');
-  await page.mouse.move(0, 0);
-  await expect.poll(thumbColor).toBe('rgba(0, 0, 0, 0)');
 });
 
 test('extra covariance demos are removed', async ({ page }) => {
