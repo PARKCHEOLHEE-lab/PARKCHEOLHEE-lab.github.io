@@ -316,7 +316,7 @@ categories: note
             <li id="cma-step-size">
                 <b>Change size (\(\sigma\))</b>
                 <p>CMA-ES keeps an arrow for recent center moves. Each round, it keeps part of the old arrow and adds the latest move, scaled to the old sampling spread. Moves in the same direction add up. Moves in opposite directions partly cancel.</p>
-                <p>In Fig. 5, the old moves (blue) add 1.034 units to the right. The latest move (orange) adds 1.398 to the right or left. The combined arrow has length \(L\approx 2.43\) or \(L\approx 0.36\).</p>
+                <p>In Fig. 5, the old moves (blue) add 1.034 units to the right. The latest move (orange) adds 1.398 to the right or left. The combined arrow has length \(L\approx 2.43\) in the top row and \(L\approx 0.36\) in the bottom row.</p>
                 <p>Divide \(L\) by 1.25, the average path length for random moves in 2D. The resulting ratio \(r\) tells us how to change \(\sigma\). When \(r\) is above 1, \(\sigma\) grows. When it is below 1, \(\sigma\) shrinks. At 1 it stays the same. This example uses an update rate of 0.289. The dashed circles show the old size.</p>
                 <div class="latex-container cma-explain" tabindex="0" role="region" aria-label="Step-size equation and example">
                     <div class="cma-explain-math">\[
@@ -328,14 +328,10 @@ categories: note
                         \end{aligned}
                     \]</div>
                     <figure>
-                        <svg viewBox="0 0 192 156" role="img" aria-labelledby="cma-size-title" aria-describedby="cma-size-desc">
+                        <svg viewBox="0 0 192 146" role="img" aria-labelledby="cma-size-title" aria-describedby="cma-size-desc">
                             <title id="cma-size-title">How center moves change the sampling size</title>
                             <desc id="cma-size-desc">Moves in the same direction give a path length of 2.43 and grow sigma by a factor of 1.31. Moving back gives a path length of 0.36 and shrinks sigma by a factor of 0.81.</desc>
                             <path d="M106 37H184 M145 1V73 M106 113H184 M145 84V142" fill="none" stroke="currentColor" opacity=".2"/>
-                            <g fill="currentColor" font-size="12">
-                                <text x="145" y="84" text-anchor="middle">σ × 1.31</text>
-                                <text x="145" y="152" text-anchor="middle">σ × 0.81</text>
-                            </g>
                             <g fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 37H50 M44 33L50 37L44 41 M21 107H50 M44 103L50 107L44 111" stroke="royalblue"/>
                                 <path d="M50 37H89 M83 33L89 37L83 41 M50 119H11 M17 115L11 119L17 123" stroke="darkorange"/>
@@ -352,7 +348,7 @@ categories: note
                             <circle cx="145" cy="37" r="2" fill="currentColor"/>
                             <circle cx="145" cy="113" r="2" fill="currentColor"/>
                         </svg>
-                        <figcaption>Same way / turns back</figcaption>
+                        <figcaption>σ × 1.31 / σ × 0.81</figcaption>
                     </figure>
                 </div>
             </li>

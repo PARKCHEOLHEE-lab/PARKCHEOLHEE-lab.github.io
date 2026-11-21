@@ -850,10 +850,8 @@ test('equation figures stay beside their math when scrolled', async ({ page }) =
   await expect(stepSize.locator('.MJXc-display')).toBeVisible();
   const sizeFigure = stepSize.getByRole('img', { name: 'How center moves change the sampling size' });
   await expect(sizeFigure).toBeVisible();
-  await expect(sizeFigure).toContainText('σ × 1.31');
-  await expect(sizeFigure).toContainText('σ × 0.81');
-  await expect(stepSize.locator('figcaption')).toContainText('Same way / turns back');
-  await expect(sizeFigure.locator('text').filter({ hasText: /same direction|turns back/i })).toHaveCount(0);
+  await expect(stepSize.locator('figcaption')).toHaveText('Fig 5: σ × 1.31 / σ × 0.81');
+  await expect(sizeFigure.locator('text')).toHaveCount(0);
   const captions = page.locator('#cma-step figcaption, #cma-updates figcaption');
   await expect(captions).toHaveCount(5);
 
