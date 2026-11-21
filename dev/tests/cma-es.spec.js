@@ -134,7 +134,7 @@ test('single top-down figure keeps geometry, legend and camera controls', async 
   await expect(root.locator('.cma-top')).toHaveAttribute('aria-hidden', 'true');
   await expect(root.locator('.cma-gauge')).toHaveCount(0);
   await expect(root.locator('.cma-legend progress')).toHaveCount(0);
-  await expect(root.locator('figcaption')).not.toContainText('small box');
+  await expect(root.locator('figcaption')).toHaveText('Fig 1: The smallest circle containing all points');
   const layout = () => root.evaluate((el) => {
     const viewport = el.querySelector('.cma-view').getBoundingClientRect();
     const canvas = el.querySelector('.cma-3d canvas').getBoundingClientRect();

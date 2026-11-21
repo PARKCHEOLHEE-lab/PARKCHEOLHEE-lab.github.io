@@ -167,9 +167,7 @@ categories: note
             </div>
         </div>
         </div>
-        <figcaption>
-            <span class="n-gen">9</span> rounds. Minimum at (<span class="n-x">3.00</span>, <span class="n-y">1.10</span>), r = <span class="n-r">3.20</span>
-        </figcaption>
+        <figcaption>The smallest circle containing all points</figcaption>
     </div>
 </ul>
 
@@ -600,10 +598,6 @@ categories: note
                 '<span class="weight-percent">\\(' + percent.toFixed(1) + '\\%\\)</span></div></td></tr>';
         }).join("");
         window.MathJax?.Hub?.Queue(["Typeset", window.MathJax.Hub, weightChart]);
-        root.querySelector(".n-x").textContent = OPT[0].toFixed(2);
-        root.querySelector(".n-y").textContent = OPT[1].toFixed(2);
-        root.querySelector(".n-r").textContent = fn(OPT).toFixed(2);
-        root.querySelector(".n-gen").textContent = NG;
 
         // One fixed x/y frame for the plan and the 3-D ground.
         var circleView = (function () {
