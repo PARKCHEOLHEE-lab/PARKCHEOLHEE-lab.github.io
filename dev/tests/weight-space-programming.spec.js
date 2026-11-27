@@ -58,16 +58,18 @@ test('short outline and one three.js from unpkg', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto(POST, { waitUntil: 'load' });
 
-  // An intro and the two examples, each a few short bullets (user, 2026-11-26: "make the post simple").
+  // An intro, the two examples, and the chair-to-sofa experiment, each a few short bullets
+  // (user, 2026-11-26: "make the post simple"; the experiment added on 2026-11-27: "노트에 추가").
   const outline = page.locator('.post-main > ul').first();
   const titles = await outline.locator(':scope > li').allTextContents();
   expect(titles.map((t) => t.trim())).toEqual([
     'Weight-space programming',
     'Example: a car that cannot climb a ramp',
     'Example: an ink wash prompt that paints like Lee Jung-seop',
+    'Experiment: a chair model that makes sofas',
   ]);
   const bullets = await outline.locator(':scope > ul').evaluateAll((lists) => lists.map((ul) => ul.querySelectorAll(':scope > li').length));
-  expect(bullets.length).toBe(3);
+  expect(bullets.length).toBe(4);
   for (const count of bullets) expect(count).toBeLessThanOrEqual(3);
   await expect(page.locator('.post-main table')).toHaveCount(0);
   await expect(page.locator('.post-main .article')).toHaveCount(0);

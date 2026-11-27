@@ -123,6 +123,26 @@ categories: note
         </div>
         <figcaption>The same prompt after each of Astra's edits. The paintings are drawn by code, not taken from the experiment: their style follows each step's similarity score. The real images are in <a href="https://aifrontier.kr/ko/articles/weight-space-programming-lab/">AI Frontier's article</a>.</figcaption>
     </div>
+    <br>
+    <li>
+        Experiment: a chair model that makes sofas
+    </li>
+        <ul>
+            <li>
+                I trained a small 3D shape model on 132 four-legged chairs from <a href="https://amazon-berkeley-objects.s3.amazonaws.com/index.html">ABO</a> (CC BY 4.0). GPT-6.2 Astra, through Codex with no tools, got its weights, its code, and pictures of its outputs, and wrote Python that sets new weights so the same inputs give sofas. It never saw a sofa: in each of 15 rounds, an edit was kept only if MMD against 64 real sofas dropped by more than 0.0075.
+            </li>
+            <li>
+                Astra did not adjust the chair, and none of its weights is left (Fig. 3, middle). It wrote a sofa recipe of up to 16 rounded boxes per sofa and solved for weights that compute it: the first layers carry each input's sofa settings, the first MLP layer measures the distance to each side of each box, the next gives one value per box, and the last joins the boxes.
+            </li>
+            <li>
+                On 64 other sofas, Astra's MMD (0.0685, lower is better) beats gradient fine-tuning on 150 sofas with the same chair inputs (0.0876), but not the fine-tuned model with its own sofa codes (0.0579). Its 1-NNA is 0.977 (0.5 is best), so the boxes are too clean to pass as real sofas. A first run with the same settings ended at 0.0720.
+            </li>
+        </ul>
+
+    <figure>
+        <img alt="The same 8 inputs through the chair model, Astra's edit, and gradient fine-tuning" src="/img/chair-to-sofa/chair-to-sofa.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>The same 8 inputs through the chair model (top), Astra's edit (middle), and gradient fine-tuning on sofas (bottom)</figcaption>
+    </figure>
 </ul>
 
 <script>
