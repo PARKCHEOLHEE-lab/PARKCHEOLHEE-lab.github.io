@@ -1,0 +1,1035 @@
+---
+title: "Weight-space programming"
+layout: post
+related:
+  - cma-es
+  - optimizers
+categories: note
+---
+
+<br>
+
+    <style>
+        /* control row and legend: the same rules as the CMA-ES post (.cma-demo), so the two read as one blog */
+        .ws-demo { --link: #66a1ff; --r30: rgba(128, 128, 128, 0.30); --r14: rgba(128, 128, 128, 0.14); --td: rgb(70, 70, 70); --paper: #fff; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-align: initial; margin: 1.4em 0; }
+        .ws-demo .ctrls { display: flex; gap: 0.5em 1em; align-items: center; flex-wrap: wrap; margin: 0.5em 0; }
+        .ws-demo .play { cursor: pointer; border: 1px solid var(--r30); background: transparent; color: inherit; border-radius: 4px; width: 1.9em; height: 1.9em; line-height: 1; font-size: 0.85em; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+        .ws-demo .play:hover { background: var(--r14); }
+        .ws-demo .play[data-playing="true"] { border-color: var(--link); color: var(--link); }
+        .ws-demo .play-icon { width: 1em; height: 1em; display: block; fill: currentColor; }
+        .ws-demo .scrub { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 3px; background: var(--r30); flex: 1 1 auto; min-width: 36px; outline: none; }
+        .ws-demo .scrub::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--link); cursor: pointer; }
+        .ws-demo .scrub::-moz-range-thumb { width: 14px; height: 14px; border: none; border-radius: 50%; background: var(--link); cursor: pointer; }
+        .ws-demo .tval { font-family: var(--mono); font-size: 0.85em; color: var(--td); white-space: nowrap; }
+        /* legend: the CMA-ES legend's type, set as a row above the drawing so it never covers a moving part */
+        .ws-demo .ws-legend { display: flex; flex-wrap: wrap; gap: 0.25em 1.2em; margin-bottom: 0.4em; font-family: var(--mono); font-size: 0.75em; color: var(--td); }
+        .ws-demo .ws-legend > div { display: flex; align-items: center; gap: 0.5em; }
+        .ws-demo .legend-key { width: 1.5em; }
+        .ws-demo .ws-view > svg { display: block; width: 100%; height: auto; }
+        #ws-car { --car: #a1a1aa; }
+        .ws-demo .before-key { border-top: 3px solid color-mix(in srgb, var(--car) 38%, transparent); }
+        .ws-demo .after-key { border-top: 3px solid var(--car); }
+        /* Fig. 2 colors: the legend keys and the 3D boxes both read these */
+        #ws-painting { --edited: #b91c1c; --quant: #3b82f6; --other: #f4f4f5; --line: #a1a1aa; }
+        .ws-demo .edited-key { border-top: 3px solid var(--edited); }
+        .ws-demo .quant-key { border-top: 3px solid color-mix(in srgb, var(--quant) 45%, transparent); }
+        .ws-demo .ws-3d { position: relative; }
+        .ws-demo .ws-3d canvas { display: block; width: 100%; height: auto; padding: 0; cursor: grab; }   /* kill the blog's global canvas padding (basic.sass) */
+        .ws-demo .ws-3d canvas:active { cursor: grabbing; }
+        /* 3D labels: the behavior-aware post's .lbl chip */
+        .ws-demo .ws-label { font-size: 10.5px; line-height: 1.16; color: #111; background: rgba(255, 255, 255, .82); border: 1px solid #e5e5e6; border-radius: 4px; padding: 1px 5px; white-space: nowrap; pointer-events: none; }
+        .ws-demo .ws-paintings { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; margin-top: 0.5em; }
+        .ws-demo .ws-paintings figure { margin: 0; }
+        .ws-demo .ws-paintings canvas { display: block; width: 100%; height: auto; aspect-ratio: 1; padding: 0; }
+    </style>
+
+<ul>
+    <li>
+        Weight-space programming
+    </li>
+        <ul>
+            <li>
+                Weights are the numbers inside a neural network. Training usually sets them with gradient descent on data.
+            </li>
+            <li>
+                <b>Weight-space programming</b> lets an LLM read another network's weights and write new values itself, without gradient descent or an optimizer.
+            </li>
+        </ul>
+    <br>
+    <li>
+        Example: a car that cannot climb a ramp
+    </li>
+        <ul>
+            <li>
+                A network trained for 1 billion steps drives the car straight at the ramp and stalls, in all 256 tests. To jump the red strip and reach the blue box, the car has to back up first.
+            </li>
+            <li>
+                GPT-6 Astra read the weights and, in one reply with no tools, added a small path that backs the car up and then hands control back to the trained network. It changed 3.5% of the weights, and the car succeeded in all 1,024 tests.
+            </li>
+        </ul>
+
+    <div class="ws-demo" id="ws-car">
+        <div class="ctrls">
+            <button type="button" class="play" aria-label="play the recorded episodes">
+                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" min="0" max="5.2" value="0" step="0.01" aria-label="time in the recorded episodes">
+            <span class="tval">0.0 s of 5.2 s</span>
+        </div>
+        <div class="ws-view">
+            <div class="ws-legend">
+                <div><span class="legend-key before-key" aria-hidden="true"></span><span>Trained, 0 of 256</span></div>
+                <div><span class="legend-key after-key" aria-hidden="true"></span><span>Edited, 1,024 of 1,024</span></div>
+            </div>
+            {% include weight-space-car-scene.svg %}
+        </div>
+        <figcaption>The car-on-ramp level, before and after the edit, with the motion recorded from <a href="https://rikiyat.github.io/blog/weight-space-programming/">Takehi et al.</a></figcaption>
+    </div>
+    <br>
+    <li>
+        Example: an ink wash prompt that paints like Lee Jung-seop
+    </li>
+        <ul>
+            <li>
+                AI Frontier asked GPT-6 Astra to edit the weights of an image model so that the prompt <code>an ink wash painting of a bull</code> comes out in the style of six paintings by Lee Jung-seop. Training and prompt changes were not allowed.
+            </li>
+            <li>
+                In Fig. 2, each box is one block of weights, and the gray path leads from the prompt to the painting. Red boxes changed at the selected step, and step 0 is the original model. The chosen edit changes 0.40% of the weights and none of the faint blue 4-bit boxes, which hold 95.8% of them.
+            </li>
+            <li>
+                At step 20, Astra's choice, the similarity to the six paintings reached 0.776, above a prompt that describes the style in words (0.739). Astra still noted that the result is not Lee Jung-seop.
+            </li>
+        </ul>
+
+    <div class="ws-demo" id="ws-painting" data-src="/assets/data/weight-space-painting.json">
+        <div class="ctrls">
+            <button type="button" class="play" aria-label="play Astra's editing steps">
+                <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="7,5 7,19 17,12" /></svg>
+            </button>
+            <input type="range" class="scrub" min="0" max="21" value="20" step="1" aria-label="editing step">
+            <span class="tval">step 20 of 21</span>
+        </div>
+        <div class="ws-view">
+            <div class="ws-legend">
+                <div><span class="legend-key edited-key" aria-hidden="true"></span><span>Changed at this step</span></div>
+                <div><span class="legend-key quant-key" aria-hidden="true"></span><span>4-bit, 95.8% of weights</span></div>
+                <div><span class="ws-score">similarity 0.776</span></div>
+            </div>
+            <div class="ws-3d" role="group" aria-label="The image model as boxes, one per block of weights. The prompt enters at the text encoder, runs around the U of 50 blocks, and leaves through the VAE as the painting. Red boxes changed at the selected step. Drag to rotate, scroll or pinch to zoom."></div>
+        </div>
+        <div class="ws-paintings">
+            <figure><canvas class="ws-original" role="img" aria-label="Step 0: the original model's ink wash bull, drawn by code"></canvas><figcaption class="nofig">step 0, original</figcaption></figure>
+            <figure><canvas class="ws-step" role="img" aria-label="Step 20: the bull after Astra's edit, drawn by code"></canvas><figcaption class="nofig ws-step-label">step 20</figcaption></figure>
+        </div>
+        <figcaption>The same prompt after each of Astra's edits. The paintings are drawn by code, not taken from the experiment: their style follows each step's similarity score. The real images are in <a href="https://aifrontier.kr/ko/articles/weight-space-programming-lab/">AI Frontier's article</a>.</figcaption>
+    </div>
+    <br>
+    <li>
+        Experiment: a chair model that makes sofas
+    </li>
+        <ul>
+            <li>
+                I trained a small 3D shape model on 132 four-legged chairs from <a href="https://amazon-berkeley-objects.s3.amazonaws.com/index.html">ABO</a> (CC BY 4.0). GPT-6.2 Astra, through Codex with no tools, got its weights, its code, and pictures of its outputs, and wrote Python that sets new weights so the same inputs give sofas. It never saw a sofa: in each of 15 rounds, an edit was kept only if MMD against 64 real sofas dropped by more than 0.0075.
+            </li>
+            <li>
+                Astra did not adjust the chair, and none of its weights is left (Fig. 3, middle). It wrote a sofa recipe of up to 16 rounded boxes per sofa and solved for weights that compute it: the first layers carry each input's sofa settings, the first MLP layer measures the distance to each side of each box, the next gives one value per box, and the last joins the boxes.
+            </li>
+            <li>
+                On 64 other sofas, Astra's MMD (0.0685, lower is better) beats gradient fine-tuning on 150 sofas with the same chair inputs (0.0876), but not the fine-tuned model with its own sofa codes (0.0579). Its 1-NNA is 0.977 (0.5 is best), so the boxes are too clean to pass as real sofas. A first run with the same settings ended at 0.0720.
+            </li>
+        </ul>
+
+    <figure>
+        <img alt="The same 8 inputs through the chair model, Astra's edit, and gradient fine-tuning" src="/img/chair-to-sofa/chair-to-sofa.png" width="100%" onerror=handle_image_error(this)>
+        <figcaption>The same 8 inputs through the chair model (top), Astra's edit (middle), and gradient fine-tuning on sofas (bottom)</figcaption>
+    </figure>
+</ul>
+
+<script>
+(function () {
+    // play / pause button + scrub slider driving a time value t in [0, tMax], as in the CMA-ES post
+    function Player(root, rate, render) {
+        var btn = root.querySelector(".play"), slider = root.querySelector(".scrub"), self = this, raf = null, last = 0;
+        self.t = 0; self.tMax = 1; self.rate = rate;
+        function icon(playing) {
+            btn.dataset.playing = playing ? "true" : "false";
+            btn.querySelector("svg").innerHTML = playing
+                ? '<rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" />'
+                : '<polygon points="7,5 7,19 17,12" />';
+        }
+        function tick(ts) {
+            var dt = last ? Math.min(0.1, (ts - last) / 1000) : 0; last = ts;
+            self.set(self.t + dt * self.rate);
+            if (self.t >= self.tMax) { self.stop(); return; }
+            raf = requestAnimationFrame(tick);
+        }
+        self.set = function (t) { self.t = Math.max(0, Math.min(self.tMax, t)); slider.value = self.t; render(self.t); };
+        self.setMax = function (m) { self.tMax = m; slider.max = m; };
+        self.stop = function () { if (raf) cancelAnimationFrame(raf); raf = null; last = 0; icon(false); };
+        self.play = function () { if (raf) return; if (self.t >= self.tMax) self.set(0); icon(true); raf = requestAnimationFrame(tick); };
+        btn.addEventListener("click", function () { if (raf) self.stop(); else self.play(); });
+        slider.addEventListener("input", function () { self.stop(); self.set(parseFloat(slider.value)); });
+    }
+    var REDUCED = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    function onFirstView(el, fn) {
+        if (!("IntersectionObserver" in window)) { fn(); return; }
+        var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io.disconnect(); fn(); } }, { threshold: 0.35 });
+        io.observe(el);
+    }
+    function ready(fn) {
+        if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", function () { requestAnimationFrame(fn); });
+        else requestAnimationFrame(fn);
+    }
+
+    // Fig. 1: the recorded SMIL keyframes stay the source of motion; the player only seeks the SVG clock.
+    function carDemo() {
+        var root = document.getElementById("ws-car"), svg = root.querySelector(".ws-view > svg"), readout = root.querySelector(".tval");
+        var tracks = svg.querySelectorAll("animateTransform"), duration = parseFloat(tracks[0].getAttribute("dur"));
+        svg.pauseAnimations(); svg.setCurrentTime(0);
+        tracks.forEach(function (track) { track.beginElement(); });
+        var player = new Player(root, 1, function (t) {
+            svg.setCurrentTime(t);
+            readout.textContent = t.toFixed(1) + " s of " + duration.toFixed(1) + " s";
+        });
+        player.setMax(duration); player.set(0);
+        if (!REDUCED) onFirstView(root, function () { player.play(); });
+    }
+
+    // Fig. 2: tensor boxes placed as AI Frontier's viewer (WspImage3D) places them. Text enters on the
+    // z = -3.3 arm, runs out along the first half of the blocks, turns, and leaves as an image on z = +3.3.
+    var LAYERS = [["qkv", 1.5], ["out", 0.5], ["fc1", 2], ["fc2", 1]], GAP = 0.07, PITCH = 0.72, ARM = 3.3;
+    function layout(blocks) {
+        var parts = [], half = blocks / 2;
+        function add(id, x, y, z, w, h, d, fourBit) { parts.push({ id: id, position: [x, y, z], size: [w, h, d], fourBit: !!fourBit }); }
+        add("te", -7.4, 2.2, -ARM, 3.2, 4.4, 3.2);
+        add("cond", -4.6, 1.6, -ARM, 0.4, 3.2, 3);
+        for (var r = 0; r < 2; r++) {
+            var y = 0;
+            LAYERS.forEach(function (l) { var h = l[1] * 0.55; add("r" + r + "." + l[0], -3.2 + r * 0.8, y + h / 2, -ARM, 0.5, h, 2.6); y += h + GAP; });
+        }
+        for (var i = 0; i < blocks; i++) {
+            var out = i < half, x = (out ? i : blocks - 1 - i) * PITCH, z = out ? -ARM : ARM;
+            y = 0;
+            LAYERS.forEach(function (l) { add("b" + i + "." + l[0], x, y + l[1] / 2, z, 0.5, l[1], 2.6, true); y += l[1] + GAP; });
+            add("b" + i + ".adaln", x, y + 0.07, z, 0.5, 0.14, 2.6);
+        }
+        add("final", -1.3, 1.1, ARM, 0.6, 2.2, 2.4);
+        for (var v = 0; v < 24; v++) add("vae.b" + v, -2.6 - v * 0.2, 1.1, ARM, 0.13, 2.2, 2.2);
+        add("vae.out", -7.9, 1.4, ARM, 0.3, 2.8, 2.8);
+        return parts;
+    }
+    // One recorded step: each step is a separate edit of the original model, not a running total.
+    // The painting's style grows with the score above the original model's (full at the best step);
+    // a score below the original means the edit went wrong (fully at the worst step).
+    function frame(data, index) {
+        var s = data.steps[index], scores = data.steps.map(function (x) { return x.score; });
+        var base = scores[0], best = Math.max.apply(null, scores), worst = Math.min.apply(null, scores);
+        var clamp = function (v) { return Math.max(0, Math.min(1, v)); };
+        return { step: s.step, score: s.score,
+                 style: clamp((s.score - base) / (best - base)), damage: clamp((base - s.score) / (base - worst)), fraction: s.fraction, changed: s.changed, parts: s.parts,
+                 chosen: index === data.final, last: data.steps.length - 1 };
+    }
+
+    function paintingDemo() {
+        var root = document.getElementById("ws-painting"), readout = root.querySelector(".tval"), score = root.querySelector(".ws-score");
+        var label = root.querySelector(".ws-step-label"), shownCanvas = root.querySelector(".ws-step");
+        var cache = {};
+        // Draw a step's painting once at the canvas's screen size (capped at 720 px), then copy it from the cache.
+        function paint(canvas, f) {
+            var size = Math.round(Math.min(720, Math.max(240, canvas.clientWidth * (window.devicePixelRatio || 1))));
+            if (!cache[f.step] || cache[f.step].width !== size) {
+                cache[f.step] = document.createElement("canvas"); cache[f.step].width = cache[f.step].height = size;
+                root.wsPaint(cache[f.step], f.step, f.style, f.damage);
+            }
+            canvas.width = canvas.height = size;
+            canvas.getContext("2d").drawImage(cache[f.step], 0, 0);
+            return cache[f.step];
+        }
+        fetch(root.dataset.src).then(function (r) { return r.json(); }).then(function (data) {
+            root.wsParts = layout(data.blocks);
+            paint(root.querySelector(".ws-original"), frame(data, 0));
+            var shown = -1;
+            var player = new Player(root, 1.25, function (t) {
+                var f = frame(data, Math.min(Math.floor(t + 1e-6), data.steps.length - 1));
+                if (f.step === shown) return;
+                shown = f.step;
+                readout.textContent = "step " + f.step + " of " + f.last;
+                score.textContent = "similarity " + f.score.toFixed(3);
+                label.textContent = "step " + f.step + (f.chosen ? ", chosen" : "");
+                shownCanvas.setAttribute("aria-label", "Step " + f.step + ": the bull after Astra's edit, drawn by code");
+                f.painting = paint(shownCanvas, f);          // the 3D view shows the same canvas
+                root.wsFrame = f;
+                root.dispatchEvent(new CustomEvent("ws-frame"));
+            });
+            player.setMax(data.steps.length - 1); player.set(data.final);
+            if (!REDUCED) onFirstView(root, function () { player.set(0); player.play(); });
+        });
+    }
+
+    function start() { carDemo(); paintingDemo(); }
+    ready(start);
+})();
+</script>
+
+<script>
+// The 22 bull paintings, drawn by code (GPT-6.2 Astra via Codex, 2026-11-27); no image files.
+(() => {
+function mulberry32(seed) {
+  return function () {
+    seed |= 0;
+    seed = seed + 0x6d2b79f5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+// Smooth noise in design coordinates, independent of the backing-store size.
+function paperNoise(random) {
+  const grid = Float32Array.from({length: 4096}, random);
+  return function (x, y) {
+    const col = Math.floor(x), row = Math.floor(y);
+    let u = x - col, v = y - row;
+    u *= u * (3 - 2 * u);
+    v *= v * (3 - 2 * v);
+    const a = (row & 63) * 64, b = ((row + 1) & 63) * 64;
+    const i = col & 63, j = (col + 1) & 63;
+    const top = grid[a+i] + u * (grid[a+j] - grid[a+i]);
+    return top + v * (grid[b+i] + u * (grid[b+j] - grid[b+i]) - top);
+  };
+}
+
+function shape(ctx, path, color) {
+  ctx.fillStyle = color;
+  ctx.fill(new Path2D(path));
+}
+
+function gray(value) {
+  return 'rgb(' + value + ' ' + value + ' ' + value + ')';
+}
+
+// The triples give the center and full spread of the bristles at each turn.
+function brush(ctx, random, oil) {
+  return function pull(knots, color) {
+    const x = [], y = [], nx = [], ny = [], width = [];
+    const last = knots.length - 3;
+    function spline(i, j, t) {
+      const a = knots[Math.max(0,i-3)+j], b = knots[i+j];
+      const c = knots[i+3+j], d = knots[Math.min(last,i+6)+j];
+      const t2 = t*t, t3 = t*t2;
+      return (2*t3-3*t2+1)*b + (t3-2*t2+t)*.42*(c-a)
+        + (3*t2-2*t3)*c + (t3-t2)*.42*(d-b);
+    }
+    for (let i=0; i<last; i+=3) {
+      const steps = Math.max(2, Math.ceil(Math.hypot(knots[i+3]-knots[i],knots[i+4]-knots[i+1])/3));
+      for (let k=0; k<steps; k++) {
+        const t = k/steps;
+        x.push(spline(i,0,t)); y.push(spline(i,1,t));
+        width.push(Math.max(.04,spline(i,2,t))*(.89+.21*random()));
+      }
+    }
+    x.push(knots[last]); y.push(knots[last+1]); width.push(knots[last+2]);
+    const end = x.length-1;
+    for (let i=0; i<=end; i++) {
+      const next = Math.min(i+1,end), prev = Math.max(0,i-1);
+      const dx = x[next]-x[prev], dy = y[next]-y[prev];
+      const length = Math.hypot(dx,dy) || 1;
+      nx.push(-dy/length); ny.push(dx/length);
+    }
+    function ribbon(lo,hi,first,final,paint,shake) {
+      ctx.fillStyle = paint;
+      ctx.beginPath();
+      for (let i=first; i<=final; i++) {
+        const w = (lo + (random()-.5)*shake)*width[i];
+        ctx.lineTo(x[i]+nx[i]*w,y[i]+ny[i]*w);
+      }
+      for (let i=final; i>=first; i--) {
+        const w = (hi + (random()-.5)*shake)*width[i];
+        ctx.lineTo(x[i]+nx[i]*w,y[i]+ny[i]*w);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+    if (oil) {
+      const core = .19+.31*oil;
+      ribbon(-core,core-.01,0,end,color,.075);
+      if (oil < .98) {
+        // On a half-loaded brush, outlying hairs touch the paper separately.
+        for (let j=0;j<7;j++) {
+          const edge = (j%2 ? -1 : 1)*(core+(.5-core)*random());
+          ribbon(edge,edge+.02,Math.floor(random()*end*.14),
+            end-Math.floor(random()*end*.2),color,.04);
+        }
+      }
+      for (let j=0; j<7; j++) {
+        const u=random()-.5, light=j%3 !== 0;
+        const spread=.008+.04*random(), first=Math.floor(end*random()*.17);
+        const final=end-Math.floor(end*random()*.25);
+        if (j===2 || j===6) {
+          ribbon(u+spread,u+spread+.024,first,final,'rgba(45,27,26,.28)',.011);
+        }
+        ribbon(u,u+spread,first,final,
+          light ? 'rgba(255,232,185,.25)' : 'rgba(25,15,21,.23)',.021);
+      }
+    } else {
+      ribbon(-.28,.18,0,end,color,.14);
+      for (let j=0; j<16; j++) {
+        const u=-.53+j*.066;
+        const lift = Math.abs(u)*.7;
+        ribbon(u,u+.025+random()*.055,Math.floor(random()*end*lift),
+          end-Math.floor(random()*end*lift),color,.036);
+      }
+    }
+  };
+}
+
+
+function clamp(value) { return Math.max(0, Math.min(1, value)); }
+
+function rise(start, end, value) {
+  const t = clamp((value-start)/(end-start));
+  return t*t*(3-2*t);
+}
+
+const outline = {
+  backFar: 'M220 182Q237 178 252 192Q254 207 245 223L235 240Q231 247 229 254L219 271Q213 274 211 281L198 281Q197 278 204 273L209 269 219 244Q221 239 220 233L225 214 218 201Z',
+  frontFar: 'M129 194Q145 191 156 204Q160 214 158 225L152 247Q153 255 158 265L161 269 160 273 164 280 160 283 151 282Q148 278 151 271L143 251Q140 247 143 238L142 220Q132 213 129 194Z',
+  torso: 'M86 188C92 176 95 166 107 153C116 142 128 124 147 120Q158 116 173 124C188 134 202 137 221 136Q239 135 257 139C272 138 286 149 291 159Q296 174 289 192Q285 204 283 216L284 226Q288 231 290 236L285 247 282 265 281 275 285 280 282 284 267 285Q265 282 272 276L274 266 277 243Q279 238 274 234L258 222Q250 216 246 207C232 207 221 212 202 216Q181 220 161 216L146 220Q140 228 131 235L126 249 115 265 108 281 108 286Q103 292 91 293L90 290 98 282 103 280 109 260Q112 254 113 248L116 228Q109 225 106 219C100 220 92 217 89 211Q82 203 86 188Z',
+  farHorn: 'M79 178C62 178 53 167 52 157Q51 151 53 144C55 156 62 166 77 166L90 165 89 175Z',
+  face: 'M70 176Q75 167 87 164Q98 164 104 173Q109 183 105 196L99 208Q95 215 91 224Q89 230 82 233L69 233Q62 230 63 225L65 216 63 210Q61 202 65 194L65 182Z',
+  ear: 'M94 179Q105 170 120 171Q120 177 112 183Q105 188 99 188L94 185Z',
+  nearHorn: 'M85 172C91 171 97 167 100 161C104 154 103 145 99 137Q104 140 106 148C110 160 104 171 95 178Q89 180 85 172Z'
+};
+
+// style: 0 is the plain ink wash, 1 the full thick paint; damage: how far the edit went wrong (0..1).
+function paintStep(canvas, step, style, damage) {
+  if (!Number.isInteger(step) || step < 0) throw new RangeError('step must be a whole number from 0');
+  const seed = step === 0 ? 7281 : 7281 + 109 * step;
+  const ctx=canvas.getContext('2d',{willReadFrequently:true}), size=canvas.width;
+  const unit=size/400, r=mulberry32(seed), noise=paperNoise(r);
+  const pigment=brush(ctx,r,false);
+  ctx.save(); ctx.setTransform(unit,0,0,unit,0,0);
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  const field = style > 0 ? paintGround(ctx, size, style) : null;
+  ctx.fillStyle='white'; ctx.fillRect(0,0,400,400);
+  function wash(path, axis, tones) {
+    const g=ctx.createLinearGradient(...axis);
+    for (let i=0; i<tones.length; i+=2) g.addColorStop(tones[i],gray(tones[i+1]));
+    shape(ctx,path,g);
+  }
+  function line(points, density) { pigment(points,gray(density)); }
+  // Pale earth, then the two limbs on the far side.
+  wash('M42 292Q67 287 89 290Q108 288 132 292Q112 293 100 296Q77 296 52 300L67 295Z',
+    [52,287,107,298],[0,239,.5,214,1,252]);
+  wash('M187 283Q224 279 240 281L255 279 278 281Q302 278 326 281Q282 282 263 286L221 288Z',
+    [199,278,237,293],[0,249,.56,222,1,250]);
+  wash(outline.backFar,
+    [209,202,249,211],[0,198,.45,123,.73,167,1,209]);
+  line([221,240,2,221,247,5,212,269,2,204,278,8,199,281,1],110);
+  wash(outline.frontFar,
+    [135,213,158,212],[0,102,.45,143,.72,200,1,119]);
+  line([146,245,2,149,252,4,155,270,2,154,279,7,162,281,1],104);
+  // One hanging switch, drawn before the haunch covers the root.
+  line([278,151,2,291,156,4,301,170,3.4,309,191,2.1,316,201,1.4,326,208,.4],71);
+  line([311,193,.6,318,202,3,326,205,6,334,204,2,340,199,.2],27);
+  line([319,202,.2,329,204,2,336,200,1.4,342,193,.1],57);
+
+  const torso = outline.torso;
+  wash(torso,[170,115,192,222],[0,54,.15,74,.4,119,.66,161,.84,210,1,142]);
+  ctx.save(); ctx.clip(new Path2D(torso));
+  // Broad wet passes share edges. Gaps between them keep the flank luminous.
+  wash('M82 193Q96 173 111 156Q125 130 148 122Q158 117 165 128C171 144 155 155 151 168C149 185 142 199 132 208Q123 218 115 236L93 230Z',
+    [109,164,162,177],[0,47,.26,55,.61,96,.86,140,1,195]);
+  wash('M148 121Q177 125 190 137Q213 143 244 138Q261 136 272 144Q260 153 239 157C206 159 197 169 177 171Q165 171 157 176C163 157 176 141 148 121Z',
+    [196,131,200,175],[0,55,.26,99,.7,176,1,214]);
+  wash('M168 164Q197 142 225 149Q240 151 232 162C221 173 209 187 197 195Q181 201 153 208Q161 196 162 184Z',
+    [169,158,202,200],[0,136,.36,182,.77,209,1,184]);
+  wash('M240 144Q256 136 272 145Q293 150 295 173Q294 193 283 199C278 209 284 223 289 232L274 235Q248 221 244 208C242 194 254 182 254 170Q256 155 240 144Z',
+    [250,177,292,192],[0,152,.3,106,.68,82,1,164]);
+  wash('M247 166Q259 157 269 159Q278 167 274 181C271 198 259 207 260 215Q245 207 244 195Q241 180 247 166Z',
+    [247,169,274,196],[0,142,.46,173,.81,138,1,111]);
+  wash('M106 218Q122 218 135 201Q145 183 148 170Q154 174 149 193Q145 210 135 221L119 245 99 258Z',
+    [114,208,140,222],[0,55,.52,115,1,171]);
+  ctx.restore();
+  // Water carries pigment across a damp edge. A receding front leaves a
+  // scalloped tide mark where the dilute wash touches a darker passage.
+  const wetImage=ctx.getImageData(0,0,size,size);
+  const wetPixels=wetImage.data, before=new Uint8ClampedArray(wetPixels);
+  const sample=(x,y)=> x<0 || x>=size || y<0 || y>=size ? 255 : before[4*(y*size+x)];
+  for(let y=Math.floor((110-24*damage)*unit);y<Math.ceil((295+37*damage)*unit);y++) {
+    for(let x=Math.floor((81-19*damage)*unit);x<Math.ceil((damage ? 392 : 300)*unit);x++) {
+      const u=x/unit, v=y/unit, k=4*(y*size+x);
+      const slow=noise(u*.065,v*.069), small=noise(u*.28,v*.32);
+      const pool=noise(u*.034+11,v*.047);
+      // An over-wet sheet takes colour downhill in irregular tongues.
+      const dryTail = rise(289,325,u) * (1-rise(209,231,v));
+      const run = damage * (1-.94*dryTail) * (2+Math.max(0, pool-.24)*35);
+      const radius=unit*(.55+(v>227 ? 1.5 : 4.4)*slow + run*.60);
+      const sx=x+unit*(2.9*(slow-.5)+1.4*(small-.5) - run*(.4+slow));
+      const sy=y+unit*(2.6*(noise(u*.08+3,v*.078)-.5)+1.2*(small-.5) - run*(.3+small));
+      let total=0;
+      for(let i=0;i<8;i++) {
+        const angle=i*Math.PI/4, reach=radius*(i%2 ? 1 : .54);
+        total+=sample(Math.round(sx+Math.cos(angle)*reach),Math.round(sy+Math.sin(angle)*reach));
+      }
+      const original=sample(Math.round(sx),Math.round(sy));
+      const diluted=original*.28+total*.09;
+      const deposit=(1-diluted/255);
+      const front=slow*.77+small*.23+.1*(pool-.5);
+      const tide=Math.max(0,1-Math.abs(front-.54)*26);
+      const bloom=Math.min(1,Math.max(0,(front-.54)*11));
+      const variation=(pool-.5)*59 + (bloom*41-tide*30)*(.26+.95*pool);
+      const brokenWash = damage * (75*bloom - 108*tide + 54*(small-.5));
+      const pigment=diluted+deposit*(variation + brokenWash);
+      const value=pigment + damage*dryTail*.64*(before[k]-pigment);
+      wetPixels[k]=wetPixels[k+1]=wetPixels[k+2]=value;
+    }
+  }
+  ctx.putImageData(wetImage,0,0);
+  // Dry brush: start firmly, pull apart at the lift, leave the lower edge open.
+  line([293,165,.4,288,155,3.3,275,144,3.8,263,140,1.4,247,139,.2],47);
+  line([246,137,.2,220,138,2.8,200,136,1.3,179,129,2.4,158,121,5,145,122,3,132,131,.4],40);
+  line([151,122,.5,132,133,5.6,118,151,8.5,109,164,3.5,98,178,.3],42);
+  line([145,152,.3,139,175,4.5,131,189,5.4,122,199,.4],76);
+  line([144,182,.2,138,199,1.8,129,215,4.4,119,226,2,114,249,.7],65);
+  line([115,243,.7,115,251,5,109,262,3.3,103,280,3.7,100,284,5,92,292,2.1],34);
+  line([106,281,1.1,106,286,5,100,289,7,92,292,2],28);
+  line([249,198,.2,248,207,2.4,254,215,5,269,225,3,278,235,6.1,281,240,2.8],69);
+  line([285,234,.5,286,241,4.8,282,250,2,279,270,3.6,277,277,4.2,271,284,4],45);
+  line([281,275,.4,282,280,6.5,278,282,6.3,267,285,1.4],26);
+  line([237,205,.1,217,211,1.7,198,216,2,181,217,.3],99);
+
+  line([125,152,.2,118,161,3,110,174,6,106,184,3.5,102,188,.3],42);
+  line([112,186,.3,108,195,3.5,104,203,5,102,209,2,100,213,.3],50);
+  line([107,212,.2,113,219,2.3,119,219,3,124,216,.4],65);
+  line([207,274,.3,205,277,3,200,280,2.8,198,281,.3],84);
+  line([154,275,.3,154,279,4.6,160,282,1.1],82);
+  // The leading horn sweeps across the forehead; the foreshortened horn turns up.
+  ctx.save(); ctx.translate(95,173); ctx.scale(1.13,1.06); ctx.translate(-95,-173);
+  wash(outline.farHorn,
+    [67,157,81,176],[0,173,.47,201,.78,80,1,40]);
+  line([53,144,.2,53,155,1.8,58,166,2.3,69,174,3.4,81,176,5],48);
+  const face = outline.face;
+  wash(face,[62,186,103,198],[0,75,.20,104,.38,153,.54,101,.78,43,1,69]);
+  wash('M66 207Q66 197 73 191Q81 185 91 184Q84 191 81 201L77 217 70 222 66 217Z',
+    [67,204,84,207],[0,126,.49,192,1,81]);
+  wash('M64 220Q68 217 74 219Q79 217 85 222Q89 226 84 230Q79 234 69 232L63 229Z',
+    [70,218,76,234],[0,126,.48,93,1,46]);
+  wash(outline.ear,
+    [106,170,110,187],[0,45,.38,100,.56,56,1,21]);
+  line([118,172,.2,111,176,1.7,103,182,3.1,98,184,.5],26);
+  line([71,176,.4,78,171,4,86,169,5,93,171,6,98,176,3.5],32);
+  line([66,186,.1,67,181,2.6,75,177,5,84,176,3,89,179,.3],31);
+  line([80,190,.2,85,186,1.8,91,185,2.2,94,187,.2],29);
+  shape(ctx,'M83 191Q86 185 91 188Q89 193 85 193Z',gray(21));
+  shape(ctx,'M85 190Q86 188 88 189L87 190Z',gray(218));
+  line([72,182,.2,74,180,2.6,79,179,3.3,82,179,.2],52);
+  line([92,190,.2,95,191,2.2,94,197,3.2,91,202,1.3],43);
+  line([74,194,.2,70,200,1.8,69,207,2.4,67,213,.5],98);
+  line([68,193,.3,65.5,192,2,64.5,195,1.7,65,197,.3],27);
+  line([96,193,.4,95,201,2.7,91,207,3.2,87,218,.5],41);
+  line([69,218,.2,66,222,2.6,67,225,2.8,69,224,1.4],20);
+  line([76,223,.5,79,221,3,82,222,2.3,82,225,.4],23);
+  line([63,229,.3,70,228.7,1.2,77,229.4,1.3,85,228.8,.4],23);
+  line([86,233,.2,91,229,2.5,93,221,.5],45);
+  wash(outline.nearHorn,
+    [93,156,106,164],[0,73,.4,202,.62,225,.84,139,1,57]);
+  line([99,137,.2,104,145,2.1,106,154,2.5,103,165,3.3,95,174,4.2,89,176,.4],41);
+
+  // A few creased hairs, trampled reed leaves and broken stems.
+  for (let i=0;i<17;i++) {
+    const t=r(), x=75+18*t+(r()-.5)*3, y=172-4*Math.sin(t*3);
+    line([x-2,y+7,.1,x,y,.6+r()*1.5,x-1+r()*3,y-3-r()*2,.1],38+Math.floor(r()*35));
+  }
+  ctx.restore();
+  for(let i=0;i<22;i++) {
+    const t=r(), x=116+t*32, y=148-t*24;
+    line([x-3,y+5,.08,x,y,.35+r()*.7,x+3,y-2-r()*3,.1],43+Math.floor(r()*44));
+  }
+  [[47,299,7],[68,293,4],[227,285,5],[307,280,4]].forEach(([x,y,n])=>{
+    for(let i=0;i<n;i++) {
+      const a=x+(r()-.5)*12, b=y+(r()-.5)*4, dx=(r()-.44)*43, dy=5+r()*20;
+      line([a,b,.25,a+dx*.32,b-dy*.48,.5+r(),a+dx,b-dy,.08],77+Math.floor(r()*116));
+    }
+  });
+  line([37,300,.12,58,297,1.6,76,294,1.2,86,294,.08],154);
+  line([247,286,.1,263,284,1.2,285,284,.2],146);
+  // Displace the wet boundary into the sizing of the paper. Darken deposits on
+  // a drying edge; broken pigment and longer fibres stay visible in close-up.
+  const source=ctx.getImageData(0,0,size,size).data;
+  const out=ctx.createImageData(size,size), dest=out.data;
+  for (let y=0,k=0;y<size;y++) for (let x=0;x<size;x++,k+=4) {
+    const u=x/unit, v=y/unit;
+    const cloud=noise(u*.047,v*.047), grain=noise(u*.57,v*.62);
+    const fiber=noise(u*.24+v*.13,v*1.68);
+    const dx=(noise(u*.24,v*.23)-.5)*1.8+(grain-.5)*.85;
+    const dy=(noise(u*.23+17,v*.24)-.5)*1.7+(fiber-.5)*.85;
+    const sx=Math.max(0,Math.min(size-1,Math.round(x+dx*unit)));
+    const sy=Math.max(0,Math.min(size-1,Math.round(y+dy*unit)));
+    const p=(sy*size+sx)*4;
+    const tone=source[p]/255, wet=1-tone;
+    const near=source[(Math.min(size-1,sy+Math.max(1,Math.round(unit*1.25)))*size+sx)*4]/255;
+    const rim=Math.max(0,near-tone);
+    const mottling=(cloud-.5)*43+(grain-.5)*20+(fiber-.5)*12;
+    const dryEdge=wet*(.55+tone*.7)*mottling-14*rim;
+    const stock=(r()-.5)*7+(fiber-.5)*7+(cloud-.5)*4;
+    dest[k]=25+220*tone+dryEdge+stock;
+    dest[k+1]=25+214*tone+dryEdge+stock;
+    dest[k+2]=23+201*tone+dryEdge+stock;
+    if (field) {
+      // Pigment absorbs light from the actual painted ground. Warm iron oxide
+      // collects in the middle values, leaving deep creases nearly black.
+      const rust = style*wet*(.4 + 2.1*tone);
+      let stain = wet*style*(1-style)*rise(.32,.68,cloud*.8+grain*.2);
+      if (wet > .04 && u>87 && u<294 && v>116 && v<219) {
+        // A second charge of burnt sienna spreads through the damp shoulder
+        // and hip. Its soft edge breaks up where the sheet is already drying.
+        const shoulder = (u-137+(v-165)*.58)/22, neck = (v-164)/51;
+        const hip = (u-270+(v-174)*.28)/25, thigh = (v-174)/42;
+        const deposit = Math.max(1-shoulder*shoulder-neck*neck,1-hip*hip-thigh*thigh);
+        stain += wet*style*(1-style)*2.9*rise(-.25,.75,deposit+(cloud-.5)*.64);
+      }
+      dest[k]   = 25 + (field[k]-25)*tone + rust*77 + stain*93 + dryEdge + stock;
+      dest[k+1] = 25 + (field[k+1]-25)*tone + rust*25 + stain*15 + dryEdge + stock;
+      dest[k+2] = 23 + (field[k+2]-23)*tone + rust - stain*34 + dryEdge + stock;
+    } else if (damage) {
+      const silt = damage*wet*(.38+cloud);
+      dest[k]   += 36*silt;
+      dest[k+1] += 21*silt;
+      dest[k+2] -= 25*silt;
+    }
+    dest[k+3]=255;
+  }
+  ctx.putImageData(out,0,0);
+  if (style > 0) paintOx(ctx, style, step);
+  // A small vermilion seal with chipped margins and a carved ox pictograph.
+  ctx.save(); ctx.globalAlpha = 1-rise(.06,.48,style); ctx.translate(319,299); ctx.rotate(-.045);
+  ctx.fillStyle='#a04935'; ctx.fillRect(0,0,12.5,15.5);
+  ctx.strokeStyle='#e9d6b7'; ctx.lineWidth=.85;
+  ctx.stroke(new Path2D('M1.3 1.8L11.2 1.4 11.1 14 1.4 14.2Z M3 3.4L3.4 6.3 6.1 7 8.9 5.8 9.2 3.2 M6.1 4.2L6 12.7 M2.9 9.4L9.7 8.7'));
+  for(let i=0;i<43;i++){ctx.fillStyle='rgba(244,234,213,.65)'; ctx.fillRect(r()*12.5,r()*15.5,r()*.8,r()*.75);}
+  ctx.restore();
+  if (style > 0) scrapeSurface(ctx, size, unit, style, noise, r);
+  ctx.restore();
+}
+
+function paintGround(ctx, size, style) {
+  const r = mulberry32(1954), noise = paperNoise(r);
+  const knife = brush(ctx, mulberry32(901), true);
+  const oil = .35*style + .65*rise(0,.85,style);
+  const load = rise(.035,.89,oil), blueLoad = rise(.48,.83,style);
+  const paper = [245,239,224];
+  function mix(a,b,t) { return a.map((v,i)=>v+(b[i]-v)*t); }
+  function rgb(a,delta) {
+    return 'rgb('+a.map(c=>Math.round(c+delta)).join(' ')+')';
+  }
+  function patch(x,y,cx,cy,rx,ry,slope) {
+    const u=(x-cx)/rx, v=(y-cy-(x-cx)*slope)/ry;
+    return Math.max(0,1-u*u-v*v);
+  }
+  function ground(x,y) {
+    const n=noise(x*.012,y*.018);
+    let c=mix([170,109,49],[234,194,114],.17+.78*n);
+    c=mix(c,[236,214,167],.82*patch(x,y,123,39,240,82,-.12));
+    c=mix(c,[177,91,39],.8*patch(x,y,352,243,167,106,.38));
+    const cold=patch(x,y,43,243,84,37,-.28)+patch(x,y,280,272,111,32,-.17)
+      +.65*patch(x,y,404,119,52,23,-.47);
+    c=mix(c,[54,88,123],blueLoad*Math.min(.96,cold*(.77+.49*n)));
+    return mix(c,[117,88,61],.65*patch(x,y,105,312,167,39,-.14));
+  }
+  // Lay in a scraped ochre ground. Wide knife strokes establish the field;
+  // the smaller strokes pick up neighbouring piles of partly mixed paint.
+  ctx.fillStyle=rgb(mix(paper,[186,139,73],oil),0); ctx.fillRect(0,0,400,400);
+  for (const [count,minLength,maxLength,thickness] of [[260,36,111,48],[560,7,53,12],[560,3,23,4.5]]) {
+    for (let i=0;i<count;i++) {
+      const x=r()*460-30, y=r()*440-20;
+      const l=minLength+r()*(maxLength-minLength), w=(.22+r())*thickness;
+      const a=(noise(x*.008+6,y*.009)-.53)*1.07-.10+(r()-.5)*.33;
+      const dx=Math.cos(a)*l, dy=Math.sin(a)*l, bend=(r()-.5)*w;
+      const c=ground(x,y);
+      const uptake = .32*oil + .68*load;
+      ctx.globalAlpha = uptake*(.30+.7*load);
+      knife([x-dx*.52,y-dy*.52,w*(.08+r()*.7),x-dx*.24,y-dy*.24+bend,w,
+        x+dx*.16,y+dy*.16,w*(.7+r()*.35),x+dx*.5,y+dy*.5-bend,w*r()*.55],rgb(mix(paper,c,Math.sqrt(oil)),(r()-.5)*29*uptake));
+    }
+  }
+  ctx.globalAlpha = 1;
+  return ctx.getImageData(0,0,size,size).data;
+}
+
+function paintOx(ctx, style, step) {
+  const r = mulberry32(1954 + step*53);
+  const weight = rise(.08,.88,style);
+  const loaded = brush(ctx,r,.12+.88*weight);
+  const cold = rise(.46,.87,style);
+  const black='#292524', tar='#473023', oxblood='#723723', umber='#86502f';
+  const brick='#a8502b', red='#bb6233', orange='#d27c3d', honey='#e2a455';
+  const straw='#ecd19b', slate='#435765', blue='#435e83', chalk='#e6c69a';
+  const widths = mulberry32(1927);
+  function pull(points, color) {
+    const threshold = widths()*.25;
+    const isBlue = color===blue || color===slate;
+    // Ochre catches on the shoulder and the brow before it covers the flank.
+    const catchesLight = color===orange || color===honey;
+    const load = style + (catchesLight ? .42*style*(1-style) : 0);
+    const opacity = isBlue ? cold : rise(threshold, .81, load);
+    const width = (.22+.78*weight)*(.85 + widths()*.30);
+    if (!opacity) return;
+    const knots = points.map((v,i) => i%3===2 ? v*width : v);
+    ctx.save();
+    ctx.globalAlpha *= opacity;
+    loaded(knots,color);
+    ctx.restore();
+  }
+  function marks(color,paths) { for (const p of paths) pull(p,color); }
+  function flurry(points,color,n,spread,w) {
+    // Drag small quantities of a second pigment along the muscle's long axis.
+    for(let i=0;i<n;i++) {
+      const start=r()*.53, finish=Math.min(1,start+.12+r()*.54);
+      const drift=(r()-.5)*spread, offset=(r()-.5)*spread;
+      const p=[];
+      for(let k=0;k<=3;k++) {
+        const t=start+(finish-start)*k/3, a=1-t;
+        const x=a*a*points[0]+2*a*t*points[2]+t*t*points[4];
+        const y=a*a*points[1]+2*a*t*points[3]+t*t*points[5];
+        p.push(x+drift+(r()-.5)*1.6,y+offset+(r()-.5)*1.6,
+          (.12+Math.sin(k*Math.PI/3))*(.3+r())*w);
+      }
+      pull(p,color);
+    }
+  }
+  // Horizontal strokes of cool paint tie the feet to the field.
+  marks(slate,[[29,302,1,54,295,5,85,292,3,105,290,1],
+    [175,289,.5,193,282,4,215,280,3,232,277,.4],
+    [240,288,1,272,282,7,299,280,4,325,275,.4]]);
+  flurry([188,286,223,277,244,278],blue,12,7,2.6);
+  flurry([38,299,66,293,99,291],umber,21,9,2.1);
+  flurry([253,291,296,277,328,279],slate,23,11,2);
+
+  // Knees, heels and tail all use the ink drawing's landmarks.
+  ctx.save(); ctx.clip(new Path2D(outline.backFar));
+  marks(tar,[[237,189,14,238,207,22,227,232,12,224,246,5,211,269,4,201,280,8]]);
+  marks(umber,[[245,199,4,239,215,10,229,231,9,226,246,4,214,266,3]]);
+  marks(slate,[[227,237,2,225,248,3,216,263,2],[205,274,.5,203,278,5,199,280,1]]);
+  ctx.restore();
+  ctx.save(); ctx.clip(new Path2D(outline.frontFar));
+  marks(tar,[[142,201,13,151,219,14,146,247,8,155,268,5,157,280,8]]);
+  marks(umber,[[150,216,6,155,225,7,149,245,4,150,252,1],
+    [147,248,1,151,257,4,155,270,2]]);
+  marks(honey,[[149,238,.5,148,247,1.8,152,258,1],[155,273,.5,155,278,2,158,280,.7]]);
+  ctx.restore();
+  marks(tar,[[212,265,.6,210,272,3.4,205,276,4.5,199,280,3.4],
+    [154,267,.5,156,274,3.1,155,278,4.6,161,281,3.6]]);
+  marks(black,[[206,275,.5,204,278,4.5,199,280.6,3,197,281,.4],
+    [155,278,.5,156,281,4.5,162,282,1.6]]);
+  marks(honey,[[204,276,.4,202,278.2,1.6,200,279,.3],
+    [155,276,.4,156,278,1.4,159,280,.5]]);
+  marks(black,[[280,151,1,292,157,4.5,301,171,3,310,191,1.9,319,203,2],
+    [315,198,1,322,205,4,330,206,6,337,202,2,341,196,.3]]);
+  marks(orange,[[289,156,.3,298,164,1.5,306,181,1,312,194,.2],
+    [319,201,.5,327,205,2,336,202,.6]]);
+  // Protect the head where it crosses the shoulder. The same transform sets
+  // both the wet face drawing and this stencil.
+  ctx.save(); ctx.clip(new Path2D(outline.torso));
+  const headTransform = new DOMMatrix().translate(95,173).scale(1.13,1.06).translate(-95,-173);
+  for (const part of [outline.face,outline.ear,outline.nearHorn]) {
+    const reserve = new Path2D();
+    reserve.rect(0,0,400,400);
+    reserve.addPath(new Path2D(part),headTransform);
+    ctx.clip(reserve,'evenodd');
+  }
+  ctx.save(); ctx.globalAlpha=weight*.72;
+  ctx.fillStyle=oxblood; ctx.fillRect(82,116,214,179); ctx.restore();
+  // Lay the original oil study's muscle strokes on the ink study's anatomy.
+  ctx.save(); ctx.transform(-.82,0,0,.79,337,48.5);
+  // The strokes fan around the hip and turn almost upright over the shoulder.
+  marks(umber,[[54,201,15,66,160,33,88,138,32,129,134,17,161,124,5],
+    [95,208,30,136,193,37,172,197,31,216,211,15],[198,100,12,223,112,37,243,153,42,252,203,30,245,226,12]]);
+  marks(brick,[[63,177,12,69,149,20,95,132,22,119,133,18,146,129,6],
+    [77,207,17,99,188,27,114,168,25,132,154,6],[110,149,11,142,150,31,174,138,34,196,115,12],
+    [118,194,5,144,176,29,175,162,27,194,142,12],[153,199,5,183,188,34,208,179,31,223,168,6],
+    [193,119,9,210,105,24,228,111,23,241,136,14],[202,137,9,219,145,28,227,169,25,219,192,8],
+    [239,119,5,254,138,25,266,168,34,276,191,23,286,209,12]]);
+  marks(red,[[63,165,3,74,144,15,94,133,14,113,131,6],
+    [73,191,7,83,174,23,99,156,19,112,146,4],[116,141,3,146,140,15,169,132,19,195,116,8],
+    [116,184,3,144,157,14,163,148,10,176,138,2],[149,180,3,175,165,15,199,147,9],
+    [170,203,5,189,193,20,198,184,9],[201,106,6,217,99,17,233,107,10,240,121,3],
+    [205,130,3,219,135,16,229,154,13,228,174,2],[238,119,3,251,136,15,257,157,21,269,179,13,276,187,4]]);
+  marks(orange,[[60,158,1,79,136,9,94,128,8,109,128,2],
+    [72,181,1,80,160,10,98,145,12,112,139,2],[118,134,1,143,133,8,158,126,7,173,119,2],
+    [131,161,1,154,149,6,174,136,8,182,123,1],[150,182,2,177,162,8,185,154,2],
+    [185,111,1,204,100,10,220,96,7,234,101,1],[218,125,2,231,134,12,238,149,9,238,162,2],
+    [247,123,1,256,132,9,264,155,8,270,166,1]]);
+  marks(tar,[[58,187,3,64,199,8,73,213,13,73,223,4],[106,147,1,119,148,3,130,144,9,151,136,4,168,121,1],
+    [119,167,1,113,185,5,101,201,10,77,227,6,63,242,1],
+    [119,199,1,138,191,3.2,154,180,5,163,172,1],[131,209,2,151,205,8,171,213,10,202,218,3],
+    [179,129,1,187,122,5,205,116,4,217,119,1],[194,191,2,204,179,7,207,164,13,199,144,5,198,136,1],
+    [212,202,1,220,194,8,230,182,13,230,159,5,224,146,1],
+    [234,217,2,247,206,13,254,188,8,246,174,2],[270,143,1,271,162,6,282,176,7,291,181,2]]);
+  marks(blue,[[61,189,1,69,193,6,77,193,8,90,181,2],
+    [138,208,.5,151,201,5,170,202,7,183,205,3,195,204,1],
+    [201,175,1,199,188,5,195,198,8,182,204,1],[247,188,1,247,197,5.5,237,205,5,230,208,1]]);
+  marks(honey,[[71,149,1,83,137,4,95,134,6,105,133,1],[125,135,2,143,131,5,162,122,1],
+    [186,110,1,204,96,6,219,93,2,229,95,1],[220,128,1,227,135,3.4,235,148,5,237,156,1],
+    [247,119,2,257,135,4,263,145,1]]);
+  // A second loading of the brush streaks the broad passages with raw colour.
+  for(const [arc,color,spread] of [
+    [[57,166,78,131,110,128],honey,12],[[71,195,91,154,119,143],orange,16],
+    [[104,196,121,160,173,137],red,16],[[124,140,168,132,193,112],honey,10],
+    [[117,202,158,183,189,151],orange,18],[[158,210,192,197,206,169],umber,14],
+    [[188,111,218,84,241,110],honey,12],[[198,115,230,108,240,148],red,12],
+    [[215,127,247,157,227,188],orange,13],[[242,116,254,151,285,187],honey,12],
+    [[260,149,267,186,299,207],umber,12],[[187,208,214,193,221,164],brick,12]
+  ]) flurry(arc,color,17,spread,2.6);
+  flurry([85,145,94,138,112,133],straw,8,8,1.05);
+  flurry([153,145,170,135,187,121],honey,11,9,1.15);
+  flurry([211,130,221,137,229,154],chalk,9,7,1);
+  ctx.restore();
+  // The shank tapers below each joint, then widens at the cloven hoof.
+  marks(brick,[[131,203,6,129,218,15,121,234,10,116,250,5,111,262,3],
+    [262,203,9,265,217,16,277,231,8,282,238,4],
+    [281,239,3,282,248,5,278,267,3,277,278,4]]);
+  marks(orange,[[136,205,2,133,217,7,125,229,8,120,237,4,117,246,1],
+    [118,249,2,116,255,4,113,260,3,108,272,.8],
+    [262,205,2,268,217,6,280,229,5,284,236,1],
+    [283,239,1,283,246,3,281,254,1]]);
+  marks(tar,[[141,208,1,133,221,5,124,234,3,119,248,1],
+    [111,256,1,112,260,4,107,274,2,102,284,4],
+    [272,222,1,279,230,5,282,239,3,278,250,2]]);
+  marks(honey,[[124,230,1,122,238,2.8,117,249,.6],
+    [264,211,1,270,219,3.8,279,228,1],[278,252,1,278,266,2,276,272,.7]]);
+  ctx.restore();
+
+  // Broken contour strokes bear down at the hump and lift off the belly.
+  marks(black,[[98,176,.4,107,156,4.5,124,136,6,141,123,4,151,120,1],
+    [149,121,2,158,120,4.5,170,124,5,184,131,3.4,198,135,.6],
+    [193,135,.4,211,137,3.6,231,136,3.2,249,138,1],
+    [258,139,1,275,145,5,286,153,4.2,292,164,1],
+    [291,179,1,289,191,3.1,284,205,3,282,215,.5],
+    [247,205,.5,252,215,4,266,226,4.5,278,235,3,280,242,1],
+    [164,216,.5,183,218,2,205,215,3.5,223,210,2,239,207,.4],
+    [115,244,.6,114,253,4.2,110,262,2,104,278,3.2,99,285,2],
+    [106,279,1,105,285,6.6,99,289,6,92,292,2.9],
+    [283,243,.5,282,253,3.4,279,268,3.2,279,279,4],
+    [281,276,2,281,280,7,274,284,6,267,284,1]]);
+  marks(straw,[[131,132,.3,140,125,2.2,147,123,.4],
+    [268,143,.3,277,147,2,282,150,.4],
+    [101,283,.5,99,287,1.9,95,289,.3],[274,278,.4,272,281,1.5,269,283,.3]]);
+  marks(brick,[[135,145,3,125,158,11,118,177,13,113,198,11,106,211,3],
+    [125,188,2,121,205,8,116,215,6,110,218,2]]);
+  marks(black,[[133,145,1,122,162,5,115,180,4,112,193,.8],
+    [128,183,.6,123,200,4,116,214,6,110,218,2],
+    [119,207,.4,114,219,2.5,109,222,2,105,219,.4]]);
+  flurry([129,151,119,170,113,186],orange,12,6,1.8);
+
+  ctx.save(); ctx.translate(95,173); ctx.scale(1.13,1.06); ctx.translate(-95,-173);
+  ctx.save(); ctx.clip(new Path2D(outline.face));
+  marks(oxblood,[[67,184,14,81,174,17,92,173,18,99,188,14,95,203,11],
+    [70,185,8,73,196,15,71,209,12,68,224,5],[97,190,9,89,203,17,84,219,13,79,227,7]]);
+  marks(red,[[67,185,4,76,177,10,89,172,7,99,177,3],
+    [67,194,4,70,201,6,69,210,9,66,219,2],[95,180,2,99,189,9,91,201,10,87,214,3]]);
+  marks(orange,[[69,193,1,76,186,7,84,182,5,89,182,1],
+    [71,197,1,74,196,5,73,203,6,69,214,2],
+    [98,189,1,95,198,4,89,205,2]]);
+  marks(honey,[[71,195,.4,74,192,2.2,80,188,1],[71,204,.3,70,213,2.6,68,217,.5]]);
+  flurry([71,191,81,176,92,178],orange,15,5,1.6);
+  flurry([95,187,94,199,84,211],brick,12,4,2);
+  ctx.restore();
+  // The ear lies in shadow behind an ivory edge of horn.
+  marks(tar,[[97,183,4,106,177,9,115,174,5,119,172,.5]]);
+  marks(red,[[100,182,1,106,180,4,115,174,.8]]);
+  marks(black,[[98,186,.5,107,185,3,113,181,2,118,173,.5],
+    [65,192,.4,65,195,2,64,198,.4],
+    [82,191,1,86,188,3,91,188,2.6,93,187,.3],
+    [85,191,.5,87,190,3.6,90,189,2,92,188,.4],
+    [92,192,.4,94,195,2.3,92,200,2.8,89,204,.4],
+    [96,204,.5,93,216,2.6,89,226,3.2,85,230,1]]);
+  pull([85.1,190, .3,86.2,189.1,1.25,87.4,189.2,.2],straw);
+  marks(umber,[[64,225,4,68,222,7,76,222,8,82,224,7,83,227,2]]);
+  marks(slate,[[65,223,.5,70,221,3.4,76,222,2.5,81,222,.5]]);
+  marks(chalk,[[64,221,.4,69,219.7,2.3,72,220.4,.4],[69,227,.3,75,227.1,1.3,80,226.8,.3]]);
+  marks(black,[[69,220,.5,66.9,222.4,2.9,67.6,224.1,2,69.2,223.1,.6],
+    [76,223,.4,79,221.8,3.2,81,222.8,2.6,82,225,.3],
+    [64,229,.5,71,229.1,1.6,77,229.6,1.6,85,228.2,.6],
+    [66,231.1,.3,73,233,2.2,82,232.3,2,87,229.8,.7]]);
+  for(let i=0;i<20;i++){
+    const x=72+r()*22, y=169+Math.abs(x-85)*.21+r()*2;
+    pull([x-4,y+8,.4,x-1,y+3,2+r()*1.5,x+1,y,1.8,x+1+r()*3,y-4,.2],
+      [tar,oxblood,red,black][i%4]);
+  }
+  marks(black,[[53,145,.4,53,155,2.5,58,166,3.8,68,174,5.4,79,176,4],
+    [99,137,.4,104,145,2.8,106,155,3.8,102,167,4.8,94,175,5.5,87,175,1]]);
+  marks(chalk,[[53,147,.3,54,157,1.9,60,166,3.3,69,171,5,77,171,3.2],
+    [100,139,.3,103,147,2,104,156,3.6,101,164,4.8,96,170,5.7,91,173,6.6,87,174,1]]);
+  pull([104,152,.4,103,160,1.2,99,166,2,93,171,1.7,90,172,.3],straw);
+  marks(umber,[[70,169,.4,69,172,1.2,69,174,.3],[96,168,.4,98,171,1.1,98,173,.2]]);
+  ctx.restore();
+}
+
+function scrapeSurface(ctx, size, unit, style, noise, r) {
+  const raw=ctx.getImageData(0,0,size,size), data=raw.data;
+  const painted=new Uint8ClampedArray(data);
+  for(let y=0,k=0;y<size;y++) for(let x=0;x<size;x++,k+=4) {
+    const u=x/unit,v=y/unit;
+    const tooth=noise(u*.91+v*.28,v*1.26), fleck=r();
+    const coarse=noise(u*.26,v*.33)-.5;
+    const sx=Math.max(0,Math.min(size-1,Math.round(x+style*unit*((tooth-.5)*.88+coarse*.85))));
+    const sy=Math.max(0,Math.min(size-1,Math.round(y+style*unit*(coarse*1.18+(fleck-.5)*.66))));
+    const p=4*(sy*size+sx);
+    const prev=4*(Math.max(0,sy-1)*size+Math.max(0,sx-1));
+    const ridge=Math.max(-11,Math.min(13,(painted[p+1]-painted[prev+1])*.34));
+    const abrasion=tooth>.86 && coarse>.08 ? 12+(tooth-.86)*90 : 0;
+    const grain=(fleck-.5)*7+(tooth-.5)*13+ridge+abrasion;
+    for(let c=0;c<3;c++) data[k+c]=painted[p+c]+style*grain;
+  }
+  ctx.putImageData(raw,0,0);
+}
+
+document.getElementById("ws-painting").wsPaint = paintStep;
+})();
+</script>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.151.3/build/three.module.js" } }
+</script>
+<script type="module">
+    // Fig. 2 in 3D: one box per tensor from layout(), seen from the direction AI Frontier's viewer uses.
+    import * as THREE from "three";
+    import { OrbitControls } from "https://unpkg.com/three@0.151.3/examples/jsm/controls/OrbitControls.js";
+    import { CSS2DRenderer, CSS2DObject } from "https://unpkg.com/three@0.151.3/examples/jsm/renderers/CSS2DRenderer.js";
+
+    const root = document.getElementById("ws-painting"), box = root && root.querySelector(".ws-3d");
+    const VIEW = new THREE.Vector3(0.14, 0.5, 0.86).normalize(), ARM = 3.3;
+    const meshes = {}, labels = {}, textures = new Map();
+    // What each part does, pinned to it: [text, x, y, z] in the layout's units.
+    // "50 blocks" sits above the red tops it would hide; "image out" sits under the painting, clear of "text encoder".
+    const LABELS = [["prompt in", -7.4, 5.0, -ARM], ["text encoder", -7.4, 2.2, -ARM], ["50 blocks", 8.64, 6.4, -ARM],
+                    ["VAE", -5, 2.4, ARM], ["image out", -11.4, -0.6, ARM]];
+
+    function label(text, x, y, z) {
+        const el = document.createElement("div");
+        el.className = "ws-label"; el.textContent = text;
+        const o = new CSS2DObject(el); o.position.set(x, y, z); return o;
+    }
+    let built = false, ready = false, stage, colors, bounds, picture, path, arrow;
+
+    function build() {
+        const css = getComputedStyle(root), read = (name) => new THREE.Color(css.getPropertyValue(name).trim());
+        colors = { edited: read("--edited"), quant: read("--quant"), other: read("--other"), line: read("--line") };
+        let renderer;
+        try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); }
+        catch (err) { box.textContent = "This view needs WebGL."; return; }
+        renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+        renderer.domElement.tabIndex = 0;
+        renderer.domElement.setAttribute("aria-label", "Tensor boxes: drag to rotate, right drag or arrow keys to pan, scroll or pinch to zoom");
+        box.appendChild(renderer.domElement);
+        const scene = new THREE.Scene(), camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minZoom = 0.8; controls.maxZoom = 4;
+        controls.listenToKeyEvents(renderer.domElement);
+        controls.addEventListener("change", render);
+        root.wsParts.forEach((part) => {
+            const geometry = new THREE.BoxGeometry(...part.size);
+            const mesh = new THREE.Mesh(geometry, new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false }));
+            const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geometry), new THREE.LineBasicMaterial({ transparent: true }));
+            mesh.position.set(...part.position);
+            mesh.userData = { fourBit: part.fourBit, edges };
+            mesh.add(edges); scene.add(mesh); meshes[part.id] = mesh;
+        });
+        // the painting leaves the model where AI Frontier's viewer shows it: past the VAE, on the return arm
+        picture = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 4.4), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        picture.position.set(-11.4, 2.5, ARM);
+        scene.add(picture);
+        // The prompt's path, as AI Frontier's viewer draws it: out along the first arm from x = -9.2,
+        // around a half circle past the last block, and back to the painting.
+        const turn = 24 * 0.72 + 0.6, points = [new THREE.Vector3(-9.2, 0, -ARM), new THREE.Vector3(turn, 0, -ARM)];
+        for (let n = 0; n <= 16; n++) { const a = -Math.PI / 2 + n / 16 * Math.PI; points.push(new THREE.Vector3(turn + Math.cos(a) * ARM, 0, Math.sin(a) * ARM)); }
+        points.push(new THREE.Vector3(-10.4, 0, ARM));
+        const ink = new THREE.LineBasicMaterial({ color: colors.line });
+        path = new THREE.Line(new THREE.BufferGeometry().setFromPoints(points), ink);
+        // arrowhead at the painting: two strokes back from the tip, as in the behavior-aware post's flowArrow
+        const tip = points[points.length - 1], back = 0.6, side = 0.36;
+        arrow = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([
+            tip, new THREE.Vector3(tip.x + back, 0, tip.z - side), tip, new THREE.Vector3(tip.x + back, 0, tip.z + side)]), ink);
+        path.position.y = arrow.position.y = -0.05;
+        scene.add(path, arrow);
+        bounds = new THREE.Box3().setFromObject(scene);
+        const overlay = new CSS2DRenderer();
+        Object.assign(overlay.domElement.style, { position: "absolute", top: "0", left: "0", pointerEvents: "none" });
+        box.appendChild(overlay.domElement);
+        LABELS.forEach(([text, x, y, z]) => { labels[text] = label(text, x, y, z); scene.add(labels[text]); });
+        const center = bounds.getCenter(new THREE.Vector3());
+        camera.position.copy(center).addScaledVector(VIEW, 60);
+        controls.target.copy(center); controls.update();
+        stage = { renderer, overlay, scene, camera, controls };
+        new ResizeObserver(fit).observe(box);
+        if (new URLSearchParams(location.search).has("scene-debug")) root.wsInspect = { meshes, picture, labels, path, arrow, stage, drawn: false };
+        ready = true;
+        fit();
+    }
+
+    // The orthographic frame that holds every box and every whole label at the current width,
+    // with the canvas as tall as its content.
+    function fit() {
+        const { renderer, overlay, camera, scene } = stage, w = box.clientWidth || 300;
+        camera.updateMatrixWorld();
+        const turn = new THREE.Matrix4().extractRotation(camera.matrixWorldInverse);
+        const inView = (p) => p.clone().sub(stage.controls.target).applyMatrix4(turn);
+        let halfW = 0, halfH = 0;
+        for (let i = 0; i < 8; i++) {
+            const corner = inView(new THREE.Vector3(i & 1 ? bounds.max.x : bounds.min.x, i & 2 ? bounds.max.y : bounds.min.y, i & 4 ? bounds.max.z : bounds.min.z));
+            halfW = Math.max(halfW, Math.abs(corner.x)); halfH = Math.max(halfH, Math.abs(corner.y));
+        }
+        // a label is a chip of fixed pixel size around its point; the overlay must hold it to measure it
+        overlay.render(scene, camera);
+        const chips = Object.values(labels).map((o) => ({ at: inView(o.position), w: o.element.offsetWidth / 2 + 2, h: o.element.offsetHeight / 2 + 2 }));
+        chips.forEach((c) => { halfW = Math.max(halfW, Math.abs(c.at.x) / Math.max(0.2, 1 - 2 * c.w / w)); });
+        halfW *= 1.04; halfH *= 1.04;
+        const perPx = 2 * halfW / w;
+        chips.forEach((c) => { halfH = Math.max(halfH, Math.abs(c.at.y) + c.h * perPx); });
+        const h = Math.round(w * halfH / halfW);
+        renderer.setSize(w, h); overlay.setSize(w, h);
+        Object.assign(camera, { left: -halfW, right: halfW, top: halfH, bottom: -halfH });
+        camera.updateProjectionMatrix();
+        render();
+    }
+
+    function render() { if (ready) { stage.renderer.render(stage.scene, stage.camera); stage.overlay.render(stage.scene, stage.camera); } }
+
+    // The painting of the shown step, one texture per painted canvas.
+    function showPainting(canvas) {
+        if (!textures.has(canvas)) textures.set(canvas, new THREE.CanvasTexture(canvas));
+        picture.material.map = textures.get(canvas);
+        picture.material.needsUpdate = true;
+    }
+
+    function draw() {
+        if (!ready || !root.wsFrame) return;
+        const edited = new Set(root.wsFrame.parts);
+        for (const id in meshes) {
+            const mesh = meshes[id], kind = edited.has(id) ? "edited" : mesh.userData.fourBit ? "quant" : "other";
+            mesh.material.color.copy(colors[kind]);
+            mesh.material.opacity = { edited: 0.9, quant: 0.04, other: 0.6 }[kind];
+            mesh.userData.edges.material.color.copy(kind === "other" ? colors.line : colors[kind]);
+            mesh.userData.edges.material.opacity = { edited: 1, quant: 0.3, other: 0.5 }[kind];
+        }
+        if (root.wsFrame.painting) showPainting(root.wsFrame.painting);
+        render();
+        if (root.wsInspect) root.wsInspect.drawn = true;
+    }
+
+    if (box) {
+        root.addEventListener("ws-frame", () => { if (!built) { built = true; build(); } draw(); });
+        if (root.wsFrame) { built = true; build(); draw(); }
+    }
+</script>
+
+<br><br>
+References:
+<ul>
+    <li><a href="https://rikiyat.github.io/blog/weight-space-programming/">Rikiya Takehi, Jayden Teoh, Alex Zhang and Omar Khattab, Sparks of Weight-Space Programming: LLMs can natively read &amp; write neural network weights</a></li>
+    <li><a href="https://aifrontier.kr/ko/articles/weight-space-programming-lab/">AI Frontier, 가중치를 직접 고쳐 보았다: Weight-Space Programming 실험 노트</a></li>
+    <li><a href="https://www.youtube.com/watch?v=UdIuPPuuuRc">AI Frontier, EP 123 (video)</a></li>
+</ul>
+
+<br><br>
